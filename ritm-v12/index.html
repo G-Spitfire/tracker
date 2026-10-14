@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Ритм"><meta name="theme-color" content="#f7f8f4">
+<title>Ритм — меняй жизнь в своём темпе</title>
+<style>
+:root{color-scheme:light dark;--bg:#f7f8f4;--card:#fff;--text:#263c35;--muted:#6f8179;--line:#e3eae4;--accent:#397d6e;--tint:#e4f0e9;--soft:#f1f5f0;--warn:#b56f46}
+@media(prefers-color-scheme:dark){:root{--bg:#151c1a;--card:#202b27;--text:#ecf4ed;--muted:#9bb4a7;--line:#35443c;--accent:#83cab5;--tint:#28453b;--soft:#26362f;--warn:#ecae82}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html{background:var(--bg)}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer;touch-action:manipulation}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#app{max-width:520px;min-height:100dvh;margin:auto;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top) + 14px) 19px calc(env(safe-area-inset-bottom) + 12px)}main{flex:1;padding-bottom:24px}.header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:7px 0 23px}.eyebrow{font-size:12px;font-weight:700;letter-spacing:1.4px;color:var(--accent);text-transform:uppercase}.title{font-size:32px;font-weight:750;letter-spacing:-1.3px;line-height:1.14;margin:5px 0 8px}.sub,.muted{color:var(--muted)}.sub{font-size:14px}.logo{width:52px;height:52px;background:var(--tint);color:var(--accent);display:grid;place-items:center;border-radius:18px;font-size:32px;font-weight:600}
+.card{border-radius:22px;background:var(--card);border:1px solid var(--line);padding:19px;margin:12px 0}.tint{background:var(--tint);border-color:transparent}.stack{display:grid;gap:11px}.section{font-size:19px;font-weight:700;margin:23px 0 10px}.small{font-size:13px;color:var(--muted)}.flex{display:flex;align-items:center;gap:10px}.between{justify-content:space-between}.grow{flex:1}.pill{border-radius:999px;padding:5px 10px;font-size:12px;color:var(--accent);background:var(--tint);font-weight:650}.btn{border:0;border-radius:15px;background:var(--accent);color:var(--bg);padding:14px 17px;min-height:50px;font-weight:700}.btn.secondary{background:var(--soft);color:var(--text)}.btn.ghost{background:transparent;color:var(--muted)}.btn.full{width:100%}.btn:disabled{opacity:.4}.rowbuttons{display:flex;flex-wrap:wrap;gap:8px}.rowbuttons .btn{flex:1;min-width:95px}
+.choice{width:100%;display:flex;align-items:center;gap:12px;text-align:left;padding:14px;border-radius:16px;background:var(--card);color:var(--text);border:1px solid var(--line);min-height:54px}.choice.selected{background:var(--tint);border-color:var(--accent)}.choice .tick{margin-left:auto;color:var(--accent);font-weight:800}.stepbar{display:flex;gap:5px;margin:12px 0 25px}.stepbar i{flex:1;background:var(--line);height:5px;border-radius:5px}.stepbar i.on{background:var(--accent)}.field{width:100%;border:1px solid var(--line);border-radius:14px;padding:13px;background:var(--card);color:var(--text);min-height:48px}.label{display:block;font-weight:650;font-size:13px;margin:16px 0 7px}.nav{position:sticky;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);background:var(--card);border:1px solid var(--line);border-radius:23px;padding:8px 4px;gap:2px;box-shadow:0 8px 36px rgba(10,35,27,.07)}.nav button{background:transparent;color:var(--muted);border:0;min-height:53px;border-radius:15px;display:grid;justify-items:center;align-content:center;gap:2px;font-size:11px}.nav button.active{background:var(--tint);color:var(--accent);font-weight:750}.nav .symbol{font-size:21px;line-height:1.2}.progress{background:var(--line);height:8px;border-radius:10px;overflow:hidden}.progress span{display:block;height:100%;background:var(--accent);border-radius:10px}.hab{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 0;border-bottom:1px solid var(--line)}.hab:last-child{border:0}.hab strong{font-size:15px}.symbolic{font-size:24px;color:var(--accent)}.empty{text-align:center;padding:36px 10px}.week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.day{text-align:center;font-size:11px;color:var(--muted)}.dot{width:28px;height:28px;border-radius:50%;background:var(--soft);margin:5px auto 0;display:grid;place-items:center}.dot.done{background:var(--accent);color:var(--bg)}.notice{font-size:13px;padding:12px 14px;background:var(--tint);color:var(--text);border-radius:14px;margin:14px 0}.danger{color:var(--warn)}.hide{display:none!important}hr{border:0;border-top:1px solid var(--line);margin:18px 0}
+</style></head><body><div id="app"><main id="main"></main><nav id="nav" class="nav hide" aria-label="Навигация"></nav></div><input type="file" id="restoreFile" class="hide" accept=".json,application/json">
+<script>
+"use strict";
+const KEY="ritm_v12_preview_1",VERSION="12.0";
+const AREAS=["Энергия и здоровье","Движение и тело","Сон и восстановление","Время для себя","Развитие и интересы","Дом и порядок"];
+const IDEAS=[
+ {title:"Пять минут разминки",anchor:"После пробуждения",area:"Движение и тело",mini:"Одна минута разминки"},
+ {title:"Десять минут прогулки",anchor:"После обеда",area:"Энергия и здоровье",mini:"Выйти на улицу на две минуты"},
+ {title:"Десять минут без телефона",anchor:"Перед сном",area:"Сон и восстановление",mini:"Убрать телефон на одну минуту"},
+ {title:"Пять минут для себя",anchor:"После утреннего чая",area:"Время для себя",mini:"Одна спокойная минута"},
+ {title:"Пять минут чтения",anchor:"После ужина",area:"Развитие и интересы",mini:"Прочитать одну страницу"},
+ {title:"Убрать одну вещь",anchor:"После завтрака",area:"Дом и порядок",mini:"Положить на место одну вещь"}
+];
+let model;
+function fresh(){return {setup:false,areas:[],pace:"gentle",habits:[],marks:{},reviews:[],energy:[],created:new Date().toISOString()}}
+function read(){try{const p=JSON.parse(localStorage.getItem(KEY));return p&&Array.isArray(p.habits)&&p.marks&&typeof p.marks==="object"?p:fresh()}catch(e){return fresh()}}
+model=read();let tab="today",stage=0,chosen=0,dialog="",editing=false;
+function store(){try{localStorage.setItem(KEY,JSON.stringify(model))}catch(e){alert("Недостаточно места для сохранения. Сделай резервную копию.")}}
+function today(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";")}
+function E(id){return document.getElementById(id)}
+function card(s,extra){return '<section class="card '+(extra||"")+'">'+s+"</section>"}
+function button(t,fn,cls){return '<button type="button" class="btn '+(cls||"")+'" onclick="'+fn+'">'+t+"</button>"}
+function view(){E("nav").classList.toggle("hide",!model.setup);E("nav").innerHTML=model.setup?["Сегодня","Мой путь","Прогресс","Профиль"].map((x,i)=>'<button class="'+(tab===["today","path","progress","profile"][i]?"active":"")+'" onclick="navigate('+i+')"><span class="symbol">'+["⌂","♧","◫","◇"][i]+"</span>"+x+"</button>").join(""):""; E("main").innerHTML=!model.setup?onboard():tab==="today"?home():tab==="path"?path():tab==="progress"?progress():profile()}
+function navigate(i){tab=["today","path","progress","profile"][i];dialog="";view();window.scrollTo(0,0)}
+function head(t,sub){return '<header class="header"><div><div class="eyebrow">Ритм</div><h1 class="title">'+t+"</h1>"+(sub?'<div class="sub">'+sub+"</div>":"")+'</div><div class="logo">≋</div></header>'}
+function steps(){return '<div class="stepbar">'+[0,1,2,3].map(i=>'<i class="'+(i<=stage?"on":"")+'"></i>').join("")+"</div>"}
+function onboard(){
+ let s=head("Твой ритм","Меняй жизнь в своём темпе")+steps();
+ if(stage===0)s+=card('<div style="text-align:center;padding:25px 4px"><div class="logo" style="margin:0 auto 20px;width:90px;height:90px;font-size:48px">≋</div><h2>Маленькие изменения. Свой темп.</h2><p class="muted">Здесь можно начинать с малого, делать паузы и возвращаться. Не нужно быть идеальной.</p></div>')+card("Настройка займёт около трёх минут. Её можно пропустить и завершить позже.","tint");
+ if(stage===1)s+='<h2>Что хочется улучшить?</h2><p class="sub">Можно выбрать до двух направлений.</p><div class="stack">'+AREAS.map((a,i)=>'<button class="choice '+(model.areas.includes(a)?"selected":"")+'" onclick="toggleArea('+i+')">'+escapeHtml(a)+'<span class="tick">'+(model.areas.includes(a)?"✓":"○")+"</span></button>").join("")+"</div>";
+ if(stage===2)s+='<h2>С какого темпа начнём?</h2><p class="sub">Нагрузку всегда можно изменить.</p><div class="stack">'+[["gentle","Бережный","Одно небольшое действие"],["steady","Умеренный","До двух действий"]].map(a=>'<button class="choice '+(model.pace===a[0]?"selected":"")+'" onclick="pace(\''+a[0]+'\')"><span><strong>'+a[1]+'</strong><br><span class="small">'+a[2]+'</span></span><span class="tick">'+(model.pace===a[0]?"✓":"○")+"</span></button>").join("")+"</div>"+card("Совет: лучше закрепить один маленький шаг, чем пытаться изменить всё сразу.","tint");
+ if(stage===3)s+='<h2>Первый маленький шаг</h2><p class="sub">Выбери пример, который тебе подходит. Позже можно всё изменить.</p><div class="stack">'+IDEAS.map((a,i)=>'<button class="choice '+(chosen===i?"selected":"")+'" onclick="pick('+i+')"><span><strong>'+escapeHtml(a.title)+'</strong><br><span class="small">'+escapeHtml(a.anchor)+'</span></span><span class="tick">'+(chosen===i?"✓":"○")+"</span></button>").join("")+"</div>";
+ s+='<div class="rowbuttons" style="margin-top:26px">'+(stage?button("Назад","back()","secondary"):"")+(stage<3?button("Продолжить","next()",""):button("Начать","finish()",""))+'</div>'+button("Настрою позже","skip()","ghost full");
+ return s
+}
+function toggleArea(i){const a=AREAS[i],idx=model.areas.indexOf(a);if(idx>=0)model.areas.splice(idx,1);else if(model.areas.length<2)model.areas.push(a);view()}
+function pace(p){model.pace=p;view()}
+function pick(i){chosen=i;view()}
+function next(){if(stage===1&&!model.areas.length){alert("Выбери хотя бы одно направление или нажми «Настрою позже».");return}stage=Math.min(stage+1,3);view();window.scrollTo(0,0)}
+function back(){stage=Math.max(stage-1,0);view()}
+function finish(){const idea=IDEAS[chosen];model.habits=[{id:Date.now(),title:idea.title,anchor:idea.anchor,mini:idea.mini,area:idea.area,created:today(),active:true}];model.setup=true;store();navigate(0)}
+function skip(){model.setup=true;store();navigate(0)}
+function countToday(){const marks=model.marks[today()]||{};return model.habits.filter(h=>h.active&&marks[h.id])}
+function active(){return model.habits.filter(h=>h.active)}
+function home(){
+ let a=active(),done=countToday(),pct=a.length?Math.round(done.length/a.length*100):0;
+ let s=head("Сегодня",new Date().toLocaleDateString("ru-RU",{weekday:"long",day:"numeric",month:"long"}));
+ s+=card('<div class="flex between"><b>Твой день</b><span class="pill">'+done.length+" из "+a.length+'</span></div><div class="progress" style="margin:14px 0"><span style="width:'+pct+'%"></span></div><p class="small" style="margin:0">Не нужно делать всё идеально. Можно вернуться завтра.</p>',"tint");
+ if(!a.length)s+=card('<div class="empty"><div class="symbolic">✧</div><h2>Начни с одного шага</h2><p class="muted">Выбери небольшое действие и привяжи к знакомому событию.</p>'+button("Добавить привычку","addHabit()","")+"</div>");
+ else{
+ const next=a.find(h=>!(model.marks[today()]||{})[h.id]);
+ if(next)s+=card('<div class="eyebrow">Твой следующий шаг</div><h2 style="margin:9px 0 4px">'+escapeHtml(next.title)+'</h2><div class="muted">'+escapeHtml(next.anchor)+'</div><div class="rowbuttons" style="margin-top:18px">'+button("Сделала","mark("+next.id+",'done')","")+button("Лёгкий вариант","mark("+next.id+",'mini')","secondary")+'</div><div style="margin-top:8px">'+button("Сегодня пропущу","mark("+next.id+",'skip')","ghost full")+'</div><p class="small">Лёгкий вариант: '+escapeHtml(next.mini)+'</p>');
+ else s+=card('<div class="empty"><div class="symbolic">✓</div><h2>На сегодня всё</h2><p class="muted">Спасибо, что уделила время себе.</p></div>',"tint");
+ s+='<div class="section">Мои привычки</div>'+card(a.map(h=>{const value=(model.marks[today()]||{})[h.id];return '<div class="hab"><div><strong>'+escapeHtml(h.title)+'</strong><div class="small">'+escapeHtml(h.anchor)+(value?' · '+(value==="done"?"Сделано":value==="mini"?"Лёгкий вариант":"Пропущено"):"")+'</div></div><button class="btn secondary" onclick="mark('+h.id+',\''+(value?"clear":"done")+'\')">'+(value?"↶":"✓")+"</button></div>"}).join(""));
+ }
+ return s+'<div class="section">Как ты себя чувствуешь?</div>'+card('<div class="small" style="margin-bottom:11px">Необязательно. Оцени уровень энергии сегодня.</div><div class="rowbuttons">'+[1,2,3,4,5].map(n=>button(String(n),"energy("+n+")","secondary")).join("")+'</div><div class="small" style="margin-top:10px">1 — совсем мало энергии, 5 — много</div>');
+}
+function mark(id,value){if(!model.marks[today()])model.marks[today()]={};if(value==="clear")delete model.marks[today()][id];else model.marks[today()][id]=value;store();view()}
+function energy(n){model.energy.push({date:today(),value:n});store();view();alert("Энергия отмечена: "+n+" из 5")}
+function path(){let s=head("Мой путь","Меняем жизнь постепенно");s+=card('<div class="eyebrow">Твои направления</div><h2>'+escapeHtml(model.areas.join(" · ")||"Пока не выбраны")+'</h2><p class="small">Можно начинать с одного направления и добавлять новые позже.</p>',"tint");
+ s+='<div class="section">Привычки в фокусе</div>';
+ if(!active().length)s+=card('<p class="muted">Пока нет активных привычек.</p>');
+ else s+=card(active().map(h=>'<div class="hab"><div class="grow"><strong>'+escapeHtml(h.title)+'</strong><div class="small">'+escapeHtml(h.anchor)+'</div><div class="small">Мини-версия: '+escapeHtml(h.mini)+'</div></div><button class="btn secondary" onclick="pauseHabit('+h.id+')">Пауза</button></div>').join(""));
+ const paused=model.habits.filter(h=>!h.active);if(paused.length)s+='<div class="section">На паузе</div>'+card(paused.map(h=>'<div class="hab"><strong>'+escapeHtml(h.title)+'</strong>'+button("Вернуть","resumeHabit("+h.id+")","secondary")+'</div>').join(""));
+ s+='<div style="margin-top:18px">'+button("+ Добавить привычку","addHabit()","secondary full")+'</div>';
+ if(dialog==="add")s+=card('<h2>Новая привычка</h2><label class="label" for="habitTitle">Что хочу делать</label><input id="habitTitle" class="field" maxlength="90" placeholder="Например, 5 минут чтения"><label class="label" for="habitAnchor">После какого события</label><input id="habitAnchor" class="field" maxlength="90" placeholder="Например, после ужина"><label class="label" for="habitMini">Облегчённый вариант</label><input id="habitMini" class="field" maxlength="90" placeholder="Например, одна страница"><div class="rowbuttons" style="margin-top:16px">'+button("Сохранить","saveHabit()","")+button("Отмена","cancelHabit()","secondary")+"</div>");
+ return s
+}
+function addHabit(){tab="path";dialog="add";view();setTimeout(()=>E("habitTitle")&&E("habitTitle").focus(),50)}
+function cancelHabit(){dialog="";view()}
+function saveHabit(){const title=E("habitTitle").value.trim(),anchor=E("habitAnchor").value.trim(),mini=E("habitMini").value.trim();if(!title||!anchor||!mini){alert("Заполни все три поля.");return}if(active().length>=2&&!confirm("В фокусе уже две привычки. Добавить ещё одну?"))return;model.habits.push({id:Date.now(),title,anchor,mini,created:today(),active:true});dialog="";store();view()}
+function pauseHabit(id){const h=model.habits.find(x=>x.id===id);if(h){h.active=false;store();view()}}
+function resumeHabit(id){const h=model.habits.find(x=>x.id===id);if(h){h.active=true;store();view()}}
+function sevenDays(){const arr=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);arr.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"))}return arr}
+function progress(){
+ const ds=sevenDays(),a=active();let finished=0,partial=0;for(const d of ds){const marks=model.marks[d]||{};Object.values(marks).forEach(v=>{if(v==="done")finished++;if(v==="mini")partial++})}
+ let s=head("Прогресс","Замечай изменения, не оценивай себя");
+ s+=card('<div class="flex between"><strong>Последние 7 дней</strong><span class="pill">'+(finished+partial)+' действий</span></div><div class="week" style="margin-top:18px">'+ds.map(d=>{const x=Object.values(model.marks[d]||{}).some(v=>v==="done"||v==="mini");return '<div class="day">'+["Вс","Пн","Вт","Ср","Чт","Пт","Сб"][new Date(d+"T12:00:00").getDay()]+'<div class="dot '+(x?"done":"")+'">'+(x?"✓":"·")+"</div></div>"}).join("")+'</div><p class="small">Обычных выполнений: '+finished+' · облегчённых: '+partial+'</p>',"tint");
+ s+='<div class="section">Еженедельный обзор</div>'+card('<p class="muted">Как давалась привычка на этой неделе?</p><div class="stack">'+[["easy","Легко, почти автоматически"],["medium","Иногда требовалось усилие"],["hard","Было сложно"]].map(x=>'<button class="choice" onclick="review(\''+x[0]+'\')">'+x[1]+' <span class="tick">→</span></button>').join("")+'</div><p class="small">Ритм не переводит автоматически к новым привычкам. Ты выбираешь дальнейший темп.</p>');
+ if(model.reviews.length){const last=model.reviews[model.reviews.length-1];s+=card('<div class="eyebrow">Твоя последняя оценка</div><p>'+escapeHtml(last.message)+'</p><div class="small">'+escapeHtml(last.date)+'</div>')}
+ return s;
+}
+function review(x){const msg=x==="easy"?"Продолжай ещё неделю в том же ритме. Если привычка остаётся лёгкой, можно осторожно усложнить её.":x==="medium"?"Оставь привычку без изменений. Важнее удобство и регулярность.":"Попробуй облегчённый вариант или поменяй событие, к которому привязано действие.";model.reviews.push({date:today(),ease:x,message:msg});store();view()}
+function profile(){return head("Профиль","Настройки и безопасность")+card('<h2>О приложении</h2><p>«Ритм» помогает менять образ жизни небольшими шагами — без жёстких сроков и наказаний за пропуски.</p><div class="small">Версия '+VERSION+' · тестовый прототип</div>')+card('<h2>Резервная копия</h2><p class="small">Данные хранятся только на этом устройстве. Сохраняй копию в «Файлы» или iCloud Drive.</p><div class="stack">'+button("Сохранить JSON-файл","backup()","secondary full")+button("Восстановить из файла","restore()","secondary full")+'</div>')+card('<h2>Первый запуск</h2><p class="small">Повторное прохождение настройки не удаляет текущие привычки. Можно изменить направления и темп.</p>'+button("Изменить настройки","reconfigure()","secondary full"))}
+function reconfigure(){if(!confirm("Открыть настройку заново? Текущие привычки и история сохранятся, но при завершении появится новая привычка."))return;model.setup=false;stage=1;store();view()}
+async function backup(){try{const file=new File([JSON.stringify({kind:"ritm-v12",data:model})],"ritm-backup-"+today()+".json",{type:"application/json"});if(navigator.canShare&&navigator.share&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:"Резервная копия Ритм"});return}catch(e){if(e.name==="AbortError")return}}const url=URL.createObjectURL(file),a=document.createElement("a");a.href=url;a.download=file.name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000)}catch(e){alert("Не удалось сохранить копию. Попробуй в Safari.")}}
+function restore(){E("restoreFile").click()}
+E("restoreFile").addEventListener("change",async function(){const f=this.files&&this.files[0];this.value="";if(!f)return;try{if(f.size>5*1024*1024)throw Error();const parsed=JSON.parse(await f.text());if(parsed.kind!=="ritm-v12"||!parsed.data||!Array.isArray(parsed.data.habits)||!parsed.data.marks||!Array.isArray(parsed.data.areas))throw Error();if(!confirm("Заменить данные Ритма содержимым выбранного файла?"))return;localStorage.setItem(KEY+"_before_restore",JSON.stringify(model));localStorage.setItem(KEY,JSON.stringify(parsed.data));model=parsed.data;tab="today";view();alert("Данные восстановлены.")}catch(e){alert("Не удалось прочитать или восстановить этот файл. Данные не изменены.")}});
+window.addEventListener("error",e=>{console.error("Ritm error",e.message)});
+view();
+</script></body></html>
