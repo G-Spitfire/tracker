@@ -190,7 +190,7 @@ main{padding:17px 16px 30px}
 <input type="file" accept="image/*" id="af" hidden onchange="setAv(this)"><div id="tt"></div><div id="s"></div>
 <script>
 window.onerror=(m,u,l)=>{if(!l)return;const b=document.createElement('div');b.style.cssText='position:fixed;left:8px;right:8px;top:8px;z-index:30;background:#ff5a4d;color:#111;padding:10px;border-radius:8px;font-size:13px';b.textContent='Ошибка: '+m+' (строка '+l+'). Нажми, чтобы закрыть.';b.onclick=()=>b.remove();document.body.appendChild(b)};
-const VER=16.3;
+const VER=16.4;
 (function(){fetch(location.pathname+'?'+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const VER=([\d.]+)/);if(m&&+m[1]!==VER){const n=Date.now();let l=0;try{l=+localStorage.getItem('mtr')||0}catch(e){}if(n-l>60000){try{localStorage.setItem('mtr',n)}catch(e){}location.replace(location.pathname+'?u='+n)}}}).catch(()=>{})})();
 const NAMES=['Английский','Литература','География','История','Информатика','Биология','Физра','Алгебра','Химия','Русский','Физика','Труд','Геометрия','ОБЖ'];
 const SEED=[[2,4,2,5],[5,2,3,5,3,3],[5,5,2],[4],[4,5],[5],[5,5],[3,3,3,5,3,3,3],[5,4],[3,2],[3,3],[4,5],[5,4,4],[]];
@@ -313,7 +313,7 @@ if(profilePage==='archive'){
 }
 if(profilePage==='profession')return `<button class="btn g" onclick="profilePage='home';render()">← Профиль</button>${prof(dates)}`;
 if(profilePage==='stats')return `<button class="btn g" onclick="profilePage='home';render()">← Профиль</button><h2>Прогресс за неделю</h2><div class="card">${weekly||'Пока нет привычек'}</div><div class="card">Выполненные задачи: <b>${S.todos.filter(t=>t.done&&dates.includes(t.done)).length}</b></div><h2>Достижения</h2><div class="card">Уроки подряд: <b>${streak()} дн.</b><div class="mu sm">Старые результаты упражнений и чтения сохранены в истории.</div></div>`;
-if(profilePage==='backup')return `<button class="btn g" onclick="profilePage='home';render()">← Профиль</button><h2>Резервная копия</h2><div class="mu sm">Версия v${VER}. Раз в неделю сохраняй копию в Заметки или Файлы. При восстановлении текущие данные будут заменены.</div><textarea id="bk" placeholder="Текст резервной копии"></textarea><div class="mini-actions"><button class="btn" onclick="exp()">Сделать копию</button><button class="btn g" onclick="imp()">Восстановить</button></div>`;
+if(profilePage==='backup')return `<button class="btn g" onclick="profilePage='home';render()">← Профиль</button><h2>Резервная копия</h2><div class="card"><b>Копия в файл</b><div class="mu sm" style="margin:8px 0 12px">Сохрани файл в «Файлы» на iPhone или в iCloud Drive. Это надёжнее, чем длинный текст в Заметках.</div><div class="mini-actions"><button type="button" class="btn" onclick="exportBackupFile()">Сохранить копию .json</button><button type="button" class="btn g" onclick="document.getElementById('backupFileInput').click()">Восстановить из файла</button></div><input id="backupFileInput" type="file" accept=".json,application/json" onchange="importBackupFile(this)" style="display:none"></div><h2>Старый способ: текст</h2><div class="mu sm">Для небольших копий. Длинный текст при вставке может обрезаться.</div><textarea id="bk" placeholder="Вставь текст резервной копии целиком"></textarea><div class="mini-actions"><button type="button" class="btn g" onclick="exp()">Скопировать текст</button><button type="button" class="btn g" onclick="imp()">Восстановить из текста</button></div><div id="backupStatus" class="mu sm" role="status" aria-live="polite" style="margin-top:10px"></div>`;
 const archivedCount=S.t.filter(t=>t.active===false).length;
 const tiles=[
  ['profession','compass','Профессия','1 шаг в неделю'],
@@ -365,7 +365,58 @@ function oAv(){sheet(`<h2 style="margin-top:0">Аватар</h2><div class="mu s
 function setAv(i){const f=i.files[0];if(!f)return;const im=new Image(),u=URL.createObjectURL(f);im.onload=()=>{const c=document.createElement('canvas'),m=Math.min(im.width,im.height);c.width=c.height=160;c.getContext('2d').drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,160,160);S.av=c.toDataURL('image/jpeg',.8);URL.revokeObjectURL(u);save();cs();render()};im.onerror=()=>alert('Не получилось открыть фото');im.src=u;i.value=''}
 function rG(k,i,v){S.g[k].find(y=>y.i==i).v=v;save();cs();render()}
 function dG(k,i){if(!confirm('Удалить оценку?'))return;S.g[k]=S.g[k].filter(y=>y.i!=i);save();cs();render()}
-function exp(){const e=document.getElementById('bk');e.value=JSON.stringify(S);e.select();try{navigator.clipboard.writeText(e.value)}catch(x){}}
-function imp(){try{const o=JSON.parse(document.getElementById('bk').value);if(!o.g||!o.t||!Object.keys(o.g).length||!Object.values(o.g).every(Array.isArray))throw 0;if(!confirm('Заменить все текущие данные содержимым копии?'))return;S=mig(o);syncN();save();render();alert('Данные восстановлены')}catch(e){alert('Не получилось: вставь в поле текст копии целиком')}}
+function backupStatus(message){const e=document.getElementById('backupStatus');if(e)e.textContent=message}
+function validateBackup(o){
+ if(!o||typeof o!=='object'||Array.isArray(o)||!o.g||typeof o.g!=='object'||Array.isArray(o.g)||!Array.isArray(o.t)||!o.p||typeof o.p!=='object'||!Object.keys(o.g).length||!Object.values(o.g).every(a=>Array.isArray(a)&&a.every(x=>x&&[2,3,4,5].includes(Number(x.v)))))throw new Error('Некорректная или неполная копия');
+ return o;
+}
+function installBackup(o){
+ validateBackup(o);
+ if(!confirm('Заменить текущие данные содержимым резервной копии?'))return false;
+ const previous=JSON.stringify(S),replacement=JSON.parse(JSON.stringify(o));
+ try{
+  const backupKey='mt_before_restore_'+iso(new Date());
+  localStorage.setItem(backupKey,previous);
+  const migrated=mig(replacement);
+  localStorage.setItem(KEY,JSON.stringify(migrated));
+  S=migrated;syncN();save();render();
+  alert('Все данные из файла восстановлены. Предыдущие данные сохранены в резервной копии на этом устройстве.');
+  return true;
+ }catch(err){
+  alert('Не удалось сохранить восстановленные данные. Текущие данные не заменены. Проверь свободное место в Safari.');
+  return false;
+ }
+}
+async function exportBackupFile(){
+ try{
+  const json=JSON.stringify(S),name='matvey-backup-'+iso(new Date())+'.json';
+  const file=new File([json],name,{type:'application/json'});
+  if(navigator.canShare&&navigator.share&&navigator.canShare({files:[file]})){
+   try{await navigator.share({files:[file],title:'Резервная копия Матвея'});backupStatus('В меню «Поделиться» выбери «Сохранить в Файлы».');return}
+   catch(err){if(err&&err.name==='AbortError')return}
+  }
+  const url=URL.createObjectURL(file),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+  backupStatus('Файл подготовлен. Проверь «Загрузки» или приложение «Файлы».');
+ }catch(err){backupStatus('Не удалось создать файл. Попробуй открыть приложение в Safari.')}
+}
+async function importBackupFile(input){
+ const file=input.files&&input.files[0];if(!file)return;
+ try{
+  if(file.size>10*1024*1024)throw new Error('Файл слишком большой');
+  const text=await file.text(),o=validateBackup(JSON.parse(text));
+  installBackup(o);
+ }catch(err){backupStatus('Файл не подходит или повреждён. Данные не изменены.')}
+ finally{input.value=''}
+}
+function exp(){
+ const e=document.getElementById('bk');e.value=JSON.stringify(S);e.select();
+ try{const result=navigator.clipboard&&navigator.clipboard.writeText(e.value);if(result)result.catch(()=>{});}catch(x){}
+ backupStatus('Текст подготовлен. Для больших копий используй сохранение в файл.');
+}
+function imp(){
+ try{installBackup(validateBackup(JSON.parse(document.getElementById('bk').value)))}
+ catch(err){backupStatus('Текст неполный или повреждён. Данные не изменены.')}
+}
 save();render();
 </script></body></html>
