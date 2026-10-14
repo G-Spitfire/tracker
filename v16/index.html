@@ -135,11 +135,34 @@ main{padding:17px 16px 30px}
  margin:0 13px calc(9px + env(safe-area-inset-bottom,0px));
  background:rgba(11,27,42,.96);-webkit-backdrop-filter:none;backdrop-filter:none}
 @media(max-width:365px){.bar{width:auto;margin-left:9px;margin-right:9px}}
+
+/* v16.2: single stable navigation layout, no floating transformed fixed layer */
+#app{position:fixed;inset:0;display:flex;flex-direction:column;overflow:hidden;padding-top:env(safe-area-inset-top,0px)}
+#sc{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.bar{
+ position:relative;inset:auto;left:auto;right:auto;bottom:auto;transform:none;
+ flex:0 0 auto;align-self:center;display:flex;z-index:2;
+ width:calc(100% - 24px);max-width:536px;
+ margin:0 12px calc(8px + env(safe-area-inset-bottom,0px));
+ padding:5px;gap:3px;
+ background:#102438;border:1px solid #3a778b;border-radius:25px;
+ box-shadow:0 6px 16px #0007;
+ -webkit-backdrop-filter:none;backdrop-filter:none;
+}
+.bar button{
+ flex:1 1 0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+ min-width:0;min-height:60px;border:0;border-radius:20px;padding:6px 2px;
+ touch-action:manipulation;-webkit-user-select:none;user-select:none;
+ -webkit-tap-highlight-color:transparent;cursor:pointer;position:relative;z-index:1;
+}
+.bar button .nav-icon,.bar button span{pointer-events:none}
+.bar button.on{background:#193f51;color:var(--ac)}
+@media(max-width:365px){.bar{width:calc(100% - 18px);margin-left:9px;margin-right:9px}}
 </style></head><body><div id="app"><div id="sc"><main id="m"></main></div><nav class="bar" aria-label="Разделы приложения"><button data-t="d"><span class="nav-icon">☑</span><span>Дела</span></button><button data-t="g"><span class="nav-icon">▤</span><span>Оценки</span></button><button data-t="r"><span class="nav-icon">◎</span><span>Цели</span></button><button data-t="p"><span class="nav-icon">◇</span><span>Профиль</span></button></nav></div>
 <input type="file" accept="image/*" id="af" hidden onchange="setAv(this)"><div id="tt"></div><div id="s"></div>
 <script>
 window.onerror=(m,u,l)=>{if(!l)return;const b=document.createElement('div');b.style.cssText='position:fixed;left:8px;right:8px;top:8px;z-index:30;background:#ff5a4d;color:#111;padding:10px;border-radius:8px;font-size:13px';b.textContent='Ошибка: '+m+' (строка '+l+'). Нажми, чтобы закрыть.';b.onclick=()=>b.remove();document.body.appendChild(b)};
-const VER=16.1;
+const VER=16.2;
 (function(){fetch(location.pathname+'?'+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const VER=([\d.]+)/);if(m&&+m[1]!==VER){const n=Date.now();let l=0;try{l=+localStorage.getItem('mtr')||0}catch(e){}if(n-l>60000){try{localStorage.setItem('mtr',n)}catch(e){}location.replace(location.pathname+'?u='+n)}}}).catch(()=>{})})();
 const NAMES=['Английский','Литература','География','История','Информатика','Биология','Физра','Алгебра','Химия','Русский','Физика','Труд','Геометрия','ОБЖ'];
 const SEED=[[2,4,2,5],[5,2,3,5,3,3],[5,5,2],[4],[4,5],[5],[5,5],[3,3,3,5,3,3,3],[5,4],[3,2],[3,3],[4,5],[5,4,4],[]];
@@ -256,7 +279,16 @@ function aC(i,n,z){if(!z&&!(n>0))return;cs();chk(()=>{const d=chosenDate(),c=S.c
 function openProfile(){tab="p";profilePage="home";render()}
 function render(){document.body.classList.toggle('grades-view',tab==='g');document.querySelectorAll('.bar button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));
  document.getElementById('m').innerHTML='<div class="hd"><button class="avb" onclick="openProfile()" aria-label="Профиль">'+(S.av?`<img src="${S.av}" alt="">`:'Mt')+'</button><div><h1 style="font-size:25px">Матвей · личный прогресс</h1><div class="mu sm">'+({d:'Дела и привычки',g:'Учёба и оценки',r:'Учебные цели',p:'Профиль'}[tab])+'</div></div></div>'+{r:road,g:grades,d:today,p:profile}[tab]();}
-document.querySelector('.bar').onclick=e=>{const button=e.target.closest('button[data-t]');const t=button?.dataset.t;if(t){tab=t;if(t==='p')profilePage='home';render();document.getElementById('sc').scrollTop=0}};
+function switchTab(t){
+ if(!['d','g','r','p'].includes(t))return;
+ tab=t;
+ if(t==='p')profilePage='home';
+ document.getElementById('sc').scrollTop=0;
+ render();
+}
+document.querySelectorAll('.bar button[data-t]').forEach(button=>{
+ button.addEventListener('click',()=>switchTab(button.dataset.t),{passive:true});
+});
 function sheet(h){document.getElementById('s').innerHTML=h?`<div class="ov" onclick="if(event.target==this)cs()"><div class="sh">${h}</div></div>`:''}
 const cs=()=>sheet('');
 let hc={s:[]};
