@@ -123,12 +123,24 @@ body.grades-view .sub .chips{gap:5px;margin-top:5px}
 body.grades-view .card:not(.sub){border-radius:20px}
 @media(max-width:365px){main{padding-left:12px;padding-right:12px}.bar{width:calc(100% - 18px)}.bar button{font-size:11px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+/* v16.1 iOS stability: scrolling inside a fixed full-screen shell, dock in normal flex flow */
+html,body{height:100%;overflow:hidden}
+body{min-height:0;padding:0;overflow:hidden}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;height:auto;min-height:0;padding-top:env(safe-area-inset-top,0px);overflow:hidden}
+#sc{flex:1;display:block;min-height:0;height:auto;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
+main{padding:17px 16px 30px}
+.bar{position:relative;flex:none;left:auto;right:auto;bottom:auto;transform:none;
+ width:auto;max-width:560px;align-self:stretch;min-height:0;
+ margin:0 13px calc(9px + env(safe-area-inset-bottom,0px));
+ background:rgba(11,27,42,.96);-webkit-backdrop-filter:none;backdrop-filter:none}
+@media(max-width:365px){.bar{width:auto;margin-left:9px;margin-right:9px}}
 </style></head><body><div id="app"><div id="sc"><main id="m"></main></div><nav class="bar" aria-label="Разделы приложения"><button data-t="d"><span class="nav-icon">☑</span><span>Дела</span></button><button data-t="g"><span class="nav-icon">▤</span><span>Оценки</span></button><button data-t="r"><span class="nav-icon">◎</span><span>Цели</span></button><button data-t="p"><span class="nav-icon">◇</span><span>Профиль</span></button></nav></div>
 <input type="file" accept="image/*" id="af" hidden onchange="setAv(this)"><div id="tt"></div><div id="s"></div>
 <script>
 window.onerror=(m,u,l)=>{if(!l)return;const b=document.createElement('div');b.style.cssText='position:fixed;left:8px;right:8px;top:8px;z-index:30;background:#ff5a4d;color:#111;padding:10px;border-radius:8px;font-size:13px';b.textContent='Ошибка: '+m+' (строка '+l+'). Нажми, чтобы закрыть.';b.onclick=()=>b.remove();document.body.appendChild(b)};
-const VER=16;
-(function(){fetch(location.pathname+'?'+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const VER=(\d+)/);if(m&&+m[1]!==VER){const n=Date.now();let l=0;try{l=+localStorage.getItem('mtr')||0}catch(e){}if(n-l>60000){try{localStorage.setItem('mtr',n)}catch(e){}location.replace(location.pathname+'?u='+n)}}}).catch(()=>{})})();
+const VER=16.1;
+(function(){fetch(location.pathname+'?'+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const VER=([\d.]+)/);if(m&&+m[1]!==VER){const n=Date.now();let l=0;try{l=+localStorage.getItem('mtr')||0}catch(e){}if(n-l>60000){try{localStorage.setItem('mtr',n)}catch(e){}location.replace(location.pathname+'?u='+n)}}}).catch(()=>{})})();
 const NAMES=['Английский','Литература','География','История','Информатика','Биология','Физра','Алгебра','Химия','Русский','Физика','Труд','Геометрия','ОБЖ'];
 const SEED=[[2,4,2,5],[5,2,3,5,3,3],[5,5,2],[4],[4,5],[5],[5,5],[3,3,3,5,3,3,3],[5,4],[3,2],[3,3],[4,5],[5,4,4],[]];
 const GOAL=4+1/3,KEY='mt16preview';
@@ -244,7 +256,7 @@ function aC(i,n,z){if(!z&&!(n>0))return;cs();chk(()=>{const d=chosenDate(),c=S.c
 function openProfile(){tab="p";profilePage="home";render()}
 function render(){document.body.classList.toggle('grades-view',tab==='g');document.querySelectorAll('.bar button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));
  document.getElementById('m').innerHTML='<div class="hd"><button class="avb" onclick="openProfile()" aria-label="Профиль">'+(S.av?`<img src="${S.av}" alt="">`:'Mt')+'</button><div><h1 style="font-size:25px">Матвей · личный прогресс</h1><div class="mu sm">'+({d:'Дела и привычки',g:'Учёба и оценки',r:'Учебные цели',p:'Профиль'}[tab])+'</div></div></div>'+{r:road,g:grades,d:today,p:profile}[tab]();}
-document.querySelector('.bar').onclick=e=>{const t=e.target.dataset.t;if(t){tab=t;if(t==='p')profilePage='home';render();window.scrollTo({top:0,behavior:'instant'})}};
+document.querySelector('.bar').onclick=e=>{const button=e.target.closest('button[data-t]');const t=button?.dataset.t;if(t){tab=t;if(t==='p')profilePage='home';render();document.getElementById('sc').scrollTop=0}};
 function sheet(h){document.getElementById('s').innerHTML=h?`<div class="ov" onclick="if(event.target==this)cs()"><div class="sh">${h}</div></div>`:''}
 const cs=()=>sheet('');
 let hc={s:[]};
