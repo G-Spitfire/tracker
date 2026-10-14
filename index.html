@@ -48,27 +48,29 @@ textarea{height:90px;margin:8px 0}
 <input type="file" accept="image/*" id="af" hidden onchange="setAv(this)"><div id="tt"></div><div id="s"></div>
 <script>
 window.onerror=(m,u,l)=>{if(!l)return;const b=document.createElement('div');b.style.cssText='position:fixed;left:8px;right:8px;top:8px;z-index:30;background:#ff5a4d;color:#111;padding:10px;border-radius:8px;font-size:13px';b.textContent='Ошибка: '+m+' (строка '+l+'). Нажми, чтобы закрыть.';b.onclick=()=>b.remove();document.body.appendChild(b)};
-const VER=12;
+const VER=13;
 (function(){fetch(location.pathname+'?'+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const VER=(\d+)/);if(m&&+m[1]!==VER){const n=Date.now();let l=0;try{l=+localStorage.getItem('mtr')||0}catch(e){}if(n-l>60000){try{localStorage.setItem('mtr',n)}catch(e){}location.replace(location.pathname+'?u='+n)}}}).catch(()=>{})})();
 const NAMES=['Английский','Литература','География','История','Информатика','Биология','Физра','Алгебра','Химия','Русский','Физика','Труд','Геометрия','ОБЖ'];
 const SEED=[[2,4,2,5],[5,2,3,5,3,3],[5,5,2],[4],[4,5],[5],[5,5],[3,3,3,5,3,3,3],[5,4],[3,2],[3,3],[4,5],[5,4,4],[]];
-const GOAL=4+1/3,END=new Date(2026,9,26),KEY='mt1';
+const GOAL=4+1/3,KEY='mt1';
 let S,tab='r';
+const endD=()=>new Date((S.end||'2026-10-26')+'T00:00:00'),fd=()=>endD().toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
 const TASKS=()=>[{i:'hw',t:'Сделать уроки'},{i:'rd',t:'Прочитать главы',u:'глав'},{i:'pu',t:'Отжался',u:'раз'},{i:'pw',t:'Подтянулся',u:'раз'},{i:'ho',t:'Помощь по дому'}];
 function def(){let n=0;return{g:Object.fromEntries(NAMES.map((k,i)=>[k,SEED[i].map(v=>({i:++n,v}))])),t:TASKS(),d:{},c:{},h:{},p:{dn:[]},v:4,n}}
-function mig(o){if(!(o.v>=4)){o.t=TASKS();o.c=o.c||{};o.h=o.h||{};o.p=o.p||{dn:[]}}if(!(o.v>=5)&&!o.g['ОБЖ'])o.g['ОБЖ']=[];if(!o.x)o.x={};o.v=5;return o}
+function mig(o){if(!(o.v>=4)){o.t=TASKS();o.c=o.c||{};o.h=o.h||{};o.p=o.p||{dn:[]}}if(!(o.v>=5)&&!o.g['ОБЖ'])o.g['ОБЖ']=[];if(!o.x)o.x={};o.v=5;if(!o.hl)o.hl=Object.keys(o.h||{}).sort().map(d=>({d,f:o.h[d],e:null}));return o}
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S||!S.g)S=def();S=mig(S);syncN();
 const ACT=()=>NAMES.filter(k=>S.g[k].length);
 const finAvg=()=>sum(ACT().map(k=>fin(avg(k))))/(ACT().length||1);
-const save=()=>{S.h[iso(new Date())]=+finAvg().toFixed(3);try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const exAvg=()=>sum(ACT().map(k=>avg(k)))/(ACT().length||1);
+const save=()=>{const f=+finAvg().toFixed(3),e=+exAvg().toFixed(3),l=S.hl[S.hl.length-1];if(!l||l.f!=f||l.e!=e){S.hl.push({d:iso(new Date()),f,e});if(S.hl.length>150)S.hl.shift()}try{localStorage.setItem(KEY,JSON.stringify(S))}catch(x){}};
 const esc=s=>s.replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 const f2=x=>x.toFixed(2),sum=a=>a.reduce((x,y)=>x+y,0);
 const fin=a=>a<2.6?2:a<3.6?3:a<4.6?4:5;
 const vals=k=>S.g[k].map(x=>x.v),avg=k=>sum(vals(k))/vals(k).length;
 const pl=n=>{const a=n%100,b=n%10;return a>10&&a<15?'дней':b==1?'день':b>1&&b<5?'дня':'дней'};
 const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-function plan(a){const n=a.length,s=sum(a);for(let k=1;k<60;k++)if((s+5*k)/(n+k)>=3.6-1e-9)return{k,x:(s+5*k)/(n+k),t:`получить ${k}× «5» подряд`}}
+function plan(a){const n=a.length,s=sum(a);for(let k=1;k<600;k++)if((s+5*k)/(n+k)>=3.6-1e-9)return{k,x:(s+5*k)/(n+k),t:`получить ${k}× «5» подряд`};return{k:9999,x:3.6,t:'получить очень много «5» подряд'}}
 function calc(){const bad=[],good=[];
  ACT().forEach(k=>{const a=vals(k),av=avg(k);
   if(av<3.6)bad.push({k,av,p:plan(a),f:fin(av)});
@@ -77,27 +79,31 @@ function calc(){const bad=[],good=[];
 function scen(k){const a=vals(k),s=sum(a),n=a.length,c=avg(k);return[5,4,3].map(v=>{const x=(s+v)/(n+1);return`<span>${v} → <b class="${x>=3.6?'ok':x>=c?'warn':'bad'}">${f2(x)}</b></span>`}).join('')}
 function streak(){let c=0,d=new Date();if(!(S.d[iso(d)]||[]).includes('hw'))d.setDate(d.getDate()-1);
  while((S.d[iso(d)]||[]).includes('hw')){c++;d.setDate(d.getDate()-1)}return c}
-function chart(){const ks=Object.keys(S.h).sort(),pts=[];let last=S.h[ks[0]];
- for(let d=new Date(ks[0]+'T00:00:00');iso(d)<=iso(new Date());d.setDate(d.getDate()+1)){const k=iso(d);if(S.h[k]!=null)last=S.h[k];pts.push({d:k,v:last})}
- const vs=pts.map(p=>p.v).concat(GOAL),lo=Math.floor((Math.min(...vs)-.1)*10)/10,hi=Math.ceil((Math.max(...vs)+.1)*10)/10,W=320,H=130,P=28,n=pts.length;
+function chart(){const L=S.hl.slice(-40),n=L.length;if(!n)return'';
+ const vs=L.map(p=>p.f).concat(L.filter(p=>p.e!=null).map(p=>p.e),GOAL),lo=Math.floor((Math.min(...vs)-.1)*10)/10,hi=Math.ceil((Math.max(...vs)+.1)*10)/10,W=320,H=130,P=28;
  const x=i=>n>1?P+i*(W-P-8)/(n-1):W/2,y=v=>H-18-(v-lo)/(hi-lo)*(H-30),lb=p=>p.d.slice(8)+'.'+p.d.slice(5,7);
- return`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="График итогового среднего"><line x1="${P}" x2="${W-8}" y1="${y(GOAL)}" y2="${y(GOAL)}" stroke="var(--ac)" stroke-dasharray="4 4"/><text x="0" y="${y(GOAL)+4}" font-size="11" fill="var(--ac)">${f2(GOAL)}</text><text x="0" y="${y(lo)+4}" font-size="11" fill="var(--mu)">${lo.toFixed(1)}</text>${n>1?`<path d="${pts.map((p,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(p.v).toFixed(1)).join('')}" fill="none" stroke="var(--ok)" stroke-width="3" stroke-linejoin="round"/>`:''}${pts.map((p,i)=>`<circle cx="${x(i)}" cy="${y(p.v)}" r="${i==n-1?5:3}" fill="var(--ok)"/>`).join('')}${n>1?`<text x="${P}" y="${H-2}" font-size="11" fill="var(--mu)">${lb(pts[0])}</text>`:''}<text x="${W-8}" y="${H-2}" font-size="11" text-anchor="end" fill="var(--mu)">${lb(pts[n-1])}</text></svg>`}
-function wdays(a){let n=0;for(const d=new Date(a);d<=END;d.setDate(d.getDate()+1)){const g=d.getDay();if(g&&g<6)n++}return n}
+ const path=k=>{let d='',pen=0;L.forEach((p,i)=>{if(p[k]==null){pen=0;return}d+=(pen?'L':'M')+x(i).toFixed(1)+' '+y(p[k]).toFixed(1);pen=1});return d};
+ const dot=(k,c,r)=>{let i=-1;for(let q=n-1;q>=0;q--)if(L[q][k]!=null){i=q;break}return i<0?'':`<circle cx="${x(i).toFixed(1)}" cy="${y(L[i][k]).toFixed(1)}" r="${r}" fill="${c}"/>`};
+ return`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="График среднего балла"><line x1="${P}" x2="${W-8}" y1="${y(GOAL)}" y2="${y(GOAL)}" stroke="var(--ac)" stroke-dasharray="4 4"/><text x="0" y="${y(GOAL)+4}" font-size="11" fill="var(--ac)">${f2(GOAL)}</text><text x="0" y="${y(lo)+4}" font-size="11" fill="var(--mu)">${lo.toFixed(1)}</text>${n>1?`<path d="${path('e')}" fill="none" stroke="var(--tx)" stroke-width="2" stroke-linejoin="round"/><path d="${path('f')}" fill="none" stroke="var(--ok)" stroke-width="3" stroke-linejoin="round"/>`:''}${dot('e','var(--tx)',4)}${dot('f','var(--ok)',5)}${n>1?`<text x="${P}" y="${H-2}" font-size="11" fill="var(--mu)">${lb(L[0])}</text>`:''}<text x="${W-8}" y="${H-2}" font-size="11" text-anchor="end" fill="var(--mu)">${lb(L[n-1])}</text></svg>${n<2?'<div class="mu sm">Линия появится после следующей оценки.</div>':''}`}
+function wdays(a){let n=0;for(const d=new Date(a);d<=endD();d.setDate(d.getDate()+1)){const g=d.getDay();if(g&&g<6)n++}return n}
 const plw=n=>{const a=n%100,b=n%10;return a>10&&a<15?'учебных дней':b==1?'учебный день':b>1&&b<5?'учебных дня':'учебных дней'};
-function road(){const{bad,good}=calc(),t0=new Date();t0.setHours(0,0,0,0);const days=wdays(t0),fa=finAvg();
+function road(){const{bad,good}=calc(),t0=new Date();t0.setHours(0,0,0,0);const days=wdays(t0),fa=finAvg(),over=iso(t0)>(S.end||'2026-10-26');
  const hint=bad.length?`<b>${bad[0].k}:</b> ${bad[0].p.t}. Бери любую возможность получить оценку.`:'Все предметы на четвёрке и выше. Держи планку.';
  const frag=good.filter(g=>g.x);
- return`<div class="hero"><div class="big">${days}</div><div class="mu" style="padding-bottom:6px">${plw(days)} до конца четверти (без выходных)<br>средний ${f2(fa)}, цель ${f2(GOAL)}</div></div>
+ return`<div class="hero"><div class="big">${days}</div><div class="mu" style="padding-bottom:6px">${over?'четверть закончилась. Дату новой можно задать в «Предметы и четверть»':plw(days)+' до конца четверти (без выходных)'}<br>средний ${f2(fa)}, цель ${f2(GOAL)}</div></div>
 <div class="card hint"><div class="lb">★ Главное на сегодня</div><div class="tx">${hint}</div></div>
 <div class="row" style="align-items:center"><h2>Подтянуть</h2><span class="mu sm">в норме ${good.length} из ${ACT().length}</span></div>
 ${bad.length?bad.map(b=>`<div class="card sub t${b.f}"><div class="row" style="align-items:center"><div><b>${b.k}</b><div class="mu sm">средний ${f2(b.av)}</div></div><div class="fin">${b.f}<small>итог</small></div></div><div style="margin-top:6px">Нужно: ${b.p.t}, будет ${f2(b.p.x)}</div><div class="sc"><span class="mu">Следующая:</span>${scen(b.k)}</div></div>`).join(''):'<div class="card ok">Подтягивать нечего.</div>'}
 ${frag.length?`<h2>Не уронить</h2>${frag.map(g=>`<div class="card row" style="align-items:center"><b>${g.k}</b><span class="mu sm" style="text-align:right">${f2(g.av)}. Тройка опустит до <b class="warn">${f2(g.x)}</b></span></div>`).join('')}`:''}`}
+let ORD=null;
+function gord(){const base=ACT().sort((a,b)=>avg(b)-avg(a)).concat(NAMES.filter(k=>!S.g[k].length));if(!ORD)ORD=base.slice();ORD=ORD.filter(k=>NAMES.includes(k)).concat(base.filter(k=>!ORD.includes(k)));return ORD}
+function reord(){ORD=null;render()}
 function grades(){const all=NAMES.flatMap(k=>vals(k)),o=sum(all)/(all.length||1);
- return`<div class="hero"><div class="big">${f2(finAvg())}</div><div class="mu" style="padding-bottom:6px">итоговый средний<br>по всем оценкам ${f2(o)}</div></div>
-<div class="card"><b>Как меняется итоговый средний</b>${chart()}<div class="sm">Цель ${f2(GOAL)}: треть предметов «5», остальные «4»</div><div class="mu sm">${finAvg()>=GOAL-1e-9?'Цель достигнута':'Осталось +'+f2(GOAL-finAvg())}</div></div>
-<div style="margin-top:12px">${ACT().sort((a,b)=>avg(b)-avg(a)).concat(NAMES.filter(k=>!S.g[k].length)).map(k=>{const em=!S.g[k].length,av=em?0:avg(k),f=em?0:fin(av);return`<div class="card sub t${f}"><div class="row" style="align-items:center"><div><b>${k}</b><div class="mu sm">${em?'оценок пока нет':'средний '+f2(av)}</div></div><div class="fin" style="font-size:38px">${em?'—':f}<small>итог</small></div></div><div class="chips">${S.g[k].map(x=>`<button class="chip c${x.v}" onclick="oG('${k}',${x.i})">${x.v}</button>`).join('')}<button class="chip add" onclick="oN('${k}')" aria-label="Добавить оценку: ${k}">+</button></div></div>`}).join('')}</div>
+ return`<div class="hero"><div class="big">${f2(finAvg())}</div><div class="mu" style="padding-bottom:6px">итоговый средний<br>(точный: ${f2(exAvg())})</div></div>
+<div class="card"><b>Как меняется средний балл</b>${chart()}<div class="sm" style="margin-top:6px"><span style="color:var(--ok)">●</span> итоговые ${f2(finAvg())} &nbsp;·&nbsp; <span>●</span> точный ${f2(exAvg())}</div><div class="sm">Цель ${f2(GOAL)}: треть предметов «5», остальные «4»</div><div class="mu sm">${finAvg()>=GOAL-1e-9?'Цель достигнута':'Осталось +'+f2(GOAL-finAvg())}</div></div>
+<div style="margin-top:12px">${gord().map(k=>{const em=!S.g[k].length,av=em?0:avg(k),f=em?0:fin(av);return`<div class="card sub t${f}"><div class="row" style="align-items:center"><div><b>${k}</b><div class="mu sm">${em?'оценок пока нет':'средний '+f2(av)}</div></div><div class="fin" style="font-size:38px">${em?'—':f}<small>итог</small></div></div><div class="chips">${S.g[k].map(x=>`<button class="chip c${x.v}" onclick="oG('${k}',${x.i})">${x.v}</button>`).join('')}<button class="chip add" onclick="oN('${k}')" aria-label="Добавить оценку: ${k}">+</button></div></div>`}).join('')}</div>
 
-<button class="btn g" style="margin-top:12px;width:100%" onclick="oSub()">Предметы: добавить или убрать</button>
+<div class="row" style="margin-top:6px;align-items:center"><span class="mu sm">Порядок обновляется при заходе на экран</span><button onclick="reord()" style="background:none;border:0;color:var(--ac);font-size:15px;font-weight:600;padding:12px 4px;min-height:44px">Упорядочить</button></div><button class="btn g" style="margin-top:6px;width:100%" onclick="oSub()">Предметы и четверть</button>
 <h2>Копия данных</h2><div class="mu sm" style="margin-bottom:6px">Версия приложения: v${VER}</div><div class="card sm mu">Раз в неделю нажимай «Сделать копию» и отправляй текст себе в заметки. Если данные пропадут, вставь текст и нажми «Восстановить».<textarea id="bk"></textarea>
 <div class="row"><button class="btn g" onclick="exp()">Сделать копию</button><button class="btn g" onclick="imp()">Восстановить</button></div></div>
 `}
@@ -133,8 +139,8 @@ function oC(i){const t=S.t.find(x=>x.i==i),q=t.u=='раз'?[10,20,30,50]:[1,2,3]
  sheet(`<h2 style="margin-top:0">${esc(t.t)}</h2><div class="mu sm">Сегодня уже: ${cnt(d,i)} ${t.u}. Сколько добавить?</div><div class="chips">${q.map(n=>`<button class="chip" onclick="aC('${i}',${n})">+${n}</button>`).join('')}</div><p><input id="cn" type="number" inputmode="numeric" min="1" placeholder="Своё число"></p><div class="row"><button class="btn" onclick="aC('${i}',+document.getElementById('cn').value)">Добавить</button><button class="btn g" onclick="aC('${i}',0,1)">Обнулить за сегодня</button></div>`)}
 function aC(i,n,z){if(!z&&!(n>0))return;cs();chk(()=>{const d=iso(new Date()),c=S.c[d]||(S.c[d]={});if(z)c[i]=0;else c[i]=(c[i]||0)+Math.round(n)})}
 function render(){document.querySelectorAll('.bar button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));
- document.getElementById('m').innerHTML='<div class="hd"><button class="avb" onclick="oAv()" aria-label="Аватар">'+(S.av?`<img src="${S.av}" alt="">`:'Mt')+'</button><div><h1 style="font-size:28px">Профиль Матвея</h1><div class="mu sm">четверть до 26 октября</div></div></div>'+{r:road,g:grades,d:today}[tab]()}
-document.querySelector('.bar').onclick=e=>{const t=e.target.dataset.t;if(t){tab=t;render();document.getElementById('sc').scrollTop=0}};
+ document.getElementById('m').innerHTML='<div class="hd"><button class="avb" onclick="oAv()" aria-label="Аватар">'+(S.av?`<img src="${S.av}" alt="">`:'Mt')+'</button><div><h1 style="font-size:28px">Профиль Матвея</h1><div class="mu sm">четверть до '+fd()+'</div></div></div>'+{r:road,g:grades,d:today}[tab]()}
+document.querySelector('.bar').onclick=e=>{const t=e.target.dataset.t;if(t){tab=t;if(t=='g')ORD=null;render();document.getElementById('sc').scrollTop=0}};
 function sheet(h){document.getElementById('s').innerHTML=h?`<div class="ov" onclick="if(event.target==this)cs()"><div class="sh">${h}</div></div>`:''}
 const cs=()=>sheet('');
 let hc={s:[]};
@@ -145,7 +151,7 @@ function sH(){const d=iso(new Date());(S.x[d]||(S.x[d]={})).hw={s:hc.s};cs();chk
 function rmH(){const d=iso(new Date());cs();chk(()=>{const a=S.d[d]||[],x=a.indexOf('hw');if(x>=0)a.splice(x,1);if(S.x[d])delete S.x[d].hw})}
 function syncN(){NAMES.length=0;NAMES.push(...Object.keys(S.g))}
 const cn=v=>v.replace(/['"`\\<>&]/g,'').replace(/\s+/g,' ').trim().slice(0,30);
-function oSub(){sheet(`<h2 style="margin-top:0">Предметы</h2>${NAMES.map((k,j)=>`<div class="row" style="padding:6px 0;align-items:center"><span>${k}<span class="mu sm"> · оценок: ${S.g[k].length}</span></span><button onclick="rmSub(${j})" style="background:none;border:0;color:var(--bad);font-size:16px;padding:8px">Убрать</button></div>`).join('')}<input id="ns" maxlength="30" placeholder="Новый предмет" style="margin-top:12px"><button class="btn" style="margin-top:10px;width:100%" onclick="addSub()">Добавить предмет</button><button class="btn g" style="margin-top:10px;width:100%" onclick="cs()">Готово</button>`)}
+function oSub(){sheet(`<h2 style="margin-top:0">Предметы и четверть</h2>${NAMES.map((k,j)=>`<div class="row" style="padding:6px 0;align-items:center"><span>${k}<span class="mu sm"> · оценок: ${S.g[k].length}</span></span><button onclick="rmSub(${j})" style="background:none;border:0;color:var(--bad);font-size:16px;padding:8px">Убрать</button></div>`).join('')}<input id="ns" maxlength="30" placeholder="Новый предмет" style="margin-top:12px"><button class="btn" style="margin-top:10px;width:100%" onclick="addSub()">Добавить предмет</button><div class="mu sm" style="margin-top:18px">Конец четверти</div><input type="date" id="qe" value="${S.end||'2026-10-26'}" onchange="S.end=this.value||S.end;save();render()" style="margin-top:6px"><button class="btn g" style="margin-top:18px;width:100%" onclick="cs()">Готово</button>`)}
 function addSub(){const v=cn(document.getElementById('ns').value);if(!v)return;if(NAMES.includes(v)){toast('Такой предмет уже есть');return}S.g[v]=[];syncN();save();render();oSub()}
 function rmSub(j){const k=NAMES[j],n=S.g[k].length;if(NAMES.length<2){toast('Нужен хотя бы один предмет');return}if(n&&!confirm('Убрать «'+k+'» вместе с оценками ('+n+')?'))return;delete S.g[k];syncN();save();render();oSub()}
 function toast(m){const e=document.getElementById('tt');e.textContent=m;e.className='on';clearTimeout(toast.t);toast.t=setTimeout(()=>e.className='',3000)}
