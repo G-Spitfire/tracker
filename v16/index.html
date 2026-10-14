@@ -158,11 +158,39 @@ main{padding:17px 16px 30px}
 .bar button .nav-icon,.bar button span{pointer-events:none}
 .bar button.on{background:#193f51;color:var(--ac)}
 @media(max-width:365px){.bar{width:calc(100% - 18px);margin-left:9px;margin-right:9px}}
+
+/* v16.3 profile: compact two-column soft TRON tiles */
+.profile-identity{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  margin:8px 0 16px;padding:12px;background:linear-gradient(125deg,#132a3b,#101d2a);
+  border:1px solid #31566a;border-radius:21px;color:var(--tx);font:inherit;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.profile-avatar{width:56px;height:56px;flex:none;display:grid;place-items:center;overflow:hidden;
+  border:1px solid #55cbe8;border-radius:50%;background:#143044;color:var(--ac);
+  font-size:19px;font-weight:800}
+.profile-avatar img{width:100%;height:100%;object-fit:cover}
+.profile-identity-text{flex:1;min-width:0;display:grid;gap:4px}
+.profile-identity-text strong{font-size:19px}
+.profile-identity-text small{font-size:12px;color:var(--mu)}
+.profile-chevron{color:var(--ac);font-size:26px}
+.profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.profile-tile{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;
+  min-width:0;min-height:132px;text-align:left;padding:15px 13px;background:linear-gradient(145deg,#162c3c,#102131);
+  border:1px solid #315569;border-radius:20px;color:var(--tx);font:inherit;
+  cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.profile-tile-icon{height:33px;color:var(--ac);display:flex;align-items:center}
+.profile-tile-name{font-size:15px;font-weight:750;line-height:1.2;margin-top:auto}
+.profile-tile-desc{font-size:11.5px;color:var(--mu);margin-top:6px;line-height:1.3}
+.profile-tile:active,.profile-identity:active{background:#193c50;border-color:var(--ac)}
+.profile-tile:focus-visible,.profile-identity:focus-visible{outline:2px solid var(--ac);outline-offset:3px}
+.profile-version{text-align:center;color:#7594a5;font-size:11px;margin:20px 0}
+.archived-habit{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.archived-habit span{overflow-wrap:anywhere}
+@media(max-width:345px){.profile-tile{padding:12px 10px;min-height:125px}.profile-tile-name{font-size:14px}.profile-grid{gap:9px}}
 </style></head><body><div id="app"><div id="sc"><main id="m"></main></div><nav class="bar" aria-label="Разделы приложения"><button data-t="d"><span class="nav-icon">☑</span><span>Дела</span></button><button data-t="g"><span class="nav-icon">▤</span><span>Оценки</span></button><button data-t="r"><span class="nav-icon">◎</span><span>Цели</span></button><button data-t="p"><span class="nav-icon">◇</span><span>Профиль</span></button></nav></div>
 <input type="file" accept="image/*" id="af" hidden onchange="setAv(this)"><div id="tt"></div><div id="s"></div>
 <script>
 window.onerror=(m,u,l)=>{if(!l)return;const b=document.createElement('div');b.style.cssText='position:fixed;left:8px;right:8px;top:8px;z-index:30;background:#ff5a4d;color:#111;padding:10px;border-radius:8px;font-size:13px';b.textContent='Ошибка: '+m+' (строка '+l+'). Нажми, чтобы закрыть.';b.onclick=()=>b.remove();document.body.appendChild(b)};
-const VER=16.2;
+const VER=16.3;
 (function(){fetch(location.pathname+'?'+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const VER=([\d.]+)/);if(m&&+m[1]!==VER){const n=Date.now();let l=0;try{l=+localStorage.getItem('mtr')||0}catch(e){}if(n-l>60000){try{localStorage.setItem('mtr',n)}catch(e){}location.replace(location.pathname+'?u='+n)}}}).catch(()=>{})})();
 const NAMES=['Английский','Литература','География','История','Информатика','Биология','Физра','Алгебра','Химия','Русский','Физика','Труд','Геометрия','ОБЖ'];
 const SEED=[[2,4,2,5],[5,2,3,5,3,3],[5,5,2],[4],[4,5],[5],[5,5],[3,3,3,5,3,3,3],[5,4],[3,2],[3,3],[4,5],[5,4,4],[]];
@@ -267,11 +295,34 @@ function removeTodo(id){if(!confirm('Удалить задачу?'))return;const
 function editHabit(id){const t=S.t.find(x=>x.i===id)||{t:'',u:'',target:1,days:[0,1,2,3,4,5,6]};sheet(`<h2>${id?'Редактировать привычку':'Новая привычка'}</h2><input id="habName" maxlength="60" placeholder="Название" value="${esc(t.t)}"><div class="mu sm" style="margin-top:12px">Как отмечать</div><select id="habUnit"><option value="" ${!t.u?'selected':''}>Выполнено / не выполнено</option>${['раз','глав','минут','км','страниц'].map(u=>`<option ${t.u===u?'selected':''} value="${u}">${u}</option>`).join('')}</select><div class="mu sm" style="margin-top:12px">Цель за день (для количественных привычек)</div><input id="habTarget" type="number" min="1" value="${t.target||1}"><div class="mu sm" style="margin-top:12px">Дни недели</div><div class="chips">${[1,2,3,4,5,6,0].map((d,i)=>`<label style="padding:7px;border:1px solid var(--ln);border-radius:7px"><input style="width:auto" type="checkbox" data-weekday="${d}" ${(t.days||[]).includes(d)?'checked':''}>${['Пн','Вт','Ср','Чт','Пт','Сб','Вс'][i]}</label>`).join('')}</div><div class="mini-actions" style="margin-top:14px"><button class="btn" onclick="saveHabit('${id||''}')">Сохранить</button>${id?`<button class="btn g" onclick="archiveHabit('${id}')">В архив</button>`:''}<button class="btn g" onclick="cs()">Отмена</button></div>`)}
 function saveHabit(id){const name=document.getElementById('habName').value.trim(),u=document.getElementById('habUnit').value,target=Math.max(1,Number(document.getElementById('habTarget').value)||1),days=[...document.querySelectorAll('[data-weekday]:checked')].map(x=>+x.dataset.weekday);if(!name||!days.length)return toast('Укажи название и дни');const t=id?S.t.find(x=>x.i===id):{i:'hb'+Date.now(),active:true};Object.assign(t,{t:name,u,target,days});if(!id)S.t.push(t);save();cs();render()}
 function archiveHabit(id){if(!confirm('Архивировать привычку? История останется.'))return;S.t.find(t=>t.i===id).active=false;save();cs();render()}
+function profileIcon(name){
+const icons={
+compass:'<circle cx="12" cy="12" r="9"/><path d="m16.2 7.8-2.8 5.6-5.6 2.8 2.8-5.6z"/>',
+chart:'<path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/><path d="M17 7h3v3"/>',
+backup:'<rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 3v6h8V3M8 16h8M12 12v8"/>',
+archive:'<rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v11h14V9M10 13h4"/>'
+};
+return '<svg aria-hidden="true" width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">'+icons[name]+'</svg>';
+}
 function profile(){const W=wk(),dates=W.map(iso),total=S.t.filter(t=>t.active!==false).length;const weekly=S.t.filter(t=>t.active!==false).map(t=>{const n=t.u?sum(dates.map(d=>cnt(d,t.i))):dates.filter(d=>(S.d[d]||[]).includes(t.i)).length;return `<div class="row" style="padding:8px 0;border-bottom:1px solid var(--ln)"><span>${esc(t.t)}</span><b>${n} ${t.u||'дн.'}</b></div>`}).join('');
+if(profilePage==='archive'){
+ const a=S.t.filter(t=>t.active===false);
+ return `<button class="btn g" onclick="profilePage='home';render()">← Профиль</button><h2>Архив привычек</h2><div class="mu sm">Привычки сохранены вместе с историей. Их можно вернуть.</div>${a.length?a.map(t=>`<div class="card archived-habit"><span>${esc(t.t)}</span><button type="button" class="btn g" onclick="tRestore('${t.i}')">Вернуть</button></div>`).join(''):'<div class="card mu">Пока нет привычек в архиве.</div>'}`;
+}
 if(profilePage==='profession')return `<button class="btn g" onclick="profilePage='home';render()">← Профиль</button>${prof(dates)}`;
 if(profilePage==='stats')return `<button class="btn g" onclick="profilePage='home';render()">← Профиль</button><h2>Прогресс за неделю</h2><div class="card">${weekly||'Пока нет привычек'}</div><div class="card">Выполненные задачи: <b>${S.todos.filter(t=>t.done&&dates.includes(t.done)).length}</b></div><h2>Достижения</h2><div class="card">Уроки подряд: <b>${streak()} дн.</b><div class="mu sm">Старые результаты упражнений и чтения сохранены в истории.</div></div>`;
 if(profilePage==='backup')return `<button class="btn g" onclick="profilePage='home';render()">← Профиль</button><h2>Резервная копия</h2><div class="mu sm">Версия v${VER}. Раз в неделю сохраняй копию в Заметки или Файлы. При восстановлении текущие данные будут заменены.</div><textarea id="bk" placeholder="Текст резервной копии"></textarea><div class="mini-actions"><button class="btn" onclick="exp()">Сделать копию</button><button class="btn g" onclick="imp()">Восстановить</button></div>`;
-return `<div class="card" onclick="oAv()"><div class="row"><b>Матвей (изменить аватар)</b><span class="mu sm">v${VER}</span></div><div class="mu sm">Личный прогресс</div></div><div class="card chk" onclick="profilePage='profession';render()"><b>🧭 Будущая профессия</b><span style="margin-left:auto">›</span></div><div class="card chk" onclick="profilePage='stats';render()"><b>📊 Прогресс и достижения</b><span style="margin-left:auto">›</span></div><div class="card chk" onclick="profilePage='backup';render()"><b>💾 Резервная копия</b><span style="margin-left:auto">›</span></div><div class="card"><b>Архив привычек</b>${S.t.filter(t=>t.active===false).map(t=>`<div class="row" style="margin-top:10px"><span>${esc(t.t)}</span><button class="btn g" onclick="tRestore('${t.i}')">Вернуть</button></div>`).join('')||'<div class="mu sm">Пусто</div>'}</div>`}
+const archivedCount=S.t.filter(t=>t.active===false).length;
+const tiles=[
+ ['profession','compass','Профессия','1 шаг в неделю'],
+ ['stats','chart','Прогресс','Статистика и награды'],
+ ['backup','backup','Копия данных','Сохранить и восстановить'],
+ ['archive','archive','Архив','Привычки: '+archivedCount]
+];
+return `<button type="button" class="profile-identity" onclick="oAv()" aria-label="Изменить аватар Матвея"><span class="profile-avatar">${S.av?'<img alt="" src="'+S.av+'">':'Mt'}</span><span class="profile-identity-text"><strong>Матвей</strong><small>Личный прогресс · изменить фото</small></span><span class="profile-chevron" aria-hidden="true">›</span></button>
+<div class="profile-grid">${tiles.map(x=>`<button type="button" class="profile-tile" onclick="profilePage='${x[0]}';render()"><span class="profile-tile-icon">${profileIcon(x[1])}</span><span class="profile-tile-name">${x[2]}</span><span class="profile-tile-desc">${x[3]}</span></button>`).join('')}</div>
+<div class="profile-version">Матвей · v${VER}</div>`;
+}
 function tRestore(id){S.t.find(t=>t.i===id).active=true;save();render()}
 function oC(i){const t=S.t.find(x=>x.i==i),q=t.u=='раз'?[10,20,30,50]:[1,2,3],d=chosenDate();
  sheet(`<h2 style="margin-top:0">${esc(t.t)}</h2><div class="mu sm">Сегодня уже: ${cnt(d,i)} ${t.u}. Сколько добавить?</div><div class="chips">${q.map(n=>`<button class="chip" onclick="aC('${i}',${n})">+${n}</button>`).join('')}</div><p><input id="cn" type="number" inputmode="numeric" min="1" placeholder="Своё число"></p><div class="row"><button class="btn" onclick="aC('${i}',+document.getElementById('cn').value)">Добавить</button><button class="btn g" onclick="aC('${i}',0,1)">Обнулить за сегодня</button></div>`)}
