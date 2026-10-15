@@ -12,7 +12,7 @@
 </style></head><body><div id="app"><main id="main"></main><nav id="nav" class="nav hide" aria-label="Навигация"></nav></div><input type="file" id="restoreFile" class="hide" accept=".json,application/json">
 <script>
 "use strict";
-const KEY="ritm_v12_preview_1",VERSION="12.0";
+const KEY="ritm_v12_preview_1",VERSION="12.1";
 const AREAS=["Энергия и здоровье","Движение и тело","Сон и восстановление","Время для себя","Развитие и интересы","Дом и порядок"];
 const IDEAS=[
  {title:"Пять минут разминки",anchor:"После пробуждения",area:"Движение и тело",mini:"Одна минута разминки"},
@@ -25,7 +25,17 @@ const IDEAS=[
 let model;
 function fresh(){return {setup:false,areas:[],pace:"gentle",habits:[],marks:{},reviews:[],energy:[],created:new Date().toISOString()}}
 function read(){try{const p=JSON.parse(localStorage.getItem(KEY));return p&&Array.isArray(p.habits)&&p.marks&&typeof p.marks==="object"?p:fresh()}catch(e){return fresh()}}
-model=read();let tab="today",stage=0,chosen=0,dialog="",editing=false;
+function migrate(data){
+ data.areas=Array.isArray(data.areas)?data.areas:[];
+ data.reviews=Array.isArray(data.reviews)?data.reviews:[];
+ data.energy=Array.isArray(data.energy)?data.energy:[];
+ data.pace=["beginner","gentle","steady","pro"].includes(data.pace)?data.pace:"gentle";
+ data.customLimit=Math.max(1,Math.floor(Number(data.customLimit)||5));
+ data.habits.forEach(h=>{if(!Array.isArray(h.days)||!h.days.length)h.days=[0,1,2,3,4,5,6];if(h.active===undefined)h.active=true;if(!h.mini)h.mini=""});
+ data.version=VERSION;return data;
+}
+model=migrate(read());let tab="today",stage=0,chosen=0,dialog="",editing=null;
+let draft={...IDEAS[0],days:[0,1,2,3,4,5,6]};
 function store(){try{localStorage.setItem(KEY,JSON.stringify(model))}catch(e){alert("Недостаточно места для сохранения. Сделай резервную копию.")}}
 function today(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";")}
@@ -38,66 +48,75 @@ function head(t,sub){return '<header class="header"><div><div class="eyebrow">Р
 function steps(){return '<div class="stepbar">'+[0,1,2,3].map(i=>'<i class="'+(i<=stage?"on":"")+'"></i>').join("")+"</div>"}
 function onboard(){
  let s=head("Твой ритм","Меняй жизнь в своём темпе")+steps();
- if(stage===0)s+=card('<div style="text-align:center;padding:25px 4px"><div class="logo" style="margin:0 auto 20px;width:90px;height:90px;font-size:48px">≋</div><h2>Маленькие изменения. Свой темп.</h2><p class="muted">Здесь можно начинать с малого, делать паузы и возвращаться. Не нужно быть идеальной.</p></div>')+card("Настройка займёт около трёх минут. Её можно пропустить и завершить позже.","tint");
- if(stage===1)s+='<h2>Что хочется улучшить?</h2><p class="sub">Можно выбрать до двух направлений.</p><div class="stack">'+AREAS.map((a,i)=>'<button class="choice '+(model.areas.includes(a)?"selected":"")+'" onclick="toggleArea('+i+')">'+escapeHtml(a)+'<span class="tick">'+(model.areas.includes(a)?"✓":"○")+"</span></button>").join("")+"</div>";
- if(stage===2)s+='<h2>С какого темпа начнём?</h2><p class="sub">Нагрузку всегда можно изменить.</p><div class="stack">'+[["gentle","Бережный","Одно небольшое действие"],["steady","Умеренный","До двух действий"]].map(a=>'<button class="choice '+(model.pace===a[0]?"selected":"")+'" onclick="pace(\''+a[0]+'\')"><span><strong>'+a[1]+'</strong><br><span class="small">'+a[2]+'</span></span><span class="tick">'+(model.pace===a[0]?"✓":"○")+"</span></button>").join("")+"</div>"+card("Совет: лучше закрепить один маленький шаг, чем пытаться изменить всё сразу.","tint");
- if(stage===3)s+='<h2>Первый маленький шаг</h2><p class="sub">Выбери пример, который тебе подходит. Позже можно всё изменить.</p><div class="stack">'+IDEAS.map((a,i)=>'<button class="choice '+(chosen===i?"selected":"")+'" onclick="pick('+i+')"><span><strong>'+escapeHtml(a.title)+'</strong><br><span class="small">'+escapeHtml(a.anchor)+'</span></span><span class="tick">'+(chosen===i?"✓":"○")+"</span></button>").join("")+"</div>";
+ if(stage===0)s+=card('<div style="text-align:center;padding:25px 4px"><div class="logo" style="margin:0 auto 20px;width:90px;height:90px;font-size:48px">≋</div><h2>Маленькие изменения. Свой темп.</h2><p class="muted">Здесь можно начинать с малого, делать паузы и возвращаться. Не нужно быть идеальной.</p></div>')+card("Первую привычку можно создать за 20–30 секунд. Её можно пропустить и завершить позже.","tint");
+ if(stage===1)s+='<h2>Что хочется улучшить?</h2><p class="sub">Можно выбрать до пяти направлений.</p><div class="stack">'+AREAS.map((a,i)=>'<button class="choice '+(model.areas.includes(a)?"selected":"")+'" onclick="toggleArea('+i+')">'+escapeHtml(a)+'<span class="tick">'+(model.areas.includes(a)?"✓":"○")+"</span></button>").join("")+"</div>";
+ if(stage===2)s+='<h2>С какого темпа начнём?</h2><p class="sub">Выбери комфортное количество привычек. Темп можно изменить позже.</p>'+paceForm();
+ if(stage===3)s+='<h2>Первый маленький шаг</h2><p class="sub">Выбери пример и измени его под себя.</p><label class="label" for="idea">Идея для начала</label><select id="idea" class="field" onchange="pick(Number(this.value))">'+IDEAS.map((a,i)=>'<option value="'+i+'" '+(chosen===i?'selected':'')+'>'+escapeHtml(a.title)+'</option>').join('')+'</select>'+habitForm(draft);
  s+='<div class="rowbuttons" style="margin-top:26px">'+(stage?button("Назад","back()","secondary"):"")+(stage<3?button("Продолжить","next()",""):button("Начать","finish()",""))+'</div>'+button("Настрою позже","skip()","ghost full");
  return s
 }
-function toggleArea(i){const a=AREAS[i],idx=model.areas.indexOf(a);if(idx>=0)model.areas.splice(idx,1);else if(model.areas.length<2)model.areas.push(a);view()}
-function pace(p){model.pace=p;view()}
-function pick(i){chosen=i;view()}
+function toggleArea(i){const a=AREAS[i],idx=model.areas.indexOf(a);if(idx>=0)model.areas.splice(idx,1);else if(model.areas.length<5)model.areas.push(a);view()}
+function pace(p){model.pace=p;store();view()}
+function pick(i){chosen=i;draft={...IDEAS[i],days:[0,1,2,3,4,5,6]};view()}
 function next(){if(stage===1&&!model.areas.length){alert("Выбери хотя бы одно направление или нажми «Настрою позже».");return}stage=Math.min(stage+1,3);view();window.scrollTo(0,0)}
 function back(){stage=Math.max(stage-1,0);view()}
-function finish(){const idea=IDEAS[chosen];if(!model.habits.some(h=>h.title===idea.title&&h.anchor===idea.anchor))model.habits.push({id:Date.now(),title:idea.title,anchor:idea.anchor,mini:idea.mini,area:idea.area,created:today(),active:true});model.setup=true;store();navigate(0)}
+function finish(){const h=formValue();if(!h)return;if(!room())return;model.habits.push({...h,id:newId(),area:IDEAS[chosen].area,created:today(),active:true});model.setup=true;store();navigate(0)}
 function skip(){model.setup=true;store();navigate(0)}
-function countToday(){const marks=model.marks[today()]||{};return model.habits.filter(h=>h.active&&marks[h.id])}
+function scheduled(){return active().filter(h=>h.days.includes(new Date().getDay()))}
+function countToday(){const marks=model.marks[today()]||{};return scheduled().filter(h=>marks[h.id])}
 function active(){return model.habits.filter(h=>h.active)}
 function home(){
- let a=active(),done=countToday(),pct=a.length?Math.round(done.length/a.length*100):0;
+ let a=scheduled(),done=countToday(),pct=a.length?Math.round(done.length/a.length*100):0;
  let s=head("Сегодня",new Date().toLocaleDateString("ru-RU",{weekday:"long",day:"numeric",month:"long"}));
  s+=card('<div class="flex between"><b>Твой день</b><span class="pill">'+done.length+" из "+a.length+'</span></div><div class="progress" style="margin:14px 0"><span style="width:'+pct+'%"></span></div><p class="small" style="margin:0">Не нужно делать всё идеально. Можно вернуться завтра.</p>',"tint");
  if(!a.length)s+=card('<div class="empty"><div class="symbolic">✧</div><h2>Начни с одного шага</h2><p class="muted">Выбери небольшое действие и привяжи к знакомому событию.</p>'+button("Добавить привычку","addHabit()","")+"</div>");
  else{
  const next=a.find(h=>!(model.marks[today()]||{})[h.id]);
- if(next)s+=card('<div class="eyebrow">Твой следующий шаг</div><h2 style="margin:9px 0 4px">'+escapeHtml(next.title)+'</h2><div class="muted">'+escapeHtml(next.anchor)+'</div><div class="rowbuttons" style="margin-top:18px">'+button("Сделала","mark("+next.id+",'done')","")+button("Лёгкий вариант","mark("+next.id+",'mini')","secondary")+'</div><div style="margin-top:8px">'+button("Сегодня пропущу","mark("+next.id+",'skip')","ghost full")+'</div><p class="small">Лёгкий вариант: '+escapeHtml(next.mini)+'</p>');
+ if(next)s+=card('<div class="eyebrow">Твой следующий шаг</div><h2 style="margin:9px 0 4px">'+escapeHtml(next.title)+'</h2><div class="muted">'+escapeHtml(next.anchor)+'</div><div style="margin-top:18px">'+button("Сделала","mark("+next.id+",'done')","full")+'</div><details style="margin-top:14px"><summary>Не получилось сегодня?</summary>'+(next.mini?'<p class="small">Можно так: '+escapeHtml(next.mini)+'</p>':'<p class="small">Даже небольшая часть — уже шаг.</p>')+'<div class="rowbuttons">'+button("Сделала немного","mark("+next.id+",'mini')","secondary")+button("Пропустить","mark("+next.id+",'skip')","ghost")+'</div></details>');
  else s+=card('<div class="empty"><div class="symbolic">✓</div><h2>На сегодня всё</h2><p class="muted">Спасибо, что уделила время себе.</p></div>',"tint");
  s+='<div class="section">Мои привычки</div>'+card(a.map(h=>{const value=(model.marks[today()]||{})[h.id];return '<div class="hab"><div><strong>'+escapeHtml(h.title)+'</strong><div class="small">'+escapeHtml(h.anchor)+(value?' · '+(value==="done"?"Сделано":value==="mini"?"Лёгкий вариант":"Пропущено"):"")+'</div></div><button class="btn secondary" onclick="mark('+h.id+',\''+(value?"clear":"done")+'\')">'+(value?"↶":"✓")+"</button></div>"}).join(""));
  }
- return s+'<div class="section">Как ты себя чувствуешь?</div>'+card('<div class="small" style="margin-bottom:11px">Необязательно. Оцени уровень энергии сегодня.</div><div class="rowbuttons">'+[1,2,3,4,5].map(n=>button(String(n),"energy("+n+")","secondary")).join("")+'</div><div class="small" style="margin-top:10px">1 — совсем мало энергии, 5 — много</div>');
+ return s;
 }
 function mark(id,value){if(!model.marks[today()])model.marks[today()]={};if(value==="clear")delete model.marks[today()][id];else model.marks[today()][id]=value;store();view()}
 function energy(n){model.energy.push({date:today(),value:n});store();view();alert("Энергия отмечена: "+n+" из 5")}
 function path(){let s=head("Мой путь","Меняем жизнь постепенно");s+=card('<div class="eyebrow">Твои направления</div><h2>'+escapeHtml(model.areas.join(" · ")||"Пока не выбраны")+'</h2><p class="small">Можно начинать с одного направления и добавлять новые позже.</p>',"tint");
  s+='<div class="section">Привычки в фокусе</div>';
  if(!active().length)s+=card('<p class="muted">Пока нет активных привычек.</p>');
- else s+=card(active().map(h=>'<div class="hab"><div class="grow"><strong>'+escapeHtml(h.title)+'</strong><div class="small">'+escapeHtml(h.anchor)+'</div><div class="small">Мини-версия: '+escapeHtml(h.mini)+'</div></div><button class="btn secondary" onclick="pauseHabit('+h.id+')">Пауза</button></div>').join(""));
+ else s+=card(active().map(h=>'<div class="hab"><div class="grow"><strong>'+escapeHtml(h.title)+'</strong><div class="small">'+escapeHtml(h.anchor)+'</div><div class="small">'+frequencyLabel(h)+'</div></div><div class="stack">'+button("Изменить","editHabit("+h.id+")","secondary")+button("Пауза","pauseHabit("+h.id+")","ghost")+'</div></div>').join(""));
  const paused=model.habits.filter(h=>!h.active);if(paused.length)s+='<div class="section">На паузе</div>'+card(paused.map(h=>'<div class="hab"><strong>'+escapeHtml(h.title)+'</strong>'+button("Вернуть","resumeHabit("+h.id+")","secondary")+'</div>').join(""));
  s+='<div style="margin-top:18px">'+button("+ Добавить привычку","addHabit()","secondary full")+'</div>';
- if(dialog==="add")s+=card('<h2>Новая привычка</h2><label class="label" for="habitTitle">Что хочу делать</label><input id="habitTitle" class="field" maxlength="90" placeholder="Например, 5 минут чтения"><label class="label" for="habitAnchor">После какого события</label><input id="habitAnchor" class="field" maxlength="90" placeholder="Например, после ужина"><label class="label" for="habitMini">Облегчённый вариант</label><input id="habitMini" class="field" maxlength="90" placeholder="Например, одна страница"><div class="rowbuttons" style="margin-top:16px">'+button("Сохранить","saveHabit()","")+button("Отмена","cancelHabit()","secondary")+"</div>");
+ if(dialog==="add")s+=card('<h2>'+(editing===null?'Новая привычка':'Изменить привычку')+'</h2>'+habitForm(editing===null?{title:"",anchor:"",mini:"",days:[0,1,2,3,4,5,6]}:model.habits.find(h=>h.id===editing))+'<div class="rowbuttons" style="margin-top:16px">'+button("Сохранить","saveHabit()","")+button("Отмена","cancelHabit()","secondary")+'</div>');
  return s
 }
-function addHabit(){tab="path";dialog="add";view();setTimeout(()=>E("habitTitle")&&E("habitTitle").focus(),50)}
-function cancelHabit(){dialog="";view()}
-function saveHabit(){const title=E("habitTitle").value.trim(),anchor=E("habitAnchor").value.trim(),mini=E("habitMini").value.trim();if(!title||!anchor||!mini){alert("Заполни все три поля.");return}if(active().length>=2&&!confirm("В фокусе уже две привычки. Добавить ещё одну?"))return;model.habits.push({id:Date.now(),title,anchor,mini,created:today(),active:true});dialog="";store();view()}
+function limit(){return {beginner:1,gentle:3,steady:5,pro:model.customLimit}[model.pace]}
+function room(){if(active().length<limit())return true;alert("Для новой привычки поставь одну на паузу или выбери другой темп в профиле.");return false}
+function newId(){let id=Date.now();while(model.habits.some(h=>String(h.id)===String(id)))id++;return id}
+function frequencyLabel(h){return h.days.length===7?'Каждый день':h.days.map(d=>["Вс","Пн","Вт","Ср","Чт","Пт","Сб"][d]).join(', ')}
+function habitForm(h){return '<label class="label" for="habitAnchor">После чего?</label><input id="habitAnchor" class="field" maxlength="90" placeholder="После завтрака" value="'+escapeHtml(h.anchor)+'"><label class="label" for="habitTitle">Что буду делать?</label><input id="habitTitle" class="field" maxlength="90" placeholder="Например, читать книгу" value="'+escapeHtml(h.title)+'"><label class="label">Как часто?</label><div class="rowbuttons">'+[1,2,3,4,5,6,0].map(d=>'<label><input type="checkbox" name="habitDay" value="'+d+'" '+(h.days.includes(d)?'checked':'')+'> '+["Вс","Пн","Вт","Ср","Чт","Пт","Сб"][d]+'</label>').join('')+'</div><details style="margin-top:18px"><summary>Дополнительные настройки</summary><label class="label" for="habitMini">Облегчённый вариант · необязательно</label><input id="habitMini" class="field" maxlength="90" placeholder="Например, одна страница" value="'+escapeHtml(h.mini||'')+'"></details>'}
+function formValue(){const title=E("habitTitle").value.trim(),anchor=E("habitAnchor").value.trim(),mini=E("habitMini").value.trim(),days=Array.from(document.querySelectorAll('input[name="habitDay"]:checked'),x=>Number(x.value));if(!title||!anchor||!days.length){alert("Укажи событие, действие и хотя бы один день недели.");return null}return {title,anchor,mini,days}}
+function addHabit(){if(!room())return;editing=null;tab="path";dialog="add";view();E("habitAnchor").focus()}
+function editHabit(id){editing=id;dialog="add";view();E("habitAnchor").focus()}
+function cancelHabit(){dialog="";editing=null;view()}
+function saveHabit(){const h=formValue();if(!h)return;if(editing!==null)Object.assign(model.habits.find(x=>x.id===editing),h);else{if(!room())return;model.habits.push({...h,id:newId(),created:today(),active:true})}dialog="";editing=null;store();view()}
+function paceForm(){return '<div class="stack">'+[["beginner","Начинающий","1 привычка"],["gentle","Бережный","До 3 привычек"],["steady","Умеренный","До 5 привычек"],["pro","Профи","Свой лимит"]].map(a=>'<button class="choice '+(model.pace===a[0]?'selected':'')+'" onclick="pace(\''+a[0]+'\')"><span><strong>'+a[1]+'</strong><br><span class="small">'+a[2]+'</span></span></button>').join('')+'</div>'+(model.pace==='pro'?'<label class="label" for="customLimit">Мой лимит привычек</label><input id="customLimit" class="field" type="number" min="1" step="1" value="'+model.customLimit+'" onchange="setLimit(this.value)">':'')}
+function setLimit(value){model.customLimit=Math.max(1,Math.floor(Number(value)||5));store()}
 function pauseHabit(id){const h=model.habits.find(x=>x.id===id);if(h){h.active=false;store();view()}}
-function resumeHabit(id){const h=model.habits.find(x=>x.id===id);if(h){h.active=true;store();view()}}
+function resumeHabit(id){const h=model.habits.find(x=>x.id===id);if(h&&room()){h.active=true;store();view()}}
 function sevenDays(){const arr=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);arr.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"))}return arr}
 function progress(){
  const ds=sevenDays(),a=active();let finished=0,partial=0;for(const d of ds){const marks=model.marks[d]||{};Object.values(marks).forEach(v=>{if(v==="done")finished++;if(v==="mini")partial++})}
  let s=head("Прогресс","Замечай изменения, не оценивай себя");
  s+=card('<div class="flex between"><strong>Последние 7 дней</strong><span class="pill">'+(finished+partial)+' действий</span></div><div class="week" style="margin-top:18px">'+ds.map(d=>{const x=Object.values(model.marks[d]||{}).some(v=>v==="done"||v==="mini");return '<div class="day">'+["Вс","Пн","Вт","Ср","Чт","Пт","Сб"][new Date(d+"T12:00:00").getDay()]+'<div class="dot '+(x?"done":"")+'">'+(x?"✓":"·")+"</div></div>"}).join("")+'</div><p class="small">Обычных выполнений: '+finished+' · облегчённых: '+partial+'</p>',"tint");
- s+='<div class="section">Еженедельный обзор</div>'+card('<p class="muted">Как давалась привычка на этой неделе?</p><div class="stack">'+[["easy","Легко, почти автоматически"],["medium","Иногда требовалось усилие"],["hard","Было сложно"]].map(x=>'<button class="choice" onclick="review(\''+x[0]+'\')">'+x[1]+' <span class="tick">→</span></button>').join("")+'</div><p class="small">Ритм не переводит автоматически к новым привычкам. Ты выбираешь дальнейший темп.</p>');
- if(model.reviews.length){const last=model.reviews[model.reviews.length-1];s+=card('<div class="eyebrow">Твоя последняя оценка</div><p>'+escapeHtml(last.message)+'</p><div class="small">'+escapeHtml(last.date)+'</div>')}
+
  return s;
 }
 function review(x){const msg=x==="easy"?"Продолжай ещё неделю в том же ритме. Если привычка остаётся лёгкой, можно осторожно усложнить её.":x==="medium"?"Оставь привычку без изменений. Важнее удобство и регулярность.":"Попробуй облегчённый вариант или поменяй событие, к которому привязано действие.";model.reviews.push({date:today(),ease:x,message:msg});store();view()}
-function profile(){return head("Профиль","Настройки и безопасность")+card('<h2>О приложении</h2><p>«Ритм» помогает менять образ жизни небольшими шагами — без жёстких сроков и наказаний за пропуски.</p><div class="small">Версия '+VERSION+' · тестовый прототип</div>')+card('<h2>Резервная копия</h2><p class="small">Данные хранятся только на этом устройстве. Сохраняй копию в «Файлы» или iCloud Drive.</p><div class="stack">'+button("Сохранить JSON-файл","backup()","secondary full")+button("Восстановить из файла","restore()","secondary full")+'</div>')+card('<h2>Первый запуск</h2><p class="small">Повторное прохождение настройки не удаляет текущие привычки. Можно изменить направления и темп.</p>'+button("Изменить настройки","reconfigure()","secondary full"))}
+function profile(){return head("Профиль","Настройки и безопасность")+card('<h2>О приложении</h2><p>«Ритм» помогает менять образ жизни небольшими шагами — без жёстких сроков и наказаний за пропуски.</p><div class="small">Версия '+VERSION+' · тестовый прототип</div>')+card('<h2>Резервная копия</h2><p class="small">Данные хранятся только на этом устройстве. Сохраняй копию в «Файлы» или iCloud Drive.</p><div class="stack">'+button("Сохранить JSON-файл","backup()","secondary full")+button("Восстановить из файла","restore()","secondary full")+'</div>')+card('<h2>Мой темп</h2>'+paceForm())+card('<h2>Первый запуск</h2><p class="small">Повторное прохождение настройки не удаляет текущие привычки. Можно изменить направления и темп.</p>'+button("Изменить настройки","reconfigure()","secondary full"))}
 function reconfigure(){if(!confirm("Открыть настройку заново? Текущие привычки и история сохранятся, но при завершении появится новая привычка."))return;model.setup=false;stage=1;store();view()}
 async function backup(){try{const file=new File([JSON.stringify({kind:"ritm-v12",data:model})],"ritm-backup-"+today()+".json",{type:"application/json"});if(navigator.canShare&&navigator.share&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:"Резервная копия Ритм"});return}catch(e){if(e.name==="AbortError")return}}const url=URL.createObjectURL(file),a=document.createElement("a");a.href=url;a.download=file.name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000)}catch(e){alert("Не удалось сохранить копию. Попробуй в Safari.")}}
 function restore(){E("restoreFile").click()}
-E("restoreFile").addEventListener("change",async function(){const f=this.files&&this.files[0];this.value="";if(!f)return;try{if(f.size>5*1024*1024)throw Error();const parsed=JSON.parse(await f.text());if(parsed.kind!=="ritm-v12"||!parsed.data||!Array.isArray(parsed.data.habits)||!parsed.data.marks||!Array.isArray(parsed.data.areas))throw Error();if(!confirm("Заменить данные Ритма содержимым выбранного файла?"))return;localStorage.setItem(KEY+"_before_restore",JSON.stringify(model));localStorage.setItem(KEY,JSON.stringify(parsed.data));model=parsed.data;tab="today";view();alert("Данные восстановлены.")}catch(e){alert("Не удалось прочитать или восстановить этот файл. Данные не изменены.")}});
+E("restoreFile").addEventListener("change",async function(){const f=this.files&&this.files[0];this.value="";if(!f)return;try{if(f.size>5*1024*1024)throw Error();const parsed=JSON.parse(await f.text());if(parsed.kind!=="ritm-v12"||!parsed.data||!Array.isArray(parsed.data.habits)||!parsed.data.marks||!Array.isArray(parsed.data.areas))throw Error();if(!confirm("Заменить данные Ритма содержимым выбранного файла?"))return;localStorage.setItem(KEY+"_before_restore",JSON.stringify(model));localStorage.setItem(KEY,JSON.stringify(parsed.data));model=migrate(parsed.data);store();tab="today";view();alert("Данные восстановлены.")}catch(e){alert("Не удалось прочитать или восстановить этот файл. Данные не изменены.")}});
 window.addEventListener("error",e=>{console.error("Ritm error",e.message)});
-view();
+store();view();
 </script></body></html>
