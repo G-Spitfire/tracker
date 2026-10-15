@@ -6,7 +6,7 @@
 
 | Приложение | Для кого | Файл | Открыть |
 | --- | --- | --- | --- |
-| Ритм | Для жены | `okna.html` | [Ритм](https://g-spitfire.github.io/tracker/okna.html) |
+| Ритм | Для Ирины | `okna.html` | [Ритм](https://g-spitfire.github.io/tracker/okna.html) |
 | Профиль Матвея | Для Матвея | `index.html` | [Приложение Матвея](https://g-spitfire.github.io/tracker/) |
 | Мой день | Для Полины | `moy-den.html` | [Приложение Полины](https://g-spitfire.github.io/tracker/moy-den.html) |
 
