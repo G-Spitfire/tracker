@@ -34,12 +34,27 @@ input,textarea{width:100%;font-size:18px;padding:13px 16px;border-radius:18px;bo
 #tt{width:max-content;position:fixed;left:50%;top:12px;transform:translate(-50%,-200px);background:#fff;color:var(--tx);font-weight:800;padding:12px 20px;border-radius:22px;box-shadow:var(--sh);z-index:20;max-width:90%;text-align:center;transition:transform .25s;pointer-events:none}#tt.on{transform:translate(-50%,0)}
 @media(prefers-reduced-motion:reduce){#tt,.pb i{transition:none}.task:active{transform:none}}
 .ov{position:fixed;inset:0;background:#33284a66;display:flex;align-items:flex-end;z-index:9}.sh{max-height:92%;overflow-y:auto;background:#fff;width:100%;max-width:480px;margin:0 auto;border-radius:32px 32px 0 0;padding:20px 18px 24px}
+
+/* School grades: the same calculations as Vector, in Iskra's palette. */
+:root{--ac:#9454e8;--ok:#208568;--bad:#c53d64;--warn:#956000}
+.bar{bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:8}
+body{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
+.sh{padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+.school-summary{display:flex;align-items:center;gap:18px}.school-score{font-size:52px;font-weight:800;color:var(--pu);line-height:1.1}
+.school-sub{border-left:4px solid var(--pu)}.school-sub .row{align-items:center}.school-sub b{overflow-wrap:anywhere}
+.school-final{font-size:32px;font-weight:800;text-align:center;flex:none}.school-final small{display:block;font-size:12px;color:var(--mu)}
+.school-sub .chip{min-width:44px;padding:0 12px}.c2{color:var(--bad);background:#ffe6ed}.c3{color:var(--warn);background:#fff0ce}.c4{color:var(--ok);background:#e0f5eb}.c5{color:#8243cf;background:#eee2ff}
+.sc{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:14px;margin-top:8px}.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+.donut-wrap{display:flex;align-items:center;gap:20px;margin:16px 0}.donut{width:140px;height:140px;flex:none}.donut-legend{flex:1}.donut-item{display:flex;align-items:center;gap:8px;margin:8px 0}.donut-item b{margin-left:auto}.donut-dot{width:10px;height:10px;border-radius:50%}
+.school-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.school-actions .btn{font-size:16px;padding:12px 16px}
+.school-info{font-size:14px;line-height:1.5}.school-empty{padding:12px 0}.school-sub .chips{gap:6px}
+@media(max-width:355px){.donut{width:115px;height:115px}.donut-wrap{gap:12px}.school-score{font-size:44px}}
 </style></head><body><main id="m"></main>
-<nav class="bar"><button data-t="t"><span>☀️</span>Сегодня</button><button data-t="r"><span>🏆</span>Награда</button><button data-t="y"><span>😊</span>Я</button></nav>
+<nav class="bar"><button data-t="t"><span>☀️</span>Сегодня</button><button data-t="g"><span>📚</span>Оценки</button><button data-t="r"><span>🏆</span>Награда</button><button data-t="y"><span>😊</span>Я</button></nav>
 <div id="tt"></div><div id="s"></div>
 <script>
 window.onerror=(m,u,l)=>{if(!l)return;const b=document.createElement('div');b.style.cssText='position:fixed;left:8px;right:8px;top:8px;z-index:30;background:#ff6f91;color:#fff;padding:10px;border-radius:14px;font-size:13px';b.textContent='Ошибка: '+m+' (строка '+l+'). Нажми, чтобы закрыть.';b.onclick=()=>b.remove();document.body.appendChild(b)};
-const VER=4;
+const VER=5;
 (function(){fetch(location.pathname+'?'+Date.now(),{cache:'no-store'}).then(r=>r.text()).then(t=>{const m=t.match(/const VER=(\d+)/);if(m&&+m[1]!==VER){const n=Date.now();let l=0;try{l=+localStorage.getItem('kidr')||0}catch(e){}if(n-l>60000){try{localStorage.setItem('kidr',n)}catch(e){}location.replace(location.pathname+'?u='+n)}}}).catch(()=>{})})();
 const KEY='kid1',DN=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],GD=[1,2,3,4,5,6,0];
 const LV=[[0,'Звёздочка'],[40,'Умница'],[120,'Мастер дня'],[250,'Чемпион']];
@@ -81,7 +96,7 @@ function me(){return`<h1 style="margin:4px 0 14px">Я</h1><div class="card" styl
 <div class="card"><b>Помощь по дому</b><div class="mu sm" style="margin-bottom:6px">сколько раз за всё время</div>${stats('ho')}</div>
 <div class="card"><b>Копия данных</b><div class="mu sm">Для взрослых: все записи хранятся на этом телефоне. Сохрани текст в заметки, если нужно перенести или восстановить.</div><textarea id="bk"></textarea><div class="chips"><button class="btn g" onclick="exp()">Сделать копию</button><button class="btn g" onclick="imp()">Восстановить</button></div></div>
 <div class="mu sm">Искра · v${VER}</div>`}
-function render(){document.querySelectorAll('.bar button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));document.getElementById('m').innerHTML={t:today,r:reward,y:me}[tab]()}
+function render(){document.querySelectorAll('.bar button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));document.getElementById('m').innerHTML={t:today,g:school.view,r:reward,y:me}[tab]()}
 document.querySelector('.bar').onclick=e=>{const b=e.target.closest('button');if(b){tab=b.dataset.t;render();scrollTo(0,0)}};
 function sheet(h){document.getElementById('s').innerHTML=h?`<div class="ov" onclick="if(event.target==this)cs()"><div class="sh">${h}</div></div>`:''}
 const cs=()=>sheet('');
@@ -101,7 +116,75 @@ function oR(){sheet(`<h2 style="margin-top:0">Награда недели</h2><i
 function sG(n){S.reward=document.getElementById('rw').value.trim()||S.reward;S.goal=n;save();oR()}
 function sR(){S.reward=document.getElementById('rw').value.trim()||S.reward;save();cs();render()}
 function exp(){const e=document.getElementById('bk');e.value=JSON.stringify(S);e.select();try{navigator.clipboard.writeText(e.value)}catch(x){}}
-function imp(){try{const o=JSON.parse(document.getElementById('bk').value);if(!o||typeof o.d!='object')throw 0;if(!o.x)o.x={};if(!o.av)o.av={e:'🦊',c:'#ffd9c9'};S=o;save();render();alert('Данные восстановлены')}catch(e){alert('Не получилось: вставь в поле текст копии целиком')}}
+function imp(){try{const o=JSON.parse(document.getElementById('bk').value);if(!o||typeof o.d!='object')throw 0;if(!o.x)o.x={};if(!o.av)o.av={e:'🦊',c:'#ffd9c9'};school.validate(o);localStorage.setItem('kid1_before_restore',JSON.stringify(S));S=o;school.init();save();render();alert('Данные восстановлены')}catch(e){alert('Не получилось: вставь в поле текст копии целиком')}}
+
+const school=(()=>{
+const GOAL=4+1/3, f2=x=>x.toFixed(2);
+function init(){
+ if(!S.school)S.school={g:Object.fromEntries(SUBJ.map(k=>[k,[]])),hl:[],n:0,end:''};
+ const q=S.school;if(!q.hl)q.hl=[];if(!q.archived)q.archived=[];
+ q.n=Math.max(q.n||0,...Object.values(q.g).flat().map(x=>x.i||0));
+}
+function validate(o){if(!o.school)return;const q=o.school;
+ if(!q.g||typeof q.g!=='object'||Array.isArray(q.g)||!Object.values(q.g).every(a=>Array.isArray(a)&&a.every(x=>x&&Number.isInteger(x.i)&&[2,3,4,5].includes(x.v)))||q.hl&&!Array.isArray(q.hl)||q.archived&&!Array.isArray(q.archived))throw Error('Некорректные оценки');
+}
+const names=()=>Object.keys(S.school.g).filter(k=>!S.school.archived.includes(k));
+const ACT=()=>names().filter(k=>S.school.g[k].length);
+const finAvg=()=>sum(ACT().map(k=>fin(avg(k))))/(ACT().length||1);
+const exAvg=()=>sum(ACT().map(k=>avg(k)))/(ACT().length||1);
+const fin=a=>a<2.6?2:a<3.6?3:a<4.6?4:5;
+const vals=k=>S.school.g[k].map(x=>x.v),avg=k=>sum(vals(k))/vals(k).length;
+function plan(a){const n=a.length,s=sum(a);for(let k=1;k<600;k++)if((s+5*k)/(n+k)>=3.6-1e-9)return{k,x:(s+5*k)/(n+k),t:`получить ${k}× «5» подряд`};return{k:9999,x:3.6,t:'получить очень много «5» подряд'}}
+function calc(){const bad=[],good=[];
+ ACT().forEach(k=>{const a=vals(k),av=avg(k);
+  if(av<3.6)bad.push({k,av,p:plan(a),f:fin(av)});
+  else{const x=(sum(a)+3)/(a.length+1);good.push({k,av,x:x<3.6?x:null})}});
+ bad.sort((a,b)=>(a.f-b.f)||(a.p.k-b.p.k)||(a.av-b.av));return{bad,good}}
+function scen(k){const a=vals(k),s=sum(a),n=a.length,c=avg(k);return[5,4,3].map(v=>{const x=(s+v)/(n+1);return`<span>${v} → <b class="${x>=3.6?'ok':x>=c?'warn':'bad'}">${f2(x)}</b></span>`}).join('')}
+function chart(){const L=S.school.hl.slice(-40),n=L.length;if(!n)return'';
+ const vs=L.map(p=>p.f).concat(L.filter(p=>p.e!=null).map(p=>p.e),GOAL),lo=Math.floor((Math.min(...vs)-.1)*10)/10,hi=Math.ceil((Math.max(...vs)+.1)*10)/10,W=320,H=130,P=28;
+ const x=i=>n>1?P+i*(W-P-8)/(n-1):W/2,y=v=>H-18-(v-lo)/(hi-lo)*(H-30),lb=p=>p.d.slice(8)+'.'+p.d.slice(5,7);
+ const path=k=>{let d='',pen=0;L.forEach((p,i)=>{if(p[k]==null){pen=0;return}d+=(pen?'L':'M')+x(i).toFixed(1)+' '+y(p[k]).toFixed(1);pen=1});return d};
+ const dot=(k,c,r)=>{let i=-1;for(let q=n-1;q>=0;q--)if(L[q][k]!=null){i=q;break}return i<0?'':`<circle cx="${x(i).toFixed(1)}" cy="${y(L[i][k]).toFixed(1)}" r="${r}" fill="${c}"/>`};
+ return`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="График среднего балла"><line x1="${P}" x2="${W-8}" y1="${y(GOAL)}" y2="${y(GOAL)}" stroke="var(--ac)" stroke-dasharray="4 4"/><text x="0" y="${y(GOAL)+4}" font-size="11" fill="var(--ac)">${f2(GOAL)}</text><text x="0" y="${y(lo)+4}" font-size="11" fill="var(--mu)">${lo.toFixed(1)}</text>${n>1?`<path d="${path('e')}" fill="none" stroke="var(--tx)" stroke-width="2" stroke-linejoin="round"/><path d="${path('f')}" fill="none" stroke="var(--ok)" stroke-width="3" stroke-linejoin="round"/>`:''}${dot('e','var(--tx)',4)}${dot('f','var(--ok)',5)}${n>1?`<text x="${P}" y="${H-2}" font-size="11" fill="var(--mu)">${lb(L[0])}</text>`:''}<text x="${W-8}" y="${H-2}" font-size="11" text-anchor="end" fill="var(--mu)">${lb(L[n-1])}</text></svg>${n<2?'<div class="mu sm">Линия появится после следующей оценки.</div>':''}`}
+function gradeDonut(){
+ const c=[2,3,4,5].map(v=>({v,n:ACT().filter(k=>fin(avg(k))===v).length}));
+ const total=c.reduce((n,x)=>n+x.n,0);
+ if(!total)return '<div class="mu sm">Диаграмма появится после добавления оценок.</div>';
+ const palette={2:'#e26487',3:'#edb345',4:'#54b99a',5:'#ad7aed'};
+ let start=0;
+ const rings=c.filter(x=>x.n).map(x=>{
+   const share=x.n/total*100;
+   const segment='<circle cx="60" cy="60" r="46" fill="none" stroke="'+palette[x.v]+'" stroke-width="12" stroke-dasharray="'+share+' '+(100-share)+'" stroke-dashoffset="'+(-start)+'" pathLength="100" transform="rotate(-90 60 60)"></circle>';
+   start+=share;
+   return segment;
+ }).join('');
+ const legend=c.map(x=>'<div class="donut-item"><span class="donut-dot" style="background:'+palette[x.v]+'"></span><span>«'+x.v+'»</span><b>'+x.n+'</b></div>').join('');
+ return '<div class="donut-wrap"><svg viewBox="0 0 120 120" role="img" aria-label="Прогноз итоговых оценок по предметам" class="donut"><circle cx="60" cy="60" r="46" fill="none" stroke="var(--ln)" stroke-width="12"></circle>'+rings+'<text x="60" y="57" text-anchor="middle" fill="var(--tx)" font-size="23" font-weight="750">'+total+'</text><text x="60" y="73" text-anchor="middle" fill="var(--mu)" font-size="9">предметов</text></svg><div class="donut-legend">'+legend+'</div></div>';
+}
+
+function commit(){const q=S.school;if(ACT().length){const f=+finAvg().toFixed(3),e=+exAvg().toFixed(3),l=q.hl[q.hl.length-1];if(!l||l.f!==f||l.e!==e)q.hl.push({d:iso(new Date()),f,e})}save();render()}
+function view(){const active=ACT(),{bad,good}=calc(),frag=good.filter(g=>g.x),ordered=names().sort((a,b)=>a.localeCompare(b,'ru'));
+ const end=S.school.end;let days=0;if(end){for(let d=new Date(iso(new Date())+'T12:00:00');iso(d)<=end;d.setDate(d.getDate()+1))if(d.getDay()>0&&d.getDay()<6)days++}
+ return `<h1>Мои оценки</h1><div class="card"><div class="school-summary"><div class="school-score">${active.length?f2(finAvg()):'—'}</div><div><b>Прогноз среднего</b><div class="mu sm">по итоговым оценкам</div><div class="sm">Точный: ${active.length?f2(exAvg()):'—'}</div></div></div><p class="school-info mu">Прогноз как в «Векторе»: от 2,6 — «3», от 3,6 — «4», от 4,6 — «5». Все оценки имеют одинаковый вес; школьные правила могут отличаться.</p>${end?`<div class="sm">${esc(end.split('-').reverse().join('.'))} · ${end<iso(new Date())?'четверть закончилась':'учебных дней до конца: '+days+' (без выходных)'}</div>`:''}</div>
+ ${!active.length?'<div class="note">Добавь первую оценку — появятся график и подсказки 🌟</div>':`<div class="card"><b>Как меняется средний балл</b>${chart()}<div class="sm"><span class="ok">●</span> прогноз итоговых · ● точный</div><div class="sm">Цель ${f2(GOAL)}: треть предметов на «5», остальные на «4»</div><div class="mu sm">${finAvg()>=GOAL-1e-9?'Цель достигнута! 🌟':'До цели +'+f2(GOAL-finAvg())}</div></div><div class="card"><b>Прогноз по предметам</b>${gradeDonut()}</div>`}
+ ${bad.length?`<h2>Что можно подтянуть</h2>${bad.map(b=>`<div class="card"><b>${esc(b.k)}</b><div class="sm">${b.p.t}, и средний станет ${f2(b.p.x)}</div><div class="sc"><span class="mu">Следующая оценка:</span>${scen(b.k)}</div></div>`).join('')}`:active.length?'<div class="note">Все предметы на четвёрке и выше. Так держать! 🌸</div>':''}
+ ${frag.length?`<div class="card"><b>На что обратить внимание</b>${frag.map(g=>`<p class="sm">${esc(g.k)}: тройка снизит средний с ${f2(g.av)} до ${f2(g.x)}.</p>`).join('')}</div>`:''}
+ <h2>Мои предметы</h2>${ordered.map(k=>{const n=names().indexOf(k),a=S.school.g[k];return `<div class="card school-sub"><div class="row"><div><b>${esc(k)}</b><div class="mu sm">${a.length?'средний '+f2(avg(k)):'оценок пока нет'}</div></div><div class="school-final">${a.length?fin(avg(k)):'—'}<small>прогноз</small></div></div><div class="chips">${a.map(x=>`<button class="chip c${x.v}" onclick="school.edit(${n},${x.i})" aria-label="Изменить оценку ${x.v}: ${esc(k)}">${x.v}</button>`).join('')}<button class="chip" onclick="school.edit(${n})" aria-label="Добавить оценку: ${esc(k)}">+</button></div>${a.length?`<div class="sc"><span class="mu">Следующая:</span>${scen(k)}</div>`:''}</div>`}).join('')}
+ <button class="btn g" onclick="school.subjects()">Предметы и четверть</button>`;
+}
+function edit(n,id){const k=names()[n],x=S.school.g[k].find(x=>x.i===id);sheet(`<h2 style="margin-top:0">${esc(k)}</h2><p class="mu sm">${x?'Исправь оценку или удали ошибочную запись.':'Какую оценку ты получила?'}</p><div class="chips">${[2,3,4,5].map(v=>`<button class="chip c${v}" onclick="school.put(${n},${v},${id===undefined?'null':id})">${v}</button>`).join('')}</div><div class="school-actions">${x?`<button class="btn g" onclick="school.remove(${n},${id})">Удалить оценку</button>`:''}<button class="btn g" onclick="cs()">Отмена</button></div>`)}
+function put(n,v,id){const k=names()[n];if(!k||![2,3,4,5].includes(v))return;const a=S.school.g[k];if(id!==null){const x=a.find(x=>x.i===id);if(!x)return;x.v=v}else a.push({i:++S.school.n,v});commit();cs();toast(v===5?'🌟 Пятёрка! Отличная работа!':'Оценка сохранена')}
+function remove(n,id){if(!confirm('Удалить эту оценку?'))return;const k=names()[n];S.school.g[k]=S.school.g[k].filter(x=>x.i!==id);commit();cs()}
+function subjects(){sheet(`<h2 style="margin-top:0">Предметы и четверть</h2>${names().map((k,n)=>`<div class="row" style="align-items:center"><span>${esc(k)}</span><button class="chip" onclick="school.archive(${n})">В архив</button></div>`).join('')}<label class="sm">Новый предмет<input id="schoolName" maxlength="30" placeholder="Название предмета"></label><div class="school-actions"><button class="btn" onclick="school.add()">Добавить</button></div>${S.school.archived.length?'<h2>Архив</h2>'+S.school.archived.map((k,n)=>`<div class="row" style="align-items:center"><span>${esc(k)}</span><button class="chip" onclick="school.restore(${n})">Вернуть</button></div>`).join(''):''}<p class="sm mu">В архиве оценки сохраняются и не участвуют в текущем прогнозе.</p><label class="sm">Конец четверти<input id="schoolEnd" type="date" value="${esc(S.school.end||'')}" onchange="school.end(this.value)"></label><div class="school-actions"><button class="btn g" onclick="cs()">Готово</button></div>`)}
+function add(){const k=document.getElementById('schoolName').value.replace(/\s+/g,' ').trim().slice(0,30);if(!k)return toast('Напиши название предмета');if(Object.hasOwn(S.school.g,k))return toast('Предмет уже есть — проверь архив');Object.defineProperty(S.school.g,k,{value:[],writable:true,enumerable:true,configurable:true});commit();subjects()}
+function archive(n){const k=names()[n];if(!confirm('Убрать «'+k+'» в архив? Оценки сохранятся.'))return;S.school.archived.push(k);commit();subjects()}
+function restore(n){S.school.archived.splice(n,1);commit();subjects()}
+function end(v){if(v&&!/^\d{4}-\d{2}-\d{2}$/.test(v))return;S.school.end=v;save();render()}
+init();return {view,edit,put,remove,subjects,add,archive,restore,end,init,validate};
+})();
+
 save();render();
 if(!S.asked){S.asked=1;save();oP()}
 </script></body></html>
+
