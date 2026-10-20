@@ -215,7 +215,7 @@ function reward(){
   const W=wk(),t=sum(W.map(st)),g=S.goal,tot=sum(Object.keys(S.d).map(st));
   const lv=CONFIG.levels.filter(x=>x[0]<=tot).pop(),nx=CONFIG.levels.find(x=>x[0]>tot),td=iso(new Date());
   return`<h1 style="margin:4px 0 14px">Награда недели</h1>
-  <div class="gift"><div style="font-size:44px;line-height:1.1">🎁</div><div style="font-size:24px;font-weight:800;margin:6px 0">${esc(S.reward)}</div><div class="pb"><i style="width:${Math.min(100,t/g*100)}%"></i></div><div style="font-weight:700">${t>=g?'Награда заработана! Ура!':`⭐ ${t} из ${g}`}</div><p style="margin:12px 0 0"><button class="btn g" data-action="editReward">Изменить награду</button></p></div>
+  <div class="gift"><div style="font-size:44px;line-height:1.1">🎁</div><div style="font-size:24px;font-weight:800;margin:6px 0">${esc(S.reward)}</div><div class="pb"><i style="width:${Math.min(100,t/g*100)}%"></i></div><div style="font-weight:700">${t>=g?'Награда заработана! Ура!':`⭐ ${t} из ${g}`}</div></div>
   <h2>Эта неделя</h2><div class="days">${W.map((d,i)=>{const n=dn(d).length,f=n&&n==tasks(d).length;return`<div class="dy ${d==td?'td':''} ${d>td?'fu':''}"><button class="c" data-action="dayHistory" data-id="${d}" aria-label="Что было ${DN[i]}">${f?'⭐':n||''}</button><div class="sm">${DN[i]}</div></div>`}).join('')}</div>
   <div class="mu sm" style="text-align:center;margin-top:6px">Нажми на день, чтобы вспомнить, что было</div>
   <div class="card" style="display:flex;gap:14px;align-items:center"><div class="av" style="background:${S.av.c}">${S.av.e}</div><div><b>${lv[1]}</b><div class="mu sm">Всего звёзд: ${tot}${nx?`. До «${nx[1]}» ещё ${nx[0]-tot}`:''}</div></div></div>`;
@@ -232,7 +232,7 @@ function me(){
   <div class="card"><b>Дни танцев</b><div class="mu sm">В эти дни будет напоминание про форму.</div><div class="chips">${GD.map((g,i)=>`<button class="chip ${S.dance.includes(g)?'on':''}" data-action="toggleDance" data-id="${g}">${DN[i]}</button>`).join('')}</div></div>
   <div class="card"><b>Мои уроки</b><div class="mu sm" style="margin-bottom:6px">сколько раз за всё время</div>${stats('hw')}</div>
   <div class="card"><b>Помощь по дому</b><div class="mu sm" style="margin-bottom:6px">сколько раз за всё время</div>${stats('ho')}</div>
-  <div class="card"><b>Копия данных</b><div class="mu sm">Для взрослых: все записи хранятся на этом телефоне. Сохрани текст в заметки, если нужно перенести или восстановить.</div><textarea id="bk"></textarea><div class="chips"><button class="btn g" data-action="exportData">Сделать копию</button><button class="btn g" data-action="importData">Восстановить</button><button class="btn g" data-action="restoreBak">Из бэкапа</button></div></div>
+  <button class="btn g" data-action="parents">Для родителей</button>
   <div class="mu sm">Искра · схема v${SCHEMA}</div>`;
 }
 
@@ -455,6 +455,47 @@ const school=(()=>{
   return{view,edit,put,remove,subjects,add,archive,restore,end};
 })();
 
+function openParents(){
+  sheet(`<h2>Для родителей</h2><p class="mu sm">Настройте награду вместе с ребёнком. Данные хранятся на этом устройстве — сохраните копию для переноса.</p><button class="btn g" data-action="editReward">Награда и цель по звёздам</button><h2>Копия данных</h2><div class="chips"><button class="btn g" data-action="exportFile">Сохранить копию файлом</button><button class="btn g" data-action="pickBackupFile">Восстановить из файла</button><input type="file" id="backupFileInput" accept=".json,application/json" data-action="importFile" hidden><div id="backupStatus" class="mu sm" role="status" aria-live="polite"></div><details><summary class="mu sm" style="padding:16px 0">Восстановить старую текстовую копию</summary><textarea id="bk" aria-label="Текст старой копии"></textarea><button class="btn g" data-action="importText">Восстановить из текста</button></details></div><button class="btn g" data-action="closeSheet">Закрыть</button>`);
+}
+function installBackup(o){
+  const source=o&&o.habit?o.habit:o;
+  if(!source||typeof source!=='object'||!source.d||Array.isArray(source.d)||typeof source.d!=='object'||!Object.values(source.d).every(a=>Array.isArray(a)))throw Error('bad habits');
+  const candidate=store.validateAll(Object.assign(store.defaults(),JSON.parse(JSON.stringify(source))));
+  const schoolRaw=o.school||source.school;
+  if(schoolRaw&&(!schoolRaw.g||typeof schoolRaw.g!=='object'||Array.isArray(schoolRaw.g)||!Object.values(schoolRaw.g).every(a=>Array.isArray(a)&&a.every(x=>x&&[2,3,4,5].includes(x.v)))))throw Error('bad grades');
+  candidate.school=schoolRaw?schoolStore.validate(schoolStore.migrate(JSON.parse(JSON.stringify(schoolRaw)))):JSON.parse(JSON.stringify(S.school));
+  if(!confirm('Заменить данные копией? Текущее состояние будет сохранено на этом устройстве.'))return;
+  const before=JSON.stringify(S),oldSchool=localStorage.getItem(KEY+'_school');
+  localStorage.setItem(KEY+'_before_restore',before);
+  try{localStorage.setItem(KEY+'_school',JSON.stringify(candidate.school));localStorage.setItem(KEY,JSON.stringify(candidate))}
+  catch(err){if(oldSchool===null)localStorage.removeItem(KEY+'_school');else localStorage.setItem(KEY+'_school',oldSchool);throw err}
+  S=candidate;render();backupStatus('Данные восстановлены. Предыдущая версия сохранена на устройстве.');
+}
+
+function backupStatus(message){const e=document.getElementById('backupStatus');if(e)e.textContent=message;else toast(message)}
+async function exportBackupFile(){
+  try{
+    const file=new File([JSON.stringify({habit:(({school,...r})=>r)(S),school:S.school})],'iskra-backup-'+iso(new Date())+'.json',{type:'application/json'});
+    if(navigator.canShare&&navigator.share&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file],title:'Копия данных'}); backupStatus('В меню «Поделиться» выбери «Сохранить в Файлы».');return}
+      catch(err){if(err.name==='AbortError')return}
+    }
+    const url=URL.createObjectURL(file),a=document.createElement('a');a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+     backupStatus('Файл подготовлен. Проверь «Загрузки» или «Файлы».');
+  }catch(err){backupStatus('Не удалось создать копию. Попробуй открыть приложение в Safari.')}
+}
+async function importBackupFile(input){
+  const file=input.files&&input.files[0];if(!file)return;
+  try{if(file.size>10*1024*1024)throw Error('size');installBackup(JSON.parse(await file.text()))}
+  catch(err){backupStatus('Файл не подходит или не удалось сохранить данные. Текущие записи не заменены.')}
+  finally{input.value=''}
+}
+function importBackupText(){
+  try{installBackup(JSON.parse(document.getElementById('bk').value))}
+  catch(err){backupStatus('Текст копии не подходит или не удалось сохранить данные. Текущие записи не заменены.')}
+}
+
 /* ===== ACTIONS ===== */
 const ACTIONS={
   profile:()=>openProfile(),
@@ -471,17 +512,10 @@ const ACTIONS={
   removeDetails:()=>removeDetails(),
   toggleDance:(g)=>{const a=S.dance,x=a.indexOf(+g);x<0?a.push(+g):a.splice(x,1);save();render()},
   closeSheet:()=>cs(),
-  exportData:()=>{const e=document.getElementById('bk');e.value=JSON.stringify({habit:(({school,...r})=>r)(S),school:S.school});e.select();try{navigator.clipboard.writeText(e.value)}catch(x){}toast('Копия в поле и в буфере')},
-  importData:()=>{
-    try{const o=JSON.parse(document.getElementById('bk').value);
-      const before=JSON.stringify({habit:(({school,...r})=>r)(S),school:S.school});
-      if(o.school){S.school=schoolStore.validate(schoolStore.migrate(o.school))}
-      if(o.habit){const h=o.habit;store.validateAll(h);for(const k of ['d','name','asked','goal','reward','dance','x','av','ex'])if(k in h)S[k]=h[k]}
-      save();render();alert('Данные восстановлены');
-      toast('Можно отменить',{action:'Вернуть',onAction:()=>{const p=JSON.parse(before);Object.assign(S,p.habit);S.school=p.school;save();render()}});
-    }catch(e){alert('Не получилось: вставь в поле текст копии целиком')}
-  },
-  restoreBak:()=>{const b=store.restoreBackup();if(!b)return toast('Бэкап не найден');const before=JSON.stringify({habit:(({school,...r})=>r)(S),school:S.school});Object.assign(S,b);save();render();toast('Из бэкапа восстановлено',{action:'Вернуть',onAction:()=>{const p=JSON.parse(before);Object.assign(S,p.habit);S.school=p.school;save();render()}})},
+  parents:()=>openParents(),
+  exportFile:()=>exportBackupFile(),
+  pickBackupFile:()=>document.getElementById('backupFileInput').click(),
+  importText:()=>importBackupText(),
   dayHistory:(d)=>openDay(d),
   history:()=>openHistory(),
   histPrev:()=>histPrev(),
@@ -518,6 +552,8 @@ document.addEventListener('input',e=>{
   if(el.dataset.action==='nameInput'){S.name=el.value.trim();save()}
   if(el.dataset.action==='endInput')school.end(el.value);
 });
+
+document.addEventListener('change',e=>{if(e.target.dataset.action==='importFile')importBackupFile(e.target)});
 
 /* ===== BOOT ===== */
 render();

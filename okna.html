@@ -101,7 +101,7 @@ const store=(()=>{
     if(!s||typeof s!=='object')throw Error('bad root');
     if(!Array.isArray(s.a))s.a=[];
     s.a=s.a.filter(x=>x&&typeof x==='object'&&Number.isInteger(x.id)&&typeof x.d==='string')
-      .map(x=>({id:x.id,a:String(x.a||''),d:String(x.d||''),t:/^\d{2}:\d{2}$/.test(x.t)?x.t:'19:30',r:x.r?1:0,w:Array.isArray(x.w)?x.w.filter(i=>i>=0&&i<7):[0,1,2,3,4,5,6],c:x.c||null,pu:x.pu||null}));
+      .map(x=>({id:x.id,a:String(x.a||''),d:String(x.d||''),t:/^\d{2}:\d{2}$/.test(x.t)?x.t:'19:30',r:x.r?1:0,w:Array.isArray(x.w)?x.w.filter(i=>i>=0&&i<7):[0,1,2,3,4,5,6],c:x.c||null,pu:x.pu||null,archivedAt:x.archivedAt||null,archivePeriods:Array.isArray(x.archivePeriods)?x.archivePeriods:[]}));
     if(!s.d||typeof s.d!=='object'||Array.isArray(s.d))s.d={};
     for(const k of Object.keys(s.d))if(!Array.isArray(s.d[k]))s.d[k]=[];
     if(!Array.isArray(s.wd))s.wd=[0,1,2,3,4];
@@ -139,7 +139,7 @@ const save=()=>store.save(S);
 const commit=(fn)=>{if(fn)fn();save();cs();render()};
 
 const wk=(o=0)=>{const d=new Date(),k=(d.getDay()+6)%7;return Array.from({length:7},(_,i)=>{const x=new Date(d);x.setDate(d.getDate()-k+i-7*o);return iso(x)})};
-const actv=(x,d)=>x.w.includes(dow(d))&&d>=(x.c||S.st||d)&&!(x.pu&&d<=x.pu);
+const actv=(x,d)=>!(x.archivedAt&&d>=x.archivedAt)&&!(x.archivePeriods||[]).some(p=>d>=p.from&&d<p.to)&&x.w.includes(dow(d))&&d>=(x.c||S.st||d)&&!(x.pu&&d<=x.pu);
 const lastMark=()=>Object.keys(S.d).filter(k=>S.d[k].length).sort().pop()||'';
 
 /* ===== CONTEXT ===== */
@@ -199,7 +199,7 @@ function hintCard(){
 }
 const hint=(k,t)=>`<div class="mc"><div>${t}</div><button data-action="dismissHint" data-id="${k}">Понятно</button></div>`;
 function pauseNote(){
-  const t=iso(new Date()),ps=S.a.filter(x=>x.pu&&x.pu>=t);
+  const t=iso(new Date()),ps=S.a.filter(x=>!x.archivedAt&&x.pu&&x.pu>=t);
   if(!ps.length)return'';
   const u=ps.map(x=>x.pu).sort().pop();
   return`<div class="tm" style="margin-top:14px;text-align:center">На паузе до ${u.slice(8)}.${u.slice(5,7)}: ${ps.map(x=>esc(x.d)).join(', ')}. <button class="lnk" data-action="unpause">Вернуть</button></div>`;
@@ -243,7 +243,7 @@ function drag(){
   g.addEventListener('touchend',()=>{on=0;if(dy>90)cs();else{sh.style.transition='transform .2s';sh.style.transform=''}});
 }
 const cs=()=>sheet('');
-function toast(m,opt){
+function toast(m,opt={}){
   const e=document.getElementById('tt');
   e.innerHTML=`<span>${esc(m)}</span>`;
   e.className='on';
@@ -299,7 +299,7 @@ function renderHistoryDay(date){
 
 /* ===== PROFILE ===== */
 function openProfile(){
-  sheet(`<h1>Профиль</h1><button class="avatar-picker" data-action="pickAvatar" aria-label="Выбрать фото профиля">${avatarHtml()}<span>Выбрать фото</span></button><input id="avatarFile" type="file" accept="image/*" hidden data-action="avatarFile"><p class="tm">Фото хранится только в этом браузере и в резервной копии.</p><label class="tm" for="profileName">Имя</label><input id="profileName" class="in" maxlength="20" value="${esc(S.p.name||'')}" data-action="profileName"><button class="sv g2" data-action="settings">Расписание, напоминания и копия данных</button><div class="tm" style="margin-top:14px;text-align:center">Изменения сохраняются сразу</div><button class="sv g2" data-action="closeSheet">Закрыть</button>`,'md');
+  sheet(`<h1>Профиль</h1><button class="avatar-picker" data-action="pickAvatar" aria-label="Выбрать фото профиля">${avatarHtml()}<span>Выбрать фото</span></button><input id="avatarFile" type="file" accept="image/*" hidden data-action="avatarFile"><p class="tm">Фото хранится только в этом браузере и в резервной копии.</p><label class="tm" for="profileName">Имя</label><input id="profileName" class="in" maxlength="20" value="${esc(S.p.name||'')}" data-action="profileName"><button class="sv g2" data-action="archive">Архив привязок</button><button class="sv g2" data-action="settings">Расписание, напоминания и копия данных</button><div class="tm" style="margin-top:14px;text-align:center">Изменения сохраняются сразу</div><button class="sv g2" data-action="closeSheet">Закрыть</button>`,'md');
 }
 function setAvatar(input){
   const file=input.files&&input.files[0];input.value='';if(!file)return;
@@ -332,9 +332,7 @@ function openSettings(){
   <button class="sv g2" data-action="ics">Добавить напоминания в Календарь</button>
   <div class="tm" style="margin-top:6px">Только привязки с включённым напоминанием. Откроется Календарь: «Добавить все». Если не открылось, открой приложение в Safari.</div>
   <div class="tm" style="margin-top:24px">Копия данных</div>
-  <textarea class="in" id="bk"></textarea>
-  <div class="ch" style="margin-top:10px"><button data-action="shareBackup">Поделиться копией</button><button data-action="showBackup">Показать текст</button><button data-action="importBackup">Восстановить</button><button data-action="restoreBak">Из бэкапа</button></div>
-  <div class="tm" style="margin-top:8px">Перенос на новый телефон: отправь копию себе, на новом телефоне вставь текст в поле выше и нажми «Восстановить».</div>
+  <button class="sv g2" data-action="exportFile">Сохранить копию файлом</button><button class="sv g2" data-action="pickBackupFile">Восстановить из файла</button><input type="file" id="backupFileInput" accept=".json,application/json" data-action="importFile" hidden><div id="backupStatus" class="tm" role="status" aria-live="polite"></div><details><summary class="tm" style="padding:16px 0">Восстановить старую текстовую копию</summary><textarea id="bk" aria-label="Текст старой копии"></textarea><button class="sv g2" data-action="importText">Восстановить из текста</button></details>
   <button class="sv g2" data-action="closeSheet">Закрыть</button>
   <div class="tm" style="margin-top:18px;text-align:center">Схема v${CONFIG.schema}</div>`,'lg');
 }
@@ -371,7 +369,7 @@ function dayCells(x,ds){
   }).join('')+'</div>';
 }
 function weekCard(r,ds){
-  return`<section class="week-card"><button class="week-title" data-action="editHabit" data-id="${r.x.id}" aria-label="Изменить: ${esc(r.x.d)}"><strong>${esc(r.x.d)}</strong><span class="tm">${esc(r.x.a)} · <span class="edit-word">Изменить</span></span></button>${reportPeriod<2?dayCells(r.x,ds):''}<div class="tm">${r.plan.length?'Сделано '+r.done.length+' из '+r.plan.length:'На прошедшие дни не запланировано'}</div></section>`;
+  return`<section class="week-card"><button class="week-title" data-action="editHabit" data-id="${r.x.id}" aria-label="Изменить: ${esc(r.x.d)}"><strong>${esc(r.x.d)}${r.x.archivedAt?' · в архиве':''}</strong><span class="tm">${esc(r.x.a)} · <span class="edit-word">Изменить</span></span></button>${reportPeriod<2?dayCells(r.x,ds):''}<div class="tm">${r.plan.length?'Сделано '+r.done.length+' из '+r.plan.length:'На прошедшие дни не запланировано'}</div></section>`;
 }
 function renderStats(){
   const ds=reportDays(),rows=weekStats(ds);
@@ -384,11 +382,12 @@ function renderStats(){
 let cu={};
 function openHabit(id){
   const x=S.a.find(y=>y.id==id);
+  if(x&&x.archivedAt){openArchive();return}
   cu=x?JSON.parse(JSON.stringify(x)):{id:0,a:'',d:'',t:'19:30',r:1,w:[0,1,2,3,4,5,6]};
   renderHabit();
 }
 function renderHabit(){
-  sheet(`<h1>${cu.id?'Привязка':'Новая привязка'}</h1><div class="tm">После чего это случается у тебя?</div><input class="in" id="fa" maxlength="40" placeholder="Например: пришла с работы" value="${esc(cu.a)}" data-action="habitA"><div class="ch">${PRE.map((p,j)=>`<button class="${cu.a==p?'on':''}" data-action="habitPrefix" data-id="${j}">${p}</button>`).join('')}</div><div class="tm" style="margin-top:24px">Тогда я…</div><input class="in" id="fd" maxlength="50" placeholder="Например: велосипед 20 минут" value="${esc(cu.d)}" data-action="habitD"><div class="tm" style="margin-top:24px">По каким дням</div><div class="ch dys" style="margin-top:8px">${DN.map((n,i)=>`<button class="${cu.w.includes(i)?'on':''}" data-action="habitDay" data-id="${i}">${n}</button>`).join('')}</div><div class="rw"><span>Время</span><input type="time" class="tp" id="ft" value="${cu.t}" data-action="habitT"></div><div class="rw" style="margin-top:12px"><span>Напомнить</span><button class="sw ${cu.r?'on':''}" aria-pressed="${!!cu.r}" aria-label="Напоминание" data-action="habitR"><span></span></button></div><button class="sv" data-action="saveHabit">Сохранить</button>${cu.id?'<button class="sv g2 dg" data-action="deleteHabit">Удалить</button>':''}<button class="sv g2" data-action="closeSheet">Отмена</button>`,'md');
+  sheet(`<h1>${cu.id?'Привязка':'Новая привязка'}</h1><div class="tm">После чего это случается у тебя?</div><input class="in" id="fa" maxlength="40" placeholder="Например: пришла с работы" value="${esc(cu.a)}" data-action="habitA"><div class="ch">${PRE.map((p,j)=>`<button class="${cu.a==p?'on':''}" data-action="habitPrefix" data-id="${j}">${p}</button>`).join('')}</div><div class="tm" style="margin-top:24px">Тогда я…</div><input class="in" id="fd" maxlength="50" placeholder="Например: велосипед 20 минут" value="${esc(cu.d)}" data-action="habitD"><div class="tm" style="margin-top:24px">По каким дням</div><div class="ch dys" style="margin-top:8px">${DN.map((n,i)=>`<button class="${cu.w.includes(i)?'on':''}" data-action="habitDay" data-id="${i}">${n}</button>`).join('')}</div><div class="rw"><span>Время</span><input type="time" class="tp" id="ft" value="${cu.t}" data-action="habitT"></div><div class="rw" style="margin-top:12px"><span>Напомнить</span><button class="sw ${cu.r?'on':''}" aria-pressed="${!!cu.r}" aria-label="Напоминание" data-action="habitR"><span></span></button></div><p class="tm">Напоминание сработает только после добавления в Календарь. Изменения здесь не обновляют ранее добавленные события — их нужно изменить в Календаре.</p>${cu.r?'<button class="sv g2" data-action="saveAndCalendar">Сохранить и добавить в Календарь</button>':''}<button class="sv" data-action="saveHabit">Сохранить</button>${cu.id?'<button class="sv g2 dg" data-action="deleteHabit">В архив</button>':''}<button class="sv g2" data-action="closeSheet">Отмена</button>`,'md');
 }
 function readHabit(){
   const fa=document.getElementById('fa'),fd=document.getElementById('fd'),ft=document.getElementById('ft');
@@ -406,21 +405,28 @@ function saveHabit(){
   }else{
     cu.id=S.n++;cu.c=iso(new Date());S.a.push(cu);
   }
-  commit();
+  commit();return true;
 }
 function deleteHabit(){
-  const id=cu.id,k=S.a.findIndex(y=>y.id==id);
-  if(k<0){cs();return}
-  const removed=S.a[k];
-  S.a.splice(k,1);save();cs();render();
-  toast('Привязка удалена',{action:'Вернуть',onAction:()=>{S.a.splice(k,0,removed);save();render()}});
+  const x=S.a.find(y=>y.id===cu.id);if(!x)return;
+  x.archivedAt=iso(new Date());save();cs();render();
+  toast('Привязка в архиве. История сохранена',{action:'Вернуть',onAction:()=>restoreHabit(x.id)});
+}
+function restoreHabit(id){
+  const x=S.a.find(y=>y.id===id);if(!x||!x.archivedAt)return;
+  (x.archivePeriods||(x.archivePeriods=[])).push({from:x.archivedAt,to:iso(new Date())});
+  x.archivedAt=null;save();render();openArchive();
+}
+function openArchive(){
+  const list=S.a.filter(x=>x.archivedAt);
+  sheet(`<h1>Архив привязок</h1><p class="tm">Прошлые результаты остаются в статистике. Привязку можно вернуть в план.</p>${list.map(x=>`<div class="week-card"><b>${esc(x.a)} → ${esc(x.d)}</b><button class="sv g2" data-action="restoreHabit" data-id="${x.id}">Вернуть</button></div>`).join('')||'<p>Архив пуст.</p>'}<button class="sv g2" data-action="closeSheet">Закрыть</button>`,'lg');
 }
 
 /* ===== LITE (пауза) ===== */
 let lt=[];
 function openLite(){lt=[];renderLite()}
 function renderLite(){
-  sheet(`<h1>Облегчить план</h1><div class="tm">Что сейчас тяжело? Выбранное встанет на паузу на 7 дней и не попадёт в статистику как пропуск.</div><div class="ch">${S.a.map(x=>`<button class="${lt.includes(x.id)?'on':''}" data-action="liteToggle" data-id="${x.id}">${esc(x.d)}</button>`).join('')}</div><button class="sv" data-action="saveLite">Поставить на паузу</button><button class="sv g2" data-action="closeSheet">Отмена</button>`,'md');
+  sheet(`<h1>Облегчить план</h1><div class="tm">Что сейчас тяжело? Выбранное встанет на паузу на 7 дней и не попадёт в статистику как пропуск.</div><div class="ch">${S.a.filter(x=>!x.archivedAt).map(x=>`<button class="${lt.includes(x.id)?'on':''}" data-action="liteToggle" data-id="${x.id}">${esc(x.d)}</button>`).join('')}</div><button class="sv" data-action="saveLite">Поставить на паузу</button><button class="sv g2" data-action="closeSheet">Отмена</button>`,'md');
 }
 function saveLite(){
   if(!lt.length){toast('Выбери хотя бы одну привязку');return}
@@ -434,44 +440,44 @@ function saveLite(){
 function unpause(){S.a.forEach(x=>{delete x.pu});commit();}
 
 /* ===== BACKUP ===== */
-function exportObj(){return{habit:(()=>{const h=Object.assign({},S);delete h.h;return h})(),schema:CONFIG.schema}}
-function shareBackup(){
-  S.bk=iso(new Date());save();
-  const t=JSON.stringify(S);
-  if(navigator.share){navigator.share({title:'Копия данных: Ритм',text:t}).then(()=>toast('Копия отправлена')).catch(()=>{})}
-  else{try{navigator.clipboard.writeText(t);toast('Копия скопирована, вставь её в заметки')}catch(x){toast('Нажми «Показать текст» и скопируй вручную')}}
-  render();
+function installBackup(o){
+  const source=o&&o.habit?o.habit:o;
+  if(!source||!Array.isArray(source.a)||!source.a.every(x=>x&&Number.isInteger(x.id)&&typeof x.d==='string')||!source.d||typeof source.d!=='object'||Array.isArray(source.d)||!Object.values(source.d).every(a=>Array.isArray(a)))throw Error('bad backup');
+  const candidate=store.validateAll(JSON.parse(JSON.stringify(source)));
+  if(!confirm('Заменить данные копией? Текущее состояние будет сохранено на этом устройстве.'))return;
+  localStorage.setItem(KEY+'_before_restore',JSON.stringify(S));
+  localStorage.setItem(KEY,JSON.stringify(candidate));S=candidate;render();backupStatus('Данные восстановлены. Предыдущая версия сохранена на устройстве.');
 }
-function showBackup(){
-  S.bk=iso(new Date());save();
-  const e=document.getElementById('bk');
-  e.value=JSON.stringify(S);e.select();
-  try{navigator.clipboard.writeText(e.value)}catch(x){}
-}
-function importBackup(){
+
+function backupStatus(message){const e=document.getElementById('backupStatus');if(e)e.textContent=message;else toast(message)}
+async function exportBackupFile(){
   try{
-    const o=JSON.parse(document.getElementById('bk').value);
-    const validated=store.validateAll(o);
-    const before=JSON.stringify(S);
-    S=validated;
-    save();cs();render();alert('Данные восстановлены');
-    toast('Можно отменить',{action:'Вернуть',onAction:()=>{S=JSON.parse(before);save();render()}});
-  }catch(e){alert('Не получилось: вставь в поле текст копии целиком')}
+    const file=new File([JSON.stringify(S)],'ritm-backup-'+iso(new Date())+'.json',{type:'application/json'});
+    if(navigator.canShare&&navigator.share&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file],title:'Копия данных'});S.bk=iso(new Date());save(); backupStatus('В меню «Поделиться» выбери «Сохранить в Файлы».');return}
+      catch(err){if(err.name==='AbortError')return}
+    }
+    const url=URL.createObjectURL(file),a=document.createElement('a');a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+    S.bk=iso(new Date());save(); backupStatus('Файл подготовлен. Проверь «Загрузки» или «Файлы».');
+  }catch(err){backupStatus('Не удалось создать копию. Попробуй открыть приложение в Safari.')}
 }
-function restoreBak(){
-  const b=store.restoreBackup();
-  if(!b)return toast('Бэкап не найден');
-  const before=JSON.stringify(S);
-  S=b;save();render();
-  toast('Из бэкапа восстановлено',{action:'Вернуть',onAction:()=>{S=JSON.parse(before);save();render()}});
+async function importBackupFile(input){
+  const file=input.files&&input.files[0];if(!file)return;
+  try{if(file.size>10*1024*1024)throw Error('size');installBackup(JSON.parse(await file.text()))}
+  catch(err){backupStatus('Файл не подходит или не удалось сохранить данные. Текущие записи не заменены.')}
+  finally{input.value=''}
+}
+function importBackupText(){
+  try{installBackup(JSON.parse(document.getElementById('bk').value))}
+  catch(err){backupStatus('Текст копии не подходит или не удалось сохранить данные. Текущие записи не заменены.')}
 }
 
 /* ===== ICS ===== */
 const ie=s=>String(s).replace(/([,;\\])/g,'\\$1');
-function icsText(){
+function icsText(onlyId){
   const now=new Date(),st=iso(now).replace(/-/g,''),BY=['MO','TU','WE','TH','FR','SA','SU'],k=(now.getDay()+6)%7;
   const startDay=S.st||iso(now);
-  const ev=S.a.filter(x=>x.r&&!(x.pu&&x.pu>=iso(now))).map(x=>{
+  const ev=S.a.filter(x=>!x.archivedAt&&x.r&&(onlyId===undefined||x.id===onlyId)&&!(x.pu&&x.pu>=iso(now))).map(x=>{
     const base=x.c||startDay;
     const baseD=new Date(base+'T00:00:00');
     const bw=(baseD.getDay()+6)%7;
@@ -482,9 +488,9 @@ function icsText(){
   });
   return['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//ritm//RU','CALSCALE:GREGORIAN'].concat(ev,['END:VCALENDAR']).join('\r\n');
 }
-function exportIcs(){
-  if(!S.a.some(x=>x.r&&!(x.pu&&x.pu>=iso(new Date())))){toast('Включи напоминание хотя бы у одной привязки');return}
-  const t=icsText(),f=new File([t],'ritm.ics',{type:'text/calendar'});
+function exportIcs(onlyId){
+  if(!S.a.some(x=>!x.archivedAt&&x.r&&(onlyId===undefined||x.id===onlyId)&&!(x.pu&&x.pu>=iso(new Date())))){toast('Включи напоминание хотя бы у одной привязки');return}
+  const t=icsText(onlyId),f=new File([t],'ritm.ics',{type:'text/calendar'});
   if(navigator.canShare&&navigator.canShare({files:[f]}))navigator.share({files:[f]}).catch(()=>{});
   else location.href=URL.createObjectURL(new Blob([t],{type:'text/calendar'}));
 }
@@ -507,10 +513,10 @@ const ACTIONS={
   liteToggle:(id)=>{const i=lt.indexOf(+id);i<0?lt.push(+id):lt.splice(i,1);renderLite()},
   saveLite:()=>saveLite(),
   unpause:()=>unpause(),
-  shareBackup:()=>shareBackup(),
-  showBackup:()=>showBackup(),
-  importBackup:()=>importBackup(),
-  restoreBak:()=>restoreBak(),
+  shareBackup:()=>exportBackupFile(),
+  exportFile:()=>exportBackupFile(),
+  pickBackupFile:()=>document.getElementById('backupFileInput').click(),
+  importText:()=>importBackupText(),
   settings:()=>openSettings(),
   pickAvatar:()=>document.getElementById('avatarFile').click(),
   toggleWorkday:(i)=>{const n=+i,x=S.wd.indexOf(n);x<0?S.wd.push(n):S.wd.splice(x,1);save();openSettings()},
@@ -520,6 +526,9 @@ const ACTIONS={
   habitR:()=>{readHabit();cu.r=cu.r?0:1;renderHabit()},
   saveHabit:()=>saveHabit(),
   deleteHabit:()=>deleteHabit(),
+  archive:()=>openArchive(),
+  restoreHabit:(id)=>restoreHabit(+id),
+  saveAndCalendar:()=>{if(saveHabit())exportIcs(cu.id)},
 };
 
 /* ===== DELEGATION ===== */
@@ -547,6 +556,7 @@ document.addEventListener('input',e=>{
 document.addEventListener('change',e=>{
   const el=e.target.closest('[data-action]');
   if(el&&el.dataset.action==='avatarFile')setAvatar(el);
+  else if(el&&el.dataset.action==='importFile')importBackupFile(el);
 });
 
 /* ===== TICK: точечное обновление «текущей» и «было» ===== */
