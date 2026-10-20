@@ -243,7 +243,7 @@ function drag(){
   g.addEventListener('touchend',()=>{on=0;if(dy>90)cs();else{sh.style.transition='transform .2s';sh.style.transform=''}});
 }
 const cs=()=>sheet('');
-function toast(m,opt){
+function toast(m,opt={}){
   const e=document.getElementById('tt');
   e.innerHTML=`<span>${esc(m)}</span>`;
   e.className='on';
