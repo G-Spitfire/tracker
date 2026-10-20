@@ -142,6 +142,7 @@ function validateAll(o){
     if(!Array.isArray(o.g[k]))o.g[k]=[];
     o.g[k]=o.g[k].filter(x=>x&&[2,3,4,5].includes(Number(x.v))).map(x=>({i:Number(x.i)||0,v:Number(x.v)}));
   }
+  o.archivedSubjects=Array.isArray(o.archivedSubjects)?o.archivedSubjects.filter(k=>Object.hasOwn(o.g,k)):[];
   if(!o.t||!Array.isArray(o.t))o.t=TASKS_DEFAULT();
   o.t=o.t.filter(t=>t&&typeof t==='object'&&typeof t.t==='string').map(t=>({i:String(t.i||('hb'+Math.random())),t:String(t.t),u:String(t.u||''),target:Math.max(1,Number(t.target)||1),days:Array.isArray(t.days)?t.days.filter(d=>d>=0&&d<7):[0,1,2,3,4,5,6],active:t.active!==false}));
   if(!o.d||typeof o.d!=='object'||Array.isArray(o.d))o.d={};
@@ -181,7 +182,7 @@ function persist(){
 try{const original=localStorage.getItem(KEY);if(original&&!localStorage.getItem('mt1_backup_before_v16_3'))localStorage.setItem('mt1_backup_before_v16_3',original)}catch(e){}
 
 S=load();
-const ITEMS=()=>Object.keys(S.g);
+const ITEMS=()=>Object.keys(S.g).filter(k=>!S.archivedSubjects.includes(k));
 const ACT=()=>ITEMS().filter(k=>S.g[k].length);
 const vals=k=>S.g[k].map(x=>x.v),avg=k=>sum(vals(k))/vals(k).length;
 const finAvg=()=>sum(ACT().map(k=>fin(avg(k))))/(ACT().length||1);
@@ -273,15 +274,16 @@ function grades(){
 /* ===== TODAY ===== */
 function today(){
   const d=chosenDate(),dn=S.d[d]||[],due=S.t.filter(t=>isDue(t,d));
-  const dueTasks=S.todos.filter(t=>!t.deleted&&(!t.done||t.done===d||(t.due&&t.due<=d)));
+  const dueTasks=S.todos.filter(t=>!t.deleted&&(t.done?t.done===d:(!t.due||t.due<=d)));
   const habits=due.map(t=>{
     const n=t.u?cnt(d,t.i):Number(dn.includes(t.i));
-    const val=t.u?`${n} ${esc(t.u)} / ${t.target||1}`:(n?'Выполнено':'Не выполнено');
-    return`<div class="chk ${n?'dn':''}"><button class="box" data-action="habitClick" data-id="${t.i}" aria-label="${esc(t.t)}">${n?'✓':''}</button><span style="flex:1" data-action="habitClick" data-id="${t.i}"><b>${esc(t.t)}</b><div class="mu sm">${val}</div></span><button class="itemtools" data-action="editHabit" data-id="${t.i}" aria-label="Редактировать">⋯</button></div>`;
+    const complete=t.u?n>=Number(t.target||1):!!n;
+    const val=t.u?`${n} из ${t.target||1} ${esc(t.u)}`:(n?'Выполнено':'Не выполнено');
+    return`<div class="chk ${complete?'dn':''}"><button class="box" data-action="habitClick" data-id="${t.i}" aria-label="${esc(t.t)}">${complete?'✓':''}</button><span style="flex:1" data-action="habitClick" data-id="${t.i}"><b>${esc(t.t)}</b><div class="mu sm">${val}</div></span><button class="itemtools" data-action="editHabit" data-id="${t.i}" aria-label="Редактировать">⋯</button></div>`;
   }).join('');
   const tasks=dueTasks.map(t=>`<div class="chk ${t.done?'dn':''}"><button class="box" data-action="toggleTodo" data-id="${t.id}" aria-label="${esc(t.text)}">${t.done?'✓':''}</button><span style="flex:1" data-action="toggleTodo" data-id="${t.id}"><b>${esc(t.text)}</b>${t.due?`<div class="mu sm">Срок: ${t.due.split('-').reverse().join('.')}</div>`:''}</span><button class="itemtools" data-action="editTodo" data-id="${t.id}">⋯</button></div>`).join('');
   const habitsDone=due.filter(t=>t.u?cnt(d,t.i)>=Number(t.target||1):dn.includes(t.i)).length;
-  const allTasks=S.todos.filter(t=>!t.deleted&&(!t.due||t.due<=d)),doneTasks=allTasks.filter(t=>t.done).length;
+  const allTasks=dueTasks,doneTasks=allTasks.filter(t=>t.done===d).length;
   return `<div class="datepick"><button data-action="shiftDay" data-id="-1">‹</button><b>${dayOffset===0?'Сегодня':new Date(d+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'short'})}</b><button data-action="shiftDay" data-id="1" ${dayOffset===0?'disabled':''}>›</button></div>
 <div class="card"><div class="row"><b>Прогресс дня</b><b class="warn">${habitsDone}/${due.length} привычек</b></div><div class="mu sm">Задач выполнено: ${doneTasks} из ${allTasks.length}</div></div>
 <div class="sec-title"><h2>Задачи</h2><button class="btn" data-action="newTodo">+ Задача</button></div><div class="card" style="padding-top:2px;padding-bottom:2px">${tasks||'<div class="mu sm" style="padding:14px 0">Задач нет. Добавь первую.</div>'}</div>
@@ -385,18 +387,21 @@ function tRestore(id){const t=S.t.find(t=>t.i===id);if(!t)return;t.active=true;s
 /* ===== SUBJECTS ===== */
 const cn=v=>String(v).replace(/['"`\\<>&]/g,'').replace(/\s+/g,' ').trim().slice(0,30);
 function openSubjects(){
-  sheet(`<h2 style="margin-top:0">Предметы и четверть</h2>${ITEMS().map((k,j)=>`<div class="row" style="padding:6px 0;align-items:center"><span>${esc(k)}<span class="mu sm"> · оценок: ${S.g[k].length}</span></span><button data-action="removeSubject" data-id="${esc(k)}" style="background:none;border:0;color:var(--bad);font-size:16px;padding:8px;cursor:pointer">Убрать</button></div>`).join('')}<input id="ns" maxlength="30" placeholder="Новый предмет" style="margin-top:12px"><button class="btn" style="margin-top:10px;width:100%" data-action="addSubject">Добавить предмет</button><div class="mu sm" style="margin-top:18px">Конец четверти</div><input type="date" id="qe" value="${S.end||CONFIG.endDefault}" data-action="endInput" style="margin-top:6px"><button class="btn g" style="margin-top:18px;width:100%" data-action="closeSheet">Готово</button>`);
+  sheet(`<h2 style="margin-top:0">Предметы и четверть</h2>${ITEMS().map((k,j)=>`<div class="row" style="padding:6px 0;align-items:center"><span>${esc(k)}<span class="mu sm"> · оценок: ${S.g[k].length}</span></span><button data-action="removeSubject" data-id="${esc(k)}" style="background:none;border:0;color:var(--bad);font-size:16px;padding:8px;cursor:pointer">В архив</button></div>`).join('')}${S.archivedSubjects.length?'<h2>Архив предметов</h2>'+S.archivedSubjects.map(k=>`<div class="row"><span>${esc(k)} · ${S.g[k].length} оценок</span><button class="btn g" data-action="restoreSubject" data-id="${esc(k)}">Вернуть</button></div>`).join(''):''}<div class="mu sm">Оценки в архиве сохраняются и не участвуют в прогнозе.</div><input id="ns" maxlength="30" placeholder="Новый предмет" style="margin-top:12px"><button class="btn" style="margin-top:10px;width:100%" data-action="addSubject">Добавить предмет</button><div class="mu sm" style="margin-top:18px">Конец четверти</div><input type="date" id="qe" value="${S.end||CONFIG.endDefault}" data-action="endInput" style="margin-top:6px"><button class="btn g" style="margin-top:18px;width:100%" data-action="closeSheet">Готово</button>`);
 }
 function addSubject(){
   const v=cn(document.getElementById('ns').value);if(!v)return;
-  if(ITEMS().includes(v))return toast('Такой предмет уже есть');
+  if(Object.hasOwn(S.g,v))return toast('Такой предмет уже есть — проверь архив');
   S.g[v]=[];save();render();openSubjects();
 }
 function removeSubject(k){
-  const n=S.g[k].length;
   if(ITEMS().length<2)return toast('Нужен хотя бы один предмет');
-  delete S.g[k];snapshot();save();render();openSubjects();
-  toast(`«${k}» убран${n?' с '+n+' оценками':''}`,{action:'Вернуть',onAction:()=>{S.g[k]=[];snapshot();save();render()}});
+  if(!Object.hasOwn(S.g,k)||S.archivedSubjects.includes(k))return;
+  S.archivedSubjects.push(k);snapshot();save();render();openSubjects();
+  toast('Предмет в архиве, оценки сохранены',{action:'Вернуть',onAction:()=>restoreSubject(k)});
+}
+function restoreSubject(k){
+  S.archivedSubjects=S.archivedSubjects.filter(x=>x!==k);snapshot();save();render();openSubjects();
 }
 
 /* ===== GRADES ===== */
@@ -607,6 +612,7 @@ const ACTIONS={
   subjects:()=>openSubjects(),
   addSubject:()=>addSubject(),
   removeSubject:(k)=>removeSubject(k),
+  restoreSubject:(k)=>restoreSubject(k),
   endInput:(_,__,el)=>{if(/^\d{4}-\d{2}-\d{2}$/.test(el.value)){S.end=el.value;save();render()}},
   addGrade:(k)=>addGrade(k),
   editGrade:(k,_,el)=>editGrade(k,Number(el.dataset.arg)),
