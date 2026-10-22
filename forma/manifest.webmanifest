@@ -4,8 +4,8 @@
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f6f8f9",
-  "theme_color": "#f6f8f9",
+  "background_color": "#f5f6f8",
+  "theme_color": "#f5f6f8",
   "lang": "ru",
   "description": "Тренировки А–Г, отметки подходов, таймер отдыха и прогресс",
   "icons": [
