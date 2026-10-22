@@ -42,9 +42,6 @@ textarea{height:80px}
 #tt.on{transform:translate(-50%,0);pointer-events:auto}
 #tt button{background:var(--ln);border:0;border-radius:14px;padding:8px 14px;font-weight:800;color:var(--tx);cursor:pointer;font-size:15px}
 @media(prefers-reduced-motion:reduce){#tt,.pb i,.sh{transition:none}.task:active{transform:none}}
-.ov{position:fixed;inset:0;background:#33284a66;display:flex;align-items:flex-end;z-index:9}
-.sh{max-height:92%;overflow-y:auto;background:var(--card);width:100%;max-width:480px;margin:0 auto;border-radius:32px 32px 0 0;padding:20px 18px calc(24px + env(safe-area-inset-bottom,0px));transform:translateY(0);transition:transform .25s}
-.ov.closing .sh{transform:translateY(100%)}
 /* ===== SCHOOL MODULE (изолированный слой) ===== */
 .school-summary{display:flex;align-items:center;gap:18px}.school-score{font-size:52px;font-weight:800;color:var(--pu);line-height:1.1}
 .school-sub{border-left:4px solid var(--pu)}.school-sub .row{align-items:center}.school-sub b{overflow-wrap:anywhere}
@@ -74,6 +71,39 @@ details.school-how{margin-top:8px}details.school-how summary{cursor:pointer;font
 .hist-grade{background:#eee2ff;color:#8243cf}
 @media(prefers-color-scheme:dark){.hist-grade{background:#33254a}.cal button.has{background:#3a2a33;color:var(--tx)}}
 @media(max-width:355px){.donut{width:115px;height:115px}.donut-wrap{gap:12px}.school-score{font-size:44px}}
+/* Устойчивая панель: заголовок и действия вне прокрутки. */
+body.sheet-open{position:fixed;left:0;right:0;top:var(--sheet-scroll-top,0px);width:100%;overflow:hidden}
+body.sheet-open #sc{overflow:hidden}
+.ov{position:fixed;left:0;right:0;top:var(--sheet-top,0px);height:var(--sheet-vh,100dvh);background:#0009;display:flex;align-items:flex-end;justify-content:center;z-index:10;overscroll-behavior:none}
+.sh{display:flex;flex-direction:column;width:100%;max-width:560px;height:min(720px,calc(var(--sheet-vh,100dvh) * .86));max-height:calc(var(--sheet-vh,100dvh) - env(safe-area-inset-top,0px) - 8px);margin:0;overflow:hidden;background:var(--card);border:1px solid var(--ln);border-bottom:0;border-radius:24px 24px 0 0;padding:0;box-shadow:0 -12px 48px #0003;transform:none}
+.sh .sheet-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:none;padding:16px 20px;border-bottom:1px solid var(--ln)}
+.sh .sheet-head h2{margin:0!important;font-size:20px;line-height:1.25;overflow-wrap:anywhere}
+.sheet-close{flex:none;width:44px;height:44px;border:1px solid var(--ln);border-radius:14px;background:var(--bg);color:var(--tx);font-family:inherit;font-size:24px;line-height:1;cursor:pointer}
+.sh .sheet-body{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-gutter:stable;padding:20px;scroll-padding:16px}
+.sh .sheet-body>:first-child{margin-top:0!important}
+.sh .sheet-body>:last-child{margin-bottom:0!important}
+.sh .sheet-footer{flex:none;display:flex;flex-wrap:wrap;gap:10px;padding:14px 20px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--ln);background:var(--card)}
+.sh .sheet-footer .btn{flex:1 1 140px;width:auto!important;min-height:48px;font-size:16px;padding:12px 16px;margin:0!important}
+.sh .sheet-field{display:flex;flex-direction:column;align-items:stretch;gap:8px;font-size:14px;color:var(--mu);margin:0}
+.sh input:not([type="checkbox"]):not([type="file"]),.sh select,.sh textarea{display:block;width:100%;min-width:0;max-width:100%;min-height:48px;box-sizing:border-box;margin:8px 0 0;padding:12px 14px;border:1px solid var(--ln);border-radius:14px;font-family:inherit;font-size:16px;line-height:1.35;background:var(--bg);color:var(--tx)}
+.sh .sheet-field input{margin-top:0!important}
+.sh input[type="date"]{appearance:none;-webkit-appearance:none;min-height:48px}
+.sh .sheet-section{margin:0 0 24px;padding:0 0 24px;border-bottom:1px solid var(--ln)}
+.sh .sheet-section:last-child{margin-bottom:0;padding-bottom:0;border-bottom:0}
+.sh .sheet-section h3{margin:0 0 12px;font-size:16px;line-height:1.3}
+.sh .sheet-section>.btn{width:100%;margin-top:12px;min-height:48px;font-size:15px}
+.sh .sheet-inline{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:stretch}
+.sh .sheet-inline input{margin:0!important}
+.sh .sheet-inline .btn{min-height:48px;font-size:15px;margin:0;padding:10px 14px;box-shadow:none}
+.sh .subject-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;padding:10px 0;border-bottom:1px solid var(--ln)}
+.sh .subject-row:last-child{border-bottom:0}
+.sh .subject-row span{min-width:0;overflow-wrap:anywhere;font-size:16px}
+.sh .subject-row small{display:block;font-size:12px;color:var(--mu);margin-top:3px}
+.sh .subject-row button{flex:none;min-height:44px;padding:8px 12px;font-family:inherit;font-size:14px;border:1px solid var(--ln);border-radius:12px;background:var(--bg);color:var(--tx);cursor:pointer}
+.sh details.sheet-section summary{font-size:16px;font-weight:700;cursor:pointer;padding:4px 0 12px}
+.sh .sheet-period{font-size:14px;color:var(--mu);margin:0 0 20px}
+@media(min-width:700px){.ov{align-items:center;padding:16px}.sh{border-bottom:1px solid var(--ln);border-radius:24px}}
+@media(max-width:355px){.sh .sheet-head,.sh .sheet-body,.sh .sheet-footer{padding-left:16px;padding-right:16px}.sh .sheet-inline{grid-template-columns:minmax(0,1fr)}.sh .sheet-inline .btn{width:100%}}
 </style></head><body><main id="m"></main>
 <nav class="bar"><button data-t="t"><span>☀️</span>Сегодня</button><button data-t="g"><span>📚</span>Оценки</button><button data-t="r"><span>🏆</span>Награда</button><button data-t="y"><span>😊</span>Я</button></nav>
 <div id="tt"></div><div id="s"></div>
@@ -136,7 +166,7 @@ function termControls(q){
 function nextTermSheet(q){
   if(q.selectedTerm!==q.currentTerm)return;
   const t=q.terms.find(t=>t.id===q.currentTerm),next={year:t.year+(t.quarter===4?1:0),quarter:t.quarter===4?1:t.quarter+1};
-  sheet(`<h2>Начать следующую четверть?</h2><p>${termLabel(t)} сохранится в архиве вместе с оценками и графиком.</p><p><b>${termLabel(next)}</b> начнётся с теми же предметами и без оценок.</p><label class="sm">Дата окончания новой четверти<input id="nextTermEnd" type="date"></label><p><button class="btn" data-action="confirmNextTerm">Сохранить и начать</button></p><button class="btn g" data-action="closeSheet">Отмена</button>`);
+  sheet(`<h2>Начать следующую четверть?</h2><p>${termLabel(t)} сохранится в архиве вместе с оценками и графиком.</p><p><b>${termLabel(next)}</b> начнётся с теми же предметами и без оценок.</p><label class="sheet-field" for="nextTermEnd">Дата окончания новой четверти<input id="nextTermEnd" type="date"></label><div data-sheet-footer><button class="btn" data-action="confirmNextTerm">Сохранить и начать</button><button class="btn g" data-action="closeSheet">Отмена</button></div>`);
 }
 function createNextTerm(q,a){
   if(q.selectedTerm!==q.currentTerm)return false;
@@ -316,17 +346,70 @@ document.querySelector('.bar').addEventListener('click',e=>{
 });
 
 /* ===== SHEET ===== */
-function sheet(h){
-  const s=document.getElementById('s');
-  if(!h){const ov=s.querySelector('.ov');if(ov){ov.classList.add('closing');setTimeout(()=>s.innerHTML='',250)}return}
-  s.innerHTML=`<div class="ov" data-close="1"><div class="sh">${h}</div></div>`;
-  const ov=s.querySelector('.ov'),sh=s.querySelector('.sh');
-  let sy=0,dy=0,dragging=false;
-  sh.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;dragging=true},{passive:true});
-  sh.addEventListener('touchmove',e=>{if(!dragging)return;dy=e.touches[0].clientY-sy;if(dy>0){sh.style.transform=`translateY(${dy}px)`}},{passive:true});
-  sh.addEventListener('touchend',()=>{dragging=false;if(dy>80){cs()}else{sh.style.transform='';dy=0}},{passive:true});
+let sheetOpener=null,sheetPageY=0;
+function sheetViewport(){
+  const v=window.visualViewport,s=document.getElementById('s');
+  s.style.setProperty('--sheet-vh',(v?v.height:window.innerHeight)+'px');
+  s.style.setProperty('--sheet-top',(v?v.offsetTop:0)+'px');
+}
+function sheet(h,key=''){
+  const s=document.getElementById('s'),old=s.querySelector('.sh');
+  if(!h){
+    if(!old)return;
+    s.replaceChildren();
+    document.querySelectorAll('main,.bar').forEach(el=>el.inert=false);
+    document.body.classList.remove('sheet-open');document.body.style.removeProperty('--sheet-scroll-top');
+    window.scrollTo(0,sheetPageY);
+    if(sheetOpener&&sheetOpener.isConnected)sheetOpener.focus({preventScroll:true});
+    sheetOpener=null;return;
+  }
+  const template=document.createElement('template');template.innerHTML=h;
+  const heading=template.content.querySelector('h2'),title=heading?heading.textContent:'Настройки';
+  const identity=key||title,same=old&&old.dataset.sheetKey===identity;
+  const scroll=same?old.querySelector('.sheet-body').scrollTop:0;
+  const active=same&&old.contains(document.activeElement)?document.activeElement:null;
+  const focusId=active&&active.id,selection=active&&typeof active.selectionStart==='number'?[active.selectionStart,active.selectionEnd]:null;
+  if(heading)heading.remove();
+  const actions=template.content.querySelector('[data-sheet-footer]');
+  const dialog=document.createElement('div');dialog.className='ov';dialog.dataset.close='1';
+  dialog.innerHTML='<section class="sh" role="dialog" aria-modal="true" aria-labelledby="sheetTitle"><header class="sheet-head"><h2 id="sheetTitle" tabindex="-1"></h2><button type="button" class="sheet-close" data-action="closeSheet" aria-label="Закрыть окно">×</button></header><div class="sheet-body"></div><footer class="sheet-footer"></footer></section>';
+  const panel=dialog.querySelector('.sh'),body=dialog.querySelector('.sheet-body'),footer=dialog.querySelector('.sheet-footer');
+  panel.dataset.sheetKey=identity;dialog.querySelector('h2').textContent=title;
+  if(actions){
+    if(actions.matches('button'))footer.append(actions);
+    else{footer.append(...actions.childNodes);actions.remove()}
+  }else footer.innerHTML='<button type="button" class="btn g" data-action="closeSheet">Закрыть</button>';
+  body.append(template.content);
+  if(!old){
+    sheetOpener=document.activeElement;sheetPageY=window.scrollY;
+    document.body.style.setProperty('--sheet-scroll-top',(-sheetPageY)+'px');document.body.classList.add('sheet-open');
+    document.querySelectorAll('main,.bar').forEach(el=>el.inert=true);
+  }
+  s.replaceChildren(dialog);sheetViewport();body.scrollTop=scroll;
+  const nextFocus=focusId&&document.getElementById(focusId);
+  if(nextFocus){nextFocus.focus({preventScroll:true});if(selection)nextFocus.setSelectionRange(...selection)}
+  else if(!same)dialog.querySelector('h2').focus({preventScroll:true});
 }
 function cs(){sheet('')}
+window.addEventListener('resize',sheetViewport);
+if(window.visualViewport){
+  window.visualViewport.addEventListener('scroll',sheetViewport);
+  window.visualViewport.addEventListener('resize',()=>{
+    sheetViewport();
+    const focused=document.activeElement;
+    if(focused&&focused.matches('input,textarea,select')&&focused.closest('.sheet-body'))requestAnimationFrame(()=>focused.scrollIntoView({block:'nearest'}));
+  });
+}
+document.addEventListener('keydown',e=>{
+  const panel=document.querySelector('.sh');if(!panel)return;
+  if(e.key==='Escape'){e.preventDefault();cs();render();return}
+  if(e.key!=='Tab')return;
+  const focusable=[...panel.querySelectorAll('button,input,select,textarea,a[href],summary,[tabindex="0"]')].filter(el=>!el.disabled&&el.getClientRects().length);
+  const first=focusable[0],last=focusable[focusable.length-1];
+  if(e.shiftKey&&(document.activeElement===first||document.activeElement.id==='sheetTitle')){e.preventDefault();last.focus()}
+  else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
+});
+
 function toast(m,opt){
   const e=document.getElementById('tt');
   e.innerHTML=`<span>${esc(m)}</span>`;
@@ -360,7 +443,7 @@ function openDetails(i){
 }
 function renderDetails(){
   const hw=cur.i=='hw',L=hw?CONFIG.subjects:CONFIG.chores,ok=(S.d[iso(new Date())]||[]).includes(cur.i);
-  sheet(`<h2 style="margin-top:0">${hw?'Какие уроки делала?':'Что помогла сделать?'}</h2><div class="chips" style="margin-top:0">${L.map((k,j)=>`<button class="chip ${cur.s.includes(k)?'on':''}" data-action="detailChip" data-id="${j}">${esc(k)}</button>`).join('')}</div><input id="dn" maxlength="60" placeholder="Что-то ещё? Напиши" value="${esc(cur.n)}"><div class="chips"><button class="btn" data-action="saveDetails">Готово</button>${ok?'<button class="btn g" data-action="removeDetails">Убрать отметку</button>':''}</div>`);
+  sheet(`<h2 style="margin-top:0">${hw?'Какие уроки делала?':'Что помогла сделать?'}</h2><div class="chips" style="margin-top:0">${L.map((k,j)=>`<button class="chip ${cur.s.includes(k)?'on':''}" data-action="detailChip" data-id="${j}">${esc(k)}</button>`).join('')}</div><input id="dn" maxlength="60" placeholder="Что-то ещё? Напиши" value="${esc(cur.n)}"><div data-sheet-footer class="chips"><button class="btn" data-action="saveDetails">Готово</button>${ok?'<button class="btn g" data-action="removeDetails">Убрать отметку</button>':''}</div>`);
 }
 function saveDetails(){
   const d=iso(new Date());cur.n=document.getElementById('dn').value.trim().slice(0,60);
@@ -371,10 +454,10 @@ function removeDetails(){cs();setDone(cur.i,false)}
 
 /* ===== PROFILE / REWARD SHEETS ===== */
 function openProfile(){
-  sheet(`<h2 style="margin-top:0">${S.name?'Мой герой':'Давай познакомимся!'}</h2><div style="display:grid;place-items:center"><div class="av" style="background:${S.av.c};width:88px;height:88px;font-size:52px">${S.av.e}</div></div><input value="${esc(S.name)}" maxlength="20" placeholder="Как тебя зовут?" data-action="nameInput"><div class="eg">${CONFIG.emojis.map(e=>`<button class="${e==S.av.e?'on':''}" data-action="pickEmoji" data-id="${e}">${e}</button>`).join('')}</div><div class="cl">${CONFIG.colors.map(c=>`<button class="${c==S.av.c?'on':''}" style="background:${c}" data-action="pickColor" data-id="${c}" aria-label="цвет"></button>`).join('')}</div><p style="text-align:center;margin:18px 0 0"><button class="btn" data-action="closeProfile">Готово</button></p>`);
+  sheet(`<h2 style="margin-top:0">${S.name?'Мой герой':'Давай познакомимся!'}</h2><div style="display:grid;place-items:center"><div class="av" style="background:${S.av.c};width:88px;height:88px;font-size:52px">${S.av.e}</div></div><input value="${esc(S.name)}" maxlength="20" placeholder="Как тебя зовут?" data-action="nameInput"><div class="eg">${CONFIG.emojis.map(e=>`<button class="${e==S.av.e?'on':''}" data-action="pickEmoji" data-id="${e}">${e}</button>`).join('')}</div><div class="cl">${CONFIG.colors.map(c=>`<button class="${c==S.av.c?'on':''}" style="background:${c}" data-action="pickColor" data-id="${c}" aria-label="цвет"></button>`).join('')}</div><p data-sheet-footer style="text-align:center;margin:18px 0 0"><button class="btn" data-action="closeProfile">Готово</button></p>`);
 }
 function openReward(){
-  sheet(`<h2 style="margin-top:0">Награда недели</h2><input id="rw" maxlength="40" value="${esc(S.reward)}"><div class="sm mu" style="margin-top:14px">Сколько звёзд нужно за неделю?</div><div class="chips">${[20,25,30,35].map(n=>`<button class="chip ${n==S.goal?'on':''}" data-action="setGoal" data-id="${n}">${n}</button>`).join('')}</div><p style="margin:18px 0 0"><button class="btn" data-action="saveReward">Готово</button></p>`);
+  sheet(`<h2 style="margin-top:0">Награда недели</h2><input id="rw" maxlength="40" value="${esc(S.reward)}"><div class="sm mu" style="margin-top:14px">Сколько звёзд нужно за неделю?</div><div class="chips">${[20,25,30,35].map(n=>`<button class="chip ${n==S.goal?'on':''}" data-action="setGoal" data-id="${n}">${n}</button>`).join('')}</div><p data-sheet-footer style="margin:18px 0 0"><button class="btn" data-action="saveReward">Готово</button></p>`);
 }
 
 /* ===== DAY HISTORY ===== */
@@ -391,7 +474,7 @@ function openDay(d){
   const done=dn(d),L=tasks(d),grades=dayGrades(d);
   const items=L.map(t=>{const ok=done.includes(t.i),x=(S.x[d]||{})[t.i];const sub=ok&&x?esc([].concat(x.s||[],x.n?[x.n]:[]).join(', ')):'';return`<div class="row"><span>${t.e} ${esc(t.t)}${sub?`<div class="mu sm">${sub}</div>`:''}</span><span>${ok?'⭐':''}</span></div>`}).join('');
   const ghtml=grades.length?`<h2>Оценки</h2>${grades.map(g=>`<div class="row"><span>${esc(g.k)}</span><span class="tag hist-grade">${g.v}</span></div>`).join('')}`:'';
-  sheet(`<div class="hist-day"><h2 style="margin-top:0">${d.split('-').reverse().join('.')}</h2><div class="mu sm" style="margin-bottom:10px">⭐ ${st(d)} звёзд</div>${items||'<div class="mu sm">Привычек нет</div>'}${ghtml}<p style="margin:18px 0 0"><button class="btn g" data-action="closeSheet">Закрыть</button></p></div>`);
+  sheet(`<div class="hist-day"><h2 style="margin-top:0">${d.split('-').reverse().join('.')}</h2><div class="mu sm" style="margin-bottom:10px">⭐ ${st(d)} звёзд</div>${items||'<div class="mu sm">Привычек нет</div>'}${ghtml}<p data-sheet-footer style="margin:18px 0 0"><button class="btn g" data-action="closeSheet">Закрыть</button></p></div>`);
 }
 
 /* ===== HISTORY CALENDAR ===== */
@@ -420,7 +503,7 @@ function renderHistory(){
     <div class="months"><button data-action="histPrev" aria-label="Предыдущий месяц">‹</button><b>${monthName}</b><button data-action="histNext" aria-label="Следующий месяц">›</button></div>
     <div class="cal">${DN.map(d=>`<div class="wd">${d}</div>`).join('')}${cells.join('')}</div>
     <div class="sm mu">Кружок — сегодня. Оранжевая точка — привычки, фиолетовая — оценки.</div>
-    <p style="margin:18px 0 0"><button class="btn g" data-action="closeSheet">Закрыть</button></p>`);
+    <p data-sheet-footer style="margin:18px 0 0"><button class="btn g" data-action="closeSheet">Закрыть</button></p>`);
 }
 function histPrev(){calMonth.m--;if(calMonth.m<0){calMonth.m=11;calMonth.y--}renderHistory()}
 function histNext(){calMonth.m++;if(calMonth.m>11){calMonth.m=0;calMonth.y++}renderHistory()}
@@ -480,7 +563,7 @@ const school=(()=>{
   }
   function edit(n,id){
     const k=names()[n],x=S.school.g[k].find(x=>x.i===id);
-    sheet(`<h2 style="margin-top:0">${esc(k)}</h2><p class="mu sm">${x?'Исправь оценку или удали ошибочную запись.':'Какую оценку ты получила?'}</p><div class="chips">${[2,3,4,5].map(v=>`<button class="chip c${v}" data-action="putGrade" data-id="${n}" data-arg="${v}" data-arg2="${id===undefined?'null':id}">${v}</button>`).join('')}</div><div class="school-actions">${x?`<button class="btn g" data-action="removeGrade" data-id="${n}" data-arg="${id}">Удалить оценку</button>`:''}<button class="btn g" data-action="closeSheet">Отмена</button></div>`);
+    sheet(`<h2 style="margin-top:0">${esc(k)}</h2><p class="mu sm">${x?'Исправь оценку или удали ошибочную запись.':'Какую оценку ты получила?'}</p><div class="chips">${[2,3,4,5].map(v=>`<button class="chip c${v}" data-action="putGrade" data-id="${n}" data-arg="${v}" data-arg2="${id===undefined?'null':id}">${v}</button>`).join('')}</div><div data-sheet-footer class="school-actions">${x?`<button class="btn g" data-action="removeGrade" data-id="${n}" data-arg="${id}">Удалить оценку</button>`:''}<button class="btn g" data-action="closeSheet">Отмена</button></div>`);
   }
   function put(n,v,id){
     const k=names()[n];if(!k||![2,3,4,5].includes(v))return;
@@ -497,7 +580,13 @@ const school=(()=>{
     toast('Оценка удалена',{action:'Вернуть',onAction:()=>{a.splice(idx,0,saved);commit()}});
   }
   function subjects(){
-    sheet(`<h2 style="margin-top:0">Предметы и четверть</h2><p class="sm">${termLabel(S.school.terms.find(t=>t.id===S.school.selectedTerm))}</p>${S.school.selectedTerm===S.school.currentTerm?'<button class="btn" data-action="nextTerm">Завершить четверть и начать следующую</button>':'<p class="mu sm">Редактирование архивной четверти</p>'}${names().map((k,n)=>`<div class="row" style="align-items:center"><span>${esc(k)}</span><button class="chip" data-action="archiveSubject" data-id="${n}">В архив</button></div>`).join('')}<label class="sm">Новый предмет<input id="schoolName" maxlength="30" placeholder="Название предмета"></label><div class="school-actions"><button class="btn" data-action="addSubject">Добавить</button></div>${S.school.archived.length?'<h2>Архив</h2>'+S.school.archived.map((k,n)=>`<div class="row" style="align-items:center"><span>${esc(k)}</span><button class="chip" data-action="restoreSubject" data-id="${n}">Вернуть</button></div>`).join(''):''}<p class="sm mu">В архиве оценки сохраняются и не участвуют в текущем прогнозе.</p><label class="sm">Конец четверти<input id="schoolEnd" type="date" value="${esc(S.school.end||'')}" data-action="endInput"></label><div class="school-actions"><button class="btn g" data-action="closeSheet">Готово</button></div>`);
+    const q=S.school;
+    sheet(`<h2>Предметы и четверть</h2><p class="sheet-period">${termLabel(q.terms.find(t=>t.id===q.selectedTerm))}${q.selectedTerm!==q.currentTerm?' · архив':''}</p>
+      <section class="sheet-section"><h3>Четверть</h3><label class="sheet-field" for="schoolEnd">Дата окончания<input id="schoolEnd" type="date" value="${esc(q.end||'')}" data-action="endInput"></label>${q.selectedTerm===q.currentTerm?'<button class="btn g" data-action="nextTerm">Начать следующую четверть</button>':''}</section>
+      <section class="sheet-section"><h3>Новый предмет</h3><div class="sheet-inline"><input id="schoolName" maxlength="30" placeholder="Название предмета" aria-label="Название нового предмета"><button class="btn" data-action="addSubject">Добавить</button></div></section>
+      <section class="sheet-section"><h3>Предметы</h3>${names().map((k,n)=>`<div class="subject-row"><span>${esc(k)}<small>Оценок: ${q.g[k].length}</small></span><button data-action="archiveSubject" data-id="${n}">В архив</button></div>`).join('')}</section>
+      ${q.archived.length?`<section class="sheet-section"><h3>Архив предметов</h3><p class="mu sm">Оценки сохранены и не участвуют в текущем прогнозе.</p>${q.archived.map((k,n)=>`<div class="subject-row"><span>${esc(k)}<small>Оценок: ${q.g[k].length}</small></span><button data-action="restoreSubject" data-id="${n}">Вернуть</button></div>`).join('')}</section>`:''}
+      <div data-sheet-footer><button class="btn" data-action="closeSheet">Готово</button></div>`,'subjects');
   }
   function add(){
     const k=document.getElementById('schoolName').value.replace(/\s+/g,' ').trim().slice(0,30);
@@ -516,7 +605,7 @@ const school=(()=>{
 })();
 
 function openParents(){
-  sheet(`<h2>Для родителей</h2><p class="mu sm">Настройте награду вместе с ребёнком. Данные хранятся на этом устройстве — сохраните копию для переноса.</p><button class="btn g" data-action="editReward">Награда и цель по звёздам</button><h2>Копия данных</h2><div class="chips"><button class="btn g" data-action="exportFile">Сохранить копию файлом</button><button class="btn g" data-action="pickBackupFile">Восстановить из файла</button><input type="file" id="backupFileInput" accept=".json,application/json" data-action="importFile" hidden><div id="backupStatus" class="mu sm" role="status" aria-live="polite"></div><details><summary class="mu sm" style="padding:16px 0">Восстановить старую текстовую копию</summary><textarea id="bk" aria-label="Текст старой копии"></textarea><button class="btn g" data-action="importText">Восстановить из текста</button></details></div><button class="btn g" data-action="closeSheet">Закрыть</button>`);
+  sheet(`<h2>Для родителей</h2><p class="mu sm">Настройте награду вместе с ребёнком. Данные хранятся на этом устройстве — сохраните копию для переноса.</p><button class="btn g" data-action="editReward">Награда и цель по звёздам</button><h2>Копия данных</h2><div class="chips"><button class="btn g" data-action="exportFile">Сохранить копию файлом</button><button class="btn g" data-action="pickBackupFile">Восстановить из файла</button><input type="file" id="backupFileInput" accept=".json,application/json" data-action="importFile" hidden><div id="backupStatus" class="mu sm" role="status" aria-live="polite"></div><details><summary class="mu sm" style="padding:16px 0">Восстановить старую текстовую копию</summary><textarea id="bk" aria-label="Текст старой копии"></textarea><button class="btn g" data-action="importText">Восстановить из текста</button></details></div><button data-sheet-footer class="btn g" data-action="closeSheet">Закрыть</button>`);
 }
 function installBackup(o){
   const source=o&&o.habit?o.habit:o;
@@ -571,7 +660,7 @@ const ACTIONS={
   saveDetails:()=>saveDetails(),
   removeDetails:()=>removeDetails(),
   toggleDance:(g)=>{const a=S.dance,x=a.indexOf(+g);x<0?a.push(+g):a.splice(x,1);save();render()},
-  closeSheet:()=>cs(),
+  closeSheet:()=>{cs();render()},
   parents:()=>openParents(),
   exportFile:()=>exportBackupFile(),
   pickBackupFile:()=>document.getElementById('backupFileInput').click(),
