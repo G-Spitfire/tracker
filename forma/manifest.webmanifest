@@ -1,0 +1,25 @@
+{
+  "name": "Форма — трекер 12 недель",
+  "short_name": "Форма",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f8f9",
+  "theme_color": "#f6f8f9",
+  "lang": "ru",
+  "description": "Тренировки А–Г, отметки подходов, таймер отдыха и прогресс",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
