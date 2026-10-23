@@ -57,7 +57,7 @@ textarea{height:90px;margin:8px 0}
 .bar button{flex:1 1 0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;min-height:60px;border:0;border-radius:20px;padding:6px 2px;background:none;color:var(--mu);font-weight:750;font-size:12px;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .bar button .nav-icon{font-size:23px;line-height:1.04;font-weight:500;pointer-events:none}
 .bar button span{pointer-events:none}
-.bar button.on{background:linear-gradient(135deg,#153b54,#192748);color:var(--ac);box-shadow:inset 0 0 0 1px #39d8ff33,0 0 18px #39d8ff13}.bar button[data-t="r"].on{background:linear-gradient(135deg,#2b2050,#1a2440);color:#b89aff;box-shadow:inset 0 0 0 1px #8b5cff44,0 0 18px #8b5cff18}
+.bar button.on{background:linear-gradient(135deg,#153b54,#192748);color:var(--ac);box-shadow:inset 0 0 0 1px #39d8ff33,0 0 18px #39d8ff13}
 .bar button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
 body.grades-view .sub{border-radius:15px;padding:8px 10px;margin:6px 0;box-shadow:none;border-left-width:3px}
 body.grades-view .sub .chip{border-radius:9px}
@@ -134,7 +134,24 @@ body.sheet-open #sc{overflow:hidden}
 .sh .sheet-period{font-size:14px;color:var(--mu);margin:0 0 20px}
 @media(min-width:700px){.ov{align-items:center;padding:16px}.sh{border-bottom:1px solid var(--ln);border-radius:24px}}
 @media(max-width:355px){.sh .sheet-head,.sh .sheet-body,.sh .sheet-footer{padding-left:16px;padding-right:16px}.sh .sheet-inline{grid-template-columns:minmax(0,1fr)}.sh .sheet-inline .btn{width:100%}}
-</style></head><body><div id="app"><div id="sc"><main id="m"></main></div><nav class="bar" aria-label="Разделы приложения"><button data-t="d"><span class="nav-icon">☑</span><span>Дела</span></button><button data-t="g"><span class="nav-icon">▤</span><span>Оценки</span></button><button data-t="r"><span class="nav-icon">◎</span><span>Цели</span></button><button data-t="p"><span class="nav-icon">◇</span><span>Профиль</span></button></nav></div>
+/* Крупные зоны нажатия, компактная навигация и калькулятор оценок. */
+.box,.chip,.datepick button,.itemtools,.x{min-width:44px;min-height:44px}
+.box{width:44px;height:44px;border-radius:12px}
+.chip{height:44px}
+.sub .chip,.sub .chip.add,body.grades-view .sub .chip,body.grades-view .sub .chip.add{width:44px;min-width:44px;height:44px;font-size:16px;border-radius:12px}
+.sh .chips .chip{min-height:48px}
+.bar{border-radius:26px;background:#101828ee;backdrop-filter:blur(14px)}
+.bar button .nav-icon{width:24px;height:24px;margin-bottom:3px;font-size:0;line-height:1}
+.bar button[data-t="p"].on{background:linear-gradient(135deg,#143a52,#1b2a4d);color:var(--ac)}
+.wi select{min-height:48px;margin:8px 0}
+.wi-result{margin-top:12px;padding:10px 12px;border-radius:14px;background:#ffffff08}
+.outlook-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--ln)}
+.outlook-row:last-child{border-bottom:0}
+.outlook-row .btn{flex:none;min-height:44px;padding:8px 13px;font-size:14px}
+.outlook-risk{padding:8px 0}
+.hintbtn{display:block;width:100%;text-align:left;font:inherit;color:var(--tx);cursor:pointer;margin:12px 0}
+.hint .go{margin-top:8px;font-size:14px;color:var(--ac);font-weight:700}
+</style></head><body><div id="app"><div id="sc"><main id="m"></main></div><nav class="bar" aria-label="Разделы приложения"><button data-t="d"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 12 3 3 5-6"/><rect x="3.5" y="3.5" width="17" height="17" rx="5"/></svg><span>Дела</span></button><button data-t="g"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20v-6M12 20V5M19 20v-10"/></svg><span>Оценки</span></button><button data-t="p"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4.5 21c.9-4 3.8-6 7.5-6s6.6 2 7.5 6"/></svg><span>Профиль</span></button></nav></div>
 <input type="file" accept="image/*" id="af" hidden data-action="avatarFile"><div id="tt"></div><div id="s"></div>
 <script>
 const CONFIG={
@@ -153,7 +170,6 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 const f2=x=>x.toFixed(2),sum=a=>a.reduce((x,y)=>x+y,0);
 const fin=a=>a<THRESH[0]?2:a<THRESH[1]?3:a<THRESH[2]?4:5;
 const pl=n=>{const a=n%100,b=n%10;return a>10&&a<15?'дней':b==1?'день':b>1&&b<5?'дня':'дней'};
-const plw=n=>{const a=n%100,b=n%10;return a>10&&a<15?'учебных дней':b==1?'учебный день':b>1&&b<5?'учебных дня':'учебных дней'};
 
 
 /* Четверти: выбранный период остаётся в прежних полях для совместимости копий. */
@@ -280,8 +296,36 @@ let warned=false;
 function persist(){
   syncTerm(S,'archivedSubjects');
   try{const old=localStorage.getItem(KEY);if(old)localStorage.setItem(BAK,old)}catch(e){}
-  try{localStorage.setItem(KEY,JSON.stringify(S))}
-  catch(e){if(!warned){warned=true;toast('Данные не сохраняются — приватный режим?')}}
+  try{localStorage.setItem(KEY,JSON.stringify(S));return true}
+  catch(e){if(!warned){warned=true;toast('Данные не сохраняются: нет места или приватный режим')}return false}
+}
+const DAILY_PREFIX='mt1_d_';
+function daily(){
+  const date=iso(new Date()),key=DAILY_PREFIX+date;
+  try{
+    let keys=Object.keys(localStorage).filter(k=>k.startsWith(DAILY_PREFIX)).sort();
+    if(!localStorage.getItem(key)){
+      const copy=JSON.stringify(S);let saved=false;
+      try{localStorage.setItem(key,copy);saved=true}catch(e){}
+      while(!saved&&keys.length){
+        localStorage.removeItem(keys.shift());
+        try{localStorage.setItem(key,copy);saved=true}catch(e){}
+      }
+      if(!saved)toast('Не удалось создать автокопию: не хватает места');
+    }
+    keys=Object.keys(localStorage).filter(k=>k.startsWith(DAILY_PREFIX)).sort();
+    keys.slice(0,-7).forEach(k=>localStorage.removeItem(k));
+    const last=localStorage.getItem('mt1_lx');
+    if(!last)localStorage.setItem('mt1_lx',date);
+    else if((Date.now()-new Date(last+'T12:00:00'))/864e5>=7&&localStorage.getItem('mt1_reminded')!==date){
+      localStorage.setItem('mt1_reminded',date);
+      setTimeout(()=>toast('Сохрани копию в файл: Профиль → Копия данных',{ms:6000}),900);
+    }
+  }catch(e){}
+}
+function dailyCopies(){
+  let keys=[];try{keys=Object.keys(localStorage).filter(k=>k.startsWith(DAILY_PREFIX)).sort().reverse()}catch(e){}
+  return `<h2>Автокопии на этом устройстве</h2><div class="mu sm">Приложение хранит до 7 копий. Нажми «Вернуть», чтобы восстановить данные на выбранную дату.</div>${keys.length?keys.map(k=>`<div class="card archived-habit"><span>${k.slice(-10).split('-').reverse().join('.')}</span><button type="button" class="btn g" data-action="restoreDaily" data-id="${k}">Вернуть</button></div>`).join(''):'<div class="card mu">Автокопий пока нет.</div>'}`;
 }
 /* Keep an untouched backup of the old installed app's data before first migration. */
 try{const original=localStorage.getItem(KEY);if(original&&!localStorage.getItem('mt1_backup_before_v16_3'))localStorage.setItem('mt1_backup_before_v16_3',original)}catch(e){}
@@ -309,9 +353,18 @@ const cnt=(d,i)=>(S.c[d]||{})[i]||0;
 const wk=()=>{const d=new Date(),k=(d.getDay()+6)%7,r=[];for(let i=0;i<7;i++){const x=new Date(d);x.setDate(d.getDate()-k+i);r.push(x)}return r};
 
 /* ===== STREAK / ACHIEVEMENTS ===== */
-function streak(){let c=0,d=new Date();if(!(S.d[iso(d)]||[]).includes('hw'))d.setDate(d.getDate()-1);while((S.d[iso(d)]||[]).includes('hw')){c++;d.setDate(d.getDate()-1)}return c}
+function streak(){
+  const hw=S.t.find(t=>t.i==='hw');if(!hw||hw.active===false)return 0;
+  const today=iso(new Date()),d=new Date();let count=0;
+  for(let n=0;n<400;n++,d.setDate(d.getDate()-1)){
+    const key=iso(d);if(!isDue(hw,key))continue;
+    if((S.d[key]||[]).includes('hw'))count++;
+    else if(key!==today)break;
+  }
+  return count;
+}
 const TH={pu:50,rd:3};
-function ach(d){const dn=S.d[d]||[],c=S.c[d]||{};return{all:S.t.every(t=>t.u?(c[t.i]||0)>=Number(t.target||1):dn.includes(t.i)),ex:(c.pu||0)+(c.pw||0)>=TH.pu,rd:(c.rd||0)>=TH.rd}}
+function ach(d){const dn=S.d[d]||[],c=S.c[d]||{},due=S.t.filter(t=>isDue(t,d));return{all:due.length>0&&due.every(t=>t.u?(c[t.i]||0)>=Number(t.target||1):dn.includes(t.i)),ex:(c.pu||0)+(c.pw||0)>=TH.pu,rd:(c.rd||0)>=TH.rd}}
 
 /* ===== SCHOOL MATH ===== */
 function plan(a){
@@ -329,7 +382,6 @@ function calc(){
   bad.sort((a,b)=>(a.f-b.f)||(a.p.k-b.p.k)||(a.av-b.av));
   return{bad,good};
 }
-function scen(k){const a=vals(k),s=sum(a),n=a.length,c=avg(k);return[5,4,3].map(v=>{const x=(s+v)/(n+1);return`<span>${v} → <b class="${x>=THRESH[1]?'ok':x>=c?'warn':'bad'}">${f2(x)}</b></span>`}).join('')}
 
 /* ===== CHARTS ===== */
 function chart(){return meanChart(S)}
@@ -344,24 +396,29 @@ function gradeDonut(){
   const legend=c.map(x=>`<div class="donut-item"><span class="donut-dot" style="background:${palette[x.v]}"></span><span>«${x.v}»</span><b>${x.n}</b></div>`).join('');
   return `<div class="donut-wrap"><svg viewBox="0 0 120 120" role="img" aria-label="Прогноз итоговых оценок по предметам" class="donut"><circle cx="60" cy="60" r="46" fill="none" stroke="var(--ln)" stroke-width="12"></circle>${rings}<text x="60" y="57" text-anchor="middle" fill="var(--tx)" font-size="23" font-weight="750">${total}</text><text x="60" y="73" text-anchor="middle" fill="var(--mu)" font-size="9">предметов</text></svg><div class="donut-legend">${legend}</div></div>`;
 }
-function wdays(a){let n=0;for(const d=new Date(a);d<=endD();d.setDate(d.getDate()+1)){const g=d.getDay();if(g&&g<6)n++}return n}
 
 /* ===== VIEWS ===== */
-function road(){
-  const{bad,good}=calc(),t0=new Date();t0.setHours(0,0,0,0);
-  const days=wdays(t0),fa=exAvg(),over=iso(t0)>(S.end||CONFIG.endDefault);
-  const hint=bad.length?`<b>${bad[0].k}:</b> ${bad[0].p.t}. Бери любую возможность получить оценку.`:'Все предметы на четвёрке и выше. Держи планку.';
-  const frag=good.filter(g=>g.x);
-  return`<div class="hero"><div class="big">${days}</div><div class="mu" style="padding-bottom:6px">${over?'четверть закончилась. Начни следующую в «Предметы и четверть»':plw(days)+' до конца четверти (без выходных)'}<br>средний ${f2(fa)}, цель ${f2(GOAL)}</div></div>
-<div class="card hint"><div class="lb">★ Главное на сегодня</div><div class="tx">${hint}</div></div>
-<div class="row" style="align-items:center"><h2>Подтянуть</h2><span class="mu sm">в норме ${good.length} из ${ACT().length}</span></div>
-${bad.length?bad.map(b=>`<div class="card sub t${b.f}"><div class="row" style="align-items:center"><div><b>${esc(b.k)}</b><div class="mu sm">средний ${f2(b.av)}</div></div><div class="fin">${b.f}<small>итог</small></div></div><div style="margin-top:6px">Нужно: ${b.p.t}, будет ${f2(b.p.x)}</div><div class="sc"><span class="mu">Следующая:</span>${scen(b.k)}</div></div>`).join(''):'<div class="card ok">Подтягивать нечего.</div>'}
-${frag.length?`<h2>Не уронить</h2>${frag.map(g=>`<div class="card row" style="align-items:center"><b>${esc(g.k)}</b><span class="mu sm" style="text-align:right">${f2(g.av)}. Тройка опустит до <b class="warn">${f2(g.x)}</b></span></div>`).join('')}`:''}`;
-}
 function gord(){return [...ITEMS()].sort((a,b)=>a.localeCompare(b,'ru',{sensitivity:'base'}))}
+let wi={k:null,v:5,n:2};
+function whatIf(){
+  const subjects=ACT();
+  if(!subjects.length)return '';
+  if(!subjects.includes(wi.k))wi.k=[...subjects].sort((a,b)=>avg(a)-avg(b))[0];
+  const a=vals(wi.k),before=avg(wi.k),after=(sum(a)+wi.v*wi.n)/(a.length+wi.n),was=fin(before),next=fin(after);
+  const message=next>was?`Итоговая оценка поднимется с «${was}» до «${next}».`:next<was?`Итоговая оценка снизится с «${was}» до «${next}».`:`Итог останется «${was}», средний балл ${after>=before?'вырастет':'снизится'}.`;
+  return `<div class="card wi"><div class="kicker">ЧТО ЕСЛИ?</div><label class="sm" for="wiSubject">Предмет</label><select id="wiSubject" data-action="wiSubject" aria-label="Предмет">${subjects.map(k=>`<option value="${esc(k)}" ${k===wi.k?'selected':''}>${esc(k)}</option>`).join('')}</select><div class="mu sm" style="margin-top:10px">Какая оценка и сколько раз?</div><div class="chips" role="group" aria-label="Оценка">${[5,4,3,2].map(v=>`<button class="chip c${v} ${wi.v===v?'on':''}" data-action="wiVal" data-id="${v}" aria-pressed="${wi.v===v}">${v}</button>`).join('')}</div><div class="chips" role="group" aria-label="Количество оценок">${[1,2,3,4].map(n=>`<button class="chip ${wi.n===n?'on':''}" data-action="wiN" data-id="${n}" aria-pressed="${wi.n===n}">${n}×</button>`).join('')}</div><div class="wi-result"><b>Новый средний: ${f2(after)}</b><div class="mu sm">Сейчас ${f2(before)} · ${message}</div></div></div>`;
+}
+function gradeOutlook(){
+  const {bad,good}=calc(),atRisk=good.filter(g=>g.x);
+  if(!ACT().length)return '<div class="card mu sm">Добавь первую оценку — здесь появится прогноз и план.</div>';
+  const needs=bad.length?`<div class="kicker">ПОДТЯНУТЬ</div>${bad.map(b=>`<div class="outlook-row"><div><b>${esc(b.k)}</b><div class="mu sm">средний ${f2(b.av)} · нужно ${b.p.t}</div></div><button class="btn g" data-action="wiPick" data-id="${esc(b.k)}">Прикинуть</button></div>`).join('')}`:'<div class="ok">Сейчас все предметы выходят на «4» или «5».</div>';
+  const risk=atRisk.length?`<div class="kicker" style="margin-top:14px">НЕ УРОНИТЬ</div>${atRisk.map(g=>`<div class="mu sm outlook-risk"><b>${esc(g.k)}</b> · средний ${f2(g.av)}. Оценка «3» снизит его до ${f2(g.x)}.</div>`).join('')}`:'';
+  return `<div class="card">${needs}${risk}</div>`;
+}
 function grades(){
   return`${termControls(S)}<div class="hero"><div class="big">${ACT().length?f2(exAvg()):'—'}</div><div class="mu" style="padding-bottom:6px">Средний балл<br>все оценки равновесные</div></div>
 <div class="card"><b>Как меняется средний балл</b>${chart()}<div class="mu sm">Сумма всех оценок ÷ количество оценок. Только выбранная четверть; архивные предметы исключены.</div></div>
+${whatIf()}${gradeOutlook()}
 <div class="card"><b>Прогноз итоговых оценок</b>${gradeDonut()}<div class="mu sm">Количество предметов, которые сейчас выходят на «2», «3», «4» или «5».</div></div>
 <div style="margin-top:12px">${gord().map(k=>{const em=!S.g[k].length,av=em?0:avg(k),f=em?0:fin(av);return`<div class="card sub t${f}"><div class="row" style="align-items:center"><div><b>${esc(k)}</b><div class="mu sm">${em?'оценок пока нет':'средний '+f2(av)}</div></div><div class="fin" style="font-size:38px">${em?'—':f}<small>итог</small></div></div><div class="chips">${S.g[k].map(x=>`<button class="chip c${x.v}" data-action="editGrade" data-id="${esc(k)}" data-arg="${x.i}">${x.v}</button>`).join('')}<button class="chip add" data-action="addGrade" data-id="${esc(k)}" aria-label="Добавить оценку: ${esc(k)}">+</button></div></div>`}).join('')}</div>
 <button class="btn g" style="margin-top:6px;width:100%" data-action="subjects">Предметы и четверть</button>`;
@@ -380,15 +437,18 @@ function today(){
   const tasks=dueTasks.map(t=>`<div class="chk ${t.done?'dn':''}"><button class="box" data-action="toggleTodo" data-id="${t.id}" aria-label="${esc(t.text)}">${t.done?'✓':''}</button><span style="flex:1" data-action="toggleTodo" data-id="${t.id}"><b>${esc(t.text)}</b>${t.due?`<div class="mu sm">Срок: ${t.due.split('-').reverse().join('.')}</div>`:''}</span><button class="itemtools" data-action="editTodo" data-id="${t.id}">⋯</button></div>`).join('');
   const habitsDone=due.filter(t=>t.u?cnt(d,t.i)>=Number(t.target||1):dn.includes(t.i)).length;
   const allTasks=dueTasks,doneTasks=allTasks.filter(t=>t.done===d).length;
+  const totalToday=due.length+allTasks.length,doneToday=habitsDone+doneTasks;
   const average=ACT().length?exAvg():0;
   const scorePct=Math.max(0,Math.min(100,Math.round(average/GOAL*100)));
+  const {bad}=calc(),hint=bad.length?`<b>${esc(bad[0].k)}:</b> ${bad[0].p.t}`:'Все предметы сейчас выходят на «4» и выше.';
   const name=String(S.p?.name||'Матвей').trim()||'Матвей';
   const routeStep=Math.min(S.p?.dn?.length||0,STEPS.length-1);
   const routeDone=(S.p?.dn?.length||0)>=STEPS.length;
   const routeText=routeDone?'Все шаги пройдены — время подвести итоги.':`Шаг ${(S.p?.dn?.length||0)+1} из ${STEPS.length} · ${STEPS[routeStep][0]}`;
   return `<div class="today-top"><div><div class="kicker">ТВОЙ ТЕМП · ТВОИ ЦЕЛИ</div><h2>Привет, ${esc(name)}!</h2></div><div class="datepick"><button data-action="shiftDay" data-id="-1" aria-label="Предыдущий день">‹</button><b>${dayOffset===0?'Сегодня':new Date(d+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'short'})}</b><button data-action="shiftDay" data-id="1" aria-label="Следующий день" ${dayOffset===0?'disabled':''}>›</button></div></div>
+<button class="card hint hintbtn" data-action="goTab" data-arg="g"><div class="lb">★ Главное по учёбе</div><div class="tx">${hint}</div><div class="go">Открыть оценки и посмотреть план →</div></button>
 <div class="today-grid"><div class="today-main">
-<div class="card today-progress"><div class="row"><b>Прогресс дня</b><b class="warn">${habitsDone}/${due.length} привычек</b></div><div class="mu sm">Задач выполнено: ${doneTasks} из ${allTasks.length}</div><div class="progress-track" role="progressbar" aria-label="Прогресс привычек" aria-valuemin="0" aria-valuemax="${Math.max(1,due.length)}" aria-valuenow="${habitsDone}"><span style="width:${due.length?Math.round(habitsDone/due.length*100):0}%"></span></div></div>
+<div class="card today-progress"><div class="row"><b>Прогресс дня</b><b class="warn">${doneToday}/${totalToday}</b></div><div class="mu sm">Привычки: ${habitsDone} из ${due.length} · задачи: ${doneTasks} из ${allTasks.length}</div><div class="progress-track" role="progressbar" aria-label="Прогресс дня" aria-valuemin="0" aria-valuemax="${Math.max(1,totalToday)}" aria-valuenow="${doneToday}"><span style="width:${totalToday?Math.round(doneToday/totalToday*100):0}%"></span></div></div>
 <div class="sec-title"><h2>Задачи</h2><button class="btn" data-action="newTodo">+ Задача</button></div><div class="card list-card">${tasks||'<div class="mu sm" style="padding:14px 0">Задач нет. Добавь первую.</div>'}</div>
 <div class="sec-title"><h2>Привычки</h2><button class="btn g" data-action="newHabit">+ Привычка</button></div><div class="card list-card">${habits||'<div class="mu sm" style="padding:14px 0">На этот день привычек нет.</div>'}</div>
 <div class="mu sm">Чтобы исправить прошлый день, переключи дату стрелками. История сохраняется.</div></div>
@@ -585,7 +645,7 @@ function profile(){
   }
   if(profilePage==='profession')return `<button class="btn g" data-action="profileHome">← Профиль</button>${prof(dates)}`;
   if(profilePage==='stats')return `<button class="btn g" data-action="profileHome">← Профиль</button><h2>Прогресс за неделю</h2><div class="card">${weekly||'Пока нет привычек'}</div><div class="card">Выполненные задачи: <b>${S.todos.filter(t=>t.done&&dates.includes(t.done)).length}</b></div><h2>Достижения</h2><div class="card">Уроки подряд: <b>${streak()} дн.</b><div class="mu sm">Старые результаты упражнений и чтения сохранены в истории.</div></div>`;
-  if(profilePage==='backup')return `<button class="btn g" data-action="profileHome">← Профиль</button><h2>Резервная копия</h2><div class="card"><b>Копия в файл</b><div class="mu sm" style="margin:8px 0 12px">Сохрани файл в «Файлы» на iPhone или в iCloud Drive. Это надёжнее, чем длинный текст в Заметках.</div><div class="mini-actions"><button type="button" class="btn" data-action="exportFile">Сохранить копию .json</button><button type="button" class="btn g" data-action="pickBackupFile">Восстановить из файла</button></div><input id="backupFileInput" type="file" accept=".json,application/json" data-action="importFile" style="display:none"></div><h2>Старый способ: текст</h2><div class="mu sm">Для небольших копий. Длинный текст при вставке может обрезаться.</div><textarea id="bk" placeholder="Вставь текст резервной копии целиком"></textarea><div class="mini-actions"><button type="button" class="btn g" data-action="showBackup">Скопировать текст</button><button type="button" class="btn g" data-action="importBackup">Восстановить из текста</button></div><div id="backupStatus" class="mu sm" role="status" aria-live="polite" style="margin-top:10px"></div>`;
+  if(profilePage==='backup')return `<button class="btn g" data-action="profileHome">← Профиль</button><h2>Резервная копия</h2><div class="card"><b>Копия в файл</b><div class="mu sm" style="margin:8px 0 12px">Сохрани файл в «Файлы» на iPhone или в iCloud Drive. Это надёжнее, чем длинный текст в Заметках.</div><div class="mini-actions"><button type="button" class="btn" data-action="exportFile">Сохранить копию .json</button><button type="button" class="btn g" data-action="pickBackupFile">Восстановить из файла</button></div><input id="backupFileInput" type="file" accept=".json,application/json" data-action="importFile" style="display:none"></div><h2>Старый способ: текст</h2><div class="mu sm">Для небольших копий. Длинный текст при вставке может обрезаться.</div><textarea id="bk" placeholder="Вставь текст резервной копии целиком"></textarea><div class="mini-actions"><button type="button" class="btn g" data-action="showBackup">Скопировать текст</button><button type="button" class="btn g" data-action="importBackup">Восстановить из текста</button></div><div id="backupStatus" class="mu sm" role="status" aria-live="polite" style="margin-top:10px"></div>${dailyCopies()}`;
   const archivedCount=S.t.filter(t=>t.active===false).length;
   const tiles=[
     ['profession','compass','Профессия','1 шаг в неделю'],
@@ -704,6 +764,7 @@ function setAvatar(input){
 
 /* ===== BACKUP ===== */
 function backupStatus(m){const e=document.getElementById('backupStatus');if(e)e.textContent=m}
+function noteBackupExport(){try{localStorage.setItem('mt1_lx',iso(new Date()));localStorage.removeItem('mt1_reminded')}catch(e){}}
 function validateBackup(o){
   if(!o||typeof o!=='object'||Array.isArray(o)||!o.g||typeof o.g!=='object'||Array.isArray(o.g)||!Array.isArray(o.t)||!o.p||typeof o.p!=='object'||!Object.keys(o.g).length||!Object.values(o.g).every(a=>Array.isArray(a)&&a.every(x=>x&&[2,3,4,5].includes(Number(x.v)))))throw new Error('Некорректная или неполная копия');
   return o;
@@ -730,13 +791,14 @@ async function exportBackupFile(){
     const json=JSON.stringify(S),name='matvey-backup-'+iso(new Date())+'.json';
     const file=new File([json],name,{type:'application/json'});
     if(navigator.canShare&&navigator.share&&navigator.canShare({files:[file]})){
-      try{await navigator.share({files:[file],title:'Резервная копия Матвея'});backupStatus('В меню «Поделиться» выбери «Сохранить в Файлы».');return}
-      catch(err){if(err&&err.name==='AbortError')return}
+      try{await navigator.share({files:[file],title:'Резервная копия Матвея'});noteBackupExport();backupStatus('Копия передана в меню «Поделиться».');return true}
+      catch(err){if(err&&err.name==='AbortError'){backupStatus('Сохранение отменено. Напоминание останется.');return false}throw err}
     }
     const url=URL.createObjectURL(file),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
     setTimeout(()=>URL.revokeObjectURL(url),60000);
-    backupStatus('Файл подготовлен. Проверь «Загрузки» или приложение «Файлы».');
-  }catch(err){backupStatus('Не удалось создать файл. Попробуй открыть приложение в Safari.')}
+    noteBackupExport();
+    backupStatus('Файл подготовлен. Проверь «Загрузки» или приложение «Файлы».');return true;
+  }catch(err){backupStatus('Не удалось создать файл. Напоминание о копии не сброшено. Попробуй Safari.');return false}
 }
 async function importBackupFile(input){
   const file=input.files&&input.files[0];if(!file)return;
@@ -763,7 +825,8 @@ function importBackup(){
 const ACTIONS={
   closeSheet:()=>{cs();render()},
   shiftDay:(n)=>shiftDay(n),
-  goTab:(t)=>switchTab(t),
+  openProfile:()=>switchTab('p'),
+  goTab:(id,arg)=>switchTab(id||arg),
   goProfession:()=>goProfession(),
   habitClick:(id)=>habitClick(id),
   addCount:(id,arg,el)=>{
@@ -807,6 +870,10 @@ const ACTIONS={
   exportFile:()=>exportBackupFile(),
   pickBackupFile:()=>document.getElementById('backupFileInput').click(),
   importFile:()=>{},
+  wiVal:id=>{wi.v=Number(id);render()},
+  wiN:id=>{wi.n=Number(id);render()},
+  wiPick:k=>{wi.k=k;wi.v=5;wi.n=Math.min(4,Math.max(1,plan(vals(k)).k));render();const e=document.querySelector('.wi');if(e)e.scrollIntoView({behavior:'smooth',block:'center'})},
+  restoreDaily:id=>{try{const value=localStorage.getItem(id);if(value)installBackup(JSON.parse(value));else toast('Автокопия не найдена')}catch(e){toast('Эту автокопию не удалось прочитать')}},
   showBackup:()=>showBackup(),
   importBackup:()=>importBackup(),
 };
@@ -830,6 +897,7 @@ document.addEventListener('change',e=>{
   const el=e.target.closest('[data-action]');
   if(!el)return;
   if(el.dataset.action==='selectTerm'){selectTerm(S,'archivedSubjects',el.value);save();render()}
+  else if(el.dataset.action==='wiSubject'){wi.k=el.value;render()}
   else if(el.dataset.action==='endInput')ACTIONS.endInput(null,null,el);
   else if(el.dataset.action==='avatarFile')setAvatar(el);
   else if(el.dataset.action==='importFile')importBackupFile(el);
@@ -837,7 +905,7 @@ document.addEventListener('change',e=>{
 
 /* ===== TABS ===== */
 function switchTab(t){
-  if(!['d','g','r','p'].includes(t))return;
+  if(!['d','g','p'].includes(t))return;
   tab=t;
   if(t==='p')profilePage='home';
   document.getElementById('sc').scrollTop=0;
@@ -850,16 +918,22 @@ document.querySelectorAll('.bar button[data-t]').forEach(button=>{
 
 /* ===== RENDER ===== */
 function render(){
+  if(!['d','g','p'].includes(tab))tab='g';
   document.body.classList.toggle('grades-view',tab==='g');
   document.querySelectorAll('.bar button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));
-  const subtitles={d:'Дела и привычки',g:'Учёба и оценки',r:'Учебные цели',p:'Профиль'};
+  const subtitles={d:'Дела и привычки',g:'Оценки и цели',p:'Профиль'};
   const avatar=S.av?`<img src="${S.av}" alt="">`:'М';
   const mark=`<svg viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="vectorMark" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#8b5cff"/><stop offset=".56" stop-color="#39d8ff"/><stop offset="1" stop-color="#b7f34a"/></linearGradient></defs><path d="M7 9 20 31 33 7" fill="none" stroke="url(#vectorMark)" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M33 3.5v7M29.5 7h7" stroke="#d8fbff" stroke-width="1.8" stroke-linecap="round"/></svg>`;
-  const main={r:road,g:grades,d:today,p:profile}[tab]();
-  document.getElementById('m').innerHTML=`<div class="hd"><div class="brand-lockup"><div class="brand-mark" aria-hidden="true">${mark}</div><div class="brand-copy"><h1>Вектор</h1><div class="mu sm">${subtitles[tab]}</div></div></div><button class="avb" data-action="profilePage" data-id="home" aria-label="Профиль">${avatar}</button></div>`+main;
+  const main={g:grades,d:today,p:profile}[tab]();
+  document.getElementById('m').innerHTML=`<div class="hd"><div class="brand-lockup"><div class="brand-mark" aria-hidden="true">${mark}</div><div class="brand-copy"><h1>Вектор</h1><div class="mu sm">${subtitles[tab]}</div></div></div><button class="avb" data-action="openProfile" aria-label="Профиль">${avatar}</button></div>`+main;
 }
 
 /* ===== BOOT ===== */
 save();
+daily();
+let day=iso(new Date());
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden&&iso(new Date())!==day){day=iso(new Date());dayOffset=0;daily();render()}
+});
 render();
 </script></body></html>
