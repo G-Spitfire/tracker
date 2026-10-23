@@ -16,6 +16,7 @@ header{height:calc(64px + env(safe-area-inset-top));padding-top:calc(8px + env(s
 @media(max-height:700px){.learning .scene-photo,.learning .scene-svg{max-height:140px}.training-body .word-heading .word{font-size:31px}.training-body .scene-box p{font-size:13px}.training-body .interlude>.mental-symbol{font-size:35px}.training-body .interlude h2{font-size:23px}.training-body .focus-card.small{margin:8px 0;padding:10px}.training-body .recall-prompt{min-height:140px;padding:12px 0}.action-dock button{min-height:44px}.training-body #scene-empty{min-height:130px}}
 
 .status{white-space:normal;text-align:right;max-width:130px}.home-screen .focus-card h2{max-width:85%;font-size:26px}.result-body h2{font-size:25px}
+@media(max-width:700px){.home-screen>.focus-card{flex-shrink:0}}
 </style></head><body><header><button class="brand" onclick="pause()" aria-label="На главную">Word<span>Scene</span></button><div class="header-tools"><span class="pill">60 СЛОВ</span><button id="sound-toggle" class="sound-toggle" onclick="toggleSound()" aria-pressed="true" aria-label="Выключить звуки">Звук вкл</button></div></header><main id="app"></main><div id="toast" role="status"></div><script src="./review-engine.js"></script><script>
 const words=[
 {en:'mug',ru:'кружка',ipa:'/mʌɡ/',cue:'маг',scene:'Маг взмахивает палочкой — и из огромной кружки вылетает искристый фонтан. Кружка размером с самого мага!',hint:'Представь ручку кружки, мага рядом и вспышку из кружки.'},
