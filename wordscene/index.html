@@ -17,6 +17,23 @@ header{height:calc(64px + env(safe-area-inset-top));padding-top:calc(8px + env(s
 
 .status{white-space:normal;text-align:right;max-width:130px}.home-screen .focus-card h2{max-width:85%;font-size:26px}.result-body h2{font-size:25px}
 @media(max-width:700px){.home-screen>.focus-card{flex-shrink:0}}
+
+/* Warm cream surfaces with blueberry, teal and apricot states. */
+:root{--paper:#fffaf3;--green:#674db8;--sage:#f5efe8;--border:#eadbd0;--muted:#756b7f;--ink:#292338;--gold:#eab64a}
+body{background:radial-gradient(ellipse at 8% 0%,#f5eeff 0,transparent 47%),radial-gradient(ellipse at 96% 65%,#fff1d8 0,transparent 48%),#fffaf3}
+.focus-card{background:radial-gradient(ellipse at 100% 0%,#fff6e8 0,transparent 58%),linear-gradient(135deg,#fff9ee,#f8f0e8);border-color:#efddd1}
+.overview{background:#fffdfa;border-color:#eddfd7}
+.line{background:#d6ebe5}.line i{background:linear-gradient(90deg,#69c4b5,#319c8e)}
+.word-heading{background:linear-gradient(120deg,#fffdf9,#f7f0e9);border-color:#eadfd7}
+.scene-box{background:linear-gradient(140deg,#fff8ef,#fbf2e8);border-color:#ecdcd0}
+.word-row{background:linear-gradient(135deg,#fffdfa,#fff8ef);border-color:#ecdfd6}
+.success-button{background:#3d9b8d;color:#fff;box-shadow:0 5px 0 #26756b,0 9px 16px #3d9b8d30;border:1px solid #70c5b8;border-radius:17px}
+.success-button:hover{background:#348a7e}
+.success-button:active{transform:translateY(2px);box-shadow:0 3px 0 #26756b}
+.rating-actions>.secondary{background:linear-gradient(135deg,#fff3e9,#fbe9de);border-color:#efd2c1;color:#94583f}
+.repair{background:linear-gradient(135deg,#fff3e8,#ffefe1);border-color:#efd4c1}
+.practice-reminder{border-color:#efd9c3;border-left-color:#cf8058;background:linear-gradient(120deg,#fff3e5,#fff8ef);color:#8f5a3e}
+.result-body .mental-symbol{color:#3d9b8d}
 </style></head><body><header><button class="brand" onclick="pause()" aria-label="На главную">Word<span>Scene</span></button><div class="header-tools"><span class="pill">60 СЛОВ</span><button id="sound-toggle" class="sound-toggle" onclick="toggleSound()" aria-pressed="true" aria-label="Выключить звуки">Звук вкл</button></div></header><main id="app"></main><div id="toast" role="status"></div><script src="./review-engine.js"></script><script>
 const words=[
 {en:'mug',ru:'кружка',ipa:'/mʌɡ/',cue:'маг',scene:'Маг взмахивает палочкой — и из огромной кружки вылетает искристый фонтан. Кружка размером с самого мага!',hint:'Представь ручку кружки, мага рядом и вспышку из кружки.'},
@@ -249,7 +266,7 @@ function lookAgain(){learn()}
 function nextLearn(){if(!sceneHidden)return;s.learnIndex++;if(s.learnIndex<s.ids.length){save();learn()}else{s.dir=1;s.history=[[],[]];s.round=0;startRound()}}
 function startRound(){s.phase='test';s.round++;s.queue=shuffled(s.ids).map(i=>({i,dir:s.dir}));s.pos=0;s.roundTime=0;s.roundErrors=0;s.hesitations=0;s.roundValid=true;s.revealed=false;s.feedback=false;s.ignoreTiming=false;save();test()}
 function test(){const t=s.queue[s.pos],w=words[t.i],n=s.part==='review'?s.queue.length:s.ids.length;frame(`${s.part==='review'?'Повторение':'Проход '+s.round} · ${s.pos+1} из ${n}`,s.pos/n*100,`<div class="recall-screen"><div class="recall-prompt"><p class="eyebrow">${t.dir===1?'Скажи по-английски':'Назови значение по-русски'}</p><div class="word">${t.dir===1?w.ru:w.en}</div><div class="answer" id="answer">${s.revealed?(t.dir===1?w.en:w.ru):''}</div></div><div id="repair"></div><div id="controls" class="rating-actions"></div><p class="note center">Ответь вслух, затем открой ответ и сравни.</p></div>`);controls();if(!s.revealed)cardStarted=performance.now()}
-function controls(){if(s.feedback){const w=words[s.queue[s.pos].i];$('controls').innerHTML='';$('repair').innerHTML=`<div class="repair"><div class="repair-art">${illustration(w.en)}</div><p>${w.scene}</p><span class="cue">${w.cue} → ${w.en}</span><p class="note">Представь сцену и произнеси слово три раза.</p><div class="bottom-actions">${btn('Продолжить →','advance()')}</div></div>`}else $('controls').innerHTML=s.revealed?btn('Верно','grade(true)')+btn('Не получилось','grade(false)','secondary'):btn('Показать ответ','reveal()');dockActions()}
+function controls(){if(s.feedback){const w=words[s.queue[s.pos].i];$('controls').innerHTML='';$('repair').innerHTML=`<div class="repair"><div class="repair-art">${illustration(w.en)}</div><p>${w.scene}</p><span class="cue">${w.cue} → ${w.en}</span><p class="note">Представь сцену и произнеси слово три раза.</p><div class="bottom-actions">${btn('Продолжить →','advance()')}</div></div>`}else $('controls').innerHTML=s.revealed?btn('Верно','grade(true)','success-button')+btn('Не получилось','grade(false)','secondary'):btn('Показать ответ','reveal()');dockActions()}
 function reveal(){if(s.revealed)return;const elapsed=(performance.now()-cardStarted)/1000;s.cardTime=!s.ignoreTiming&&Number.isFinite(elapsed)&&elapsed>=0?elapsed:null;s.revealed=true;save();test()}
 function logAnswer(ok,easy){const t=s.queue[s.pos],p=record(t.i);p.started=true;p.attempts++;if(!ok){p.errors++;if(!s.errors.includes(t.i))s.errors.push(t.i);if(!s.partErrors.includes(t.i))s.partErrors.push(t.i)}else{if(!easy)p.hesitations++;if(s.cardTime!==null&&s.cardTime!==undefined){p.times[t.dir]??=[];p.times[t.dir].push(s.cardTime);if(p.times[t.dir].length>60)p.times[t.dir].shift();}}p.lastAt=Date.now()}
 function finishReviewedWord(i,legacy=false){
