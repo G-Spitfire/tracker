@@ -39,7 +39,7 @@ const score = value => {
   return match ? Number(match[1]) : null;
 };
 const markScore = row => score(row.value) ?? score(row.valueCode);
-const unknownMark = row => /^(?:неизвестно|не определено|unknown)?$/i.test(String(row.value ?? '').trim());
+const unknownMark = row => /^(?:неизвестн(?:ая|ое|ый|ые|о)|не определен(?:а|о|ы|о)?|unknown|null|undefined)?$/i.test(String(row.value ?? '').trim());
 const markLabel = row => {
   const n = markScore(row);
   if (n !== null) return String(n);
@@ -173,6 +173,23 @@ function cloudGrades() {
   s += '<div class="card"><b>Динамика среднего балла</b>' + trend(numeric) +
     '<div class="mu sm">Все числовые оценки равновесные; официальный школьный средний может отличаться.</div></div>';
   if (!filtered.length) s += '<div class="card">В выбранном периоде оценок пока нет.</div>';
+  const unresolvedRows = filtered.filter(row => unknownMark(row) && markScore(row) === null);
+  if (unresolvedRows.length) {
+    const records = unresolvedRows.slice().sort((a,b) => b.date.localeCompare(a.date) ||
+      a.subject.localeCompare(b.subject,'ru'));
+    s += '<div class="card scs-unknown"><details><summary>Неопределённые отметки: ' +
+      unresolvedRows.length + ' — узнать подробнее</summary>' +
+      '<p class="mu sm">Оценка не определяется по названию и коду дневника. ' +
+      'Это может быть особый вид отметки. Мы не подменяем такие значения цифрами.</p>' +
+      records.map(row => '<div class="scs-unknown-row"><b>' + esc(row.subject) + '</b>' +
+        '<div class="mu sm">Дата: ' + esc(row.date.split('-').reverse().join('.')) +
+        ' · исходное название: ' + esc(row.value || 'отсутствует') +
+        ' · код: ' + esc(row.valueCode || 'отсутствует') +
+        ' · тип: ' + esc(row.type || 'не указан') +
+        '</div></div>').join('') +
+      '<p class="mu sm">Эти сведения помогут проверить отметку в исходном дневнике. ' +
+      'Здесь нет школьных идентификаторов и паролей.</p></details></div>';
+  }
   s += ordered.map(([subject, marks]) => {
     const nums = marks.map(markScore).filter(n => n !== null);
     const mean = nums.length ? Number(avg(nums.map(n => ({n})))) : null;
@@ -196,10 +213,10 @@ function cloudGrades() {
       'Средний ' + mean.toFixed(2) + ' · прогноз ' + forecast(mean)) +
       '</div></div></div><div class="chips">' + chips + '</div></div>';
   }).join('');
-  const unresolved = filtered.filter(row => unknownMark(row) && markScore(row) === null).length;
-  if (unresolved) {
-    s += '<p class="mu sm">Знак «?» означает, что дневник не передал распознаваемого значения: ' +
-      unresolved + ' записей. Они не учитываются в среднем балле.</p>';
+  if (unresolvedRows.length) {
+    s += '<p class="mu sm">Знак «?» — значение не удалось определить: ' +
+      unresolvedRows.length + ' записей. Они не учитываются в среднем балле. ' +
+      'Подробности можно раскрыть над списком предметов.</p>';
   }
   s += '<p class="mu sm">Источник: Петербургское образование. Прогноз условный, по равновесным оценкам; школьные коэффициенты здесь не применяются.</p>';
   return s;
@@ -270,6 +287,7 @@ function view(legacy) {
 
 const css = document.createElement('style');
 css.textContent = '.scs{display:block}.scs .scs-head,.scs .scs-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}.scs .scs-flag{font-size:11px;opacity:.75}.scs .scs-form{display:grid;gap:12px;margin-top:15px}.scs .scs-form label,.scs .scs-filters label{display:grid;gap:6px;font-size:13px;font-weight:600}.scs input{padding:11px;border:1px solid var(--ln);border-radius:11px;background:var(--bg);color:var(--tx);font:inherit;min-width:0;box-sizing:border-box;width:100%}.scs .scs-actions{justify-content:flex-start;margin-top:12px}.scs .scs-filters{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}.scs .scs-warning{color:var(--bad);margin:12px 0;font-size:14px}.scs .scs-manual{width:100%;margin:14px 0}.scs .chips{display:flex;gap:6px;flex-wrap:wrap}.scs .chips .chip{cursor:default}.scs .sub{margin:9px 0}@media(max-width:360px){.scs .scs-filters{grid-template-columns:1fr}}';
+css.textContent += '.scs .scs-unknown summary{cursor:pointer;list-style:revert;font-weight:700;padding:6px 0}.scs .scs-unknown-row{padding:10px 0;border-bottom:1px solid var(--ln)}.scs .scs-unknown-row:last-of-type{border-bottom:0}.scs .scs-unknown details>p{line-height:1.5}';
 document.head.appendChild(css);
 window.schoolCloud = { view, summary };
 notify();
