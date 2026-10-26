@@ -440,9 +440,11 @@ function today(){
   const habitsDone=due.filter(t=>t.u?cnt(d,t.i)>=Number(t.target||1):dn.includes(t.i)).length;
   const allTasks=dueTasks,doneTasks=allTasks.filter(t=>t.done===d).length;
   const totalToday=due.length+allTasks.length,doneToday=habitsDone+doneTasks;
-  const average=ACT().length?exAvg():0;
+  const schoolSummary=window.schoolCloud?.summary()||null;
+  const average=schoolSummary?schoolSummary.average:(ACT().length?exAvg():0);
   const scorePct=Math.max(0,Math.min(100,Math.round(average/GOAL*100)));
-  const {bad}=calc(),hint=bad.length?`<b>${esc(bad[0].k)}:</b> ${bad[0].p.t}`:'Все предметы сейчас выходят на «4» и выше.';
+  const {bad}=calc();
+  const hint=schoolSummary?(schoolSummary.count?(schoolSummary.weakSubject?`<b>${esc(schoolSummary.weakSubject)}</b>: стоит подтянуть предмет.`:'Все предметы сейчас выходят на «4» и выше.'):'В дневнике пока нет числовых оценок.'):(bad.length?`<b>${esc(bad[0].k)}:</b> ${bad[0].p.t}`:'Все предметы сейчас выходят на «4» и выше.');
   const name=String(S.p?.name||'Матвей').trim()||'Матвей';
   const routeStep=Math.min(S.p?.dn?.length||0,STEPS.length-1);
   const routeDone=(S.p?.dn?.length||0)>=STEPS.length;
@@ -455,7 +457,7 @@ function today(){
 <div class="sec-title"><h2>Привычки</h2><button class="btn g" data-action="newHabit">+ Привычка</button></div><div class="card list-card">${habits||'<div class="mu sm" style="padding:14px 0">На этот день привычек нет.</div>'}</div>
 <div class="mu sm">Чтобы исправить прошлый день, переключи дату стрелками. История сохраняется.</div></div>
 <aside class="today-side" aria-label="Учебные цели">
-<section class="card focus-card"><div class="kicker">УЧЁБА</div><div class="focus-score">${ACT().length?f2(average):'—'}</div><div class="mu sm">Средний балл · цель ${f2(GOAL)}</div><div class="progress-track" role="progressbar" aria-label="Путь к среднему баллу ${f2(GOAL)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${scorePct}"><span style="width:${scorePct}%"></span></div><button class="btn g" data-action="goTab" data-arg="g">Оценки <span aria-hidden="true">→</span></button></section>
+<section class="card focus-card"><div class="kicker">УЧЁБА</div><div class="focus-score">${schoolSummary?(schoolSummary.count?f2(average):'—'):(ACT().length?f2(average):'—')}</div><div class="mu sm">${schoolSummary?'Средний из дневника':'Средний балл'} · цель ${f2(GOAL)}</div><div class="progress-track" role="progressbar" aria-label="Путь к среднему баллу ${f2(GOAL)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${scorePct}"><span style="width:${scorePct}%"></span></div><button class="btn g" data-action="goTab" data-arg="g">Оценки <span aria-hidden="true">→</span></button></section>
 <section class="card route-card"><div class="route-mark" aria-hidden="true">↗</div><div class="kicker">ДАЛЬНЯЯ ЦЕЛЬ</div><h3>Мой маршрут</h3><p class="mu sm">Путь к университету начинается с интересной профессии и маленьких шагов.</p><p class="route-step">${esc(routeText)}</p><button class="btn g" data-action="goProfession">Открыть маршрут <span aria-hidden="true">→</span></button></section>
 </aside></div>`;
 }
