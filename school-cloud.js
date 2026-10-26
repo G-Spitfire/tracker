@@ -339,7 +339,7 @@ const ikWorks = rows => rows.filter(r=>!officialKind(r));
 const ikSort = rows => rows.slice().sort((a,b)=>a.date.localeCompare(b.date)||a.id.localeCompare(b.id));
 const ikMean = rows => rows.length ? rows.reduce((total,r)=>total+r.n,0)/rows.length : null;
 const ikF = n => n===null?'—':(Math.abs(n)<0.005?0:n).toFixed(2).replace('.',',');
-const ikDeltaLabel=n=>n===null?'нет сравнения':n>0?'к прошлой неделе':n<0?'к прошлой неделе':'без изменений';
+const ikDeltaLabel=n=>n===null?'нет сравнения':n!==0?'к предыдущим 7 дням':'без изменений';
 const ikLocalDate=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const ikDate = iso => /^\d{4}-\d{2}-\d{2}$/.test(iso||'') ? iso.slice(8)+'.'+iso.slice(5,7)+'.'+iso.slice(0,4) : '—';
 const ikStar = '<img class="ik-star" src="./iskra-star.svg" alt="" aria-hidden="true">';
@@ -365,11 +365,11 @@ function ikTrend(rows) {
   const labelX=Math.max(25,Math.min(W-44,last[0]-21)),labelY=Math.max(3,last[1]-25);
   const bubble='<rect x="'+labelX+'" y="'+labelY+'" width="43" height="21" rx="8" fill="#8b62ee"/><text x="'+(labelX+21.5)+'" y="'+(labelY+15)+'" text-anchor="middle" style="fill:white;font-size:11px;font-weight:700">'+ikF(shown.at(-1).n)+'</text>';
   const svg='<svg class="ik-chart" viewBox="0 0 320 132" role="img" aria-label="Изменение среднего балла за выбранный период">'+grid+'<path class="area" d="'+area+'"/><path class="line" d="'+line+'"/>'+dots+bubble+'<text x="'+L+'" y="129">'+lab1+'</text><text x="314" y="129" text-anchor="end">'+lab2+'</text></svg>';
-  // Compare the most recent seven calendar days with the preceding seven.
-  const now=new Date(),start=new Date(now),mid=new Date(now);
-  start.setHours(0,0,0,0);start.setDate(start.getDate()-13);
-  mid.setHours(0,0,0,0);mid.setDate(mid.getDate()-6);
-  const from=ikLocalDate(start),boundary=ikLocalDate(mid),end=ikLocalDate(now);
+  // Anchor comparison to the selected period's most recent grade, not today's date.
+  const anchor=new Date(sorted.at(-1).date+'T12:00:00'),start=new Date(anchor),mid=new Date(anchor);
+  start.setDate(start.getDate()-13);
+  mid.setDate(mid.getDate()-6);
+  const from=ikLocalDate(start),boundary=ikLocalDate(mid),end=ikLocalDate(anchor);
   const recent=sorted.filter(r=>r.date>=boundary&&r.date<=end),previous=sorted.filter(r=>r.date>=from&&r.date<boundary);
   const raw=recent.length&&previous.length?ikMean(recent)-ikMean(previous):null;
   return {html:svg,growth:raw===null?null:Math.abs(raw)<.005?0:raw};
@@ -458,7 +458,7 @@ function viewIskra() {
   if(ikPeriod!=='all'&&!available)html+='<div class="ik-issues">Для этого периода пока не указаны даты. После сохранения появятся оценки и график.</div>';
   else {
     html+='<div class="card"><div class="ik-graph-label"><b>Динамика среднего балла</b><span class="ik-muted">За работы</span></div>'+tr.html+
-      '<p class="ik-kpi-meaning">Изменение среднего после появления оценок.</p></div>';
+      '<p class="ik-kpi-meaning">Сравнение средних за последние 7 дней выбранного периода и предыдущие 7 дней.</p></div>';
     html+='<div class="ik-time-stat"><div class="ik-tile"><div class="ik-tile-icon">↗</div><strong class="'+(tr.growth!==null&&tr.growth>0?'ik-positive':'')+'">'+(tr.growth===null?'—':(tr.growth>0?'+':'')+ikF(tr.growth))+'</strong><small>'+ikDeltaLabel(tr.growth)+'</small></div>'+
       '<div class="ik-tile"><div class="ik-tile-icon">⭐</div><strong>'+(last?last.n:'—')+'</strong><small>последняя оценка</small></div>'+
       '<div class="ik-tile"><div class="ik-tile-icon">▥</div><strong>'+works.length+'</strong><small>всего оценок</small></div></div>';
