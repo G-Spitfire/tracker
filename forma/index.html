@@ -274,7 +274,7 @@ function planForm(row,i){
 }
 function planCatalog(rows){
  if(!ui.planPicker)return '';
- const used=new Set(rows.map((x,i)=>ui.planPicker==='replace'&&i===ui.editSelected?'':x[0]));
+ const used=new Set(rows.map(x=>x[0]));
  const options=Object.entries(CUES).filter(([id])=>!used.has(id));
  return `<div class="plan-catalog" id="plan-catalog">
  <div class="plan-edit-title"><strong>${ui.planPicker==='replace'?'Заменить упражнение':'Добавить упражнение'}</strong><button class="btn small ghost" data-action="plan-close-picker">Закрыть</button></div>
