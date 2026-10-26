@@ -212,3 +212,57 @@ h1{font-size:29px;font-weight:850;letter-spacing:-.035em}h2{font-size:21px;font-
 .ik-term-field input{margin:0!important;font-size:14px}
 .ik-parent-offline{border-top:1px solid #ede8f3;margin-top:14px;padding-top:12px}
 .ik-compact-header .ik-cloud-pill{white-space:nowrap}
+
+/* Iskra original illustrated artwork, 35 optimized sprites (2026-10-26). */
+.ik-art{display:inline-block!important;flex:0 0 auto;background-image:url("./assets/iskra/art-atlas.webp");background-size:700% 500%;background-repeat:no-repeat;background-color:transparent!important;border:0;vertical-align:middle;object-fit:contain;width:36px;height:36px;line-height:1}
+.ik-art-star{background-position:0.0000% 0.0000%}
+.ik-art-star_wave{background-position:16.6667% 0.0000%}
+.ik-art-star_celebrate{background-position:33.3333% 0.0000%}
+.ik-art-star_read{background-position:50.0000% 0.0000%}
+.ik-art-star_gift{background-position:66.6667% 0.0000%}
+.ik-art-nav_today{background-position:83.3333% 0.0000%}
+.ik-art-nav_grades{background-position:100.0000% 0.0000%}
+.ik-art-nav_reward{background-position:0.0000% 25.0000%}
+.ik-art-avatar_girl{background-position:16.6667% 25.0000%}
+.ik-art-settings{background-position:33.3333% 25.0000%}
+.ik-art-parent_lock{background-position:50.0000% 25.0000%}
+.ik-art-history{background-position:66.6667% 25.0000%}
+.ik-art-info{background-position:83.3333% 25.0000%}
+.ik-art-task_read{background-position:100.0000% 25.0000%}
+.ik-art-task_english{background-position:0.0000% 50.0000%}
+.ik-art-task_clothes{background-position:16.6667% 50.0000%}
+.ik-art-task_clean{background-position:33.3333% 50.0000%}
+.ik-art-task_walk{background-position:50.0000% 50.0000%}
+.ik-art-task_book{background-position:66.6667% 50.0000%}
+.ik-art-task_star{background-position:83.3333% 50.0000%}
+.ik-art-task_done{background-position:100.0000% 50.0000%}
+.ik-art-achievement_streak{background-position:0.0000% 75.0000%}
+.ik-art-achievement_grades{background-position:16.6667% 75.0000%}
+.ik-art-achievement_helper{background-position:33.3333% 75.0000%}
+.ik-art-achievement_walk{background-position:50.0000% 75.0000%}
+.ik-art-achievement_read{background-position:66.6667% 75.0000%}
+.ik-art-achievement_first{background-position:83.3333% 75.0000%}
+.ik-art-achievement_master{background-position:100.0000% 75.0000%}
+.ik-art-achievement_gift{background-position:0.0000% 100.0000%}
+.ik-art-portrait{background-position:16.6667% 100.0000%}
+.ik-art-prize_gift{background-position:33.3333% 100.0000%}
+.ik-art-prize_cake{background-position:50.0000% 100.0000%}
+.ik-art-cloud{background-position:66.6667% 100.0000%}
+.ik-art-sparkles{background-position:83.3333% 100.0000%}
+.ik-art-heart{background-position:100.0000% 100.0000%}
+.ik-star{content:url("./assets/iskra/hero-star.webp");object-fit:contain}
+.bar button .ik-art--nav{display:block!important;width:28px;height:28px;margin:0 auto 3px;font-size:initial}
+.ik-task-icon{display:grid;place-items:center;width:39px;min-width:39px;overflow:visible}
+.ik-task-icon .ik-art--task{width:42px;height:42px}
+.ik-action-icon{background:#fbf5ff;width:49px;height:49px}
+.ik-action-icon .ik-art--action{width:48px;height:48px}
+.ik-achievement .icon{display:grid;place-items:center;height:59px}
+.ik-achievement .ik-art--achievement{width:60px;height:60px}
+.ik-profile-card .ik-avatar:has(.ik-art){padding:0;overflow:hidden;border-color:#fff;background:linear-gradient(140deg,#ffe4f4,#eed5ff)}
+.ik-avatar .ik-art--avatar{width:70px;height:70px}
+.ik-sub-icon .ik-art--grade{width:33px;height:33px}
+.ik-sub-icon{width:33px;display:grid;place-items:center}
+.ik-tile .ik-tile-icon .ik-art--stat{width:30px;height:30px}
+.ik-tile .ik-tile-icon{min-height:28px}
+.ik-art--week{width:28px;height:28px}
+@media(max-width:365px){.ik-action-icon{width:43px;height:43px}.ik-action-icon .ik-art--action{width:42px;height:42px}.ik-task-icon{min-width:36px;width:36px}.ik-task-icon .ik-art--task{width:39px;height:39px}}
