@@ -250,7 +250,7 @@ h1{font-size:29px;font-weight:850;letter-spacing:-.035em}h2{font-size:21px;font-
 .ik-art-cloud{background-position:66.6667% 100.0000%}
 .ik-art-sparkles{background-position:83.3333% 100.0000%}
 .ik-art-heart{background-position:100.0000% 100.0000%}
-.ik-star{content:url("./assets/iskra/hero-star.webp");object-fit:contain}
+.ik-star{object-fit:contain}
 .bar button .ik-art--nav{display:block!important;width:28px;height:28px;margin:0 auto 3px;font-size:initial}
 .ik-task-icon{display:grid;place-items:center;width:39px;min-width:39px;overflow:visible}
 .ik-task-icon .ik-art--task{width:42px;height:42px}
@@ -266,3 +266,7 @@ h1{font-size:29px;font-weight:850;letter-spacing:-.035em}h2{font-size:21px;font-
 .ik-tile .ik-tile-icon{min-height:28px}
 .ik-art--week{width:28px;height:28px}
 @media(max-width:365px){.ik-action-icon{width:43px;height:43px}.ik-action-icon .ik-art--action{width:42px;height:42px}.ik-task-icon{min-width:36px;width:36px}.ik-task-icon .ik-art--task{width:39px;height:39px}}
+
+.ik-avatar{position:relative}
+.ik-avatar-choice{position:absolute;right:-7px;bottom:-4px;display:grid;place-items:center;min-width:23px;height:23px;padding:0 2px;background:#fff;border:1px solid #f2e1f6;border-radius:999px;box-shadow:0 3px 7px #a57fcb36;font-size:15px;line-height:1}
+.ik-heading-with-star .ik-star{filter:drop-shadow(0 6px 12px #d7a9d49a)}
