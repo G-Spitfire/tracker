@@ -34,7 +34,7 @@ h1{font-size:29px;font-weight:850;letter-spacing:-.035em}h2{font-size:21px;font-
 .ik-row-between{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .ik-filter-row{display:flex;gap:7px;overflow-x:auto;padding:0 0 2px;scrollbar-width:none}
 .ik-filter-row::-webkit-scrollbar{display:none}
-.ik-filter{font:700 12px/1.1 inherit;white-space:nowrap;flex:1 0 auto;padding:10px 12px;border:0;border-radius:18px;background:#fff7f8;color:#706c8b;cursor:pointer}
+.ik-filter{font-family:inherit;font-size:12px;line-height:1.1;font-weight:700;white-space:nowrap;flex:1 0 auto;padding:10px 12px;border:0;border-radius:18px;background:#fff7f8;color:#706c8b;cursor:pointer}
 .ik-filter.active{background:linear-gradient(120deg,#9d76f6,#7850e8);color:white;box-shadow:0 5px 13px #a47ae63d}
 .ik-progress-circle{position:relative;width:120px;height:120px;flex:none;display:grid;place-items:center}
 .ik-progress-circle svg{position:absolute;inset:0;width:100%;height:100%}
@@ -48,7 +48,7 @@ h1{font-size:29px;font-weight:850;letter-spacing:-.035em}h2{font-size:21px;font-
 .ik-check{width:26px;height:26px;border:2px solid #dfd9e9;border-radius:50%;background:#fff;display:grid;place-items:center;flex:none;cursor:pointer;color:white;font-size:14px}
 .ik-check.done{background:#8b62ee;border-color:#8b62ee}
 .ik-task-icon{width:30px;text-align:center;flex:none;font-size:23px}
-.ik-task-title{flex:1;background:none;border:0;color:#252149;text-align:left;font:750 14px/1.3 inherit;min-width:0;padding:0;cursor:pointer}
+.ik-task-title{flex:1;background:none;border:0;color:#252149;text-align:left;font-family:inherit;font-size:14px;line-height:1.3;font-weight:750;min-width:0;padding:0;cursor:pointer}
 .ik-task-title small{display:block;font-size:11px;font-weight:500;color:#8981a0;overflow-wrap:anywhere}
 .ik-task-time{color:#9992ab;font-size:12px;white-space:nowrap}
 .ik-mini-btn{width:30px;height:30px;border:0;border-radius:11px;background:#f7f2ff;color:#9875dd;flex:none;cursor:pointer}
