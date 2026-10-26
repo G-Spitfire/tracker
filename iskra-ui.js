@@ -23,7 +23,7 @@
     return '<div class="ik-time-stat">' +
       '<div class="ik-tile"><div class="ik-tile-icon">✅</div><strong>'+completed()+'</strong><small>дел сделано</small></div>'+
       '<div class="ik-tile"><div class="ik-tile-icon">⭐</div><strong>'+earned()+'</strong><small>звёзд</small></div>'+
-      '<div class="ik-tile"><div class="ik-tile-icon">▥</div><strong>'+a+'</strong><small>средний балл</small></div></div>';
+      '<div class="ik-tile"><div class="ik-tile-icon">▥</div><strong>'+a+'</strong><small>средний за период</small></div></div>';
   }
   function ikToday(){
     const d=iso(new Date()), allTasks=tasks(d), done=dn(d), count=done.length, total=allTasks.length;
@@ -97,12 +97,21 @@
   ACTIONS.ikTaskTimes=()=>createTimeSheet();
   ACTIONS.ikSaveTimes=()=>{document.querySelectorAll('[data-ik-task-time]').forEach(input=>{if(input.value)S.times[input.dataset.ikTaskTime]=input.value;else delete S.times[input.dataset.ikTaskTime]});save();cs();render()};
   const baseParents=ACTIONS.parents;
-  ACTIONS.parents=()=>{baseParents();const b=document.querySelector('.sheet-body');if(b){const extra=document.createElement('div');extra.innerHTML='<h2>Мои дела</h2><button class="btn g" data-action="ikTaskTimes">Настроить время дел</button>';b.prepend(extra)}};
+  ACTIONS.parents=()=>{
+    baseParents();
+    const b=document.querySelector('.sheet-body');
+    if(!b)return;
+    const extra=document.createElement('div'),session=window.schoolCloud?.connection?.();
+    const status=session?.isConnected
+      ? '<p class="mu sm">Подключено: '+safe(session.email||'учётная запись Полины')+'</p><button class="btn g" type="button" data-sc-action="logout">Выйти из дневника</button>'
+      : '<p class="mu sm">Для подключения открой вкладку «Оценки».</p>';
+    extra.innerHTML='<h2>Мои дела</h2><button class="btn g" data-action="ikTaskTimes">Настроить время дел</button><h2>Школьный дневник</h2>'+status;
+    b.prepend(extra);
+  };
   document.querySelectorAll('.bar button').forEach((b,i)=>{
     const icons=['<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 20v-7M10 20V6M15 20v-11M20 20V3"/></svg>','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4H4v5a4 4 0 0 0 4 4M17 4h3v5a4 4 0 0 1-4 4M7 2h10v8a5 5 0 0 1-10 0z"/></svg>','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2z"/></svg>'];
     const txt=['Сегодня','Оценки','Награда','Я'][i];b.innerHTML=icons[i]+txt;
   });
-  const oldOn=window.onpageshow;
   window.addEventListener('pageshow',()=>{S=store.load();S.times=S.times||{};S.interests=S.interests||'';render()});
   render();
 })();
