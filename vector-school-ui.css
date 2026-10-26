@@ -1,0 +1,99 @@
+/* School diary: lightweight read-only dashboards, mobile first. */
+.school-connection{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end;margin:4px 0 15px;font-size:12px}
+.school-connection>.hint{margin-right:auto}
+.school-tabs{display:grid;grid-template-columns:1fr 1fr;padding:4px;background:#eaf0f8;border-radius:12px;gap:5px;margin:5px 0 14px}
+.school-tab{border:0;border-radius:9px;background:transparent;color:#55687f;min-height:40px;font-weight:700}
+.school-tab.active{background:white;color:#225ab8;box-shadow:0 1px 5px #1a40771b}
+.school-year{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}
+.school-year select,.school-filter-label select{background:#fff;border:1px solid #d5e0ec;color:#243957;border-radius:9px;padding:10px;min-height:40px;max-width:100%}
+.school-period-control{margin:0 0 13px}
+.school-filter-label{display:flex;align-items:center;justify-content:space-between;gap:15px;color:#64748b;font-weight:600;font-size:13px}
+.school-term-editor{margin:10px 0}
+.school-term-editor .hint{margin:10px 0}
+.school-term-fields{display:flex;align-items:end;flex-wrap:wrap;gap:10px}
+.school-term-fields label{flex:1;min-width:130px;display:grid;gap:6px;font-size:12px;font-weight:700}
+.school-term-fields input{border:1px solid #d4dfed;border-radius:9px;background:#fff;padding:10px;min-height:40px;width:100%}
+.school-period-note{display:flex;align-items:center;justify-content:space-between;margin:5px 0 14px}
+.school-topline{display:flex;align-items:stretch;justify-content:space-between;gap:14px;margin-bottom:14px!important}
+.school-topline>div:first-child,.school-topmeta{display:flex;flex-direction:column;gap:5px}
+.school-topline strong{font-size:36px;line-height:1.1;letter-spacing:-1px}
+.school-topmeta{text-align:right;justify-content:center}
+.school-section-head{margin:18px 0 12px}
+.school-section-head h2{margin:0 0 6px}
+.school-section-head p{margin:0}
+.school-recent{margin:14px 0 18px}
+.school-recent h3{margin:0 0 10px}
+.school-recent-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.school-recent-row{min-width:0;display:flex;gap:10px;align-items:center;padding:10px;border-radius:11px;background:#fff;border:1px solid #e1e8f0}
+.school-recent-row .grade{font-size:17px;min-width:34px;height:35px}
+.school-recent-row div,.school-mark-row div{min-width:0;display:grid;gap:3px}
+.school-recent-row b,.school-mark-row b{font-size:12px;overflow-wrap:anywhere}
+.school-recent-row small,.school-mark-row small{font-size:11px;color:#667b96}
+.school-chart-card{margin:15px 0}
+.school-chart-heading h3,.school-chart-card h3{margin:0 0 4px}
+.school-chart-heading p{margin:0 0 13px}
+.school-mode-switch{display:flex;align-items:center;gap:5px;padding:4px;border-radius:10px;background:#eff3fa;margin:12px 0}
+.school-mode-switch button{flex:1;background:transparent;border:0;border-radius:8px;font-weight:700;color:#536884;font-size:12px;min-height:38px;padding:8px 5px}
+.school-mode-switch button.active{background:#fff;color:#2456bf;box-shadow:0 1px 4px #284e7c17}
+.school-checks{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0 8px}
+.school-check{display:inline-flex;align-items:center;gap:5px;padding:6px 9px;border:1px solid #dae3ed;border-radius:99px;font-size:12px;cursor:pointer}
+.school-check input{accent-color:#2456bf}
+.school-warn{color:#a44136;font-size:12px}
+.school-legend{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0}
+.school-legend span{font-size:12px;display:flex;align-items:center;gap:6px}
+.school-legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.school-plot{display:block;width:100%;height:auto;min-height:130px;overflow:visible;margin:10px 0}
+.school-plot circle{cursor:pointer;transition:r .15s}
+.school-plot circle:hover,.school-plot circle:focus{r:7.5;outline:0;stroke:#17243a;stroke-width:2}
+.school-chart-info{background:#f5f8fc;border:1px solid #e1eaf3;border-radius:11px;padding:12px;margin:10px 0}
+.school-chart-info p{margin:6px 0}
+.school-day-grades{display:flex;gap:5px;flex-wrap:wrap}
+.school-chip{font-size:11px;background:#fff;border:1px solid #e2e8f1;border-radius:7px;padding:5px 7px;overflow-wrap:anywhere}
+.school-subject-list{margin:14px 0}
+.school-subject-row{width:100%;min-height:73px;display:flex;gap:11px;align-items:center;text-align:left;border:1px solid #e3e9f2;border-radius:13px;background:#fff;padding:12px;margin-bottom:8px}
+.school-subject-row:hover{background:#f8fbff}
+.school-subject-name{flex:1;min-width:0;display:grid;gap:6px}
+.school-subject-name b{font-size:14px}
+.school-inline-grades{display:flex;gap:4px;flex-wrap:wrap}
+.school-small-grade{display:grid;place-items:center;width:22px;height:23px;background:#eef3fc;border-radius:5px;color:#305d9d;font-size:11px;font-weight:700}
+.school-inline-grades small{color:#8492a5;font-size:11px}
+.school-number{flex:none;min-width:53px;display:grid;justify-items:end;gap:5px}
+.school-number strong{font-size:17px}
+.school-number small{font-size:10px;color:#697c93;text-align:right;max-width:76px}
+.school-chevron{font-size:25px;color:#91a2b6}
+.school-detail-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:5px 0 12px}
+.school-detail-head h2{font-size:21px;margin:0}
+.school-subject-hero{margin-bottom:12px}
+.school-means{display:flex;justify-content:space-between;gap:16px}
+.school-means>div{display:flex;flex-direction:column;gap:6px}
+.school-means strong{font-size:34px;line-height:1.1}
+.school-result-large{text-align:right}
+.school-result-large span{font-size:12px;color:#687991}
+.school-result-large small{font-size:11px;color:#687991}
+.school-quarter-strip,.school-marks,.school-official-list{margin:12px 0}
+.school-quarter-strip h3,.school-marks h3,.school-official-list h3{margin:0 0 12px}
+.school-quarter-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.school-quarter-tile{min-width:0;text-align:center;background:#f4f7fb;border-radius:9px;padding:9px 4px;display:grid;gap:6px}
+.school-quarter-tile span{font-size:11px;color:#728299}
+.school-quarter-tile strong{font-size:21px}
+.school-quarter-strip>.hint{margin-bottom:0}
+.school-mark-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #edf0f5}
+.school-mark-row:last-child{border-bottom:0}
+.school-table-wrap{overflow-x:auto;padding:0!important}
+.school-finals-table{border-collapse:collapse;min-width:470px;width:100%;font-size:13px}
+.school-finals-table th,.school-finals-table td{border-bottom:1px solid #ecf0f5;padding:13px 8px;text-align:center}
+.school-finals-table thead th{font-size:11px;color:#657a91;background:#f6f9fe}
+.school-finals-table th:first-child{text-align:left;padding-left:14px}
+.school-finals-table td:last-child{background:#f7f9fd}
+.school-finals-table .school-official{font-size:17px}
+.school-muted{color:#abb5c4}
+@media(max-width:560px){
+.school-recent-list{grid-template-columns:1fr}
+.school-topline strong{font-size:31px}
+.school-mode-switch button{font-size:11px}
+.school-number{min-width:43px}
+.school-subject-row{padding:11px 9px;gap:7px}
+.school-subject-name b{font-size:13px}
+.school-subject-row .school-number strong{font-size:15px}
+.school-term-fields label{min-width:100%}
+}
