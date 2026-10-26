@@ -134,6 +134,7 @@ async function refresh(force = false) {
       const next = verify(snap.data());
       state.data = next;
       state.phase = 'ready';
+      if(appKind==='iskra')ikAutoPeriod();
       if (!state.from) state.from = /^\d{4}-\d{2}-\d{2}$/.test(next.rangeFrom)
         ? next.rangeFrom : next.schoolYear.slice(0, 4) + '-09-01';
       if (!state.to) state.to = today();
@@ -283,11 +284,37 @@ const ikReadPeriods = () => {
   catch (_) { return {}; }
 };
 const ikSavedPeriods = ikReadPeriods();
-let ikPeriod = 'all', ikSubject = '', ikEditing = '';
-const ikPresets = [['all','Все время'],['q1','1 четверть'],['q2','2 четверть'],['custom','Другая дата']];
+let ikPeriod='all',ikSubject='',ikEditing='',ikYear='',ikPeriodChosen=false;
+const ikPresets=[['all','Все оценки'],['q1','1 четверть'],['q2','2 четверть'],['q3','3 четверть'],['q4','4 четверть'],['custom','Другие даты']];
+const ikYearForDate=d=>{
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d||''))return '';
+  const y=Number(d.slice(0,4))-(Number(d.slice(5,7))<9?1:0);
+  return y+'/'+(y+1);
+};
+const ikYearValue=()=>ikYear||state.data?.schoolYear||ikYearForDate(today());
+const ikTermKey=(period,year=ikYearValue())=>year+'#'+period;
+const ikYears=()=>{
+  const ys=new Set([ikYearValue(),state.data?.schoolYear,...(state.data?.grades||[]).map(r=>ikYearForDate(r.date)),...Object.keys(ikSavedPeriods).filter(k=>k.includes('#')).map(k=>k.split('#')[0])]);
+  return [...ys].filter(Boolean).sort().reverse();
+};
+function ikAutoPeriod(){
+  if(ikPeriodChosen)return;
+  ikYear=state.data?.schoolYear||ikYearForDate(today());
+  // Migrate legacy quarter dates only into the currently loaded school year.
+  for(const q of ['q1','q2'])if(ikSavedPeriods[q]&&!ikSavedPeriods[ikTermKey(q)])ikSavedPeriods[ikTermKey(q)]=ikSavedPeriods[q];
+  const current=today();
+  ikPeriod=['q1','q2','q3','q4'].find(q=>{
+    const p=ikSavedPeriods[ikTermKey(q)];
+    return ikValidRange(p)&&current>=p.from&&current<=p.to;
+  })||'all';
+}
 const ikValidRange = p => p && /^\d{4}-\d{2}-\d{2}$/.test(p.from||'') &&
   /^\d{4}-\d{2}-\d{2}$/.test(p.to||'') && p.from<=p.to;
-const ikRange = () => ikPeriod==='all' ? null : ikValidRange(ikSavedPeriods[ikPeriod]) ? ikSavedPeriods[ikPeriod] : null;
+const ikRange=()=>{
+  if(ikPeriod==='all')return null;
+  const p=ikSavedPeriods[ikTermKey(ikPeriod)];
+  return ikValidRange(p)?p:null;
+};
 const ikFiltered = () => {
   if(!state.data)return [];
   const bounds=ikRange();
@@ -298,7 +325,8 @@ const ikWorks = rows => rows.filter(r=>!officialKind(r));
 const ikSort = rows => rows.slice().sort((a,b)=>a.date.localeCompare(b.date)||a.id.localeCompare(b.id));
 const ikMean = rows => rows.length ? rows.reduce((total,r)=>total+r.n,0)/rows.length : null;
 const ikF = n => n===null?'—':(Math.abs(n)<0.005?0:n).toFixed(2).replace('.',',');
-const ikDeltaLabel = n => n===null?'нет данных':n>0?'рост среднего':n<0?'снижение':'без изменений';
+const ikDeltaLabel=n=>n===null?'нет сравнения':n>0?'к прошлой неделе':n<0?'к прошлой неделе':'без изменений';
+const ikLocalDate=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const ikDate = iso => /^\d{4}-\d{2}-\d{2}$/.test(iso||'') ? iso.slice(8)+'.'+iso.slice(5,7)+'.'+iso.slice(0,4) : '—';
 const ikStar = '<img class="ik-star" src="./iskra-star.svg" alt="" aria-hidden="true">';
 const ikIcons = {'Русский язык':'📕','Русский':'📕','Математика':'🧮','Литературное чтение':'📖','Чтение':'📖','Английский язык':'🔤','Английский':'🔤','Окружающий мир':'🌿','Физическая культура':'🏃','Физкультура':'🏃','Музыка':'🎵','Изобразительное искусство':'🎨','ИЗО':'🎨','Технология':'🧩','ОРКСЭ':'📚'};
@@ -311,34 +339,54 @@ function ikTrend(rows) {
   if(!shown.length)return {html:'<div class="ik-empty">График появится после первой оценки.</div>',growth:null};
   if(shown.length<2)return {html:'<div class="ik-empty">Появится после следующей оценки.</div>',growth:null};
   const W=320,H=132,L=28,R=6,T=15,B=23;
-  const x=i=>L+(W-L-R)*i/(shown.length-1),y=n=>T+(5-n)*(H-T-B)/2;
+  const x=i=>L+(W-L-R)*i/(shown.length-1),y=n=>T+(5-n)*(H-T-B)/3;
   const coords=shown.map((p,i)=>[x(i),y(p.n)]);
   const line=coords.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
   const last=coords[coords.length-1],first=coords[0],bottom=H-B;
   const area=line+' L'+last[0].toFixed(1)+' '+bottom+' L'+first[0].toFixed(1)+' '+bottom+' Z';
-  const grid=[3,4,5].map(v=>'<line class="grid" x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v)+'" y2="'+y(v)+'"/><text x="6" y="'+(y(v)+4)+'">'+v+'</text>').join('');
+  const grid=[2,3,4,5].map(v=>'<line class="grid" x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v)+'" y2="'+y(v)+'"/><text x="6" y="'+(y(v)+4)+'">'+v+'</text>').join('');
   const dotStep=Math.max(1,Math.ceil(coords.length/11));
   const dots=coords.map((p,i)=>(i%dotStep===0||i===coords.length-1)?'<circle class="dot" cx="'+p[0]+'" cy="'+p[1]+'" r="'+(i===coords.length-1?4.5:2.7)+'"/>':'').join('');
   const lab1=shown[0].date.slice(8)+'.'+shown[0].date.slice(5,7),lab2=shown[shown.length-1].date.slice(8)+'.'+shown[shown.length-1].date.slice(5,7);
   const labelX=Math.max(25,Math.min(W-44,last[0]-21)),labelY=Math.max(3,last[1]-25);
   const bubble='<rect x="'+labelX+'" y="'+labelY+'" width="43" height="21" rx="8" fill="#8b62ee"/><text x="'+(labelX+21.5)+'" y="'+(labelY+15)+'" text-anchor="middle" style="fill:white;font-size:11px;font-weight:700">'+ikF(shown.at(-1).n)+'</text>';
   const svg='<svg class="ik-chart" viewBox="0 0 320 132" role="img" aria-label="Изменение среднего балла за выбранный период">'+grid+'<path class="area" d="'+area+'"/><path class="line" d="'+line+'"/>'+dots+bubble+'<text x="'+L+'" y="129">'+lab1+'</text><text x="314" y="129" text-anchor="end">'+lab2+'</text></svg>';
-  const delta=totals.at(-1).n-totals[0].n;
-  return {html:svg,growth:Math.abs(delta)<0.005?0:delta};
+  // Compare the most recent seven calendar days with the preceding seven.
+  const now=new Date(),start=new Date(now),mid=new Date(now);
+  start.setHours(0,0,0,0);start.setDate(start.getDate()-13);
+  mid.setHours(0,0,0,0);mid.setDate(mid.getDate()-6);
+  const from=ikLocalDate(start),boundary=ikLocalDate(mid),end=ikLocalDate(now);
+  const recent=sorted.filter(r=>r.date>=boundary&&r.date<=end),previous=sorted.filter(r=>r.date>=from&&r.date<boundary);
+  const raw=recent.length&&previous.length?ikMean(recent)-ikMean(previous):null;
+  return {html:svg,growth:raw===null?null:Math.abs(raw)<.005?0:raw};
 }
-function ikPeriodButtons() {
-  return '<div class="ik-filter-row">'+ikPresets.map(([id,name])=>'<button type="button" class="ik-filter '+(ikPeriod===id?'active':'')+'" data-ik-period="'+id+'">'+name+'</button>').join('')+'</div>';
+function ikPeriodButtons(){
+  return '<div class="ik-year-row"><span class="ik-muted">Учебный год</span><select class="ik-year-select" data-ik-year aria-label="Учебный год">'+ikYears().map(y=>'<option value="'+esc(y)+'" '+(y===ikYearValue()?'selected':'')+'>'+esc(y)+'</option>').join('')+'</select></div>'+
+    '<div class="ik-filter-row">'+ikPresets.map(([id,name])=>'<button type="button" class="ik-filter '+(ikPeriod===id?'active':'')+'" data-ik-period="'+id+'">'+name+'</button>').join('')+'</div>';
 }
-function ikPeriodEditor() {
-  const needs=ikPeriod!=='all'&&!ikRange();
+function ikPeriodEditor(){
   if(ikPeriod==='all')return '';
-  if(!needs&&ikEditing!==ikPeriod){const p=ikRange();return '<div class="ik-row-between"><span class="ik-muted">'+ikDate(p.from)+' — '+ikDate(p.to)+'</span><button type="button" class="ik-btn-small" data-ik-edit-period="1">Изменить даты</button></div>'}
-  const p=ikSavedPeriods[ikPeriod]||{},name=ikPresets.find(x=>x[0]===ikPeriod)?.[1]||'Период';
-  return '<form class="ik-period-editor" id="ik-period-form"><b>'+esc(name)+': укажи даты</b>'+
-    '<p class="ik-muted" style="margin:0">Даты четвертей устанавливаются вручную, поскольку школьная база не передаёт их надёжные границы.</p>'+
-    '<label>Начало<input name="from" type="date" value="'+esc(p.from||'')+'" required></label>'+
-    '<label>Конец<input name="to" type="date" value="'+esc(p.to||'')+'" required></label>'+
-    '<button type="submit" class="btn">Сохранить период</button></form>';
+  const p=ikRange();
+  if(ikPeriod!=='custom'){
+    return p?'<p class="ik-muted ik-period-caption">'+ikDate(p.from)+' — '+ikDate(p.to)+'</p>':
+      '<div class="ik-issues">Даты этой четверти пока не настроены. Попроси взрослого настроить учебные периоды в разделе «Для родителей».</div>';
+  }
+  if(p&&ikEditing!=='custom')return '<div class="ik-row-between"><span class="ik-muted">'+ikDate(p.from)+' — '+ikDate(p.to)+'</span><button type="button" class="ik-btn-small" data-ik-edit-period="1">Изменить даты</button></div>';
+  const value=ikSavedPeriods[ikTermKey('custom')]||{};
+  return '<form id="ik-period-form" class="ik-period-editor"><b>Выбери даты</b>'+
+    '<label>С<input type="date" name="from" required value="'+esc(value.from||'')+'"></label>'+
+    '<label>По<input type="date" name="to" required value="'+esc(value.to||'')+'"></label>'+
+    '<button class="btn" type="submit">Показать оценки</button></form>';
+}
+function ikPeriodSettingsHtml(){
+  const year=ikYearValue();
+  let html='<h2>Учебные четверти</h2><p class="mu sm">Даты устанавливаются родителем и не меняют оценки в школьном дневнике.</p>'+
+    '<form id="ik-term-settings" class="ik-period-editor"><label>Учебный год<select name="year">'+ikYears().map(y=>'<option '+(y===year?'selected':'')+' value="'+esc(y)+'">'+esc(y)+'</option>').join('')+'</select></label>';
+  for(const [q,name] of ikPresets.filter(x=>/^q[1-4]$/.test(x[0]))){
+    const val=ikSavedPeriods[ikTermKey(q,year)]||{};
+    html+='<fieldset class="ik-term-field"><legend>'+name+'</legend><label>Начало<input type="date" name="'+q+'_from" value="'+esc(val.from||'')+'"></label><label>Конец<input type="date" name="'+q+'_to" value="'+esc(val.to||'')+'"></label></fieldset>';
+  }
+  return html+'<button type="submit" class="btn">Сохранить четверти</button></form>';
 }
 function ikFreshness() {
   if(!state.data?.syncedAt)return 'Время загрузки неизвестно';
@@ -353,12 +401,13 @@ function ikSubjectPage() {
   const name=ikSubject,all=ikFiltered().filter(r=>r.subject===name),works=ikWorks(all),official=all.filter(r=>officialKind(r));
   const mean=ikMean(works),last=ikSort(works).at(-1),tr=ikTrend(works);
   const officially=ikSort(official).at(-1);
+  const termGrade=ikPeriod.startsWith('q')?ikSort(official.filter(r=>officialKind(r)==='За четверть')).at(-1):null;
   return '<div class="ik-page scs-iskra ik-detail-page"><div class="ik-row-between"><button type="button" class="ik-btn-small" data-ik-back="1">‹ Назад</button><span class="ik-cloud-pill">☁ Из дневника</span></div>'+
     '<div class="ik-row"><span style="font-size:35px">'+ikSubjectIcon(name)+'</span><div><h1 style="font-size:24px">'+esc(name)+'</h1><span class="ik-muted">'+works.length+' оценок за работы</span></div></div>'+
     ikPeriodButtons()+ikPeriodEditor()+
     '<div class="ik-main-card"><div class="ik-hero-split"><div><div class="ik-caption">Средний балл</div><div class="ik-number">'+ikF(mean)+'</div><div class="ik-caption">По выбранному периоду</div></div>'+ikStar+'</div></div>'+
-    (officially?'<div class="ik-official"><div><b>🏅 '+esc(officialKind(officially))+'</b><small>Официально · '+ikDate(officially.date)+'</small></div><strong>'+officially.n+'</strong></div>':
-    mean!==null?'<div class="ik-tile"><small>Прогноз итоговой (ориентировочно)</small><strong>'+forecast(mean)+'</strong><small>По простому среднему, школьные правила могут отличаться.</small></div>':'')+
+    (officially?'<div class="ik-official"><div><b>🏅 '+esc(officialKind(officially))+'</b><small>Официально · '+ikDate(officially.date)+'</small></div><strong>'+officially.n+'</strong></div>':'')+
+    (mean!==null&&ikPeriod.startsWith('q')&&!termGrade&&ikRange()?'<div class="ik-tile"><small>Прогноз за выбранную четверть (ориентировочно)</small><strong>'+forecast(mean)+'</strong><small>По простому среднему; официальная оценка может отличаться.</small></div>':'')+
     '<div class="card"><div class="ik-graph-label"><b>Динамика среднего балла</b></div>'+tr.html+'</div>'+
     '<div class="ik-time-stat"><div class="ik-tile"><div class="ik-tile-icon">✏️</div><strong>'+works.length+'</strong><small>всего оценок</small></div>'+
     '<div class="ik-tile"><div class="ik-tile-icon">⭐</div><strong>'+(last?last.n:'—')+'</strong><small>последняя</small></div>'+
@@ -453,7 +502,10 @@ css.textContent = '.scs{display:block}.scs .scs-head,.scs .scs-actions{display:f
 css.textContent += '.scs .scs-grade-audit{margin-top:14px}.scs .scs-grade-audit summary{cursor:pointer;font-size:13px;font-weight:700;padding:8px 0}.scs .scs-grade-audit ol{padding:0;list-style:none;margin:6px 0}.scs .scs-grade-detail{display:grid;grid-template-columns:100px 32px minmax(0,1fr);gap:10px;align-items:center;border-bottom:1px solid var(--ln);padding:9px 0;font-size:13px}.scs .scs-grade-date{font-variant-numeric:tabular-nums}.scs .scs-grade-number{display:inline-flex;width:30px;height:30px;border-radius:50%;align-items:center;justify-content:center;background:var(--bg);font-weight:750}.scs .scs-grade-detail .mu{overflow-wrap:anywhere}@media(max-width:360px){.scs .scs-grade-detail{grid-template-columns:82px 30px minmax(0,1fr);gap:6px}}';
 css.textContent += '.scs .scs-final-list{display:grid;gap:8px;margin:12px 0}.scs .scs-final-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:11px 13px;border:1px solid var(--ln);border-radius:12px;background:var(--bg)}.scs .scs-final-label{font-weight:700;flex:1;min-width:135px}.scs .scs-final-mark{font-size:22px;font-weight:800;border-radius:9px;padding:3px 10px;background:var(--bg)}';
 document.head.appendChild(css);
-window.schoolCloud = { view, summary, connection:()=>({isConnected:!!state.user,email:state.user?.email||''}) };
+window.schoolCloud = {view,summary,overallSummary:()=>{
+  const rows=(state.data?.grades||[]).map(row=>({...row,n:gradeScore(row)})).filter(r=>r.n!==null&&!officialKind(r));
+  return {count:rows.length,average:rows.length?ikMean(rows):null};
+},termSettingsHtml:ikPeriodSettingsHtml,resetSubject:()=>{ikSubject='';},connection:()=>({isConnected:!!state.user,email:state.user?.email||''})};
 notify();
 
 onAuthStateChanged(auth, user => {
@@ -518,18 +570,41 @@ document.addEventListener('visibilitychange', () => {
 document.addEventListener('click', event => {
   if (appKind !== 'iskra') return;
   const period=event.target.closest('[data-ik-period]');
-  if(period){ikPeriod=period.dataset.ikPeriod;ikEditing=ikPeriod!=='all'&&!ikValidRange(ikSavedPeriods[ikPeriod])?ikPeriod:'';ikSubject='';notify();return}
+  if(period){ikPeriod=period.dataset.ikPeriod;ikPeriodChosen=true;ikEditing='';notify();return}
   if(event.target.closest('[data-ik-edit-period]')){ikEditing=ikPeriod;notify();return}
   const subj=event.target.closest('[data-ik-subject]');
   if(subj){ikSubject=subj.dataset.ikSubject;notify();window.scrollTo(0,0);return}
   if(event.target.closest('[data-ik-back]')){ikSubject='';notify();window.scrollTo(0,0)}
+});
+document.addEventListener('change',event=>{
+  if(appKind!=='iskra'||!event.target.matches('[data-ik-year]'))return;
+  ikYear=event.target.value;ikPeriod='all';ikSubject='';ikPeriodChosen=true;notify();
 });
 document.addEventListener('submit', event => {
   if(appKind!=='iskra'||event.target.id!=='ik-period-form')return;
   event.preventDefault();
   const from=event.target.elements.from.value,to=event.target.elements.to.value;
   if(!ikValidRange({from,to})){state.error='Проверь даты начала и окончания периода.';notify();return}
-  ikSavedPeriods[ikPeriod]={from,to};
+  ikSavedPeriods[ikTermKey(ikPeriod)]={from,to};
   try{localStorage.setItem(ikPeriodsKey,JSON.stringify(ikSavedPeriods))}catch(_){}
   ikEditing='';state.error='';notify();
+});
+document.addEventListener('submit',event=>{
+  if(appKind!=='iskra'||event.target.id!=='ik-term-settings')return;
+  event.preventDefault();
+  const form=event.target,year=form.elements.year.value,next={};
+  for(const q of ['q1','q2','q3','q4']){
+    const from=form.elements[q+'_from'].value,to=form.elements[q+'_to'].value;
+    if(!!from!==!!to||(from&&(!ikValidRange({from,to})||ikYearForDate(from)!==year))){
+      state.error='Проверь границы четвертей: обе даты должны относиться к выбранному учебному году.';
+      notify();return;
+    }
+    if(from)next[ikTermKey(q,year)]={from,to};
+  }
+  for(const q of ['q1','q2','q3','q4'])delete ikSavedPeriods[ikTermKey(q,year)];
+  Object.assign(ikSavedPeriods,next);
+  try{localStorage.setItem(ikPeriodsKey,JSON.stringify(ikSavedPeriods))}catch(_){}
+  ikYear=year;ikAutoPeriod();state.error='';
+  document.dispatchEvent(new CustomEvent('ikTermSettingsSaved'));
+  notify();
 });
