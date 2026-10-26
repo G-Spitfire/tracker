@@ -415,7 +415,7 @@ function gradeOutlook(){
   const risk=atRisk.length?`<div class="kicker" style="margin-top:14px">НЕ УРОНИТЬ</div>${atRisk.map(g=>`<div class="mu sm outlook-risk"><b>${esc(g.k)}</b> · средний ${f2(g.av)}. Оценка «3» снизит его до ${f2(g.x)}.</div>`).join('')}`:'';
   return `<div class="card">${needs}${risk}</div>`;
 }
-function grades(){
+function gradesLocal(){
   return`${termControls(S)}<div class="hero"><div class="big">${ACT().length?f2(exAvg()):'—'}</div><div class="mu" style="padding-bottom:6px">Средний балл<br>все оценки равновесные</div></div>
 <div class="card"><b>Как меняется средний балл</b>${chart()}<div class="mu sm">Сумма всех оценок ÷ количество оценок. Только выбранная четверть; архивные предметы исключены.</div></div>
 ${whatIf()}${gradeOutlook()}
@@ -423,6 +423,8 @@ ${whatIf()}${gradeOutlook()}
 <div style="margin-top:12px">${gord().map(k=>{const em=!S.g[k].length,av=em?0:avg(k),f=em?0:fin(av);return`<div class="card sub t${f}"><div class="row" style="align-items:center"><div><b>${esc(k)}</b><div class="mu sm">${em?'оценок пока нет':'средний '+f2(av)}</div></div><div class="fin" style="font-size:38px">${em?'—':f}<small>итог</small></div></div><div class="chips">${S.g[k].map(x=>`<button class="chip c${x.v}" data-action="editGrade" data-id="${esc(k)}" data-arg="${x.i}">${x.v}</button>`).join('')}<button class="chip add" data-action="addGrade" data-id="${esc(k)}" aria-label="Добавить оценку: ${esc(k)}">+</button></div></div>`}).join('')}</div>
 <button class="btn g" style="margin-top:6px;width:100%" data-action="subjects">Предметы и четверть</button>`;
 }
+
+function grades(){return window.schoolCloud ? window.schoolCloud.view(gradesLocal) : gradesLocal()}
 
 /* ===== TODAY ===== */
 function today(){
@@ -438,9 +440,11 @@ function today(){
   const habitsDone=due.filter(t=>t.u?cnt(d,t.i)>=Number(t.target||1):dn.includes(t.i)).length;
   const allTasks=dueTasks,doneTasks=allTasks.filter(t=>t.done===d).length;
   const totalToday=due.length+allTasks.length,doneToday=habitsDone+doneTasks;
-  const average=ACT().length?exAvg():0;
+  const schoolSummary=window.schoolCloud?.summary()||null;
+  const average=schoolSummary?schoolSummary.average:(ACT().length?exAvg():0);
   const scorePct=Math.max(0,Math.min(100,Math.round(average/GOAL*100)));
-  const {bad}=calc(),hint=bad.length?`<b>${esc(bad[0].k)}:</b> ${bad[0].p.t}`:'Все предметы сейчас выходят на «4» и выше.';
+  const {bad}=calc();
+  const hint=schoolSummary?(schoolSummary.count?(schoolSummary.weakSubject?`<b>${esc(schoolSummary.weakSubject)}</b>: стоит подтянуть предмет.`:'Все предметы сейчас выходят на «4» и выше.'):'В дневнике пока нет числовых оценок.'):(bad.length?`<b>${esc(bad[0].k)}:</b> ${bad[0].p.t}`:'Все предметы сейчас выходят на «4» и выше.');
   const name=String(S.p?.name||'Матвей').trim()||'Матвей';
   const routeStep=Math.min(S.p?.dn?.length||0,STEPS.length-1);
   const routeDone=(S.p?.dn?.length||0)>=STEPS.length;
@@ -453,7 +457,7 @@ function today(){
 <div class="sec-title"><h2>Привычки</h2><button class="btn g" data-action="newHabit">+ Привычка</button></div><div class="card list-card">${habits||'<div class="mu sm" style="padding:14px 0">На этот день привычек нет.</div>'}</div>
 <div class="mu sm">Чтобы исправить прошлый день, переключи дату стрелками. История сохраняется.</div></div>
 <aside class="today-side" aria-label="Учебные цели">
-<section class="card focus-card"><div class="kicker">УЧЁБА</div><div class="focus-score">${ACT().length?f2(average):'—'}</div><div class="mu sm">Средний балл · цель ${f2(GOAL)}</div><div class="progress-track" role="progressbar" aria-label="Путь к среднему баллу ${f2(GOAL)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${scorePct}"><span style="width:${scorePct}%"></span></div><button class="btn g" data-action="goTab" data-arg="g">Оценки <span aria-hidden="true">→</span></button></section>
+<section class="card focus-card"><div class="kicker">УЧЁБА</div><div class="focus-score">${schoolSummary?(schoolSummary.count?f2(average):'—'):(ACT().length?f2(average):'—')}</div><div class="mu sm">${schoolSummary?'Средний из дневника':'Средний балл'} · цель ${f2(GOAL)}</div><div class="progress-track" role="progressbar" aria-label="Путь к среднему баллу ${f2(GOAL)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${scorePct}"><span style="width:${scorePct}%"></span></div><button class="btn g" data-action="goTab" data-arg="g">Оценки <span aria-hidden="true">→</span></button></section>
 <section class="card route-card"><div class="route-mark" aria-hidden="true">↗</div><div class="kicker">ДАЛЬНЯЯ ЦЕЛЬ</div><h3>Мой маршрут</h3><p class="mu sm">Путь к университету начинается с интересной профессии и маленьких шагов.</p><p class="route-step">${esc(routeText)}</p><button class="btn g" data-action="goProfession">Открыть маршрут <span aria-hidden="true">→</span></button></section>
 </aside></div>`;
 }
@@ -928,6 +932,8 @@ function render(){
   document.getElementById('m').innerHTML=`<div class="hd"><div class="brand-lockup"><div class="brand-mark" aria-hidden="true">${mark}</div><div class="brand-copy"><h1>Вектор</h1><div class="mu sm">${subtitles[tab]}</div></div></div><button class="avb" data-action="openProfile" aria-label="Профиль">${avatar}</button></div>`+main;
 }
 
+window.addEventListener('schoolCloudUpdated',()=>{if(tab==='g')render()});
+
 /* ===== BOOT ===== */
 save();
 daily();
@@ -936,4 +942,4 @@ document.addEventListener('visibilitychange',()=>{
   if(!document.hidden&&iso(new Date())!==day){day=iso(new Date());dayOffset=0;daily();render()}
 });
 render();
-</script></body></html>
+</script><script type="module" src="./school-cloud.js" data-school-cloud="vector"></script></body></html>

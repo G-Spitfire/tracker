@@ -548,7 +548,7 @@ const school=(()=>{
   }
   function commit(){recordMean(S.school,'archived');save();render()}
 
-  function view(){
+  function viewLocal(){
     const active=ACT(),{bad,good}=calc(),frag=good.filter(g=>g.x),ordered=names().sort((a,b)=>a.localeCompare(b,'ru'));
     const end=S.school.end;let days=0;
     if(end){for(let d=new Date(iso(new Date())+'T12:00:00');iso(d)<=end;d.setDate(d.getDate()+1))if(d.getDay()>0&&d.getDay()<6)days++}
@@ -601,6 +601,7 @@ const school=(()=>{
   }
   function restore(n){S.school.archived.splice(n,1);commit();subjects()}
   function end(v){if(v&&!/^\d{4}-\d{2}-\d{2}$/.test(v))return;S.school.end=v;save();render()}
+  function view(){return window.schoolCloud ? window.schoolCloud.view(viewLocal) : viewLocal()}
   return{view,edit,put,remove,subjects,add,archive,restore,end};
 })();
 
@@ -710,7 +711,9 @@ document.addEventListener('change',e=>{
   else if(e.target.dataset.action==='importFile')importBackupFile(e.target)
 });
 
+window.addEventListener('schoolCloudUpdated',()=>{if(tab==='g')render()});
+
 /* ===== BOOT ===== */
 render();
 if(!S.asked){S.asked=1;save();openProfile()}
-</script></body></html>
+</script><script type="module" src="./school-cloud.js" data-school-cloud="iskra"></script></body></html>
