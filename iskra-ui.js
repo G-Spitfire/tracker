@@ -195,6 +195,7 @@
     sheet(html);
   };
   document.addEventListener('ikTermSettingsSaved',()=>{cs();render();toast('Периоды сохранены')});
+  document.addEventListener('ikGradeSignedOut',()=>{cs();render();toast('Дневник отключён')});
   ACTIONS.ikOfflineToggle=()=>{
     const next=!window.schoolCloud?.offlineEnabled?.();
     if(window.schoolCloud?.setOfflineEnabled?.(next)){cs();ACTIONS.parents(true);toast(next?'Офлайн-копия разрешена':'Офлайн-копия отключена')}
@@ -209,7 +210,7 @@
     const extra=document.createElement('div'),session=window.schoolCloud?.connection?.();
     const status=session?.isConnected
       ? '<p class="mu sm">Подключено: '+safe(session.email||'учётная запись Полины')+'</p><button class="btn g" type="button" data-sc-action="logout">Выйти из дневника</button>'
-      : '<p class="mu sm">Для подключения открой вкладку «Оценки».</p>';
+      : '<p class="mu sm">Подключи дневник один раз — дальше оценки загружаются автоматически.</p>'+ (window.schoolCloud?.loginHtml?.()||'');
     extra.innerHTML='<h2>Мои дела</h2><button class="btn g" data-action="ikManageTasks">Дела и дни недели</button><button class="btn g" data-action="ikTaskTimes">Время дел</button><h2>Периоды школьных оценок</h2><button class="btn g" data-action="ikGradePeriods">Границы четвертей</button><h2>Школьный дневник</h2>'+status+
       '<div class="ik-parent-offline"><p class="mu sm">Офлайн-копия оценок: '+(window.schoolCloud?.offlineEnabled?.()?'включена':'выключена')+'. Если включить, оценки сохраняются на этом устройстве без шифрования.</p><button class="btn g" data-action="ikOfflineToggle">'+(window.schoolCloud?.offlineEnabled?.()?'Отключить офлайн-копию':'Разрешить офлайн-копию')+'</button></div>';
     b.prepend(extra);
