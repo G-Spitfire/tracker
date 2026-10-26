@@ -298,7 +298,7 @@ const ikReadPeriods = () => {
   catch (_) { return {}; }
 };
 const ikSavedPeriods = ikReadPeriods();
-let ikPeriod='all',ikSubject='',ikEditing='',ikYear='',ikPeriodChosen=false;
+let ikPeriod='all',ikSubject='',ikEditing='',ikPeriodChosen=false;
 const ikPresets=[['all','Все оценки'],['q1','1 четверть'],['q2','2 четверть'],['q3','3 четверть'],['q4','4 четверть'],['custom','Другие даты']];
 const ikYearForDate=d=>{
   if(!/^\d{4}-\d{2}-\d{2}$/.test(d||''))return '';
@@ -308,13 +308,8 @@ const ikYearForDate=d=>{
 // Show only the currently active academic year in Iskra.
 const ikYearValue=()=>ikYearForDate(today());
 const ikTermKey=(period,year=ikYearValue())=>year+'#'+period;
-const ikYears=()=>{
-  const ys=new Set([ikYearValue(),state.data?.schoolYear,...(state.data?.grades||[]).map(r=>ikYearForDate(r.date)),...Object.keys(ikSavedPeriods).filter(k=>k.includes('#')).map(k=>k.split('#')[0])]);
-  return [...ys].filter(Boolean).sort().reverse();
-};
 function ikAutoPeriod(){
   if(ikPeriodChosen)return;
-  ikYear=ikYearForDate(today());
   // Do not migrate legacy unscoped dates; their academic year is ambiguous.
   const current=today();
   ikPeriod=['q1','q2','q3','q4'].find(q=>{
@@ -453,7 +448,7 @@ function viewIskra() {
     subjects.get(r.subject)[officialKind(r)?'official':'works'].push(r);
   });
   const ordered=[...subjects].sort((a,b)=>(ikMean(b[1].works)??-1)-(ikMean(a[1].works)??-1)||a[0].localeCompare(b[0],'ru'));
-  html+='<div class="ik-main-card ik-hero-split"><div><div class="ik-caption">Средний балл</div><div class="ik-number">'+ikF(mean)+'</div><div class="ik-caption">'+works.length+' оценок · '+(ikPeriod==='all'?'все доступные даты':available?ikDate(available.from)+' — '+ikDate(available.to):'период не настроен')+'</div></div>'+ikStar+'</div>';
+  html+='<div class="ik-main-card ik-hero-split"><div><div class="ik-caption">Средний балл</div><div class="ik-number">'+ikF(mean)+'</div><div class="ik-caption">'+works.length+' оценок · '+(ikPeriod==='all'?'текущий учебный год':available?ikDate(available.from)+' — '+ikDate(available.to):'период не настроен')+'</div></div>'+ikStar+'</div>';
   html+=ikPeriodButtons()+ikPeriodEditor();
   if(ikPeriod!=='all'&&!available)html+='<div class="ik-issues">Для этого периода пока не указаны даты. После сохранения появятся оценки и график.</div>';
   else {
@@ -659,7 +654,7 @@ document.addEventListener('submit',event=>{
   for(const q of ['q1','q2','q3','q4'])delete ikSavedPeriods[ikTermKey(q,year)];
   Object.assign(ikSavedPeriods,next);
   try{localStorage.setItem(ikPeriodsKey,JSON.stringify(ikSavedPeriods))}catch(_){}
-  ikYear=year;ikAutoPeriod();state.error='';
+  ikAutoPeriod();state.error='';
   document.dispatchEvent(new CustomEvent('ikTermSettingsSaved'));
   notify();
 });
