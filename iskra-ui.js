@@ -139,6 +139,49 @@
   }
   ACTIONS.ikTaskTimes=()=>createTimeSheet();
   ACTIONS.ikSaveTimes=()=>{document.querySelectorAll('[data-ik-task-time]').forEach(input=>{if(input.value)S.times[input.dataset.ikTaskTime]=input.value;else delete S.times[input.dataset.ikTaskTime]});save();cs();render()};
+
+  function taskEditor(){
+    const days=[['Пн',1],['Вт',2],['Ср',3],['Чт',4],['Пт',5],['Сб',6],['Вс',0]];
+    const entries=taskCatalog();
+    const html=entries.map(task=>{
+      const schedule=Array.isArray(S.taskDays[task.i])?S.taskDays[task.i]:(defaultDays[task.i]||[0,1,2,3,4,5,6]);
+      const disabled=S.hiddenTasks.includes(task.i);
+      return '<div class="ik-plan-row"><div class="ik-row-between"><b>'+safe(task.e||'✨')+' '+safe(task.t)+'</b>'+
+        '<button class="ik-btn-small" data-action="ikHideTask" data-id="'+safe(task.i)+'">'+(disabled?'Включить':'Отключить')+'</button>'+
+        (task.i.startsWith('user-')?'<button class="ik-btn-small" data-action="ikRemoveTask" data-id="'+safe(task.i)+'" aria-label="Удалить дело">×</button>':'')+'</div>'+
+        '<div class="ik-plan-days">'+days.map(([label,wd])=>'<button type="button" class="ik-day-pill '+(schedule.includes(wd)?'on':'')+'" data-action="ikTaskDay" data-id="'+safe(task.i)+'" data-arg="'+wd+'" aria-pressed="'+schedule.includes(wd)+'">'+label+'</button>').join('')+'</div></div>';
+    }).join('');
+    sheet('<h2>Расписание дел</h2><p class="mu sm">Изменения действуют для новых дней. Ранее выполненные дела и полученные звёзды сохраняются.</p>'+
+      html+'<h3>Добавить дело</h3><label class="sheet-field">Название<input maxlength="45" id="ik-new-task" placeholder="Например, Погулять"></label>'+
+      '<label class="sheet-field">Категория<select id="ik-new-category"><option value="personal">Личное</option><option value="school">Учёба</option></select></label>'+
+      '<button class="btn g" data-action="ikAddTask">Добавить дело</button>');
+  }
+  ACTIONS.ikManageTasks=()=>taskEditor();
+  ACTIONS.ikTaskDay=(id,_,el)=>{
+    const wd=Number(el.dataset.arg),task=taskCatalog().find(t=>t.i===id);
+    if(!task||!Number.isInteger(wd)||wd<0||wd>6)return;
+    const arr=Array.isArray(S.taskDays[id])?S.taskDays[id].slice():(defaultDays[id]||[0,1,2,3,4,5,6]).slice();
+    const at=arr.indexOf(wd);if(at>=0)arr.splice(at,1);else arr.push(wd);
+    S.taskDays[id]=arr;save();taskEditor();
+  };
+  ACTIONS.ikHideTask=id=>{
+    const task=taskCatalog().find(t=>t.i===id);if(!task)return;
+    const at=S.hiddenTasks.indexOf(id);if(at<0)S.hiddenTasks.push(id);else S.hiddenTasks.splice(at,1);
+    save();taskEditor();
+  };
+  ACTIONS.ikRemoveTask=id=>{
+    if(!S.customTasks.some(t=>t.i===id)||!confirm('Удалить дело из будущих планов? История выполнений останется.'))return;
+    S.customTasks=S.customTasks.filter(t=>t.i!==id);save();taskEditor();
+  };
+  ACTIONS.ikAddTask=()=>{
+    const input=document.getElementById('ik-new-task'),selector=document.getElementById('ik-new-category'),name=input?.value.trim().slice(0,45);
+    if(!name)return toast('Введите название дела');
+    if(taskCatalog().length>=30)return toast('Достигнут лимит 30 дел');
+    if(taskCatalog().some(t=>t.t.toLocaleLowerCase('ru-RU')===name.toLocaleLowerCase('ru-RU')))return toast('Такое дело уже существует');
+    S.customTasks.push({i:'user-'+Date.now().toString(36),e:'✨',t:name,category:selector?.value==='school'?'school':'personal'});
+    save();taskEditor();
+  };
+  ACTIONS.ikGradePeriods=()=>{cs();navTo('g');window.schoolCloud?.openPeriods?.();};
   const baseParents=ACTIONS.parents;
   ACTIONS.parents=()=>{
     baseParents();
@@ -148,7 +191,7 @@
     const status=session?.isConnected
       ? '<p class="mu sm">Подключено: '+safe(session.email||'учётная запись Полины')+'</p><button class="btn g" type="button" data-sc-action="logout">Выйти из дневника</button>'
       : '<p class="mu sm">Для подключения открой вкладку «Оценки».</p>';
-    extra.innerHTML='<h2>Мои дела</h2><button class="btn g" data-action="ikTaskTimes">Настроить время дел</button><h2>Школьный дневник</h2>'+status;
+    extra.innerHTML='<h2>Мои дела</h2><button class="btn g" data-action="ikManageTasks">Дела и дни недели</button><button class="btn g" data-action="ikTaskTimes">Время дел</button><h2>Награды</h2><button class="btn g" data-action="editReward">Настроить награду и цель</button><h2>Периоды школьных оценок</h2><button class="btn g" data-action="ikGradePeriods">Границы четвертей</button><h2>Школьный дневник</h2>'+status;
     b.prepend(extra);
   };
   document.querySelectorAll('.bar button').forEach((b,i)=>{
