@@ -148,11 +148,22 @@ function finals(ui,snapshot,periods) {
  const older=previous.length?'<details class="card school-older-grades"><summary>Итоговые из других учебных лет · '+previous.length+'</summary>'+
  '<p class="hint">Показываем найденные старые записи без выбора года и без смешивания с текущими итогами.</p>'+
  previous.map(g=>'<div class="school-archive-row"><span class="school-archive-year">'+esc(schoolYearOf(g.date))+'</span>'+gradeItem(g)+'</div>').join('')+'</details>':'';
+ const typeTotals=new Map();
+ for(const g of (snapshot?.grades||[])){
+  const raw=String(g.type||'Тип не указан').trim().slice(0,120)||'Тип не указан';
+  const row=typeTotals.get(raw)||{total:0,official:0};
+  row.total++;if(g.official)row.official++;typeTotals.set(raw,row);
+ }
+ const audit='<details class="school-source-audit"><summary>Проверить типы оценок в выгрузке · '+(snapshot?.grades||[]).length+' записей</summary>'+
+ '<p class="hint">Диагностика только на этом устройстве. Если в дневнике есть четвертная отметка, но здесь нет соответствующего типа, значит её не оказалось в полученной выгрузке.</p>'+
+ [...typeTotals].sort((a,b)=>b[1].official-a[1].official||b[1].total-a[1].total||a[0].localeCompare(b[0],'ru')).map(([name,v])=>
+ '<div class="school-audit-type"><span>'+esc(name)+'</span><span>'+v.total+' зап. · '+v.official+' итоговых</span></div>').join('')+
+ '</details>';
  const empty=recognizedAll.length===0?
  '<div class="empty">В полученной выгрузке пока нет записей, которые программа смогла распознать как официальные итоговые оценки. Это не означает, что их нет в школьном дневнике: нужно проверить исходную выгрузку и типы записей.</div>':
  official.length===0?'<div class="notice info">За текущий учебный год распознанных итоговых пока нет. Проверь архив ниже: отметки за прошлые годы не пропали.</div>':'';
  const info=official.length&&names.length?'<p class="hint">Прочерк не всегда означает отсутствие отметки: если даты четверти не настроены, ищи её в блоке нераспределённых записей.</p>':'';
- return label+diagnostic+empty+table+info+pending+older;
+ return label+diagnostic+empty+table+info+pending+older+audit;
 }
 function schoolYearOf(date){
  const y=Number(String(date||'').slice(0,4)),m=Number(String(date||'').slice(5,7));
