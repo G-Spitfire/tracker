@@ -233,12 +233,23 @@ S.taskDays=S.taskDays&&typeof S.taskDays==='object'?S.taskDays:{};
 S.hiddenTasks=Array.isArray(S.hiddenTasks)?S.hiddenTasks:[];
 S.customTasks=Array.isArray(S.customTasks)?S.customTasks:[];
 S.rewardHistory=S.rewardHistory&&typeof S.rewardHistory==='object'?S.rewardHistory:{};
+S.weekPlans=S.weekPlans&&typeof S.weekPlans==='object'?S.weekPlans:{};
 S.earnedAchievements=S.earnedAchievements&&typeof S.earnedAchievements==='object'?S.earnedAchievements:{};
 // Preserve past earned stars even when a parent's future schedule changes.
 for(const date of Object.keys(S.d||{})){
   if(!Object.hasOwn(S.planHistory,date))S.planHistory[date]=legacyTasks(date);
 }
 const defaultDays={bg:[0,1,2,3,4],cl:[0,1,2,3,4],hw:[1,2,3,4,5],en:[1,2,3,4,5],ho:[0,1,2,3,4,5,6],ex:[0,1,2,3,4,5,6],rd:[0,6]};
+const weekStart=d=>{const date=new Date(d+'T12:00:00');date.setDate(date.getDate()-(date.getDay()+6)%7);return iso(date)};
+const weekPlan=week=>{
+  const awarded=S.rewardHistory[week];
+  if(!S.weekPlans||typeof S.weekPlans!=='object')S.weekPlans={};
+  if(!S.weekPlans[week])S.weekPlans[week]={
+    name:awarded?.name||S.reward||'Семейная награда',
+    goal:awarded?.goal||S.goal||25
+  };
+  return S.weekPlans[week];
+};
 const taskCatalog=()=>[EX,...T,RD,...S.customTasks];
 const tasks=d=>{
   if(Array.isArray(S.planHistory[d]))return S.planHistory[d];
@@ -394,13 +405,13 @@ function setDone(i,on,silent,date){
   if(!L.some(t=>t.i===i))return;
   const previousDetails=!on&&x>=0&&S.x[d]&&S.x[d][i]?JSON.parse(JSON.stringify(S.x[d][i])):null;
   if(on&&x<0)a.push(i);
-  if(!on&&x>=0){a.splice(x,1);if(S.x[d])delete S.x[d][i]}
+  if(!on&&x>=0){a.splice(x,1)} // Details survive an unchecked/rechecked task.
   const all=dn(d).length===L.length;
   const weekStart=new Date(d+'T12:00:00');
   weekStart.setDate(weekStart.getDate()-(weekStart.getDay()+6)%7);
-  const monday=iso(weekStart),weekSum=Array.from({length:7},(_,i)=>{const x=new Date(weekStart);x.setDate(x.getDate()+i);return st(iso(x))}).reduce((a,b)=>a+b,0);
-  if(weekSum>=S.goal&&!S.rewardHistory[monday]){
-    S.rewardHistory[monday]={name:S.reward,goal:S.goal,earnedAt:iso(new Date()),status:'earned'};
+  const monday=iso(weekStart),plan=weekPlan(monday),weekSum=Array.from({length:7},(_,i)=>{const x=new Date(weekStart);x.setDate(x.getDate()+i);return st(iso(x))}).reduce((a,b)=>a+b,0);
+  if(weekSum>=plan.goal&&!S.rewardHistory[monday]){
+    S.rewardHistory[monday]={name:plan.name,goal:plan.goal,earnedAt:iso(new Date()),status:'earned'};
   }
   save();render();
   if(silent)return;
@@ -430,8 +441,9 @@ function removeDetails(){cs();setDone(cur.i,false)}
 function openProfile(){
   sheet(`<h2 style="margin-top:0">${S.name?'Мой герой':'Давай познакомимся!'}</h2><div style="display:grid;place-items:center"><div class="av" style="background:${S.av.c};width:88px;height:88px;font-size:52px">${S.av.e}</div></div><input value="${esc(S.name)}" maxlength="20" placeholder="Как тебя зовут?" data-action="nameInput"><div class="eg">${CONFIG.emojis.map(e=>`<button class="${e==S.av.e?'on':''}" data-action="pickEmoji" data-id="${e}">${e}</button>`).join('')}</div><div class="cl">${CONFIG.colors.map(c=>`<button class="${c==S.av.c?'on':''}" style="background:${c}" data-action="pickColor" data-id="${c}" aria-label="цвет"></button>`).join('')}</div><p data-sheet-footer style="text-align:center;margin:18px 0 0"><button class="btn" data-action="closeProfile">Готово</button></p>`);
 }
+let draftReward='',draftGoal=25;
 function openReward(){
-  sheet(`<h2 style="margin-top:0">Награда недели</h2><input id="rw" maxlength="40" value="${esc(S.reward)}"><div class="sm mu" style="margin-top:14px">Сколько звёзд нужно за неделю?</div><div class="chips">${[20,25,30,35].map(n=>`<button class="chip ${n==S.goal?'on':''}" data-action="setGoal" data-id="${n}">${n}</button>`).join('')}</div><p data-sheet-footer style="margin:18px 0 0"><button class="btn" data-action="saveReward">Готово</button></p>`);
+  sheet(`<h2 style="margin-top:0">Награда недели</h2><p class="mu sm">Изменения награды и цели действуют со следующей недели. Текущая неделя сохранит прежнюю цель.</p><input id="rw" maxlength="40" value="${esc(draftReward)}"><div class="sm mu" style="margin-top:14px">Сколько звёзд нужно за неделю?</div><div class="chips">${[20,25,30,35].map(n=>`<button class="chip ${n===draftGoal?'on':''}" data-action="setGoal" data-id="${n}">${n}</button>`).join('')}</div><p data-sheet-footer style="margin:18px 0 0"><button class="btn" data-action="saveReward">Сохранить</button></p>`);
 }
 
 /* ===== DAY HISTORY ===== */
@@ -525,9 +537,14 @@ const ACTIONS={
   closeProfile:()=>{cs();render()},
   pickEmoji:(e)=>{S.av.e=e;save();openProfile()},
   pickColor:(c)=>{S.av.c=c;save();openProfile()},
-  editReward:()=>openReward(),
-  setGoal:(n)=>{const rw=document.getElementById('rw');if(rw)S.reward=rw.value.trim()||S.reward;S.goal=+n;save();openReward()},
-  saveReward:()=>{const rw=document.getElementById('rw');if(rw)S.reward=rw.value.trim()||S.reward;save();cs();render()},
+  editReward:()=>{weekPlan(weekStart(iso(new Date())));save();draftReward=S.reward;draftGoal=S.goal;openReward()},
+  setGoal:(n)=>{draftReward=document.getElementById('rw')?.value.trim()||draftReward;draftGoal=+n;openReward()},
+  saveReward:()=>{
+    const name=(document.getElementById('rw')?.value||draftReward).trim().slice(0,40)||S.reward;
+    if(!confirm('Сохранить награду и цель для следующих недель?'))return;
+    weekPlan(weekStart(iso(new Date())));
+    S.reward=name;S.goal=draftGoal;save();cs();render();
+  },
   toggle:(i)=>toggleTask(i),
   details:(i)=>openDetails(i),
   detailChip:(j)=>{cur.n=document.getElementById('dn').value;const k=(cur.i=='hw'?CONFIG.subjects:CONFIG.chores)[+j],x=cur.s.indexOf(k);x<0?cur.s.push(k):cur.s.splice(x,1);renderDetails()},
