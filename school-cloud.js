@@ -501,14 +501,6 @@ function view(legacy) {
   if (state.phase === 'empty') body += '<p class="mu sm">Проверь привязку UID в сборщике MacBook.</p>';
   body += '</div>';
   if (state.data && state.user) body += cloudGrades();
-  body += '<button type="button" class="btn g scs-manual" data-sc-action="manual">' +
-    (state.manual ? 'Скрыть ручные оценки' : 'Показать мои прежние ручные оценки') +
-    '</button>';
-  if (state.manual) {
-    body += '<div class="scs-manual-content"><div class="card"><b>Ручные записи</b>' +
-      '<p class="mu sm">Отдельный архив. Не смешивается с оценками из дневника.</p></div>' +
-      legacy() + '</div>';
-  }
   return body + '</section>';
 }
 
@@ -518,6 +510,7 @@ css.textContent += '.scs .scs-grade-audit{margin-top:14px}.scs .scs-grade-audit 
 css.textContent += '.scs .scs-final-list{display:grid;gap:8px;margin:12px 0}.scs .scs-final-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:11px 13px;border:1px solid var(--ln);border-radius:12px;background:var(--bg)}.scs .scs-final-label{font-weight:700;flex:1;min-width:135px}.scs .scs-final-mark{font-size:22px;font-weight:800;border-radius:9px;padding:3px 10px;background:var(--bg)}';
 document.head.appendChild(css);
 window.schoolCloud = {view,summary,
+status:()=>({phase:state.phase,error:state.error,loading:state.loading,connected:!!state.user}),
   // Read-only normalized snapshot for the Vector functional dashboard. No grade data is persisted by Vector.
   snapshot:()=>state.user&&state.data?{
     schoolYear:state.data.schoolYear,syncedAt:state.data.syncedAt,
@@ -592,9 +585,7 @@ document.addEventListener('submit', async event => {
 document.addEventListener('click', async event => {
   const button = event.target.closest('[data-sc-action]');
   if (!button) return;
-  if (button.dataset.scAction === 'manual') {
-    state.manual = !state.manual; notify();
-  } else if (button.dataset.scAction === 'refresh') {
+  if (button.dataset.scAction === 'refresh') {
     refresh(true);
   } else if (button.dataset.scAction === 'logout') {
     if(appKind==='iskra'){try{localStorage.removeItem('iskra_offline_grades_'+auth.currentUser?.uid)}catch(_){}}
