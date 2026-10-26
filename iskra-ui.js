@@ -190,56 +190,83 @@
   ACTIONS.ikTaskTimes=()=>createTimeSheet();
   ACTIONS.ikSaveTimes=()=>{document.querySelectorAll('[data-ik-task-time]').forEach(input=>{if(input.value)S.times[input.dataset.ikTaskTime]=input.value;else delete S.times[input.dataset.ikTaskTime]});save();cs();render()};
 
+  let taskPlanDraft=null;
+  const createTaskDraft=()=>({
+    customTasks:JSON.parse(JSON.stringify(S.customTasks)),
+    taskDays:JSON.parse(JSON.stringify(S.taskDays)),
+    hiddenTasks:[...S.hiddenTasks],
+    taskCategories:{...S.taskCategories}
+  });
+  const taskDraftItems=()=>[EX,...T,RD,...(taskPlanDraft?.customTasks||[])];
   function taskEditor(){
+    if(!taskPlanDraft)taskPlanDraft=createTaskDraft();
     const days=[['Пн',1],['Вт',2],['Ср',3],['Чт',4],['Пт',5],['Сб',6],['Вс',0]];
-    const entries=taskCatalog();
-    const html=entries.map(task=>{
-      const schedule=Array.isArray(S.taskDays[task.i])?S.taskDays[task.i]:(defaultDays[task.i]||[0,1,2,3,4,5,6]);
-      const disabled=S.hiddenTasks.includes(task.i);
-      const cat=S.taskCategories?.[task.i]||task.category||(['hw','en','bg'].includes(task.i)?'school':'personal');
+    const html=taskDraftItems().map(task=>{
+      const schedule=Array.isArray(taskPlanDraft.taskDays[task.i])?taskPlanDraft.taskDays[task.i]:(defaultDays[task.i]||[0,1,2,3,4,5,6]);
+      const disabled=taskPlanDraft.hiddenTasks.includes(task.i);
+      const cat=taskPlanDraft.taskCategories[task.i]||task.category||(['hw','en','bg'].includes(task.i)?'school':'personal');
       return '<div class="ik-plan-row"><div class="ik-row-between"><b>'+safe(task.e||'✨')+' '+safe(task.t)+'</b>'+
-        '<button class="ik-btn-small" data-action="ikHideTask" data-id="'+safe(task.i)+'">'+(disabled?'Включить':'Отключить')+'</button>'+
-        (task.i.startsWith('user-')?'<button class="ik-btn-small" data-action="ikRemoveTask" data-id="'+safe(task.i)+'" aria-label="Удалить дело">×</button>':'')+'</div>'+
-        '<button class="ik-btn-small" data-action="ikTaskCategory" data-id="'+safe(task.i)+'">Категория: '+(cat==='school'?'Учёба':'Личное')+' ⇄</button>'+
+        '<button type="button" class="ik-btn-small" data-action="ikHideTask" data-id="'+safe(task.i)+'">'+(disabled?'Включить':'Отключить')+'</button>'+
+        (task.i.startsWith('user-')?'<button type="button" class="ik-btn-small" data-action="ikRemoveTask" data-id="'+safe(task.i)+'" aria-label="Удалить дело">×</button>':'')+'</div>'+
+        '<button type="button" class="ik-btn-small" data-action="ikTaskCategory" data-id="'+safe(task.i)+'">Категория: '+(cat==='school'?'Учёба':'Личное')+' ⇄</button>'+
         '<div class="ik-plan-days">'+days.map(([label,wd])=>'<button type="button" class="ik-day-pill '+(schedule.includes(wd)?'on':'')+'" data-action="ikTaskDay" data-id="'+safe(task.i)+'" data-arg="'+wd+'" aria-pressed="'+schedule.includes(wd)+'">'+label+'</button>').join('')+'</div></div>';
     }).join('');
-    sheet('<h2>Расписание дел</h2><p class="mu sm">Изменения действуют для новых дней. Ранее выполненные дела и полученные звёзды сохраняются.</p>'+
+    sheet('<h2>Расписание дел</h2><p class="mu sm">Настрой дела и нажми «Сохранить». Все изменения начнут действовать завтра. Текущий день и история останутся прежними.</p>'+
       html+'<h3>Добавить дело</h3><label class="sheet-field">Название<input maxlength="45" id="ik-new-task" placeholder="Например, Погулять"></label>'+
       '<label class="sheet-field">Категория<select id="ik-new-category"><option value="personal">Личное</option><option value="school">Учёба</option></select></label>'+
-      '<button class="btn g" data-action="ikAddTask">Добавить дело</button>');
+      '<button type="button" class="btn g" data-action="ikAddTask">Добавить дело</button>'+
+      '<div data-sheet-footer class="chips"><button type="button" class="btn g" data-action="ikPlanCancel">Отмена</button><button type="button" class="btn" data-action="ikPlanSave">Сохранить</button></div>');
   }
-  ACTIONS.ikManageTasks=()=>taskEditor();
+  ACTIONS.ikManageTasks=()=>{taskPlanDraft=createTaskDraft();taskEditor()};
   ACTIONS.ikTaskCategory=id=>{
-    const task=taskCatalog().find(t=>t.i===id);if(!task)return;
-    freezeDay(iso(new Date()));
-    S.taskCategories=S.taskCategories&&typeof S.taskCategories==='object'?S.taskCategories:{};
-    const current=S.taskCategories[id]||task.category||(['hw','en','bg'].includes(id)?'school':'personal');
-    S.taskCategories[id]=current==='school'?'personal':'school';save();taskEditor();
+    const task=taskDraftItems().find(t=>t.i===id);if(!task)return;
+    const current=taskPlanDraft.taskCategories[id]||task.category||(['hw','en','bg'].includes(id)?'school':'personal');
+    taskPlanDraft.taskCategories[id]=current==='school'?'personal':'school';taskEditor();
   };
   ACTIONS.ikTaskDay=(id,_,el)=>{
-    const wd=Number(el.dataset.arg),task=taskCatalog().find(t=>t.i===id);
+    const wd=Number(el.dataset.arg),task=taskDraftItems().find(t=>t.i===id);
     if(!task||!Number.isInteger(wd)||wd<0||wd>6)return;
-    const arr=Array.isArray(S.taskDays[id])?S.taskDays[id].slice():(defaultDays[id]||[0,1,2,3,4,5,6]).slice();
+    const arr=Array.isArray(taskPlanDraft.taskDays[id])?taskPlanDraft.taskDays[id].slice():(defaultDays[id]||[0,1,2,3,4,5,6]).slice();
     const at=arr.indexOf(wd);if(at>=0)arr.splice(at,1);else arr.push(wd);
-    freezeDay(iso(new Date()));S.taskDays[id]=arr;save();taskEditor();
+    taskPlanDraft.taskDays[id]=arr;taskEditor();
   };
   ACTIONS.ikHideTask=id=>{
-    const task=taskCatalog().find(t=>t.i===id);if(!task)return;
-    freezeDay(iso(new Date()));const at=S.hiddenTasks.indexOf(id);if(at<0)S.hiddenTasks.push(id);else S.hiddenTasks.splice(at,1);
-    save();taskEditor();
+    const task=taskDraftItems().find(t=>t.i===id);if(!task)return;
+    const at=taskPlanDraft.hiddenTasks.indexOf(id);
+    if(at<0)taskPlanDraft.hiddenTasks.push(id);else taskPlanDraft.hiddenTasks.splice(at,1);
+    taskEditor();
   };
   ACTIONS.ikRemoveTask=id=>{
-    if(!S.customTasks.some(t=>t.i===id)||!confirm('Удалить дело из будущих планов? История выполнений останется.'))return;
-    freezeDay(iso(new Date()));S.customTasks=S.customTasks.filter(t=>t.i!==id);save();taskEditor();
+    if(!taskPlanDraft?.customTasks.some(t=>t.i===id))return;
+    taskPlanDraft.customTasks=taskPlanDraft.customTasks.filter(t=>t.i!==id);
+    delete taskPlanDraft.taskDays[id];delete taskPlanDraft.taskCategories[id];
+    taskPlanDraft.hiddenTasks=taskPlanDraft.hiddenTasks.filter(v=>v!==id);
+    taskEditor();
   };
   ACTIONS.ikAddTask=()=>{
     const input=document.getElementById('ik-new-task'),selector=document.getElementById('ik-new-category'),name=input?.value.trim().slice(0,45);
     if(!name)return toast('Введите название дела');
-    if(taskCatalog().length>=30)return toast('Достигнут лимит 30 дел');
-    if(taskCatalog().some(t=>t.t.toLocaleLowerCase('ru-RU')===name.toLocaleLowerCase('ru-RU')))return toast('Такое дело уже существует');
-    freezeDay(iso(new Date()));S.customTasks.push({i:'user-'+Date.now().toString(36),e:'✨',t:name,category:selector?.value==='school'?'school':'personal'});
-    save();taskEditor();
+    if(taskDraftItems().length>=30)return toast('Достигнут лимит 30 дел');
+    if(taskDraftItems().some(t=>t.t.toLocaleLowerCase('ru-RU')===name.toLocaleLowerCase('ru-RU')))return toast('Такое дело уже существует');
+    const id='user-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,5);
+    taskPlanDraft.customTasks.push({i:id,e:'✨',t:name,category:selector?.value==='school'?'school':'personal'});
+    taskEditor();
   };
+  ACTIONS.ikPlanSave=()=>{
+    if(!taskPlanDraft)return;
+    const invalid=taskDraftItems().find(task=>{
+      const days=taskPlanDraft.taskDays[task.i]??defaultDays[task.i]??[0,1,2,3,4,5,6];
+      return !taskPlanDraft.hiddenTasks.includes(task.i)&&days.length===0;
+    });
+    if(invalid){toast('Выбери дни для дела «'+invalid.t+'» или отключи его');return}
+    freezeDay(iso(new Date()));
+    S.customTasks=taskPlanDraft.customTasks;
+    S.taskDays=taskPlanDraft.taskDays;
+    S.hiddenTasks=taskPlanDraft.hiddenTasks;
+    S.taskCategories=taskPlanDraft.taskCategories;
+    taskPlanDraft=null;save();cs();render();toast('Расписание сохранено для будущих дней');
+  };
+  ACTIONS.ikPlanCancel=()=>{taskPlanDraft=null;cs();render()};
   ACTIONS.ikGradePeriods=()=>{
     const html=window.schoolCloud?.termSettingsHtml?.();
     if(!html){toast('Сначала подключи школьный дневник');return}
