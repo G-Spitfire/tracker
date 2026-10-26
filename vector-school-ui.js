@@ -20,10 +20,26 @@ function cumulative(rows) {
   }
   return points;
 }
+function quarterFromType(g){
+ if(!g?.official||g.officialLabel!=='За четверть')return null;
+ const name=String(g.type||'').toLocaleLowerCase('ru-RU').replace(/ё/g,'е');
+ const n=name.match(/(?:^|\s)([1-4])\s*(?:[-–]\s*[яй])?\s*четверт/);
+ if(n)return Number(n[1]);
+ const roman=name.match(/(?:^|\s)(iv|iii|ii|i)\s*четверт/);
+ return roman?({i:1,ii:2,iii:3,iv:4})[roman[1]]:null;
+}
+function gradeQuarter(g,periods,year){
+ const explicit=quarterFromType(g);
+ if(explicit)return explicit;
+ for(const q of [1,2,3,4]){
+  const p=periods?.[year]?.[String(q)];
+  if(p&&safeDate(p.from)&&safeDate(p.to)&&g.date>=p.from&&g.date<=p.to)return q;
+ }
+ return null;
+}
 function officialInQuarter(snapshot,periods,year,quarter,subject) {
- const period=periods?.[year]?.[String(quarter)];
- if(!period||!safeDate(period.from)||!safeDate(period.to))return null;
- return (snapshot?.grades||[]).filter(g=>g.subject===subject&&g.official&&g.officialLabel==='За четверть'&&g.date>=period.from&&g.date<=period.to).sort(compareGrade).at(-1)||null;
+ const yearStart=Number(year.slice(0,4)),from=yearStart+'-09-01',to=(yearStart+1)+'-08-31';
+ return (snapshot?.grades||[]).filter(g=>g.subject===subject&&g.official&&g.officialLabel==='За четверть'&&g.date>=from&&g.date<=to&&gradeQuarter(g,periods,year)===Number(quarter)).sort(compareGrade).at(-1)||null;
 }
 function officialInYear(snapshot,year,subject) {
  const start=Number(year.slice(0,4));
@@ -42,11 +58,11 @@ function rangeRows(snapshot,range) {
 function works(rows) {return rows.filter(g=>!g.official&&Number.isFinite(g.score)&&g.score>=2&&g.score<=5);}
 function average(rows) {return rows.length?rows.reduce((v,g)=>v+g.score,0)/rows.length:null;}
 function button(label,action,extra='') {return '<button type="button" class="button '+extra+'" data-action="'+action+'">'+esc(label)+'</button>';}
-function header(ui,yearOpts) {
+function header(ui) {
  return '<div class="page-title"><div><h1>Школа</h1><div class="sub">Дневник с аналитикой</div></div></div>'+
  '<div class="school-tabs" role="group" aria-label="Раздел школы">'+
  ['overview','finals'].map((x,i)=>'<button type="button" data-action="school-view" data-id="'+x+'" class="school-tab '+((ui.schoolScreen||'overview')===x?'active':'')+'">'+(i?'Итоги':'Дневник')+'</button>').join('')+
- '</div><div class="school-year"><label for="year-picker" class="hint">Учебный год</label><select id="year-picker">'+yearOpts+'</select></div>';
+ '</div><div class="school-year-label hint">Учебный год '+esc(ui.year)+'</div>';
 }
 function chartInfo(point,subject) {
  if(!point)return '';
@@ -162,8 +178,9 @@ function overview(ui,snapshot,rows,range,periods,helpers) {
  chosen.map((name,i)=>({key:name,name,color:palette[i],points:cumulative(ordinary.filter(g=>g.subject===name))}));
  const toggles='<div class="school-mode-switch"><button class="'+(mode==='overall'?'active':'')+'" data-action="school-chart-mode" data-id="overall">Общий средний</button>'+
  '<button class="'+(mode==='subjects'?'active':'')+'" data-action="school-chart-mode" data-id="subjects">По предметам</button></div>';
- const checkboxes=mode==='subjects'?'<div class="school-checks">'+possible.map(n=>'<label class="school-check"><input type="checkbox" data-school-compare="'+esc(n)+'" '+(chosen.includes(n)?'checked':'')+'><span>'+esc(n)+'</span></label>').join('')+'</div>'+
- '<p class="hint">Выбери до трёх предметов для сравнения.</p>'+ (ui.schoolChartWarning?'<p class="school-warn">'+esc(ui.schoolChartWarning)+'</p>':''):'';
+ const checkboxes=mode==='subjects'?'<details class="school-compare-picker" '+(ui.schoolCompareOpen?'open':'')+'><summary>Выбрать предметы <span class="school-selected-count">'+chosen.length+' из 3</span></summary>'+
+ '<div class="school-checks">'+possible.map(n=>'<label class="school-check"><input type="checkbox" data-school-compare="'+esc(n)+'" '+(chosen.includes(n)?'checked':'')+'><span>'+esc(n)+'</span></label>').join('')+'</div>'+
+ '<p class="hint">На графике отображаются максимум три предмета.</p>'+ (ui.schoolChartWarning?'<p class="school-warn">'+esc(ui.schoolChartWarning)+'</p>':'')+'</details>':'';
  const legend=mode==='subjects'?'<div class="school-legend">'+series.map(item=>'<span><i style="background:'+item.color+'"></i>'+esc(item.name)+'</span>').join('')+'</div>':'';
  const graph='<div class="card school-chart-card"><div class="school-chart-heading"><div><h3>Динамика успеваемости</h3><p class="hint">Накопленный средний балл · шкала 2–5</p></div></div>'+toggles+checkboxes+legend+
  chart(series,range,ui.schoolChartPoint)+
@@ -208,9 +225,10 @@ function render(ctx) {
   if(active)ui.quarter=active;
   ui.schoolPeriodTouched=true;
  }
- const years=[...new Set([schoolYearFor(currentDate()),String(snap.schoolYear||'').replace('/','-'),...snap.grades.map(g=>schoolYearFor(g.date))].filter(y=>/^\d{4}-\d{4}$/.test(y)))].sort().reverse();
- const opts=years.map(y=>'<option value="'+esc(y)+'" '+(ui.year===y?'selected':'')+'>'+esc(y)+'</option>').join('');
- const tabs=header(ui,opts);
+ // The year is automatic and cannot be changed in this version.
+ const targetYear=schoolYearFor(currentDate());
+ if(ui.year!==targetYear){ui.year=targetYear;ui.quarter='year';ui.subject='';ui.editTerm=false;ui.schoolPeriodTouched=false;}
+ const tabs=header(ui);
  if(ui.schoolScreen==='finals'){
   if(ui.subject){ui.subject='';ui.schoolChartPoint=null;}
   return status+tabs+finals(ui,snap,s.schoolPeriods||{});
@@ -234,6 +252,7 @@ function handleAction(btn,ctx) {
 function onChange(event,ctx) {
  const input=event.target;if(!input.matches('[data-school-compare]'))return false;
  const ui=ctx.ui,name=input.dataset.schoolCompare;
+ ui.schoolCompareOpen=!!input.closest?.('.school-compare-picker')?.open;
  const snap=ctx.cloudSnapshot(),range=ctx.schoolRange(),rows=works(rangeRows(snap,range));
  const choices=[...new Set(rows.map(g=>g.subject))].sort((a,b)=>a.localeCompare(b,'ru'));
  let chosen=Array.isArray(ui.schoolChartSubjects)?ui.schoolChartSubjects.filter(n=>choices.includes(n)):choices.slice(0,3);
@@ -244,6 +263,6 @@ function onChange(event,ctx) {
  ui.schoolChartSubjects=chosen;ui.schoolChartWarning='';ui.schoolChartPoint=null;
  ctx.render();return true;
 }
-window.VectorSchool={render,handleAction,onChange,test:{cumulative,officialInQuarter,officialInYear,termState,rangeRows,works,average}};
+window.VectorSchool={render,handleAction,onChange,test:{cumulative,officialInQuarter,officialInYear,quarterFromType,gradeQuarter,termState,rangeRows,works,average}};
 if(typeof window.render==='function')window.render();
 })();
