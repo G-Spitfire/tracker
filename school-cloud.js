@@ -180,20 +180,34 @@ function cloudGrades() {
   s += ordered.map(([subject, marks]) => {
     const nums = marks.map(r => r.n);
     const mean = nums.length ? Number(avg(nums.map(n => ({n})))) : null;
-    const chips = marks.slice().sort((a, b) => b.date.localeCompare(a.date) ||
-      b.id.localeCompare(a.id)).map(row => {
+    // Same direction as a chronological journal: older entries first.
+    // School record IDs are unique but two different IDs can still be visually identical.
+    const chronological = marks.slice().sort((a, b) => a.date.localeCompare(b.date) ||
+      a.id.localeCompare(b.id));
+    const chips = chronological.map(row => {
       const val = row.n;
       const tip = [row.date.split('-').reverse().join('.'), row.type].filter(Boolean).join(' · ');
       return '<span class="chip c' + val +
         '" title="' + esc(tip) + '" aria-label="' + esc(tip + ': ' + val) +
         '">' + val + '</span>';
     }).join('');
+    const items = chronological.map(row => '<li class="scs-grade-detail">' +
+      '<span class="scs-grade-date">' + esc(row.date.split('-').reverse().join('.')) + '</span>' +
+      '<span class="scs-grade-number c' + row.n + '">' + row.n + '</span>' +
+      '<span class="mu sm">' + esc(row.type || 'Вид работы не указан') + '</span></li>').join('');
     return '<div class="card sub"><div class="row"><div><b>' + esc(subject) +
-      '</b><div class="mu sm">' + (mean === null ? 'Нет числовых оценок' :
-      'Средний ' + mean.toFixed(2) + ' · прогноз ' + forecast(mean)) +
-      '</div></div></div><div class="chips">' + chips + '</div></div>';
+      '</b><div class="mu sm">Средний ' + mean.toFixed(2) +
+      ' · прогноз ' + forecast(mean) + ' · оценок: ' + chronological.length +
+      '</div></div></div><div class="chips">' + chips + '</div>' +
+      '<details class="scs-grade-audit"><summary>Посмотреть даты и работы (' +
+      chronological.length + ')</summary><ol>' + items + '</ol>' +
+      '<p class="mu sm">Сравни с дневником за те же даты. Две одинаковые оценки ' +
+      'в один день могут быть разными работами — ничего не удаляется автоматически.</p>' +
+      '</details></div>';
   }).join('');
-  s += '<p class="mu sm">Показаны только оценки от 2 до 5. Отсутствия и служебные отметки журнала скрыты. Прогноз условный: школьные коэффициенты не применяются.</p>';
+  s += '<p class="mu sm">Период: ' + esc(state.from.split('-').reverse().join('.')) +
+    ' — ' + esc(state.to.split('-').reverse().join('.')) +
+    '. Сравнивай с тем же периодом в школьном дневнике. Показаны только оценки 2–5; отсутствия и служебные записи скрыты. Прогноз условный: школьные коэффициенты не применяются.</p>';
   return s;
 }
 
@@ -263,6 +277,7 @@ function view(legacy) {
 
 const css = document.createElement('style');
 css.textContent = '.scs{display:block}.scs .scs-head,.scs .scs-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}.scs .scs-flag{font-size:11px;opacity:.75}.scs .scs-form{display:grid;gap:12px;margin-top:15px}.scs .scs-form label,.scs .scs-filters label{display:grid;gap:6px;font-size:13px;font-weight:600}.scs input{padding:11px;border:1px solid var(--ln);border-radius:11px;background:var(--bg);color:var(--tx);font:inherit;min-width:0;box-sizing:border-box;width:100%}.scs .scs-actions{justify-content:flex-start;margin-top:12px}.scs .scs-filters{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}.scs .scs-warning{color:var(--bad);margin:12px 0;font-size:14px}.scs .scs-manual{width:100%;margin:14px 0}.scs .chips{display:flex;gap:6px;flex-wrap:wrap}.scs .chips .chip{cursor:default}.scs .sub{margin:9px 0}@media(max-width:360px){.scs .scs-filters{grid-template-columns:1fr}}';
+css.textContent += '.scs .scs-grade-audit{margin-top:14px}.scs .scs-grade-audit summary{cursor:pointer;font-size:13px;font-weight:700;padding:8px 0}.scs .scs-grade-audit ol{padding:0;list-style:none;margin:6px 0}.scs .scs-grade-detail{display:grid;grid-template-columns:100px 32px minmax(0,1fr);gap:10px;align-items:center;border-bottom:1px solid var(--ln);padding:9px 0;font-size:13px}.scs .scs-grade-date{font-variant-numeric:tabular-nums}.scs .scs-grade-number{display:inline-flex;width:30px;height:30px;border-radius:50%;align-items:center;justify-content:center;background:var(--bg);font-weight:750}.scs .scs-grade-detail .mu{overflow-wrap:anywhere}@media(max-width:360px){.scs .scs-grade-detail{grid-template-columns:82px 30px minmax(0,1fr);gap:6px}}';
 document.head.appendChild(css);
 window.schoolCloud = { view, summary };
 notify();
