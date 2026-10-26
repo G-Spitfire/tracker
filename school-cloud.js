@@ -327,7 +327,8 @@ function ikPeriodButtons() {
 }
 function ikPeriodEditor() {
   const needs=ikPeriod!=='all'&&!ikRange();
-  if(ikPeriod==='all'||(!needs&&ikEditing!==ikPeriod))return '';
+  if(ikPeriod==='all')return '';
+  if(!needs&&ikEditing!==ikPeriod){const p=ikRange();return '<div class="ik-row-between"><span class="ik-muted">'+ikDate(p.from)+' — '+ikDate(p.to)+'</span><button type="button" class="ik-btn-small" data-ik-edit-period="1">Изменить даты</button></div>'}
   const p=ikSavedPeriods[ikPeriod]||{},name=ikPresets.find(x=>x[0]===ikPeriod)?.[1]||'Период';
   return '<form class="ik-period-editor" id="ik-period-form"><b>'+esc(name)+': укажи даты</b>'+
     '<p class="ik-muted" style="margin:0">Даты четвертей устанавливаются вручную, поскольку школьная база не передаёт их надёжные границы.</p>'+
@@ -448,7 +449,7 @@ css.textContent = '.scs{display:block}.scs .scs-head,.scs .scs-actions{display:f
 css.textContent += '.scs .scs-grade-audit{margin-top:14px}.scs .scs-grade-audit summary{cursor:pointer;font-size:13px;font-weight:700;padding:8px 0}.scs .scs-grade-audit ol{padding:0;list-style:none;margin:6px 0}.scs .scs-grade-detail{display:grid;grid-template-columns:100px 32px minmax(0,1fr);gap:10px;align-items:center;border-bottom:1px solid var(--ln);padding:9px 0;font-size:13px}.scs .scs-grade-date{font-variant-numeric:tabular-nums}.scs .scs-grade-number{display:inline-flex;width:30px;height:30px;border-radius:50%;align-items:center;justify-content:center;background:var(--bg);font-weight:750}.scs .scs-grade-detail .mu{overflow-wrap:anywhere}@media(max-width:360px){.scs .scs-grade-detail{grid-template-columns:82px 30px minmax(0,1fr);gap:6px}}';
 css.textContent += '.scs .scs-final-list{display:grid;gap:8px;margin:12px 0}.scs .scs-final-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:11px 13px;border:1px solid var(--ln);border-radius:12px;background:var(--bg)}.scs .scs-final-label{font-weight:700;flex:1;min-width:135px}.scs .scs-final-mark{font-size:22px;font-weight:800;border-radius:9px;padding:3px 10px;background:var(--bg)}';
 document.head.appendChild(css);
-window.schoolCloud = { view, summary };
+window.schoolCloud = { view, summary, connection:()=>({isConnected:!!state.user,email:state.user?.email||''}) };
 notify();
 
 onAuthStateChanged(auth, user => {
@@ -514,6 +515,7 @@ document.addEventListener('click', event => {
   if (appKind !== 'iskra') return;
   const period=event.target.closest('[data-ik-period]');
   if(period){ikPeriod=period.dataset.ikPeriod;ikEditing=ikPeriod!=='all'&&!ikValidRange(ikSavedPeriods[ikPeriod])?ikPeriod:'';ikSubject='';notify();return}
+  if(event.target.closest('[data-ik-edit-period]')){ikEditing=ikPeriod;notify();return}
   const subj=event.target.closest('[data-ik-subject]');
   if(subj){ikSubject=subj.dataset.ikSubject;notify();window.scrollTo(0,0);return}
   if(event.target.closest('[data-ik-back]')){ikSubject='';notify();window.scrollTo(0,0)}
