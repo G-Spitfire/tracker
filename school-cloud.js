@@ -566,6 +566,12 @@ document.addEventListener('submit', async event => {
     state.phase = 'signedOut';
     state.error = errorText(err);
     notify();
+    const target=document.querySelector('#scs-login');
+    if(target){
+      let message=document.querySelector('#scs-login-error');
+      if(!message){message=document.createElement('p');message.id='scs-login-error';message.className='scs-warning';message.setAttribute('role','status');target.after(message)}
+      message.textContent=state.error;
+    }
   }
 });
 
@@ -640,9 +646,18 @@ document.addEventListener('submit',event=>{
     const from=form.elements[q+'_from'].value,to=form.elements[q+'_to'].value;
     if(!!from!==!!to||(from&&(!ikValidRange({from,to})||ikYearForDate(from)!==year))){
       state.error='Проверь границы четвертей: обе даты должны относиться к выбранному учебному году.';
-      notify();return;
+      let msg=form.querySelector('.scs-warning');
+      if(!msg){msg=document.createElement('p');msg.className='scs-warning';msg.setAttribute('role','status');form.append(msg)}
+      msg.textContent=state.error;notify();return;
     }
     if(from)next[ikTermKey(q,year)]={from,to};
+  }
+  const ordered=['q1','q2','q3','q4'].map(q=>next[ikTermKey(q,year)]).filter(Boolean);
+  if(ordered.some((p,i)=>i>0&&p.from<=ordered[i-1].to)){
+    state.error='Четверти должны идти по порядку и не пересекаться.';
+    let msg=form.querySelector('.scs-warning');
+    if(!msg){msg=document.createElement('p');msg.className='scs-warning';msg.setAttribute('role','status');form.append(msg)}
+    msg.textContent=state.error;notify();return;
   }
   for(const q of ['q1','q2','q3','q4'])delete ikSavedPeriods[ikTermKey(q,year)];
   Object.assign(ikSavedPeriods,next);
