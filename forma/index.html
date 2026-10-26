@@ -58,6 +58,16 @@ window.addEventListener('storage',e=>{if(e.key===THEME_KEY||e.key===null){themeC
 .plan-unsaved{font-size:12px;color:var(--accent);font-weight:650}
 .plan-reset-link{border:0;background:transparent;color:var(--sub);padding:7px 0;font-size:12px;text-decoration:underline}
 
+
+.activity-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:13px 0}
+.activity-stats>div{display:grid;gap:4px;padding:14px;background:var(--neutral);border-radius:12px}
+.activity-stats strong{font-size:26px;font-variant-numeric:tabular-nums}
+.activity-stats small{font-size:11px;color:var(--sub)}
+.activity-days{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:7px;margin-top:14px}
+.activity-day{width:100%;max-width:24px;aspect-ratio:1;justify-self:center;background:var(--neutral);border:1px solid var(--line);border-radius:7px}
+.activity-day.trained{background:var(--accent);border-color:var(--accent)}
+.activity-range{display:flex;justify-content:space-between;margin-top:8px}
+
 @media(max-width:400px){.shell{padding-left:12px;padding-right:12px}.card{padding:16px}.hero h2{font-size:27px}.stat .value{font-size:18px}.top{padding-top:20px}.btn{font-size:13px}}@media(min-width:760px){.shell{padding-bottom:105px}.navinner{max-width:760px}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 
 :root{--button:#245cdb;--brand:#172132;--soft-end:#f8faff;--accent-line:#bfcef4;--neutral:#f0f2f6;--field:#fcfcfe;--nav:rgba(255,255,255,.96);--danger:#b73536;--warn-bg:#fff4e6;--warn-text:#895c29;--switch-off:#cbd2dd}
@@ -124,7 +134,7 @@ function setTab(t){ui.tab=t;ui.showSession=null;render();scrollTo({top:0,behavio
 function navHTML(){const tabs=[['today','Тренировка'],['history','История'],['progress','Прогресс'],['settings','Данные']];return tabs.map(([id,title])=>`<button data-action="tab" data-val="${id}" class="${ui.tab===id?'active':''}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[id]}</svg>${title}</button>`).join('')}
 function render(){document.getElementById('topDate').innerHTML=`${dateFmt(new Date(),{weekday:'long'})}<br>${dateFmt(new Date(),{day:'numeric',month:'long',year:'numeric'})}`;document.getElementById('nav').innerHTML=navHTML();document.getElementById('main').innerHTML=ui.tab==='today'?renderToday():ui.tab==='history'?renderHistory():ui.tab==='progress'?renderProgress():renderSettings();updateClock()}
 function renderToday(){if(db.active)return renderActive();const chosen=PROGRAM[ui.chosen];const items=exercises(ui.chosen,ui.goodWeather?'outdoor':'home');return `<section class="card hero"><div class="eyebrow">ЭТА НЕДЕЛЯ · ${weeklyCount()}/3 ОСНОВНЫХ</div><h2>Сильнее.<br>Шире. Собраннее.</h2><p>Три основные тренировки в неделю. Отмечай подходы — время и прогресс сохраняются автоматически.</p><span class="pill dark">Следующая по циклу: ${DAY_LABEL[nextWorkout()]}</span></section>
-<div class="section">Выбери тренировку<small>A → B → C. D — по желанию, начиная примерно с 5-й недели.</small></div><div class="workouts">${Object.keys(PROGRAM).map(id=>`<button class="workout-tile ${ui.chosen===id?'selected':''}" data-action="choose" data-val="${id}"><div class="letter">${PROGRAM[id].label}</div><b>${esc(PROGRAM[id].title)}</b><div class="name">${esc(PROGRAM[id].where)}</div></button>`).join('')}</div>
+<div class="section">Выбери тренировку<small>A → B → C. D — дополнительная, по желанию.</small></div><div class="workouts">${Object.keys(PROGRAM).map(id=>`<button class="workout-tile ${ui.chosen===id?'selected':''}" data-action="choose" data-val="${id}"><div class="letter">${PROGRAM[id].label}</div><b>${esc(PROGRAM[id].title)}</b><div class="name">${esc(PROGRAM[id].where)}</div></button>`).join('')}</div>
 <div class="card" style="margin-top:13px"><div class="flex"><div><div class="eyebrow">ПЛАН ${chosen.label}</div><h2 style="font-size:20px;margin:6px 0 5px">${chosen.title}</h2><div class="caption">${chosen.summary}</div></div><span class="pill">${items.length} упражнений</span></div>${ui.chosen!=='G'?`<div class="switchrow"><label class="switch"><input id="outdoor" type="checkbox" ${ui.goodWeather?'checked':''}><span class="knob"></span></label><div><strong>На улице</strong><div class="muted">Включено — на улице, выключено — дома</div></div></div>`:''}<div class="line" style="margin:1px 0 8px"></div>${items.map((e,i)=>`<div class="plan-row"><div class="no">${i+1}</div><div class="plan-details"><b>${esc(e.name)}</b><div class="caption">${esc(CUES[e.id].cue)}</div></div><div class="count">${e.sets}×${e.min===e.max?e.min:e.min+'–'+e.max}${e.perLeg?' / н':''}</div></div>`).join('')}<button class="btn light full" data-action="edit-plan" style="margin-top:14px">Настроить упражнения</button><button class="btn primary full" data-action="start" style="margin-top:9px">Начать тренировку ${chosen.label} →</button><p class="caption">Время начала фиксируется по кнопке. Время первого подхода — при первой отметке. Каждый подход получает собственную временную метку.</p></div>${renderOfp()}`}
 function renderOfp(){const today=dayKey();const done=db.ofpDays.includes(today);return `<div class="card soft"><div class="checkrow"><div class="circlecheck">${done?'✓':'＋'}</div><div style="flex:1"><b>Ежедневная ОФП</b><div class="caption">Шея, изометрия в 4 направлениях, лопатки, bird dog / dead bug · 7–10 минут</div></div><button class="btn small ${done?'light':'primary'}" data-action="ofp">${done?'Готово':'Отметить'}</button></div><details class="how"><summary>Показать комплекс ▾</summary><p>1. Chin tuck — 8–10×3 сек.<br>2. Изометрия: лоб, затылок, вправо, влево — по 3×5 сек. с лёгким усилием (20–30%).<br>3. Контроль лопаток — 10 раз.<br>4. Bird dog и dead bug чередуются по дням — 2×6–8 на сторону.<br><strong>Остановись, если появляются боль, онемение или головокружение.</strong></p></details></div>`}
 function start(){if(db.active)return notify('Сначала заверши текущую тренировку');armAudio();const active={id:'s_'+Date.now(),workout:ui.chosen,mode:ui.goodWeather?'outdoor':'home',startedAt:nowISO(),exercises:exercises(ui.chosen,ui.goodWeather?'outdoor':'home'),logs:[],note:'',rest:null};if(!save({...db,active,programStartedAt:db.programStartedAt||active.startedAt}))return;ui.drafts={};ui.focusSlot=active.exercises[0]?.slot??null;render();notify('Тренировка началась. Удачи!')}
@@ -187,44 +197,71 @@ function finish(){
 function renderHistory(){if(ui.showSession){const s=db.sessions.find(x=>x.id===ui.showSession);if(s)return renderSessionDetail(s);ui.showSession=null}return `<div class="section">История<small>Здесь хранятся точные временные метки и фактические повторения.</small></div>${db.sessions.length?`<div class="card">${db.sessions.slice().reverse().map(s=>`<div class="history-item"><div class="flex"><div><div class="history-title">Тренировка ${DAY_LABEL[s.workout]} · ${esc(dateFmt(s.startedAt,{day:'numeric',month:'long',year:'numeric'}))}</div><div class="caption">${timeFmt(s.startedAt)} → ${timeFmt(s.endedAt)} · ${dur(workoutElapsed(s,s.endedAt))}</div><div class="selected-facts"><span class="pill">${s.logs.length} подходов</span>${s.mode==='outdoor'?'<span class="pill green">Хорошая погода</span>':''}</div></div><button class="btn small" data-action="view" data-id="${esc(s.id)}">Открыть</button></div></div>`).join('')}</div>`:'<div class="card empty"><div class="big">◷</div>Пока нет завершённых тренировок.<br>После первой здесь появятся время, повторения и длительность.</div>'}`}
 function renderSessionDetail(s){const first=s.logs?.[0]?.loggedAt;return `<div class="buttons"><button class="btn ghost" data-action="back-history">← Все тренировки</button></div><div class="card hero"><div class="eyebrow">ТРЕНИРОВКА ${DAY_LABEL[s.workout]} · ${dateFmt(s.startedAt,{day:'numeric',month:'long'})}</div><h2>${dur(workoutElapsed(s,s.endedAt))}</h2><p>Начало: ${timeFmt(s.startedAt)}<br>Первая отметка: ${first?timeFmt(first):'—'}<br>Завершение: ${timeFmt(s.endedAt)}</p></div><div class="card"><div class="flex"><b>Подходы и отметки</b><span class="pill">${s.logs.length} записей</span></div>${s.exercises.map(e=>{const logs=s.logs.filter(x=>x.slot===e.slot);return `<div class="plan-row"><div class="no">${e.slot+1}</div><div class="plan-details"><b>${esc(e.name)}</b><div class="caption">${logs.length?logs.map(l=>`№${l.setNumber}: ${l.reps}${e.perLeg?' на ногу':''} — ${timeFmt(l.loggedAt)}`).join('<br>'):'Нет отмеченных подходов'}</div></div></div>`}).join('')}${s.note?`<p class="notice">${esc(s.note)}</p>`:''}<div class="buttons"><button class="btn danger ghost full" data-action="delete-session" data-id="${esc(s.id)}">Удалить эту тренировку</button></div></div>`}
 function measurePoints(){return db.measures.slice().sort((a,b)=>Date.parse(a.createdAt)-Date.parse(b.createdAt))}
-function weekStart(t){const d=new Date(t);d.setHours(0,0,0,0);d.setDate(d.getDate()-(d.getDay()+6)%7);return d}
-function statWeek(t){
- const origin=db.programStartedAt||[...db.sessions.map(x=>x.startedAt),db.active?.startedAt].filter(Boolean).sort()[0];
- if(!origin)return null;const a=weekStart(origin),b=weekStart(t),utc=x=>Date.UTC(x.getFullYear(),x.getMonth(),x.getDate());
- return Math.floor((utc(b)-utc(a))/604800000)+1;
+function strengthRecords(id){
+ return db.sessions.filter(s=>Array.isArray(s.logs)&&s.logs.some(l=>l.exId===id)).map(s=>{
+  const firstBySlot=new Map();
+  for(const l of s.logs){
+   if(l.exId!==id)continue;
+   const prior=firstBySlot.get(l.slot);
+   if(!prior||l.setNumber<prior.setNumber)firstBySlot.set(l.slot,l);
+  }
+  const values=[...firstBySlot.values()].map(l=>l.reps);
+  return {date:new Date(s.startedAt),reps:Math.max(...values)};
+ }).filter(p=>Number.isFinite(p.date.getTime())&&Number.isFinite(p.reps)).sort((a,b)=>a.date-b.date).slice(-16);
 }
-function statExercise(id){
- const current=Math.max(1,statWeek(nowISO())||1),start=Math.max(1,current-7),result=Array(current-start+1).fill(null);
- for(const s of db.sessions){const w=statWeek(s.startedAt);if(!w||w<start||w>current)continue;
- const first=new Map();for(const l of s.logs){if(l.exId!==id)continue;const x=first.get(l.slot);if(!x||l.setNumber<x.setNumber)first.set(l.slot,l)}
- for(const l of first.values())result[w-start]=Math.max(result[w-start]??-Infinity,l.reps)}
- return result;
-}
-function statCounts(){
- const current=Math.max(1,statWeek(nowISO())||1),start=Math.max(1,current-7),result=Array(current-start+1).fill(0);
- for(const s of db.sessions){const w=statWeek(s.startedAt);if(w>=start&&w<=current&&s.workout!=='G'&&s.logs?.length)result[w-start]++}
- return result;
+function recentActivity(){
+ const today=new Date();today.setHours(0,0,0,0);
+ const start=new Date(today);start.setDate(today.getDate()-29);
+ const previousStart=new Date(start);previousStart.setDate(start.getDate()-30);
+ const counts=new Map();let last30=0,prior30=0;
+ const main=db.sessions.filter(s=>s.workout!=='G'&&s.logs?.length&&Number.isFinite(Date.parse(s.startedAt)));
+ for(const session of main){
+  const when=new Date(session.startedAt),day=dayKey(when);
+  if(when>=start){last30++;counts.set(day,(counts.get(day)||0)+1)}
+  else if(when>=previousStart)prior30++;
+ }
+ const days=Array.from({length:30},(_,i)=>{
+  const d=new Date(start);d.setDate(start.getDate()+i);
+  return {day:dayKey(d),count:counts.get(dayKey(d))||0,label:dateFmt(d,{day:'numeric',month:'short'})};
+ });
+ return {days,last30,prior30,allMain:main.length};
 }
 function statDiff(data,unit){const a=data.filter(x=>Number.isFinite(x));if(a.length<2)return '—';const d=a.at(-1)-a[0];return(d>0?'+':'')+Number(d.toFixed(2)).toLocaleString('ru-RU')+' '+unit+(a[0]?' ('+(d>0?'+':'')+Math.round(100*d/a[0])+'%)':'')}
 function statPlot(a){const good=a.map((y,i)=>({y,i})).filter(p=>Number.isFinite(p.y));if(!good.length)return '<p class="caption">Нет данных</p>';let mn=Math.min(...good.map(x=>x.y)),mx=Math.max(...good.map(x=>x.y)),s=Math.max(1,mx-mn);const X=i=>30+i*540/Math.max(1,a.length-1),Y=y=>155-(y-mn+s*.2)/(s*1.4)*130;let lines=[],part=[];a.forEach((y,i)=>{if(!Number.isFinite(y)){if(part.length>1)lines.push(part.join(' '));part=[]}else part.push(X(i)+','+Y(y))});if(part.length>1)lines.push(part.join(' '));return '<div class="chart-wrap"><svg viewBox="0 0 600 180" role="img" aria-label="График">'+lines.map(p=>'<polyline points="'+p+'" fill="none" stroke="var(--accent)" stroke-width="3"/>').join('')+good.map(p=>'<circle cx="'+X(p.i)+'" cy="'+Y(p.y)+'" r="4" fill="var(--accent)"><title>№'+(p.i+1)+': '+p.y+'</title></circle>').join('')+'</svg></div>'}
 function strengthChart(){
  const defs=[['pull','Подтягивания','#245cdb'],['push','Отжимания','#dd843f'],['squat','Приседания','#24977d']];
- const d=defs.map(([id,name,color])=>{const raw=statExercise(id),base=raw.find(v=>v!=null&&v>0);return {name,color,raw,pct:raw.map(v=>base&&v!=null?Math.round(100*(v/base-1)):null)}});
- const a=d.flatMap(z=>z.pct).filter(Number.isFinite);if(!a.length)return '<p class="caption">Нет результатов по базовым упражнениям.</p>';
- const mn=Math.min(0,...a),mx=Math.max(0,...a),pad=Math.max(10,(mx-mn)*.15),n=d[0].raw.length,start=Math.max(1,(statWeek(nowISO())||1)-n+1),X=i=>40+535*i/Math.max(1,n-1),Y=v=>155-(v-mn+pad)/(mx-mn+2*pad)*135;let marks='';
- for(const z of d){let seg=[];const flush=()=>{if(seg.length>1)marks+='<polyline fill="none" stroke="'+z.color+'" stroke-width="3" points="'+seg.join(' ')+'"/>';seg=[]};
- z.pct.forEach((v,i)=>{if(v==null){flush();return}seg.push(X(i)+','+Y(v));marks+='<circle cx="'+X(i)+'" cy="'+Y(v)+'" r="4" fill="'+z.color+'"><title>'+z.name+' / неделя '+(start+i)+': '+z.raw[i]+' повторений ('+v+'%)</title></circle>'});flush()}
- const legend=d.map(z=>{const v=z.raw.filter(x=>x!=null);return '<div class="strength-legend"><span style="background:'+z.color+'"></span><div><b>'+z.name+'</b><div class="caption">'+(v.length?v[0]+' → '+v.at(-1)+' повторений · '+statDiff(v,'повт.'):'Нет данных')+'</div></div></div>'}).join('');
- return '<div class="chart-wrap"><svg viewBox="0 0 600 180" role="img" aria-label="Силовой прогресс по календарным неделям"><line x1="40" x2="575" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="currentColor" opacity=".2"/>'+marks+'<text x="40" y="177" font-size="11" fill="currentColor">Нед. '+start+'</text><text x="575" y="177" text-anchor="end" font-size="11" fill="currentColor">Нед. '+(start+n-1)+'</text></svg></div>'+legend;
+ const groups=defs.map(([id,name,color])=>{
+  const records=strengthRecords(id),base=records[0]?.reps;
+  return {name,color,records,points:records.map(p=>({...p,pct:base?100*(p.reps/base-1):0}))};
+ });
+ const all=groups.flatMap(g=>g.points);
+ if(!all.length)return '<p class="caption">Пока нет результатов по базовым упражнениям.</p>';
+ const minTime=Math.min(...all.map(p=>p.date.getTime())),maxTime=Math.max(...all.map(p=>p.date.getTime()));
+ const allPct=all.map(p=>p.pct),minPct=Math.min(0,...allPct),maxPct=Math.max(0,...allPct);
+ const pad=Math.max(10,(maxPct-minPct)*.15);
+ const X=d=>minTime===maxTime?306:40+(d.getTime()-minTime)/(maxTime-minTime)*535;
+ const Y=v=>155-(v-minPct+pad)/(maxPct-minPct+2*pad)*135;
+ let artwork='';
+ for(const g of groups){
+  const points=g.points.map(p=>X(p.date).toFixed(2)+','+Y(p.pct).toFixed(2));
+  if(points.length>1)artwork+='<polyline fill="none" stroke="'+g.color+'" stroke-width="3" points="'+points.join(' ')+'"/>';
+  for(const p of g.points)artwork+='<circle cx="'+X(p.date)+'" cy="'+Y(p.pct)+'" r="4" fill="'+g.color+'"><title>'+g.name+', '+dateFmt(p.date)+': '+p.reps+' повт. ('+Math.round(p.pct)+'%)</title></circle>';
+ }
+ const labels=groups.map(g=>{
+  const first=g.records[0],last=g.records.at(-1);
+  const change=first&&last?(last.reps-first.reps):null;
+  return '<div class="strength-legend"><span style="background:'+g.color+'"></span><div><b>'+g.name+'</b><div class="caption">'+(last?first.reps+' → '+last.reps+' повторений'+(g.records.length>1?' ('+(change>0?'+':'')+Math.round(100*change/first.reps)+'%)':''):'Нет данных')+'</div></div></div>';
+ }).join('');
+ return '<div class="chart-wrap"><svg viewBox="0 0 600 180" role="img" aria-label="Силовой прогресс по датам занятий"><line x1="40" x2="575" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="currentColor" opacity=".2"/>'+artwork+'<text x="40" y="177" font-size="11" fill="currentColor">'+dateFmt(minTime)+'</text><text x="575" y="177" text-anchor="end" font-size="11" fill="currentColor">'+dateFmt(maxTime)+'</text></svg></div>'+labels;
 }
 function renderProgress(){
-const week=statWeek(nowISO())||1,counts=statCounts(),firstWeek=Math.max(1,week-counts.length+1),weight=measurePoints().filter(x=>Number.isFinite(x.weight)),abd=measurePoints().filter(x=>Number.isFinite(x.abdomen)),body=ui.chart==='weight'?weight:abd;
+const activity=recentActivity(),weight=measurePoints().filter(x=>Number.isFinite(x.weight)),abd=measurePoints().filter(x=>Number.isFinite(x.abdomen)),body=ui.chart==='weight'?weight:abd;
 const completedWorkouts=db.sessions.filter(x=>x.logs?.length&&Number.isFinite(Date.parse(x.startedAt))&&Number.isFinite(Date.parse(x.endedAt))&&Date.parse(x.endedAt)>=Date.parse(x.startedAt));const totalMinutes=Math.floor(completedWorkouts.reduce((sum,x)=>sum+workoutElapsed(x,x.endedAt),0)/60000);
 let s='<div class="section">Мой прогресс<small>Вся история · без срока окончания программы</small></div>';
-s+='<div class="statgrid"><div class="stat"><div class="label">Всего тренировок</div><div class="value">'+completedWorkouts.length+'</div></div><div class="stat"><div class="label">Время тренировок</div><div class="value" style="font-size:17px">'+Math.floor(totalMinutes/60)+' ч '+totalMinutes%60+' мин</div></div><div class="stat"><div class="label">Основных занятий</div><div class="value">'+counts.reduce((a,b)=>a+b,0)+'</div></div><div class="stat"><div class="label">Живот</div><div class="value" style="font-size:15px">'+statDiff(abd.map(x=>x.abdomen),'см')+'</div></div><div class="stat"><div class="label">Вес</div><div class="value" style="font-size:15px">'+statDiff(weight.map(x=>x.weight),'кг')+'</div></div></div>';
-s+='<div class="card" style="margin-top:13px"><b>Силовой прогресс</b><p class="caption">Подтягивания, обычные отжимания и приседания с резинкой. Лучший первый подход за неделю. Изменение в процентах относительно первой результативной недели.</p>'+strengthChart()+'</div>';
+s+='<div class="statgrid"><div class="stat"><div class="label">Всего тренировок</div><div class="value">'+completedWorkouts.length+'</div></div><div class="stat"><div class="label">Время тренировок</div><div class="value" style="font-size:17px">'+Math.floor(totalMinutes/60)+' ч '+totalMinutes%60+' мин</div></div><div class="stat"><div class="label">Основных занятий</div><div class="value">'+activity.allMain+'</div></div><div class="stat"><div class="label">Живот</div><div class="value" style="font-size:15px">'+statDiff(abd.map(x=>x.abdomen),'см')+'</div></div><div class="stat"><div class="label">Вес</div><div class="value" style="font-size:15px">'+statDiff(weight.map(x=>x.weight),'кг')+'</div></div></div>';
+s+='<div class="card" style="margin-top:13px"><b>Силовой прогресс</b><p class="caption">Подтягивания, обычные отжимания и приседания с резинкой. Лучший первый подход в каждом занятии. До 16 последних результатов каждого упражнения, сравнение с первым показанным.</p>'+strengthChart()+'</div>';
 s+='<div class="card"><b>Изменения тела</b><div class="formgrid" style="margin:12px 0"><div class="stat"><div class="label">Вес, последнее</div><div class="value">'+(weight.at(-1)?.weight??'—')+'</div><div class="caption">'+statDiff(weight.map(x=>x.weight),'кг')+'</div></div><div class="stat"><div class="label">Живот, последнее</div><div class="value">'+(abd.at(-1)?.abdomen??'—')+'</div><div class="caption">'+statDiff(abd.map(x=>x.abdomen),'см')+'</div></div></div><div class="seg"><button data-action="chart" data-val="abdomen" class="'+(ui.chart==='abdomen'?'active':'')+'">Живот</button><button data-action="chart" data-val="weight" class="'+(ui.chart==='weight'?'active':'')+'">Вес</button></div>'+statPlot(body.map(x=>x[ui.chart]))+'</div>';
-s+='<div class="card"><b>Регулярность</b><p class="caption">Основные тренировки А, Б, В · последние календарные недели</p>'+counts.map((c,i)=>'<div class="row" style="margin:10px 0"><span style="width:60px" class="tiny">Нед. '+(firstWeek+i)+'</span><div class="progress-track" style="flex:1"><div style="width:'+Math.min(100,c/3*100)+'%"></div></div><b class="tiny">'+c+'/3</b></div>').join('')+'</div>';
+s+='<div class="card"><b>Регулярность</b><p class="caption">Основные тренировки A, B, C · последние 30 дней. Закрашенные дни — дни с тренировкой.</p><div class="activity-stats"><div><strong>'+activity.last30+'</strong><small>За 30 дней</small></div><div><strong>'+activity.prior30+'</strong><small>За предыдущие 30 дней</small></div></div><div class="activity-days" role="group" aria-label="Тренировочные дни за 30 дней">'+activity.days.map(d=>'<span class="activity-day '+(d.count?'trained':'')+'" title="'+d.label+': '+d.count+' осн. тренировок" aria-label="'+d.label+': '+d.count+' основных тренировок"></span>').join('')+'</div><div class="caption activity-range">'+activity.days[0].label+' — '+activity.days.at(-1).label+'</div></div>';
 return s+`<div class="card"><b>Новое измерение</b><p class="caption">Лучше измеряться утром в одинаковых условиях. Обхват живота — по прежней линии чуть ниже пупка.</p><div class="formgrid"><div class="field"><label for="mweight">Вес, кг</label><input id="mweight" type="number" min="30" max="300" step="0.1" placeholder="72.0" inputmode="decimal"></div><div class="field"><label for="mabdomen">Живот, см</label><input id="mabdomen" type="number" min="40" max="200" step="0.1" placeholder="90.0" inputmode="decimal"></div><div class="field"><label for="mwaist">Талия, см (доп.)</label><input id="mwaist" type="number" min="40" max="200" step="0.1" placeholder="—" inputmode="decimal"></div><div class="field"><label for="msteps">Шаги, среднее (доп.)</label><input id="msteps" type="number" min="0" max="50000" step="1" placeholder="8000" inputmode="numeric"></div></div><button class="btn primary full" data-action="save-measure" style="margin-top:12px">Сохранить измерение</button></div><div class="card"><b>История измерений</b>${db.measures.length?`<div style="margin-top:7px">${measurePoints().slice().reverse().slice(0,12).map(m=>`<div class="history-item flex"><div><b>${dateFmt(m.createdAt,{day:'numeric',month:'short',year:'numeric'})}</b><div class="caption">${m.weight??'—'} кг · живот ${m.abdomen??'—'} см${m.waist!=null?' · талия '+m.waist+' см':''}${m.steps!=null?' · '+m.steps+' шагов':''}</div></div><button class="btn ghost small" data-action="delete-measure" data-id="${esc(m.id)}">Удалить</button></div>`).join('')}</div>`:'<p class="caption">Измерений пока нет.</p>'}</div>`}
 function saveMeasure(){const ids={weight:'mweight',abdomen:'mabdomen',waist:'mwaist',steps:'msteps'},m={id:'m_'+Date.now(),createdAt:nowISO()};let n=0;for(let [k,id] of Object.entries(ids)){const val=document.getElementById(id).value.replace(',','.').trim();if(val){const num=Number(val);const limits={weight:[30,300],abdomen:[40,200],waist:[40,200],steps:[0,50000]};if(!Number.isFinite(num)||num<limits[k][0]||num>limits[k][1]||(k==='steps'&&!Number.isInteger(num)))return notify('Проверь введённые числа');m[k]=num;n++}}if(!n)return notify('Введи хотя бы одно измерение');if(!save({...db,measures:[...db.measures,m]}))return;render();notify('Измерение сохранено')}
 
