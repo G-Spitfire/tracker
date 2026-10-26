@@ -228,10 +228,84 @@ s+='<div class="card"><b>Регулярность</b><p class="caption">Осно
 return s+`<div class="card"><b>Новое измерение</b><p class="caption">Лучше измеряться утром в одинаковых условиях. Обхват живота — по прежней линии чуть ниже пупка.</p><div class="formgrid"><div class="field"><label for="mweight">Вес, кг</label><input id="mweight" type="number" min="30" max="300" step="0.1" placeholder="72.0" inputmode="decimal"></div><div class="field"><label for="mabdomen">Живот, см</label><input id="mabdomen" type="number" min="40" max="200" step="0.1" placeholder="90.0" inputmode="decimal"></div><div class="field"><label for="mwaist">Талия, см (доп.)</label><input id="mwaist" type="number" min="40" max="200" step="0.1" placeholder="—" inputmode="decimal"></div><div class="field"><label for="msteps">Шаги, среднее (доп.)</label><input id="msteps" type="number" min="0" max="50000" step="1" placeholder="8000" inputmode="numeric"></div></div><button class="btn primary full" data-action="save-measure" style="margin-top:12px">Сохранить измерение</button></div><div class="card"><b>История измерений</b>${db.measures.length?`<div style="margin-top:7px">${measurePoints().slice().reverse().slice(0,12).map(m=>`<div class="history-item flex"><div><b>${dateFmt(m.createdAt,{day:'numeric',month:'short',year:'numeric'})}</b><div class="caption">${m.weight??'—'} кг · живот ${m.abdomen??'—'} см${m.waist!=null?' · талия '+m.waist+' см':''}${m.steps!=null?' · '+m.steps+' шагов':''}</div></div><button class="btn ghost small" data-action="delete-measure" data-id="${esc(m.id)}">Удалить</button></div>`).join('')}</div>`:'<p class="caption">Измерений пока нет.</p>'}</div>`}
 function saveMeasure(){const ids={weight:'mweight',abdomen:'mabdomen',waist:'mwaist',steps:'msteps'},m={id:'m_'+Date.now(),createdAt:nowISO()};let n=0;for(let [k,id] of Object.entries(ids)){const val=document.getElementById(id).value.replace(',','.').trim();if(val){const num=Number(val);const limits={weight:[30,300],abdomen:[40,200],waist:[40,200],steps:[0,50000]};if(!Number.isFinite(num)||num<limits[k][0]||num>limits[k][1]||(k==='steps'&&!Number.isInteger(num)))return notify('Проверь введённые числа');m[k]=num;n++}}if(!n)return notify('Введи хотя бы одно измерение');if(!save({...db,measures:[...db.measures,m]}))return;render();notify('Измерение сохранено')}
 
-function editRows(){return ui.editRows??(ui.editRows=(db.programOverrides?.[ui.editWorkout]||PROGRAM[ui.editWorkout].items).map(x=>x.slice()))}
-function readEditor(){const el=document.getElementById('program-editor');if(!el)return true;const rows=[];for(const r of el.querySelectorAll('[data-edit-row]')){const v=k=>r.querySelector('[data-field="'+k+'"]').value,old=editRows()[Number(r.dataset.editRow)],id=v('id'),sets=Number(v('sets')),min=Number(v('min')),max=Number(v('max'));if(!CUES[id]||rows.some(x=>x[0]===id)||!Number.isInteger(sets)||sets<1||sets>12||!Number.isInteger(min)||min<1||min>100||!Number.isInteger(max)||max<min||max>100){notify('Проверь подходы и повторения');return false}rows.push([id,sets,min,max,...(old[0]===id?old.slice(4):[null,null,null,id==='bulgar'])]);if(id==='bulgar')rows.at(-1)[7]=true}ui.editRows=rows;return true}
-function programEditor(){return '<div class="section">Программа<small>Только будущие тренировки. История и текущее занятие не изменятся.</small></div><div class="card" id="program-editor"><div class="seg">'+Object.keys(PROGRAM).map(k=>'<button data-action="pick-plan" data-val="'+k+'" class="'+(ui.editWorkout===k?'active':'')+'">'+k+'</button>').join('')+'</div>'+editRows().map((r,i)=>'<details class="editor-row" data-edit-row="'+i+'"><summary><b>'+(i+1)+'. '+esc(CUES[r[0]]?.name||r[0])+'</b> · '+r[1]+' × '+r[2]+'–'+r[3]+'</summary><div class="flex" style="margin-top:10px"><b>Порядок</b><div class="buttons"><button class="btn small" data-action="plan-move" data-index="'+i+'" data-diff="-1" '+(i===0?'disabled':'')+'>↑</button><button class="btn small" data-action="plan-move" data-index="'+i+'" data-diff="1" '+(i===editRows().length-1?'disabled':'')+'>↓</button></div><button class="btn ghost danger small" data-action="plan-remove" data-index="'+i+'">Удалить</button></div><div class="field"><select data-field="id">'+Object.keys(CUES).map(id=>'<option value="'+id+'" '+(r[0]===id?'selected':'')+'>'+esc(CUES[id].name)+'</option>').join('')+'</select></div><div class="formgrid"><div class="field"><label>Подходы</label><input data-field="sets" type="number" min="1" max="12" value="'+r[1]+'"></div><div class="field"><label>От</label><input data-field="min" type="number" min="1" max="100" value="'+r[2]+'"></div><div class="field"><label>До</label><input data-field="max" type="number" min="1" max="100" value="'+r[3]+'"></div></div></details>').join('')+'<div class="field"><label for="newExercise">Добавить упражнение</label><select id="newExercise"><option value="">Выбери упражнение</option>'+Object.keys(CUES).filter(id=>!editRows().some(x=>x[0]===id)).map(id=>'<option value="'+id+'">'+esc(CUES[id].name)+'</option>').join('')+'</select></div><button class="btn full" data-action="plan-add">+ Добавить выбранное</button><button class="btn primary full" data-action="plan-save">Сохранить изменения</button><button class="btn ghost full" data-action="plan-reset">Вернуть исходный план</button></div>'}
 
+function editRows(){
+ return ui.editRows??(ui.editRows=(db.programOverrides?.[ui.editWorkout]||PROGRAM[ui.editWorkout].items).map(x=>x.slice()));
+}
+function planDirty(){
+ return ui.editRows!==null&&JSON.stringify(ui.editRows)!==JSON.stringify(db.programOverrides?.[ui.editWorkout]||PROGRAM[ui.editWorkout].items);
+}
+function readEditor(){
+ const root=document.getElementById('plan-form');
+ if(ui.editRows===null||ui.editSelected==null||!root)return true;
+ const val=field=>root.querySelector('[data-field="'+field+'"]')?.value??'';
+ const sets=Number(val('sets')),min=Number(val('min')),max=Number(val('max')),rest=Number(val('rest'));
+ if(!Number.isInteger(sets)||sets<1||sets>12||!Number.isInteger(min)||min<1||min>100||
+    !Number.isInteger(max)||max<min||max>100||!Number.isInteger(rest)||rest<15||rest>900){
+  notify('Проверь подходы, повторения и отдых (15–900 сек.)');return false;
+ }
+ const rows=editRows(),old=rows[ui.editSelected];if(!old)return true;
+ const next=old.slice();next[1]=sets;next[2]=min;next[3]=max;
+ const defaultRest=CUES[next[0]].rest;
+ if(rest!==defaultRest||next.length>8){
+  while(next.length<8)next.push(null);
+  next[8]=rest===defaultRest?null:rest;
+ }
+ rows[ui.editSelected]=next;
+ return true;
+}
+function planForm(row,i){
+ const rest=Number.isFinite(row[8])?row[8]:CUES[row[0]].rest;
+ return `<div class="plan-edit" id="plan-form">
+ <div class="plan-edit-title"><strong>Настройки упражнения</strong><button class="btn ghost small" data-action="plan-replace-open">Заменить</button></div>
+ <div class="plan-edit-grid">
+ <div class="field"><label for="planSets">Подходы</label><input id="planSets" data-field="sets" type="number" inputmode="numeric" min="1" max="12" step="1" value="${row[1]}"></div>
+ <div class="field"><label for="planMin">От, повторений</label><input id="planMin" data-field="min" type="number" inputmode="numeric" min="1" max="100" step="1" value="${row[2]}"></div>
+ <div class="field"><label for="planMax">До, повторений</label><input id="planMax" data-field="max" type="number" inputmode="numeric" min="1" max="100" step="1" value="${row[3]}"></div>
+ <div class="field"><label for="planRest">Отдых, сек</label><input id="planRest" data-field="rest" type="number" inputmode="numeric" min="15" max="900" step="5" value="${rest}"></div>
+ </div>
+ ${row[7]?'<p class="caption">Повторения считаются на каждую ногу.</p>':''}
+ <div class="plan-edit-actions"><span class="caption">Порядок</span>
+ <button class="btn small" data-action="plan-move" data-diff="-1" aria-label="Поднять упражнение выше" ${i===0?'disabled':''}>↑ Выше</button>
+ <button class="btn small" data-action="plan-move" data-diff="1" aria-label="Опустить упражнение ниже" ${i===editRows().length-1?'disabled':''}>↓ Ниже</button>
+ <button class="btn ghost danger small" data-action="plan-remove">Удалить</button>
+ </div>
+ </div>`;
+}
+function planCatalog(rows){
+ if(!ui.planPicker)return '';
+ const used=new Set(rows.map((x,i)=>ui.planPicker==='replace'&&i===ui.editSelected?'':x[0]));
+ const options=Object.entries(CUES).filter(([id])=>!used.has(id));
+ return `<div class="plan-catalog" id="plan-catalog">
+ <div class="plan-edit-title"><strong>${ui.planPicker==='replace'?'Заменить упражнение':'Добавить упражнение'}</strong><button class="btn small ghost" data-action="plan-close-picker">Закрыть</button></div>
+ <div class="field"><label for="planSearch">Поиск по упражнениям</label><input type="search" id="planSearch" placeholder="Например, подтягивания" autocomplete="off"></div>
+ <div class="plan-catalog-list">
+ ${options.map(([id,item])=>`<button class="plan-choice" data-action="${ui.planPicker==='replace'?'plan-replace':'plan-add'}" data-val="${id}" data-search="${esc(item.name.toLowerCase())}">${esc(item.name)} <span>＋</span></button>`).join('')}
+ </div></div>`;
+}
+function programEditor(){
+ const rows=editRows(),dirty=planDirty();
+ return `<div class="section">Программа<small>Редактирование только будущих тренировок</small></div>
+ <div class="card program-card" id="program-editor">
+ <div class="seg plan-tabs">${Object.keys(PROGRAM).map(k=>`<button data-action="pick-plan" data-val="${k}" class="${ui.editWorkout===k?'active':''}">${PROGRAM[k].label}</button>`).join('')}</div>
+ <p class="caption plan-subtitle">${esc(PROGRAM[ui.editWorkout].title)} · ${rows.length} упражнений</p>
+ <div class="plan-editor-list">
+ ${rows.map((row,i)=>`<div class="plan-editor-item">
+ <button class="plan-row-button ${ui.editSelected===i?'selected':''}" data-action="plan-select" data-index="${i}" aria-expanded="${ui.editSelected===i}" ${ui.editSelected===i?'aria-controls="plan-form"':''}>
+ <span class="plan-number">${i+1}</span><span class="plan-row-copy"><strong>${esc(CUES[row[0]].name)}</strong>
+ <small>${row[1]} × ${row[2]===row[3]?row[2]:row[2]+'–'+row[3]}${row[7]?' на ногу':''} · отдых ${Number.isFinite(row[8])?row[8]:CUES[row[0]].rest} сек</small></span>
+ <span class="plan-chevron">${ui.editSelected===i?'⌃':'›'}</span></button>
+ ${ui.editSelected===i?planForm(row,i):''}
+ </div>`).join('')}
+ </div>
+ ${ui.planPicker?planCatalog(rows):`<button class="btn full plan-add-button" data-action="plan-add-open">＋ Добавить упражнение</button>`}
+ <div class="plan-save-actions"><button class="btn primary full" data-action="plan-save">Сохранить план</button>
+ <button class="btn ghost full" data-action="plan-cancel">Отменить изменения</button>
+ </div>
+ <div class="plan-editor-foot"><span class="${dirty?'plan-unsaved':'caption'}">${dirty?'● Есть несохранённые изменения':'Изменения не затронут старые тренировки'}</span>
+ <button class="plan-reset-link" data-action="plan-reset">Исходный план</button></div>
+ </div>`;
+}
 function themeIcons(){return '<div class="theme-icons">'+[['light','☀','Светлая'],['dark','☾','Тёмная'],['system','▣','Автоматически']].map(([id,symbol,name])=>'<button class="btn small '+(themeChoice===id?'primary':'ghost')+'" data-action="theme-set" data-val="'+id+'" aria-label="'+name+'" title="'+name+'">'+symbol+'</button>').join('')+'</div>'}
 function renderSettings(){return '<div class="flex" style="align-items:center;justify-content:space-between"><h2>Настройки</h2>'+themeIcons()+'</div>'+programEditor()+'<div class="card"><details><summary>Резервная копия</summary><p class="caption">Сохраняет всю историю и настройки программы.</p><button class="btn full" data-action="export-json">Сохранить JSON</button><button class="btn full" data-action="import">Восстановить JSON</button></details></div><div class="card"><details><summary>Сбросить все данные</summary><button class="btn danger ghost full" data-action="clear">Удалить все записи</button></details></div>'}
 function download(filename,content,mime){const blob=new Blob([content],{type:mime});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);notify('Файл подготовлен')}
