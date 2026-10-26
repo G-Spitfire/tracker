@@ -1,0 +1,2738 @@
+{
+  "title": "WordScene vocabulary draft",
+  "version": "450-review",
+  "basis": "Spotlight 2–4 vocabulary sheet, primary material only",
+  "rules": {
+    "include": "Single-word headwords only; keep compounds written as one word.",
+    "exclude": "Phrases, user-rejected example words, obvious derivatives when the base form is retained.",
+    "replacement": "cook (готовить) replaces cooker."
+  },
+  "excludedFromSource": [
+    "thimble",
+    "flour",
+    "cooker",
+    "baker's",
+    "chips",
+    "cousin",
+    "thirteen",
+    "thirty",
+    "scared",
+    "scary",
+    "mac",
+    "fair",
+    "yacht",
+    "dairy",
+    "baker",
+    "friendly",
+    "greengrocer's"
+  ],
+  "added": [
+    {
+      "en": "cook",
+      "ru": "готовить",
+      "grade": "added"
+    }
+  ],
+  "words": [
+    {
+      "en": "animal",
+      "ru": "животное",
+      "grade": "2",
+      "source": "2: My animals."
+    },
+    {
+      "en": "ant",
+      "ru": "муравей",
+      "grade": "2",
+      "source": "2: Слова от a-h"
+    },
+    {
+      "en": "apple",
+      "ru": "яблоко",
+      "grade": "2",
+      "source": "2: Yummy chocolate"
+    },
+    {
+      "en": "autumn",
+      "ru": "осень",
+      "grade": "2",
+      "source": "2: А magic island"
+    },
+    {
+      "en": "ballerina",
+      "ru": "балерина",
+      "grade": "2",
+      "source": "2: My toys"
+    },
+    {
+      "en": "banana",
+      "ru": "банан",
+      "grade": "2",
+      "source": "2: Yummy chocolate"
+    },
+    {
+      "en": "bath",
+      "ru": "ванна (как сосуд для купания)",
+      "grade": "2",
+      "source": "2: In the bath"
+    },
+    {
+      "en": "bathroom",
+      "ru": "ванная комната",
+      "grade": "2",
+      "source": "2: In the bath"
+    },
+    {
+      "en": "bed",
+      "ru": "кровать",
+      "grade": "2",
+      "source": "2: Слова от a-h\n2: My home"
+    },
+    {
+      "en": "bedroom",
+      "ru": "спальня",
+      "grade": "2",
+      "source": "2: Whereʼs Chuckles?"
+    },
+    {
+      "en": "big",
+      "ru": "большой",
+      "grade": "2",
+      "source": "2: Teddy’s wonderful\n3: Unite 4 A happy family"
+    },
+    {
+      "en": "bird",
+      "ru": "птица",
+      "grade": "2",
+      "source": "2: My animals."
+    },
+    {
+      "en": "birthday",
+      "ru": "день рождения",
+      "grade": "2",
+      "source": "2: My favourite food"
+    },
+    {
+      "en": "biscuit",
+      "ru": "печенье",
+      "grade": "2",
+      "source": "2: Yummy chocolate"
+    },
+    {
+      "en": "black",
+      "ru": "чёрный",
+      "grade": "2",
+      "source": "2: Whereʼs Chuckles?\n3: Colours"
+    },
+    {
+      "en": "blue",
+      "ru": "синий; голубой",
+      "grade": "2",
+      "source": "2: Colours\n3: Colours"
+    },
+    {
+      "en": "box",
+      "ru": "коробка",
+      "grade": "2",
+      "source": "2: Слова от r до z"
+    },
+    {
+      "en": "boy",
+      "ru": "мальчик",
+      "grade": "2",
+      "source": "2: I can jump"
+    },
+    {
+      "en": "brother",
+      "ru": "брат",
+      "grade": "2",
+      "source": "2: My family\n4: Культура и чтение, с. 16–29 плана"
+    },
+    {
+      "en": "brown",
+      "ru": "коричневый",
+      "grade": "2",
+      "source": "2: Whereʼs Chuckles?\n3: Colours"
+    },
+    {
+      "en": "burger",
+      "ru": "гамбургер, бургер",
+      "grade": "2",
+      "source": "2: Yummy chocolate"
+    },
+    {
+      "en": "candle",
+      "ru": "свеча",
+      "grade": "2",
+      "source": "2: My birthday\n4: Культура и чтение, с. 16–29 плана"
+    },
+    {
+      "en": "cat",
+      "ru": "кот",
+      "grade": "2",
+      "source": "2: Слова от a-h"
+    },
+    {
+      "en": "chair",
+      "ru": "стул",
+      "grade": "2",
+      "source": "2: My home"
+    },
+    {
+      "en": "cheese",
+      "ru": "сыр",
+      "grade": "2",
+      "source": "2: Слова с\n3: Module 3 Unite 5 He loves Jelly! Он любит желе!"
+    },
+    {
+      "en": "chick",
+      "ru": "цыплёнок",
+      "grade": "2",
+      "source": "2: Слова с"
+    },
+    {
+      "en": "chimney",
+      "ru": "дымоход; печная труба",
+      "grade": "2",
+      "source": "2: In the bath"
+    },
+    {
+      "en": "chimp",
+      "ru": "шимпанзе",
+      "grade": "2",
+      "source": "2: My animals."
+    },
+    {
+      "en": "chocolate",
+      "ru": "шоколад",
+      "grade": "2",
+      "source": "2: Yummy chocolate"
+    },
+    {
+      "en": "circus",
+      "ru": "цирк",
+      "grade": "2",
+      "source": "2: At the circus"
+    },
+    {
+      "en": "climb",
+      "ru": "карабкаться вверх, взбираться",
+      "grade": "2",
+      "source": "2: I can jump"
+    },
+    {
+      "en": "clown",
+      "ru": "клоун",
+      "grade": "2",
+      "source": "2: At the circus"
+    },
+    {
+      "en": "coat",
+      "ru": "пальто",
+      "grade": "2",
+      "source": "2: My holidays"
+    },
+    {
+      "en": "colour",
+      "ru": "цвет",
+      "grade": "2",
+      "source": "2: Colours"
+    },
+    {
+      "en": "cook",
+      "ru": "готовить",
+      "grade": "добавлено",
+      "source": "Базовая форма вместо cooker по решению пользователя"
+    },
+    {
+      "en": "daddy",
+      "ru": "папа",
+      "grade": "2",
+      "source": "2: My family"
+    },
+    {
+      "en": "dance",
+      "ru": "танцевать",
+      "grade": "2",
+      "source": "2: My animals."
+    },
+    {
+      "en": "dark",
+      "ru": "тёмный",
+      "grade": "2",
+      "source": "2: She has got blue eyes"
+    },
+    {
+      "en": "dog",
+      "ru": "собака",
+      "grade": "2",
+      "source": "2: Слова от a-h"
+    },
+    {
+      "en": "dolphin",
+      "ru": "дельфин",
+      "grade": "2",
+      "source": "2: Слова с\n4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "door",
+      "ru": "дверь",
+      "grade": "2",
+      "source": "2: In the bath"
+    },
+    {
+      "en": "ear",
+      "ru": "ухо",
+      "grade": "2",
+      "source": "2: She has got blue eyes"
+    },
+    {
+      "en": "egg",
+      "ru": "яйцо",
+      "grade": "2",
+      "source": "2: Слова от a-h\n3: Module 3 Unite 5 He loves Jelly! Он любит желе!"
+    },
+    {
+      "en": "eight",
+      "ru": "восемь / 8",
+      "grade": "2",
+      "source": "2: My birthday\n3: Numbers from 1 to 10"
+    },
+    {
+      "en": "elephant",
+      "ru": "слон",
+      "grade": "2",
+      "source": "2: Слова с\n3: Module 4 Unite 7 Toys for little Betsy! Игрушки для маленькой Бетси!"
+    },
+    {
+      "en": "eye",
+      "ru": "глаз",
+      "grade": "2",
+      "source": "2: She has got blue eyes"
+    },
+    {
+      "en": "family",
+      "ru": "семья",
+      "grade": "2",
+      "source": "2: My family"
+    },
+    {
+      "en": "fat",
+      "ru": "жирный (о еде), толстый. / толстый, тучный",
+      "grade": "2",
+      "source": "2: My favourite food\n3: Module 5 Unit 9 Cows are funny! Забавные коровы!"
+    },
+    {
+      "en": "favourite",
+      "ru": "любимый",
+      "grade": "2",
+      "source": "2: Yummy chocolate"
+    },
+    {
+      "en": "fish",
+      "ru": "рыба",
+      "grade": "2",
+      "source": "2: Слова с\n2: My animals."
+    },
+    {
+      "en": "five",
+      "ru": "пять / 5",
+      "grade": "2",
+      "source": "2: My birthday\n3: Numbers from 1 to 10"
+    },
+    {
+      "en": "flag",
+      "ru": "флаг",
+      "grade": "2",
+      "source": "2: Слова от a-h"
+    },
+    {
+      "en": "floor",
+      "ru": "пол",
+      "grade": "2",
+      "source": "2: In the bath"
+    },
+    {
+      "en": "flower",
+      "ru": "цветок",
+      "grade": "2",
+      "source": "2: Gardens in Russia and in the United Kingdom.\n2: А magic island"
+    },
+    {
+      "en": "fly",
+      "ru": "летать",
+      "grade": "2",
+      "source": "2: I can jump"
+    },
+    {
+      "en": "food",
+      "ru": "еда",
+      "grade": "2",
+      "source": "2: Yummy chocolate"
+    },
+    {
+      "en": "four",
+      "ru": "четыре / 4",
+      "grade": "2",
+      "source": "2: My birthday\n3: Numbers from 1 to 10"
+    },
+    {
+      "en": "friend",
+      "ru": "друг",
+      "grade": "2",
+      "source": "2: Hello!"
+    },
+    {
+      "en": "frog",
+      "ru": "лягушка",
+      "grade": "2",
+      "source": "2: My animals."
+    },
+    {
+      "en": "fruit",
+      "ru": "фрукты; плод",
+      "grade": "2",
+      "source": "2: Gardens in Russia and in the United Kingdom.\n4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "garden",
+      "ru": "сад",
+      "grade": "2",
+      "source": "2: Whereʼs Chuckles?\n4: Культура и чтение, с. 16–29 плана"
+    },
+    {
+      "en": "girl",
+      "ru": "девочка",
+      "grade": "2",
+      "source": "2: I can jump"
+    },
+    {
+      "en": "glass",
+      "ru": "стакан",
+      "grade": "2",
+      "source": "2: Слова от a-h"
+    },
+    {
+      "en": "grandma",
+      "ru": "бабушка",
+      "grade": "2",
+      "source": "2: My family"
+    },
+    {
+      "en": "grandpa",
+      "ru": "дедушка",
+      "grade": "2",
+      "source": "2: My family"
+    },
+    {
+      "en": "green",
+      "ru": "зелёный",
+      "grade": "2",
+      "source": "2: Colours\n3: Colours"
+    },
+    {
+      "en": "hair",
+      "ru": "волосы",
+      "grade": "2",
+      "source": "2: She has got blue eyes"
+    },
+    {
+      "en": "happy",
+      "ru": "счастливый",
+      "grade": "2",
+      "source": "2: My birthday\n4: Module 7, с. 28 плана"
+    },
+    {
+      "en": "hat",
+      "ru": "шляпа",
+      "grade": "2",
+      "source": "2: My holidays"
+    },
+    {
+      "en": "home",
+      "ru": "дом",
+      "grade": "2",
+      "source": "2: My home"
+    },
+    {
+      "en": "horse",
+      "ru": "лошадь / лошадка",
+      "grade": "2",
+      "source": "2: Слова от a-h\n2: My animals.\n2: Old Russian toys"
+    },
+    {
+      "en": "house",
+      "ru": "дом",
+      "grade": "2",
+      "source": "2: Whereʼs Chuckles?"
+    },
+    {
+      "en": "ink",
+      "ru": "чернила",
+      "grade": "2",
+      "source": "2: Слова от i- до q"
+    },
+    {
+      "en": "island",
+      "ru": "остров",
+      "grade": "2",
+      "source": "2: Itʹs windy!"
+    },
+    {
+      "en": "jacket",
+      "ru": "куртка",
+      "grade": "2",
+      "source": "2: My holidays"
+    },
+    {
+      "en": "jeans",
+      "ru": "джинсы",
+      "grade": "2",
+      "source": "2: Itʹs windy!\n4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "jug",
+      "ru": "кувшин",
+      "grade": "2",
+      "source": "2: Слова от i- до q"
+    },
+    {
+      "en": "jump",
+      "ru": "прыгать",
+      "grade": "2",
+      "source": "2: My animals."
+    },
+    {
+      "en": "kangaroo",
+      "ru": "кенгуру",
+      "grade": "2",
+      "source": "2: Слова от i- до q\n4: Культура и чтение, с. 16–29 плана"
+    },
+    {
+      "en": "kitchen",
+      "ru": "кухня",
+      "grade": "2",
+      "source": "2: Whereʼs Chuckles?"
+    },
+    {
+      "en": "lamp",
+      "ru": "лампа",
+      "grade": "2",
+      "source": "2: Слова от i- до q"
+    },
+    {
+      "en": "magician",
+      "ru": "маг, фокусник",
+      "grade": "2",
+      "source": "2: At the circus"
+    },
+    {
+      "en": "meat",
+      "ru": "мясо",
+      "grade": "2",
+      "source": "2: The town mouse and the country mouse\n4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "milk",
+      "ru": "молоко",
+      "grade": "2",
+      "source": "2: My favourite food"
+    },
+    {
+      "en": "mouse",
+      "ru": "мышь",
+      "grade": "2",
+      "source": "2: Слова от i- до q\n3: Module 5 Unit 9 Cows are funny! Забавные коровы!"
+    },
+    {
+      "en": "mouth",
+      "ru": "рот",
+      "grade": "2",
+      "source": "2: She has got blue eyes\n3: Module 5 Unit 9 Cows are funny! Забавные коровы!"
+    },
+    {
+      "en": "mummy",
+      "ru": "мама",
+      "grade": "2",
+      "source": "2: My family"
+    },
+    {
+      "en": "music",
+      "ru": "музыка",
+      "grade": "2",
+      "source": "2: А magic island\n3: Unite 2 School subjects Школьные предметы"
+    },
+    {
+      "en": "nest",
+      "ru": "гнездо",
+      "grade": "2",
+      "source": "2: Слова от i- до q"
+    },
+    {
+      "en": "nine",
+      "ru": "девять / 9",
+      "grade": "2",
+      "source": "2: My birthday\n3: Numbers from 1 to 10"
+    },
+    {
+      "en": "nose",
+      "ru": "нос",
+      "grade": "2",
+      "source": "2: She has got blue eyes"
+    },
+    {
+      "en": "one",
+      "ru": "один / 1",
+      "grade": "2",
+      "source": "2: My birthday\n3: Numbers from 1 to 10"
+    },
+    {
+      "en": "orange",
+      "ru": "апельсин / оранжевый",
+      "grade": "2",
+      "source": "2: Слова от i- до q\n3: Colours"
+    },
+    {
+      "en": "pan",
+      "ru": "сковородка",
+      "grade": "2",
+      "source": "2: My favourite food"
+    },
+    {
+      "en": "party",
+      "ru": "вечеринка",
+      "grade": "2",
+      "source": "2: My birthday"
+    },
+    {
+      "en": "photo",
+      "ru": "фотография",
+      "grade": "2",
+      "source": "2: Слова с"
+    },
+    {
+      "en": "pin",
+      "ru": "булавка",
+      "grade": "2",
+      "source": "2: Слова от i- до q"
+    },
+    {
+      "en": "pink",
+      "ru": "розовый",
+      "grade": "2",
+      "source": "2: My toys\n3: Colours"
+    },
+    {
+      "en": "pizza",
+      "ru": "пицца",
+      "grade": "2",
+      "source": "2: My favourite food"
+    },
+    {
+      "en": "puppet",
+      "ru": "кукла для кукольного театра",
+      "grade": "2",
+      "source": "2: Teddy’s wonderful"
+    },
+    {
+      "en": "queen",
+      "ru": "королева",
+      "grade": "2",
+      "source": "2: Слова от i- до q"
+    },
+    {
+      "en": "rabbit",
+      "ru": "кролик",
+      "grade": "2",
+      "source": "2: Слова от r до z\n3: Unite 10 clever animals. умные животные"
+    },
+    {
+      "en": "radio",
+      "ru": "радио",
+      "grade": "2",
+      "source": "2: My home"
+    },
+    {
+      "en": "red",
+      "ru": "красный",
+      "grade": "2",
+      "source": "2: Colours\n3: Colours"
+    },
+    {
+      "en": "run",
+      "ru": "бежать",
+      "grade": "2",
+      "source": "2: My animals."
+    },
+    {
+      "en": "sad",
+      "ru": "печальный, грустный / грустный",
+      "grade": "2",
+      "source": "2: My birthday\n4: Module 5, с. 24–25 плана"
+    },
+    {
+      "en": "sandwich",
+      "ru": "сэндвич; бутерброд",
+      "grade": "2",
+      "source": "2: Yummy chocolate"
+    },
+    {
+      "en": "sausage",
+      "ru": "сосиска, колбаса / сосиска",
+      "grade": "2",
+      "source": "2: My favourite food\n3: Unite 6 In my lunch box! В моей коробке для ланча!"
+    },
+    {
+      "en": "season",
+      "ru": "сезон, время года",
+      "grade": "2",
+      "source": "2: А magic island"
+    },
+    {
+      "en": "seven",
+      "ru": "семь / 7",
+      "grade": "2",
+      "source": "2: My birthday\n3: Numbers from 1 to 10"
+    },
+    {
+      "en": "sheep",
+      "ru": "овца",
+      "grade": "2",
+      "source": "2: Слова с\n3: Module 5 Unit 9 Cows are funny! Забавные коровы!"
+    },
+    {
+      "en": "shelf",
+      "ru": "полка",
+      "grade": "2",
+      "source": "2: My toys"
+    },
+    {
+      "en": "ship",
+      "ru": "корабль",
+      "grade": "2",
+      "source": "2: Слова с"
+    },
+    {
+      "en": "shoe",
+      "ru": "туфля; ботинок",
+      "grade": "2",
+      "source": "2: Itʹs windy!"
+    },
+    {
+      "en": "shorts",
+      "ru": "шорты",
+      "grade": "2",
+      "source": "2: My holidays"
+    },
+    {
+      "en": "sing",
+      "ru": "петь",
+      "grade": "2",
+      "source": "2: My animals."
+    },
+    {
+      "en": "sister",
+      "ru": "сестра",
+      "grade": "2",
+      "source": "2: Hello!"
+    },
+    {
+      "en": "six",
+      "ru": "шесть / 6",
+      "grade": "2",
+      "source": "2: My birthday\n3: Numbers from 1 to 10"
+    },
+    {
+      "en": "skirt",
+      "ru": "юбка",
+      "grade": "2",
+      "source": "2: Itʹs windy!"
+    },
+    {
+      "en": "small",
+      "ru": "маленький",
+      "grade": "2",
+      "source": "2: Teddy’s wonderful\n3: Unite 4 A happy family"
+    },
+    {
+      "en": "smoke",
+      "ru": "дым",
+      "grade": "2",
+      "source": "2: In the bath"
+    },
+    {
+      "en": "snake",
+      "ru": "змея",
+      "grade": "2",
+      "source": "2: Слова от r до z\n3: Fun at school 3"
+    },
+    {
+      "en": "sock",
+      "ru": "носок",
+      "grade": "2",
+      "source": "2: Itʹs windy!"
+    },
+    {
+      "en": "spring",
+      "ru": "весна",
+      "grade": "2",
+      "source": "2: А magic island"
+    },
+    {
+      "en": "summer",
+      "ru": "лето",
+      "grade": "2",
+      "source": "2: А magic island"
+    },
+    {
+      "en": "swim",
+      "ru": "плавать",
+      "grade": "2",
+      "source": "2: My animals."
+    },
+    {
+      "en": "swing",
+      "ru": "качаться (например, на качелях)",
+      "grade": "2",
+      "source": "2: At the circus"
+    },
+    {
+      "en": "table",
+      "ru": "стол",
+      "grade": "2",
+      "source": "2: My home"
+    },
+    {
+      "en": "ten",
+      "ru": "десять / 10",
+      "grade": "2",
+      "source": "2: My birthday\n3: Numbers from 1 to 10\n3: Round numbers"
+    },
+    {
+      "en": "three",
+      "ru": "три / 3",
+      "grade": "2",
+      "source": "2: My birthday\n3: Numbers from 1 to 10"
+    },
+    {
+      "en": "thumb",
+      "ru": "большой палец (руки)",
+      "grade": "2",
+      "source": "2: Слова с"
+    },
+    {
+      "en": "time",
+      "ru": "время",
+      "grade": "2",
+      "source": "2: The town mouse and the country mouse\n3: Module 1 Unite 1 School again! Снова в школу!"
+    },
+    {
+      "en": "town",
+      "ru": "город",
+      "grade": "2",
+      "source": "2: At the circus\n4: Культура и чтение, с. 16–29 плана"
+    },
+    {
+      "en": "toy",
+      "ru": "игрушка",
+      "grade": "2",
+      "source": "2: My toys"
+    },
+    {
+      "en": "tree",
+      "ru": "дерево",
+      "grade": "2",
+      "source": "2: Слова от r до z"
+    },
+    {
+      "en": "two",
+      "ru": "два / 2",
+      "grade": "2",
+      "source": "2: My birthday\n3: Numbers from 1 to 10"
+    },
+    {
+      "en": "umbrella",
+      "ru": "зонт",
+      "grade": "2",
+      "source": "2: Слова от r до z"
+    },
+    {
+      "en": "vegetable",
+      "ru": "овощ",
+      "grade": "2",
+      "source": "2: Gardens in Russia and in the United Kingdom.\n4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "vest",
+      "ru": "майка",
+      "grade": "2",
+      "source": "2: Слова от r до z"
+    },
+    {
+      "en": "white",
+      "ru": "белый",
+      "grade": "2",
+      "source": "2: Colours\n3: Colours"
+    },
+    {
+      "en": "window",
+      "ru": "окно",
+      "grade": "2",
+      "source": "2: Слова от r до z"
+    },
+    {
+      "en": "winter",
+      "ru": "зима",
+      "grade": "2",
+      "source": "2: А magic island"
+    },
+    {
+      "en": "yellow",
+      "ru": "жёлтый / желтый",
+      "grade": "2",
+      "source": "2: Colours\n3: Colours"
+    },
+    {
+      "en": "yummy",
+      "ru": "вкусный",
+      "grade": "2",
+      "source": "2: Yummy chocolate"
+    },
+    {
+      "en": "zip",
+      "ru": "застёжка-молния",
+      "grade": "2",
+      "source": "2: Слова от r до z"
+    },
+    {
+      "en": "aeroplane",
+      "ru": "самолет / самолёт",
+      "grade": "3",
+      "source": "3: Module 4 Unite 7 Toys for little Betsy! Игрушки для маленькой Бетси!\n4: Starter, с. 15 плана"
+    },
+    {
+      "en": "afternoon",
+      "ru": "после обеда",
+      "grade": "3",
+      "source": "3: Unite 16 On Sundays!"
+    },
+    {
+      "en": "again",
+      "ru": "снова",
+      "grade": "3",
+      "source": "3: Starter unit"
+    },
+    {
+      "en": "age",
+      "ru": "возраст",
+      "grade": "3",
+      "source": "3: Schools in the UK! A bite to eat!\n4: Starter, с. 15 плана"
+    },
+    {
+      "en": "armchair",
+      "ru": "кресло",
+      "grade": "3",
+      "source": "3: Unite 8 In my room! В моей комнате!"
+    },
+    {
+      "en": "art",
+      "ru": "рисование; искусство",
+      "grade": "3",
+      "source": "3: Unite 2 School subjects Школьные предметы"
+    },
+    {
+      "en": "aunt",
+      "ru": "тётя",
+      "grade": "3",
+      "source": "3: Families in Russia\n4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "baby",
+      "ru": "младенец",
+      "grade": "3",
+      "source": "3: Unite 4 A happy family"
+    },
+    {
+      "en": "basketball",
+      "ru": "баскетбол",
+      "grade": "3",
+      "source": "3: Unite 14 in the Park!"
+    },
+    {
+      "en": "begin",
+      "ru": "начинать",
+      "grade": "3",
+      "source": "3: Starter unit\n4: Культура и чтение, с. 16–29 плана"
+    },
+    {
+      "en": "bell",
+      "ru": "колокольчик",
+      "grade": "3",
+      "source": "3: Unite 14 in the Park!"
+    },
+    {
+      "en": "bloom",
+      "ru": "цвести",
+      "grade": "3",
+      "source": "3: Module 6 Unite 11 Grandma! Grandpa!"
+    },
+    {
+      "en": "body",
+      "ru": "тело, туловище",
+      "grade": "3",
+      "source": "3: Module 5 Unit 9 Cows are funny! Забавные коровы!"
+    },
+    {
+      "en": "cafe",
+      "ru": "кафе",
+      "grade": "3",
+      "source": "3: Families in Russia\n4: Module 2, с. 18–19 плана"
+    },
+    {
+      "en": "cake",
+      "ru": "торт",
+      "grade": "3",
+      "source": "3: Unite 6 In my lunch box! В моей коробке для ланча!"
+    },
+    {
+      "en": "car",
+      "ru": "автомобиль",
+      "grade": "3",
+      "source": "3: Module 6 Unite 11 Grandma! Grandpa!"
+    },
+    {
+      "en": "carrot",
+      "ru": "морковь",
+      "grade": "3",
+      "source": "3: Unite 6 In my lunch box! В моей коробке для ланча!"
+    },
+    {
+      "en": "cartoon",
+      "ru": "мультфильм",
+      "grade": "3",
+      "source": "3: Unite 15 a fun day!"
+    },
+    {
+      "en": "catch",
+      "ru": "ловить",
+      "grade": "3",
+      "source": "3: Arthur and Rascal\n4: Module 6, с. 26–27 плана"
+    },
+    {
+      "en": "chicken",
+      "ru": "курица, цыпленок",
+      "grade": "3",
+      "source": "3: Module 3 Unite 5 He loves Jelly! Он любит желе!"
+    },
+    {
+      "en": "circle",
+      "ru": "круг",
+      "grade": "3",
+      "source": "3: Fun at school\n4: Starter, с. 15 плана"
+    },
+    {
+      "en": "clock",
+      "ru": "часы",
+      "grade": "3",
+      "source": "3: Unite 15 a fun day!"
+    },
+    {
+      "en": "come",
+      "ru": "приходить",
+      "grade": "3",
+      "source": "3: Module 1 Unite 1 School again! Снова в школу!"
+    },
+    {
+      "en": "computer",
+      "ru": "компьютер",
+      "grade": "3",
+      "source": "3: Unite 8 In my room! В моей комнате!"
+    },
+    {
+      "en": "cow",
+      "ru": "корова",
+      "grade": "3",
+      "source": "3: Module 5 Unit 9 Cows are funny! Забавные коровы!"
+    },
+    {
+      "en": "crawl",
+      "ru": "ползать",
+      "grade": "3",
+      "source": "3: Unite 10 clever animals. умные животные"
+    },
+    {
+      "en": "crocodile",
+      "ru": "крокодил",
+      "grade": "3",
+      "source": "3: Fun at school\n4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "crunch",
+      "ru": "хрустеть",
+      "grade": "3",
+      "source": "3: Unite 6 In my lunch box! В моей коробке для ланча!"
+    },
+    {
+      "en": "cupboard",
+      "ru": "шкаф с полками",
+      "grade": "3",
+      "source": "3: Unite 12 My House! Мой дом!"
+    },
+    {
+      "en": "day",
+      "ru": "день",
+      "grade": "3",
+      "source": "3: Starter unit\n3: Unite 15 a fun day!"
+    },
+    {
+      "en": "desk",
+      "ru": "парта, письменный стол",
+      "grade": "3",
+      "source": "3: Unite 8 In my room! В моей комнате!"
+    },
+    {
+      "en": "drink",
+      "ru": "пить",
+      "grade": "3",
+      "source": "3: Unite 6 In my lunch box! В моей коробке для ланча!"
+    },
+    {
+      "en": "drive",
+      "ru": "водить машину",
+      "grade": "3",
+      "source": "3: Module 7 Unite 13 we’re having a grate time!"
+    },
+    {
+      "en": "dry",
+      "ru": "сухой",
+      "grade": "3",
+      "source": "3: Unite 6 In my lunch box! В моей коробке для ланча!"
+    },
+    {
+      "en": "duck",
+      "ru": "утка",
+      "grade": "3",
+      "source": "3: Starter unit"
+    },
+    {
+      "en": "eighteen",
+      "ru": "18",
+      "grade": "3",
+      "source": "3: Numbers from 11 to 20"
+    },
+    {
+      "en": "eighty",
+      "ru": "восемьдесят",
+      "grade": "3",
+      "source": "3: Round numbers\n4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "eleven",
+      "ru": "11",
+      "grade": "3",
+      "source": "3: Numbers from 11 to 20"
+    },
+    {
+      "en": "evening",
+      "ru": "вечер",
+      "grade": "3",
+      "source": "3: Unite 16 On Sundays!"
+    },
+    {
+      "en": "everywhere",
+      "ru": "повсюду, везде",
+      "grade": "3",
+      "source": "3: Unite 12 My House! Мой дом!"
+    },
+    {
+      "en": "fabulous",
+      "ru": "потрясающий",
+      "grade": "3",
+      "source": "3: Unite 14 in the Park!"
+    },
+    {
+      "en": "face",
+      "ru": "лицо",
+      "grade": "3",
+      "source": "3: Module 7 Unite 13 we’re having a grate time!"
+    },
+    {
+      "en": "fast",
+      "ru": "быстрый",
+      "grade": "3",
+      "source": "3: Tesco superstore! Animal down under!\n4: Module 6, с. 26–27 плана"
+    },
+    {
+      "en": "father",
+      "ru": "папа",
+      "grade": "3",
+      "source": "3: Unite 4 A happy family"
+    },
+    {
+      "en": "fifteen",
+      "ru": "15",
+      "grade": "3",
+      "source": "3: Numbers from 11 to 20"
+    },
+    {
+      "en": "fifty",
+      "ru": "пятьдесят",
+      "grade": "3",
+      "source": "3: Round numbers\n4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "foot",
+      "ru": "ступня",
+      "grade": "3",
+      "source": "3: Module 5 Unit 9 Cows are funny! Забавные коровы!"
+    },
+    {
+      "en": "forty",
+      "ru": "сорок",
+      "grade": "3",
+      "source": "3: Round numbers\n4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "fourteen",
+      "ru": "14",
+      "grade": "3",
+      "source": "3: Numbers from 11 to 20"
+    },
+    {
+      "en": "Friday",
+      "ru": "пятница",
+      "grade": "3",
+      "source": "3: Unite 15 a fun day!"
+    },
+    {
+      "en": "fridge",
+      "ru": "холодильник",
+      "grade": "3",
+      "source": "3: Unite 12 My House! Мой дом!"
+    },
+    {
+      "en": "geography",
+      "ru": "география",
+      "grade": "3",
+      "source": "3: Unite 2 School subjects Школьные предметы"
+    },
+    {
+      "en": "get",
+      "ru": "получать",
+      "grade": "3",
+      "source": "3: Module 1 Unite 1 School again! Снова в школу!"
+    },
+    {
+      "en": "grandfather",
+      "ru": "дедушка",
+      "grade": "3",
+      "source": "3: Unite 4 A happy family"
+    },
+    {
+      "en": "grandmother",
+      "ru": "бабушка",
+      "grade": "3",
+      "source": "3: Unite 4 A happy family"
+    },
+    {
+      "en": "great",
+      "ru": "великолепный, замечательный",
+      "grade": "3",
+      "source": "3: Unite 4 A happy family"
+    },
+    {
+      "en": "grey",
+      "ru": "серый",
+      "grade": "3",
+      "source": "3: Colours"
+    },
+    {
+      "en": "hand",
+      "ru": "рука, часовая стрелка",
+      "grade": "3",
+      "source": "3: Unite 15 a fun day!"
+    },
+    {
+      "en": "hare",
+      "ru": "заяц",
+      "grade": "3",
+      "source": "3: Fun after school\n4: Module 6, с. 26–27 плана"
+    },
+    {
+      "en": "head",
+      "ru": "голова",
+      "grade": "3",
+      "source": "3: Module 5 Unit 9 Cows are funny! Забавные коровы!"
+    },
+    {
+      "en": "hippo",
+      "ru": "бегемот",
+      "grade": "3",
+      "source": "3: Grandpa Durov’s Wonderland\n4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "history",
+      "ru": "история",
+      "grade": "3",
+      "source": "3: Unite 2 School subjects Школьные предметы"
+    },
+    {
+      "en": "interesting",
+      "ru": "интересный",
+      "grade": "3",
+      "source": "3: Tesco superstore! Animal down under!\n4: Module 5, с. 24–25 плана"
+    },
+    {
+      "en": "jelly",
+      "ru": "желе",
+      "grade": "3",
+      "source": "3: Module 3 Unite 5 He loves Jelly! Он любит желе!"
+    },
+    {
+      "en": "join",
+      "ru": "присоединяться",
+      "grade": "3",
+      "source": "3: Unite 15 a fun day!\n4: Starter, с. 15 плана"
+    },
+    {
+      "en": "know",
+      "ru": "знать",
+      "grade": "3",
+      "source": "3: Fun at school 2\n4: Module 5, с. 24–25 плана"
+    },
+    {
+      "en": "laugh",
+      "ru": "смех, смеяться",
+      "grade": "3",
+      "source": "3: Unite 14 in the Park!"
+    },
+    {
+      "en": "leg",
+      "ru": "нога",
+      "grade": "3",
+      "source": "3: Module 5 Unit 9 Cows are funny! Забавные коровы!"
+    },
+    {
+      "en": "lemonade",
+      "ru": "лимонад",
+      "grade": "3",
+      "source": "3: Module 3 Unite 5 He loves Jelly! Он любит желе!"
+    },
+    {
+      "en": "little",
+      "ru": "маленький",
+      "grade": "3",
+      "source": "3: Starter unit"
+    },
+    {
+      "en": "lizard",
+      "ru": "ящерица",
+      "grade": "3",
+      "source": "3: Fun at school 2\n4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "long",
+      "ru": "длинный",
+      "grade": "3",
+      "source": "3: Module 5 Unit 9 Cows are funny! Забавные коровы!"
+    },
+    {
+      "en": "love",
+      "ru": "любовь",
+      "grade": "3",
+      "source": "3: Starter unit"
+    },
+    {
+      "en": "mammal",
+      "ru": "млекопитающее",
+      "grade": "3",
+      "source": "3: Fun at school 2\n4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "man",
+      "ru": "мужчина",
+      "grade": "3",
+      "source": "3: Module 5 Unit 9 Cows are funny! Забавные коровы!"
+    },
+    {
+      "en": "march",
+      "ru": "маршировать; март (March)",
+      "grade": "3",
+      "source": "3: The toy soldier\n4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "maths",
+      "ru": "математика",
+      "grade": "3",
+      "source": "3: Unite 2 School subjects Школьные предметы"
+    },
+    {
+      "en": "mirror",
+      "ru": "зеркало",
+      "grade": "3",
+      "source": "3: Unite 12 My House! Мой дом!"
+    },
+    {
+      "en": "Monday",
+      "ru": "понедельник",
+      "grade": "3",
+      "source": "3: Unite 15 a fun day!"
+    },
+    {
+      "en": "morning",
+      "ru": "утро",
+      "grade": "3",
+      "source": "3: Unite 16 On Sundays!"
+    },
+    {
+      "en": "mother",
+      "ru": "мама",
+      "grade": "3",
+      "source": "3: Unite 4 A happy family\n4: Культура и чтение, с. 16–29 плана"
+    },
+    {
+      "en": "munch",
+      "ru": "жевать",
+      "grade": "3",
+      "source": "3: Unite 6 In my lunch box! В моей коробке для ланча!"
+    },
+    {
+      "en": "museum",
+      "ru": "музей",
+      "grade": "3",
+      "source": "3: House museums in Russia\n4: Module 7, с. 28 плана"
+    },
+    {
+      "en": "need",
+      "ru": "нуждаться",
+      "grade": "3",
+      "source": "3: Unite 6 In my lunch box! В моей коробке для ланча!\n4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "night",
+      "ru": "ночь",
+      "grade": "3",
+      "source": "3: Unite 16 On Sundays!"
+    },
+    {
+      "en": "nineteen",
+      "ru": "19",
+      "grade": "3",
+      "source": "3: Numbers from 11 to 20"
+    },
+    {
+      "en": "ninety",
+      "ru": "девяносто",
+      "grade": "3",
+      "source": "3: Round numbers\n4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "number",
+      "ru": "номер",
+      "grade": "3",
+      "source": "3: Module 1 Unite 1 School again! Снова в школу!"
+    },
+    {
+      "en": "object",
+      "ru": "предмет",
+      "grade": "3",
+      "source": "3: Unite 2 School subjects Школьные предметы"
+    },
+    {
+      "en": "park",
+      "ru": "парк",
+      "grade": "3",
+      "source": "3: Unite 14 in the Park!"
+    },
+    {
+      "en": "parrot",
+      "ru": "попугай",
+      "grade": "3",
+      "source": "3: Unite 10 clever animals. умные животные"
+    },
+    {
+      "en": "pasta",
+      "ru": "макаронные изделия",
+      "grade": "3",
+      "source": "3: Unite 6 In my lunch box! В моей коробке для ланча!"
+    },
+    {
+      "en": "PE",
+      "ru": "физ-ра",
+      "grade": "3",
+      "source": "3: Unite 2 School subjects Школьные предметы"
+    },
+    {
+      "en": "pen",
+      "ru": "ручка",
+      "grade": "3",
+      "source": "3: Module 1 Unite 1 School again! Снова в школу!"
+    },
+    {
+      "en": "pencil",
+      "ru": "карандаш",
+      "grade": "3",
+      "source": "3: Module 1 Unite 1 School again! Снова в школу!"
+    },
+    {
+      "en": "piano",
+      "ru": "пианино",
+      "grade": "3",
+      "source": "3: Module 7 Unite 13 we’re having a grate time!"
+    },
+    {
+      "en": "playroom",
+      "ru": "игровая комната",
+      "grade": "3",
+      "source": "3: Unite 8 In my room! В моей комнате!"
+    },
+    {
+      "en": "plus",
+      "ru": "плюс",
+      "grade": "3",
+      "source": "3: Module 1 Unite 1 School again! Снова в школу!"
+    },
+    {
+      "en": "potato",
+      "ru": "картофель",
+      "grade": "3",
+      "source": "3: Unite 6 In my lunch box! В моей коробке для ланча!"
+    },
+    {
+      "en": "present",
+      "ru": "подарок",
+      "grade": "3",
+      "source": "3: Module 6 Unite 11 Grandma! Grandpa!\n4: Starter, с. 15 плана"
+    },
+    {
+      "en": "put",
+      "ru": "ставить / класть",
+      "grade": "3",
+      "source": "3: The toy soldier\n4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "quiz",
+      "ru": "викторина",
+      "grade": "3",
+      "source": "3: Unite 15 a fun day!"
+    },
+    {
+      "en": "race",
+      "ru": "гонка",
+      "grade": "3",
+      "source": "3: Unite 14 in the Park!\n4: Module 6, с. 26–27 плана"
+    },
+    {
+      "en": "rainbow",
+      "ru": "радуга",
+      "grade": "3",
+      "source": "3: Starter unit"
+    },
+    {
+      "en": "relative",
+      "ru": "родственник",
+      "grade": "3",
+      "source": "3: Unite 16 On Sundays!\n4: Культура и чтение, с. 16–29 плана"
+    },
+    {
+      "en": "rice",
+      "ru": "рис",
+      "grade": "3",
+      "source": "3: Unite 6 In my lunch box! В моей коробке для ланча!"
+    },
+    {
+      "en": "ring",
+      "ru": "звенеть, кольцо",
+      "grade": "3",
+      "source": "3: Unite 14 in the Park!"
+    },
+    {
+      "en": "room",
+      "ru": "комната",
+      "grade": "3",
+      "source": "3: Module 6 Unite 11 Grandma! Grandpa!"
+    },
+    {
+      "en": "rubber",
+      "ru": "ластик",
+      "grade": "3",
+      "source": "3: Module 1 Unite 1 School again! Снова в школу!"
+    },
+    {
+      "en": "ruler",
+      "ru": "линейка",
+      "grade": "3",
+      "source": "3: Module 1 Unite 1 School again! Снова в школу!"
+    },
+    {
+      "en": "Saturday",
+      "ru": "суббота",
+      "grade": "3",
+      "source": "3: Unite 15 a fun day!"
+    },
+    {
+      "en": "school",
+      "ru": "школа",
+      "grade": "3",
+      "source": "3: Module 1 Unite 1 School again! Снова в школу!"
+    },
+    {
+      "en": "science",
+      "ru": "естествознание",
+      "grade": "3",
+      "source": "3: Unite 2 School subjects Школьные предметы"
+    },
+    {
+      "en": "seahorse",
+      "ru": "морской конек",
+      "grade": "3",
+      "source": "3: Unite 10 clever animals. умные животные"
+    },
+    {
+      "en": "seventeen",
+      "ru": "17",
+      "grade": "3",
+      "source": "3: Numbers from 11 to 20"
+    },
+    {
+      "en": "seventy",
+      "ru": "семьдесят",
+      "grade": "3",
+      "source": "3: Round numbers\n4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "short",
+      "ru": "короткий",
+      "grade": "3",
+      "source": "3: Module 5 Unit 9 Cows are funny! Забавные коровы!\n4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "shout",
+      "ru": "кричать",
+      "grade": "3",
+      "source": "3: The toy soldier\n4: Module 6, с. 26–27 плана"
+    },
+    {
+      "en": "sixteen",
+      "ru": "16",
+      "grade": "3",
+      "source": "3: Numbers from 11 to 20"
+    },
+    {
+      "en": "sixty",
+      "ru": "шестьдесят",
+      "grade": "3",
+      "source": "3: Round numbers\n4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "sleep",
+      "ru": "спать",
+      "grade": "3",
+      "source": "3: Unite 14 in the Park!\n4: Культура и чтение, с. 16–29 плана"
+    },
+    {
+      "en": "soccer",
+      "ru": "футбол",
+      "grade": "3",
+      "source": "3: Unite 14 in the Park!"
+    },
+    {
+      "en": "sofa",
+      "ru": "диван",
+      "grade": "3",
+      "source": "3: Unite 12 My House! Мой дом!"
+    },
+    {
+      "en": "spider",
+      "ru": "паук",
+      "grade": "3",
+      "source": "3: Unite 10 clever animals. умные животные"
+    },
+    {
+      "en": "square",
+      "ru": "квадрат",
+      "grade": "3",
+      "source": "3: Fun at school 3\n4: Starter, с. 15 плана"
+    },
+    {
+      "en": "subject",
+      "ru": "школьный предмет",
+      "grade": "3",
+      "source": "3: Unite 2 School subjects Школьные предметы\n4: Starter, с. 15 плана"
+    },
+    {
+      "en": "Sunday",
+      "ru": "воскресенье",
+      "grade": "3",
+      "source": "3: Unite 15 a fun day!"
+    },
+    {
+      "en": "surname",
+      "ru": "фамилия",
+      "grade": "3",
+      "source": "3: Fun at school 3\n4: Starter, с. 15 плана"
+    },
+    {
+      "en": "tail",
+      "ru": "хвост",
+      "grade": "3",
+      "source": "3: Module 5 Unit 9 Cows are funny! Забавные коровы!"
+    },
+    {
+      "en": "talk",
+      "ru": "разговаривать",
+      "grade": "3",
+      "source": "3: Unite 10 clever animals. умные животные"
+    },
+    {
+      "en": "tall",
+      "ru": "высокий",
+      "grade": "3",
+      "source": "3: Unite 4 A happy family\n4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "theatre",
+      "ru": "театр",
+      "grade": "3",
+      "source": "3: Grandpa Durov’s Wonderland\n4: Module 2, с. 18–19 плана"
+    },
+    {
+      "en": "thin",
+      "ru": "тонкий, худой",
+      "grade": "3",
+      "source": "3: Module 5 Unit 9 Cows are funny! Забавные коровы!"
+    },
+    {
+      "en": "think",
+      "ru": "думать",
+      "grade": "3",
+      "source": "3: Starter unit"
+    },
+    {
+      "en": "Thursday",
+      "ru": "четверг",
+      "grade": "3",
+      "source": "3: Unite 15 a fun day!"
+    },
+    {
+      "en": "today",
+      "ru": "сегодня",
+      "grade": "3",
+      "source": "3: Starter unit"
+    },
+    {
+      "en": "tooth",
+      "ru": "зуб",
+      "grade": "3",
+      "source": "3: Module 5 Unit 9 Cows are funny! Забавные коровы!"
+    },
+    {
+      "en": "tortoise",
+      "ru": "черепаха",
+      "grade": "3",
+      "source": "3: Unite 10 clever animals. умные животные\n4: Module 6, с. 26–27 плана"
+    },
+    {
+      "en": "track",
+      "ru": "путь (железнодорожный)",
+      "grade": "3",
+      "source": "3: Module 5 Unit 9 Cows are funny! Забавные коровы!"
+    },
+    {
+      "en": "train",
+      "ru": "поезд",
+      "grade": "3",
+      "source": "3: Module 4 Unite 7 Toys for little Betsy! Игрушки для маленькой Бетси!\n4: Starter, с. 15 плана"
+    },
+    {
+      "en": "triangle",
+      "ru": "треугольник",
+      "grade": "3",
+      "source": "3: Fun at school 3\n4: Starter, с. 15 плана"
+    },
+    {
+      "en": "Tuesday",
+      "ru": "вторник",
+      "grade": "3",
+      "source": "3: Unite 15 a fun day!"
+    },
+    {
+      "en": "TV",
+      "ru": "телевизор",
+      "grade": "3",
+      "source": "3: Unite 8 In my room! В моей комнате!"
+    },
+    {
+      "en": "twelve",
+      "ru": "12",
+      "grade": "3",
+      "source": "3: Numbers from 11 to 20"
+    },
+    {
+      "en": "twenty",
+      "ru": "20 / двадцать",
+      "grade": "3",
+      "source": "3: Numbers from 11 to 20\n3: Round numbers"
+    },
+    {
+      "en": "uncle",
+      "ru": "дядя",
+      "grade": "3",
+      "source": "3: Families in Russia\n4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "uniform",
+      "ru": "форма",
+      "grade": "3",
+      "source": "3: Schools in the UK! A bite to eat!\n4: Module 2, с. 18–19 плана"
+    },
+    {
+      "en": "visit",
+      "ru": "навещать, посещать",
+      "grade": "3",
+      "source": "3: Unite 16 On Sundays!"
+    },
+    {
+      "en": "walk",
+      "ru": "гулять, ходить",
+      "grade": "3",
+      "source": "3: Unite 10 clever animals. умные животные"
+    },
+    {
+      "en": "Wednesday",
+      "ru": "среда",
+      "grade": "3",
+      "source": "3: Unite 15 a fun day!"
+    },
+    {
+      "en": "whale",
+      "ru": "кит",
+      "grade": "3",
+      "source": "3: Fun at school 3\n4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "winner",
+      "ru": "победитель",
+      "grade": "3",
+      "source": "3: Arthur and Rascal\n4: Module 6, с. 26–27 плана"
+    },
+    {
+      "en": "wish",
+      "ru": "желать / желание",
+      "grade": "3",
+      "source": "3: Merry Christmas, everybody! Mother’s Day\n4: Module 5, с. 24–25 плана"
+    },
+    {
+      "en": "woman",
+      "ru": "женщина",
+      "grade": "3",
+      "source": "3: Module 5 Unit 9 Cows are funny! Забавные коровы!"
+    },
+    {
+      "en": "year",
+      "ru": "год",
+      "grade": "3",
+      "source": "3: Unite 2 School subjects Школьные предметы"
+    },
+    {
+      "en": "ago",
+      "ru": "тому назад",
+      "grade": "4",
+      "source": "4: Module 5, с. 24–25 плана"
+    },
+    {
+      "en": "amazing",
+      "ru": "удивительный",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "angry",
+      "ru": "сердитый",
+      "grade": "4",
+      "source": "4: Module 5, с. 24–25 плана"
+    },
+    {
+      "en": "April",
+      "ru": "апрель",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "August",
+      "ru": "август",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "badminton",
+      "ru": "бадминтон",
+      "grade": "4",
+      "source": "4: Module 2, с. 18–19 плана"
+    },
+    {
+      "en": "bake",
+      "ru": "печь",
+      "grade": "4",
+      "source": "4: Module 2, с. 18–19 плана"
+    },
+    {
+      "en": "ball",
+      "ru": "мяч",
+      "grade": "4",
+      "source": "4: Starter, с. 15 плана"
+    },
+    {
+      "en": "bar",
+      "ru": "плитка (шоколада)",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "bark",
+      "ru": "лаять",
+      "grade": "4",
+      "source": "4: Module 6, с. 26–27 плана"
+    },
+    {
+      "en": "baseball",
+      "ru": "бейсбол",
+      "grade": "4",
+      "source": "4: Module 2, с. 18–19 плана"
+    },
+    {
+      "en": "beans",
+      "ru": "фасоль",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "boots",
+      "ru": "сапоги",
+      "grade": "4",
+      "source": "4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "bored",
+      "ru": "скучающий",
+      "grade": "4",
+      "source": "4: Module 5, с. 24–25 плана"
+    },
+    {
+      "en": "bottle",
+      "ru": "бутылка",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "busy",
+      "ru": "занятый",
+      "grade": "4",
+      "source": "4: Module 6, с. 26–27 плана"
+    },
+    {
+      "en": "butter",
+      "ru": "сливочное масло",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "camera",
+      "ru": "фотоаппарат",
+      "grade": "4",
+      "source": "4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "carton",
+      "ru": "картонная упаковка",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "CD",
+      "ru": "компакт-диск",
+      "grade": "4",
+      "source": "4: Starter, с. 15 плана"
+    },
+    {
+      "en": "celebrate",
+      "ru": "праздновать",
+      "grade": "4",
+      "source": "4: Module 7, с. 28 плана"
+    },
+    {
+      "en": "class",
+      "ru": "класс",
+      "grade": "4",
+      "source": "4: Starter, с. 15 плана"
+    },
+    {
+      "en": "cloudy",
+      "ru": "облачный",
+      "grade": "4",
+      "source": "4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "coconut",
+      "ru": "кокос",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "cold",
+      "ru": "холодный",
+      "grade": "4",
+      "source": "4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "concert",
+      "ru": "концерт",
+      "grade": "4",
+      "source": "4: Module 7, с. 28 плана"
+    },
+    {
+      "en": "cross",
+      "ru": "пересекать",
+      "grade": "4",
+      "source": "4: Module 6, с. 26–27 плана"
+    },
+    {
+      "en": "cup",
+      "ru": "чашка",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "December",
+      "ru": "декабрь",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "delicious",
+      "ru": "очень вкусный",
+      "grade": "4",
+      "source": "4: Module 5, с. 24–25 плана"
+    },
+    {
+      "en": "dinosaur",
+      "ru": "динозавр",
+      "grade": "4",
+      "source": "4: Module 7, с. 28 плана"
+    },
+    {
+      "en": "diving",
+      "ru": "ныряние",
+      "grade": "4",
+      "source": "4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "doctor",
+      "ru": "врач",
+      "grade": "4",
+      "source": "4: Module 2, с. 18–19 плана"
+    },
+    {
+      "en": "doll",
+      "ru": "кукла",
+      "grade": "4",
+      "source": "4: Starter, с. 15 плана"
+    },
+    {
+      "en": "dream",
+      "ru": "мечта",
+      "grade": "4",
+      "source": "4: Module 5, с. 24–25 плана"
+    },
+    {
+      "en": "eleventh",
+      "ru": "одиннадцатый",
+      "grade": "4",
+      "source": "4: Module 5, с. 24–25 плана"
+    },
+    {
+      "en": "February",
+      "ru": "февраль",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "feel",
+      "ru": "чувствовать",
+      "grade": "4",
+      "source": "4: Starter, с. 15 плана"
+    },
+    {
+      "en": "fifth",
+      "ru": "пятый",
+      "grade": "4",
+      "source": "4: Module 5, с. 24–25 плана"
+    },
+    {
+      "en": "fireworks",
+      "ru": "фейерверк",
+      "grade": "4",
+      "source": "4: Module 7, с. 28 плана"
+    },
+    {
+      "en": "first",
+      "ru": "первый",
+      "grade": "4",
+      "source": "4: Module 5, с. 24–25 плана"
+    },
+    {
+      "en": "flippers",
+      "ru": "ласты",
+      "grade": "4",
+      "source": "4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "fourth",
+      "ru": "четвёртый",
+      "grade": "4",
+      "source": "4: Module 5, с. 24–25 плана"
+    },
+    {
+      "en": "funfair",
+      "ru": "ярмарка с аттракционами",
+      "grade": "4",
+      "source": "4: Module 7, с. 28 плана"
+    },
+    {
+      "en": "funny",
+      "ru": "смешной",
+      "grade": "4",
+      "source": "4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "garage",
+      "ru": "гараж",
+      "grade": "4",
+      "source": "4: Module 2, с. 18–19 плана"
+    },
+    {
+      "en": "giraffe",
+      "ru": "жираф",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "gloves",
+      "ru": "перчатки",
+      "grade": "4",
+      "source": "4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "Greece",
+      "ru": "греция",
+      "grade": "4",
+      "source": "4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "greengrocer",
+      "ru": "продавец овощей и фруктов",
+      "grade": "4",
+      "source": "4: Module 2, с. 18–19 плана"
+    },
+    {
+      "en": "guitar",
+      "ru": "гитара",
+      "grade": "4",
+      "source": "4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "hairbrush",
+      "ru": "щётка для волос",
+      "grade": "4",
+      "source": "4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "half",
+      "ru": "половина",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "hate",
+      "ru": "ненавидеть",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "hockey",
+      "ru": "хоккей",
+      "grade": "4",
+      "source": "4: Module 2, с. 18–19 плана"
+    },
+    {
+      "en": "hope",
+      "ru": "надеяться",
+      "grade": "4",
+      "source": "4: Starter, с. 15 плана"
+    },
+    {
+      "en": "hospital",
+      "ru": "больница",
+      "grade": "4",
+      "source": "4: Module 2, с. 18–19 плана"
+    },
+    {
+      "en": "hot",
+      "ru": "жаркий",
+      "grade": "4",
+      "source": "4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "hungry",
+      "ru": "голодный",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "Italy",
+      "ru": "италия",
+      "grade": "4",
+      "source": "4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "January",
+      "ru": "январь",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "jar",
+      "ru": "банка",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "journey",
+      "ru": "путешествие",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "July",
+      "ru": "июль",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "June",
+      "ru": "июнь",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "keys",
+      "ru": "ключи",
+      "grade": "4",
+      "source": "4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "kilo",
+      "ru": "килограмм",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "kind",
+      "ru": "добрый",
+      "grade": "4",
+      "source": "4: Module 1, с. 16–17 плана\n4: Module 7, с. 28 плана"
+    },
+    {
+      "en": "kitten",
+      "ru": "котёнок",
+      "grade": "4",
+      "source": "4: Module 6, с. 26–27 плана"
+    },
+    {
+      "en": "lake",
+      "ru": "озеро",
+      "grade": "4",
+      "source": "4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "last",
+      "ru": "прошлый",
+      "grade": "4",
+      "source": "4: Module 5, с. 24–25 плана"
+    },
+    {
+      "en": "lazy",
+      "ru": "ленивый",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "lemon",
+      "ru": "лимон",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "loaf",
+      "ru": "буханка",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "loud",
+      "ru": "громкий",
+      "grade": "4",
+      "source": "4: Module 7, с. 28 плана"
+    },
+    {
+      "en": "lunchtime",
+      "ru": "время обеда",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "mango",
+      "ru": "манго",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "May",
+      "ru": "май",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "mechanic",
+      "ru": "механик",
+      "grade": "4",
+      "source": "4: Module 2, с. 18–19 плана"
+    },
+    {
+      "en": "Mexico",
+      "ru": "мексика",
+      "grade": "4",
+      "source": "4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "monkey",
+      "ru": "обезьяна",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "month",
+      "ru": "месяц",
+      "grade": "4",
+      "source": "4: Module 2, с. 18–19 плана"
+    },
+    {
+      "en": "mountains",
+      "ru": "горы",
+      "grade": "4",
+      "source": "4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "next",
+      "ru": "следующий",
+      "grade": "4",
+      "source": "4: Module 6, с. 26–27 плана"
+    },
+    {
+      "en": "November",
+      "ru": "ноябрь",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "nurse",
+      "ru": "медсестра",
+      "grade": "4",
+      "source": "4: Module 2, с. 18–19 плана"
+    },
+    {
+      "en": "October",
+      "ru": "октябрь",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "packet",
+      "ru": "пакет",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "pass",
+      "ru": "проходить мимо",
+      "grade": "4",
+      "source": "4: Module 6, с. 26–27 плана"
+    },
+    {
+      "en": "passport",
+      "ru": "паспорт",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "pepper",
+      "ru": "перец",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "pineapple",
+      "ru": "ананас",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "plump",
+      "ru": "полный",
+      "grade": "4",
+      "source": "4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "Poland",
+      "ru": "польша",
+      "grade": "4",
+      "source": "4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "polite",
+      "ru": "вежливый",
+      "grade": "4",
+      "source": "4: Module 2, с. 18–19 плана"
+    },
+    {
+      "en": "porridge",
+      "ru": "каша",
+      "grade": "4",
+      "source": "4: Module 6, с. 26–27 плана"
+    },
+    {
+      "en": "Portugal",
+      "ru": "португалия",
+      "grade": "4",
+      "source": "4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "postcard",
+      "ru": "открытка",
+      "grade": "4",
+      "source": "4: Module 2, с. 18–19 плана"
+    },
+    {
+      "en": "postman",
+      "ru": "почтальон",
+      "grade": "4",
+      "source": "4: Module 2, с. 18–19 плана"
+    },
+    {
+      "en": "pretty",
+      "ru": "красивый",
+      "grade": "4",
+      "source": "4: Module 7, с. 28 плана"
+    },
+    {
+      "en": "rainy",
+      "ru": "дождливый",
+      "grade": "4",
+      "source": "4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "remember",
+      "ru": "помнить",
+      "grade": "4",
+      "source": "4: Starter, с. 15 плана"
+    },
+    {
+      "en": "rest",
+      "ru": "отдыхать",
+      "grade": "4",
+      "source": "4: Module 6, с. 26–27 плана"
+    },
+    {
+      "en": "ride",
+      "ru": "аттракцион",
+      "grade": "4",
+      "source": "4: Module 7, с. 28 плана"
+    },
+    {
+      "en": "rules",
+      "ru": "правила",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "Russia",
+      "ru": "россия",
+      "grade": "4",
+      "source": "4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "sailing",
+      "ru": "парусный спорт",
+      "grade": "4",
+      "source": "4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "salt",
+      "ru": "соль",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "seal",
+      "ru": "тюлень",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "seaside",
+      "ru": "морское побережье",
+      "grade": "4",
+      "source": "4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "second",
+      "ru": "второй",
+      "grade": "4",
+      "source": "4: Module 5, с. 24–25 плана"
+    },
+    {
+      "en": "September",
+      "ru": "сентябрь",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "shy",
+      "ru": "застенчивый",
+      "grade": "4",
+      "source": "4: Module 7, с. 28 плана"
+    },
+    {
+      "en": "sixteenth",
+      "ru": "шестнадцатый",
+      "grade": "4",
+      "source": "4: Module 5, с. 24–25 плана"
+    },
+    {
+      "en": "skating",
+      "ru": "катание на коньках",
+      "grade": "4",
+      "source": "4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "skiing",
+      "ru": "катание на лыжах",
+      "grade": "4",
+      "source": "4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "slim",
+      "ru": "стройный",
+      "grade": "4",
+      "source": "4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "slow",
+      "ru": "медленный",
+      "grade": "4",
+      "source": "4: Module 6, с. 26–27 плана"
+    },
+    {
+      "en": "soon",
+      "ru": "скоро",
+      "grade": "4",
+      "source": "4: Module 6, с. 26–27 плана"
+    },
+    {
+      "en": "Spain",
+      "ru": "испания",
+      "grade": "4",
+      "source": "4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "station",
+      "ru": "станция",
+      "grade": "4",
+      "source": "4: Module 2, с. 18–19 плана"
+    },
+    {
+      "en": "strong",
+      "ru": "сильный",
+      "grade": "4",
+      "source": "4: Module 7, с. 28 плана"
+    },
+    {
+      "en": "study",
+      "ru": "учиться",
+      "grade": "4",
+      "source": "4: Module 6, с. 26–27 плана"
+    },
+    {
+      "en": "sugar",
+      "ru": "сахар",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "suitcase",
+      "ru": "чемодан",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "sunglasses",
+      "ru": "солнцезащитные очки",
+      "grade": "4",
+      "source": "4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "sunny",
+      "ru": "солнечный",
+      "grade": "4",
+      "source": "4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "surfing",
+      "ru": "сёрфинг",
+      "grade": "4",
+      "source": "4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "swimsuit",
+      "ru": "купальник",
+      "grade": "4",
+      "source": "4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "tasty",
+      "ru": "вкусный",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "tennis",
+      "ru": "теннис",
+      "grade": "4",
+      "source": "4: Module 2, с. 18–19 плана"
+    },
+    {
+      "en": "tent",
+      "ru": "палатка",
+      "grade": "4",
+      "source": "4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "third",
+      "ru": "третий",
+      "grade": "4",
+      "source": "4: Module 5, с. 24–25 плана"
+    },
+    {
+      "en": "ticket",
+      "ru": "билет",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "tin",
+      "ru": "жестяная банка",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "tired",
+      "ru": "уставший",
+      "grade": "4",
+      "source": "4: Module 5, с. 24–25 плана"
+    },
+    {
+      "en": "tomato",
+      "ru": "помидор",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "treat",
+      "ru": "угощение",
+      "grade": "4",
+      "source": "4: Module 3, с. 20–21 плана"
+    },
+    {
+      "en": "Turkey",
+      "ru": "турция",
+      "grade": "4",
+      "source": "4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "twelfth",
+      "ru": "двенадцатый",
+      "grade": "4",
+      "source": "4: Module 5, с. 24–25 плана"
+    },
+    {
+      "en": "twentieth",
+      "ru": "двадцатый",
+      "grade": "4",
+      "source": "4: Module 5, с. 24–25 плана"
+    },
+    {
+      "en": "vet",
+      "ru": "ветеринар",
+      "grade": "4",
+      "source": "4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "violin",
+      "ru": "скрипка",
+      "grade": "4",
+      "source": "4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "volleyball",
+      "ru": "волейбол",
+      "grade": "4",
+      "source": "4: Module 2, с. 18–19 плана"
+    },
+    {
+      "en": "waiter",
+      "ru": "официант",
+      "grade": "4",
+      "source": "4: Module 2, с. 18–19 плана"
+    },
+    {
+      "en": "warm",
+      "ru": "тёплый",
+      "grade": "4",
+      "source": "4: Module 4, с. 22–23 плана"
+    },
+    {
+      "en": "watch",
+      "ru": "наручные часы",
+      "grade": "4",
+      "source": "4: Module 1, с. 16–17 плана"
+    },
+    {
+      "en": "week",
+      "ru": "неделя",
+      "grade": "4",
+      "source": "4: Module 2, с. 18–19 плана"
+    },
+    {
+      "en": "windy",
+      "ru": "ветреный",
+      "grade": "4",
+      "source": "4: Module 8, с. 29 плана"
+    },
+    {
+      "en": "yesterday",
+      "ru": "вчера",
+      "grade": "4",
+      "source": "4: Module 5, с. 24–25 плана"
+    }
+  ]
+}
