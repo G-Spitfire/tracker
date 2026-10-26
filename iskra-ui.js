@@ -1,9 +1,14 @@
 /* Iskra 2.0: child-focused screens. Legacy data/IDs remain unchanged. */
 (function(){
   'use strict';
-  const star = '<img class="ik-star" alt="" aria-hidden="true" src="./iskra-star.svg">';
-  const starSmall = '<img class="ik-star ik-star-sm" alt="" aria-hidden="true" src="./iskra-star.svg">';
+  const star = '<img class="ik-star" alt="" aria-hidden="true" width="118" height="118" src="./assets/iskra/hero-star.webp" decoding="async">';
+  const starSmall = '<img class="ik-star ik-star-sm" alt="" aria-hidden="true" width="74" height="74" src="./assets/iskra/hero-star.webp" decoding="async">';
   const safe = value => esc(value == null ? '' : String(value));
+  const art=(name,kind='')=>'<span class="ik-art ik-art-'+name+(kind?' ik-art--'+kind:'')+'" aria-hidden="true"></span>';
+  const taskArt={hw:'task_read',en:'task_english',bg:'nav_today',cl:'task_clothes',ho:'task_clean',ex:'task_walk',rd:'task_book'};
+  const taskIcon=t=>art(taskArt[t.i]||'task_star','task');
+  const achievementArt={'Постоянство':'achievement_streak','Отличные оценки':'achievement_grades','Помощник':'achievement_helper','Первый шаг':'achievement_first','Книголюб':'achievement_read','Мастер дел':'achievement_master'};
+
   const fmtDate = date => new Date(date + 'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'long'});
   const completed = () => Object.keys(S.d||{}).reduce((n,date) => n+dn(date).length,0);
   const earned = () => Object.keys(S.d||{}).reduce((n,date) => n+st(date),0);
@@ -32,9 +37,9 @@
     const grades=windowDays===null?window.schoolCloud?.overallSummary?.():window.schoolCloud?.summaryBetween?.(start,end);
     const mean=grades?.count&&Number.isFinite(grades.average)?grades.average.toFixed(2).replace('.',','):'—';
     return '<div class="ik-time-stat">'+
-      '<div class="ik-tile"><div class="ik-tile-icon">✅</div><strong>'+count+'</strong><small>дел сделано</small></div>'+
-      '<div class="ik-tile"><div class="ik-tile-icon">⭐</div><strong>'+starsCount+'</strong><small>звёзд</small></div>'+
-      '<div class="ik-tile"><div class="ik-tile-icon">▥</div><strong>'+mean+'</strong><small>средний за период</small></div></div>';
+      '<div class="ik-tile"><div class="ik-tile-icon">'+art('task_done','stat')+'</div><strong>'+count+'</strong><small>дел сделано</small></div>'+
+      '<div class="ik-tile"><div class="ik-tile-icon">'+art('task_star','stat')+'</div><strong>'+starsCount+'</strong><small>звёзд</small></div>'+
+      '<div class="ik-tile"><div class="ik-tile-icon">'+art('nav_grades','stat')+'</div><strong>'+mean+'</strong><small>средний за период</small></div></div>';
   }
   function ikToday(){
     recordAchievements();
@@ -53,7 +58,7 @@
         const yes=done.includes(t.i),x=(S.x[d]||{})[t.i],sub=yes&&x&&((x.s||[]).length||x.n)?[].concat(x.s||[],x.n?[x.n]:[]).join(', '):(t.s||'');
         const details=t.i==='hw'||t.i==='ho';
         return '<div class="ik-task '+(yes?'done':'')+'"><button class="ik-check '+(yes?'done':'')+'" data-action="toggle" data-id="'+t.i+'" aria-label="'+(yes?'Снять отметку: ':'Выполнить: ')+safe(t.t)+'">'+(yes?'✓':'')+'</button>'+
-          '<span class="ik-task-icon">'+safe(t.e||timeIcon(t.i))+'</span><button class="ik-task-title" data-action="'+(details?'details':'ikTaskInfo')+'" data-id="'+t.i+'">'+safe(t.t)+(sub?'<small>'+safe(sub)+'</small>':'')+'</button>'+
+          '<span class="ik-task-icon">'+taskIcon(t)+'</span><button class="ik-task-title" data-action="'+(details?'details':'ikTaskInfo')+'" data-id="'+t.i+'">'+safe(t.t)+(sub?'<small>'+safe(sub)+'</small>':'')+'</button>'+
           (S.times[t.i]?'<span class="ik-task-time">'+safe(S.times[t.i])+'</span>':'')+
           '<button class="ik-mini-btn" data-action="'+(details?'details':'ikTaskInfo')+'" data-id="'+t.i+'" aria-label="Подробнее">›</button>'+'</div>';
       }).join(''):'<div class="ik-empty">В этой категории дел сегодня нет.</div>')+'</div>'+
@@ -115,25 +120,25 @@
     return '<div class="ik-page ik-reward"><div class="ik-heading"><h1>Награда</h1><span class="ik-cloud-pill">⭐ Мои достижения</span></div>'+
       '<div class="ik-main-card"><div class="ik-hero-split">'+star+'<div style="flex:1"><b>Твоя неделя</b><div class="ik-row" style="gap:7px"><span class="ik-number" style="font-size:43px">'+tw+'</span><span style="font-size:25px">⭐</span></div><div class="ik-caption">из '+goal+' звёзд для награды</div><p class="ik-caption" style="margin-bottom:0">'+rewardStatus+'</p></div></div><div class="ik-level-track"><div style="width:'+perc(tw,goal)+'%"></div></div></div>'+
       '<div class="card ik-week">'+dates.map((date,i)=>{const n=dn(date).length,all=n>0&&n===tasks(date).length;return '<button class="ik-week-day '+(all?'is-full':'')+'" data-action="ikWeekDay" data-id="'+date+'" aria-label="'+DN[i]+': '+st(date)+' звёзд"><div class="ik-week-star">'+(all?'⭐':n?'✦':'☆')+'</div><span>'+DN[i]+'</span><small>'+st(date)+' ★</small></button>'}).join('')+'</div>'+
-      '<button class="ik-action-row" data-action="ikLevels"><span class="ik-action-icon">👑</span><span style="flex:1"><b>Твой уровень</b><small>'+safe(levels[l][1])+' · уровень '+(l+1)+'</small><div class="ik-level-track"><div style="width:'+pr+'%"></div></div><small>'+(next?'До следующего: '+Math.max(0,next[0]-total)+' звёзд':'Максимальный уровень!')+'</small></span><span class="ik-chevron">›</span></button>'+
-      '<button class="ik-action-row" data-action="ikRewardInfo"><span class="ik-action-icon">🎁</span><span style="flex:1"><b>Ближайшая награда</b><small>'+safe(prize?.name||currentPlan.name)+'</small><div class="ik-level-track"><div style="width:'+perc(tw,goal)+'%"></div></div><small>'+(prize?.status==='received'?'Награда получена':tw>=goal?'Можно вручить':Math.max(0,goal-tw)+' звёзд осталось')+'</small></span><span class="ik-chevron">›</span></button>'+
+      '<button class="ik-action-row" data-action="ikLevels"><span class="ik-action-icon">'+art('achievement_master','action')+'</span><span style="flex:1"><b>Твой уровень</b><small>'+safe(levels[l][1])+' · уровень '+(l+1)+'</small><div class="ik-level-track"><div style="width:'+pr+'%"></div></div><small>'+(next?'До следующего: '+Math.max(0,next[0]-total)+' звёзд':'Максимальный уровень!')+'</small></span><span class="ik-chevron">›</span></button>'+
+      '<button class="ik-action-row" data-action="ikRewardInfo"><span class="ik-action-icon">'+art('prize_gift','action')+'</span><span style="flex:1"><b>Ближайшая награда</b><small>'+safe(prize?.name||currentPlan.name)+'</small><div class="ik-level-track"><div style="width:'+perc(tw,goal)+'%"></div></div><small>'+(prize?.status==='received'?'Награда получена':tw>=goal?'Можно вручить':Math.max(0,goal-tw)+' звёзд осталось')+'</small></span><span class="ik-chevron">›</span></button>'+
       '<div class="ik-row-between"><h2 class="ik-sec-title">Достижения</h2><span class="ik-tab-sublabel">'+achievements.filter(a=>a.ok).length+' из '+achievements.length+'</span></div>'+
-      '<div class="ik-achievements">'+achievements.map(a=>'<div class="ik-achievement '+(a.ok?'':'locked')+'"><span class="icon">'+a.icon+'</span><b>'+a.title+'</b><small>'+(a.ok?('Получено '+safe(S.earnedAchievements[a.title])):a.small)+'</small></div>').join('')+'</div>'+
+      '<div class="ik-achievements">'+achievements.map(a=>'<div class="ik-achievement '+(a.ok?'':'locked')+'"><span class="icon">'+art(achievementArt[a.title]||'star','achievement')+'</span><b>'+a.title+'</b><small>'+(a.ok?('Получено '+safe(S.earnedAchievements[a.title])):a.small)+'</small></div>').join('')+'</div>'+
       '<button class="ik-action-row" data-action="ikRewardHistory"><span class="ik-action-icon">📜</span><span style="flex:1"><b>История наград</b><small>Заработанные и полученные награды</small></span><span class="ik-chevron">›</span></button></div>';
   }
   function ikProfile(){
     recordAchievements();
     const l=currentLevel(),total=earned(),next=levels[l+1],step=next?next[0]-levels[l][0]:0,gained=total-levels[l][0],prog=next?perc(gained,step):100;
-    function item(icon,title,subtitle,action){return '<button class="ik-action-row" data-action="'+action+'"><span class="ik-action-icon">'+icon+'</span><span style="flex:1"><b>'+title+'</b>'+(subtitle?'<small>'+safe(subtitle)+'</small>':'')+'</span><span class="ik-chevron">›</span></button>'}
+    function item(icon,title,subtitle,action){return '<button class="ik-action-row" data-action="'+action+'"><span class="ik-action-icon">'+art(icon,'action')+'</span><span style="flex:1"><b>'+title+'</b>'+(subtitle?'<small>'+safe(subtitle)+'</small>':'')+'</span><span class="ik-chevron">›</span></button>'}
     return '<div class="ik-page ik-profile"><div class="ik-heading"><h1>Я</h1><button class="ik-top-link" data-action="ikPersonalSettings" aria-label="Личные настройки">⚙ Настройки</button></div>'+
-      '<div class="card ik-profile-card"><div class="ik-avatar" aria-label="Аватар">'+safe(S.av.e)+'</div><div class="ik-profile-body"><strong>'+safe(S.name||'Полина')+' ✨</strong><small>'+safe(levels[l][1])+' · уровень '+(l+1)+'</small><div class="ik-level-track"><div style="width:'+prog+'%"></div></div><small>'+(next?Math.max(0,gained)+' из '+step+' звёзд до уровня':'Все уровни пройдены')+'</small></div><button class="ik-mini-btn" data-action="profile" aria-label="Изменить профиль">✎</button></div>'+
+      '<div class="card ik-profile-card"><div class="ik-avatar" aria-label="Аватар">'+art('portrait','avatar')+'</div><div class="ik-profile-body"><strong>'+safe(S.name||'Полина')+' ✨</strong><small>'+safe(levels[l][1])+' · уровень '+(l+1)+'</small><div class="ik-level-track"><div style="width:'+prog+'%"></div></div><small>'+(next?Math.max(0,gained)+' из '+step+' звёзд до уровня':'Все уровни пройдены')+'</small></div><button class="ik-mini-btn" data-action="profile" aria-label="Изменить профиль">✎</button></div>'+
       '<div class="ik-row-between"><h2 class="ik-sec-title">Моя статистика</h2><button class="ik-top-link" data-action="ikProfileWindow">'+profileWindowLabel()+' ▾</button></div>'+statsTiles()+
-      '<div class="ik-list">'+item('💗','Мои интересы',S.interests||'Добавь то, что тебе нравится','ikInterests')+
-      item('📅','История дел','Что было в прошлые дни','history')+
-      item('🏆','Мои награды','Звёзды и достижения','ikToReward')+
-      item('▥','Мои оценки','Из школьного дневника','ikToGrades')+'</div>'+
-      '<div class="ik-list">'+item('🔒','Для родителей','Настройки и резервная копия','parents')+
-      item('ⓘ','О приложении','Искра · твой день и достижения','ikAbout')+'</div></div>';
+      '<div class="ik-list">'+item('heart','Мои интересы',S.interests||'Добавь то, что тебе нравится','ikInterests')+
+      item('history','История дел','Что было в прошлые дни','history')+
+      item('nav_reward','Мои награды','Звёзды и достижения','ikToReward')+
+      item('nav_grades','Мои оценки','Из школьного дневника','ikToGrades')+'</div>'+
+      '<div class="ik-list">'+item('parent_lock','Для родителей','Настройки и резервная копия','parents')+
+      item('info','О приложении','Искра · твой день и достижения','ikAbout')+'</div></div>';
   }
   today=ikToday;reward=ikReward;me=ikProfile;
   ACTIONS.ikFilter=(id)=>{filter=id;render()};
