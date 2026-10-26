@@ -32,7 +32,8 @@ const today = () => {
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') +
     '-' + String(d.getDate()).padStart(2, '0');
 };
-const score = value => /^[2-5]$/.test(String(value).trim()) ? Number(value) : null;
+const score = value => /^[2-5](?:\.0+)?$/.test(String(value).trim()) ? Number(value) : null;
+const markScore = row => score(row.valueCode) ?? markScore(row);
 const avg = rows => rows.length
   ? (rows.reduce((n, row) => n + row.n, 0) / rows.length).toFixed(2) : '—';
 const forecast = n => n < 2.6 ? 2 : n < 3.6 ? 3 : n < 4.6 ? 4 : 5;
@@ -71,7 +72,8 @@ function verify(raw) {
     ids.add(row.id);
     grades.push({
       id: row.id, date: row.date, subject: row.subject.trim() || 'Без предмета',
-      value: row.value, type: typeof row.type === 'string' ? row.type : ''
+      value: row.value, valueCode: typeof row.valueCode === 'string' ? row.valueCode : '',
+      type: typeof row.type === 'string' ? row.type : ''
     });
   }
   return {
@@ -141,7 +143,7 @@ function trend(rows) {
 function cloudGrades() {
   const d = state.data;
   const filtered = d.grades.filter(row => row.date >= state.from && row.date <= state.to);
-  const numeric = filtered.map(row => ({...row, n: score(row.value)})).filter(row => row.n !== null);
+  const numeric = filtered.map(row => ({...row, n: markScore(row)})).filter(row => row.n !== null);
   const group = new Map();
   filtered.forEach(row => {
     if (!group.has(row.subject)) group.set(row.subject, []);
@@ -165,7 +167,7 @@ function cloudGrades() {
     const mean = nums.length ? Number(avg(nums.map(n => ({n})))) : null;
     const chips = marks.slice().sort((a, b) => b.date.localeCompare(a.date) ||
       b.id.localeCompare(a.id)).map(row => {
-      const val = score(row.value);
+      const val = markScore(row);
       const tip = [row.date.split('-').reverse().join('.'), row.type].filter(Boolean).join(' · ');
       return '<span class="chip ' + (val === null ? '' : 'c' + val) +
         '" title="' + esc(tip) + '" aria-label="' + esc(tip + ': ' + row.value) +
@@ -183,7 +185,7 @@ function cloudGrades() {
 function summary() {
   if (!state.user || !state.data || !state.from || !state.to) return null;
   const filtered = state.data.grades.filter(row => row.date >= state.from && row.date <= state.to);
-  const valid = filtered.map(row => ({...row, n: score(row.value)})).filter(row => row.n !== null);
+  const valid = filtered.map(row => ({...row, n: markScore(row)})).filter(row => row.n !== null);
   const average = valid.length ? valid.reduce((s, row) => s + row.n, 0) / valid.length : 0;
   const groups = new Map();
   valid.forEach(row => {
