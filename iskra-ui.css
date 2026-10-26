@@ -125,6 +125,12 @@ h1{font-size:29px;font-weight:850;letter-spacing:-.035em}h2{font-size:21px;font-
 .ik-issues{padding:10px 12px;background:#fff8e7;border-radius:14px;font-size:12px;color:#8b6429}
 .ik-kpi-meaning{margin:8px 0 0;font-size:11px;color:#8b83a0}
 .ik-hero-split{display:flex;align-items:center;justify-content:space-between;gap:8px}
+
+.scs-iskra .scs-form{display:grid;gap:13px;margin-top:16px}
+.scs-iskra .scs-form label{display:grid;gap:6px;color:#5d537b;font-size:13px;font-weight:700}
+.scs-iskra .scs-form input{margin-top:0;border:1px solid #e9e1f4;border-radius:13px;padding:12px 14px;font-size:16px;min-height:45px;width:100%;box-sizing:border-box}
+.scs-iskra .scs-form button{width:100%;margin-top:3px}
+.scs-iskra .scs-warning{background:#fff3ed;border:1px solid #ffe1d7;color:#9d543f;border-radius:14px;padding:11px 12px;font-size:13px}
 .ik-settings-input{min-height:46px;border:1px solid #e9e1f3;background:white;border-radius:15px;padding:11px 12px;font:inherit;width:100%}
 @media(max-width:365px){main{padding:15px 12px 28px}.ik-main-card .ik-number{font-size:40px}.ik-star{width:97px;height:97px}.ik-main-card .ik-star{width:83px;height:83px}.ik-task{gap:8px;padding:10px}.ik-grade-track{width:40px}.ik-time-stat{gap:6px}.ik-tile{padding:11px 7px}.ik-filter{padding:9px 10px;font-size:11px}}
 @media(min-width:540px){main{padding-top:28px}.bar{border-radius:27px;max-width:520px;left:50%;transform:translateX(-50%);bottom:9px;width:calc(100% - 24px);min-height:68px;padding:6px 12px}}
