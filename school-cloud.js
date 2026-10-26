@@ -49,6 +49,20 @@ const gradeScore = row => (
   isAttendanceLabel(row.value) || isAttendanceLabel(row.valueCode) ||
   isAttendanceLabel(row.type)
 ) ? null : markScore(row);
+// Estimate type comes from the school's estimate_type_name, not from a prediction.
+// Avoid identifying a summative test (e.g. "Итоговая контрольная работа")
+// as the teacher's final term grade.
+const officialKind = row => {
+  const kind = String(row.type || '').toLocaleLowerCase('ru-RU')
+    .replace(/ё/g, 'е').replace(/\s+/g, ' ').trim();
+  if (!kind || /контрольн|проверочн|самостоят|диктант|сочинен|работа|домашн|урок|тест|проект|практическ|зачет|экзамен/.test(kind)) return '';
+  if (/четверт/.test(kind)) return 'За четверть';
+  if (/триместр/.test(kind)) return 'За триместр';
+  if (/полугод/.test(kind)) return 'За полугодие';
+  if (/годов|за год|по итогам года/.test(kind)) return 'За год';
+  if (/^итоговая(?: (?:оценка|отметка))?$|^аттестационная(?: (?:оценка|отметка))?$/.test(kind)) return 'Итоговая';
+  return '';
+};
 const avg = rows => rows.length
   ? (rows.reduce((n, row) => n + row.n, 0) / rows.length).toFixed(2) : '—';
 const forecast = n => n < 2.6 ? 2 : n < 3.6 ? 3 : n < 4.6 ? 4 : 5;
@@ -158,11 +172,14 @@ function trend(rows) {
 function cloudGrades() {
   const d = state.data;
   const filtered = d.grades.filter(row => row.date >= state.from && row.date <= state.to);
-  const numeric = filtered.map(row => ({...row, n: gradeScore(row)})).filter(row => row.n !== null);
+  const numbered = filtered.map(row => ({...row, n: gradeScore(row)}))
+    .filter(row => row.n !== null);
+  const numeric = numbered.filter(row => !officialKind(row));
+  const official = numbered.filter(row => !!officialKind(row));
   const group = new Map();
-  numeric.forEach(row => {
-    if (!group.has(row.subject)) group.set(row.subject, []);
-    group.get(row.subject).push(row);
+  numbered.forEach(row => {
+    if (!group.has(row.subject)) group.set(row.subject, {works: [], official: []});
+    group.get(row.subject)[officialKind(row) ? 'official' : 'works'].push(row);
   });
   const ordered = [...group].sort((a, b) => a[0].localeCompare(b[0], 'ru'));
   let s = '<div class="scs-filters"><label>С даты<input type="date" data-sc-date="from" value="' +
@@ -172,49 +189,68 @@ function cloudGrades() {
     s += '<p class="scs-warning">Начальная дата позже конечной. Измени период.</p>';
   }
   s += '<div class="hero"><div class="big">' + avg(numeric) +
-    '</div><div class="mu">Средний балл · ' + numeric.length +
-    ' числовых оценок</div></div>';
+    '</div><div class="mu">Средний за работы · ' + numeric.length +
+    ' оценок' + (official.length ? ' · ' + official.length + ' итоговых отдельно' : '') +
+    '</div></div>';
   s += '<div class="card"><b>Динамика среднего балла</b>' + trend(numeric) +
     '<div class="mu sm">Все числовые оценки равновесные; официальный школьный средний может отличаться.</div></div>';
-  if (!numeric.length) s += '<div class="card">В выбранном периоде числовых оценок пока нет.</div>';
-  s += ordered.map(([subject, marks]) => {
-    const nums = marks.map(r => r.n);
-    const mean = nums.length ? Number(avg(nums.map(n => ({n})))) : null;
-    // Same direction as a chronological journal: older entries first.
-    // School record IDs are unique but two different IDs can still be visually identical.
-    const chronological = marks.slice().sort((a, b) => a.date.localeCompare(b.date) ||
+  if (!numbered.length) s += '<div class="card">В выбранном периоде числовых оценок пока нет.</div>';
+  s += ordered.map(([subject, group]) => {
+    const works = group.works.slice().sort((a, b) => a.date.localeCompare(b.date) ||
       a.id.localeCompare(b.id));
-    const chips = chronological.map(row => {
-      const val = row.n;
+    const officialMarks = group.official.slice().sort((a, b) =>
+      a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+    const mean = works.length ? works.reduce((n, r) => n + r.n, 0) / works.length : null;
+    const chips = works.map(row => {
       const tip = [row.date.split('-').reverse().join('.'), row.type].filter(Boolean).join(' · ');
-      return '<span class="chip c' + val +
-        '" title="' + esc(tip) + '" aria-label="' + esc(tip + ': ' + val) +
-        '">' + val + '</span>';
+      return '<span class="chip c' + row.n +
+        '" title="' + esc(tip) + '" aria-label="' + esc(tip + ': ' + row.n) +
+        '">' + row.n + '</span>';
     }).join('');
-    const items = chronological.map(row => '<li class="scs-grade-detail">' +
+    const finalRows = officialMarks.map(row => {
+      const kind = officialKind(row);
+      const date = row.date.split('-').reverse().join('.');
+      return '<div class="scs-final-row">' +
+        '<span class="scs-final-label">' + esc(kind) + ' · официально</span>' +
+        '<span class="scs-final-mark c' + row.n + '">' + row.n + '</span>' +
+        '<span class="mu sm">' + esc(date) + '</span>' +
+        '</div>';
+    }).join('');
+    const detailRows = works.map(row =>
+      '<li class="scs-grade-detail">' +
       '<span class="scs-grade-date">' + esc(row.date.split('-').reverse().join('.')) + '</span>' +
       '<span class="scs-grade-number c' + row.n + '">' + row.n + '</span>' +
-      '<span class="mu sm">' + esc(row.type || 'Вид работы не указан') + '</span></li>').join('');
+      '<span class="mu sm">' + esc(row.type || 'Вид работы не указан') + '</span></li>'
+    ).join('');
+    const subtitle = (mean === null ? 'Оценок за работы пока нет'
+      : 'Средний за работы ' + mean.toFixed(2)) +
+      (!officialMarks.length && mean !== null ? ' · прогноз ' + forecast(mean) : '') +
+      ' · оценок за работы: ' + works.length;
+    const audit = works.length
+      ? '<details class="scs-grade-audit"><summary>Посмотреть даты и работы (' +
+        works.length + ')</summary><ol>' + detailRows + '</ol>' +
+        '<p class="mu sm">Итоговые оценки за период в этот список не включены.</p>' +
+        '</details>'
+      : '';
     return '<div class="card sub"><div class="row"><div><b>' + esc(subject) +
-      '</b><div class="mu sm">Средний ' + mean.toFixed(2) +
-      ' · прогноз ' + forecast(mean) + ' · оценок: ' + chronological.length +
-      '</div></div></div><div class="chips">' + chips + '</div>' +
-      '<details class="scs-grade-audit"><summary>Посмотреть даты и работы (' +
-      chronological.length + ')</summary><ol>' + items + '</ol>' +
-      '<p class="mu sm">Сравни с дневником за те же даты. Две одинаковые оценки ' +
-      'в один день могут быть разными работами — ничего не удаляется автоматически.</p>' +
-      '</details></div>';
+      '</b><div class="mu sm">' + subtitle + '</div></div></div>' +
+      (finalRows ? '<div class="scs-final-list">' + finalRows + '</div>' : '') +
+      (works.length ? '<div class="chips">' + chips + '</div>' : '') +
+      audit + '</div>';
   }).join('');
   s += '<p class="mu sm">Период: ' + esc(state.from.split('-').reverse().join('.')) +
     ' — ' + esc(state.to.split('-').reverse().join('.')) +
-    '. Сравнивай с тем же периодом в школьном дневнике. Показаны только оценки 2–5; отсутствия и служебные записи скрыты. Прогноз условный: школьные коэффициенты не применяются.</p>';
+    '. Итоговые отметки, определённые по типу записи дневника, показаны отдельно и не участвуют в среднем. ' +
+    'Пропуски и служебные записи скрыты. Прогноз — только при отсутствии официального итога. ' +
+    'Средний за работы равновесный; школьные коэффициенты не применяются.</p>';
   return s;
 }
 
 function summary() {
   if (!state.user || !state.data || !state.from || !state.to) return null;
   const filtered = state.data.grades.filter(row => row.date >= state.from && row.date <= state.to);
-  const valid = filtered.map(row => ({...row, n: gradeScore(row)})).filter(row => row.n !== null);
+  const valid = filtered.map(row => ({...row, n: gradeScore(row)}))
+    .filter(row => row.n !== null && !officialKind(row));
   const average = valid.length ? valid.reduce((s, row) => s + row.n, 0) / valid.length : 0;
   const groups = new Map();
   valid.forEach(row => {
@@ -254,9 +290,11 @@ function view(legacy) {
     if (state.data) {
       const d = new Date(state.data.syncedAt);
       const date = Number.isFinite(d.getTime()) ? d.toLocaleString('ru-RU') : 'неизвестно';
-      const gradeCount = state.data.grades.filter(row => gradeScore(row) !== null).length;
-      body += '<p class="mu sm">В дневнике: ' + gradeCount +
-        ' оценок · получено MacBook: ' + esc(date) + '</p>';
+      const full = state.data.grades.filter(row => gradeScore(row) !== null);
+      const officialCount = full.filter(row => !!officialKind(row)).length;
+      body += '<p class="mu sm">В дневнике: ' + (full.length - officialCount) +
+        ' оценок за работы' + (officialCount ? ' · ' + officialCount + ' итоговых' : '') +
+        ' · получено MacBook: ' + esc(date) + '</p>';
     }
   }
   if (state.error) body += '<p class="scs-warning" role="status">' + esc(state.error) + '</p>';
@@ -278,6 +316,7 @@ function view(legacy) {
 const css = document.createElement('style');
 css.textContent = '.scs{display:block}.scs .scs-head,.scs .scs-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}.scs .scs-flag{font-size:11px;opacity:.75}.scs .scs-form{display:grid;gap:12px;margin-top:15px}.scs .scs-form label,.scs .scs-filters label{display:grid;gap:6px;font-size:13px;font-weight:600}.scs input{padding:11px;border:1px solid var(--ln);border-radius:11px;background:var(--bg);color:var(--tx);font:inherit;min-width:0;box-sizing:border-box;width:100%}.scs .scs-actions{justify-content:flex-start;margin-top:12px}.scs .scs-filters{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}.scs .scs-warning{color:var(--bad);margin:12px 0;font-size:14px}.scs .scs-manual{width:100%;margin:14px 0}.scs .chips{display:flex;gap:6px;flex-wrap:wrap}.scs .chips .chip{cursor:default}.scs .sub{margin:9px 0}@media(max-width:360px){.scs .scs-filters{grid-template-columns:1fr}}';
 css.textContent += '.scs .scs-grade-audit{margin-top:14px}.scs .scs-grade-audit summary{cursor:pointer;font-size:13px;font-weight:700;padding:8px 0}.scs .scs-grade-audit ol{padding:0;list-style:none;margin:6px 0}.scs .scs-grade-detail{display:grid;grid-template-columns:100px 32px minmax(0,1fr);gap:10px;align-items:center;border-bottom:1px solid var(--ln);padding:9px 0;font-size:13px}.scs .scs-grade-date{font-variant-numeric:tabular-nums}.scs .scs-grade-number{display:inline-flex;width:30px;height:30px;border-radius:50%;align-items:center;justify-content:center;background:var(--bg);font-weight:750}.scs .scs-grade-detail .mu{overflow-wrap:anywhere}@media(max-width:360px){.scs .scs-grade-detail{grid-template-columns:82px 30px minmax(0,1fr);gap:6px}}';
+css.textContent += '.scs .scs-final-list{display:grid;gap:8px;margin:12px 0}.scs .scs-final-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:11px 13px;border:1px solid var(--ln);border-radius:12px;background:var(--bg)}.scs .scs-final-label{font-weight:700;flex:1;min-width:135px}.scs .scs-final-mark{font-size:22px;font-weight:800;border-radius:9px;padding:3px 10px;background:var(--bg)}';
 document.head.appendChild(css);
 window.schoolCloud = { view, summary };
 notify();
