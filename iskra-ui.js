@@ -194,23 +194,23 @@
     if(!task||!Number.isInteger(wd)||wd<0||wd>6)return;
     const arr=Array.isArray(S.taskDays[id])?S.taskDays[id].slice():(defaultDays[id]||[0,1,2,3,4,5,6]).slice();
     const at=arr.indexOf(wd);if(at>=0)arr.splice(at,1);else arr.push(wd);
-    S.taskDays[id]=arr;save();taskEditor();
+    freezeDay(iso(new Date()));S.taskDays[id]=arr;save();taskEditor();
   };
   ACTIONS.ikHideTask=id=>{
     const task=taskCatalog().find(t=>t.i===id);if(!task)return;
-    const at=S.hiddenTasks.indexOf(id);if(at<0)S.hiddenTasks.push(id);else S.hiddenTasks.splice(at,1);
+    freezeDay(iso(new Date()));const at=S.hiddenTasks.indexOf(id);if(at<0)S.hiddenTasks.push(id);else S.hiddenTasks.splice(at,1);
     save();taskEditor();
   };
   ACTIONS.ikRemoveTask=id=>{
     if(!S.customTasks.some(t=>t.i===id)||!confirm('Удалить дело из будущих планов? История выполнений останется.'))return;
-    S.customTasks=S.customTasks.filter(t=>t.i!==id);save();taskEditor();
+    freezeDay(iso(new Date()));S.customTasks=S.customTasks.filter(t=>t.i!==id);save();taskEditor();
   };
   ACTIONS.ikAddTask=()=>{
     const input=document.getElementById('ik-new-task'),selector=document.getElementById('ik-new-category'),name=input?.value.trim().slice(0,45);
     if(!name)return toast('Введите название дела');
     if(taskCatalog().length>=30)return toast('Достигнут лимит 30 дел');
     if(taskCatalog().some(t=>t.t.toLocaleLowerCase('ru-RU')===name.toLocaleLowerCase('ru-RU')))return toast('Такое дело уже существует');
-    S.customTasks.push({i:'user-'+Date.now().toString(36),e:'✨',t:name,category:selector?.value==='school'?'school':'personal'});
+    freezeDay(iso(new Date()));S.customTasks.push({i:'user-'+Date.now().toString(36),e:'✨',t:name,category:selector?.value==='school'?'school':'personal'});
     save();taskEditor();
   };
   ACTIONS.ikGradePeriods=()=>{
