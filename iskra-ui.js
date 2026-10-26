@@ -196,6 +196,11 @@
   };
   document.addEventListener('ikTermSettingsSaved',()=>{cs();render();toast('Периоды сохранены')});
   document.addEventListener('ikGradeSignedOut',()=>{cs();render();toast('Дневник отключён')});
+  window.addEventListener('schoolCloudUpdated',()=>{
+    if(document.querySelector('#scs-login')&&window.schoolCloud?.connection?.().isConnected){
+      cs();render();toast('Дневник подключён');
+    }
+  });
   ACTIONS.ikOfflineToggle=()=>{
     const next=!window.schoolCloud?.offlineEnabled?.();
     if(window.schoolCloud?.setOfflineEnabled?.(next)){cs();ACTIONS.parents(true);toast(next?'Офлайн-копия разрешена':'Офлайн-копия отключена')}
