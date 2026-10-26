@@ -238,7 +238,7 @@ S.earnedAchievements=S.earnedAchievements&&typeof S.earnedAchievements==='object
 for(const date of Object.keys(S.d||{})){
   if(!Object.hasOwn(S.planHistory,date))S.planHistory[date]=legacyTasks(date);
 }
-const defaultDays={bg:[1,2,3,4,5],cl:[0,1,2,3,4],hw:[1,2,3,4,5],en:[1,2,3,4,5],ho:[0,1,2,3,4,5,6],ex:[0,1,2,3,4,5,6],rd:[0,6]};
+const defaultDays={bg:[0,1,2,3,4],cl:[0,1,2,3,4],hw:[1,2,3,4,5],en:[1,2,3,4,5],ho:[0,1,2,3,4,5,6],ex:[0,1,2,3,4,5,6],rd:[0,6]};
 const taskCatalog=()=>[EX,...T,RD,...S.customTasks];
 const tasks=d=>{
   if(Array.isArray(S.planHistory[d]))return S.planHistory[d];
