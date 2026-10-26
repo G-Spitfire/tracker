@@ -56,7 +56,7 @@
   }
   function ikReward(){
     const dates=weekDates(),tw=dates.reduce((n,d)=>n+st(d),0),goal=S.goal||25,total=earned(),l=currentLevel(),next=levels[l+1],prevLevel=levels[l][0],pr=next?perc(total-prevLevel,next[0]-prevLevel):100;
-    const clouds=averageSchool(),topGrade=clouds&&clouds.count&&clouds.average>=4.5;
+    const clouds=window.schoolCloud?.overallSummary?.(),topGrade=clouds&&clouds.count&&clouds.average>=4.5;
     const help=Object.keys(S.d||{}).filter(d=>(S.d[d]||[]).includes('ho')).length;
     const streak=badgeStreak();
     const readDays=Object.keys(S.d||{}).filter(d=>(S.d[d]||[]).includes('rd')).length;
@@ -103,7 +103,7 @@
   today=ikToday;reward=ikReward;me=ikProfile;
   ACTIONS.ikFilter=(id)=>{filter=id;render()};
   ACTIONS.ikToReward=()=>navTo('r');
-  ACTIONS.ikToGrades=()=>{window.schoolCloud?.goHome?.();navTo('g')};
+  ACTIONS.ikToGrades=()=>{window.schoolCloud?.resetSubject?.();navTo('g')};
   ACTIONS.ikWeekDay=(d)=>openDay(d);
   ACTIONS.ikTaskInfo=(id)=>{
     const task=tasks(iso(new Date())).find(t=>t.i===id);if(!task)return;
@@ -181,7 +181,12 @@
     S.customTasks.push({i:'user-'+Date.now().toString(36),e:'✨',t:name,category:selector?.value==='school'?'school':'personal'});
     save();taskEditor();
   };
-  ACTIONS.ikGradePeriods=()=>{cs();navTo('g');window.schoolCloud?.openPeriods?.();};
+  ACTIONS.ikGradePeriods=()=>{
+    const html=window.schoolCloud?.termSettingsHtml?.();
+    if(!html){toast('Сначала подключи школьный дневник');return}
+    sheet(html);
+  };
+  document.addEventListener('ikTermSettingsSaved',()=>{cs();render();toast('Периоды сохранены')});
   const baseParents=ACTIONS.parents;
   ACTIONS.parents=()=>{
     baseParents();
@@ -198,6 +203,13 @@
     const icons=['<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 20v-7M10 20V6M15 20v-11M20 20V3"/></svg>','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4H4v5a4 4 0 0 0 4 4M17 4h3v5a4 4 0 0 1-4 4M7 2h10v8a5 5 0 0 1-10 0z"/></svg>','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2z"/></svg>'];
     const txt=['Сегодня','Оценки','Награда','Я'][i];b.innerHTML=icons[i]+txt;
   });
-  window.addEventListener('pageshow',()=>{S=store.load();S.times=S.times||{};S.interests=S.interests||'';render()});
+  let lastViewedDate=iso(new Date());
+  const refreshDate=()=>{
+    const current=iso(new Date());
+    if(current!==lastViewedDate){lastViewedDate=current;if(tab==='t'||tab==='r')render()}
+  };
+  window.addEventListener('pageshow',()=>{S=store.load();S.times=S.times||{};S.interests=S.interests||'';refreshDate();render()});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshDate()});
+  setInterval(()=>{if(!document.hidden)refreshDate()},60000);
   render();
 })();
