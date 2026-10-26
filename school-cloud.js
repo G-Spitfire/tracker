@@ -39,7 +39,8 @@ const score = value => {
   return match ? Number(match[1]) : null;
 };
 const markScore = row => score(row.value) ?? score(row.valueCode);
-const unknownMark = row => /^(?:неизвестно|не определено|unknown)?$/i.test(String(row.value ?? '').trim());
+// The portal may return "неизвестная", "неизвестно", "неизвестный" or an empty label.
+const unknownMark = row => /^(?:неизвестн[а-яё]*(?:\s+(?:отметка|оценка))?|не\s+определен[а-яё]*|не\s+указан[а-яё]*|unknown|[?—-])?$/i.test(String(row.value ?? '').trim());
 const markLabel = row => {
   const n = markScore(row);
   if (n !== null) return String(n);
@@ -198,8 +199,19 @@ function cloudGrades() {
   }).join('');
   const unresolved = filtered.filter(row => unknownMark(row) && markScore(row) === null).length;
   if (unresolved) {
-    s += '<p class="mu sm">Знак «?» означает, что дневник не передал распознаваемого значения: ' +
-      unresolved + ' записей. Они не учитываются в среднем балле.</p>';
+    const unresolvedRows = filtered.filter(row => unknownMark(row) && markScore(row) === null)
+      .sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
+    s += '<details class="card scs-unknown-list"><summary>Неопределённые отметки: ' +
+      unresolved + ' · что это?</summary>' +
+      '<p class="mu sm">В выгрузке школьного дневника нет однозначной числовой оценки. ' +
+      'Чтобы не исказить средний балл, мы показываем «?» и не учитываем такую запись.</p>' +
+      unresolvedRows.map(row =>
+        '<div class="scs-unknown-row"><b>' + esc(row.subject) + '</b> · ' +
+        esc(row.date.split('-').reverse().join('.')) +
+        (row.type ? '<div class="mu sm">' + esc(row.type) + '</div>' : '') +
+        '<div class="mu sm">Название: ' + esc(row.value || 'пусто') +
+        ' · код: ' + esc(row.valueCode || 'пусто') + '</div></div>'
+      ).join('') + '</details>';
   }
   s += '<p class="mu sm">Источник: Петербургское образование. Прогноз условный, по равновесным оценкам; школьные коэффициенты здесь не применяются.</p>';
   return s;
@@ -269,7 +281,7 @@ function view(legacy) {
 }
 
 const css = document.createElement('style');
-css.textContent = '.scs{display:block}.scs .scs-head,.scs .scs-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}.scs .scs-flag{font-size:11px;opacity:.75}.scs .scs-form{display:grid;gap:12px;margin-top:15px}.scs .scs-form label,.scs .scs-filters label{display:grid;gap:6px;font-size:13px;font-weight:600}.scs input{padding:11px;border:1px solid var(--ln);border-radius:11px;background:var(--bg);color:var(--tx);font:inherit;min-width:0;box-sizing:border-box;width:100%}.scs .scs-actions{justify-content:flex-start;margin-top:12px}.scs .scs-filters{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}.scs .scs-warning{color:var(--bad);margin:12px 0;font-size:14px}.scs .scs-manual{width:100%;margin:14px 0}.scs .chips{display:flex;gap:6px;flex-wrap:wrap}.scs .chips .chip{cursor:default}.scs .sub{margin:9px 0}@media(max-width:360px){.scs .scs-filters{grid-template-columns:1fr}}';
+css.textContent = '.scs{display:block}.scs .scs-head,.scs .scs-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}.scs .scs-flag{font-size:11px;opacity:.75}.scs .scs-form{display:grid;gap:12px;margin-top:15px}.scs .scs-form label,.scs .scs-filters label{display:grid;gap:6px;font-size:13px;font-weight:600}.scs input{padding:11px;border:1px solid var(--ln);border-radius:11px;background:var(--bg);color:var(--tx);font:inherit;min-width:0;box-sizing:border-box;width:100%}.scs .scs-actions{justify-content:flex-start;margin-top:12px}.scs .scs-filters{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}.scs .scs-warning{color:var(--bad);margin:12px 0;font-size:14px}.scs .scs-manual{width:100%;margin:14px 0}.scs .chips{display:flex;gap:6px;flex-wrap:wrap}.scs .chips .chip{cursor:default}.scs .sub{margin:9px 0}.scs .scs-unknown-list{margin-top:14px}.scs .scs-unknown-list summary{cursor:pointer;font-weight:700;line-height:1.5}.scs .scs-unknown-row{padding:11px 0;border-bottom:1px solid var(--ln);overflow-wrap:anywhere}.scs .scs-unknown-row:last-child{border-bottom:0}@media(max-width:360px){.scs .scs-filters{grid-template-columns:1fr}}';
 document.head.appendChild(css);
 window.schoolCloud = { view, summary };
 notify();
