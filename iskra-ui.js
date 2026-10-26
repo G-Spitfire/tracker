@@ -178,9 +178,11 @@
     const html=entries.map(task=>{
       const schedule=Array.isArray(S.taskDays[task.i])?S.taskDays[task.i]:(defaultDays[task.i]||[0,1,2,3,4,5,6]);
       const disabled=S.hiddenTasks.includes(task.i);
+      const cat=S.taskCategories?.[task.i]||task.category||(['hw','en','bg'].includes(task.i)?'school':'personal');
       return '<div class="ik-plan-row"><div class="ik-row-between"><b>'+safe(task.e||'✨')+' '+safe(task.t)+'</b>'+
         '<button class="ik-btn-small" data-action="ikHideTask" data-id="'+safe(task.i)+'">'+(disabled?'Включить':'Отключить')+'</button>'+
         (task.i.startsWith('user-')?'<button class="ik-btn-small" data-action="ikRemoveTask" data-id="'+safe(task.i)+'" aria-label="Удалить дело">×</button>':'')+'</div>'+
+        '<button class="ik-btn-small" data-action="ikTaskCategory" data-id="'+safe(task.i)+'">Категория: '+(cat==='school'?'Учёба':'Личное')+' ⇄</button>'+
         '<div class="ik-plan-days">'+days.map(([label,wd])=>'<button type="button" class="ik-day-pill '+(schedule.includes(wd)?'on':'')+'" data-action="ikTaskDay" data-id="'+safe(task.i)+'" data-arg="'+wd+'" aria-pressed="'+schedule.includes(wd)+'">'+label+'</button>').join('')+'</div></div>';
     }).join('');
     sheet('<h2>Расписание дел</h2><p class="mu sm">Изменения действуют для новых дней. Ранее выполненные дела и полученные звёзды сохраняются.</p>'+
@@ -189,6 +191,13 @@
       '<button class="btn g" data-action="ikAddTask">Добавить дело</button>');
   }
   ACTIONS.ikManageTasks=()=>taskEditor();
+  ACTIONS.ikTaskCategory=id=>{
+    const task=taskCatalog().find(t=>t.i===id);if(!task)return;
+    freezeDay(iso(new Date()));
+    S.taskCategories=S.taskCategories&&typeof S.taskCategories==='object'?S.taskCategories:{};
+    const current=S.taskCategories[id]||task.category||(['hw','en','bg'].includes(id)?'school':'personal');
+    S.taskCategories[id]=current==='school'?'personal':'school';save();taskEditor();
+  };
   ACTIONS.ikTaskDay=(id,_,el)=>{
     const wd=Number(el.dataset.arg),task=taskCatalog().find(t=>t.i===id);
     if(!task||!Number.isInteger(wd)||wd<0||wd>6)return;
