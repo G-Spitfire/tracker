@@ -418,13 +418,12 @@ function ikSubjectPage() {
   const name=ikSubject,all=ikFiltered().filter(r=>r.subject===name),works=ikWorks(all),official=all.filter(r=>officialKind(r));
   const mean=ikMean(works),last=ikSort(works).at(-1),tr=ikTrend(works);
   const officially=ikSort(official).at(-1);
-  const termGrade=ikPeriod.startsWith('q')?ikSort(official.filter(r=>officialKind(r)==='За четверть')).at(-1):null;
   return '<div class="ik-page scs-iskra ik-detail-page"><div class="ik-row-between"><button type="button" class="ik-btn-small" data-ik-back="1">‹ Назад</button><span class="ik-cloud-pill">☁ Из дневника</span></div>'+
     '<div class="ik-row"><span style="font-size:35px">'+ikSubjectIcon(name)+'</span><div><h1 style="font-size:24px">'+esc(name)+'</h1><span class="ik-muted">'+works.length+' оценок за работы</span></div></div>'+
     ikPeriodButtons()+ikPeriodEditor()+
     '<div class="ik-main-card"><div class="ik-hero-split"><div><div class="ik-caption">Средний балл</div><div class="ik-number">'+ikF(mean)+'</div><div class="ik-caption">По выбранному периоду</div></div>'+ikStar+'</div></div>'+
     (officially?'<div class="ik-official"><div><b>🏅 '+esc(officialKind(officially))+'</b><small>Официально · '+ikDate(officially.date)+'</small></div><strong>'+officially.n+'</strong></div>':'')+
-    (mean!==null&&ikPeriod.startsWith('q')&&!termGrade&&ikRange()?'<div class="ik-tile"><small>Прогноз за выбранную четверть (ориентировочно)</small><strong>'+forecast(mean)+'</strong><small>По простому среднему; официальная оценка может отличаться.</small></div>':'')+
+    (mean!==null&&/^q[1-4]$/.test(ikPeriod)&&!officially&&ikRange()?'<div class="ik-tile"><small>Прогноз за выбранную четверть (ориентировочно)</small><strong>'+forecast(mean)+'</strong><small>По простому среднему; официальная оценка может отличаться.</small></div>':'')+
     '<div class="card"><div class="ik-graph-label"><b>Динамика среднего балла</b></div>'+tr.html+'</div>'+
     '<div class="ik-time-stat"><div class="ik-tile"><div class="ik-tile-icon">✏️</div><strong>'+works.length+'</strong><small>всего оценок</small></div>'+
     '<div class="ik-tile"><div class="ik-tile-icon">⭐</div><strong>'+(last?last.n:'—')+'</strong><small>последняя</small></div>'+
