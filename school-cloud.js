@@ -609,8 +609,18 @@ document.addEventListener('click', event => {
   if(event.target.closest('[data-ik-back]')){ikSubject='';notify();window.scrollTo(0,0)}
 });
 document.addEventListener('change',event=>{
-  if(appKind!=='iskra'||!event.target.matches('[data-ik-year]'))return;
-  ikYear=event.target.value;ikPeriod='all';ikSubject='';ikPeriodChosen=true;notify();
+  if(appKind!=='iskra')return;
+  if(event.target.matches('[data-ik-year]')){
+    ikYear=event.target.value;ikPeriod='all';ikSubject='';ikPeriodChosen=true;notify();return;
+  }
+  if(event.target.matches('#ik-term-settings select[name="year"]')){
+    const year=event.target.value,form=event.target.form;
+    for(const q of ['q1','q2','q3','q4']){
+      const saved=ikSavedPeriods[ikTermKey(q,year)]||{};
+      form.elements[q+'_from'].value=saved.from||'';
+      form.elements[q+'_to'].value=saved.to||'';
+    }
+  }
 });
 document.addEventListener('submit', event => {
   if(appKind!=='iskra'||event.target.id!=='ik-period-form')return;
