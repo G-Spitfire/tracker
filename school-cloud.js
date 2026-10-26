@@ -337,9 +337,21 @@ const ikF = n => n===null?'—':(Math.abs(n)<0.005?0:n).toFixed(2).replace('.','
 const ikDeltaLabel=n=>n===null?'нет сравнения':n!==0?'к предыдущим 7 дням':'без изменений';
 const ikLocalDate=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const ikDate = iso => /^\d{4}-\d{2}-\d{2}$/.test(iso||'') ? iso.slice(8)+'.'+iso.slice(5,7)+'.'+iso.slice(0,4) : '—';
-const ikStar = '<img class="ik-star" src="./iskra-star.svg" alt="" aria-hidden="true">';
+const ikStar = '<img class="ik-star" src="./assets/iskra/hero-star.webp" width="94" height="94" decoding="async" alt="" aria-hidden="true">';
 const ikIcons = {'Русский язык':'📕','Русский':'📕','Математика':'🧮','Литературное чтение':'📖','Чтение':'📖','Английский язык':'🔤','Английский':'🔤','Окружающий мир':'🌿','Физическая культура':'🏃','Физкультура':'🏃','Музыка':'🎵','Изобразительное искусство':'🎨','ИЗО':'🎨','Технология':'🧩','ОРКСЭ':'📚'};
 const ikSubjectIcon = name => ikIcons[name]||'📘';
+const ikSubjectSprite = name => {
+  const key=name.toLocaleLowerCase('ru-RU');
+  const kind=/математик/.test(key)?'nav_grades':
+    /английск|иностран/.test(key)?'task_english':
+    /литератур|чтени|русск/.test(key)?'task_read':
+    /физкультур|физическ/.test(key)?'task_walk':
+    /музык/.test(key)?'sparkles':
+    /окружающ|природ/.test(key)?'achievement_helper':
+    /изобраз|изо|художеств/.test(key)?'task_star':
+    /технолог|труд/.test(key)?'task_clothes':'task_book';
+  return '<span class="ik-art ik-art-'+kind+' ik-art--grade" aria-hidden="true"></span>';
+};
 function ikTrend(rows) {
   const sorted=ikSort(rows),totals=[];
   let total=0; sorted.forEach((r,i)=>{total+=r.n;totals.push({n:total/(i+1),date:r.date})});
@@ -413,14 +425,14 @@ function ikSubjectPage() {
   const mean=ikMean(works),last=ikSort(works).at(-1),tr=ikTrend(works);
   const officially=ikSort(official).at(-1);
   return '<div class="ik-page scs-iskra ik-detail-page"><div class="ik-row-between"><button type="button" class="ik-btn-small" data-ik-back="1">‹ Назад</button><span class="ik-cloud-pill">☁ Из дневника</span></div>'+
-    '<div class="ik-row"><span style="font-size:35px">'+ikSubjectIcon(name)+'</span><div><h1 style="font-size:24px">'+esc(name)+'</h1><span class="ik-muted">'+works.length+' оценок за работы</span></div></div>'+
+    '<div class="ik-row"><span class="ik-sub-icon">'+ikSubjectSprite(name)+'</span><div><h1 style="font-size:24px">'+esc(name)+'</h1><span class="ik-muted">'+works.length+' оценок за работы</span></div></div>'+
     ikPeriodButtons()+ikPeriodEditor()+
     '<div class="ik-main-card"><div class="ik-hero-split"><div><div class="ik-caption">Средний балл</div><div class="ik-number">'+ikF(mean)+'</div><div class="ik-caption">По выбранному периоду</div></div>'+ikStar+'</div></div>'+
     (officially?'<div class="ik-official"><div><b>🏅 '+esc(officialKind(officially))+'</b><small>Официально · '+ikDate(officially.date)+'</small></div><strong>'+officially.n+'</strong></div>':'')+
     (mean!==null&&/^q[1-4]$/.test(ikPeriod)&&!officially&&ikRange()?'<div class="ik-tile"><small>Прогноз за выбранную четверть (ориентировочно)</small><strong>'+forecast(mean)+'</strong><small>По простому среднему; официальная оценка может отличаться.</small></div>':'')+
     '<div class="card"><div class="ik-graph-label"><b>Динамика среднего балла</b></div>'+tr.html+'</div>'+
     '<div class="ik-time-stat"><div class="ik-tile"><div class="ik-tile-icon">✏️</div><strong>'+works.length+'</strong><small>всего оценок</small></div>'+
-    '<div class="ik-tile"><div class="ik-tile-icon">⭐</div><strong>'+(last?last.n:'—')+'</strong><small>последняя</small></div>'+
+    '<div class="ik-tile"><div class="ik-tile-icon"><span class="ik-art ik-art-task_star ik-art--stat" aria-hidden="true"></span></div><strong>'+(last?last.n:'—')+'</strong><small>последняя</small></div>'+
     '<div class="ik-tile"><div class="ik-tile-icon">↗</div><strong class="'+(tr.growth!==null&&tr.growth>0?'ik-positive':'')+'">'+(tr.growth===null?'—':(tr.growth>0?'+':'')+ikF(tr.growth))+'</strong><small>'+ikDeltaLabel(tr.growth)+'</small></div></div>'+
     '<div class="card"><b>Все оценки за работы</b>'+ikGradeList(works)+'</div>'+
     (official.length?'<div class="card"><b>Официальные итоговые оценки</b>'+ikGradeList(official)+'</div>':'')+
@@ -455,12 +467,12 @@ function viewIskra() {
     html+='<div class="card"><div class="ik-graph-label"><b>Динамика среднего балла</b><span class="ik-muted">За работы</span></div>'+tr.html+
       '<p class="ik-kpi-meaning">Сравнение средних за последние 7 дней выбранного периода и предыдущие 7 дней.</p></div>';
     html+='<div class="ik-time-stat"><div class="ik-tile"><div class="ik-tile-icon">↗</div><strong class="'+(tr.growth!==null&&tr.growth>0?'ik-positive':'')+'">'+(tr.growth===null?'—':(tr.growth>0?'+':'')+ikF(tr.growth))+'</strong><small>'+ikDeltaLabel(tr.growth)+'</small></div>'+
-      '<div class="ik-tile"><div class="ik-tile-icon">⭐</div><strong>'+(last?last.n:'—')+'</strong><small>последняя оценка</small></div>'+
-      '<div class="ik-tile"><div class="ik-tile-icon">▥</div><strong>'+works.length+'</strong><small>всего оценок</small></div></div>';
+      '<div class="ik-tile"><div class="ik-tile-icon"><span class="ik-art ik-art-task_star ik-art--stat" aria-hidden="true"></span></div><strong>'+(last?last.n:'—')+'</strong><small>последняя оценка</small></div>'+
+      '<div class="ik-tile"><div class="ik-tile-icon"><span class="ik-art ik-art-nav_grades ik-art--stat" aria-hidden="true"></span></div><strong>'+works.length+'</strong><small>всего оценок</small></div></div>';
     html+='<div class="ik-row-between"><h2 class="ik-sec-title">Предметы</h2><span class="ik-muted">По среднему ↓</span></div>';
     html+='<div class="ik-list" style="padding:4px 12px">'+(ordered.length?ordered.map(([subject,group])=>{
       const a=ikMean(group.works),end=ikSort(group.official).at(-1),progress=a===null?0:Math.max(0,Math.min(100,(a-2)/3*100));
-      return '<button type="button" class="ik-grade-row" style="width:100%;border-left:0;border-right:0;border-top:0;text-align:left;cursor:pointer" data-ik-subject="'+esc(subject)+'"><span class="ik-sub-icon">'+ikSubjectIcon(subject)+'</span>'+
+      return '<button type="button" class="ik-grade-row" style="width:100%;border-left:0;border-right:0;border-top:0;text-align:left;cursor:pointer" data-ik-subject="'+esc(subject)+'"><span class="ik-sub-icon">'+ikSubjectSprite(subject)+'</span>'+
         '<span class="ik-grade-name">'+esc(subject)+(end?'<small class="ik-muted" style="display:block;font-size:10px">Официально: '+end.n+'</small>':'')+'</span>'+
         '<span class="ik-grade-track"><span style="width:'+progress+'%"></span></span><span class="ik-grade-num">'+ikF(a)+'</span><span class="ik-chevron" style="font-size:17px;margin-left:0">›</span></button>';
     }).join(''):'<div class="ik-empty">Оценок за этот период пока нет.</div>')+'</div>';
