@@ -305,7 +305,8 @@ const ikYearForDate=d=>{
   const y=Number(d.slice(0,4))-(Number(d.slice(5,7))<9?1:0);
   return y+'/'+(y+1);
 };
-const ikYearValue=()=>ikYear||state.data?.schoolYear||ikYearForDate(today());
+// Show only the currently active academic year in Iskra.
+const ikYearValue=()=>ikYearForDate(today());
 const ikTermKey=(period,year=ikYearValue())=>year+'#'+period;
 const ikYears=()=>{
   const ys=new Set([ikYearValue(),state.data?.schoolYear,...(state.data?.grades||[]).map(r=>ikYearForDate(r.date)),...Object.keys(ikSavedPeriods).filter(k=>k.includes('#')).map(k=>k.split('#')[0])]);
@@ -313,13 +314,12 @@ const ikYears=()=>{
 };
 function ikAutoPeriod(){
   if(ikPeriodChosen)return;
-  ikYear=state.data?.schoolYear||ikYearForDate(today());
-  // Migrate legacy quarter dates only into the currently loaded school year.
-  for(const q of ['q1','q2'])if(ikSavedPeriods[q]&&!ikSavedPeriods[ikTermKey(q)])ikSavedPeriods[ikTermKey(q)]=ikSavedPeriods[q];
+  ikYear=ikYearForDate(today());
+  // Do not migrate legacy unscoped dates; their academic year is ambiguous.
   const current=today();
   ikPeriod=['q1','q2','q3','q4'].find(q=>{
     const p=ikSavedPeriods[ikTermKey(q)];
-    return ikValidRange(p)&&current>=p.from&&current<=p.to;
+    return ikValidRange(p)&&ikYearForDate(p.from)===ikYearValue()&&current>=p.from&&current<=p.to;
   })||'all';
 }
 const ikValidRange = p => p && /^\d{4}-\d{2}-\d{2}$/.test(p.from||'') &&
@@ -327,12 +327,12 @@ const ikValidRange = p => p && /^\d{4}-\d{2}-\d{2}$/.test(p.from||'') &&
 const ikRange=()=>{
   if(ikPeriod==='all')return null;
   const p=ikSavedPeriods[ikTermKey(ikPeriod)];
-  return ikValidRange(p)?p:null;
+  return ikValidRange(p)&&ikYearForDate(p.from)===ikYearValue()&&ikYearForDate(p.to)===ikYearValue()?p:null;
 };
 const ikFiltered = () => {
   if(!state.data)return [];
   const bounds=ikRange();
-  return state.data.grades.filter(r => ikPeriod==='all' || (bounds && r.date>=bounds.from && r.date<=bounds.to))
+  return state.data.grades.filter(r => ikYearForDate(r.date)===ikYearValue()&&(ikPeriod==='all' || (bounds && r.date>=bounds.from && r.date<=bounds.to)))
     .map(r => ({...r,n:gradeScore(r)})).filter(r => r.n!==null);
 };
 const ikWorks = rows => rows.filter(r=>!officialKind(r));
@@ -375,8 +375,7 @@ function ikTrend(rows) {
   return {html:svg,growth:raw===null?null:Math.abs(raw)<.005?0:raw};
 }
 function ikPeriodButtons(){
-  return '<div class="ik-year-row"><span class="ik-muted">Учебный год</span><select class="ik-year-select" data-ik-year aria-label="Учебный год">'+ikYears().map(y=>'<option value="'+esc(y)+'" '+(y===ikYearValue()?'selected':'')+'>'+esc(y)+'</option>').join('')+'</select></div>'+
-    '<div class="ik-filter-row">'+ikPresets.map(([id,name])=>'<button type="button" class="ik-filter '+(ikPeriod===id?'active':'')+'" data-ik-period="'+id+'">'+name+'</button>').join('')+'</div>';
+  return '<div class="ik-filter-row">'+ikPresets.map(([id,name])=>'<button type="button" class="ik-filter '+(ikPeriod===id?'active':'')+'" data-ik-period="'+id+'">'+name+'</button>').join('')+'</div>';
 }
 function ikPeriodEditor(){
   if(ikPeriod==='all')return '';
@@ -394,8 +393,8 @@ function ikPeriodEditor(){
 }
 function ikPeriodSettingsHtml(){
   const year=ikYearValue();
-  let html='<h2>Учебные четверти</h2><p class="mu sm">Даты устанавливаются родителем и не меняют оценки в школьном дневнике.</p>'+
-    '<form id="ik-term-settings" class="ik-period-editor"><label>Учебный год<select name="year">'+ikYears().map(y=>'<option '+(y===year?'selected':'')+' value="'+esc(y)+'">'+esc(y)+'</option>').join('')+'</select></label>';
+  let html='<h2>Учебные четверти</h2><p class="mu sm">Задай даты четвертей текущего учебного года ('+esc(year)+'). Даты не меняют оценки в дневнике.</p>'+
+    '<form id="ik-term-settings" class="ik-period-editor"><input type="hidden" name="year" value="'+esc(year)+'">';
   for(const [q,name] of ikPresets.filter(x=>/^q[1-4]$/.test(x[0]))){
     const val=ikSavedPeriods[ikTermKey(q,year)]||{};
     html+='<fieldset class="ik-term-field"><legend>'+name+'</legend><label>Начало<input type="date" name="'+q+'_from" value="'+esc(val.from||'')+'"></label><label>Конец<input type="date" name="'+q+'_to" value="'+esc(val.to||'')+'"></label></fieldset>';
@@ -528,7 +527,7 @@ window.schoolCloud = {view,summary,
       score:gradeScore(row),official:!!officialKind(row),officialLabel:officialKind(row)
     })).filter(row=>row.score!==null)
   }:null,
-  loginHtml:()=>state.user?'<p class="mu sm">Дневник уже подключён.</p>':loginPanel(),periodLabel:()=>ikPeriod==='all'?'за всё время':(ikPeriod==='custom'?'за выбранные даты':(ikPresets.find(x=>x[0]===ikPeriod)?.[1]||'за период')+' · '+ikYearValue()),
+  loginHtml:()=>state.user?'<p class="mu sm">Дневник уже подключён.</p>':loginPanel(),periodLabel:()=>ikPeriod==='all'?'за текущий учебный год':(ikPeriod==='custom'?'за выбранные даты':(ikPresets.find(x=>x[0]===ikPeriod)?.[1]||'за период')+' · '+ikYearValue()),
 offlineEnabled:()=>{try{return localStorage.getItem('iskra_offline_enabled')==='1'}catch(_){return false}},
 setOfflineEnabled:value=>{
   if(appKind!=='iskra')return false;
@@ -543,12 +542,12 @@ setOfflineEnabled:value=>{
 },
 summaryBetween:(from,to)=>{
   if(appKind!=='iskra'||!state.user||!state.data)return null;
-  const rows=state.data.grades.filter(r=>(!from||r.date>=from)&&(!to||r.date<=to))
+  const rows=state.data.grades.filter(r=>ikYearForDate(r.date)===ikYearValue()&&(!from||r.date>=from)&&(!to||r.date<=to))
     .map(r=>({...r,n:gradeScore(r)})).filter(r=>r.n!==null&&!officialKind(r));
   return {count:rows.length,average:rows.length?ikMean(rows):null};
 },
 overallSummary:()=>{
-  const rows=(state.data?.grades||[]).map(row=>({...row,n:gradeScore(row)})).filter(r=>r.n!==null&&!officialKind(r));
+  const rows=(state.data?.grades||[]).filter(row=>ikYearForDate(row.date)===ikYearValue()).map(row=>({...row,n:gradeScore(row)})).filter(r=>r.n!==null&&!officialKind(r));
   return {count:rows.length,average:rows.length?ikMean(rows):null};
 },termSettingsHtml:ikPeriodSettingsHtml,resetSubject:()=>{ikSubject='';},connection:()=>({isConnected:!!state.user,email:state.user?.email||''})};
 notify();
@@ -632,23 +631,15 @@ document.addEventListener('click', event => {
 });
 document.addEventListener('change',event=>{
   if(appKind!=='iskra')return;
-  if(event.target.matches('[data-ik-year]')){
-    ikYear=event.target.value;ikPeriod='all';ikPeriodChosen=true;notify();return;
-  }
-  if(event.target.matches('#ik-term-settings select[name="year"]')){
-    const year=event.target.value,form=event.target.form;
-    for(const q of ['q1','q2','q3','q4']){
-      const saved=ikSavedPeriods[ikTermKey(q,year)]||{};
-      form.elements[q+'_from'].value=saved.from||'';
-      form.elements[q+'_to'].value=saved.to||'';
-    }
-  }
+  // Academic-year switching is intentionally unavailable in Iskra.
 });
 document.addEventListener('submit', event => {
   if(appKind!=='iskra'||event.target.id!=='ik-period-form')return;
   event.preventDefault();
   const from=event.target.elements.from.value,to=event.target.elements.to.value;
-  if(!ikValidRange({from,to})){state.error='Проверь даты начала и окончания периода.';notify();return}
+  if(!ikValidRange({from,to})||ikYearForDate(from)!==ikYearValue()||ikYearForDate(to)!==ikYearValue()){
+    state.error='Выбери даты в пределах текущего учебного года.';notify();return
+  }
   ikSavedPeriods[ikTermKey(ikPeriod)]={from,to};
   try{localStorage.setItem(ikPeriodsKey,JSON.stringify(ikSavedPeriods))}catch(_){}
   ikEditing='';state.error='';notify();
@@ -656,7 +647,7 @@ document.addEventListener('submit', event => {
 document.addEventListener('submit',event=>{
   if(appKind!=='iskra'||event.target.id!=='ik-term-settings')return;
   event.preventDefault();
-  const form=event.target,year=form.elements.year.value,next={};
+  const form=event.target,year=ikYearValue(),next={};
   for(const q of ['q1','q2','q3','q4']){
     const from=form.elements[q+'_from'].value,to=form.elements[q+'_to'].value;
     if(!!from!==!!to||(from&&(!ikValidRange({from,to})||ikYearForDate(from)!==year))){
