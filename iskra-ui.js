@@ -92,7 +92,7 @@
     function item(icon,title,subtitle,action){return '<button class="ik-action-row" data-action="'+action+'"><span class="ik-action-icon">'+icon+'</span><span style="flex:1"><b>'+title+'</b>'+(subtitle?'<small>'+safe(subtitle)+'</small>':'')+'</span><span class="ik-chevron">›</span></button>'}
     return '<div class="ik-page ik-profile"><div class="ik-heading"><h1>Я</h1><button class="ik-top-link" data-action="ikPersonalSettings" aria-label="Личные настройки">⚙ Настройки</button></div>'+
       '<div class="card ik-profile-card"><div class="ik-avatar" aria-label="Аватар">'+safe(S.av.e)+'</div><div class="ik-profile-body"><strong>'+safe(S.name||'Полина')+' ✨</strong><small>'+safe(levels[l][1])+' · уровень '+(l+1)+'</small><div class="ik-level-track"><div style="width:'+prog+'%"></div></div><small>'+(next?Math.max(0,gained)+' из '+step+' звёзд до уровня':'Все уровни пройдены')+'</small></div><button class="ik-mini-btn" data-action="profile" aria-label="Изменить профиль">✎</button></div>'+
-      '<div class="ik-row-between"><h2 class="ik-sec-title">Моя статистика</h2><span class="ik-tab-sublabel">За всё время</span></div>'+statsTiles()+
+      '<div class="ik-row-between"><h2 class="ik-sec-title">Моя статистика</h2><span class="ik-tab-sublabel">Дела и звёзды — за всё время</span></div>'+statsTiles()+
       '<div class="ik-list">'+item('💗','Мои интересы',S.interests||'Добавь то, что тебе нравится','ikInterests')+
       item('📅','История дел','Что было в прошлые дни','history')+
       item('🏆','Мои награды','Звёзды и достижения','ikToReward')+
@@ -124,8 +124,16 @@
     h.status='received';h.receivedAt=iso(new Date());save();cs();render();
   };
   ACTIONS.ikRewardHistory=()=>{
-    const entries=Object.entries(S.rewardHistory).sort((a,b)=>b[0].localeCompare(a[0]));
-    sheet('<h2>История наград</h2>'+(entries.length?entries.map(([date,h])=>'<div class="row"><span>🎁 '+safe(h.name)+'<small class="mu sm" style="display:block">Неделя с '+safe(date)+'</small></span><b>'+ (h.status==='received'?'Получена':'Заработана')+'</b></div>').join(''):'<p class="mu sm">Первая награда ещё впереди.</p>'));
+    const entries=Object.entries(S.rewardHistory||{}).sort((a,b)=>b[0].localeCompare(a[0]));
+    sheet('<h2>История наград</h2>'+(entries.length?entries.map(([date,h])=>
+      '<div class="row" style="align-items:center"><span>🎁 '+safe(h.name)+'<small class="mu sm" style="display:block">Неделя с '+safe(date)+'</small></span>'+
+      (h.status==='received'?'<b class="ok">✓ Получена</b>':'<button type="button" class="ik-btn-small" data-action="ikClaimPastReward" data-id="'+safe(date)+'">Подтвердить</button>')+'</div>'
+    ).join(''):'<p class="mu sm">Первая награда ещё впереди.</p>'));
+  };
+  ACTIONS.ikClaimPastReward=week=>{
+    const reward=S.rewardHistory?.[week];if(!reward||reward.status==='received')return;
+    if(!confirm('Взрослый подтверждает получение награды «'+reward.name+'»?'))return;
+    reward.status='received';reward.receivedAt=iso(new Date());save();ACTIONS.ikRewardHistory();render();
   };
   ACTIONS.ikLevels=()=>sheet('<h2>Твои уровни</h2>'+levels.map((lv,i)=>'<div class="row"><b>'+(i+1)+'. '+safe(lv[1])+'</b><span class="mu">'+lv[0]+' ⭐</span></div>').join('')+'<p class="mu sm">Звёзды за выполненные дела помогают переходить на новые уровни.</p>');
   ACTIONS.ikAbout=()=>sheet('<h2>Об Искре</h2><p>«Искра» помогает выполнять дела, радоваться достижениям и узнавать школьные оценки.</p><p class="mu sm">Оценки загружаются из школьного дневника через защищённое подключение. Звёзды и отметки дел сохраняются на этом устройстве.</p>');
