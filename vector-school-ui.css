@@ -97,3 +97,33 @@
 .school-subject-row .school-number strong{font-size:15px}
 .school-term-fields label{min-width:100%}
 }
+
+/* School simplification: no school-year dropdown; comparison subjects hidden by default. */
+.school-year-label{margin:0 0 12px;font-size:12px}
+.school-compare-picker{margin:12px 0;border:1px solid #dce5f0;background:#fafcff;border-radius:11px;overflow:hidden}
+.school-compare-picker summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;list-style:none;padding:12px 14px;color:#285ca8;font-weight:700;font-size:13px}
+.school-compare-picker summary::-webkit-details-marker{display:none}
+.school-compare-picker summary:after{content:"▾";margin-left:auto;font-size:16px;color:#7c92b4;transition:transform .18s}
+.school-compare-picker[open] summary:after{transform:rotate(180deg)}
+.school-compare-picker .school-selected-count{font-size:11px;font-weight:600;color:#5e728b;margin-left:auto}
+.school-compare-picker .school-checks{padding:0 12px;max-height:185px;overflow-y:auto}
+.school-compare-picker>.hint,.school-compare-picker>.school-warn{padding:0 12px 10px;margin:0}
+.school-grade-count{font-size:13px;color:#64748b;padding:7px 0 15px}
+.school-grade-count b{color:#253c60}
+.school-unassigned,.school-older-grades{margin:14px 0}
+.school-unassigned h3{margin:0 0 10px}
+.school-unassigned .hint{margin:8px 0 14px}
+.school-older-grades summary{cursor:pointer;font-size:14px;color:#2456bf;font-weight:700}
+.school-older-grades>.hint{margin:12px 0}
+.school-archive-row{border-bottom:1px solid #edf0f5;padding:8px 0}
+.school-archive-row:last-child{border-bottom:0}
+.school-archive-year{font-size:11px;color:#60718e;font-weight:700}
+.school-archive-row .school-mark-row{border-bottom:0;padding-bottom:0}
+
+.school-source-audit{margin:14px 0;padding:12px 14px;border:1px solid #dce5f0;border-radius:12px;background:#fff}
+.school-source-audit summary{font-size:13px;font-weight:700;cursor:pointer;color:#2456bf}
+.school-source-audit .hint{margin:10px 0}
+.school-audit-type{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #ecf0f6;font-size:12px}
+.school-audit-type:last-child{border-bottom:0}
+.school-audit-type span:first-child{overflow-wrap:anywhere;min-width:0;flex:1}
+.school-audit-type span:last-child{color:#75849b;text-align:right;min-width:100px}
