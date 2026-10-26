@@ -187,8 +187,14 @@
     sheet(html);
   };
   document.addEventListener('ikTermSettingsSaved',()=>{cs();render();toast('Периоды сохранены')});
+  ACTIONS.ikOfflineToggle=()=>{
+    const next=!window.schoolCloud?.offlineEnabled?.();
+    if(window.schoolCloud?.setOfflineEnabled?.(next)){cs();ACTIONS.parents();toast(next?'Офлайн-копия разрешена':'Офлайн-копия отключена')}
+    else toast('Не удалось изменить настройку');
+  };
   const baseParents=ACTIONS.parents;
   ACTIONS.parents=()=>{
+    if(!confirm('Родитель открывает настройки приложения?'))return;
     baseParents();
     const b=document.querySelector('.sheet-body');
     if(!b)return;
@@ -196,7 +202,8 @@
     const status=session?.isConnected
       ? '<p class="mu sm">Подключено: '+safe(session.email||'учётная запись Полины')+'</p><button class="btn g" type="button" data-sc-action="logout">Выйти из дневника</button>'
       : '<p class="mu sm">Для подключения открой вкладку «Оценки».</p>';
-    extra.innerHTML='<h2>Мои дела</h2><button class="btn g" data-action="ikManageTasks">Дела и дни недели</button><button class="btn g" data-action="ikTaskTimes">Время дел</button><h2>Награды</h2><button class="btn g" data-action="editReward">Настроить награду и цель</button><h2>Периоды школьных оценок</h2><button class="btn g" data-action="ikGradePeriods">Границы четвертей</button><h2>Школьный дневник</h2>'+status;
+    extra.innerHTML='<h2>Мои дела</h2><button class="btn g" data-action="ikManageTasks">Дела и дни недели</button><button class="btn g" data-action="ikTaskTimes">Время дел</button><h2>Периоды школьных оценок</h2><button class="btn g" data-action="ikGradePeriods">Границы четвертей</button><h2>Школьный дневник</h2>'+status+
+      '<div class="ik-parent-offline"><p class="mu sm">Офлайн-копия оценок: '+(window.schoolCloud?.offlineEnabled?.()?'включена':'выключена')+'. Если включить, оценки сохраняются на этом устройстве без шифрования.</p><button class="btn g" data-action="ikOfflineToggle">'+(window.schoolCloud?.offlineEnabled?.()?'Отключить офлайн-копию':'Разрешить офлайн-копию')+'</button></div>';
     b.prepend(extra);
   };
   document.querySelectorAll('.bar button').forEach((b,i)=>{
