@@ -377,7 +377,7 @@ function sheet(h,key=''){
   if(nextFocus){nextFocus.focus({preventScroll:true});if(selection)nextFocus.setSelectionRange(...selection)}
   else if(!same)dialog.querySelector('h2').focus({preventScroll:true});
 }
-function cs(){sheet('')}
+function cs(){sheet('');window.dispatchEvent(new CustomEvent('iskraSheetClosed'))}
 window.addEventListener('resize',sheetViewport);
 if(window.visualViewport){
   window.visualViewport.addEventListener('scroll',sheetViewport);
