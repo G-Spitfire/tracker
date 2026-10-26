@@ -156,8 +156,7 @@ function overview(ui,snapshot,rows,range,periods,helpers) {
  const recent=latest.length?'<div class="school-recent"><h3>Последние оценки</h3><div class="school-recent-list">'+latest.map(g=>'<div class="school-recent-row"><span class="grade g'+g.score+'">'+g.score+'</span><div><b>'+esc(g.subject)+'</b><small>'+esc(g.type||'Работа')+' · '+dateLabel(g.date)+'</small></div></div>').join('')+'</div></div>':'';
  const mode=ui.schoolChartMode==='subjects'?'subjects':'overall';
  const possible=[...new Set(ordinary.map(g=>g.subject))].sort((a,b)=>a.localeCompare(b,'ru'));
- let chosen=(ui.schoolChartSubjects||[]).filter(n=>possible.includes(n)).slice(0,3);
- if(!chosen.length)chosen=possible.slice(0,3);
+ let chosen=Array.isArray(ui.schoolChartSubjects)?ui.schoolChartSubjects.filter(n=>possible.includes(n)).slice(0,3):possible.slice(0,3);
  const series=mode==='overall'?
  [{key:'overall',name:'',color:palette[0],points:cumulative(ordinary)}]:
  chosen.map((name,i)=>({key:name,name,color:palette[i],points:cumulative(ordinary.filter(g=>g.subject===name))}));
@@ -237,8 +236,7 @@ function onChange(event,ctx) {
  const ui=ctx.ui,name=input.dataset.schoolCompare;
  const snap=ctx.cloudSnapshot(),range=ctx.schoolRange(),rows=works(rangeRows(snap,range));
  const choices=[...new Set(rows.map(g=>g.subject))].sort((a,b)=>a.localeCompare(b,'ru'));
- let chosen=(ui.schoolChartSubjects||[]).filter(n=>choices.includes(n));
- if(!chosen.length)chosen=choices.slice(0,3);
+ let chosen=Array.isArray(ui.schoolChartSubjects)?ui.schoolChartSubjects.filter(n=>choices.includes(n)):choices.slice(0,3);
  if(input.checked){
   if(!chosen.includes(name)&&chosen.length>=3){ui.schoolChartWarning='Можно сравнивать не более трёх предметов.';ctx.render();return true;}
   if(!chosen.includes(name))chosen.push(name);
@@ -247,5 +245,5 @@ function onChange(event,ctx) {
  ctx.render();return true;
 }
 window.VectorSchool={render,handleAction,onChange,test:{cumulative,officialInQuarter,officialInYear,termState,rangeRows,works,average}};
-if(typeof render==='function')render();
+if(typeof window.render==='function')window.render();
 })();
