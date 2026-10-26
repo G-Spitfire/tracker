@@ -8,6 +8,7 @@
 | --- | --- | --- | --- |
 | Ритм | Для Ирины | `okna.html` | [Ритм](https://g-spitfire.github.io/tracker/okna.html) |
 | Вектор | Для Матвея | `index.html` | [Вектор](https://g-spitfire.github.io/tracker/) |
+| Вектор MVP (тест) | Проверка задач, проектов и школьного раздела на демонстрационных данных | `vector-mvp/index.html` | [Открыть тестовый MVP](https://g-spitfire.github.io/tracker/vector-mvp/) |
 | Искра | Для Полины | `moy-den.html` | [Искра](https://g-spitfire.github.io/tracker/moy-den.html) |
 | Форма | Личный трекер тренировок | `forma/index.html` | [Форма](https://g-spitfire.github.io/tracker/forma/) |
 | WordScene | Английские слова для Полины | `wordscene/index.html` | [WordScene](https://g-spitfire.github.io/tracker/wordscene/) |
