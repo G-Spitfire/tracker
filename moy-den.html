@@ -234,6 +234,7 @@ S.hiddenTasks=Array.isArray(S.hiddenTasks)?S.hiddenTasks:[];
 S.customTasks=Array.isArray(S.customTasks)?S.customTasks:[];
 S.rewardHistory=S.rewardHistory&&typeof S.rewardHistory==='object'?S.rewardHistory:{};
 S.weekPlans=S.weekPlans&&typeof S.weekPlans==='object'?S.weekPlans:{};
+S.taskCategories=S.taskCategories&&typeof S.taskCategories==='object'?S.taskCategories:{};
 S.earnedAchievements=S.earnedAchievements&&typeof S.earnedAchievements==='object'?S.earnedAchievements:{};
 // Preserve past earned stars even when a parent's future schedule changes.
 for(const date of Object.keys(S.d||{})){
@@ -244,10 +245,13 @@ const weekStart=d=>{const date=new Date(d+'T12:00:00');date.setDate(date.getDate
 const weekPlan=week=>{
   const awarded=S.rewardHistory[week];
   if(!S.weekPlans||typeof S.weekPlans!=='object')S.weekPlans={};
-  if(!S.weekPlans[week])S.weekPlans[week]={
-    name:awarded?.name||S.reward||'Семейная награда',
-    goal:awarded?.goal||S.goal||25
-  };
+  if(!S.weekPlans[week]){
+    S.weekPlans[week]={
+      name:awarded?.name||S.reward||'Семейная награда',
+      goal:awarded?.goal||S.goal||25
+    };
+    store.save(S);
+  }
   return S.weekPlans[week];
 };
 const taskCatalog=()=>[EX,...T,RD,...S.customTasks];
@@ -257,7 +261,7 @@ const tasks=d=>{
   return taskCatalog().filter(t=>
     (t.i!=='ex'||d>=S.ex)&&!S.hiddenTasks.includes(t.i)&&
     (Array.isArray(S.taskDays[t.i])?S.taskDays[t.i]:(defaultDays[t.i]||[0,1,2,3,4,5,6])).includes(wd)
-  );
+  ).map(t=>({...t,category:S.taskCategories[t.i]||t.category}));
 };
 const freezeDay=d=>{if(!Array.isArray(S.planHistory[d]))S.planHistory[d]=tasks(d).map(t=>({...t}))};
 const dn=d=>(S.d[d]||[]).filter(i=>tasks(d).some(t=>t.i==i));
