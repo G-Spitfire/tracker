@@ -1,7 +1,7 @@
 /* Vector school diary view. Read-only Firebase snapshot, no stored grades. */
 (function () {
 'use strict';
-const palette=['#2463c9','#13a18c','#a56de2'];
+const palette=['#2463c9','#087c68','#8e54b7','#bb5036','#ad3474'];
 const esc = value => String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[ch]));
 const fmt = v => v===null||v===undefined||!Number.isFinite(v)?'—':v.toFixed(2).replace('.',',');
 const dateLabel = s => String(s||'').split('-').reverse().join('.');
@@ -20,6 +20,36 @@ function cumulative(rows) {
   }
   return points;
 }
+/* Compare two consecutive equally sized blocks of the most recent marks.
+   With 4–5 grades use 2 vs 2; with 6+ grades use 3 vs 3.
+   Do not treat a neutral or unmeasurable subject as improving/declining. */
+function subjectTrends(rows) {
+ const groups=new Map();
+ for(const g of works(rows)) {
+  if(!groups.has(g.subject))groups.set(g.subject,[]);
+  groups.get(g.subject).push(g);
+ }
+ return [...groups].flatMap(([name,group])=>{
+  const ordered=byDate(group),n=ordered.length,block=Math.min(3,Math.floor(n/2));
+  if(block<2)return [];
+  const earlier=ordered.slice(n-2*block,n-block),later=ordered.slice(n-block);
+  const previous=average(earlier),recent=average(later),delta=recent-previous;
+  if(Math.abs(delta)<1e-8)return [];
+  return [{name,delta,previous,recent,count:n}];
+ });
+}
+function autoTrendSeries(rows) {
+ const trends=subjectTrends(rows);
+ const byName=(a,b)=>a.name.localeCompare(b.name,'ru');
+ const up=trends.filter(t=>t.delta>0).sort((a,b)=>b.delta-a.delta||byName(a,b)).slice(0,2);
+ const down=trends.filter(t=>t.delta<0).sort((a,b)=>a.delta-b.delta||byName(a,b)).slice(0,3);
+ return [...up,...down].map((t,i)=>({
+  key:t.name,name:t.name,delta:t.delta,group:t.delta>0?'up':'down',
+  color:palette[i],dash:t.delta<0?'7 4':'',
+  points:cumulative(rows.filter(g=>g.subject===t.name))
+ }));
+}
+
 function quarterFromType(g){
  if(!g?.official||g.officialLabel!=='За четверть')return null;
  const name=String(g.type||'').toLocaleLowerCase('ru-RU').replace(/ё/g,'е');
@@ -64,16 +94,9 @@ function header(ui) {
  ['overview','finals'].map((x,i)=>'<button type="button" data-action="school-view" data-id="'+x+'" class="school-tab '+((ui.schoolScreen||'overview')===x?'active':'')+'">'+(i?'Итоги':'Дневник')+'</button>').join('')+
  '</div><div class="school-year-label hint">Учебный год '+esc(ui.year)+'</div>';
 }
-function chartInfo(point,subject) {
- if(!point)return '';
- return '<div class="school-chart-info"><div class="row between wrap"><b>'+dateLabel(point.date)+'</b><strong>'+fmt(point.average)+'</strong></div>'+
- '<p class="hint">'+(subject?esc(subject)+' · ':'')+'Средний на эту дату · '+point.count+' оценок накоплено</p>'+
- '<div class="school-day-grades">'+point.newGrades.map(g=>'<span class="school-chip"><b>'+g.score+'</b> '+esc(g.subject)+
- (g.type?' · '+esc(g.type):'')+'</span>').join('')+'</div></div>';
-}
-function chart(series,range,selectedKey) {
+function chart(series,range) {
  const available=series.filter(s=>s.points.length);
- if(!available.length)return '<div class="empty">В этом периоде ещё нет обычных оценок для построения графика.</div>';
+ if(!available.length)return '<div class="empty">Пока недостаточно обычных оценок для графика.</div>';
  const width=560,height=226,left=39,right=12,top=14,bottom=35;
  const start=Date.parse((range?.from||available.flatMap(s=>s.points).map(p=>p.date).sort()[0])+'T12:00:00');
  const latest=available.flatMap(s=>s.points).map(p=>p.date).sort().at(-1);
@@ -83,19 +106,24 @@ function chart(series,range,selectedKey) {
  const X=d=>left+(Math.max(start,Math.min(end,Date.parse(d+'T12:00:00')))-start)/(end-start)*(width-left-right);
  const Y=v=>top+(5-v)/3*(height-top-bottom);
  const grid=[2,3,4,5].map(n=>'<line x1="'+left+'" x2="'+(width-right)+'" y1="'+Y(n)+'" y2="'+Y(n)+'" stroke="#e5ebf5"/><text x="'+(left-9)+'" y="'+(Y(n)+4)+'" text-anchor="end" font-size="12" fill="#6f7f94">'+n+'</text>').join('');
- const plot=available.map(s=>{
-  const points=s.points.map(p=>X(p.date).toFixed(1)+','+Y(p.average).toFixed(1)).join(' ');
-  return (s.points.length>1?'<polyline points="'+points+'" fill="none" stroke="'+s.color+'" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>':'')+
-  s.points.map((p,i)=>'<circle cx="'+X(p.date).toFixed(1)+'" cy="'+Y(p.average).toFixed(1)+'" r="5.2" fill="'+s.color+'" stroke="white" stroke-width="1.6" role="button" tabindex="0" data-action="school-chart-point" data-id="'+esc(s.key)+'" data-index="'+i+'" aria-label="'+esc((s.name?s.name+', ':'')+dateLabel(p.date)+': средний '+fmt(p.average))+'"><title>'+esc(dateLabel(p.date)+' · '+fmt(p.average))+'</title></circle>').join('');
+ const plot=available.map(line=>{
+  const points=line.points.map(p=>X(p.date).toFixed(1)+','+Y(p.average).toFixed(1)).join(' ');
+  const dash=line.dash?' stroke-dasharray="'+line.dash+'"':'';
+  const curve=line.points.length>1?'<polyline points="'+points+'" fill="none" stroke="'+line.color+'" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"'+dash+'/>':'';
+  return curve+line.points.map(p=>{
+   const gradeLabels=p.newGrades.map(g=>g.score+' '+g.subject+(g.type?' ('+g.type+')':'')).join('; ');
+   const tooltip=(line.name?line.name+' — ':'')+dateLabel(p.date)+', средний '+fmt(p.average)+
+    ', всего '+p.count+' оценок; за день: '+gradeLabels;
+   return '<circle cx="'+X(p.date).toFixed(1)+'" cy="'+Y(p.average).toFixed(1)+'" r="4.2" fill="'+line.color+'" stroke="white" stroke-width="1.4">'+
+    '<title>'+esc(tooltip)+'</title></circle>';
+  }).join('');
  }).join('');
  const first=range?.from||available.flatMap(s=>s.points).map(p=>p.date).sort()[0];
- const last=String(new Date(end).getFullYear())+'-'+String(new Date(end).getMonth()+1).padStart(2,'0')+'-'+String(new Date(end).getDate()).padStart(2,'0');
- const svg='<svg class="school-plot" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="График накопленного среднего балла от 2 до 5">'+grid+plot+
+ const endTime=new Date(end);
+ const last=String(endTime.getFullYear())+'-'+String(endTime.getMonth()+1).padStart(2,'0')+'-'+String(endTime.getDate()).padStart(2,'0');
+ return '<svg class="school-plot" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="График накопленного среднего балла от 2 до 5">'+grid+plot+
  '<text x="'+left+'" y="'+(height-7)+'" font-size="11" fill="#778aa3">'+dateLabel(first)+'</text>'+
  '<text x="'+(width-right)+'" y="'+(height-7)+'" font-size="11" fill="#778aa3" text-anchor="end">'+dateLabel(last)+'</text></svg>';
- const found=available.flatMap(s=>s.points.map((p,i)=>({key:s.key,point:p,index:i,subject:s.name})));
- const selected=found.find(o=>o.key===selectedKey?.key&&o.index===selectedKey?.index)||found.slice().sort((a,b)=>compareGrade(a.point,b.point)).at(-1);
- return svg+chartInfo(selected.point,selected.subject);
 }
 function periodUi(ui,periods) {
  const options=[['year','Весь учебный год'],['1','I четверть'],['2','II четверть'],['3','III четверть'],['4','IV четверть']];
@@ -187,7 +215,7 @@ function detail(ui,snapshot,rows,range,periods,helpers) {
   return '<div class="school-quarter-tile"><span>'+['','I','II','III','IV'][q]+'</span><strong>'+(score?score.score:'—')+'</strong></div>';
  }).join('')+'<div class="school-quarter-tile"><span>Год</span><strong>'+(officialInYear(snapshot,ui.year,name)?.score??'—')+'</strong></div></div><p class="hint">В этой строке только официальные итоги.</p></div>';
  const graph='<div class="card school-chart-card"><h3>Как менялся средний</h3>'+
- chart([{key:'subject',name:'',color:palette[0],points:cumulative(ordinary)}],range,ui.schoolChartPoint?.key==='subject'?ui.schoolChartPoint:null)+
+ chart([{key:'subject',name:'',color:palette[0],points:cumulative(ordinary)}],range)+
  '<p class="hint">Точки появляются в дни с оценками. Шкала 2–5.</p></div>';
  const marks='<div class="card school-marks"><h3>Оценки за работы</h3>'+
  (ordinary.length?ordinary.slice().sort(compareGrade).reverse().map(g=>'<div class="school-mark-row"><span class="grade g'+g.score+'">'+g.score+'</span><div><b>'+esc(g.type||'Работа в школе')+'</b><small>'+dateLabel(g.date)+'</small></div></div>').join(''):'<div class="empty">За выбранный период оценок за работы нет.</div>')+'</div>';
@@ -204,20 +232,23 @@ function overview(ui,snapshot,rows,range,periods,helpers) {
  '<div class="school-topmeta"><span class="hint">Период</span><b>'+(isQuarter?current+'-я четверть':'Учебный год')+'</b></div></div>';
  const recent=latest.length?'<div class="school-recent"><h3>Последние оценки</h3><div class="school-recent-list">'+latest.map(g=>'<div class="school-recent-row"><span class="grade g'+g.score+'">'+g.score+'</span><div><b>'+esc(g.subject)+'</b><small>'+esc(g.type||'Работа')+' · '+dateLabel(g.date)+'</small></div></div>').join('')+'</div></div>':'';
  const mode=ui.schoolChartMode==='subjects'?'subjects':'overall';
- const possible=[...new Set(ordinary.map(g=>g.subject))].sort((a,b)=>a.localeCompare(b,'ru'));
- let chosen=Array.isArray(ui.schoolChartSubjects)?ui.schoolChartSubjects.filter(n=>possible.includes(n)).slice(0,3):possible.slice(0,3);
  const series=mode==='overall'?
  [{key:'overall',name:'',color:palette[0],points:cumulative(ordinary)}]:
- chosen.map((name,i)=>({key:name,name,color:palette[i],points:cumulative(ordinary.filter(g=>g.subject===name))}));
+ autoTrendSeries(ordinary);
  const toggles='<div class="school-mode-switch"><button class="'+(mode==='overall'?'active':'')+'" data-action="school-chart-mode" data-id="overall">Общий средний</button>'+
  '<button class="'+(mode==='subjects'?'active':'')+'" data-action="school-chart-mode" data-id="subjects">По предметам</button></div>';
- const checkboxes=mode==='subjects'?'<details class="school-compare-picker" '+(ui.schoolCompareOpen?'open':'')+'><summary>Выбрать предметы <span class="school-selected-count">'+chosen.length+' из 3</span></summary>'+
- '<div class="school-checks">'+possible.map(n=>'<label class="school-check"><input type="checkbox" data-school-compare="'+esc(n)+'" '+(chosen.includes(n)?'checked':'')+'><span>'+esc(n)+'</span></label>').join('')+'</div>'+
- '<p class="hint">На графике отображаются максимум три предмета.</p>'+ (ui.schoolChartWarning?'<p class="school-warn">'+esc(ui.schoolChartWarning)+'</p>':'')+'</details>':'';
- const legend=mode==='subjects'?'<div class="school-legend">'+series.map(item=>'<span><i style="background:'+item.color+'"></i>'+esc(item.name)+'</span>').join('')+'</div>':'';
- const graph='<div class="card school-chart-card"><div class="school-chart-heading"><div><h3>Динамика успеваемости</h3><p class="hint">Накопленный средний балл · шкала 2–5</p></div></div>'+toggles+checkboxes+legend+
- chart(series,range,ui.schoolChartPoint)+
- '<p class="hint">Учитываются только оценки за работы. Итоговые отметки не меняют график; прогнозов на линии нет.</p></div>';
+ const legend=mode==='subjects'&&series.length?'<div class="school-legend school-trend-legend">'+series.map(item=>
+  '<span><i style="background:'+item.color+'"></i><b>'+esc(item.name)+'</b> <em class="'+(item.delta>0?'school-up':'school-down')+'">'+
+  (item.delta>0?'↑ +':'↓ −')+fmt(Math.abs(item.delta))+'</em></span>').join('')+'</div>':'';
+ const explanation=mode==='subjects'?
+ '<p class="hint">Автоматически: 2 предмета с наибольшим ростом и 3 с наибольшим снижением. Сравниваем среднее последних 2–3 оценок с предыдущими 2–3. Минимум 4 оценки по предмету; без изменений — не показываем.</p>':
+ '<p class="hint">Накопленный средний балл по всем обычным оценкам за период.</p>';
+ const noTrend=mode==='subjects'&&!series.length?
+ '<div class="empty">Пока нет предметов с достаточным количеством оценок и заметным изменением среднего.</div>':'';
+ const graph='<div class="card school-chart-card"><div class="school-chart-heading"><div><h3>Динамика успеваемости</h3><p class="hint">Накопленный средний балл · шкала 2–5</p></div></div>'+
+ toggles+legend+(noTrend||chart(series,range))+explanation+
+ '<p class="hint">Итоговые отметки не влияют на линии. Цвет и стрелка в легенде показывают направление изменений.</p></div>';
+
  const list='<section class="school-subject-list"><div class="school-section-head"><h2>Предметы</h2><p class="hint">Средний за работы и официальная отметка или прогноз</p></div>'+
  (subjectNames.length?subjectNames.map(name=>{
   const sRows=rows.filter(g=>g.subject===name),subworks=works(sRows),m=average(subworks);
@@ -263,7 +294,7 @@ function render(ctx) {
  if(ui.year!==targetYear){ui.year=targetYear;ui.quarter='year';ui.subject='';ui.editTerm=false;ui.schoolPeriodTouched=false;}
  const tabs=header(ui);
  if(ui.schoolScreen==='finals'){
-  if(ui.subject){ui.subject='';ui.schoolChartPoint=null;}
+  if(ui.subject){ui.subject='';}
   return status+tabs+finals(ui,snap,s.schoolPeriods||{});
  }
  const controls=periodUi(ui,s.schoolPeriods||{});
@@ -275,27 +306,12 @@ function render(ctx) {
 }
 function handleAction(btn,ctx) {
  const ui=ctx.ui,act=btn.dataset.action,id=btn.dataset.id;
- if(!['school-view','school-chart-mode','school-chart-point'].includes(act))return false;
- if(act==='school-view'){ui.schoolScreen=id;ui.subject='';ui.schoolChartPoint=null;}
- if(act==='school-chart-mode'){ui.schoolChartMode=id;ui.schoolChartPoint=null;ui.schoolChartWarning='';}
- if(act==='school-chart-point'){ui.schoolChartPoint={key:id,index:Number(btn.dataset.index)};}
+ if(!['school-view','school-chart-mode'].includes(act))return false;
+ if(act==='school-view'){ui.schoolScreen=id;ui.subject='';}
+ if(act==='school-chart-mode'){ui.schoolChartMode=id;}
  ctx.render();
  return true;
 }
-function onChange(event,ctx) {
- const input=event.target;if(!input.matches('[data-school-compare]'))return false;
- const ui=ctx.ui,name=input.dataset.schoolCompare;
- ui.schoolCompareOpen=!!input.closest?.('.school-compare-picker')?.open;
- const snap=ctx.cloudSnapshot(),range=ctx.schoolRange(),rows=works(rangeRows(snap,range));
- const choices=[...new Set(rows.map(g=>g.subject))].sort((a,b)=>a.localeCompare(b,'ru'));
- let chosen=Array.isArray(ui.schoolChartSubjects)?ui.schoolChartSubjects.filter(n=>choices.includes(n)):choices.slice(0,3);
- if(input.checked){
-  if(!chosen.includes(name)&&chosen.length>=3){ui.schoolChartWarning='Можно сравнивать не более трёх предметов.';ctx.render();return true;}
-  if(!chosen.includes(name))chosen.push(name);
- } else chosen=chosen.filter(n=>n!==name);
- ui.schoolChartSubjects=chosen;ui.schoolChartWarning='';ui.schoolChartPoint=null;
- ctx.render();return true;
-}
-window.VectorSchool={render,handleAction,onChange,test:{cumulative,officialInQuarter,officialInYear,quarterFromType,gradeQuarter,termState,rangeRows,works,average}};
+window.VectorSchool={render,handleAction,test:{cumulative,subjectTrends,autoTrendSeries,officialInQuarter,officialInYear,quarterFromType,gradeQuarter,termState,rangeRows,works,average}};
 if(typeof window.render==='function')window.render();
 })();
