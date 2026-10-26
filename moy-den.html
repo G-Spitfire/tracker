@@ -419,6 +419,9 @@ function setDone(i,on,silent,date){
   const monday=iso(weekStart),plan=weekPlan(monday),weekSum=Array.from({length:7},(_,i)=>{const x=new Date(weekStart);x.setDate(x.getDate()+i);return st(iso(x))}).reduce((a,b)=>a+b,0);
   if(weekSum>=plan.goal&&!S.rewardHistory[monday]){
     S.rewardHistory[monday]={name:plan.name,goal:plan.goal,earnedAt:iso(new Date()),status:'earned'};
+  } else if(weekSum<plan.goal&&S.rewardHistory[monday]?.status==='earned'){
+    // Only pending awards can be revoked; received awards remain in history.
+    delete S.rewardHistory[monday];
   }
   save();render();
   if(silent)return;
@@ -477,10 +480,10 @@ function renderHistory(){
   for(let i=0;i<startWd;i++)cells.push('<button class="empty" disabled></button>');
   for(let d=1;d<=daysIn;d++){
     const ds=iso(new Date(y,m,d));
-    const hasHab=(S.d[ds]||[]).length>0||Object.keys(S.x[ds]||{}).length>0;
+    const hasHab=dn(ds).length>0;
     const fut=ds>td;
     const dots=hasHab?'<span class="dot h"></span>':'';
-    cells.push(`<button class="${hasHab?'has':''} ${ds===td?'today':''} ${fut?'future':''}" data-action="histDay" data-id="${ds}">${d}${dots}</button>`);
+    cells.push(`<button class="${hasHab?'has':''} ${ds===td?'today':''} ${fut?'future':''}" ${fut?'disabled aria-disabled="true"':''} data-action="histDay" data-id="${ds}">${d}${dots}</button>`);
   }
   const monthName=first.toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
   sheet(`<h2 style="margin-top:0">История</h2>
