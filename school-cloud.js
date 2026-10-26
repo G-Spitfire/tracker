@@ -39,13 +39,16 @@ const score = value => {
   return match ? Number(match[1]) : null;
 };
 const markScore = row => score(row.value) ?? score(row.valueCode);
-// The portal may return "неизвестная", "неизвестно", "неизвестный" or an empty label.
-const unknownMark = row => /^(?:неизвестн[а-яё]*(?:\s+(?:отметка|оценка))?|не\s+определен[а-яё]*|не\s+указан[а-яё]*|unknown|[?—-])?$/i.test(String(row.value ?? '').trim());
-const markLabel = row => {
-  const n = markScore(row);
-  if (n !== null) return String(n);
-  return unknownMark(row) ? '?' : String(row.value);
+// Attendance/non-grade journal events are never academic marks. Some are
+// rendered by the school API as "неизвестная" instead of "н".
+const isAttendanceLabel = value => {
+  const text = String(value ?? '').trim().toLocaleLowerCase('ru-RU').replace(/\s+/g, ' ');
+  return /^(?:н\.?|по болезни|болезнь|болел[аи]?|отсутствовал[аи]?|отсутствие|пропуск(?:\s+урока)?|неизвестн[а-яё]*(?:\s+(?:отметка|оценка))?|не\s+определен[а-яё]*|не\s+указан[а-яё]*|unknown|[?—-])$/.test(text);
 };
+const gradeScore = row => (
+  isAttendanceLabel(row.value) || isAttendanceLabel(row.valueCode) ||
+  isAttendanceLabel(row.type)
+) ? null : markScore(row);
 const avg = rows => rows.length
   ? (rows.reduce((n, row) => n + row.n, 0) / rows.length).toFixed(2) : '—';
 const forecast = n => n < 2.6 ? 2 : n < 3.6 ? 3 : n < 4.6 ? 4 : 5;
@@ -155,9 +158,9 @@ function trend(rows) {
 function cloudGrades() {
   const d = state.data;
   const filtered = d.grades.filter(row => row.date >= state.from && row.date <= state.to);
-  const numeric = filtered.map(row => ({...row, n: markScore(row)})).filter(row => row.n !== null);
+  const numeric = filtered.map(row => ({...row, n: gradeScore(row)})).filter(row => row.n !== null);
   const group = new Map();
-  filtered.forEach(row => {
+  numeric.forEach(row => {
     if (!group.has(row.subject)) group.set(row.subject, []);
     group.get(row.subject).push(row);
   });
@@ -171,56 +174,33 @@ function cloudGrades() {
   s += '<div class="hero"><div class="big">' + avg(numeric) +
     '</div><div class="mu">Средний балл · ' + numeric.length +
     ' числовых оценок</div></div>';
-  const unresolved = filtered.filter(row => unknownMark(row) && markScore(row) === null).length;
-  if (unresolved) {
-    const unresolvedRows = filtered.filter(row => unknownMark(row) && markScore(row) === null)
-      .sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
-    s += '<details class="card scs-unknown-list"><summary>Неопределённые отметки: ' +
-      unresolved + ' · что это?</summary>' +
-      '<p class="mu sm">В выгрузке школьного дневника нет однозначной числовой оценки. ' +
-      'Чтобы не исказить средний балл, мы показываем «?» и не учитываем такую запись.</p>' +
-      unresolvedRows.map(row =>
-        '<div class="scs-unknown-row"><b>' + esc(row.subject) + '</b> · ' +
-        esc(row.date.split('-').reverse().join('.')) +
-        (row.type ? '<div class="mu sm">' + esc(row.type) + '</div>' : '') +
-        '<div class="mu sm">Название: ' + esc(row.value || 'пусто') +
-        ' · код: ' + esc(row.valueCode || 'пусто') + '</div></div>'
-      ).join('') + '</details>';
-  }
   s += '<div class="card"><b>Динамика среднего балла</b>' + trend(numeric) +
     '<div class="mu sm">Все числовые оценки равновесные; официальный школьный средний может отличаться.</div></div>';
-  if (!filtered.length) s += '<div class="card">В выбранном периоде оценок пока нет.</div>';
+  if (!numeric.length) s += '<div class="card">В выбранном периоде числовых оценок пока нет.</div>';
   s += ordered.map(([subject, marks]) => {
-    const nums = marks.map(markScore).filter(n => n !== null);
+    const nums = marks.map(r => r.n);
     const mean = nums.length ? Number(avg(nums.map(n => ({n})))) : null;
     const chips = marks.slice().sort((a, b) => b.date.localeCompare(a.date) ||
       b.id.localeCompare(a.id)).map(row => {
-      const val = markScore(row);
-      const label = markLabel(row);
-      const unrecognized = unknownMark(row) && val === null;
-      const details = unrecognized
-        ? 'Дневник не передал распознаваемое значение' +
-          (row.valueCode ? ' · код: ' + row.valueCode : '')
-        : '';
-      const tip = [row.date.split('-').reverse().join('.'), row.type, details]
-        .filter(Boolean).join(' · ');
-      return '<span class="chip ' + (val === null ? '' : 'c' + val) +
-        '" title="' + esc(tip) + '" aria-label="' + esc(tip + ': ' + label) +
-        '">' + esc(label) + '</span>';
+      const val = row.n;
+      const tip = [row.date.split('-').reverse().join('.'), row.type].filter(Boolean).join(' · ');
+      return '<span class="chip c' + val +
+        '" title="' + esc(tip) + '" aria-label="' + esc(tip + ': ' + val) +
+        '">' + val + '</span>';
     }).join('');
     return '<div class="card sub"><div class="row"><div><b>' + esc(subject) +
       '</b><div class="mu sm">' + (mean === null ? 'Нет числовых оценок' :
       'Средний ' + mean.toFixed(2) + ' · прогноз ' + forecast(mean)) +
       '</div></div></div><div class="chips">' + chips + '</div></div>';
   }).join('');
-  s += '<p class="mu sm">Источник: Петербургское образование. Прогноз условный, по равновесным оценкам; школьные коэффициенты здесь не применяются.</p>';
+  s += '<p class="mu sm">Показаны только оценки от 2 до 5. Пропуски уроков, отметки «н», «по болезни» и другие нечисловые записи журнала здесь скрыты. Прогноз условный: школьные коэффициенты не применяются.</p>';
   return s;
 }
 
 function summary() {
   if (!state.user || !state.data || !state.from || !state.to) return null;
   const filtered = state.data.grades.filter(row => row.date >= state.from && row.date <= state.to);
-  const valid = filtered.map(row => ({...row, n: markScore(row)})).filter(row => row.n !== null);
+  const valid = filtered.map(row => ({...row, n: gradeScore(row)})).filter(row => row.n !== null);
   const average = valid.length ? valid.reduce((s, row) => s + row.n, 0) / valid.length : 0;
   const groups = new Map();
   valid.forEach(row => {
@@ -260,8 +240,9 @@ function view(legacy) {
     if (state.data) {
       const d = new Date(state.data.syncedAt);
       const date = Number.isFinite(d.getTime()) ? d.toLocaleString('ru-RU') : 'неизвестно';
-      body += '<p class="mu sm">В дневнике: ' + state.data.grades.length +
-        ' записей · получено MacBook: ' + esc(date) + '</p>';
+      const gradeCount = state.data.grades.filter(row => gradeScore(row) !== null).length;
+      body += '<p class="mu sm">В дневнике: ' + gradeCount +
+        ' оценок · получено MacBook: ' + esc(date) + '</p>';
     }
   }
   if (state.error) body += '<p class="scs-warning" role="status">' + esc(state.error) + '</p>';
@@ -281,7 +262,7 @@ function view(legacy) {
 }
 
 const css = document.createElement('style');
-css.textContent = '.scs{display:block}.scs .scs-head,.scs .scs-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}.scs .scs-flag{font-size:11px;opacity:.75}.scs .scs-form{display:grid;gap:12px;margin-top:15px}.scs .scs-form label,.scs .scs-filters label{display:grid;gap:6px;font-size:13px;font-weight:600}.scs input{padding:11px;border:1px solid var(--ln);border-radius:11px;background:var(--bg);color:var(--tx);font:inherit;min-width:0;box-sizing:border-box;width:100%}.scs .scs-actions{justify-content:flex-start;margin-top:12px}.scs .scs-filters{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}.scs .scs-warning{color:var(--bad);margin:12px 0;font-size:14px}.scs .scs-manual{width:100%;margin:14px 0}.scs .chips{display:flex;gap:6px;flex-wrap:wrap}.scs .chips .chip{cursor:default}.scs .sub{margin:9px 0}.scs .scs-unknown-list{margin-top:14px}.scs .scs-unknown-list summary{cursor:pointer;font-weight:700;line-height:1.5}.scs .scs-unknown-row{padding:11px 0;border-bottom:1px solid var(--ln);overflow-wrap:anywhere}.scs .scs-unknown-row:last-child{border-bottom:0}@media(max-width:360px){.scs .scs-filters{grid-template-columns:1fr}}';
+css.textContent = '.scs{display:block}.scs .scs-head,.scs .scs-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}.scs .scs-flag{font-size:11px;opacity:.75}.scs .scs-form{display:grid;gap:12px;margin-top:15px}.scs .scs-form label,.scs .scs-filters label{display:grid;gap:6px;font-size:13px;font-weight:600}.scs input{padding:11px;border:1px solid var(--ln);border-radius:11px;background:var(--bg);color:var(--tx);font:inherit;min-width:0;box-sizing:border-box;width:100%}.scs .scs-actions{justify-content:flex-start;margin-top:12px}.scs .scs-filters{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}.scs .scs-warning{color:var(--bad);margin:12px 0;font-size:14px}.scs .scs-manual{width:100%;margin:14px 0}.scs .chips{display:flex;gap:6px;flex-wrap:wrap}.scs .chips .chip{cursor:default}.scs .sub{margin:9px 0}@media(max-width:360px){.scs .scs-filters{grid-template-columns:1fr}}';
 document.head.appendChild(css);
 window.schoolCloud = { view, summary };
 notify();
