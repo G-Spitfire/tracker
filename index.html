@@ -415,7 +415,7 @@ function gradeOutlook(){
   const risk=atRisk.length?`<div class="kicker" style="margin-top:14px">НЕ УРОНИТЬ</div>${atRisk.map(g=>`<div class="mu sm outlook-risk"><b>${esc(g.k)}</b> · средний ${f2(g.av)}. Оценка «3» снизит его до ${f2(g.x)}.</div>`).join('')}`:'';
   return `<div class="card">${needs}${risk}</div>`;
 }
-function grades(){
+function gradesLocal(){
   return`${termControls(S)}<div class="hero"><div class="big">${ACT().length?f2(exAvg()):'—'}</div><div class="mu" style="padding-bottom:6px">Средний балл<br>все оценки равновесные</div></div>
 <div class="card"><b>Как меняется средний балл</b>${chart()}<div class="mu sm">Сумма всех оценок ÷ количество оценок. Только выбранная четверть; архивные предметы исключены.</div></div>
 ${whatIf()}${gradeOutlook()}
@@ -423,6 +423,8 @@ ${whatIf()}${gradeOutlook()}
 <div style="margin-top:12px">${gord().map(k=>{const em=!S.g[k].length,av=em?0:avg(k),f=em?0:fin(av);return`<div class="card sub t${f}"><div class="row" style="align-items:center"><div><b>${esc(k)}</b><div class="mu sm">${em?'оценок пока нет':'средний '+f2(av)}</div></div><div class="fin" style="font-size:38px">${em?'—':f}<small>итог</small></div></div><div class="chips">${S.g[k].map(x=>`<button class="chip c${x.v}" data-action="editGrade" data-id="${esc(k)}" data-arg="${x.i}">${x.v}</button>`).join('')}<button class="chip add" data-action="addGrade" data-id="${esc(k)}" aria-label="Добавить оценку: ${esc(k)}">+</button></div></div>`}).join('')}</div>
 <button class="btn g" style="margin-top:6px;width:100%" data-action="subjects">Предметы и четверть</button>`;
 }
+
+function grades(){return window.schoolCloud ? window.schoolCloud.view(gradesLocal) : gradesLocal()}
 
 /* ===== TODAY ===== */
 function today(){
@@ -928,6 +930,8 @@ function render(){
   document.getElementById('m').innerHTML=`<div class="hd"><div class="brand-lockup"><div class="brand-mark" aria-hidden="true">${mark}</div><div class="brand-copy"><h1>Вектор</h1><div class="mu sm">${subtitles[tab]}</div></div></div><button class="avb" data-action="openProfile" aria-label="Профиль">${avatar}</button></div>`+main;
 }
 
+window.addEventListener('schoolCloudUpdated',()=>{if(tab==='g')render()});
+
 /* ===== BOOT ===== */
 save();
 daily();
@@ -936,4 +940,4 @@ document.addEventListener('visibilitychange',()=>{
   if(!document.hidden&&iso(new Date())!==day){day=iso(new Date());dayOffset=0;daily();render()}
 });
 render();
-</script></body></html>
+</script><script type="module" src="./school-cloud.js" data-school-cloud="vector"></script></body></html>
