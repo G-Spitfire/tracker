@@ -55,7 +55,7 @@
     return streak;
   }
   function ikReward(){
-    const dates=weekDates(),weekKey=dates[0],savedWeek=S.rewardHistory?.[weekKey],tw=dates.reduce((n,d)=>n+st(d),0),goal=savedWeek?.goal||S.goal||25,total=earned(),l=currentLevel(),next=levels[l+1],prevLevel=levels[l][0],pr=next?perc(total-prevLevel,next[0]-prevLevel):100;
+    const dates=weekDates(),weekKey=dates[0],currentPlan=weekPlan(weekKey),savedWeek=S.rewardHistory?.[weekKey],tw=dates.reduce((n,d)=>n+st(d),0),goal=savedWeek?.goal||currentPlan.goal,total=earned(),l=currentLevel(),next=levels[l+1],prevLevel=levels[l][0],pr=next?perc(total-prevLevel,next[0]-prevLevel):100;
     const clouds=window.schoolCloud?.overallSummary?.(),topGrade=clouds&&clouds.count&&clouds.average>=4.5;
     const help=Object.keys(S.d||{}).filter(d=>(S.d[d]||[]).includes('ho')).length;
     const streak=badgeStreak();
@@ -75,14 +75,14 @@
     }
     if(newAchievement)save();
     const existing=S.rewardHistory[weekKey];
-    if(tw>=goal&&!existing){S.rewardHistory[weekKey]={name:S.reward,goal,earnedAt:iso(new Date()),status:'earned'};save()}
+    if(tw>=goal&&!existing){S.rewardHistory[weekKey]={name:currentPlan.name,goal,earnedAt:iso(new Date()),status:'earned'};save()}
     const prize=S.rewardHistory[weekKey];
     const rewardStatus=prize?.status==='received'?'Награда получена!':prize?'Награда заработана!':'Ты на верном пути! Продолжай в том же духе!';
     return '<div class="ik-page ik-reward"><div class="ik-heading"><h1>Награда</h1><span class="ik-cloud-pill">⭐ Мои достижения</span></div>'+
       '<div class="ik-main-card"><div class="ik-hero-split">'+star+'<div style="flex:1"><b>Твоя неделя</b><div class="ik-row" style="gap:7px"><span class="ik-number" style="font-size:43px">'+tw+'</span><span style="font-size:25px">⭐</span></div><div class="ik-caption">из '+goal+' звёзд для награды</div><p class="ik-caption" style="margin-bottom:0">'+rewardStatus+'</p></div></div><div class="ik-level-track"><div style="width:'+perc(tw,goal)+'%"></div></div></div>'+
       '<div class="card ik-week">'+dates.map((date,i)=>{const n=dn(date).length,all=n>0&&n===tasks(date).length;return '<button class="ik-week-day '+(all?'is-full':'')+'" data-action="ikWeekDay" data-id="'+date+'" aria-label="'+DN[i]+': '+st(date)+' звёзд"><div class="ik-week-star">'+(all?'⭐':n?'✦':'☆')+'</div><span>'+DN[i]+'</span><small>'+st(date)+' ★</small></button>'}).join('')+'</div>'+
       '<button class="ik-action-row" data-action="ikLevels"><span class="ik-action-icon">👑</span><span style="flex:1"><b>Твой уровень</b><small>'+safe(levels[l][1])+' · уровень '+(l+1)+'</small><div class="ik-level-track"><div style="width:'+pr+'%"></div></div><small>'+(next?'До следующего: '+Math.max(0,next[0]-total)+' звёзд':'Максимальный уровень!')+'</small></span><span class="ik-chevron">›</span></button>'+
-      '<button class="ik-action-row" data-action="ikRewardInfo"><span class="ik-action-icon">🎁</span><span style="flex:1"><b>Ближайшая награда</b><small>'+safe(prize?.name||S.reward)+'</small><div class="ik-level-track"><div style="width:'+perc(tw,goal)+'%"></div></div><small>'+Math.max(0,goal-tw)+' звёзд осталось</small></span><span class="ik-chevron">›</span></button>'+
+      '<button class="ik-action-row" data-action="ikRewardInfo"><span class="ik-action-icon">🎁</span><span style="flex:1"><b>Ближайшая награда</b><small>'+safe(prize?.name||currentPlan.name)+'</small><div class="ik-level-track"><div style="width:'+perc(tw,goal)+'%"></div></div><small>'+Math.max(0,goal-tw)+' звёзд осталось</small></span><span class="ik-chevron">›</span></button>'+
       '<div class="ik-row-between"><h2 class="ik-sec-title">Достижения</h2><span class="ik-tab-sublabel">'+achievements.filter(a=>a.ok).length+' из '+achievements.length+'</span></div>'+
       '<div class="ik-achievements">'+achievements.map(a=>'<div class="ik-achievement '+(a.ok?'':'locked')+'"><span class="icon">'+a.icon+'</span><b>'+a.title+'</b><small>'+(a.ok?('Получено '+safe(S.earnedAchievements[a.title])):a.small)+'</small></div>').join('')+'</div>'+
       '<button class="ik-action-row" data-action="ikRewardHistory"><span class="ik-action-icon">📜</span><span style="flex:1"><b>История наград</b><small>Заработанные и полученные награды</small></span><span class="ik-chevron">›</span></button></div>';
@@ -113,8 +113,8 @@
   ACTIONS.ikTaskDone=(id)=>{cs();toggleTask(id)};
   ACTIONS.ikPersonalSettings=()=>sheet('<h2>Мои настройки</h2><button class="btn g" data-action="profile">Имя и аватар</button><button class="btn g" data-action="ikInterests">Мои интересы</button><p class="mu sm">Настройки наград и расписания находятся в разделе «Для родителей».</p>');
   ACTIONS.ikRewardInfo=()=>{
-    const date=weekDates()[0],h=S.rewardHistory[date];
-    sheet('<h2>Награда недели</h2><p><b>'+safe(h?.name||S.reward)+'</b></p><p class="mu sm">Звёзды: '+weekDates().reduce((n,d)=>n+st(d),0)+' из '+(h?.goal||S.goal)+'</p>'+
+    const date=weekDates()[0],h=S.rewardHistory[date],plan=weekPlan(date);
+    sheet('<h2>Награда недели</h2><p><b>'+safe(h?.name||plan.name)+'</b></p><p class="mu sm">Звёзды: '+weekDates().reduce((n,d)=>n+st(d),0)+' из '+(h?.goal||plan.goal)+'</p>'+
     (h?.status==='received'?'<p>Награда уже получена!</p>':h?'<p>Цель выполнена! Получение подтверждает взрослый.</p><button class="btn" data-action="ikClaimReward">Подтвердить получение</button>':'<p>Продолжай собирать звёзды!</p>'));
   };
   ACTIONS.ikClaimReward=()=>{
