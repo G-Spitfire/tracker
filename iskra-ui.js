@@ -58,7 +58,15 @@
     const clouds=averageSchool(),topGrade=clouds&&clouds.count&&clouds.average>=4.5;
     const help=Object.keys(S.d||{}).filter(d=>(S.d[d]||[]).includes('ho')).length;
     const streak=badgeStreak();
-    const achievements=[{icon:'🌞',title:'Постоянство',small:'7 дней подряд',ok:streak>=7},{icon:'🏅',title:'Отличные оценки',small:'Средний от 4,50',ok:topGrade},{icon:'💗',title:'Помощник',small:'10 дел по дому',ok:help>=10}];
+    const readDays=Object.keys(S.d||{}).filter(d=>(S.d[d]||[]).includes('rd')).length;
+    const achievements=[
+      {icon:'🌞',title:'Постоянство',small:'7 дней подряд',ok:streak>=7},
+      {icon:'🏅',title:'Отличные оценки',small:'Средний от 4,50',ok:topGrade},
+      {icon:'💗',title:'Помощник',small:'10 дел по дому',ok:help>=10},
+      {icon:'👟',title:'Первый шаг',small:'Первое дело',ok:completed()>=1},
+      {icon:'📖',title:'Книголюб',small:'10 дней чтения',ok:readDays>=10},
+      {icon:'🌟',title:'Мастер дел',small:'50 выполненных дел',ok:completed()>=50}
+    ];
     return '<div class="ik-page ik-reward"><div class="ik-heading"><h1>Награда</h1><span class="ik-cloud-pill">⭐ Мои достижения</span></div>'+
       '<div class="ik-main-card"><div class="ik-hero-split">'+star+'<div style="flex:1"><b>Твоя неделя</b><div class="ik-row" style="gap:7px"><span class="ik-number" style="font-size:43px">'+tw+'</span><span style="font-size:25px">⭐</span></div><div class="ik-caption">из '+goal+' звёзд для награды</div><p class="ik-caption" style="margin-bottom:0">'+(tw>=goal?'Ура! Цель выполнена!':'Ты на верном пути! Продолжай в том же духе!')+'</p></div></div><div class="ik-level-track"><div style="width:'+perc(tw,goal)+'%"></div></div></div>'+
       '<div class="card ik-week">'+dates.map((date,i)=>{const n=dn(date).length,all=n>0&&n===tasks(date).length;return '<div class="ik-week-day '+(all?'is-full':'')+'"><div class="ik-week-star">'+(all?'⭐':n?'✦':'☆')+'</div><span>'+DN[i]+'</span></div>'}).join('')+'</div>'+
