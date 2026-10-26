@@ -22,7 +22,7 @@ const auth = getAuth(fb);
 const db = getFirestore(fb);
 const state = {
   phase: 'init', user: null, data: null, error: '',
-  manual: false, from: '', to: '', loading: false, lastFetch: 0
+  manual: false, from: '', to: '', loading: false, lastFetch: 0, offline: false
 };
 const esc = value => String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -131,8 +131,13 @@ async function refresh(force = false) {
       state.phase = 'empty';
       state.error = 'Для этого аккаунта пока нет выгрузки оценок.';
     } else {
-      const next = verify(snap.data());
+      const raw = snap.data(), next = verify(raw);
       state.data = next;
+      state.offline=false;
+      if(appKind==='iskra'){
+        try{if(localStorage.getItem('iskra_offline_enabled')==='1')
+          localStorage.setItem('iskra_offline_grades_'+user.uid,JSON.stringify(raw))}catch(_){}
+      }
       state.phase = 'ready';
       if(appKind==='iskra')ikAutoPeriod();
       if (!state.from) state.from = /^\d{4}-\d{2}-\d{2}$/.test(next.rangeFrom)
@@ -142,8 +147,17 @@ async function refresh(force = false) {
     state.lastFetch = Date.now();
   } catch (err) {
     if (auth.currentUser?.uid !== user.uid) return;
+    if(appKind==='iskra'&&!state.data){
+      try{
+        if(localStorage.getItem('iskra_offline_enabled')==='1'){
+          const raw=JSON.parse(localStorage.getItem('iskra_offline_grades_'+user.uid)||'null');
+          if(raw){state.data=verify(raw);state.offline=true;ikAutoPeriod()}
+        }
+      }catch(_){}
+    }
     state.phase = state.data ? 'ready' : 'error';
-    state.error = err && String(err.message).startsWith('invalid-school-')
+    state.error = state.offline?'Нет соединения. Показана сохранённая офлайн-копия; её оценки могут быть устаревшими.':
+      err && String(err.message).startsWith('invalid-school-')
       ? 'Неверный формат данных в базе. Старые записи не изменены.'
       : errorText(err);
   } finally {
@@ -389,9 +403,12 @@ function ikPeriodSettingsHtml(){
   return html+'<button type="submit" class="btn">Сохранить четверти</button></form>';
 }
 function ikFreshness() {
-  if(!state.data?.syncedAt)return 'Время загрузки неизвестно';
+  if(!state.data?.syncedAt)return 'Дата последней выгрузки неизвестна';
   const date=new Date(state.data.syncedAt);
-  return Number.isFinite(date.getTime())?'Данные из дневника · '+date.toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'Время загрузки неизвестно';
+  if(!Number.isFinite(date.getTime()))return 'Дата последней выгрузки неизвестна';
+  const stamp=date.toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  const stale=Date.now()-date.getTime()>24*3600*1000;
+  return (state.offline?'Офлайн-копия':'Выгрузка из школы')+' · '+stamp+(stale?' · может устареть':'');
 }
 function ikGradeList(rows) {
   if(!rows.length)return '<div class="ik-empty">Оценок за работы пока нет.</div>';
@@ -425,7 +442,7 @@ function viewIskra() {
       (state.phase==='init'?'<p class="ik-muted">Подключаемся к базе…</p>':loginPanel())+
       (state.error?'<p class="scs-warning">'+esc(state.error)+'</p>':'')+'</div></div>';
   }
-  html+='<div class="ik-row-between"><span class="ik-muted">'+esc(ikFreshness())+'</span><button type="button" class="ik-btn-small" data-sc-action="refresh" '+(state.loading?'disabled':'')+'>↻ Обновить</button></div>';
+  html+='<div class="ik-row-between"><span class="ik-muted">'+esc(ikFreshness())+'</span><button type="button" class="ik-btn-small" data-sc-action="refresh" '+(state.loading?'disabled':'')+'>↻ Проверить</button></div>';
   if(state.error)html+='<div class="ik-issues" role="status">'+esc(state.error)+(state.data?' Показаны последние полученные данные.':'')+'</div>';
   if(!state.data){
     html+='<div class="card ik-empty">'+ikStar+'<h2>'+(state.phase==='loading'?'Загружаем оценки…':'Оценок пока нет')+'</h2><p>После выгрузки с MacBook оценки появятся здесь автоматически.</p></div>';
@@ -502,7 +519,20 @@ css.textContent = '.scs{display:block}.scs .scs-head,.scs .scs-actions{display:f
 css.textContent += '.scs .scs-grade-audit{margin-top:14px}.scs .scs-grade-audit summary{cursor:pointer;font-size:13px;font-weight:700;padding:8px 0}.scs .scs-grade-audit ol{padding:0;list-style:none;margin:6px 0}.scs .scs-grade-detail{display:grid;grid-template-columns:100px 32px minmax(0,1fr);gap:10px;align-items:center;border-bottom:1px solid var(--ln);padding:9px 0;font-size:13px}.scs .scs-grade-date{font-variant-numeric:tabular-nums}.scs .scs-grade-number{display:inline-flex;width:30px;height:30px;border-radius:50%;align-items:center;justify-content:center;background:var(--bg);font-weight:750}.scs .scs-grade-detail .mu{overflow-wrap:anywhere}@media(max-width:360px){.scs .scs-grade-detail{grid-template-columns:82px 30px minmax(0,1fr);gap:6px}}';
 css.textContent += '.scs .scs-final-list{display:grid;gap:8px;margin:12px 0}.scs .scs-final-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:11px 13px;border:1px solid var(--ln);border-radius:12px;background:var(--bg)}.scs .scs-final-label{font-weight:700;flex:1;min-width:135px}.scs .scs-final-mark{font-size:22px;font-weight:800;border-radius:9px;padding:3px 10px;background:var(--bg)}';
 document.head.appendChild(css);
-window.schoolCloud = {view,summary,overallSummary:()=>{
+window.schoolCloud = {view,summary,periodLabel:()=>ikPeriod==='all'?'за всё время':(ikPeriod==='custom'?'за выбранные даты':(ikPresets.find(x=>x[0]===ikPeriod)?.[1]||'за период')+' · '+ikYearValue()),
+offlineEnabled:()=>{try{return localStorage.getItem('iskra_offline_enabled')==='1'}catch(_){return false}},
+setOfflineEnabled:value=>{
+  if(appKind!=='iskra')return false;
+  try{
+    if(value&& !confirm('Разрешить сохранять оценки Полины в памяти этого устройства для просмотра без интернета? Данные будут доступны пользователям этого браузера.'))return false;
+    localStorage.setItem('iskra_offline_enabled',value?'1':'0');
+    const uid=auth.currentUser?.uid;
+    if(!value&&uid)localStorage.removeItem('iskra_offline_grades_'+uid);
+    if(value&&uid&&state.data)localStorage.setItem('iskra_offline_grades_'+uid,JSON.stringify({schemaVersion:1,source:'petersburgedu',schoolYear:state.data.schoolYear,syncedAt:state.data.syncedAt,rangeFrom:state.data.rangeFrom,rangeTo:state.data.rangeTo,grades:state.data.grades}));
+    return true;
+  }catch(_){return false}
+},
+overallSummary:()=>{
   const rows=(state.data?.grades||[]).map(row=>({...row,n:gradeScore(row)})).filter(r=>r.n!==null&&!officialKind(r));
   return {count:rows.length,average:rows.length?ikMean(rows):null};
 },termSettingsHtml:ikPeriodSettingsHtml,resetSubject:()=>{ikSubject='';},connection:()=>({isConnected:!!state.user,email:state.user?.email||''})};
@@ -511,6 +541,7 @@ notify();
 onAuthStateChanged(auth, user => {
   state.user = user;
   state.data = null;
+  state.offline = false;
   state.error = '';
   state.loading = false;
   state.lastFetch = 0;
@@ -546,6 +577,7 @@ document.addEventListener('click', async event => {
   } else if (button.dataset.scAction === 'refresh') {
     refresh(true);
   } else if (button.dataset.scAction === 'logout') {
+    if(appKind==='iskra'){try{localStorage.removeItem('iskra_offline_grades_'+auth.currentUser?.uid)}catch(_){}}
     await signOut(auth);
   }
 });
