@@ -284,9 +284,56 @@
     if(window.schoolCloud?.setOfflineEnabled?.(next)){cs();ACTIONS.parents(true);toast(next?'Офлайн-копия разрешена':'Офлайн-копия отключена')}
     else toast('Не удалось изменить настройку');
   };
+  // A local parent-only PIN barrier. This is not server-side authorization.
+  const parentPinKey='iskra_parent_pin_v1';
+  let parentUnlocked=false;
+  const parentPinHash=async(pin,salt)=>{
+    const message=new TextEncoder().encode(salt+':'+pin);
+    const digest=await window.crypto.subtle.digest('SHA-256',message);
+    return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
+  };
+  const getParentPin=()=>{try{return JSON.parse(localStorage.getItem(parentPinKey)||'null')}catch(_){return null}};
+  async function setupParentPin(){
+    const pin=window.prompt('Родителю: придумай PIN из 6 цифр для настроек «Искры».');
+    if(pin===null)return false;
+    if(!/^\d{6}$/.test(pin)){toast('PIN должен содержать ровно 6 цифр');return false}
+    const again=window.prompt('Повтори PIN, чтобы подтвердить.');
+    if(again!==pin){toast('PIN не совпал');return false}
+    if(!window.crypto?.subtle||!window.crypto?.getRandomValues){toast('Для PIN нужен защищённый сайт HTTPS');return false}
+    const salt=Array.from(window.crypto.getRandomValues(new Uint8Array(16)),x=>x.toString(16).padStart(2,'0')).join('');
+    const hash=await parentPinHash(pin,salt);
+    try{localStorage.setItem(parentPinKey,JSON.stringify({salt,hash}));return true}
+    catch(_){toast('PIN не удалось сохранить');return false}
+  }
+  async function authorizeParent(){
+    let saved=getParentPin();
+    if(!saved){return setupParentPin()}
+    if(typeof saved.salt!=='string'||typeof saved.hash!=='string'||!window.crypto?.subtle){
+      toast('Не удалось проверить родительский PIN');return false
+    }
+    const pin=window.prompt('Введите родительский PIN (6 цифр).');
+    if(pin===null)return false;
+    if(!/^\d{6}$/.test(pin)||await parentPinHash(pin,saved.salt)!==saved.hash){
+      toast('Неверный родительский PIN');return false
+    }
+    return true;
+  }
+  ACTIONS.ikChangeParentPin=async()=>{
+    if(!parentUnlocked)return;
+    if(!confirm('Заменить родительский PIN новым?'))return;
+    if(await setupParentPin())toast('Новый PIN сохранён');
+  };
+  document.addEventListener('click',e=>{
+    if(e.target.closest('[data-action="closeSheet"]')||e.target.matches('[data-close]'))parentUnlocked=false;
+  });
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')parentUnlocked=false});
+  window.addEventListener('pageshow',()=>{parentUnlocked=false});
   const baseParents=ACTIONS.parents;
-  ACTIONS.parents=(skipConfirmation=false)=>{
-    if(!skipConfirmation&&!confirm('Родитель открывает настройки приложения?'))return;
+  ACTIONS.parents=async()=>{
+    if(!parentUnlocked){
+      if(!await authorizeParent())return;
+      parentUnlocked=true;
+    }
     baseParents();
     const b=document.querySelector('.sheet-body');
     if(!b)return;
@@ -295,6 +342,8 @@
       ? '<p class="mu sm">Подключено: '+safe(session.email||'учётная запись Полины')+'</p><button class="btn g" type="button" data-sc-action="logout">Выйти из дневника</button>'
       : '<p class="mu sm">Подключи дневник один раз — дальше оценки загружаются автоматически.</p>'+ (window.schoolCloud?.loginHtml?.()||'');
     extra.innerHTML='<h2>Мои дела</h2><button class="btn g" data-action="ikManageTasks">Дела и дни недели</button><button class="btn g" data-action="ikTaskTimes">Время дел</button><h2>Периоды школьных оценок</h2><button class="btn g" data-action="ikGradePeriods">Границы четвертей</button><h2>Школьный дневник</h2>'+status+
+      '<button class="btn g" data-action="ikChangeParentPin">Сменить родительский PIN</button>'+
+      '<p class="mu sm">PIN действует только на этом устройстве и не заменяет вход в школьный дневник.</p>'+
       '<div class="ik-parent-offline"><p class="mu sm">Офлайн-копия оценок: '+(window.schoolCloud?.offlineEnabled?.()?'включена':'выключена')+'. Если включить, оценки сохраняются на этом устройстве без шифрования.</p><button class="btn g" data-action="ikOfflineToggle">'+(window.schoolCloud?.offlineEnabled?.()?'Отключить офлайн-копию':'Разрешить офлайн-копию')+'</button></div>';
     b.prepend(extra);
   };
