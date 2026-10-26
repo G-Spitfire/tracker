@@ -617,7 +617,7 @@ document.addEventListener('click', event => {
 document.addEventListener('change',event=>{
   if(appKind!=='iskra')return;
   if(event.target.matches('[data-ik-year]')){
-    ikYear=event.target.value;ikPeriod='all';ikSubject='';ikPeriodChosen=true;notify();return;
+    ikYear=event.target.value;ikPeriod='all';ikPeriodChosen=true;notify();return;
   }
   if(event.target.matches('#ik-term-settings select[name="year"]')){
     const year=event.target.value,form=event.target.form;
