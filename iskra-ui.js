@@ -132,7 +132,7 @@
   ACTIONS.ikInterests=()=>sheet('<h2>Мои интересы</h2><p class="mu sm">Что тебе нравится? Например, чтение, спорт или рисование.</p><input id="ikInterestInput" maxlength="100" value="'+safe(S.interests)+'" placeholder="Мои увлечения"><button data-sheet-footer class="btn" data-action="ikSaveInterests">Сохранить</button>');
   ACTIONS.ikSaveInterests=()=>{const x=document.getElementById('ikInterestInput');if(x)S.interests=x.value.trim().slice(0,100);save();cs();render()};
   function createTimeSheet(){
-    const current=tasks(iso(new Date()));
+    const current=taskCatalog().filter(t=>!S.hiddenTasks.includes(t.i));
     sheet('<h2>Время дел</h2><p class="mu sm">Необязательно: время появится рядом с делом. Напоминания пока не отправляются.</p>'+
     current.map(t=>'<label class="sheet-field">'+safe(t.t)+'<input type="time" data-ik-task-time="'+t.i+'" value="'+safe(S.times[t.i]||'')+'"></label>').join('')+
     '<button data-sheet-footer class="btn" data-action="ikSaveTimes">Сохранить</button>');
@@ -189,12 +189,12 @@
   document.addEventListener('ikTermSettingsSaved',()=>{cs();render();toast('Периоды сохранены')});
   ACTIONS.ikOfflineToggle=()=>{
     const next=!window.schoolCloud?.offlineEnabled?.();
-    if(window.schoolCloud?.setOfflineEnabled?.(next)){cs();ACTIONS.parents();toast(next?'Офлайн-копия разрешена':'Офлайн-копия отключена')}
+    if(window.schoolCloud?.setOfflineEnabled?.(next)){cs();ACTIONS.parents(true);toast(next?'Офлайн-копия разрешена':'Офлайн-копия отключена')}
     else toast('Не удалось изменить настройку');
   };
   const baseParents=ACTIONS.parents;
-  ACTIONS.parents=()=>{
-    if(!confirm('Родитель открывает настройки приложения?'))return;
+  ACTIONS.parents=(skipConfirmation=false)=>{
+    if(!skipConfirmation&&!confirm('Родитель открывает настройки приложения?'))return;
     baseParents();
     const b=document.querySelector('.sheet-body');
     if(!b)return;
