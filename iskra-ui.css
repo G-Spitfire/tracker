@@ -192,3 +192,23 @@ h1{font-size:29px;font-weight:850;letter-spacing:-.035em}h2{font-size:21px;font-
   .scs-iskra .ik-grade-track{width:32px}
   .scs-iskra .ik-main-card .ik-star{width:73px;height:73px}
 }
+
+/* Iskra 2.1 interaction refinements. */
+.ik-plan-row{border:1px solid #eee7f7;background:#fff;border-radius:16px;padding:12px;margin:10px 0;display:grid;gap:9px}
+.ik-plan-row .ik-row-between{gap:7px;flex-wrap:wrap}
+.ik-plan-row .ik-row-between b{flex:1;min-width:135px;font-size:14px}
+.ik-plan-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.ik-day-pill{height:34px;border-radius:11px;border:1px solid #eee4f7;background:#f6f2fa;color:#77708a;font:600 11px system-ui;cursor:pointer;padding:0}
+.ik-day-pill.on{background:#8963eb;border-color:#8963eb;color:#fff}
+.ik-week-day{border:0;background:transparent;cursor:pointer;padding:0;line-height:1.3}
+.ik-week-day small{font-size:10px;color:#7768a0}
+.ik-year-row{display:flex;gap:10px;justify-content:space-between;align-items:center}
+.ik-year-select{min-height:36px;border:1px solid #e6def3;border-radius:13px;padding:5px 10px;color:#583e89;background:#fff;font:600 12px system-ui}
+.scs-iskra .ik-filter-row{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity}
+.scs-iskra .ik-filter{flex:0 0 auto;min-width:67px;padding:10px 9px;scroll-snap-align:start}
+.ik-term-field{border:1px solid #e8def4;border-radius:14px;padding:10px;display:grid;gap:6px;min-width:0}
+.ik-term-field legend{font-size:13px;font-weight:750;color:#5c4882}
+.ik-term-field label{display:grid;gap:4px;color:#766c8c;font-size:12px}
+.ik-term-field input{margin:0!important;font-size:14px}
+.ik-parent-offline{border-top:1px solid #ede8f3;margin-top:14px;padding-top:12px}
+.ik-compact-header .ik-cloud-pill{white-space:nowrap}
