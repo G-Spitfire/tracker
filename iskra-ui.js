@@ -281,7 +281,7 @@
   });
   ACTIONS.ikOfflineToggle=()=>{
     const next=!window.schoolCloud?.offlineEnabled?.();
-    if(window.schoolCloud?.setOfflineEnabled?.(next)){cs();ACTIONS.parents(true);toast(next?'Офлайн-копия разрешена':'Офлайн-копия отключена')}
+    if(window.schoolCloud?.setOfflineEnabled?.(next)){ACTIONS.parents();toast(next?'Офлайн-копия разрешена':'Офлайн-копия отключена')}
     else toast('Не удалось изменить настройку');
   };
   // A local parent-only PIN barrier. This is not server-side authorization.
@@ -328,6 +328,7 @@
   });
   document.addEventListener('keydown',e=>{if(e.key==='Escape')parentUnlocked=false});
   window.addEventListener('pageshow',()=>{parentUnlocked=false});
+  window.addEventListener('iskraSheetClosed',()=>{parentUnlocked=false});
   const baseParents=ACTIONS.parents;
   ACTIONS.parents=async()=>{
     if(!parentUnlocked){
