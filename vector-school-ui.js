@@ -197,7 +197,7 @@ function render(ctx) {
  let head='<div class="page-title"><div><h1>Школа</h1><div class="sub">Дневник с аналитикой</div></div></div>';
  if(!connection.isConnected)return head+'<div class="card"><b>Подключение оценок</b><p class="hint">Войди в аккаунт Firebase для Матвея, чтобы получать реальные школьные оценки.</p>'+ (api.loginHtml?.()||'')+(info.error?'<p class="notice">'+esc(info.error)+'</p>':'')+'</div>';
  const snap=cloudSnapshot();
- const status='<div class="school-connection"><span class="hint">'+(snap?.syncedAt?'Выгрузка: '+new Date(snap.syncedAt).toLocaleString('ru-RU'):'Оценки подключены')+'</span>'+
+ const status='<div class="school-connection"><span class="hint">'+(snap?.syncedAt&&!Number.isNaN(new Date(snap.syncedAt).getTime())?'Выгрузка: '+new Date(snap.syncedAt).toLocaleString('ru-RU'):'Оценки подключены')+'</span>'+
  '<button type="button" class="link" data-sc-action="refresh" '+(info.loading?'disabled':'')+'>Обновить</button>'+
  '<button type="button" class="link" data-sc-action="logout">Выйти</button></div>'+
  (info.error?'<p class="notice">'+esc(info.error)+'</p>':'')+(info.loading?'<p class="hint">Получаем обновление из Firebase…</p>':'');
@@ -208,7 +208,7 @@ function render(ctx) {
   if(active)ui.quarter=active;
   ui.schoolPeriodTouched=true;
  }
- const years=[...new Set([schoolYearFor(currentDate()),snap.schoolYear,...snap.grades.map(g=>schoolYearFor(g.date))].filter(Boolean))].sort().reverse();
+ const years=[...new Set([schoolYearFor(currentDate()),String(snap.schoolYear||'').replace('/','-'),...snap.grades.map(g=>schoolYearFor(g.date))].filter(y=>/^\d{4}-\d{4}$/.test(y)))].sort().reverse();
  const opts=years.map(y=>'<option value="'+esc(y)+'" '+(ui.year===y?'selected':'')+'>'+esc(y)+'</option>').join('');
  const tabs=header(ui,opts);
  if(ui.schoolScreen==='finals'){
