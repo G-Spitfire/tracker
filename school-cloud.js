@@ -180,6 +180,26 @@ function cloudGrades() {
   return s;
 }
 
+function summary() {
+  if (!state.user || !state.data || !state.from || !state.to) return null;
+  const filtered = state.data.grades.filter(row => row.date >= state.from && row.date <= state.to);
+  const valid = filtered.map(row => ({...row, n: score(row.value)})).filter(row => row.n !== null);
+  const average = valid.length ? valid.reduce((s, row) => s + row.n, 0) / valid.length : 0;
+  const groups = new Map();
+  valid.forEach(row => {
+    const values = groups.get(row.subject) || [];
+    values.push(row.n);
+    groups.set(row.subject, values);
+  });
+  const weakest = [...groups].map(([name, values]) => ({
+    name, mean: values.reduce((s, n) => s + n, 0) / values.length
+  })).sort((a, b) => a.mean - b.mean)[0];
+  return {
+    average, count: valid.length,
+    weakSubject: weakest && weakest.mean < 3.6 ? weakest.name : ''
+  };
+}
+
 function loginPanel() {
   return '<form id="scs-login" class="scs-form">' +
     '<label>Почта пользователя Firebase<input type="email" name="email" required autocomplete="username"></label>' +
@@ -226,7 +246,7 @@ function view(legacy) {
 const css = document.createElement('style');
 css.textContent = '.scs{display:block}.scs .scs-head,.scs .scs-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}.scs .scs-flag{font-size:11px;opacity:.75}.scs .scs-form{display:grid;gap:12px;margin-top:15px}.scs .scs-form label,.scs .scs-filters label{display:grid;gap:6px;font-size:13px;font-weight:600}.scs input{padding:11px;border:1px solid var(--ln);border-radius:11px;background:var(--bg);color:var(--tx);font:inherit;min-width:0;box-sizing:border-box;width:100%}.scs .scs-actions{justify-content:flex-start;margin-top:12px}.scs .scs-filters{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}.scs .scs-warning{color:var(--bad);margin:12px 0;font-size:14px}.scs .scs-manual{width:100%;margin:14px 0}.scs .chips{display:flex;gap:6px;flex-wrap:wrap}.scs .chips .chip{cursor:default}.scs .sub{margin:9px 0}@media(max-width:360px){.scs .scs-filters{grid-template-columns:1fr}}';
 document.head.appendChild(css);
-window.schoolCloud = { view };
+window.schoolCloud = { view, summary };
 notify();
 
 onAuthStateChanged(auth, user => {
