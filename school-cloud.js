@@ -32,8 +32,19 @@ const today = () => {
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') +
     '-' + String(d.getDate()).padStart(2, '0');
 };
-const score = value => /^[2-5](?:\.0+)?$/.test(String(value).trim()) ? Number(value) : null;
-const markScore = row => score(row.valueCode) ?? score(row.value);
+// School API supplies a display name and a separate code, e.g. "5" + "5/5".
+const score = value => {
+  const text = String(value ?? '').trim();
+  const match = /^([2-5])(?:\.0+)?(?:\/5)?$/.exec(text);
+  return match ? Number(match[1]) : null;
+};
+const markScore = row => score(row.value) ?? score(row.valueCode);
+const unknownMark = row => /^(?:неизвестно|не определено|unknown)?$/i.test(String(row.value ?? '').trim());
+const markLabel = row => {
+  const n = markScore(row);
+  if (n !== null) return String(n);
+  return unknownMark(row) ? '?' : String(row.value);
+};
 const avg = rows => rows.length
   ? (rows.reduce((n, row) => n + row.n, 0) / rows.length).toFixed(2) : '—';
 const forecast = n => n < 2.6 ? 2 : n < 3.6 ? 3 : n < 4.6 ? 4 : 5;
@@ -163,21 +174,33 @@ function cloudGrades() {
     '<div class="mu sm">Все числовые оценки равновесные; официальный школьный средний может отличаться.</div></div>';
   if (!filtered.length) s += '<div class="card">В выбранном периоде оценок пока нет.</div>';
   s += ordered.map(([subject, marks]) => {
-    const nums = marks.map(r => score(r.value)).filter(n => n !== null);
+    const nums = marks.map(markScore).filter(n => n !== null);
     const mean = nums.length ? Number(avg(nums.map(n => ({n})))) : null;
     const chips = marks.slice().sort((a, b) => b.date.localeCompare(a.date) ||
       b.id.localeCompare(a.id)).map(row => {
       const val = markScore(row);
-      const tip = [row.date.split('-').reverse().join('.'), row.type].filter(Boolean).join(' · ');
+      const label = markLabel(row);
+      const unrecognized = unknownMark(row) && val === null;
+      const details = unrecognized
+        ? 'Дневник не передал распознаваемое значение' +
+          (row.valueCode ? ' · код: ' + row.valueCode : '')
+        : '';
+      const tip = [row.date.split('-').reverse().join('.'), row.type, details]
+        .filter(Boolean).join(' · ');
       return '<span class="chip ' + (val === null ? '' : 'c' + val) +
-        '" title="' + esc(tip) + '" aria-label="' + esc(tip + ': ' + row.value) +
-        '">' + esc(row.value) + '</span>';
+        '" title="' + esc(tip) + '" aria-label="' + esc(tip + ': ' + label) +
+        '">' + esc(label) + '</span>';
     }).join('');
     return '<div class="card sub"><div class="row"><div><b>' + esc(subject) +
       '</b><div class="mu sm">' + (mean === null ? 'Нет числовых оценок' :
       'Средний ' + mean.toFixed(2) + ' · прогноз ' + forecast(mean)) +
       '</div></div></div><div class="chips">' + chips + '</div></div>';
   }).join('');
+  const unresolved = filtered.filter(row => unknownMark(row) && markScore(row) === null).length;
+  if (unresolved) {
+    s += '<p class="mu sm">Знак «?» означает, что дневник не передал распознаваемого значения: ' +
+      unresolved + ' записей. Они не учитываются в среднем балле.</p>';
+  }
   s += '<p class="mu sm">Источник: Петербургское образование. Прогноз условный, по равновесным оценкам; школьные коэффициенты здесь не применяются.</p>';
   return s;
 }
