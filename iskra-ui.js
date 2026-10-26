@@ -19,12 +19,22 @@
   if(!S.ex){S.ex=iso(new Date());save();}
   const weekDates=()=>wk();
   function navTo(id){tab=id;render();window.scrollTo(0,0)}
+  const profileWindow=()=>['all','30','7'].includes(S.profileStatsWindow)?S.profileStatsWindow:'all';
+  const profileWindowLabel=()=>({all:'За всё время','30':'За 30 дней','7':'За 7 дней'})[profileWindow()];
   function statsTiles(){
-    const sumGrade=averageSchool(),a=sumGrade&&sumGrade.count?sumGrade.average.toFixed(2).replace('.',','):'—';
-    return '<div class="ik-time-stat">' +
-      '<div class="ik-tile"><div class="ik-tile-icon">✅</div><strong>'+completed()+'</strong><small>дел сделано</small></div>'+
-      '<div class="ik-tile"><div class="ik-tile-icon">⭐</div><strong>'+earned()+'</strong><small>звёзд</small></div>'+
-      '<div class="ik-tile"><div class="ik-tile-icon">▥</div><strong>'+a+'</strong><small>средний: '+safe(gradeScope())+'</small></div></div>';
+    const windowDays=profileWindow()==='all'?null:Number(profileWindow());
+    const now=new Date(),fromDate=new Date(now);
+    if(windowDays!==null)fromDate.setDate(fromDate.getDate()-(windowDays-1));
+    const start=windowDays===null?null:iso(fromDate),end=iso(now);
+    const days=Object.keys(S.d||{}).filter(d=>start===null||(d>=start&&d<=end));
+    const count=days.reduce((n,d)=>n+dn(d).length,0);
+    const starsCount=days.reduce((n,d)=>n+st(d),0);
+    const grades=windowDays===null?window.schoolCloud?.overallSummary?.():window.schoolCloud?.summaryBetween?.(start,end);
+    const mean=grades?.count&&Number.isFinite(grades.average)?grades.average.toFixed(2).replace('.',','):'—';
+    return '<div class="ik-time-stat">'+
+      '<div class="ik-tile"><div class="ik-tile-icon">✅</div><strong>'+count+'</strong><small>дел сделано</small></div>'+
+      '<div class="ik-tile"><div class="ik-tile-icon">⭐</div><strong>'+starsCount+'</strong><small>звёзд</small></div>'+
+      '<div class="ik-tile"><div class="ik-tile-icon">▥</div><strong>'+mean+'</strong><small>средний за период</small></div></div>';
   }
   function ikToday(){
     recordAchievements();
@@ -116,7 +126,7 @@
     function item(icon,title,subtitle,action){return '<button class="ik-action-row" data-action="'+action+'"><span class="ik-action-icon">'+icon+'</span><span style="flex:1"><b>'+title+'</b>'+(subtitle?'<small>'+safe(subtitle)+'</small>':'')+'</span><span class="ik-chevron">›</span></button>'}
     return '<div class="ik-page ik-profile"><div class="ik-heading"><h1>Я</h1><button class="ik-top-link" data-action="ikPersonalSettings" aria-label="Личные настройки">⚙ Настройки</button></div>'+
       '<div class="card ik-profile-card"><div class="ik-avatar" aria-label="Аватар">'+safe(S.av.e)+'</div><div class="ik-profile-body"><strong>'+safe(S.name||'Полина')+' ✨</strong><small>'+safe(levels[l][1])+' · уровень '+(l+1)+'</small><div class="ik-level-track"><div style="width:'+prog+'%"></div></div><small>'+(next?Math.max(0,gained)+' из '+step+' звёзд до уровня':'Все уровни пройдены')+'</small></div><button class="ik-mini-btn" data-action="profile" aria-label="Изменить профиль">✎</button></div>'+
-      '<div class="ik-row-between"><h2 class="ik-sec-title">Моя статистика</h2><span class="ik-tab-sublabel">Дела и звёзды — за всё время</span></div>'+statsTiles()+
+      '<div class="ik-row-between"><h2 class="ik-sec-title">Моя статистика</h2><button class="ik-top-link" data-action="ikProfileWindow">'+profileWindowLabel()+' ▾</button></div>'+statsTiles()+
       '<div class="ik-list">'+item('💗','Мои интересы',S.interests||'Добавь то, что тебе нравится','ikInterests')+
       item('📅','История дел','Что было в прошлые дни','history')+
       item('🏆','Мои награды','Звёзды и достижения','ikToReward')+
@@ -128,6 +138,10 @@
   ACTIONS.ikFilter=(id)=>{filter=id;render()};
   ACTIONS.ikToReward=()=>navTo('r');
   ACTIONS.ikToGrades=()=>{window.schoolCloud?.resetSubject?.();navTo('g')};
+  ACTIONS.ikProfileWindow=()=>{
+    S.profileStatsWindow=({all:'30','30':'7','7':'all'})[profileWindow()];
+    save();render();
+  };
   ACTIONS.ikWeekDay=(d)=>openDay(d);
   ACTIONS.ikTaskInfo=(id)=>{
     const task=tasks(iso(new Date())).find(t=>t.i===id);if(!task)return;
