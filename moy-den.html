@@ -192,19 +192,18 @@ function meanChart(q){
 const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const store=(()=>{
   function defaults(){return{
-    d:{},name:'',asked:0,goal:25,reward:'Семейная награда',dance:[],x:{},
+    d:{},name:'',asked:0,goal:25,reward:'Семейная награда',x:{},
     av:{e:'🦊',c:'#ffd9c9'},schema:SCHEMA,
   }}
   function validateAll(s){
     if(!s||typeof s!=='object'||typeof s.d!=='object'||Array.isArray(s.d))throw Error('bad root');
     if(!s.x||typeof s.x!=='object')s.x={};
     if(!s.av||typeof s.av!=='object')s.av={e:'🦊',c:'#ffd9c9'};
-    if(!Array.isArray(s.dance))s.dance=[];
     return s;
   }
   function migrate(s){
     let v=s.schema||1;
-    if(v<2){s.ex=s.ex||iso(new Date());s.dance=s.dance||[];v=2}
+    if(v<2){s.ex=s.ex||iso(new Date());v=2}
     if(v<3){s.schema=3;v=3}
     return s;
   }
@@ -297,7 +296,6 @@ function today(){
   const d=iso(new Date()),L=tasks(d),done=dn(d),n=done.length,all=n==L.length,X=S.x[d]||{};
   const ph=all?'Ура! Ты справилась!':!n?'Привет! С чего начнём?':n*2>=L.length?'Уже почти всё!':'Отлично, продолжаем!';
   return`<div class="hd">${avb()}<h1>Привет${S.name?', '+esc(S.name):''}!</h1></div>
-  ${S.dance.includes(new Date().getDay())?'<div class="note">💃 Сегодня танцы! Форма уже в портфеле?</div>':''}
   <div class="hero">${ring(n,L.length)}<div><div class="ph">${ph}</div><div class="sm">⭐ сегодня: ${st(d)}</div></div></div>
   ${L.map(t=>{
     const x=X[t.i],ok=done.includes(t.i);
@@ -328,7 +326,6 @@ function me(){
   return`<h1 style="margin:4px 0 14px">Я</h1>
   <div class="card" style="display:flex;gap:14px;align-items:center"><div class="av" style="background:${S.av.c}">${S.av.e}</div><div style="flex:1"><b>${S.name?esc(S.name):'Без имени'}</b></div><button class="btn g" data-action="profile">Изменить</button></div>
   <div class="card" style="display:flex;gap:14px;align-items:center"><div style="font-size:36px">📅</div><div style="flex:1"><b>История</b><div class="mu sm">Что было в прошлые дни</div></div><button class="btn g" data-action="history">Открыть</button></div>
-  <div class="card"><b>Дни танцев</b><div class="mu sm">В эти дни будет напоминание про форму.</div><div class="chips">${GD.map((g,i)=>`<button class="chip ${S.dance.includes(g)?'on':''}" data-action="toggleDance" data-id="${g}">${DN[i]}</button>`).join('')}</div></div>
   <div class="card"><b>Мои уроки</b><div class="mu sm" style="margin-bottom:6px">сколько раз за всё время</div>${stats('hw')}</div>
   <div class="card"><b>Помощь по дому</b><div class="mu sm" style="margin-bottom:6px">сколько раз за всё время</div>${stats('ho')}</div>
   <button class="btn g" data-action="parents">Для родителей</button>
@@ -660,7 +657,6 @@ const ACTIONS={
   detailChip:(j)=>{cur.n=document.getElementById('dn').value;const k=(cur.i=='hw'?CONFIG.subjects:CONFIG.chores)[+j],x=cur.s.indexOf(k);x<0?cur.s.push(k):cur.s.splice(x,1);renderDetails()},
   saveDetails:()=>saveDetails(),
   removeDetails:()=>removeDetails(),
-  toggleDance:(g)=>{const a=S.dance,x=a.indexOf(+g);x<0?a.push(+g):a.splice(x,1);save();render()},
   closeSheet:()=>{cs();render()},
   parents:()=>openParents(),
   exportFile:()=>exportBackupFile(),
