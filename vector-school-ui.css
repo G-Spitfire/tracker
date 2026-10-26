@@ -119,3 +119,11 @@
 .school-archive-row:last-child{border-bottom:0}
 .school-archive-year{font-size:11px;color:#60718e;font-weight:700}
 .school-archive-row .school-mark-row{border-bottom:0;padding-bottom:0}
+
+.school-source-audit{margin:14px 0;padding:12px 14px;border:1px solid #dce5f0;border-radius:12px;background:#fff}
+.school-source-audit summary{font-size:13px;font-weight:700;cursor:pointer;color:#2456bf}
+.school-source-audit .hint{margin:10px 0}
+.school-audit-type{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #ecf0f6;font-size:12px}
+.school-audit-type:last-child{border-bottom:0}
+.school-audit-type span:first-child{overflow-wrap:anywhere;min-width:0;flex:1}
+.school-audit-type span:last-child{color:#75849b;text-align:right;min-width:100px}
