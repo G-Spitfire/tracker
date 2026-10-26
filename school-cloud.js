@@ -518,7 +518,17 @@ css.textContent = '.scs{display:block}.scs .scs-head,.scs .scs-actions{display:f
 css.textContent += '.scs .scs-grade-audit{margin-top:14px}.scs .scs-grade-audit summary{cursor:pointer;font-size:13px;font-weight:700;padding:8px 0}.scs .scs-grade-audit ol{padding:0;list-style:none;margin:6px 0}.scs .scs-grade-detail{display:grid;grid-template-columns:100px 32px minmax(0,1fr);gap:10px;align-items:center;border-bottom:1px solid var(--ln);padding:9px 0;font-size:13px}.scs .scs-grade-date{font-variant-numeric:tabular-nums}.scs .scs-grade-number{display:inline-flex;width:30px;height:30px;border-radius:50%;align-items:center;justify-content:center;background:var(--bg);font-weight:750}.scs .scs-grade-detail .mu{overflow-wrap:anywhere}@media(max-width:360px){.scs .scs-grade-detail{grid-template-columns:82px 30px minmax(0,1fr);gap:6px}}';
 css.textContent += '.scs .scs-final-list{display:grid;gap:8px;margin:12px 0}.scs .scs-final-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:11px 13px;border:1px solid var(--ln);border-radius:12px;background:var(--bg)}.scs .scs-final-label{font-weight:700;flex:1;min-width:135px}.scs .scs-final-mark{font-size:22px;font-weight:800;border-radius:9px;padding:3px 10px;background:var(--bg)}';
 document.head.appendChild(css);
-window.schoolCloud = {view,summary,loginHtml:()=>state.user?'<p class="mu sm">Дневник уже подключён.</p>':loginPanel(),periodLabel:()=>ikPeriod==='all'?'за всё время':(ikPeriod==='custom'?'за выбранные даты':(ikPresets.find(x=>x[0]===ikPeriod)?.[1]||'за период')+' · '+ikYearValue()),
+window.schoolCloud = {view,summary,
+  // Read-only normalized snapshot for the Vector functional dashboard. No grade data is persisted by Vector.
+  snapshot:()=>state.user&&state.data?{
+    schoolYear:state.data.schoolYear,syncedAt:state.data.syncedAt,
+    selectedFrom:state.from,selectedTo:state.to,
+    grades:state.data.grades.map(row=>({
+      id:row.id,date:row.date,subject:row.subject,type:row.type,
+      score:gradeScore(row),official:!!officialKind(row),officialLabel:officialKind(row)
+    })).filter(row=>row.score!==null)
+  }:null,
+  loginHtml:()=>state.user?'<p class="mu sm">Дневник уже подключён.</p>':loginPanel(),periodLabel:()=>ikPeriod==='all'?'за всё время':(ikPeriod==='custom'?'за выбранные даты':(ikPresets.find(x=>x[0]===ikPeriod)?.[1]||'за период')+' · '+ikYearValue()),
 offlineEnabled:()=>{try{return localStorage.getItem('iskra_offline_enabled')==='1'}catch(_){return false}},
 setOfflineEnabled:value=>{
   if(appKind!=='iskra')return false;
