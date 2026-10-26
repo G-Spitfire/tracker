@@ -131,6 +131,14 @@ const store=(()=>{
     if(!s||typeof s!=='object'||typeof s.d!=='object'||Array.isArray(s.d))throw Error('bad root');
     if(!s.x||typeof s.x!=='object')s.x={};
     if(!s.av||typeof s.av!=='object')s.av={e:'🦊',c:'#ffd9c9'};
+    if(!CONFIG.emojis.includes(s.av.e))s.av.e='🦊';
+    if(!CONFIG.colors.includes(s.av.c))s.av.c='#ffd9c9';
+    if(!Array.isArray(s.customTasks))s.customTasks=[];
+    s.customTasks=s.customTasks.filter(t=>t&&typeof t==='object'&&
+      typeof t.i==='string'&&/^[a-zA-Z0-9_-]{1,70}$/.test(t.i)&&
+      typeof t.t==='string'&&t.t.trim().length>0&&t.t.length<=60&&
+      typeof t.e==='string'&&t.e.length<=8);
+    if(s.customTasks.length>30)s.customTasks=s.customTasks.slice(0,30);
     if(!s.ex)s.ex=iso(new Date());
     if(!s.planHistory||typeof s.planHistory!=='object'||Array.isArray(s.planHistory))s.planHistory={};
     if(!s.taskDays||typeof s.taskDays!=='object'||Array.isArray(s.taskDays))s.taskDays={};
@@ -501,9 +509,96 @@ const school={view:()=>window.schoolCloud ? window.schoolCloud.view() : '<div cl
 function openParents(){
   sheet(`<h2>Для родителей</h2><p class="mu sm">Настройте награду вместе с ребёнком. Данные хранятся на этом устройстве — сохраните копию для переноса.</p><button class="btn g" data-action="editReward">Награда и цель по звёздам</button><h2>Копия данных</h2><div class="chips"><button class="btn g" data-action="exportFile">Сохранить копию файлом</button><button class="btn g" data-action="pickBackupFile">Восстановить из файла</button><input type="file" id="backupFileInput" accept=".json,application/json" data-action="importFile" hidden><div id="backupStatus" class="mu sm" role="status" aria-live="polite"></div><details><summary class="mu sm" style="padding:16px 0">Восстановить старую текстовую копию</summary><textarea id="bk" aria-label="Текст старой копии"></textarea><button class="btn g" data-action="importText">Восстановить из текста</button></details></div><button data-sheet-footer class="btn g" data-action="closeSheet">Закрыть</button>`);
 }
+function validateBackupPayload(source){
+  const isObj=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
+  const problem=()=>{throw Error('invalid-backup-structure')};
+  let scanned=0;
+  const scan=(v,depth=0)=>{
+    if(++scanned>90000||depth>15)problem();
+    if(v===null||typeof v!=='object')return;
+    if(Array.isArray(v)){if(v.length>10000)problem();v.forEach(x=>scan(x,depth+1));return}
+    for(const [k,value] of Object.entries(v)){
+      if(k==='__proto__'||k==='prototype'||k==='constructor'||k.length>120)problem();
+      scan(value,depth+1);
+    }
+  };
+  scan(source);
+  if(!isObj(source)||!isObj(source.d))problem();
+  const idOk=s=>typeof s==='string'&&/^[a-zA-Z0-9_-]{1,70}$/.test(s);
+  const dateOk=s=>typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s);
+  if(Object.keys(source.d).length>10000)problem();
+  for(const [date,entries] of Object.entries(source.d)){
+    if(!dateOk(date)||!Array.isArray(entries)||entries.length>60||entries.some(v=>!idOk(v)))problem();
+  }
+  if(source.x!==undefined){
+    if(!isObj(source.x))problem();
+    for(const [date,entries] of Object.entries(source.x)){
+      if(!dateOk(date)||!isObj(entries))problem();
+      for(const [id,detail] of Object.entries(entries)){
+        if(!idOk(id)||!isObj(detail)||(!Array.isArray(detail.s)&&detail.s!==undefined)||
+          (detail.s||[]).some(x=>typeof x!=='string'||x.length>100)||
+          (detail.n!==undefined&&(typeof detail.n!=='string'||detail.n.length>150)))problem();
+      }
+    }
+  }
+  if(source.av!==undefined){
+    if(!isObj(source.av)||!CONFIG.emojis.includes(source.av.e)||!CONFIG.colors.includes(source.av.c))problem();
+  }
+  if(source.name!==undefined&&(typeof source.name!=='string'||source.name.length>80))problem();
+  if(source.goal!==undefined&&(!Number.isInteger(source.goal)||source.goal<1||source.goal>1000))problem();
+  if(source.reward!==undefined&&(typeof source.reward!=='string'||source.reward.length>100))problem();
+  if(source.interests!==undefined&&(typeof source.interests!=='string'||source.interests.length>300))problem();
+  if(source.profileStatsWindow!==undefined&&!['all','30','7'].includes(source.profileStatsWindow))problem();
+  const validateTask=t=>isObj(t)&&idOk(t.i)&&typeof t.t==='string'&&t.t.length>0&&t.t.length<=70&&
+    typeof t.e==='string'&&t.e.length<=8&&
+    (t.category===undefined||['school','personal'].includes(t.category))&&
+    (t.s===undefined||(typeof t.s==='string'&&t.s.length<=150));
+  if(source.customTasks!==undefined&&(!Array.isArray(source.customTasks)||source.customTasks.length>30||
+    source.customTasks.some(t=>!validateTask(t))))problem();
+  if(source.planHistory!==undefined){
+    if(!isObj(source.planHistory))problem();
+    for(const [date,entries] of Object.entries(source.planHistory))
+      if(!dateOk(date)||!Array.isArray(entries)||entries.length>60||entries.some(t=>!validateTask(t)))problem();
+  }
+  if(source.hiddenTasks!==undefined&&(!Array.isArray(source.hiddenTasks)||source.hiddenTasks.some(v=>!idOk(v))))problem();
+  if(source.taskDays!==undefined){
+    if(!isObj(source.taskDays))problem();
+    for(const [id,days] of Object.entries(source.taskDays))
+      if(!idOk(id)||!Array.isArray(days)||days.some(v=>!Number.isInteger(v)||v<0||v>6))problem();
+  }
+  if(source.taskCategories!==undefined){
+    if(!isObj(source.taskCategories))problem();
+    for(const [id,cat] of Object.entries(source.taskCategories))
+      if(!idOk(id)||!['school','personal'].includes(cat))problem();
+  }
+  if(source.times!==undefined){
+    if(!isObj(source.times))problem();
+    for(const [id,time] of Object.entries(source.times))
+      if(!idOk(id)||typeof time!=='string'||(time!==''&&!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)))problem();
+  }
+  if(source.weekPlans!==undefined){
+    if(!isObj(source.weekPlans))problem();
+    for(const [date,p] of Object.entries(source.weekPlans))
+      if(!dateOk(date)||!isObj(p)||typeof p.name!=='string'||p.name.length>100||
+        !Number.isInteger(p.goal)||p.goal<1||p.goal>1000)problem();
+  }
+  if(source.rewardHistory!==undefined){
+    if(!isObj(source.rewardHistory))problem();
+    for(const [date,p] of Object.entries(source.rewardHistory))
+      if(!dateOk(date)||!isObj(p)||typeof p.name!=='string'||p.name.length>100||
+        !Number.isInteger(p.goal)||p.goal<1||p.goal>1000||
+        !['earned','received'].includes(p.status))problem();
+  }
+  if(source.earnedAchievements!==undefined){
+    if(!isObj(source.earnedAchievements))problem();
+    for(const [name,date] of Object.entries(source.earnedAchievements))
+      if(name.length>100||typeof date!=='string'||date.length>40)problem();
+  }
+}
 function installBackup(o){
   const source=o&&o.habit?o.habit:o;
   if(!source||typeof source!=='object'||!source.d||Array.isArray(source.d)||typeof source.d!=='object'||!Object.values(source.d).every(a=>Array.isArray(a)))throw Error('bad habits');
+  validateBackupPayload(source);
   const candidate=store.validateAll(Object.assign(store.defaults(),JSON.parse(JSON.stringify(source))));
   const schoolRaw=o.school||source.school;
   if(schoolRaw&&(!schoolRaw.g||typeof schoolRaw.g!=='object'||Array.isArray(schoolRaw.g)||!Object.values(schoolRaw.g).every(a=>Array.isArray(a)&&a.every(x=>x&&[2,3,4,5].includes(x.v)))))throw Error('bad grades');
@@ -537,7 +632,7 @@ async function importBackupFile(input){
   finally{input.value=''}
 }
 function importBackupText(){
-  try{installBackup(JSON.parse(document.getElementById('bk').value))}
+  try{const input=document.getElementById('bk').value;if(input.length>10*1024*1024)throw Error('size');installBackup(JSON.parse(input))}
   catch(err){backupStatus('Текст копии не подходит или не удалось сохранить данные. Текущие записи не заменены.')}
 }
 
