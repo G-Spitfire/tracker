@@ -131,6 +131,15 @@ const store=(()=>{
     if(!s||typeof s!=='object'||typeof s.d!=='object'||Array.isArray(s.d))throw Error('bad root');
     if(!s.x||typeof s.x!=='object')s.x={};
     if(!s.av||typeof s.av!=='object')s.av={e:'🦊',c:'#ffd9c9'};
+    if(!s.ex)s.ex=iso(new Date());
+    if(!s.planHistory||typeof s.planHistory!=='object'||Array.isArray(s.planHistory))s.planHistory={};
+    if(!s.taskDays||typeof s.taskDays!=='object'||Array.isArray(s.taskDays))s.taskDays={};
+    if(!Array.isArray(s.hiddenTasks))s.hiddenTasks=[];
+    if(!Array.isArray(s.customTasks))s.customTasks=[];
+    if(!s.rewardHistory||typeof s.rewardHistory!=='object')s.rewardHistory={};
+    if(!s.earnedAchievements||typeof s.earnedAchievements!=='object')s.earnedAchievements={};
+    if(!s.times||typeof s.times!=='object')s.times={};
+    if(typeof s.interests!=='string')s.interests='';
     return s;
   }
   function migrate(s){
@@ -218,7 +227,7 @@ const EX={i:'ex',e:'🤸',t:'Зарядка',s:'5–10 минут',b:'#ffe9d2',c
 const T=[{i:'bg',e:'🎒',t:'Собрать портфель',b:'#ffe3d6',c:'#ff8a65'},{i:'cl',e:'👕',t:'Приготовить вещи на завтра',b:'#dff1ff',c:'#4fb3ff'},{i:'hw',e:'✏️',t:'Сделать уроки',s:'нажми ✎, чтобы выбрать предметы',b:'#fff0c2',c:'#f2b300'},{i:'en',e:'🇬🇧',t:'Английский',s:'10–15 минут',b:'#e6defc',c:'#8e6cf0'},{i:'ho',e:'🧹',t:'Помочь по дому',s:'нажми ✎, чтобы рассказать',b:'#d9f6e8',c:'#2fbf8f'}];
 const RD={i:'rd',e:'📖',t:'Почитать',s:'на выходных',b:'#ffdcec',c:'#ff6fa5'};
 // Existing histories keep their original task list and star rules.
-const legacyTasks=d=>{const w=new Date(d+'T00:00:00').getDay(),b=d>=S.ex?[EX].concat(T):T;return w===0||w===6?b.concat([RD]):b};
+const legacyTasks=(d,source=S)=>{const w=new Date(d+'T00:00:00').getDay(),b=d>=source.ex?[EX].concat(T):T;return w===0||w===6?b.concat([RD]):b};
 S.planHistory=S.planHistory&&typeof S.planHistory==='object'?S.planHistory:{};
 S.taskDays=S.taskDays&&typeof S.taskDays==='object'?S.taskDays:{};
 S.hiddenTasks=Array.isArray(S.hiddenTasks)?S.hiddenTasks:[];
@@ -293,6 +302,7 @@ function render(){
 }
 document.querySelector('.bar').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.t==='g'&&tab!=='g')window.schoolCloud?.resetSubject?.();
   tab=b.dataset.t;render();scrollTo(0,0);
 });
 
@@ -386,6 +396,12 @@ function setDone(i,on,silent,date){
   if(on&&x<0)a.push(i);
   if(!on&&x>=0){a.splice(x,1);if(S.x[d])delete S.x[d][i]}
   const all=dn(d).length===L.length;
+  const weekStart=new Date(d+'T12:00:00');
+  weekStart.setDate(weekStart.getDate()-(weekStart.getDay()+6)%7);
+  const monday=iso(weekStart),weekSum=Array.from({length:7},(_,i)=>{const x=new Date(weekStart);x.setDate(x.getDate()+i);return st(iso(x))}).reduce((a,b)=>a+b,0);
+  if(weekSum>=S.goal&&!S.rewardHistory[monday]){
+    S.rewardHistory[monday]={name:S.reward,goal:S.goal,earnedAt:iso(new Date()),status:'earned'};
+  }
   save();render();
   if(silent)return;
   if(on&&x<0)toast(all&&!wasAll?'🎉 Все дела готовы! +2 бонусные звезды':'⭐ +1 звезда');
@@ -470,6 +486,8 @@ function installBackup(o){
   const schoolRaw=o.school||source.school;
   if(schoolRaw&&(!schoolRaw.g||typeof schoolRaw.g!=='object'||Array.isArray(schoolRaw.g)||!Object.values(schoolRaw.g).every(a=>Array.isArray(a)&&a.every(x=>x&&[2,3,4,5].includes(x.v)))))throw Error('bad grades');
   candidate.school=schoolRaw?schoolStore.validate(schoolStore.migrate(JSON.parse(JSON.stringify(schoolRaw)))):JSON.parse(JSON.stringify(S.school));
+  for(const date of Object.keys(candidate.d))if(!Array.isArray(candidate.planHistory[date]))
+    candidate.planHistory[date]=legacyTasks(date,candidate).map(t=>({...t}));
   if(!confirm('Заменить данные копией? Текущее состояние будет сохранено на этом устройстве.'))return;
   const before=JSON.stringify(S),oldSchool=localStorage.getItem(KEY+'_school');
   localStorage.setItem(KEY+'_before_restore',before);
