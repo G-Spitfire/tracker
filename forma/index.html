@@ -313,7 +313,7 @@ function readEditor(){
  }
  const rows=editRows(),old=rows[ui.editSelected];if(!old)return true;
  const replacement=val('outdoor'),rMin=Number(val('outdoorMin')),rMax=Number(val('outdoorMax'));
- if(replacement&&(!CUES[replacement]||replacement===old[0]||!Number.isInteger(rMin)||rMin<1||rMin>100||
+ if(replacement&&(!Object.prototype.hasOwnProperty.call(CUES,replacement)||replacement===old[0]||!Number.isInteger(rMin)||rMin<1||rMin>100||
     !Number.isInteger(rMax)||rMax<rMin||rMax>100)){notify('Проверь уличную замену и повторения');return false}
  const next=old.slice();next[1]=sets;next[2]=min;next[3]=max;
  if(replacement){next[4]=replacement;next[5]=rMin;next[6]=rMax}
@@ -400,14 +400,14 @@ function validBackup(n){
  const date=x=>typeof x==='string'&&Number.isFinite(Date.parse(x));
  const str=(x,max=10000)=>typeof x==='string'&&x.length<=max;
  const row=a=>{
-  if(!Array.isArray(a)||a.length<4||a.length>9||!CUES[a[0]]||
+  if(!Array.isArray(a)||a.length<4||a.length>9||!Object.prototype.hasOwnProperty.call(CUES,a[0])||
      !Number.isInteger(a[1])||a[1]<1||a[1]>12||
      !Number.isInteger(a[2])||a[2]<1||a[2]>100||
      !Number.isInteger(a[3])||a[3]<a[2]||a[3]>100||
      (a[7]!=null&&typeof a[7]!=='boolean')||
      (a[8]!=null&&(!Number.isInteger(a[8])||a[8]<15||a[8]>900)))return false;
   if(a[4]==null)return a[5]==null&&a[6]==null;
-  if(typeof a[4]!=='string'||!CUES[a[4]]||a[4]===a[0])return false;
+  if(typeof a[4]!=='string'||!Object.prototype.hasOwnProperty.call(CUES,a[4])||a[4]===a[0])return false;
   const min=a[5]??a[2],max=a[6]??a[3];
   return Number.isInteger(min)&&min>=1&&min<=100&&Number.isInteger(max)&&max>=min&&max<=100;
  };
@@ -494,7 +494,7 @@ if(a==='plan-add-open'||a==='plan-replace-open'){
 if(a==='plan-close-picker'){if(!readEditor())return;ui.planPicker=null;return render()}
 if(a==='plan-add'||a==='plan-replace'){
  if(!readEditor())return;
- if(!CUES[val])return;
+ if(!Object.prototype.hasOwnProperty.call(CUES,val))return;
  const rows=editRows();
  if(!canUseExercise(rows,val,a==='plan-replace'?ui.editSelected:null))return notify('Упражнение уже встречается в домашнем или уличном плане');
  const next=[val,3,8,12,null,null,null,val==='bulgar'];
