@@ -118,23 +118,45 @@ function periodUi(ui,periods) {
  return '<div class="school-period-control">'+select+setting+'</div>';
 }
 function finals(ui,snapshot,periods) {
- const year=ui.year,qs=[1,2,3,4];
- const dates=Number(year.slice(0,4));
- const all= (snapshot?.grades||[]).filter(g=>g.date>=dates+'-09-01'&&g.date<=(dates+1)+'-08-31');
+ const year=ui.year,qs=[1,2,3,4],first=Number(year.slice(0,4));
+ const all= (snapshot?.grades||[]).filter(g=>g.date>=first+'-09-01'&&g.date<=(first+1)+'-08-31');
+ const official=all.filter(g=>g.official).sort(compareGrade);
+ const recognizedAll=(snapshot?.grades||[]).filter(g=>g.official).sort(compareGrade);
+ const previous=recognizedAll.filter(g=>schoolYearOf(g.date)!==year).reverse();
  const names=[...new Set(all.map(g=>g.subject))].sort((a,b)=>a.localeCompare(b,'ru'));
- const unconfigured=qs.filter(q=>!periods?.[year]?.[q]);
- const label='<div class="school-section-head"><h2>Официальные итоги</h2><p class="hint">Только выставленные оценки из журнала. Ни одного расчётного прогноза.</p></div>';
- const warn=unconfigured.length?'<div class="notice info">Для отображения итогов по четвертям настрой даты: '+unconfigured.map(x=>x+'-я').join(', ')+'. Оценки без настроенного периода не угадываем.</div>':'';
- if(!names.length)return label+warn+'<div class="empty">Официальных итогов за этот учебный год пока нет.</div>';
+ const label='<div class="school-section-head"><h2>Официальные итоги</h2><p class="hint">Только оценки, распознанные как итоговые записи школьного журнала. Прогнозов нет.</p></div>';
+ const diagnostic='<div class="school-grade-count">В полученных данных распознано итоговых отметок: <b>'+recognizedAll.length+
+ '</b> · за '+esc(year)+': <b>'+official.length+'</b></div>';
  const header='<thead><tr><th>Предмет</th>'+qs.map(q=>'<th>'+['','I','II','III','IV'][q]+'</th>').join('')+'<th>Год</th></tr></thead>';
  const rows=names.map(name=>{
-  const values=qs.map(q=>officialInQuarter(snapshot,periods,year,q,name));
+  const quarters=qs.map(q=>officialInQuarter(snapshot,periods,year,q,name));
   const yearly=officialInYear(snapshot,year,name);
   return '<tr><th scope="row"><button class="link" data-action="open-subject" data-id="'+esc(name)+'">'+esc(name)+'</button></th>'+
-  values.map(g=>'<td>'+(g?'<b class="school-official">'+g.score+'</b>':'<span class="school-muted">—</span>')+'</td>').join('')+
-  '<td>'+(yearly?'<b class="school-official">'+yearly.score+'</b>':'<span class="school-muted">—</span>')+'</td></tr>';
+   quarters.map(g=>'<td>'+(g?'<b class="school-official">'+g.score+'</b>':'<span class="school-muted">—</span>')+'</td>').join('')+
+   '<td>'+(yearly?'<b class="school-official">'+yearly.score+'</b>':'<span class="school-muted">—</span>')+'</td></tr>';
  }).join('');
- return label+warn+'<div class="card school-table-wrap"><table class="school-finals-table">'+header+'<tbody>'+rows+'</tbody></table></div>';
+ const table=names.length?'<div class="card school-table-wrap"><table class="school-finals-table">'+header+'<tbody>'+rows+'</tbody></table></div>':'';
+ // Never discard official records just because the user has not set term dates.
+ const unassigned=official.filter(g=>(g.officialLabel==='За четверть'&&!gradeQuarter(g,periods,year))||
+ (g.officialLabel!=='За четверть'&&g.officialLabel!=='За год'));
+ const gradeItem=g=>'<div class="school-mark-row"><span class="grade g'+g.score+'">'+g.score+'</span><div><b>'+esc(g.subject)+
+ '</b><small>'+esc(g.type||g.officialLabel||'Итоговая запись')+' · '+dateLabel(g.date)+'</small></div></div>';
+ const pending=unassigned.length?
+ '<div class="card school-unassigned"><h3>Итоговые записи без привязки к четверти · '+unassigned.length+'</h3>'+
+ '<p class="hint">Эти отметки есть в данных, но их четверть нельзя установить точно без дат периода или номера четверти в названии записи.</p>'+
+ unassigned.slice().reverse().map(gradeItem).join('')+'</div>':'';
+ const older=previous.length?'<details class="card school-older-grades"><summary>Итоговые из других учебных лет · '+previous.length+'</summary>'+
+ '<p class="hint">Показываем найденные старые записи без выбора года и без смешивания с текущими итогами.</p>'+
+ previous.map(g=>'<div class="school-archive-row"><span class="school-archive-year">'+esc(schoolYearOf(g.date))+'</span>'+gradeItem(g)+'</div>').join('')+'</details>':'';
+ const empty=recognizedAll.length===0?
+ '<div class="empty">В полученной выгрузке пока нет записей, которые программа смогла распознать как официальные итоговые оценки. Это не означает, что их нет в школьном дневнике: нужно проверить исходную выгрузку и типы записей.</div>':
+ official.length===0?'<div class="notice info">За текущий учебный год распознанных итоговых пока нет. Проверь архив ниже: отметки за прошлые годы не пропали.</div>':'';
+ const info=official.length&&names.length?'<p class="hint">Прочерк не всегда означает отсутствие отметки: если даты четверти не настроены, ищи её в блоке нераспределённых записей.</p>':'';
+ return label+diagnostic+empty+table+info+pending+older;
+}
+function schoolYearOf(date){
+ const y=Number(String(date||'').slice(0,4)),m=Number(String(date||'').slice(5,7));
+ return String(m>=9?y:y-1)+'-'+String(m>=9?y+1:y);
 }
 function detail(ui,snapshot,rows,range,periods,helpers) {
  const name=ui.subject,subjectRows=rows.filter(g=>g.subject===name);
