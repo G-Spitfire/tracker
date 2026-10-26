@@ -318,7 +318,7 @@ const validProgram=p=>p==null||(p&&typeof p==='object'&&!Array.isArray(p)&&Objec
 const session=s=>s&&str(s.id,100)&&['A','B','V','G'].includes(s.workout)&&date(s.startedAt)&&(s.endedAt==null||date(s.endedAt))&&Array.isArray(s.exercises)&&s.exercises.length<=100&&s.exercises.every(ex)&&Array.isArray(s.logs)&&s.logs.length<=1000&&s.logs.every(l=>l&&Number.isInteger(l.slot)&&str(l.exId,100)&&str(l.exerciseName,300)&&Number.isInteger(l.setNumber)&&Number.isInteger(l.reps)&&l.reps>=1&&l.reps<=300&&date(l.loggedAt))&&(s.note==null||str(s.note))&&(!s.rest||(Number.isFinite(s.rest.until)&&Number.isFinite(s.rest.duration)))&&(s.pausedAt==null||date(s.pausedAt))&&(s.pausedMs==null||(Number.isFinite(s.pausedMs)&&s.pausedMs>=0));
 return validProgram(n.programOverrides)&&(n.programStartedAt==null||date(n.programStartedAt))&&n.sessions.every(session)&&n.measures.every(m=>m&&str(m.id,100)&&date(m.createdAt)&&['weight','abdomen','waist','steps'].every(k=>m[k]==null||(typeof m[k]==='number'&&Number.isFinite(m[k])&&m[k]>=0&&m[k]<=50000)))&&n.ofpDays.every(d=>typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d))&&(n.active==null||session(n.active));
 }
-function handleFile(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const n=JSON.parse(r.result);if(!validBackup(n))throw Error('invalid');if(!confirm('Заменить текущий журнал данными из резервной копии? Это действие перезапишет локальную историю.'))return;if(!save({...EMPTY(),...n}))return;ui.chosen=nextWorkout();ui.tab='today';render();notify('Резервная копия восстановлена')}catch(e){notify('Файл не похож на резервную копию приложения')}};r.readAsText(f)}
+function handleFile(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const n=JSON.parse(r.result);if(!validBackup(n))throw Error('invalid');if(!confirm('Заменить текущий журнал данными из резервной копии? Это действие перезапишет локальную историю.'))return;if(!save({...EMPTY(),...n}))return;ui.chosen=nextWorkout();ui.tab='today';ui.editRows=null;ui.editSelected=null;ui.planPicker=null;render();notify('Резервная копия восстановлена')}catch(e){notify('Файл не похож на резервную копию приложения')}};r.readAsText(f)}
 function updateClock(){
  if(!db.active)return;
  const s=db.active,clock=document.getElementById('clock-live');
@@ -329,9 +329,93 @@ function updateClock(){
  if(countdown&&s.rest)countdown.textContent=dur(s.rest.until-Date.now());
 }
 setInterval(updateClock,500);
-document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;const a=b.dataset.action,val=b.dataset.val,slot=Number(b.dataset.slot);if(a==='theme-set'){themeChoice=val;applyTheme();try{localStorage.setItem(THEME_KEY,val)}catch(_){notify('Тема не сохранена')}return render()}if(a==='tab'){if(ui.tab==='settings'&&val!=='settings'&&ui.editRows){if(!readEditor())return;const original=db.programOverrides?.[ui.editWorkout]||PROGRAM[ui.editWorkout].items;if(JSON.stringify(ui.editRows)!==JSON.stringify(original)&&!confirm('Изменения программы не сохранены. Выйти?'))return;ui.editRows=null}return setTab(val)}if(a==='pick-plan'){if(!readEditor())return;const original=db.programOverrides?.[ui.editWorkout]||PROGRAM[ui.editWorkout].items;if(JSON.stringify(ui.editRows)!==JSON.stringify(original)&&!confirm('Изменения не сохранены. Перейти?'))return;ui.editWorkout=val;ui.editRows=null;return render()}if(a==='plan-move'){if(!readEditor())return;const rows=editRows(),i=Number(b.dataset.index),j=i+Number(b.dataset.diff);if(j>=0&&j<rows.length)[rows[i],rows[j]]=[rows[j],rows[i]];return render()}if(a==='plan-add'){if(!readEditor())return;const id=document.getElementById('newExercise')?.value,used=new Set(editRows().map(x=>x[0]));if(!CUES[id]||used.has(id))return notify('Выбери новое упражнение из списка');editRows().push([id,3,8,12,null,null,null,id==='bulgar']);return render()}if(a==='plan-remove'){if(!readEditor())return;if(editRows().length<=1)return notify('Оставь хотя бы одно упражнение');editRows().splice(Number(b.dataset.index),1);return render()}if(a==='plan-save'){if(!readEditor())return;const programOverrides={...db.programOverrides,[ui.editWorkout]:editRows().map(x=>x.slice())};if(save({...db,programOverrides})){ui.editRows=null;render();notify('Новый план сохранён')}return}if(a==='plan-reset'){if(!confirm('Восстановить исходную тренировку '+ui.editWorkout+'?'))return;const programOverrides={...db.programOverrides};delete programOverrides[ui.editWorkout];if(save({...db,programOverrides})){ui.editRows=null;render()}return}if(a==='choose'){ui.chosen=val;ui.goodWeather=false;return render()}if(a==='start')return start();if(a==='pause-workout')return pauseWorkout();if(a==='resume-workout')return resumeWorkout();if(a==='ofp'){const k=dayKey();const ofpDays=db.ofpDays.includes(k)?db.ofpDays.filter(x=>x!==k):[...db.ofpDays,k];if(save({...db,ofpDays}))return render()}if(a==='step'){const inp=document.querySelector(`.reps[data-slot="${slot}"]`);if(inp){inp.value=Math.max(1,Math.min(300,(Number(inp.value)||1)+Number(b.dataset.diff)));ui.drafts[slot]=Number(inp.value)}return}if(a==='log')return logSet(slot);if(a==='focus-exercise'&&db.active){ui.focusSlot=slot;return render()}if(a==='exercise-list'){document.getElementById('focus-all')?.setAttribute('open','');return}if(a==='next-exercise'&&db.active){const es=db.active.exercises,at=es.findIndex(x=>x.slot===activeSlot(db.active).slot);ui.focusSlot=es[Math.min(at+1,es.length-1)].slot;return render()}if(a==='undo'){const s=db.active;const index=s?.logs.map(x=>x.slot).lastIndexOf(slot);if(index>=0){const active={...s,logs:s.logs.filter((_,i)=>i!==index),rest:null};if(save({...db,active}))render()}return}if(a==='skip-rest'&&db.active){if(save({...db,active:{...db.active,rest:null}}))return render()}if(a==='more-rest'&&db.active?.rest){const rest={...db.active.rest,until:db.active.rest.until+30000,duration:db.active.rest.duration+30};if(save({...db,active:{...db.active,rest}}))return render()}if(a==='finish')return finish();if(a==='discard'&&confirm('Отменить тренировку? Все отметки текущего занятия будут потеряны.')){if(save({...db,active:null}))return render()}if(a==='view'){ui.showSession=b.dataset.id;return render()}if(a==='back-history'){ui.showSession=null;return render()}if(a==='delete-session'&&confirm('Удалить тренировку без возможности восстановления (кроме сохранённого JSON)?')){if(!save({...db,sessions:db.sessions.filter(s=>s.id!==b.dataset.id)}))return;ui.showSession=null;ui.chosen=nextWorkout();return render()}if(a==='chart'){ui.chart=val;return render()}if(a==='save-measure')return saveMeasure();if(a==='delete-measure'&&confirm('Удалить это измерение?')){if(save({...db,measures:db.measures.filter(m=>m.id!==b.dataset.id)}))return render()}if(a==='export-json')return download('forma-backup-'+dayKey()+'.json',JSON.stringify(db,null,2),'application/json');if(a==='import')return document.getElementById('importFile').click();if(a==='clear'&&confirm('Точно удалить ВСЕ данные приложения? Рекомендуется сначала скачать JSON.')&&confirm('Подтверди удаление ещё раз.')){if(!save(EMPTY()))return;ui.editRows=null;ui.chosen='A';ui.tab='today';return render()}});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;const a=b.dataset.action,val=b.dataset.val,slot=Number(b.dataset.slot);
+if(a==='theme-set'){
+ if(ui.tab==='settings'&&!readEditor())return;
+ themeChoice=val;applyTheme();try{localStorage.setItem(THEME_KEY,val)}catch(_){notify('Тема не сохранена')}
+ return render();
+}
+if(a==='tab'){
+ if(ui.tab==='settings'&&val!=='settings'){
+  if(!readEditor())return;
+  if(planDirty()&&!confirm('Есть несохранённые изменения программы. Выйти без сохранения?'))return;
+  ui.editRows=null;ui.editSelected=null;ui.planPicker=null;
+ }
+ return setTab(val);
+}
+if(a==='edit-plan'){
+ ui.editWorkout=ui.chosen;ui.editRows=null;ui.editSelected=null;ui.planPicker=null;
+ return setTab('settings');
+}
+if(a==='pick-plan'){
+ if(!readEditor())return;
+ if(planDirty()&&!confirm('Изменения не сохранены. Перейти к другой тренировке?'))return;
+ ui.editWorkout=val;ui.editRows=null;ui.editSelected=null;ui.planPicker=null;return render();
+}
+if(a==='plan-select'){
+ if(!readEditor())return;
+ const i=Number(b.dataset.index);
+ if(!Number.isInteger(i)||i<0||i>=editRows().length)return;
+ ui.editSelected=ui.editSelected===i?null:i;ui.planPicker=null;return render();
+}
+if(a==='plan-move'){
+ if(!readEditor())return;
+ const rows=editRows(),i=ui.editSelected,j=i+Number(b.dataset.diff);
+ if(i==null||!Number.isInteger(j)||j<0||j>=rows.length)return;
+ [rows[i],rows[j]]=[rows[j],rows[i]];ui.editSelected=j;return render();
+}
+if(a==='plan-remove'){
+ if(!readEditor())return;
+ const rows=editRows(),i=ui.editSelected;
+ if(i==null||rows.length<=1)return notify('В программе должно быть хотя бы одно упражнение');
+ rows.splice(i,1);ui.editSelected=Math.min(i,rows.length-1);ui.planPicker=null;return render();
+}
+if(a==='plan-add-open'||a==='plan-replace-open'){
+ if(!readEditor())return;
+ if(a==='plan-replace-open'&&ui.editSelected==null)return;
+ ui.planPicker=a==='plan-add-open'?'add':'replace';
+ return render();
+}
+if(a==='plan-close-picker'){ui.planPicker=null;return render()}
+if(a==='plan-add'||a==='plan-replace'){
+ if(!CUES[val])return;
+ const rows=editRows();
+ if(rows.some((x,i)=>x[0]===val&&(a!=='plan-replace'||i!==ui.editSelected)))return notify('Это упражнение уже в плане');
+ const next=[val,3,8,12,null,null,null,val==='bulgar'];
+ if(a==='plan-replace'){
+  if(ui.editSelected==null)return;
+  rows[ui.editSelected]=next;
+ }else{
+  if(rows.length>=30)return notify('Максимум 30 упражнений');
+  rows.push(next);ui.editSelected=rows.length-1;
+ }
+ ui.planPicker=null;return render();
+}
+if(a==='plan-cancel'){
+ ui.editRows=null;ui.editSelected=null;ui.planPicker=null;
+ render();return notify('Изменения отменены');
+}
+if(a==='plan-reset'){
+ if(!confirm('Вернуть исходный план? Для применения нажми «Сохранить план».'))return;
+ ui.editRows=PROGRAM[ui.editWorkout].items.map(x=>x.slice());
+ ui.editSelected=null;ui.planPicker=null;return render();
+}
+if(a==='plan-save'){
+ if(!readEditor())return;
+ if(!planDirty())return notify('Изменений нет');
+ const rows=editRows();
+ const ids=rows.map(x=>x[0]);
+ if(new Set(ids).size!==ids.length)return notify('Упражнения не должны повторяться');
+ const programOverrides={...db.programOverrides};
+ if(JSON.stringify(rows)===JSON.stringify(PROGRAM[ui.editWorkout].items))delete programOverrides[ui.editWorkout];
+ else programOverrides[ui.editWorkout]=rows.map(x=>x.slice());
+ if(!save({...db,programOverrides}))return;
+ ui.editRows=null;ui.editSelected=null;ui.planPicker=null;render();
+ return notify('План сохранён');
+}
+if(a==='choose'){ui.chosen=val;ui.goodWeather=false;return render()}if(a==='start')return start();if(a==='pause-workout')return pauseWorkout();if(a==='resume-workout')return resumeWorkout();if(a==='ofp'){const k=dayKey();const ofpDays=db.ofpDays.includes(k)?db.ofpDays.filter(x=>x!==k):[...db.ofpDays,k];if(save({...db,ofpDays}))return render()}if(a==='step'){const inp=document.querySelector(`.reps[data-slot="${slot}"]`);if(inp){inp.value=Math.max(1,Math.min(300,(Number(inp.value)||1)+Number(b.dataset.diff)));ui.drafts[slot]=Number(inp.value)}return}if(a==='log')return logSet(slot);if(a==='focus-exercise'&&db.active){ui.focusSlot=slot;return render()}if(a==='exercise-list'){document.getElementById('focus-all')?.setAttribute('open','');return}if(a==='next-exercise'&&db.active){const es=db.active.exercises,at=es.findIndex(x=>x.slot===activeSlot(db.active).slot);ui.focusSlot=es[Math.min(at+1,es.length-1)].slot;return render()}if(a==='undo'){const s=db.active;const index=s?.logs.map(x=>x.slot).lastIndexOf(slot);if(index>=0){const active={...s,logs:s.logs.filter((_,i)=>i!==index),rest:null};if(save({...db,active}))render()}return}if(a==='skip-rest'&&db.active){if(save({...db,active:{...db.active,rest:null}}))return render()}if(a==='more-rest'&&db.active?.rest){const rest={...db.active.rest,until:db.active.rest.until+30000,duration:db.active.rest.duration+30};if(save({...db,active:{...db.active,rest}}))return render()}if(a==='finish')return finish();if(a==='discard'&&confirm('Отменить тренировку? Все отметки текущего занятия будут потеряны.')){if(save({...db,active:null}))return render()}if(a==='view'){ui.showSession=b.dataset.id;return render()}if(a==='back-history'){ui.showSession=null;return render()}if(a==='delete-session'&&confirm('Удалить тренировку без возможности восстановления (кроме сохранённого JSON)?')){if(!save({...db,sessions:db.sessions.filter(s=>s.id!==b.dataset.id)}))return;ui.showSession=null;ui.chosen=nextWorkout();return render()}if(a==='chart'){ui.chart=val;return render()}if(a==='save-measure')return saveMeasure();if(a==='delete-measure'&&confirm('Удалить это измерение?')){if(save({...db,measures:db.measures.filter(m=>m.id!==b.dataset.id)}))return render()}if(a==='export-json')return download('forma-backup-'+dayKey()+'.json',JSON.stringify(db,null,2),'application/json');if(a==='import')return document.getElementById('importFile').click();if(a==='clear'&&confirm('Точно удалить ВСЕ данные приложения? Рекомендуется сначала скачать JSON.')&&confirm('Подтверди удаление ещё раз.')){if(!save(EMPTY()))return;ui.editRows=null;ui.editSelected=null;ui.planPicker=null;ui.chosen='A';ui.tab='today';return render()}});
 document.addEventListener('change',e=>{if(e.target.id==='themeChoice'){themeChoice=e.target.value;applyTheme();try{localStorage.setItem(THEME_KEY,themeChoice)}catch(_){notify('Тема изменена, но браузер не смог сохранить выбор')}return}if(e.target.id==='outdoor'){ui.goodWeather=e.target.checked;render()}if(e.target.id==='importFile'){handleFile(e.target.files[0]);e.target.value=''}});
-document.addEventListener('input',e=>{if(e.target.classList.contains('reps'))ui.drafts[Number(e.target.dataset.slot)]=Number(e.target.value);if(e.target.id==='note'&&db.active){save({...db,active:{...db.active,note:e.target.value}})}});
+document.addEventListener('input',e=>{if(e.target.id==='planSearch'){const q=e.target.value.trim().toLocaleLowerCase('ru');document.querySelectorAll('.plan-choice').forEach(x=>{x.hidden=!x.dataset.search.includes(q)})}if(e.target.classList.contains('reps'))ui.drafts[Number(e.target.dataset.slot)]=Number(e.target.value);if(e.target.id==='note'&&db.active){save({...db,active:{...db.active,note:e.target.value}})}});
 window.addEventListener('storage',e=>{if(e.key===DB_KEY){db=load();render()}});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)updateClock()});
 if('serviceWorker'in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('./sw.js').catch(()=>{})}
