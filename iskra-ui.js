@@ -27,6 +27,7 @@
       '<div class="ik-tile"><div class="ik-tile-icon">▥</div><strong>'+a+'</strong><small>средний: '+safe(gradeScope())+'</small></div></div>';
   }
   function ikToday(){
+    recordAchievements();
     const d=iso(new Date()), allTasks=tasks(d), done=dn(d), count=done.length, total=allTasks.length;
     const groups={school:['hw','en','bg'],personal:['cl','ho','ex','rd']};
     const visible=filter==='all'?allTasks:allTasks.filter(task=>task.category ? task.category===filter:groups[filter].includes(task.i));
@@ -54,26 +55,48 @@
     while(streak<400&&dn(iso(d)).length){streak++;d.setDate(d.getDate()-1)}
     return streak;
   }
+  function bestStreak(){
+    const dates=Object.keys(S.d||{}).filter(d=>dn(d).length>0).sort();
+    let best=0,run=0,previous='';
+    for(const date of dates){
+      if(previous){
+        const x=new Date(previous+'T12:00:00');
+        x.setDate(x.getDate()+1);
+        run=iso(x)===date?run+1:1;
+      }else run=1;
+      best=Math.max(best,run);previous=date;
+    }
+    return best;
+  }
+  function recordAchievements(){
+    S.earnedAchievements=S.earnedAchievements&&typeof S.earnedAchievements==='object'?S.earnedAchievements:{};
+    const dates=Object.keys(S.d||{}),clouds=window.schoolCloud?.overallSummary?.();
+    const conditions={
+      'Постоянство':bestStreak()>=7,
+      'Отличные оценки':!!(clouds?.count&&clouds.average>=4.5),
+      'Помощник':dates.filter(d=>(S.d[d]||[]).includes('ho')).length>=10,
+      'Первый шаг':dates.some(d=>dn(d).length>0),
+      'Книголюб':dates.filter(d=>(S.d[d]||[]).includes('rd')).length>=10,
+      'Мастер дел':completed()>=50
+    };
+    let changed=false;
+    for(const [name,earned] of Object.entries(conditions)){
+      if(earned&&!S.earnedAchievements[name]){S.earnedAchievements[name]=iso(new Date());changed=true}
+    }
+    if(changed)save();
+  }
   function ikReward(){
     const dates=weekDates(),weekKey=dates[0],currentPlan=weekPlan(weekKey),savedWeek=S.rewardHistory?.[weekKey],tw=dates.reduce((n,d)=>n+st(d),0),goal=savedWeek?.goal||currentPlan.goal,total=earned(),l=currentLevel(),next=levels[l+1],prevLevel=levels[l][0],pr=next?perc(total-prevLevel,next[0]-prevLevel):100;
-    const clouds=window.schoolCloud?.overallSummary?.(),topGrade=clouds&&clouds.count&&clouds.average>=4.5;
-    const help=Object.keys(S.d||{}).filter(d=>(S.d[d]||[]).includes('ho')).length;
-    const streak=badgeStreak();
-    const readDays=Object.keys(S.d||{}).filter(d=>(S.d[d]||[]).includes('rd')).length;
+    recordAchievements();
     const achievements=[
-      {icon:'🌞',title:'Постоянство',small:'7 дней подряд',ok:streak>=7},
-      {icon:'🏅',title:'Отличные оценки',small:'Средний от 4,50',ok:topGrade},
-      {icon:'💗',title:'Помощник',small:'10 дел по дому',ok:help>=10},
-      {icon:'👟',title:'Первый шаг',small:'Первое дело',ok:completed()>=1},
-      {icon:'📖',title:'Книголюб',small:'10 дней чтения',ok:readDays>=10},
-      {icon:'🌟',title:'Мастер дел',small:'50 выполненных дел',ok:completed()>=50}
+      {icon:'🌞',title:'Постоянство',small:'7 дней подряд'},
+      {icon:'🏅',title:'Отличные оценки',small:'Средний от 4,50'},
+      {icon:'💗',title:'Помощник',small:'10 дел по дому'},
+      {icon:'👟',title:'Первый шаг',small:'Первое дело'},
+      {icon:'📖',title:'Книголюб',small:'10 дней чтения'},
+      {icon:'🌟',title:'Мастер дел',small:'50 выполненных дел'}
     ];
-    let newAchievement=false;
-    for(const a of achievements){
-      if(a.ok&&!S.earnedAchievements[a.title]){S.earnedAchievements[a.title]=iso(new Date());newAchievement=true}
-      a.ok=!!S.earnedAchievements[a.title];
-    }
-    if(newAchievement)save();
+    for(const a of achievements)a.ok=!!S.earnedAchievements[a.title];
     const existing=S.rewardHistory[weekKey];
     if(tw>=goal&&!existing){S.rewardHistory[weekKey]={name:currentPlan.name,goal,earnedAt:iso(new Date()),status:'earned'};save()}
     const prize=S.rewardHistory[weekKey];
@@ -88,6 +111,7 @@
       '<button class="ik-action-row" data-action="ikRewardHistory"><span class="ik-action-icon">📜</span><span style="flex:1"><b>История наград</b><small>Заработанные и полученные награды</small></span><span class="ik-chevron">›</span></button></div>';
   }
   function ikProfile(){
+    recordAchievements();
     const l=currentLevel(),total=earned(),next=levels[l+1],step=next?next[0]-levels[l][0]:0,gained=total-levels[l][0],prog=next?perc(gained,step):100;
     function item(icon,title,subtitle,action){return '<button class="ik-action-row" data-action="'+action+'"><span class="ik-action-icon">'+icon+'</span><span style="flex:1"><b>'+title+'</b>'+(subtitle?'<small>'+safe(subtitle)+'</small>':'')+'</span><span class="ik-chevron">›</span></button>'}
     return '<div class="ik-page ik-profile"><div class="ik-heading"><h1>Я</h1><button class="ik-top-link" data-action="ikPersonalSettings" aria-label="Личные настройки">⚙ Настройки</button></div>'+
@@ -220,6 +244,7 @@
       '<div class="ik-parent-offline"><p class="mu sm">Офлайн-копия оценок: '+(window.schoolCloud?.offlineEnabled?.()?'включена':'выключена')+'. Если включить, оценки сохраняются на этом устройстве без шифрования.</p><button class="btn g" data-action="ikOfflineToggle">'+(window.schoolCloud?.offlineEnabled?.()?'Отключить офлайн-копию':'Разрешить офлайн-копию')+'</button></div>';
     b.prepend(extra);
   };
+  window.addEventListener('schoolCloudUpdated',recordAchievements);
   document.querySelectorAll('.bar button').forEach((b,i)=>{
     const icons=['<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 20v-7M10 20V6M15 20v-11M20 20V3"/></svg>','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4H4v5a4 4 0 0 0 4 4M17 4h3v5a4 4 0 0 1-4 4M7 2h10v8a5 5 0 0 1-10 0z"/></svg>','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2z"/></svg>'];
     const txt=['Сегодня','Оценки','Награда','Я'][i];b.innerHTML=icons[i]+txt;
