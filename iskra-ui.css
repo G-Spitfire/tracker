@@ -135,3 +135,60 @@ h1{font-size:29px;font-weight:850;letter-spacing:-.035em}h2{font-size:21px;font-
 @media(max-width:365px){main{padding:15px 12px 28px}.ik-main-card .ik-number{font-size:40px}.ik-star{width:97px;height:97px}.ik-main-card .ik-star{width:83px;height:83px}.ik-task{gap:8px;padding:10px}.ik-grade-track{width:40px}.ik-time-stat{gap:6px}.ik-tile{padding:11px 7px}.ik-filter{padding:9px 10px;font-size:11px}}
 @media(min-width:540px){main{padding-top:28px}.bar{border-radius:27px;max-width:520px;left:50%;transform:translateX(-50%);bottom:9px;width:calc(100% - 24px);min-height:68px;padding:6px 12px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Reference calibration after comparison with real iPhone screenshots (26 Oct). */
+.ik-page{gap:11px}
+.ik-compact-header,.ik-reward>.ik-heading,.ik-profile>.ik-heading{
+  min-height:37px;position:relative;justify-content:center;
+}
+.ik-compact-header h1,.ik-reward>.ik-heading h1,.ik-profile>.ik-heading h1{
+  font-size:18px;letter-spacing:-.02em;text-align:center;
+}
+.ik-compact-header>.ik-cloud-pill,.ik-reward>.ik-heading>.ik-cloud-pill,
+.ik-profile>.ik-heading>.ik-top-link{
+  position:absolute;right:0;top:50%;transform:translateY(-50%);
+  font-size:11px;
+}
+.scs-iskra:not(.ik-detail-page){gap:10px}
+.scs-iskra .ik-row-between>.ik-muted{font-size:10px;line-height:1.25}
+.scs-iskra .ik-row-between>.ik-btn-small{min-height:33px;padding:6px 10px}
+.scs-iskra .ik-main-card{padding:14px 17px;min-height:110px}
+.scs-iskra .ik-main-card .ik-star{width:85px;height:85px}
+.scs-iskra .ik-main-card .ik-number{font-size:43px}
+.scs-iskra .ik-filter-row{display:grid;grid-template-columns:1fr 1fr 1fr 1.13fr;gap:5px;overflow:visible}
+.scs-iskra .ik-filter{min-width:0;white-space:nowrap;flex:none;font-size:10px;padding:9px 2px;line-height:1.15}
+.scs-iskra .ik-graph-label{margin-bottom:0}
+.scs-iskra>.card{padding:13px 15px}
+.scs-iskra .ik-chart{height:auto;max-height:123px}
+.scs-iskra .ik-kpi-meaning{font-size:10px;margin:2px 0 0}
+.scs-iskra .ik-time-stat{gap:7px}
+.scs-iskra .ik-time-stat .ik-tile{padding:9px 8px;border-radius:15px}
+.scs-iskra .ik-time-stat .ik-tile-icon{height:21px;font-size:19px}
+.scs-iskra .ik-time-stat .ik-tile strong{font-size:20px;margin:3px 0 0}
+.scs-iskra .ik-time-stat .ik-tile small{font-size:10px}
+.scs-iskra .ik-sec-title{font-size:18px}
+.scs-iskra .ik-grade-row{padding:8px 2px;gap:7px}
+.scs-iskra .ik-grade-track{width:48px}
+.scs-iskra .ik-grade-num{width:37px}
+.scs-iskra .ik-list{border-radius:17px}
+.scs-iskra .ik-official{align-items:center;padding:12px 14px}
+.scs-iskra .ik-official b{display:block;line-height:1.35;font-size:14px}
+.scs-iskra .ik-official small{display:block;margin-top:4px;line-height:1.3}
+.ik-reward>.ik-main-card{position:relative;overflow:hidden}
+.ik-reward>.ik-main-card::before{
+  content:"";position:absolute;inset:auto -32px -45px auto;width:185px;height:93px;
+  border-radius:55% 55% 0 0;background:radial-gradient(circle at 36% 20%,#fff1f8a0 0 23%,transparent 24%),radial-gradient(ellipse,#f6daff91,transparent 75%);
+  pointer-events:none;
+}
+.ik-reward>.ik-main-card>.ik-hero-split,.ik-reward>.ik-main-card>.ik-level-track{position:relative;z-index:1}
+.ik-reward .ik-achievement{padding:11px 5px}
+.ik-profile .ik-time-stat .ik-tile{padding:11px 9px}
+.ik-profile .ik-time-stat .ik-tile strong{font-size:20px}
+.ik-profile .ik-time-stat .ik-tile small{font-size:10px}
+.ik-profile .ik-profile-card{padding:15px 17px}
+@media(max-width:365px){
+  .ik-compact-header>.ik-cloud-pill{font-size:9px}
+  .scs-iskra .ik-filter{font-size:9px}
+  .scs-iskra .ik-grade-track{width:32px}
+  .scs-iskra .ik-main-card .ik-star{width:73px;height:73px}
+}
