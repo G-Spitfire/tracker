@@ -217,7 +217,29 @@ const wk=()=>{const d=new Date(),k=(d.getDay()+6)%7;return Array.from({length:7}
 const EX={i:'ex',e:'🤸',t:'Зарядка',s:'5–10 минут',b:'#ffe9d2',c:'#ff9a3c'};
 const T=[{i:'bg',e:'🎒',t:'Собрать портфель',b:'#ffe3d6',c:'#ff8a65'},{i:'cl',e:'👕',t:'Приготовить вещи на завтра',b:'#dff1ff',c:'#4fb3ff'},{i:'hw',e:'✏️',t:'Сделать уроки',s:'нажми ✎, чтобы выбрать предметы',b:'#fff0c2',c:'#f2b300'},{i:'en',e:'🇬🇧',t:'Английский',s:'10–15 минут',b:'#e6defc',c:'#8e6cf0'},{i:'ho',e:'🧹',t:'Помочь по дому',s:'нажми ✎, чтобы рассказать',b:'#d9f6e8',c:'#2fbf8f'}];
 const RD={i:'rd',e:'📖',t:'Почитать',s:'на выходных',b:'#ffdcec',c:'#ff6fa5'};
-const tasks=d=>{const w=new Date(d+'T00:00:00').getDay(),b=d>=S.ex?[EX].concat(T):T;return w==0||w==6?b.concat([RD]):b};
+// Existing histories keep their original task list and star rules.
+const legacyTasks=d=>{const w=new Date(d+'T00:00:00').getDay(),b=d>=S.ex?[EX].concat(T):T;return w===0||w===6?b.concat([RD]):b};
+S.planHistory=S.planHistory&&typeof S.planHistory==='object'?S.planHistory:{};
+S.taskDays=S.taskDays&&typeof S.taskDays==='object'?S.taskDays:{};
+S.hiddenTasks=Array.isArray(S.hiddenTasks)?S.hiddenTasks:[];
+S.customTasks=Array.isArray(S.customTasks)?S.customTasks:[];
+S.rewardHistory=S.rewardHistory&&typeof S.rewardHistory==='object'?S.rewardHistory:{};
+S.earnedAchievements=S.earnedAchievements&&typeof S.earnedAchievements==='object'?S.earnedAchievements:{};
+// Preserve past earned stars even when a parent's future schedule changes.
+for(const date of Object.keys(S.d||{})){
+  if(!Object.hasOwn(S.planHistory,date))S.planHistory[date]=legacyTasks(date);
+}
+const defaultDays={bg:[1,2,3,4,5],cl:[0,1,2,3,4],hw:[1,2,3,4,5],en:[1,2,3,4,5],ho:[0,1,2,3,4,5,6],ex:[0,1,2,3,4,5,6],rd:[0,6]};
+const taskCatalog=()=>[EX,...T,RD,...S.customTasks];
+const tasks=d=>{
+  if(Array.isArray(S.planHistory[d]))return S.planHistory[d];
+  const wd=new Date(d+'T12:00:00').getDay();
+  return taskCatalog().filter(t=>
+    (t.i!=='ex'||d>=S.ex)&&!S.hiddenTasks.includes(t.i)&&
+    (Array.isArray(S.taskDays[t.i])?S.taskDays[t.i]:(defaultDays[t.i]||[0,1,2,3,4,5,6])).includes(wd)
+  );
+};
+const freezeDay=d=>{if(!Array.isArray(S.planHistory[d]))S.planHistory[d]=tasks(d).map(t=>({...t}))};
 const dn=d=>(S.d[d]||[]).filter(i=>tasks(d).some(t=>t.i==i));
 const st=d=>{const n=dn(d).length;return n+(n&&n==tasks(d).length?2:0)};
 const ring=(n,m)=>{const C=2*Math.PI*40;return`<svg width="96" height="96" viewBox="0 0 96 96" style="flex:none"><circle cx="48" cy="48" r="40" fill="none" stroke="#ffffff55" stroke-width="10"/><circle cx="48" cy="48" r="40" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-n/m)}" transform="rotate(-90 48 48)"/><text x="48" y="56" text-anchor="middle" font-size="24" font-weight="800" fill="#fff">${n}/${m}</text></svg>`};
@@ -355,17 +377,20 @@ function toast(m,opt){
 }
 
 /* ===== LOGIC ===== */
-function setDone(i,on,silent){
-  const d=iso(new Date()),a=S.d[d]||(S.d[d]=[]),L=tasks(d),wasAll=dn(d).length==L.length,x=a.indexOf(i);
+function setDone(i,on,silent,date){
+  const d=date||iso(new Date());
+  freezeDay(d);
+  const a=S.d[d]||(S.d[d]=[]),L=tasks(d),wasAll=dn(d).length===L.length,x=a.indexOf(i);
+  if(!L.some(t=>t.i===i))return;
   const previousDetails=!on&&x>=0&&S.x[d]&&S.x[d][i]?JSON.parse(JSON.stringify(S.x[d][i])):null;
   if(on&&x<0)a.push(i);
   if(!on&&x>=0){a.splice(x,1);if(S.x[d])delete S.x[d][i]}
-  const all=dn(d).length==L.length;
+  const all=dn(d).length===L.length;
   save();render();
   if(silent)return;
   if(on&&x<0)toast(all&&!wasAll?'🎉 Все дела готовы! +2 бонусные звезды':'⭐ +1 звезда');
   else if(!on&&x>=0)toast('Отметка снята',{action:'Вернуть',onAction:()=>{
-    setDone(i,true,true);
+    setDone(i,true,true,d);
     if(previousDetails){(S.x[d]||(S.x[d]={}))[i]=previousDetails;save();render()}
   }});
 }
@@ -395,9 +420,11 @@ function openReward(){
 
 /* ===== DAY HISTORY ===== */
 function openDay(d){
-  const done=dn(d),L=tasks(d);
-  const items=L.map(t=>{const ok=done.includes(t.i),x=(S.x[d]||{})[t.i];const sub=ok&&x?esc([].concat(x.s||[],x.n?[x.n]:[]).join(', ')):'';return`<div class="row"><span>${t.e} ${esc(t.t)}${sub?`<div class="mu sm">${sub}</div>`:''}</span><span>${ok?'⭐':''}</span></div>`}).join('');
-  sheet(`<div class="hist-day"><h2 style="margin-top:0">${d.split('-').reverse().join('.')}</h2><div class="mu sm" style="margin-bottom:10px">⭐ ${st(d)} звёзд</div>${items||'<div class="mu sm">Привычек нет</div>'}<p data-sheet-footer style="margin:18px 0 0"><button class="btn g" data-action="closeSheet">Закрыть</button></p></div>`);
+  const done=dn(d),L=tasks(d),now=iso(new Date()),y=new Date();
+  y.setDate(y.getDate()-1);
+  const canEdit=d===iso(y);
+  const items=L.map(t=>{const ok=done.includes(t.i),x=(S.x[d]||{})[t.i];const sub=ok&&x?esc([].concat(x.s||[],x.n?[x.n]:[]).join(', ')):'';return`<div class="row"><span>${t.e} ${esc(t.t)}${sub?`<div class="mu sm">${sub}</div>`:''}</span>${canEdit?`<button type="button" class="ik-btn-small" data-action="historyToggle" data-id="${esc(d)}" data-arg="${esc(t.i)}" aria-label="${ok?'Снять':'Отметить'} выполнение">${ok?'✓ Готово':'Отметить'}</button>`:`<span>${ok?'⭐':''}</span>`}</div>`}).join('');
+  sheet(`<div class="hist-day"><h2 style="margin-top:0">${d.split('-').reverse().join('.')}</h2><div class="mu sm" style="margin-bottom:10px">⭐ ${st(d)} звёзд</div>${items||'<div class="mu sm">Дел нет</div>'}${canEdit?'<p class="mu sm">Вчерашние отметки можно исправить после подтверждения взрослого.</p>':''}<p data-sheet-footer style="margin:18px 0 0"><button class="btn g" data-action="closeSheet">Закрыть</button></p></div>`);
 }
 
 /* ===== HISTORY CALENDAR ===== */
@@ -498,8 +525,14 @@ const ACTIONS={
   histPrev:()=>histPrev(),
   histNext:()=>histNext(),
   histDay:(d)=>openDay(d),
+  historyToggle:(d,i)=>{
+    const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
+    if(d!==iso(yesterday)||!tasks(d).some(t=>t.i===i))return;
+    if(!confirm('Взрослый подтверждает исправление вчерашнего дела?'))return;
+    setDone(i,!(S.d[d]||[]).includes(i),true,d);
+    openDay(d);
+  },
 };
-function toggleTask(i){};
 function toggleTask(i){
   const d=iso(new Date()),done=(S.d[d]||[]).includes(i);
   setDone(i,!done);
