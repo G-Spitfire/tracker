@@ -171,6 +171,22 @@ function cloudGrades() {
   s += '<div class="hero"><div class="big">' + avg(numeric) +
     '</div><div class="mu">Средний балл · ' + numeric.length +
     ' числовых оценок</div></div>';
+  const unresolved = filtered.filter(row => unknownMark(row) && markScore(row) === null).length;
+  if (unresolved) {
+    const unresolvedRows = filtered.filter(row => unknownMark(row) && markScore(row) === null)
+      .sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
+    s += '<details class="card scs-unknown-list"><summary>Неопределённые отметки: ' +
+      unresolved + ' · что это?</summary>' +
+      '<p class="mu sm">В выгрузке школьного дневника нет однозначной числовой оценки. ' +
+      'Чтобы не исказить средний балл, мы показываем «?» и не учитываем такую запись.</p>' +
+      unresolvedRows.map(row =>
+        '<div class="scs-unknown-row"><b>' + esc(row.subject) + '</b> · ' +
+        esc(row.date.split('-').reverse().join('.')) +
+        (row.type ? '<div class="mu sm">' + esc(row.type) + '</div>' : '') +
+        '<div class="mu sm">Название: ' + esc(row.value || 'пусто') +
+        ' · код: ' + esc(row.valueCode || 'пусто') + '</div></div>'
+      ).join('') + '</details>';
+  }
   s += '<div class="card"><b>Динамика среднего балла</b>' + trend(numeric) +
     '<div class="mu sm">Все числовые оценки равновесные; официальный школьный средний может отличаться.</div></div>';
   if (!filtered.length) s += '<div class="card">В выбранном периоде оценок пока нет.</div>';
@@ -197,22 +213,6 @@ function cloudGrades() {
       'Средний ' + mean.toFixed(2) + ' · прогноз ' + forecast(mean)) +
       '</div></div></div><div class="chips">' + chips + '</div></div>';
   }).join('');
-  const unresolved = filtered.filter(row => unknownMark(row) && markScore(row) === null).length;
-  if (unresolved) {
-    const unresolvedRows = filtered.filter(row => unknownMark(row) && markScore(row) === null)
-      .sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
-    s += '<details class="card scs-unknown-list"><summary>Неопределённые отметки: ' +
-      unresolved + ' · что это?</summary>' +
-      '<p class="mu sm">В выгрузке школьного дневника нет однозначной числовой оценки. ' +
-      'Чтобы не исказить средний балл, мы показываем «?» и не учитываем такую запись.</p>' +
-      unresolvedRows.map(row =>
-        '<div class="scs-unknown-row"><b>' + esc(row.subject) + '</b> · ' +
-        esc(row.date.split('-').reverse().join('.')) +
-        (row.type ? '<div class="mu sm">' + esc(row.type) + '</div>' : '') +
-        '<div class="mu sm">Название: ' + esc(row.value || 'пусто') +
-        ' · код: ' + esc(row.valueCode || 'пусто') + '</div></div>'
-      ).join('') + '</details>';
-  }
   s += '<p class="mu sm">Источник: Петербургское образование. Прогноз условный, по равновесным оценкам; школьные коэффициенты здесь не применяются.</p>';
   return s;
 }
