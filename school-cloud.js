@@ -33,7 +33,7 @@ const today = () => {
     '-' + String(d.getDate()).padStart(2, '0');
 };
 const score = value => /^[2-5](?:\.0+)?$/.test(String(value).trim()) ? Number(value) : null;
-const markScore = row => score(row.valueCode) ?? markScore(row);
+const markScore = row => score(row.valueCode) ?? score(row.value);
 const avg = rows => rows.length
   ? (rows.reduce((n, row) => n + row.n, 0) / rows.length).toFixed(2) : '—';
 const forecast = n => n < 2.6 ? 2 : n < 3.6 ? 3 : n < 4.6 ? 4 : 5;
