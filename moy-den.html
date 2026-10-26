@@ -136,7 +136,10 @@ const store=(()=>{
     if(!s.taskDays||typeof s.taskDays!=='object'||Array.isArray(s.taskDays))s.taskDays={};
     if(!Array.isArray(s.hiddenTasks))s.hiddenTasks=[];
     if(!Array.isArray(s.customTasks))s.customTasks=[];
-    if(!s.rewardHistory||typeof s.rewardHistory!=='object')s.rewardHistory={};
+    if(!s.rewardHistory||typeof s.rewardHistory!=='object'||Array.isArray(s.rewardHistory))s.rewardHistory={};
+    if(!s.weekPlans||typeof s.weekPlans!=='object'||Array.isArray(s.weekPlans))s.weekPlans={};
+    if(!s.taskCategories||typeof s.taskCategories!=='object'||Array.isArray(s.taskCategories))s.taskCategories={};
+    if(!['all','30','7'].includes(s.profileStatsWindow))s.profileStatsWindow='all';
     if(!s.earnedAchievements||typeof s.earnedAchievements!=='object')s.earnedAchievements={};
     if(!s.times||typeof s.times!=='object')s.times={};
     if(typeof s.interests!=='string')s.interests='';
