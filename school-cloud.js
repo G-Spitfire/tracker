@@ -531,6 +531,12 @@ setOfflineEnabled:value=>{
     return true;
   }catch(_){return false}
 },
+summaryBetween:(from,to)=>{
+  if(appKind!=='iskra'||!state.user||!state.data)return null;
+  const rows=state.data.grades.filter(r=>(!from||r.date>=from)&&(!to||r.date<=to))
+    .map(r=>({...r,n:gradeScore(r)})).filter(r=>r.n!==null&&!officialKind(r));
+  return {count:rows.length,average:rows.length?ikMean(rows):null};
+},
 overallSummary:()=>{
   const rows=(state.data?.grades||[]).map(row=>({...row,n:gradeScore(row)})).filter(r=>r.n!==null&&!officialKind(r));
   return {count:rows.length,average:rows.length?ikMean(rows):null};
