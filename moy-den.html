@@ -115,80 +115,12 @@ const CONFIG={
   emojis:['🦊','🐱','🐶','🐼','🦄','🐰','🐻','🐯','🐸','🐨','🦉','🐬','🦋','🐙','🐧','🦁','🌸','🚀','🎨','⭐'],
   colors:['#ffd9c9','#ffe9a8','#d3f2e4','#d6ecff','#e6dcff','#ffd6ea'],
   levels:[[0,'Звёздочка'],[40,'Умница'],[120,'Мастер дня'],[250,'Чемпион']],
-  gradeThresholds:[2.6,3.6,4.6],
-  gradeGoal:4+1/3,
-  maxPlan:9999,
 };
 const KEY='kid1',BAK=KEY+'_bak',DN=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const SCHEMA=4;
 
 
-/* Четверти: выбранный период остаётся в прежних полях для совместимости копий. */
-function termCopy(v){return JSON.parse(JSON.stringify(v))}
-function termLabel(t){return t.year+'/'+String(t.year+1).slice(-2)+' · '+['I','II','III','IV'][t.quarter-1]+' четверть'}
-function termFields(q,a){return {g:termCopy(q.g),hl:termCopy(q.hl||[]),meanHistory:termCopy(q.meanHistory||[]),end:q.end||'',n:q.n||0,[a]:termCopy(q[a]||[])}}
-function syncTerm(q,a){const t=q.terms.find(t=>t.id===q.selectedTerm);if(t)Object.assign(t,termFields(q,a))}
-function initTerms(q,a){
-  const now=new Date(),year=now.getFullYear()-(now.getMonth()<8?1:0);
-  if(!Array.isArray(q.terms)||!q.terms.length){
-    const t={id:year+'-1',year,quarter:1,...termFields(q,a)};
-    q.terms=[t];q.selectedTerm=t.id;q.currentTerm=t.id;
-  }
-  for(const t of q.terms){
-    if(!t||!Number.isInteger(t.year)||!Number.isInteger(t.quarter)||t.quarter<1||t.quarter>4||!t.g||typeof t.g!=='object'||Array.isArray(t.g))throw Error('bad term');
-    for(const k of Object.keys(t.g)){
-      if(!Array.isArray(t.g[k]))throw Error('bad term grades');
-      t.g[k]=t.g[k].filter(x=>x&&[2,3,4,5].includes(Number(x.v))).map(x=>({...x,i:Number(x.i)||0,v:Number(x.v)}));
-    }
-    t[a]=Array.isArray(t[a])?t[a].filter(k=>Object.hasOwn(t.g,k)):[];
-    t.hl=Array.isArray(t.hl)?t.hl:[];
-    t.meanHistory=Array.isArray(t.meanHistory)?t.meanHistory.filter(p=>p&&typeof p.d==='string'&&(p.e===null||Number.isFinite(p.e))):[];
-  }
-  if(!q.terms.some(t=>t.id===q.selectedTerm))q.selectedTerm=q.terms[0].id;
-  if(!q.terms.some(t=>t.id===q.currentTerm))q.currentTerm=q.terms[q.terms.length-1].id;
-  q.meanHistory=Array.isArray(q.meanHistory)?q.meanHistory:[];
-  recordMean(q,a);syncTerm(q,a);return q;
-}
-function recordMean(q,a){
-  const values=Object.keys(q.g).filter(k=>!(q[a]||[]).includes(k)).flatMap(k=>q.g[k].map(x=>x.v));
-  const e=values.length?values.reduce((s,v)=>s+v,0)/values.length:null;
-  q.meanHistory=q.meanHistory||[];
-  const last=q.meanHistory[q.meanHistory.length-1];
-  if((values.length||last)&&(!last||last.e!==e))q.meanHistory.push({d:iso(new Date()),e});
-}
-function selectTerm(q,a,id){
-  const t=q.terms.find(t=>t.id===id);if(!t)return;
-  syncTerm(q,a);Object.assign(q,termCopy(termFields(t,a)));q.selectedTerm=id;
-}
-function termControls(q){
-  return `<div class="card"><label class="sm">Учебный год и четверть<select data-action="selectTerm" aria-label="Учебный год и четверть" style="width:100%;margin-top:6px;padding:12px;border:1px solid var(--ln);border-radius:14px;background:var(--bg);color:var(--tx);font:inherit;min-height:44px">${q.terms.map(t=>`<option value="${esc(t.id)}" ${t.id===q.selectedTerm?'selected':''}>${termLabel(t)}${t.id===q.currentTerm?' · текущая':' · архив'}</option>`).join('')}</select></label>${q.selectedTerm!==q.currentTerm?'<p class="mu sm">Архив четверти. Оценки можно исправлять; текущая четверть хранится отдельно.</p>':''}</div>`;
-}
-function nextTermSheet(q){
-  if(q.selectedTerm!==q.currentTerm)return;
-  const t=q.terms.find(t=>t.id===q.currentTerm),next={year:t.year+(t.quarter===4?1:0),quarter:t.quarter===4?1:t.quarter+1};
-  sheet(`<h2>Начать следующую четверть?</h2><p>${termLabel(t)} сохранится в архиве вместе с оценками и графиком.</p><p><b>${termLabel(next)}</b> начнётся с теми же предметами и без оценок.</p><label class="sheet-field" for="nextTermEnd">Дата окончания новой четверти<input id="nextTermEnd" type="date"></label><div data-sheet-footer><button class="btn" data-action="confirmNextTerm">Сохранить и начать</button><button class="btn g" data-action="closeSheet">Отмена</button></div>`);
-}
-function createNextTerm(q,a){
-  if(q.selectedTerm!==q.currentTerm)return false;
-  const end=document.getElementById('nextTermEnd').value;
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(end)){toast('Укажи дату окончания новой четверти');return false}
-  if(q.end&&end<=q.end){toast('Новая четверть должна заканчиваться позже предыдущей');return false}
-  syncTerm(q,a);
-  const previous=q.terms.find(t=>t.id===q.currentTerm),year=previous.year+(previous.quarter===4?1:0),quarter=previous.quarter===4?1:previous.quarter+1,id=year+'-'+quarter;
-  if(q.terms.some(t=>t.id===id))return false;
-  const t={id,year,quarter,g:Object.fromEntries(Object.keys(q.g).map(k=>[k,[]])),hl:[],meanHistory:[],end,n:0,[a]:termCopy(q[a]||[])};
-  q.terms.push(t);q.currentTerm=id;selectTerm(q,a,id);return true;
-}
-function meanChart(q){
-  const L=(q.meanHistory||[]).slice(-40),n=L.length,vs=L.filter(p=>p.e!==null).map(p=>p.e);if(!vs.length)return '<p class="mu sm">График появится после первой оценки.</p>';
-  const lo=Math.max(1.9,Math.min(...vs)-.15),hi=Math.min(5.1,Math.max(...vs)+.15),W=320,H=130,P=32;
-  const x=i=>n>1?P+i*(W-P-8)/(n-1):W/2,y=v=>H-20-(v-lo)/(hi-lo)*(H-35),lb=p=>p.d.slice(8)+'.'+p.d.slice(5,7);
-  let path='',pen=false;L.forEach((p,i)=>{if(p.e===null){pen=false;return}path+=(pen?'L':'M')+x(i).toFixed(1)+' '+y(p.e).toFixed(1);pen=true});
-  const last=L[n-1];
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Арифметическое среднее всех оценок"><text x="0" y="${y(lo)}" font-size="11" fill="var(--mu)">${lo.toFixed(1)}</text><text x="0" y="${y(hi)+4}" font-size="11" fill="var(--mu)">${hi.toFixed(1)}</text><path d="${path}" fill="none" stroke="var(--ac)" stroke-width="3" stroke-linejoin="round"/>${last.e===null?'':`<circle cx="${x(n-1)}" cy="${y(last.e)}" r="4" fill="var(--ac)"/>`}<text x="${P}" y="${H-2}" font-size="11" fill="var(--mu)">${lb(L[0])}</text>${n>1?`<text x="${W-8}" y="${H-2}" text-anchor="end" font-size="11" fill="var(--mu)">${lb(last)}</text>`:''}</svg>${n<2?'<div class="mu sm">Линия появится после изменения среднего балла.</div>':''}`;
-}
-
-/* ===== STORE (привычки) ===== */
+/* Ручные оценки сохранены только как резервный архив данных. */
 const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const store=(()=>{
   function defaults(){return{
@@ -243,7 +175,7 @@ const schoolStore=(()=>{
     if(!Array.isArray(q.hl))q.hl=[];
     if(!Array.isArray(q.archived))q.archived=[];
     q.n=Math.max(q.n||0,...Object.values(q.g).flat().map(x=>x.i||0));
-    return initTerms(q,'archived');
+    return q;
   }
   function migrate(q){
     // схема 3 -> 4: у оценок появляется дата d
@@ -279,7 +211,7 @@ delete S._schoolRaw;
 
 let tab='t',cur={i:'',s:[],n:''},calMonth=null;
 
-const save=()=>{syncTerm(S.school,'archived');store.save(S);try{localStorage.setItem(KEY+'_school',JSON.stringify(S.school))}catch(e){}};
+const save=()=>store.save(S);
 const sum=a=>a.reduce((x,y)=>x+y,0),esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 const wk=()=>{const d=new Date(),k=(d.getDay()+6)%7;return Array.from({length:7},(_,i)=>{const x=new Date(d);x.setDate(d.getDate()-k+i);return iso(x)})};
 const EX={i:'ex',e:'🤸',t:'Зарядка',s:'5–10 минут',b:'#ffe9d2',c:'#ff9a3c'};
@@ -458,20 +390,10 @@ function openReward(){
 }
 
 /* ===== DAY HISTORY ===== */
-function dayGrades(d){
-  const out=[];
-  for(const t of S.school.terms){
-    const q=t.id===S.school.selectedTerm?S.school:t;
-    for(const k of Object.keys(q.g))for(const x of q.g[k])if(x.d===d)out.push({k,v:x.v,i:x.i});
-  }
-  return out;
-}
-
 function openDay(d){
-  const done=dn(d),L=tasks(d),grades=dayGrades(d);
+  const done=dn(d),L=tasks(d);
   const items=L.map(t=>{const ok=done.includes(t.i),x=(S.x[d]||{})[t.i];const sub=ok&&x?esc([].concat(x.s||[],x.n?[x.n]:[]).join(', ')):'';return`<div class="row"><span>${t.e} ${esc(t.t)}${sub?`<div class="mu sm">${sub}</div>`:''}</span><span>${ok?'⭐':''}</span></div>`}).join('');
-  const ghtml=grades.length?`<h2>Оценки</h2>${grades.map(g=>`<div class="row"><span>${esc(g.k)}</span><span class="tag hist-grade">${g.v}</span></div>`).join('')}`:'';
-  sheet(`<div class="hist-day"><h2 style="margin-top:0">${d.split('-').reverse().join('.')}</h2><div class="mu sm" style="margin-bottom:10px">⭐ ${st(d)} звёзд</div>${items||'<div class="mu sm">Привычек нет</div>'}${ghtml}<p data-sheet-footer style="margin:18px 0 0"><button class="btn g" data-action="closeSheet">Закрыть</button></p></div>`);
+  sheet(`<div class="hist-day"><h2 style="margin-top:0">${d.split('-').reverse().join('.')}</h2><div class="mu sm" style="margin-bottom:10px">⭐ ${st(d)} звёзд</div>${items||'<div class="mu sm">Привычек нет</div>'}<p data-sheet-footer style="margin:18px 0 0"><button class="btn g" data-action="closeSheet">Закрыть</button></p></div>`);
 }
 
 /* ===== HISTORY CALENDAR ===== */
@@ -490,117 +412,22 @@ function renderHistory(){
   for(let d=1;d<=daysIn;d++){
     const ds=iso(new Date(y,m,d));
     const hasHab=(S.d[ds]||[]).length>0||Object.keys(S.x[ds]||{}).length>0;
-    const hasGrade=dayGrades(ds).length>0;
     const fut=ds>td;
-    const dots=(hasHab?'<span class="dot h"></span>':'')+(hasGrade?'<span class="dot g"></span>':'');
-    cells.push(`<button class="${hasHab||hasGrade?'has':''} ${ds===td?'today':''} ${fut?'future':''}" data-action="histDay" data-id="${ds}">${d}${dots}</button>`);
+    const dots=hasHab?'<span class="dot h"></span>':'';
+    cells.push(`<button class="${hasHab?'has':''} ${ds===td?'today':''} ${fut?'future':''}" data-action="histDay" data-id="${ds}">${d}${dots}</button>`);
   }
   const monthName=first.toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
   sheet(`<h2 style="margin-top:0">История</h2>
     <div class="months"><button data-action="histPrev" aria-label="Предыдущий месяц">‹</button><b>${monthName}</b><button data-action="histNext" aria-label="Следующий месяц">›</button></div>
     <div class="cal">${DN.map(d=>`<div class="wd">${d}</div>`).join('')}${cells.join('')}</div>
-    <div class="sm mu">Кружок — сегодня. Оранжевая точка — привычки, фиолетовая — оценки.</div>
+    <div class="sm mu">Кружок — сегодня. Оранжевая точка — выполненные дела.</div>
     <p data-sheet-footer style="margin:18px 0 0"><button class="btn g" data-action="closeSheet">Закрыть</button></p>`);
 }
 function histPrev(){calMonth.m--;if(calMonth.m<0){calMonth.m=11;calMonth.y--}renderHistory()}
 function histNext(){calMonth.m++;if(calMonth.m>11){calMonth.m=0;calMonth.y++}renderHistory()}
 
-/* ===== SCHOOL (изолированный модуль) ===== */
-const school=(()=>{
-  const TH=CONFIG.gradeThresholds;
-  const f2=x=>x.toFixed(2);
-  const names=()=>Object.keys(S.school.g).filter(k=>!S.school.archived.includes(k));
-  const ACT=()=>names().filter(k=>S.school.g[k].length);
-  const vals=k=>S.school.g[k].map(x=>x.v),avg=k=>sum(vals(k))/vals(k).length;
-  const fin=a=>a<TH[0]?2:a<TH[1]?3:a<TH[2]?4:5;
-    const exAvg=()=>{const a=ACT().flatMap(k=>vals(k));return sum(a)/(a.length||1)};
-  function plan(a){
-    const n=a.length,s=sum(a),target=TH[1];
-    const k=Math.max(0,Math.ceil((target*n-s)/(5-target)-1e-9));
-    const x=(s+5*k)/(n+k);
-    return{k,x,t:k>=CONFIG.maxPlan?'получить очень много «5» подряд':`получить ${k}× «5» подряд`};
-  }
-  function calc(){
-    const bad=[],good=[];
-    ACT().forEach(k=>{const a=vals(k),av=avg(k);
-      if(av<TH[1])bad.push({k,av,p:plan(a),f:fin(av)});
-      else{const x=(sum(a)+3)/(a.length+1);good.push({k,av,x:x<TH[1]?x:null})}});
-    bad.sort((a,b)=>(a.f-b.f)||(a.p.k-b.p.k)||(a.av-b.av));return{bad,good};
-  }
-  function scen(k){
-    const a=vals(k),s=sum(a),n=a.length,c=avg(k);
-    return[5,4,3].map(v=>{const x=(s+v)/(n+1);return`<span>${v} → <b class="${x>=TH[1]?'ok':x>=c?'warn':'bad'}">${f2(x)}</b></span>`}).join('');
-  }
-  function chart(){return meanChart(S.school)}
-
-  function gradeDonut(){
-    const c=[2,3,4,5].map(v=>({v,n:ACT().filter(k=>fin(avg(k))===v).length}));
-    const total=c.reduce((n,x)=>n+x.n,0);
-    if(!total)return'<div class="mu sm">Диаграмма появится после добавления оценок.</div>';
-    const palette={2:'#e26487',3:'#edb345',4:'#54b99a',5:'#ad7aed'};
-    let start=0;
-    const rings=c.filter(x=>x.n).map(x=>{const share=x.n/total*100;const seg=`<circle cx="60" cy="60" r="46" fill="none" stroke="${palette[x.v]}" stroke-width="12" stroke-dasharray="${share} ${100-share}" stroke-dashoffset="${-start}" pathLength="100" transform="rotate(-90 60 60)"></circle>`;start+=share;return seg}).join('');
-    const legend=c.map(x=>`<div class="donut-item"><span class="donut-dot" style="background:${palette[x.v]}"></span><span>«${x.v}»</span><b>${x.n}</b></div>`).join('');
-    return`<div class="donut-wrap"><svg viewBox="0 0 120 120" role="img" aria-label="Какая будет четвертная по предметам" class="donut"><circle cx="60" cy="60" r="46" fill="none" stroke="var(--ln)" stroke-width="12"></circle>${rings}<text x="60" y="57" text-anchor="middle" fill="var(--tx)" font-size="23" font-weight="750">${total}</text><text x="60" y="73" text-anchor="middle" fill="var(--mu)" font-size="9">предметов</text></svg><div class="donut-legend">${legend}</div></div>`;
-  }
-  function commit(){recordMean(S.school,'archived');save();render()}
-
-  function viewLocal(){
-    const active=ACT(),{bad,good}=calc(),frag=good.filter(g=>g.x),ordered=names().sort((a,b)=>a.localeCompare(b,'ru'));
-    const end=S.school.end;let days=0;
-    if(end){for(let d=new Date(iso(new Date())+'T12:00:00');iso(d)<=end;d.setDate(d.getDate()+1))if(d.getDay()>0&&d.getDay()<6)days++}
-    return`<h1>Мои оценки</h1>${termControls(S.school)}<div class="card"><div class="school-summary"><div class="school-score">${active.length?f2(exAvg()):'—'}</div><div><b>Средний балл</b><div class="mu sm">все оценки равновесные</div></div></div>
-    <details class="school-how"><summary>Как это считается?</summary><p class="school-info mu">Крупная цифра и график — сумма всех оценок, делённая на их количество. Учитывается выбранная четверть без архивных предметов. Прогноз по каждому предмету: от 2,6 — «3», от 3,6 — «4», от 4,6 — «5». Все оценки весят одинаково, но в школе правила могут отличаться.</p></details>
-    ${end?`<div class="sm" style="margin-top:8px">${esc(end.split('-').reverse().join('.'))} · ${end<iso(new Date())?'четверть закончилась':'учебных дней до конца: '+days+' (без выходных)'}</div>`:''}</div>
-    ${!active.length?'<div class="note">Добавь первую оценку — появятся график и подсказки 🌟</div>':`<div class="card"><b>Как меняется средний балл</b>${chart()}<div class="mu sm">Арифметическое среднее всех оценок выбранной четверти.</div></div><div class="card"><b>Какая будет четвертная по предметам</b>${gradeDonut()}</div>`}
-    ${bad.length?`<h2>Что можно подтянуть</h2>${bad.map(b=>`<div class="card"><b>${esc(b.k)}</b><div class="sm">${b.p.t}, и средний станет ${f2(b.p.x)}</div><div class="sc"><span class="mu">Если получишь:</span>${scen(b.k)}</div></div>`).join('')}`:active.length?'<div class="note">Все предметы на четвёрке и выше. Так держать! 🌸</div>':''}
-    ${frag.length?`<div class="card"><b>На что обратить внимание</b>${frag.map(g=>`<p class="sm">${esc(g.k)}: тройка снизит средний с ${f2(g.av)} до ${f2(g.x)}.</p>`).join('')}</div>`:''}
-    <h2>Мои предметы</h2>${ordered.map(k=>{const n=names().indexOf(k),a=S.school.g[k];return`<div class="card school-sub"><div class="row"><div><b>${esc(k)}</b><div class="mu sm">${a.length?'средний '+f2(avg(k)):'оценок пока нет'}</div></div><div class="school-final">${a.length?fin(avg(k)):'—'}<small>выйдет</small></div></div><div class="chips">${a.map(x=>`<button class="chip c${x.v}" data-action="editGrade" data-id="${n}" data-arg="${x.i}" aria-label="Изменить оценку ${x.v}: ${esc(k)}">${x.v}</button>`).join('')}<button class="chip" data-action="addGrade" data-id="${n}" aria-label="Добавить оценку: ${esc(k)}">+</button></div>${a.length?`<div class="sc"><span class="mu">Если получишь:</span>${scen(k)}</div>`:''}</div>`}).join('')}
-    <button class="btn g" data-action="subjects">Предметы и четверть</button>`;
-  }
-  function edit(n,id){
-    const k=names()[n],x=S.school.g[k].find(x=>x.i===id);
-    sheet(`<h2 style="margin-top:0">${esc(k)}</h2><p class="mu sm">${x?'Исправь оценку или удали ошибочную запись.':'Какую оценку ты получила?'}</p><div class="chips">${[2,3,4,5].map(v=>`<button class="chip c${v}" data-action="putGrade" data-id="${n}" data-arg="${v}" data-arg2="${id===undefined?'null':id}">${v}</button>`).join('')}</div><div data-sheet-footer class="school-actions">${x?`<button class="btn g" data-action="removeGrade" data-id="${n}" data-arg="${id}">Удалить оценку</button>`:''}<button class="btn g" data-action="closeSheet">Отмена</button></div>`);
-  }
-  function put(n,v,id){
-    const k=names()[n];if(!k||![2,3,4,5].includes(v))return;
-    const a=S.school.g[k];
-    if(id!==null){const x=a.find(x=>x.i===id);if(!x)return;x.v=v}
-    else a.push({i:++S.school.n,v,d:iso(new Date())});
-    commit();cs();toast(v===5?'🌟 Пятёрка! Отличная работа!':'Оценка сохранена');
-  }
-  function remove(n,id){
-    const k=names()[n],a=S.school.g[k],x=a.find(x=>x.i===id);
-    if(!x)return;
-    const idx=a.indexOf(x),saved={...x};
-    a.splice(idx,1);commit();cs();
-    toast('Оценка удалена',{action:'Вернуть',onAction:()=>{a.splice(idx,0,saved);commit()}});
-  }
-  function subjects(){
-    const q=S.school;
-    sheet(`<h2>Предметы и четверть</h2><p class="sheet-period">${termLabel(q.terms.find(t=>t.id===q.selectedTerm))}${q.selectedTerm!==q.currentTerm?' · архив':''}</p>
-      <section class="sheet-section"><h3>Четверть</h3><label class="sheet-field" for="schoolEnd">Дата окончания<input id="schoolEnd" type="date" value="${esc(q.end||'')}" data-action="endInput"></label>${q.selectedTerm===q.currentTerm?'<button class="btn g" data-action="nextTerm">Начать следующую четверть</button>':''}</section>
-      <section class="sheet-section"><h3>Новый предмет</h3><div class="sheet-inline"><input id="schoolName" maxlength="30" placeholder="Название предмета" aria-label="Название нового предмета"><button class="btn" data-action="addSubject">Добавить</button></div></section>
-      <section class="sheet-section"><h3>Предметы</h3>${names().map((k,n)=>`<div class="subject-row"><span>${esc(k)}<small>Оценок: ${q.g[k].length}</small></span><button data-action="archiveSubject" data-id="${n}">В архив</button></div>`).join('')}</section>
-      ${q.archived.length?`<section class="sheet-section"><h3>Архив предметов</h3><p class="mu sm">Оценки сохранены и не участвуют в текущем прогнозе.</p>${q.archived.map((k,n)=>`<div class="subject-row"><span>${esc(k)}<small>Оценок: ${q.g[k].length}</small></span><button data-action="restoreSubject" data-id="${n}">Вернуть</button></div>`).join('')}</section>`:''}
-      <div data-sheet-footer><button class="btn" data-action="closeSheet">Готово</button></div>`,'subjects');
-  }
-  function add(){
-    const k=document.getElementById('schoolName').value.replace(/\s+/g,' ').trim().slice(0,30);
-    if(!k)return toast('Напиши название предмета');
-    if(Object.hasOwn(S.school.g,k))return toast('Предмет уже есть — проверь архив');
-    S.school.g[k]=[];commit();subjects();
-  }
-  function archive(n){
-    const k=names()[n];if(!k)return;
-    S.school.archived.push(k);commit();subjects();
-    toast(`«${k}» в архиве`,{action:'Вернуть',onAction:()=>{S.school.archived.pop();commit();subjects()}});
-  }
-  function restore(n){S.school.archived.splice(n,1);commit();subjects()}
-  function end(v){if(v&&!/^\d{4}-\d{2}-\d{2}$/.test(v))return;S.school.end=v;save();render()}
-  function view(){return window.schoolCloud ? window.schoolCloud.view(viewLocal) : viewLocal()}
-  return{view,edit,put,remove,subjects,add,archive,restore,end};
-})();
+/* Новые оценки доступны только через автоматическую загрузку. */
+const school={view:()=>window.schoolCloud ? window.schoolCloud.view() : '<div class="ik-page"><h1>Мои оценки</h1><div class="card">Подключаем дневник…</div></div>'};
 
 function openParents(){
   sheet(`<h2>Для родителей</h2><p class="mu sm">Настройте награду вместе с ребёнком. Данные хранятся на этом устройстве — сохраните копию для переноса.</p><button class="btn g" data-action="editReward">Награда и цель по звёздам</button><h2>Копия данных</h2><div class="chips"><button class="btn g" data-action="exportFile">Сохранить копию файлом</button><button class="btn g" data-action="pickBackupFile">Восстановить из файла</button><input type="file" id="backupFileInput" accept=".json,application/json" data-action="importFile" hidden><div id="backupStatus" class="mu sm" role="status" aria-live="polite"></div><details><summary class="mu sm" style="padding:16px 0">Восстановить старую текстовую копию</summary><textarea id="bk" aria-label="Текст старой копии"></textarea><button class="btn g" data-action="importText">Восстановить из текста</button></details></div><button data-sheet-footer class="btn g" data-action="closeSheet">Закрыть</button>`);
@@ -667,19 +494,8 @@ const ACTIONS={
   histPrev:()=>histPrev(),
   histNext:()=>histNext(),
   histDay:(d)=>openDay(d),
-  editGrade:(n,_,el)=>school.edit(+n,+el.dataset.arg),
-  addGrade:(n)=>school.edit(+n),
-  putGrade:(n,_,el)=>school.put(+n,+el.dataset.arg,el.dataset.arg2==='null'?null:+el.dataset.arg2),
-  removeGrade:(n,_,el)=>school.remove(+n,+el.dataset.arg),
-  selectTerm:()=>{},
-  nextTerm:()=>nextTermSheet(S.school),
-  confirmNextTerm:()=>{if(createNextTerm(S.school,'archived')){save();cs();render();toast('Новая четверть начата, предыдущая сохранена')}},
-  subjects:()=>school.subjects(),
-  addSubject:()=>school.add(),
-  archiveSubject:(n)=>school.archive(+n),
-  restoreSubject:(n)=>school.restore(+n),
-  endInput:(_,__,el)=>school.end(el.value),
 };
+function toggleTask(i){};
 function toggleTask(i){
   const d=iso(new Date()),done=(S.d[d]||[]).includes(i);
   setDone(i,!done);
@@ -699,12 +515,10 @@ document.addEventListener('input',e=>{
   const el=e.target.closest('[data-action]');
   if(!el)return;
   if(el.dataset.action==='nameInput'){S.name=el.value.trim();save()}
-  if(el.dataset.action==='endInput')school.end(el.value);
 });
 
 document.addEventListener('change',e=>{
-  if(e.target.dataset.action==='selectTerm'){selectTerm(S.school,'archived',e.target.value);save();render()}
-  else if(e.target.dataset.action==='importFile')importBackupFile(e.target)
+  if(e.target.dataset.action==='importFile')importBackupFile(e.target)
 });
 
 window.addEventListener('schoolCloudUpdated',()=>{if(tab==='g')render()});
