@@ -20,19 +20,16 @@ function cumulative(rows) {
   }
   return points;
 }
-/* Compare two consecutive equally sized blocks of the most recent marks.
-   With 4–5 grades use 2 vs 2; with 6+ grades use 3 vs 3.
-   Do not treat a neutral or unmeasurable subject as improving/declining. */
-/* Difference between the cumulative mean at the end of the period and
-   the cumulative mean 14 calendar days earlier. At least two prior
-   marks and one new mark are needed; never infer a change without new marks. */
-function subjectDelta14(rows,range,now=currentDate()){
+/* Weekly change in the cumulative period average, not the average of
+   a separate seven-day batch. Require at least two earlier marks and
+   one new mark. Official quarter marks do not enter the calculation. */
+function subjectDelta7(rows,range,now=currentDate()){
  if(!range)return null;
  const end=range.to<now?range.to:now;
  if(end<range.from)return null;
  const threshold=new Date(end+'T12:00:00Z');
  if(Number.isNaN(threshold.valueOf()))return null;
- threshold.setUTCDate(threshold.getUTCDate()-14);
+ threshold.setUTCDate(threshold.getUTCDate()-7);
  const cutoff=threshold.toISOString().slice(0,10);
  const all=byDate(works(rows).filter(g=>g.date>=range.from&&g.date<=end));
  const before=all.filter(g=>g.date<=cutoff);
@@ -85,6 +82,22 @@ function header(ui) {
  ['overview','finals'].map((x,i)=>'<button type="button" data-action="school-view" data-id="'+x+'" class="school-tab '+((ui.schoolScreen||'overview')===x?'active':'')+'">'+(i?'Итоги':'Дневник')+'</button>').join('')+
  '</div>';
 }
+/* Least-squares straight trend across dated cumulative averages. The trend
+   spans actual grade dates only; it is not a forecast for later dates. */
+function linearTrend(points) {
+ if(points.length<3)return null;
+ const t0=Date.parse(points[0].date+'T12:00:00Z');
+ const samples=points.map(p=>({x:(Date.parse(p.date+'T12:00:00Z')-t0)/86400000,y:p.average}));
+ if(samples.some(p=>!Number.isFinite(p.x)||!Number.isFinite(p.y)))return null;
+ const n=samples.length,meanX=samples.reduce((a,p)=>a+p.x,0)/n,meanY=samples.reduce((a,p)=>a+p.y,0)/n;
+ const denominator=samples.reduce((a,p)=>a+(p.x-meanX)**2,0);
+ if(denominator<=0)return null;
+ const slope=samples.reduce((a,p)=>a+(p.x-meanX)*(p.y-meanY),0)/denominator;
+ const intercept=meanY-slope*meanX;
+ const bound=v=>Math.max(2,Math.min(5,v));
+ return {first:bound(intercept),last:bound(intercept+slope*samples.at(-1).x),slope};
+}
+
 function chart(series,range) {
  const available=series.filter(s=>s.points.length);
  if(!available.length)return '<div class="empty">Пока недостаточно обычных оценок для графика.</div>';
@@ -99,9 +112,12 @@ function chart(series,range) {
  const grid=[2,3,4,5].map(n=>'<line x1="'+left+'" x2="'+(width-right)+'" y1="'+Y(n)+'" y2="'+Y(n)+'" stroke="#e5ebf5"/><text x="'+(left-9)+'" y="'+(Y(n)+4)+'" text-anchor="end" font-size="12" fill="#6f7f94">'+n+'</text>').join('');
  const plot=available.map(line=>{
   const points=line.points.map(p=>X(p.date).toFixed(1)+','+Y(p.average).toFixed(1)).join(' ');
-  const dash=line.dash?' stroke-dasharray="'+line.dash+'"':'';
-  const curve=line.points.length>1?'<polyline points="'+points+'" fill="none" stroke="'+line.color+'" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"'+dash+'/>':'';
-  return curve+line.points.map(p=>{
+  const curve=line.points.length>1?'<polyline points="'+points+'" fill="none" stroke="'+line.color+'" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>':'';
+  const trend=linearTrend(line.points);
+  const trendLine=trend?'<line class="school-chart-trend" x1="'+X(line.points[0].date).toFixed(1)+'" y1="'+Y(trend.first).toFixed(1)+
+   '" x2="'+X(line.points.at(-1).date).toFixed(1)+'" y2="'+Y(trend.last).toFixed(1)+
+   '" stroke="#c96d28" stroke-width="2.4" stroke-dasharray="7 5" stroke-linecap="round"><title>Линия тренда — направление изменения среднего, не прогноз</title></line>':'';
+  return curve+trendLine+line.points.map(p=>{
    const gradeLabels=p.newGrades.map(g=>g.score+' '+g.subject+(g.type?' ('+g.type+')':'')).join('; ');
    const tooltip=(line.name?line.name+' — ':'')+dateLabel(p.date)+', средний '+fmt(p.average)+
     ', всего '+p.count+' оценок; за день: '+gradeLabels;
@@ -112,9 +128,11 @@ function chart(series,range) {
  const first=range?.from||available.flatMap(s=>s.points).map(p=>p.date).sort()[0];
  const endTime=new Date(end);
  const last=String(endTime.getFullYear())+'-'+String(endTime.getMonth()+1).padStart(2,'0')+'-'+String(endTime.getDate()).padStart(2,'0');
- return '<svg class="school-plot" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="График накопленного среднего балла от 2 до 5">'+grid+plot+
+ const hasTrend=available.some(line=>linearTrend(line.points));
+ return '<svg class="school-plot" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="График накопленного среднего балла от 2 до 5 с линией тренда при достаточном количестве оценок">'+grid+plot+
  '<text x="'+left+'" y="'+(height-7)+'" font-size="11" fill="#778aa3">'+dateLabel(first)+'</text>'+
- '<text x="'+(width-right)+'" y="'+(height-7)+'" font-size="11" fill="#778aa3" text-anchor="end">'+dateLabel(last)+'</text></svg>';
+ '<text x="'+(width-right)+'" y="'+(height-7)+'" font-size="11" fill="#778aa3" text-anchor="end">'+dateLabel(last)+'</text></svg>'+
+ (hasTrend?'<div class="school-chart-key"><span><i class="school-chart-actual"></i>Средний</span><span><i class="school-chart-trend-key"></i>Тренд</span></div>':'');
 }
 function periodUi(ui,periods) {
  const options=[['year','Весь учебный год'],['1','I четверть'],['2','II четверть'],['3','III четверть'],['4','IV четверть']];
@@ -187,8 +205,11 @@ function detail(ui,snapshot,rows,range,periods,helpers) {
  const info=byQuarter&&state.type==='official'?'<div class="school-result-large"><span>Официальная оценка</span><strong>'+state.value+'</strong><small>Выставлена в журнале</small></div>':
   byQuarter&&state.type==='active'?'<div class="school-result-large"><span>Ориентировочный прогноз</span><strong>'+(prediction??'—')+'</strong><small>Неофициально · порог 0,60</small></div>':
   byQuarter?'<div class="school-result-large"><span>Четвертная оценка</span><strong>—</strong><small>'+esc(state.label)+'</small></div>':'';
- const row='<div class="school-subject-hero card"><div class="school-means"><div><span class="hint">Средний за работы</span><strong>'+fmt(mean)+'</strong><span class="hint">'+ordinary.length+' оценок</span></div>'+info+'</div>'+
- '<p class="hint">Средний простой, без школьных коэффициентов. Официальные отметки в расчёт не входят.</p></div>';
+ const isOfficialQuarter=byQuarter&&state.type==='official';
+ const row='<div class="school-subject-hero card"><div class="school-means">'+
+ (isOfficialQuarter?info:'<div><span class="hint">Средний за работы</span><strong>'+fmt(mean)+'</strong><span class="hint">'+ordinary.length+' оценок</span></div>'+info)+
+ '</div><p class="hint">'+(isOfficialQuarter?'Это официальный результат из школьного журнала. Оценки за работы и динамика — ниже.':
+ 'Средний простой, без школьных коэффициентов. Официальные отметки в расчёт не входят.')+'</p></div>';
  const summary='<div class="card school-quarter-strip"><h3>История итогов</h3><div class="school-quarter-grid">'+[1,2,3,4].map(q=>{
   const score=officialInQuarter(snapshot,periods,ui.year,q,name);
   return '<div class="school-quarter-tile"><span>'+['','I','II','III','IV'][q]+'</span><strong>'+(score?score.score:'—')+'</strong></div>';
@@ -200,7 +221,7 @@ function detail(ui,snapshot,rows,range,periods,helpers) {
  (ordinary.length?ordinary.slice().sort(compareGrade).reverse().map(g=>'<div class="school-mark-row"><span class="grade g'+g.score+'">'+g.score+'</span><div><b>'+esc(g.type||'Работа в школе')+'</b><small>'+dateLabel(g.date)+'</small></div></div>').join(''):'<div class="empty">За выбранный период оценок за работы нет.</div>')+'</div>';
  const finalsBlock=official.length?'<div class="card school-official-list"><h3>Официальные оценки периода</h3>'+official.map(g=>'<div class="school-mark-row"><span class="grade g'+g.score+'">'+g.score+'</span><div><b>'+esc(g.officialLabel||'Итог')+'</b><small>'+dateLabel(g.date)+'</small></div></div>').join('')+'</div>':'';
  return '<div class="school-detail-head">'+button('← К предметам','back-school','tiny')+'<h2>'+esc(name)+'</h2></div>'+
- row+summary+graph+marks+finalsBlock;
+ row+graph+marks+summary+finalsBlock;
 }
 function overview(ui,snapshot,rows,range,periods,helpers) {
  const ordinary=works(rows),mean=average(ordinary);
@@ -213,10 +234,11 @@ function overview(ui,snapshot,rows,range,periods,helpers) {
  chart([{key:'overall',name:'',color:palette[0],points:cumulative(ordinary)}],range)+
  '<p class="hint">Средний по всем оценкам за работы в выбранном периоде.</p></div>';
  const list='<section class="school-subject-list"><div class="school-section-head"><h2>Предметы</h2>'+
- '<p class="hint">Стрелка показывает изменение среднего за последние 14 дней выбранного периода. Нет новых оценок или истории — нет стрелки.</p></div>'+
+ '<p class="hint">Стрелка показывает изменение накопленного среднего за последнюю неделю. Нет новых оценок или истории — нет стрелки.</p></div>'+
  (subjectNames.length?subjectNames.map(name=>{
   const subset=rows.filter(g=>g.subject===name),subjectWorks=works(subset),m=average(subjectWorks);
-  const delta=subjectDelta14(subjectWorks,range);
+  const officialQuarter=isQuarter?officialInQuarter(snapshot,periods,ui.year,current,name):null;
+  const delta=officialQuarter?null:subjectDelta7(subjectWorks,range);
   let trend='';
   if(delta!==null){
    if(delta>0)trend='<span class="school-subject-trend school-trend-up">↑ +'+fmt(delta)+'</span>';
@@ -225,7 +247,7 @@ function overview(ui,snapshot,rows,range,periods,helpers) {
   }
   let right='',context='';
   if(isQuarter){
-   const mark=officialInQuarter(snapshot,periods,ui.year,current,name);
+   const mark=officialQuarter;
    const state=termState(range,mark,currentDate());
    if(state.type==='official'){right=mark.score;context='Итог';}
    else if(state.type==='active'&&m!==null){right=helpers.gradePrediction(m);context='Прогноз';}
@@ -236,8 +258,8 @@ function overview(ui,snapshot,rows,range,periods,helpers) {
   }
   return '<button type="button" class="school-subject-row" data-action="open-subject" data-id="'+esc(name)+'">'+
    '<div class="school-subject-name"><b>'+esc(name)+'</b>'+trend+'</div>'+
-   '<div class="school-number"><strong>'+fmt(m)+'</strong><small>средний</small></div>'+
-   '<div class="school-number"><strong>'+right+'</strong><small>'+esc(context)+'</small></div><span class="school-chevron">›</span></button>';
+   (officialQuarter?'':'<div class="school-number"><strong>'+fmt(m)+'</strong><small>средний</small></div>')+
+   '<div class="school-number '+(officialQuarter?'school-final-only':'')+'"><strong>'+right+'</strong><small>'+esc(context)+'</small></div><span class="school-chevron">›</span></button>';
  }).join(''):'<div class="empty">За выбранный период оценок пока нет.</div>')+'</section>';
  const recent=latest.length?'<details class="school-recent-collapsed"><summary>Последние оценки <span class="school-recent-count">'+latest.length+'</span></summary>'+
  '<div class="school-recent-list">'+latest.map(g=>'<div class="school-recent-row"><span class="grade g'+g.score+'">'+g.score+'</span>'+
@@ -286,6 +308,6 @@ function handleAction(btn,ctx) {
  ctx.render();
  return true;
 }
-window.VectorSchool={render,handleAction,test:{cumulative,subjectDelta14,officialInQuarter,officialInYear,quarterFromType,gradeQuarter,termState,rangeRows,works,average}};
+window.VectorSchool={render,handleAction,test:{cumulative,subjectDelta7,linearTrend,officialInQuarter,officialInYear,quarterFromType,gradeQuarter,termState,rangeRows,works,average}};
 if(typeof window.render==='function')window.render();
 })();
