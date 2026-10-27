@@ -81,22 +81,10 @@ function choiceCard(){
 today=function(){
   ensure();
   let markup=originalToday();
-  // The main list remains available, but completed tasks are tucked away.
-  if(filterIsAll(markup)){
-    const finished=[];
-    markup=markup.replace(/<div class="ik-task done"[\s\S]*?<\/div>/g,x=>{finished.push(x);return ''});
-    if(finished.length){
-      const anchor='<p class="ik-muted" style="text-align:center">';
-      const completed='<details class="ik-joy-completed"><summary>Уже сделано · '+finished.length+' <span aria-hidden="true">⌄</span></summary>'+
-        '<div class="ik-task-list">'+finished.join('')+'</div></details>';
-      markup=markup.replace(anchor,completed+anchor);
-    }
-  }
-  markup=markup.replace('<div class="ik-filter-row">',welcomeCard()+nextCard()+'<div class="ik-filter-row">');
+  markup=markup.replace('<div class="ik-task-list">',welcomeCard()+nextCard()+'<div class="ik-task-list">');
   const beforeFooter='<p class="ik-muted" style="text-align:center">';
   return markup.replace(beforeFooter,choiceCard()+beforeFooter);
 };
-function filterIsAll(markup){return markup.includes('data-id="all"')&&markup.includes('ik-filter active" data-action="ikFilter" data-id="all"')}
 ACTIONS.ikJoyNext=id=>{
   if(!tasks(todayKey()).some(t=>t.i===id))return;
   (id==='hw'||id==='ho'?ACTIONS.details:ACTIONS.ikTaskInfo)(id);
