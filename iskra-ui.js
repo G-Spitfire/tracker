@@ -225,7 +225,7 @@
       '<div class="ik-row-between"><h2 class="ik-sec-title">Моя статистика</h2><button class="ik-top-link" data-action="ikProfileWindow">'+profileWindowLabel()+' ▾</button></div>'+statsTiles()+
       '<div class="ik-list">'+item('heart','Мои интересы',S.interests||'Добавь то, что тебе нравится','ikInterests')+
       item('history','История дел','Что было в прошлые дни','history')+
-      item('nav_reward','Мои звёзды','Уровни и достижения','ikToReward')+
+      item('task_star','Мои звёзды','Уровни и достижения','ikToReward')+
       item('nav_grades','Мои оценки','Из школьного дневника','ikToGrades')+'</div>'+
       '<div class="ik-list">'+item('parent_lock','Для родителей','Настройки и резервная копия','parents')+
       item('info','О приложении','Искра · твой день и достижения','ikAbout')+'</div></div>';
@@ -453,7 +453,7 @@
   };
   window.addEventListener('schoolCloudUpdated',recordAchievements);
   document.querySelectorAll('.bar button').forEach((b,i)=>{
-    const icon=['nav_today','nav_grades','nav_reward','avatar_girl'][i];
+    const icon=['nav_today','nav_grades','task_star','avatar_girl'][i];
     const text=['Сегодня','Оценки','Звёзды','Я'][i];
     b.innerHTML=art(icon,'nav')+text;
   });
