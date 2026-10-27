@@ -575,7 +575,7 @@ button:focus-visible,[role="button"]:focus-visible,input:focus-visible,select:fo
 .ik-header-back{
   background:rgba(255,255,255,.86);
   box-shadow:0 3px 12px rgba(128,92,174,.11);
-  color:#7756bb;font:300 31px/1 inherit;cursor:pointer;padding:0 0 3px
+  color:#7756bb;font-family:inherit;font-size:31px;line-height:1;font-weight:300;cursor:pointer;padding:0 0 3px
 }
 .ik-header-back:active{background:#f6edff}
 .ik-subscreen-header .ik-cloud-pill{
