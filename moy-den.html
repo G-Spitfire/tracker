@@ -277,7 +277,13 @@ const tasks=d=>{
   if(Array.isArray(S.planHistory[d])){
     // Switching off a task takes effect immediately today, but never rewrites past dates.
     const current=d===iso(new Date());
-    return current?S.planHistory[d].filter(t=>!S.hiddenTasks.includes(t.i)||(S.d[d]||[]).includes(t.i)):S.planHistory[d];
+    if(!current)return S.planHistory[d];
+    const catalog=taskCatalog(),wd=new Date(d+'T12:00:00').getDay();
+    const enabled=t=>(t.i!=='ex'||d>=S.ex)&&!S.hiddenTasks.includes(t.i)&&
+      (Array.isArray(S.taskDays[t.i])?S.taskDays[t.i]:(defaultDays[t.i]||[0,1,2,3,4,5,6])).includes(wd);
+    const retained=S.planHistory[d].filter(t=>enabled(t)||(S.d[d]||[]).includes(t.i));
+    const ids=new Set(retained.map(t=>t.i));
+    return retained.concat(catalog.filter(t=>enabled(t)&&!ids.has(t.i)).map(t=>({...t,category:S.taskCategories[t.i]||t.category})));
   }
   const wd=new Date(d+'T12:00:00').getDay();
   return taskCatalog().filter(t=>
