@@ -308,21 +308,66 @@ const ikYearForDate=d=>{
 // Show only the currently active academic year in Iskra.
 const ikYearValue=()=>ikYearForDate(today());
 const ikTermKey=(period,year=ikYearValue())=>year+'#'+period;
+// Infer quarter boundaries from teacher-issued official quarter grades.
+// School-specific dates configured by the parent always take precedence.
+function ikOfficialTermEnds(){
+  const ends={};
+  const rows=(state.data?.grades||[]).filter(r=>
+    ikYearForDate(r.date)===ikYearValue()&&officialKind(r)==='За четверть'&&gradeScore(r)!==null
+  ).sort((a,b)=>a.date.localeCompare(b.date));
+  const bounds=[['q1',9,11],['q2',12,2],['q3',3,4],['q4',5,8]];
+  for(const row of rows){
+    const month=Number(row.date.slice(5,7));
+    const q=bounds.find(([id,start,end])=>start<=end?month>=start&&month<=end:month>=start||month<=end)?.[0];
+    if(q&&(!ends[q]||row.date>ends[q]))ends[q]=row.date;
+  }
+  return ends;
+}
+function ikDerivedRange(period){
+  if(!/^q[1-4]$/.test(period)||!state.data)return null;
+  const year=Number(ikYearValue().split('/')[0]),official=ikOfficialTermEnds();
+  const starts={q1:year+'-09-01'};
+  if(official.q1)starts.q2=ikDatePlus(official.q1,1);
+  if(official.q2)starts.q3=ikDatePlus(official.q2,1);
+  if(official.q3)starts.q4=ikDatePlus(official.q3,1);
+  const ends={q1:official.q1,q2:official.q2,q3:official.q3,q4:official.q4};
+  // Current term is open until today. Without a known boundary, never claim
+  // precise dates for a future quarter.
+  const start=starts[period];
+  if(!start)return null;
+  const end=ends[period]||today();
+  return start<=end?{from:start,to:end,inferred:true}:null;
+}
+function ikDatePlus(date,delta){
+  const d=new Date(date+'T12:00:00');d.setDate(d.getDate()+delta);
+  return ikLocalDate(d);
+}
 function ikAutoPeriod(){
   if(ikPeriodChosen)return;
-  // Do not migrate legacy unscoped dates; their academic year is ambiguous.
   const current=today();
-  ikPeriod=['q1','q2','q3','q4'].find(q=>{
+  const set=['q1','q2','q3','q4'];
+  const saved=set.find(q=>{
     const p=ikSavedPeriods[ikTermKey(q)];
     return ikValidRange(p)&&ikYearForDate(p.from)===ikYearValue()&&current>=p.from&&current<=p.to;
-  })||'all';
+  });
+  if(saved){ikPeriod=saved;return}
+  const official=ikOfficialTermEnds();
+  const done=set.filter(q=>official[q]&&official[q]<current);
+  const next=done.length?set[Math.min(set.length-1,set.indexOf(done.at(-1))+1)]:null;
+  // A teacher's final quarter marks are stronger evidence than an estimated
+  // date. Start quarter 2 after quarter 1 has official final marks.
+  if(next&&ikDerivedRange(next)){ikPeriod=next;return}
+  const inferred=set.find(q=>{
+    const p=ikDerivedRange(q);return p&&current>=p.from&&current<=p.to;
+  });
+  ikPeriod=inferred||'all';
 }
 const ikValidRange = p => p && /^\d{4}-\d{2}-\d{2}$/.test(p.from||'') &&
   /^\d{4}-\d{2}-\d{2}$/.test(p.to||'') && p.from<=p.to;
 const ikRange=()=>{
   if(ikPeriod==='all')return null;
   const p=ikSavedPeriods[ikTermKey(ikPeriod)];
-  return ikValidRange(p)&&ikYearForDate(p.from)===ikYearValue()&&ikYearForDate(p.to)===ikYearValue()?p:null;
+  return ikValidRange(p)&&ikYearForDate(p.from)===ikYearValue()&&ikYearForDate(p.to)===ikYearValue()?p:ikDerivedRange(ikPeriod);
 };
 const ikFiltered = () => {
   if(!state.data)return [];
@@ -388,7 +433,7 @@ function ikPeriodEditor(){
   if(ikPeriod==='all')return '';
   const p=ikRange();
   if(ikPeriod!=='custom'){
-    return p?'<p class="ik-muted ik-period-caption">'+ikDate(p.from)+' — '+ikDate(p.to)+'</p>':
+    return p?'<p class="ik-muted ik-period-caption">'+ikDate(p.from)+' — '+ikDate(p.to)+(p.inferred?' · по итоговым оценкам из дневника':'')+'</p>':
       '<div class="ik-issues">Даты этой четверти пока не настроены. Попроси взрослого настроить учебные периоды в разделе «Для родителей».</div>';
   }
   if(p&&ikEditing!=='custom')return '<div class="ik-row-between"><span class="ik-muted">'+ikDate(p.from)+' — '+ikDate(p.to)+'</span><button type="button" class="ik-btn-small" data-ik-edit-period="1">Изменить даты</button></div>';
@@ -531,6 +576,12 @@ css.textContent += '.scs .scs-grade-audit{margin-top:14px}.scs .scs-grade-audit 
 css.textContent += '.scs .scs-final-list{display:grid;gap:8px;margin:12px 0}.scs .scs-final-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:11px 13px;border:1px solid var(--ln);border-radius:12px;background:var(--bg)}.scs .scs-final-label{font-weight:700;flex:1;min-width:135px}.scs .scs-final-mark{font-size:22px;font-weight:800;border-radius:9px;padding:3px 10px;background:var(--bg)}';
 document.head.appendChild(css);
 window.schoolCloud = {view,summary,
+  subjects:()=>{
+    if(appKind!=='iskra'||!state.user||!state.data)return [];
+    return [...new Set(state.data.grades.filter(r=>ikYearForDate(r.date)===ikYearValue())
+      .map(r=>r.subject).filter(v=>typeof v==='string'&&v.trim()))]
+      .sort((a,b)=>a.localeCompare(b,'ru'));
+  },
 status:()=>({phase:state.phase,error:state.error,loading:state.loading,connected:!!state.user}),
   // Read-only normalized snapshot for the Vector functional dashboard. No grade data is persisted by Vector.
   snapshot:()=>state.user&&state.data?{
