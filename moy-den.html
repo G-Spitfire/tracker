@@ -462,10 +462,7 @@ function removeDetails(){cs();setDone(cur.i,false)}
 function openProfile(){
   sheet(`<h2 style="margin-top:0">${S.name?'Мой герой':'Давай познакомимся!'}</h2><div style="display:grid;place-items:center"><div class="av" style="background:${S.av.c};width:88px;height:88px;font-size:52px">${S.av.e}</div></div><input value="${esc(S.name)}" maxlength="20" placeholder="Как тебя зовут?" data-action="nameInput"><div class="eg">${CONFIG.emojis.map(e=>`<button class="${e==S.av.e?'on':''}" data-action="pickEmoji" data-id="${e}">${e}</button>`).join('')}</div><div class="cl">${CONFIG.colors.map(c=>`<button class="${c==S.av.c?'on':''}" style="background:${c}" data-action="pickColor" data-id="${c}" aria-label="цвет"></button>`).join('')}</div><p data-sheet-footer style="text-align:center;margin:18px 0 0"><button class="btn" data-action="closeProfile">Готово</button></p>`);
 }
-let draftReward='',draftGoal=25;
-function openReward(){
-  sheet(`<h2 style="margin-top:0">Награда недели</h2><p class="mu sm">Изменения награды и цели действуют со следующей недели. Текущая неделя сохранит прежнюю цель.</p><input id="rw" maxlength="40" value="${esc(draftReward)}"><div class="sm mu" style="margin-top:14px">Сколько звёзд нужно за неделю?</div><div class="chips">${[20,25,30,35].map(n=>`<button class="chip ${n===draftGoal?'on':''}" data-action="setGoal" data-id="${n}">${n}</button>`).join('')}</div><p data-sheet-footer style="margin:18px 0 0"><button class="btn" data-action="saveReward">Сохранить</button></p>`);
-}
+/* Tangible rewards are paused. Old rewardHistory records remain in stored data. */
 
 /* ===== DAY HISTORY ===== */
 function openDay(d){
@@ -664,14 +661,6 @@ const ACTIONS={
   closeProfile:()=>{cs();render()},
   pickEmoji:(e)=>{S.av.e=e;save();openProfile()},
   pickColor:(c)=>{S.av.c=c;save();openProfile()},
-  editReward:()=>{weekPlan(weekStart(iso(new Date())));save();draftReward=S.reward;draftGoal=S.goal;openReward()},
-  setGoal:(n)=>{draftReward=document.getElementById('rw')?.value.trim()||draftReward;draftGoal=+n;openReward()},
-  saveReward:()=>{
-    const name=(document.getElementById('rw')?.value||draftReward).trim().slice(0,40)||S.reward;
-    if(!confirm('Сохранить награду и цель для следующих недель?'))return;
-    weekPlan(weekStart(iso(new Date())));
-    S.reward=name;S.goal=draftGoal;save();cs();render();
-  },
   toggle:(i)=>toggleTask(i),
   details:(i)=>openDetails(i),
   detailChip:(j)=>{cur.n=document.getElementById('dn').value;const list=cur.i==='hw'?(window.schoolCloud?.subjects?.()||[]):CONFIG.chores;const k=list[+j];if(!k)return;const x=cur.s.indexOf(k);x<0?cur.s.push(k):cur.s.splice(x,1);renderDetails()},
