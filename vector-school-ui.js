@@ -293,15 +293,15 @@ function render(ctx) {
  '</div>'+
  (info.error?'<p class="notice">'+esc(info.error)+'</p>':'')+(info.loading?'<p class="hint">Получаем обновление из Firebase…</p>':'');
  if(!snap)return head+status+'<div class="card">Ожидаем данные из Firebase. Кнопка «Обновить» не запускает сборщик на MacBook.</div>';
- if(!ui.schoolPeriodTouched&&ui.quarter==='year'){
-  const now=currentDate(),periods=s.schoolPeriods?.[ui.year]||{};
-  const active=[1,2,3,4].find(q=>periods[q]&&now>=periods[q].from&&now<=periods[q].to);
-  if(active)ui.quarter=active;
+ // School year and the default term are automatic. Manual term choices remain
+ // respected until a new page session or the school-year rollover.
+ const now=currentDate(),targetYear=schoolYearFor(now);
+ if(ui.year!==targetYear){ui.year=targetYear;ui.quarter='year';ui.subject='';ui.editTerm=false;ui.schoolPeriodTouched=false;}
+ if(!ui.schoolPeriodTouched){
+  const fallback=ctx.defaultSchoolQuarter?.(now,ui.year,s.schoolPeriods||{});
+  if(fallback)ui.quarter=fallback;
   ui.schoolPeriodTouched=true;
  }
- // The year is automatic and cannot be changed in this version.
- const targetYear=schoolYearFor(currentDate());
- if(ui.year!==targetYear){ui.year=targetYear;ui.quarter='year';ui.subject='';ui.editTerm=false;ui.schoolPeriodTouched=false;}
  const tabs=header(ui);
  if(ui.schoolScreen==='finals'){
   if(ui.subject){ui.subject='';}
