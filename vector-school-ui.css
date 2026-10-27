@@ -120,3 +120,11 @@
 .school-subject-trend{font-size:10px}
 .school-chart-card{padding:12px!important}
 }
+
+/* Historical linear trend is distinct from the observed grade-average line. */
+.school-chart-key{display:flex;justify-content:center;align-items:center;gap:16px;flex-wrap:wrap;margin:1px 0 7px;color:#63758c;font-size:11px}
+.school-chart-key span{display:inline-flex;align-items:center;gap:7px}
+.school-chart-key i{display:inline-block;width:22px;border-top:3px solid #2463c9;border-radius:2px}
+.school-chart-key .school-chart-trend-key{border-color:#c96d28;border-top-style:dashed}
+.school-means .school-result-large:only-child{text-align:left}
+.school-final-only{min-width:60px}
