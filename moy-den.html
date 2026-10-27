@@ -114,7 +114,7 @@ const CONFIG={
   chores:['Убрала в комнате','Помыла посуду','Накрыла на стол','Помогала готовить','Вынесла мусор','Полила цветы','Пол или пылесос'],
   emojis:['🦊','🐱','🐶','🐼','🦄','🐰','🐻','🐯','🐸','🐨','🦉','🐬','🦋','🐙','🐧','🦁','🌸','🚀','🎨','⭐'],
   colors:['#ffd9c9','#ffe9a8','#d3f2e4','#d6ecff','#e6dcff','#ffd6ea'],
-  levels:[[0,'Звёздочка'],[40,'Умница'],[120,'Мастер дня'],[250,'Чемпион']],
+  levels:[[0,'Звёздочка'],[40,'Умница'],[120,'Мастер дня'],[250,'Чемпион'],[400,'Исследователь'],[600,'Смельчак'],[850,'Хранитель искр'],[1150,'Звёздный капитан'],[1500,'Создатель чудес'],[1900,'Повелитель созвездий'],[2350,'Легенда Искры'],[2850,'Хранитель галактики'],[3400,'Звёздная легенда']],
 };
 const KEY='kid1',BAK=KEY+'_bak',DN=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const SCHEMA=4;
@@ -274,7 +274,11 @@ const weekPlan=week=>{
 };
 const taskCatalog=()=>[EX,...T,RD,...S.customTasks];
 const tasks=d=>{
-  if(Array.isArray(S.planHistory[d]))return S.planHistory[d];
+  if(Array.isArray(S.planHistory[d])){
+    // Switching off a task takes effect immediately today, but never rewrites past dates.
+    const current=d===iso(new Date());
+    return current?S.planHistory[d].filter(t=>!S.hiddenTasks.includes(t.i)):S.planHistory[d];
+  }
   const wd=new Date(d+'T12:00:00').getDay();
   return taskCatalog().filter(t=>
     (t.i!=='ex'||d>=S.ex)&&!S.hiddenTasks.includes(t.i)&&
@@ -429,15 +433,7 @@ function setDone(i,on,silent,date){
   if(on&&x<0)a.push(i);
   if(!on&&x>=0){a.splice(x,1)} // Details survive an unchecked/rechecked task.
   const all=dn(d).length===L.length;
-  const weekStart=new Date(d+'T12:00:00');
-  weekStart.setDate(weekStart.getDate()-(weekStart.getDay()+6)%7);
-  const monday=iso(weekStart),plan=weekPlan(monday),weekSum=Array.from({length:7},(_,i)=>{const x=new Date(weekStart);x.setDate(x.getDate()+i);return st(iso(x))}).reduce((a,b)=>a+b,0);
-  if(weekSum>=plan.goal&&!S.rewardHistory[monday]){
-    S.rewardHistory[monday]={name:plan.name,goal:plan.goal,earnedAt:iso(new Date()),status:'earned'};
-  } else if(weekSum<plan.goal&&S.rewardHistory[monday]?.status==='earned'){
-    // Only pending awards can be revoked; received awards remain in history.
-    delete S.rewardHistory[monday];
-  }
+  // No new tangible rewards are accrued; historic reward records remain in backups.
   save();render();
   if(silent)return;
   if(on&&x<0)toast(all&&!wasAll?'🎉 Все дела готовы! +2 бонусные звезды':'⭐ +1 звезда');
@@ -452,8 +448,8 @@ function openDetails(i){
   renderDetails();
 }
 function renderDetails(){
-  const hw=cur.i=='hw',L=hw?CONFIG.subjects:CONFIG.chores,ok=(S.d[iso(new Date())]||[]).includes(cur.i);
-  sheet(`<h2 style="margin-top:0">${hw?'Какие уроки делала?':'Что помогла сделать?'}</h2><div class="chips" style="margin-top:0">${L.map((k,j)=>`<button class="chip ${cur.s.includes(k)?'on':''}" data-action="detailChip" data-id="${j}">${esc(k)}</button>`).join('')}</div><input id="dn" maxlength="60" placeholder="Что-то ещё? Напиши" value="${esc(cur.n)}"><div data-sheet-footer class="chips"><button class="btn" data-action="saveDetails">Готово</button>${ok?'<button class="btn g" data-action="removeDetails">Убрать отметку</button>':''}</div>`);
+  const hw=cur.i==='hw',L=hw?(window.schoolCloud?.subjects?.()||[]):CONFIG.chores,ok=(S.d[iso(new Date())]||[]).includes(cur.i);
+  sheet(`<h2 style="margin-top:0">${hw?'Какие уроки делала?':'Что помогла сделать?'}</h2>${hw?'<p class="mu sm">Предметы берутся из школьного дневника.</p>':''}<div class="chips" style="margin-top:0">${L.map((k,j)=>`<button class="chip ${cur.s.includes(k)?'on':''}" data-action="detailChip" data-id="${j}">${esc(k)}</button>`).join('')}${hw&&!L.length?'<p class="mu sm">Предметы пока не загружены. Отметить выполненные уроки всё равно можно.</p>':''}</div><input id="dn" maxlength="60" placeholder="Что-то ещё? Напиши" value="${esc(cur.n)}"><div data-sheet-footer class="chips"><button class="btn" data-action="saveDetails">Готово</button>${ok?'<button class="btn g" data-action="removeDetails">Убрать отметку</button>':''}</div>`);
 }
 function saveDetails(){
   const d=iso(new Date());cur.n=document.getElementById('dn').value.trim().slice(0,60);
@@ -678,7 +674,7 @@ const ACTIONS={
   },
   toggle:(i)=>toggleTask(i),
   details:(i)=>openDetails(i),
-  detailChip:(j)=>{cur.n=document.getElementById('dn').value;const k=(cur.i=='hw'?CONFIG.subjects:CONFIG.chores)[+j],x=cur.s.indexOf(k);x<0?cur.s.push(k):cur.s.splice(x,1);renderDetails()},
+  detailChip:(j)=>{cur.n=document.getElementById('dn').value;const list=cur.i==='hw'?(window.schoolCloud?.subjects?.()||[]):CONFIG.chores;const k=list[+j];if(!k)return;const x=cur.s.indexOf(k);x<0?cur.s.push(k):cur.s.splice(x,1);renderDetails()},
   saveDetails:()=>saveDetails(),
   removeDetails:()=>removeDetails(),
   closeSheet:()=>{cs();render()},
