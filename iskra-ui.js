@@ -217,25 +217,29 @@
     customTasks:JSON.parse(JSON.stringify(S.customTasks)),
     taskDays:JSON.parse(JSON.stringify(S.taskDays)),
     hiddenTasks:[...S.hiddenTasks],
-    taskCategories:{...S.taskCategories}
+    taskCategories:{...S.taskCategories},
+    todayDate:iso(new Date()),
+    todayVisible:tasks(iso(new Date())).map(t=>t.i)
   });
   const taskDraftItems=()=>[EX,...T,RD,...(taskPlanDraft?.customTasks||[])];
   function taskEditor(){
     if(!taskPlanDraft)taskPlanDraft=createTaskDraft();
     const days=[['Пн',1],['Вт',2],['Ср',3],['Чт',4],['Пт',5],['Сб',6],['Вс',0]];
+    const todayDay=new Date(taskPlanDraft.todayDate+'T12:00:00').getDay();
     const html=taskDraftItems().map(task=>{
       const schedule=Array.isArray(taskPlanDraft.taskDays[task.i])?taskPlanDraft.taskDays[task.i]:(defaultDays[task.i]||[0,1,2,3,4,5,6]);
       const disabled=taskPlanDraft.hiddenTasks.includes(task.i);
-      const cat=taskPlanDraft.taskCategories[task.i]||task.category||(['hw','en','bg'].includes(task.i)?'school':'personal');
+      const showToday=!disabled&&taskPlanDraft.todayVisible.includes(task.i);
+      const completed=(S.d?.[taskPlanDraft.todayDate]||[]).includes(task.i);
       return '<div class="ik-plan-row"><div class="ik-row-between"><b>'+safe(task.e||'✨')+' '+safe(task.t)+'</b>'+
         '<button type="button" class="ik-btn-small" data-action="ikHideTask" data-id="'+safe(task.i)+'">'+(disabled?'Включить':'Отключить')+'</button>'+
         (task.i.startsWith('user-')?'<button type="button" class="ik-btn-small" data-action="ikRemoveTask" data-id="'+safe(task.i)+'" aria-label="Удалить дело">×</button>':'')+'</div>'+
-        ''+
-        '<div class="ik-plan-days">'+days.map(([label,wd])=>'<button type="button" class="ik-day-pill '+(schedule.includes(wd)?'on':'')+'" data-action="ikTaskDay" data-id="'+safe(task.i)+'" data-arg="'+wd+'" aria-pressed="'+schedule.includes(wd)+'">'+label+'</button>').join('')+'</div></div>';
+        '<div class="ik-plan-today-row"><span class="ik-plan-today-state">'+(completed?'Уже сделано сегодня':showToday?'Будет в делах сегодня':'Сегодня в списке нет')+'</span>'+
+        '<button type="button" class="ik-btn-small ik-plan-today-button '+(showToday?'on':'')+'" data-action="ikShowToday" data-id="'+safe(task.i)+'" aria-pressed="'+showToday+'">'+(showToday?'Убрать сегодня':'Показать сегодня')+'</button></div>'+
+        '<div class="ik-plan-days">'+days.map(([label,wd])=>'<button type="button" class="ik-day-pill '+(schedule.includes(wd)?'on':'')+'" data-action="ikTaskDay" data-id="'+safe(task.i)+'" data-arg="'+wd+'" aria-label="'+label+(wd===todayDay?', сегодня':'')+'" aria-pressed="'+schedule.includes(wd)+'">'+label+'</button>').join('')+'</div></div>';
     }).join('');
-    sheet('<h2>Расписание дел</h2><p class="mu sm">Нажми «Сохранить». Отключённые дела исчезнут сегодня, а изменения дней недели начнут действовать завтра. История сохранится.</p>'+
+    sheet('<h2>Расписание дел</h2><p class="mu sm">Кнопка «Включить» добавит дело и на сегодня. Можно отдельно нажать «Показать сегодня», даже если по расписанию оно только в выходные. Дни недели задают повторение в будущем. Нажми «Сохранить» для применения.</p>'+
       html+'<h3>Добавить дело</h3><label class="sheet-field">Название<input maxlength="45" id="ik-new-task" placeholder="Например, Погулять"></label>'+
-      ''+
       '<button type="button" class="btn g" data-action="ikAddTask">Добавить дело</button>'+
       '<div data-sheet-footer class="chips"><button type="button" class="btn g" data-action="ikPlanCancel">Отмена</button><button type="button" class="btn" data-action="ikPlanSave">Сохранить</button></div>');
   }
@@ -244,13 +248,37 @@
     const wd=Number(el.dataset.arg),task=taskDraftItems().find(t=>t.i===id);
     if(!task||!Number.isInteger(wd)||wd<0||wd>6)return;
     const arr=Array.isArray(taskPlanDraft.taskDays[id])?taskPlanDraft.taskDays[id].slice():(defaultDays[id]||[0,1,2,3,4,5,6]).slice();
-    const at=arr.indexOf(wd);if(at>=0)arr.splice(at,1);else arr.push(wd);
-    taskPlanDraft.taskDays[id]=arr;taskEditor();
+    const at=arr.indexOf(wd);
+    if(at>=0)arr.splice(at,1);else arr.push(wd);
+    taskPlanDraft.taskDays[id]=arr;
+    // Editing the current weekday is an explicit choice to show or hide today.
+    if(wd===new Date(taskPlanDraft.todayDate+'T12:00:00').getDay()){
+      const i=taskPlanDraft.todayVisible.indexOf(id);
+      if(at>=0&&i>=0)taskPlanDraft.todayVisible.splice(i,1);
+      if(at<0&&i<0){taskPlanDraft.todayVisible.push(id);taskPlanDraft.hiddenTasks=taskPlanDraft.hiddenTasks.filter(t=>t!==id)}
+    }
+    taskEditor();
   };
   ACTIONS.ikHideTask=id=>{
     const task=taskDraftItems().find(t=>t.i===id);if(!task)return;
     const at=taskPlanDraft.hiddenTasks.indexOf(id);
-    if(at<0)taskPlanDraft.hiddenTasks.push(id);else taskPlanDraft.hiddenTasks.splice(at,1);
+    if(at<0){
+      taskPlanDraft.hiddenTasks.push(id);
+      taskPlanDraft.todayVisible=taskPlanDraft.todayVisible.filter(t=>t!==id);
+    }else{
+      taskPlanDraft.hiddenTasks.splice(at,1);
+      // Reactivation must be visible immediately, independently of weekday rules.
+      if(!taskPlanDraft.todayVisible.includes(id))taskPlanDraft.todayVisible.push(id);
+    }
+    taskEditor();
+  };
+  ACTIONS.ikShowToday=id=>{
+    if(!taskDraftItems().some(t=>t.i===id))return;
+    const at=taskPlanDraft.todayVisible.indexOf(id);
+    if(at<0){
+      taskPlanDraft.todayVisible.push(id);
+      taskPlanDraft.hiddenTasks=taskPlanDraft.hiddenTasks.filter(t=>t!==id);
+    }else taskPlanDraft.todayVisible.splice(at,1);
     taskEditor();
   };
   ACTIONS.ikRemoveTask=id=>{
@@ -258,6 +286,7 @@
     taskPlanDraft.customTasks=taskPlanDraft.customTasks.filter(t=>t.i!==id);
     delete taskPlanDraft.taskDays[id];delete taskPlanDraft.taskCategories[id];
     taskPlanDraft.hiddenTasks=taskPlanDraft.hiddenTasks.filter(v=>v!==id);
+    taskPlanDraft.todayVisible=taskPlanDraft.todayVisible.filter(v=>v!==id);
     taskEditor();
   };
   ACTIONS.ikAddTask=()=>{
@@ -267,20 +296,43 @@
     if(taskDraftItems().some(t=>t.t.toLocaleLowerCase('ru-RU')===name.toLocaleLowerCase('ru-RU')))return toast('Такое дело уже существует');
     const id='user-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,5);
     taskPlanDraft.customTasks.push({i:id,e:'✨',t:name});
+    taskPlanDraft.todayVisible.push(id);
     taskEditor();
   };
   ACTIONS.ikPlanSave=()=>{
     if(!taskPlanDraft)return;
-    const invalid=taskDraftItems().find(task=>{
+    if(taskPlanDraft.todayDate!==iso(new Date())){
+      toast('Наступил новый день. Открой расписание заново');taskPlanDraft=null;return
+    }
+    const catalog=taskDraftItems();
+    const invalid=catalog.find(task=>{
       const days=taskPlanDraft.taskDays[task.i]??defaultDays[task.i]??[0,1,2,3,4,5,6];
       return !taskPlanDraft.hiddenTasks.includes(task.i)&&days.length===0;
     });
     if(invalid){toast('Выбери дни для дела «'+invalid.t+'» или отключи его');return}
+    const date=taskPlanDraft.todayDate;
+    freezeDay(date);
+    const oldPlan=S.planHistory[date]||[];
+    const done=new Set(S.d?.[date]||[]);
+    const visible=new Set(taskPlanDraft.todayVisible);
+    const hidden=new Set(taskPlanDraft.hiddenTasks);
+    const byId=new Map(catalog.map(t=>[t.i,t]));
+    // Completed work is never deleted. Changes to this day are only made by
+    // the parent's explicit "show today", "enable" or "disable" controls.
+    const keep=oldPlan.filter(t=>done.has(t.i)||visible.has(t.i)&&!hidden.has(t.i)&&byId.has(t.i));
+    const ids=new Set(keep.map(t=>t.i));
+    for(const t of catalog){
+      if(!ids.has(t.i)&&visible.has(t.i)&&!hidden.has(t.i)){
+        keep.push({...t});ids.add(t.i);
+      }
+    }
     S.customTasks=taskPlanDraft.customTasks;
     S.taskDays=taskPlanDraft.taskDays;
     S.hiddenTasks=taskPlanDraft.hiddenTasks;
     S.taskCategories=taskPlanDraft.taskCategories;
-    taskPlanDraft=null;save();cs();render();toast('Расписание обновлено');
+    S.planHistory[date]=keep;
+    taskPlanDraft=null;save();cs();render();
+    toast('Сохранено: сегодняшний список обновлён');
   };
   ACTIONS.ikPlanCancel=()=>{taskPlanDraft=null;cs();render()};
   ACTIONS.ikGradePeriods=()=>{
