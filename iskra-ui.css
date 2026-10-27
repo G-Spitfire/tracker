@@ -397,7 +397,7 @@ button:focus-visible,[role="button"]:focus-visible,input:focus-visible,select:fo
 .ik-achievements-link{
   border:0;background:rgba(255,255,255,.68);
   border-radius:14px;padding:8px 9px;display:flex;
-  font:700 11px/1.1 inherit;cursor:pointer;gap:5px;
+  font-family:inherit;font-size:11px;line-height:1.1;font-weight:700;cursor:pointer;gap:5px;
   color:#7a5ab7;white-space:nowrap
 }
 .ik-achievements-link .ik-art--tiny{width:18px;height:18px}
