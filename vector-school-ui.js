@@ -23,33 +23,24 @@ function cumulative(rows) {
 /* Compare two consecutive equally sized blocks of the most recent marks.
    With 4–5 grades use 2 vs 2; with 6+ grades use 3 vs 3.
    Do not treat a neutral or unmeasurable subject as improving/declining. */
-function subjectTrends(rows) {
- const groups=new Map();
- for(const g of works(rows)) {
-  if(!groups.has(g.subject))groups.set(g.subject,[]);
-  groups.get(g.subject).push(g);
- }
- return [...groups].flatMap(([name,group])=>{
-  const ordered=byDate(group),n=ordered.length,block=Math.min(3,Math.floor(n/2));
-  if(block<2)return [];
-  const earlier=ordered.slice(n-2*block,n-block),later=ordered.slice(n-block);
-  const previous=average(earlier),recent=average(later),delta=recent-previous;
-  if(Math.abs(delta)<1e-8)return [];
-  return [{name,delta,previous,recent,count:n}];
- });
+/* Difference between the cumulative mean at the end of the period and
+   the cumulative mean 14 calendar days earlier. At least two prior
+   marks and one new mark are needed; never infer a change without new marks. */
+function subjectDelta14(rows,range,now=currentDate()){
+ if(!range)return null;
+ const end=range.to<now?range.to:now;
+ if(end<range.from)return null;
+ const threshold=new Date(end+'T12:00:00Z');
+ if(Number.isNaN(threshold.valueOf()))return null;
+ threshold.setUTCDate(threshold.getUTCDate()-14);
+ const cutoff=threshold.toISOString().slice(0,10);
+ const all=byDate(works(rows).filter(g=>g.date>=range.from&&g.date<=end));
+ const before=all.filter(g=>g.date<=cutoff);
+ const recent=all.filter(g=>g.date>cutoff);
+ if(before.length<2||recent.length<1)return null;
+ const value=average(all)-average(before);
+ return Math.abs(value)<0.005?0:value;
 }
-function autoTrendSeries(rows) {
- const trends=subjectTrends(rows);
- const byName=(a,b)=>a.name.localeCompare(b.name,'ru');
- const up=trends.filter(t=>t.delta>0).sort((a,b)=>b.delta-a.delta||byName(a,b)).slice(0,2);
- const down=trends.filter(t=>t.delta<0).sort((a,b)=>a.delta-b.delta||byName(a,b)).slice(0,3);
- return [...up,...down].map((t,i)=>({
-  key:t.name,name:t.name,delta:t.delta,group:t.delta>0?'up':'down',
-  color:palette[i],dash:t.delta<0?'7 4':'',
-  points:cumulative(rows.filter(g=>g.subject===t.name))
- }));
-}
-
 function quarterFromType(g){
  if(!g?.official||g.officialLabel!=='За четверть')return null;
  const name=String(g.type||'').toLocaleLowerCase('ru-RU').replace(/ё/g,'е');
@@ -127,23 +118,11 @@ function chart(series,range) {
 }
 function periodUi(ui,periods) {
  const options=[['year','Весь учебный год'],['1','I четверть'],['2','II четверть'],['3','III четверть'],['4','IV четверть']];
- const select='<label class="school-filter-label" for="quarter-picker">Период<select id="quarter-picker">'+options.map(([v,name])=>'<option value="'+v+'" '+(String(ui.quarter)===v?'selected':'')+'>'+name+'</option>').join('')+'</select></label>';
- const q=String(ui.quarter);
- const period=periods?.[ui.year]?.[q];
- const editing=ui.editTerm;
- let setting='';
- if(q!=='year'&&(!period||editing)){
-  setting='<div class="card school-term-editor"><b>'+(period?'Изменить даты':'Настроить даты')+' '+q+'-й четверти</b>'+
-  '<p class="hint">Школьный журнал не передаёт границы четвертей. Укажи их один раз, чтобы получать точную выборку.</p>'+
-  '<form id="school-term-form" class="school-term-fields">'+
-  '<label>С<input name="from" type="date" value="'+esc(period?.from||'')+'" required></label>'+
-  '<label>По<input name="to" type="date" value="'+esc(period?.to||'')+'" required></label>'+
-  '<button class="button primary" type="submit">Сохранить</button>'+
-  (period?button('Отмена','cancel-term-edit'):'')+'</form></div>';
- }else if(period&&q!=='year'){
-  setting='<div class="school-period-note"><span class="hint">'+dateLabel(period.from)+' — '+dateLabel(period.to)+'</span>'+button('Изменить даты','edit-term','tiny')+'</div>';
- }
- return '<div class="school-period-control">'+select+setting+'</div>';
+ const select='<label class="school-filter-label" for="quarter-picker">Период<select id="quarter-picker">'+options.map(([v,name])=>
+  '<option value="'+v+'" '+(String(ui.quarter)===v?'selected':'')+'>'+name+'</option>').join('')+'</select></label>';
+ const q=String(ui.quarter),period=periods?.[ui.year]?.[q];
+ const note=q!=='year'&&!period?'<p class="school-period-hint hint">Даты этой четверти пока не заданы. <button type="button" class="link" data-action="school-period-settings">Настроить</button></p>':'';
+ return '<div class="school-period-control">'+select+note+'</div>';
 }
 function finals(ui,snapshot,periods) {
  const year=ui.year,qs=[1,2,3,4],first=Number(year.slice(0,4));
@@ -152,7 +131,7 @@ function finals(ui,snapshot,periods) {
  const recognizedAll=(snapshot?.grades||[]).filter(g=>g.official).sort(compareGrade);
  const previous=recognizedAll.filter(g=>schoolYearOf(g.date)!==year).reverse();
  const names=[...new Set(all.map(g=>g.subject))].sort((a,b)=>a.localeCompare(b,'ru'));
- const label='<div class="school-section-head"><h2>Официальные итоги</h2><p class="hint">Только оценки, распознанные как итоговые записи школьного журнала. Прогнозов нет.</p></div>';
+ const label='<div class="school-section-head"><h2>Официальные итоги</h2><p class="hint">Только оценки, выставленные школой.</p></div>';
  const diagnostic='<div class="school-grade-count">В полученных данных распознано итоговых отметок: <b>'+recognizedAll.length+
  '</b> · за '+esc(year)+': <b>'+official.length+'</b></div>';
  const header='<thead><tr><th>Предмет</th>'+qs.map(q=>'<th>'+['','I','II','III','IV'][q]+'</th>').join('')+'<th>Год</th></tr></thead>';
@@ -191,7 +170,7 @@ function finals(ui,snapshot,periods) {
  '<div class="empty">В полученной выгрузке пока нет записей, которые программа смогла распознать как официальные итоговые оценки. Это не означает, что их нет в школьном дневнике: нужно проверить исходную выгрузку и типы записей.</div>':
  official.length===0?'<div class="notice info">За текущий учебный год распознанных итоговых пока нет. Проверь архив ниже: отметки за прошлые годы не пропали.</div>':'';
  const info=official.length&&names.length?'<p class="hint">Прочерк не всегда означает отсутствие отметки: если даты четверти не настроены, ищи её в блоке нераспределённых записей.</p>':'';
- return label+diagnostic+empty+table+info+pending+older+audit;
+ return label+empty+table+'<details class="school-data-check"><summary>Проверка данных и архив</summary>'+diagnostic+info+pending+older+audit+'</details>';
 }
 function schoolYearOf(date){
  const y=Number(String(date||'').slice(0,4)),m=Number(String(date||'').slice(5,7));
@@ -224,52 +203,47 @@ function detail(ui,snapshot,rows,range,periods,helpers) {
  row+summary+graph+marks+finalsBlock;
 }
 function overview(ui,snapshot,rows,range,periods,helpers) {
- const ordinary=works(rows),allOfficial=rows.filter(g=>g.official);
- const mean=average(ordinary),subjectNames=[...new Set(rows.map(g=>g.subject))].sort((a,b)=>a.localeCompare(b,'ru'));
+ const ordinary=works(rows),mean=average(ordinary);
+ const subjectNames=[...new Set(rows.map(g=>g.subject))].sort((a,b)=>a.localeCompare(b,'ru'));
  const current=String(ui.quarter),isQuarter=current!=='year';
  const latest=ordinary.slice().sort(compareGrade).reverse().slice(0,4);
- const top='<div class="card school-topline"><div><span class="hint">Средний по всем работам</span><strong>'+fmt(mean)+'</strong><span class="hint">'+ordinary.length+' оценок · '+allOfficial.length+' итоговых отдельно</span></div>'+
- '<div class="school-topmeta"><span class="hint">Период</span><b>'+(isQuarter?current+'-я четверть':'Учебный год')+'</b></div></div>';
- const recent=latest.length?'<div class="school-recent"><h3>Последние оценки</h3><div class="school-recent-list">'+latest.map(g=>'<div class="school-recent-row"><span class="grade g'+g.score+'">'+g.score+'</span><div><b>'+esc(g.subject)+'</b><small>'+esc(g.type||'Работа')+' · '+dateLabel(g.date)+'</small></div></div>').join('')+'</div></div>':'';
- const mode=ui.schoolChartMode==='subjects'?'subjects':'overall';
- const series=mode==='overall'?
- [{key:'overall',name:'',color:palette[0],points:cumulative(ordinary)}]:
- autoTrendSeries(ordinary);
- const toggles='<div class="school-mode-switch"><button class="'+(mode==='overall'?'active':'')+'" data-action="school-chart-mode" data-id="overall">Общий средний</button>'+
- '<button class="'+(mode==='subjects'?'active':'')+'" data-action="school-chart-mode" data-id="subjects">По предметам</button></div>';
- const legend=mode==='subjects'&&series.length?'<div class="school-legend school-trend-legend">'+series.map(item=>
-  '<span><i style="background:'+item.color+'"></i><b>'+esc(item.name)+'</b> <em class="'+(item.delta>0?'school-up':'school-down')+'">'+
-  (item.delta>0?'↑ +':'↓ −')+fmt(Math.abs(item.delta))+'</em></span>').join('')+'</div>':'';
- const explanation=mode==='subjects'?
- '<p class="hint">Автоматически: 2 предмета с наибольшим ростом и 3 с наибольшим снижением. Сравниваем среднее последних 2–3 оценок с предыдущими 2–3. Минимум 4 оценки по предмету; без изменений — не показываем.</p>':
- '<p class="hint">Накопленный средний балл по всем обычным оценкам за период.</p>';
- const noTrend=mode==='subjects'&&!series.length?
- '<div class="empty">Пока нет предметов с достаточным количеством оценок и заметным изменением среднего.</div>':'';
- const graph='<div class="card school-chart-card"><div class="school-chart-heading"><div><h3>Динамика успеваемости</h3><p class="hint">Накопленный средний балл · шкала 2–5</p></div></div>'+
- toggles+legend+(noTrend||chart(series,range))+explanation+
- '<p class="hint">Итоговые отметки не влияют на линии. Цвет и стрелка в легенде показывают направление изменений.</p></div>';
-
- const list='<section class="school-subject-list"><div class="school-section-head"><h2>Предметы</h2><p class="hint">Средний за работы и официальная отметка или прогноз</p></div>'+
+ const top='<div class="card school-topline"><div><span class="hint">Средний по всем работам</span><strong>'+fmt(mean)+'</strong></div>'+
+  '<div class="school-topmeta"><span class="hint">Оценок за период</span><b>'+ordinary.length+'</b></div></div>';
+ const graph='<div class="card school-chart-card"><div class="school-chart-heading"><h3>Динамика среднего</h3></div>'+
+ chart([{key:'overall',name:'',color:palette[0],points:cumulative(ordinary)}],range)+
+ '<p class="hint">Средний по всем оценкам за работы в выбранном периоде.</p></div>';
+ const list='<section class="school-subject-list"><div class="school-section-head"><h2>Предметы</h2>'+
+ '<p class="hint">Стрелка показывает изменение среднего за последние 14 дней выбранного периода. Нет новых оценок или истории — нет стрелки.</p></div>'+
  (subjectNames.length?subjectNames.map(name=>{
-  const sRows=rows.filter(g=>g.subject===name),subworks=works(sRows),m=average(subworks);
+  const subset=rows.filter(g=>g.subject===name),subjectWorks=works(subset),m=average(subjectWorks);
+  const delta=subjectDelta14(subjectWorks,range);
+  let trend='';
+  if(delta!==null){
+   if(delta>0)trend='<span class="school-subject-trend school-trend-up">↑ +'+fmt(delta)+'</span>';
+   else if(delta<0)trend='<span class="school-subject-trend school-trend-down">↓ −'+fmt(Math.abs(delta))+'</span>';
+   else trend='<span class="school-subject-trend school-trend-even">Без изменений</span>';
+  }
   let right='',context='';
   if(isQuarter){
    const mark=officialInQuarter(snapshot,periods,ui.year,current,name);
    const state=termState(range,mark,currentDate());
-   if(state.type==='official'){right=mark.score;context='Официально';}
+   if(state.type==='official'){right=mark.score;context='Итог';}
    else if(state.type==='active'&&m!==null){right=helpers.gradePrediction(m);context='Прогноз';}
-   else {right='—';context=state.label;}
+   else{right='—';context=state.label;}
   }else{
    const mark=officialInYear(snapshot,ui.year,name);
    right=mark?mark.score:'—';context=mark?'Годовая':'Без годовой';
   }
-  const chips=byDate(subworks).slice(-4).map(g=>'<span class="school-small-grade">'+g.score+'</span>').join('');
   return '<button type="button" class="school-subject-row" data-action="open-subject" data-id="'+esc(name)+'">'+
-   '<div class="school-subject-name"><b>'+esc(name)+'</b><div class="school-inline-grades">'+(chips||'<small>Нет оценок за работы</small>')+'</div></div>'+
+   '<div class="school-subject-name"><b>'+esc(name)+'</b>'+trend+'</div>'+
    '<div class="school-number"><strong>'+fmt(m)+'</strong><small>средний</small></div>'+
    '<div class="school-number"><strong>'+right+'</strong><small>'+esc(context)+'</small></div><span class="school-chevron">›</span></button>';
  }).join(''):'<div class="empty">За выбранный период оценок пока нет.</div>')+'</section>';
- return top+recent+graph+list;
+ const recent=latest.length?'<details class="school-recent-collapsed"><summary>Последние оценки <span class="school-recent-count">'+latest.length+'</span></summary>'+
+ '<div class="school-recent-list">'+latest.map(g=>'<div class="school-recent-row"><span class="grade g'+g.score+'">'+g.score+'</span>'+
+ '<div><b>'+esc(g.subject)+'</b><small>'+esc(g.type||'Работа')+' · '+dateLabel(g.date)+'</small></div></div>').join('')+
+ '</div></details>':'';
+ return top+graph+list+recent;
 }
 function render(ctx) {
  const {ui,state:s,api,cloudSnapshot,schoolYearFor,schoolRange,gradePrediction}=ctx;
@@ -312,6 +286,6 @@ function handleAction(btn,ctx) {
  ctx.render();
  return true;
 }
-window.VectorSchool={render,handleAction,test:{cumulative,subjectTrends,autoTrendSeries,officialInQuarter,officialInYear,quarterFromType,gradeQuarter,termState,rangeRows,works,average}};
+window.VectorSchool={render,handleAction,test:{cumulative,subjectDelta14,officialInQuarter,officialInYear,quarterFromType,gradeQuarter,termState,rangeRows,works,average}};
 if(typeof window.render==='function')window.render();
 })();
