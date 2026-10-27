@@ -25,7 +25,7 @@ function reaction(message,extra){
   node.className='ik-joy-pop';
   node.setAttribute('role','status');
   node.setAttribute('aria-live','polite');
-  node.innerHTML='<img src="./assets/iskra/hero-star.webp" alt="" width="58" height="58" decoding="async">'+
+  node.innerHTML=sprite('star_celebrate','reaction')+
     '<span class="ik-joy-pop-copy"><b>'+quote(message)+'</b><small>'+quote(extra)+'</small></span>'+
     '<button type="button" data-action="ikJoyDismiss" aria-label="Закрыть">×</button>';
   document.body.append(node);
