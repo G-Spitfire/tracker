@@ -251,34 +251,7 @@
   };
   ACTIONS.ikTaskDone=(id)=>{cs();toggleTask(id)};
   ACTIONS.ikPersonalSettings=()=>sheet('<h2>Мои настройки</h2><button class="btn g" data-action="profile">Имя и аватар</button><button class="btn g" data-action="ikInterests">Мои интересы</button><p class="mu sm">Настройки наград и расписания находятся в разделе «Для родителей».</p>');
-  ACTIONS.ikRewardInfo=()=>{
-    const date=weekDates()[0],h=S.rewardHistory[date],plan=weekPlan(date);
-    sheet('<h2>Награда недели</h2><p><b>'+safe(h?.name||plan.name)+'</b></p><p class="mu sm">Звёзды: '+weekDates().reduce((n,d)=>n+st(d),0)+' из '+(h?.goal||plan.goal)+'</p>'+
-    (h?.status==='received'?'<p>Награда уже получена!</p>':h?'<p>Цель выполнена! Получение подтверждает взрослый.</p><button class="btn" data-action="ikClaimReward">Подтвердить получение</button>':'<p>Продолжай собирать звёзды!</p>'));
-  };
-  ACTIONS.ikClaimReward=async()=>{
-    if(!await authorizeParent())return;
-    const date=weekDates()[0],h=S.rewardHistory[date];
-    if(!h||h.status==='received'||weekDates().reduce((n,d)=>n+st(d),0)<(h.goal||weekPlan(date).goal))return;
-    if(!confirm('Родитель подтверждает, что награда уже вручена?'))return;
-    h.status='received';h.receivedAt=iso(new Date());save();cs();render();
-  };
-  ACTIONS.ikRewardHistory=()=>{
-    const entries=Object.entries(S.rewardHistory||{}).sort((a,b)=>b[0].localeCompare(a[0]));
-    sheet('<h2>История наград</h2>'+(entries.length?entries.map(([date,h])=>
-      '<div class="row" style="align-items:center"><span>🎁 '+safe(h.name)+'<small class="mu sm" style="display:block">Неделя с '+safe(date)+'</small></span>'+
-      (h.status==='received'?'<b class="ok">✓ Получена</b>':'<button type="button" class="ik-btn-small" data-action="ikClaimPastReward" data-id="'+safe(date)+'">Подтвердить</button>')+'</div>'
-    ).join(''):'<p class="mu sm">Первая награда ещё впереди.</p>'));
-  };
-  ACTIONS.ikClaimPastReward=async week=>{
-    if(!await authorizeParent())return;
-    const reward=S.rewardHistory?.[week];if(!reward||reward.status==='received')return;
-    const [yy,mm,dd]=week.split('-').map(Number),start=new Date(yy,mm-1,dd);
-    const stars=Array.from({length:7},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);return st(iso(d))}).reduce((a,b)=>a+b,0);
-    if(stars<(reward.goal||25)){delete S.rewardHistory[week];save();ACTIONS.ikRewardHistory();return}
-    if(!confirm('Взрослый подтверждает получение награды «'+reward.name+'»?'))return;
-    reward.status='received';reward.receivedAt=iso(new Date());save();ACTIONS.ikRewardHistory();render();
-  };
+  // Real-world reward actions are retired. Historical records stay in backups.
   ACTIONS.ikLevels=()=>sheet('<h2>Твои уровни</h2>'+levels.map((lv,i)=>'<div class="row"><b>'+(i+1)+'. '+safe(lv[1])+'</b><span class="mu">'+lv[0]+' ⭐</span></div>').join('')+'<p class="mu sm">Звёзды за выполненные дела помогают переходить на новые уровни.</p>');
   ACTIONS.ikAbout=()=>sheet('<h2>Об Искре</h2><p>«Искра» помогает выполнять дела, радоваться достижениям и узнавать школьные оценки.</p><p class="mu sm">Оценки загружаются из школьного дневника через защищённое подключение. Звёзды и отметки дел сохраняются на этом устройстве.</p>');
   ACTIONS.ikInterests=()=>sheet('<h2>Мои интересы</h2><p class="mu sm">Что тебе нравится? Например, чтение, спорт или рисование.</p><input id="ikInterestInput" maxlength="100" value="'+safe(S.interests)+'" placeholder="Мои увлечения"><button data-sheet-footer class="btn" data-action="ikSaveInterests">Сохранить</button>');
@@ -320,11 +293,6 @@
       '<div data-sheet-footer class="chips"><button type="button" class="btn g" data-action="ikPlanCancel">Отмена</button><button type="button" class="btn" data-action="ikPlanSave">Сохранить</button></div>');
   }
   ACTIONS.ikManageTasks=()=>{taskPlanDraft=createTaskDraft();taskEditor()};
-  ACTIONS.ikTaskCategory=id=>{
-    const task=taskDraftItems().find(t=>t.i===id);if(!task)return;
-    const current=taskPlanDraft.taskCategories[id]||task.category||(['hw','en','bg'].includes(id)?'school':'personal');
-    taskPlanDraft.taskCategories[id]=current==='school'?'personal':'school';taskEditor();
-  };
   ACTIONS.ikTaskDay=(id,_,el)=>{
     const wd=Number(el.dataset.arg),task=taskDraftItems().find(t=>t.i===id);
     if(!task||!Number.isInteger(wd)||wd<0||wd>6)return;
