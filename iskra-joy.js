@@ -32,13 +32,16 @@ function reaction(message,extra){
   window.setTimeout(()=>{if(node.isConnected)node.remove()},3100);
 }
 ACTIONS.ikJoyDismiss=()=>document.querySelector('.ik-joy-pop')?.remove();
-const oldToggle=toggleTask;
-toggleTask=function(id){
-  const d=todayKey(),was=dn(d).includes(id);
-  oldToggle(id);
-  if(!was&&dn(d).includes(id)){
+// One feedback path covers checkboxes AND detailed homework/chores dialogs.
+const oldSetDone=setDone;
+setDone=function(id,on,silent,date){
+  const d=date||todayKey(),was=dn(d).includes(id);
+  const celebrate=!silent&&on&&!was&&d===todayKey()&&tasks(d).some(t=>t.i===id);
+  oldSetDone(id,on,silent||celebrate,date);
+  if(celebrate&&dn(d).includes(id)){
     const remaining=tasks(d).length-dn(d).length;
-    reaction(remaining===0?'Все дела сделаны!':'Звёздочка радуется!','+1 ⭐'+(remaining===0?' · и 2 бонусные звезды!':' · Осталось '+remaining+' дел'));
+    reaction(remaining===0?'Все дела сделаны!':'Звёздочка радуется!',
+      '+1 ⭐'+(remaining===0?' · и 2 бонусные звезды!':' · Осталось '+remaining+' дел'));
   }
 };
 const originalToday=today;
