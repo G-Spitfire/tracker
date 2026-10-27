@@ -133,40 +133,88 @@
     return {done,streak:bestStreak(),help,school,read,full,sundays,mondays,comeback,joy,draw,story,
       bestWeek:Math.max(0,...Object.values(weekTotals))};
   }
+  const achievementSpecs=[
+    {name:'Первый шаг',hint:'Первое выполненное дело',icon:'achievement_first'},
+    {name:'Десятка побед',hint:'10 выполненных дел',icon:'achievement_helper'},
+    {name:'Мастер дел',hint:'50 выполненных дел',icon:'achievement_master'},
+    {name:'Большая сотня',hint:'100 выполненных дел',icon:'achievement_master'},
+    {name:'Три дня подряд',hint:'Три дня с делами без перерыва',icon:'achievement_streak'},
+    {name:'Постоянство',hint:'Семь дней подряд',icon:'achievement_streak'},
+    {name:'Две недели',hint:'14 дней подряд',icon:'achievement_streak'},
+    {name:'Помощник',hint:'10 раз помогать по дому',icon:'achievement_helper'},
+    {name:'Добрая неделя',hint:'Помочь дома в три разных дня недели',icon:'achievement_helper'},
+    {name:'Книголюб',hint:'10 дней с чтением',icon:'achievement_read'},
+    {name:'Усердие',hint:'Учёба в 10 разных дней',icon:'achievement_grades'},
+    {name:'Учебный марафон',hint:'30 дней с учёбой',icon:'achievement_grades'},
+    {name:'Тайный художник',hint:'Порисовать пять раз по своему желанию',icon:'achievement_first'},
+    {name:'Сочинитель историй',hint:'Придумать пять историй',icon:'achievement_read'},
+    {name:'Следопыт',hint:'Пять прогулок по своему желанию',icon:'achievement_walk'},
+    {name:'Три приключения',hint:'Попробовать все три дела по выбору',icon:'achievement_gift'},
+    {name:'Зимняя искра',hint:'Выполнить дело зимой',icon:'sparkles'},
+    {name:'Сто звёзд',hint:'Накопить 100 звёзд',icon:'task_star'}
+  ];
+  function bestStreak(){
+    const dates=Object.keys(S.d||{}).filter(d=>dn(d).length>0).sort();
+    let best=0,run=0,previous='';
+    for(const date of dates){
+      if(previous){
+        const x=new Date(previous+'T12:00:00');x.setDate(x.getDate()+1);
+        run=iso(x)===date?run+1:1;
+      }else run=1;
+      best=Math.max(best,run);previous=date;
+    }
+    return best;
+  }
   function recordAchievements(){
     S.earnedAchievements=S.earnedAchievements&&typeof S.earnedAchievements==='object'?S.earnedAchievements:{};
-    const facts=progressFacts();let changed=false;
-    for(const a of achievementDefs){
-      if(!S.earnedAchievements[a.title]&&a.test(facts)){
-        S.earnedAchievements[a.title]=iso(new Date());changed=true;
-      }
+    const dates=Object.keys(S.d||{}).filter(d=>dn(d).length>0);
+    const doneTotal=dates.reduce((n,d)=>n+dn(d).length,0);
+    const streak=bestStreak();
+    const homeDates=dates.filter(d=>dn(d).includes('ho'));
+    const homeWeeks={};
+    for(const date of homeDates){const w=weekStart(date);homeWeeks[w]=(homeWeeks[w]||0)+1}
+    const studyDays=dates.filter(d=>dn(d).some(id=>id==='hw'||id==='en')).length;
+    const doneJoy=Object.keys(S.joyDone||{}).filter(d=>S.joyDone[d]);
+    const joyTypes=doneJoy.map(d=>S.joyChoices?.[d]).filter(Boolean);
+    const matches={
+      'Первый шаг':doneTotal>=1,'Десятка побед':doneTotal>=10,
+      'Мастер дел':doneTotal>=50,'Большая сотня':doneTotal>=100,
+      'Три дня подряд':streak>=3,'Постоянство':streak>=7,'Две недели':streak>=14,
+      'Помощник':homeDates.length>=10,
+      'Добрая неделя':Object.values(homeWeeks).some(n=>n>=3),
+      'Книголюб':dates.filter(d=>dn(d).includes('rd')).length>=10,
+      'Усердие':studyDays>=10,'Учебный марафон':studyDays>=30,
+      'Тайный художник':joyTypes.filter(t=>t==='draw').length>=5,
+      'Сочинитель историй':joyTypes.filter(t=>t==='story').length>=5,
+      'Следопыт':joyTypes.filter(t=>t==='walk').length>=5,
+      'Три приключения':['draw','story','walk'].every(t=>joyTypes.includes(t)),
+      'Зимняя искра':dates.some(d=>[12,1,2].includes(Number(d.slice(5,7)))),
+      'Сто звёзд':earned()>=100
+    };
+    let changed=false;
+    for(const [name,isEarned] of Object.entries(matches)){
+      if(isEarned&&!S.earnedAchievements[name]){S.earnedAchievements[name]=iso(new Date());changed=true}
     }
     if(changed)save();
   }
   function ikReward(){
     recordAchievements();
-    const dates=weekDates(),total=earned(),week=dates.reduce((n,d)=>n+st(d),0);
-    const l=currentLevel(),next=levels[l+1],since=levels[l][0],left=next?next[0]-total:0;
-    const percent=next?perc(total-since,next[0]-since):100;
-    const achieved=achievementDefs.filter(a=>S.earnedAchievements[a.title]).length;
-    return '<div class="ik-page ik-reward"><div class="ik-heading ik-subscreen-header">'+
-      '<button class="ik-header-back" data-action="ikToToday" aria-label="Вернуться к делам">‹</button>'+
-      '<h1>Мои звёзды</h1><button class="ik-cloud-pill ik-achievements-link" data-action="ikJumpAchievements" aria-label="Мои достижения">'+art('task_star','tiny')+'</button></div>'+
+    const dates=weekDates(),tw=dates.reduce((n,d)=>n+st(d),0),total=earned(),l=currentLevel();
+    const next=levels[l+1],prev=levels[l][0],progress=next?perc(total-prev,next[0]-prev):100;
+    const count=achievementSpecs.filter(x=>S.earnedAchievements[x.name]).length;
+    const legacy=S.earnedAchievements['Отличные оценки'];
+    const tile=a=>'<div class="ik-achievement '+(S.earnedAchievements[a.name]?'':'locked')+'"><span class="icon">'+art(a.icon,'achievement')+'</span><b>'+safe(a.name)+'</b><small>'+safe(S.earnedAchievements[a.name]?'Получено '+S.earnedAchievements[a.name]:a.hint)+'</small></div>';
+    return '<div class="ik-page ik-reward"><div class="ik-heading ik-subscreen-header"><button class="ik-header-back" data-action="ikToToday" aria-label="Вернуться к делам">‹</button><h1>Звёзды</h1><button class="ik-cloud-pill ik-achievements-link" data-action="ikJumpAchievements" aria-label="Мои достижения">'+art('task_star','tiny')+'<span class="ik-achievements-text">Достижения</span></button></div>'+
       '<div class="ik-main-card ik-reward-hero">'+art('cloud','decor-cloud')+art('sparkles','decor-sparkles')+
-      '<div class="ik-hero-split">'+star+'<div style="flex:1"><b>Мои звёзды</b>'+
-      '<div class="ik-row" style="gap:7px"><span class="ik-number" style="font-size:43px">'+total+'</span><span style="font-size:25px">⭐</span></div>'+
-      '<div class="ik-caption">За эту неделю: '+week+' ⭐</div><p class="ik-caption" style="margin-bottom:0">Звёзды остаются с тобой!</p></div></div>'+
-      '<div class="ik-level-track"><div style="width:'+percent+'%"></div></div></div>'+
-      '<div class="card ik-week">'+dates.map((d,i)=>'<button class="ik-week-day" data-action="ikWeekDay" data-id="'+d+'" aria-label="'+DN[i]+': '+st(d)+' звёзд">'+
-      '<div class="ik-week-star">'+(st(d)>0?art('task_star','week'):'☆')+'</div><span>'+DN[i]+'</span><small>'+st(d)+' ★</small></button>').join('')+'</div>'+
-      '<button class="ik-action-row" data-action="ikLevels"><span class="ik-action-icon">'+art('achievement_master','action')+'</span>'+
-      '<span style="flex:1"><b>Твой уровень</b><small>'+safe(levels[l][1])+' · уровень '+(l+1)+' из '+levels.length+'</small>'+
-      '<div class="ik-level-track"><div style="width:'+percent+'%"></div></div>'+
-      '<small>'+(next?'До следующего: '+left+' звёзд':'Высший уровень!')+'</small></span><span class="ik-chevron">›</span></button>'+
-      '<div class="ik-row-between" id="ik-achievements"><h2 class="ik-sec-title">Достижения</h2><span class="ik-tab-sublabel">'+achieved+' из '+achievementDefs.length+'</span></div>'+
-      '<div class="ik-achievements">'+achievementDefs.map(a=>'<div class="ik-achievement '+(S.earnedAchievements[a.title]?'':'locked')+'">'+
-        '<span class="icon">'+art(a.icon,'achievement')+'</span><b>'+safe(a.title)+'</b>'+
-        '<small>'+(S.earnedAchievements[a.title]?'Получено '+safe(S.earnedAchievements[a.title]):safe(a.small))+'</small></div>').join('')+'</div></div>';
+      '<div class="ik-hero-split">'+star+'<div style="flex:1"><b>Мои звёзды</b><div class="ik-row" style="gap:7px"><span class="ik-number" style="font-size:43px">'+total+'</span><span style="font-size:25px">⭐</span></div><div class="ik-caption">Собирай звёзды и открывай новые уровни!</div></div></div>'+
+      '<div class="ik-level-track"><div style="width:'+progress+'%"></div></div></div>'+
+      '<div class="card ik-week">'+dates.map((date,i)=>{const n=st(date),has=dn(date).length>0;return '<button class="ik-week-day" data-action="ikWeekDay" data-id="'+date+'" aria-label="'+DN[i]+': '+n+' звёзд"><div class="ik-week-star">'+(has?art('task_star','week'):'☆')+'</div><span>'+DN[i]+'</span><small>'+n+' ★</small></button>'}).join('')+'</div>'+
+      '<div class="ik-action-row ik-level-summary" role="group"><span class="ik-action-icon">'+art('achievement_master','action')+'</span><span style="flex:1"><b>'+safe(levels[l][1])+'</b><small>Уровень '+(l+1)+' · '+tw+' ⭐ за неделю</small><div class="ik-level-track"><div style="width:'+progress+'%"></div></div><small>'+(next?'До следующего уровня: '+Math.max(0,next[0]-total)+' звёзд':'Высший уровень!')+'</small></span><button class="ik-btn-small" data-action="ikLevels">Уровни ›</button></div>'+
+      '<div class="ik-row-between" id="ik-achievements"><h2 class="ik-sec-title">Достижения</h2><span class="ik-tab-sublabel">'+count+' из '+achievementSpecs.length+'</span></div>'+
+      '<div class="ik-achievements">'+achievementSpecs.slice(0,6).map(tile).join('')+'</div>'+
+      '<details class="ik-joy-all-achievements"><summary>Все достижения · '+achievementSpecs.length+' <span aria-hidden="true">⌄</span></summary><div class="ik-achievements">'+achievementSpecs.slice(6).map(tile).join('')+'</div></details>'+
+      (legacy?'<p class="ik-muted">Старое достижение «Отличные оценки» тоже сохранено в истории.</p>':'')+
+      '<p class="ik-muted">Звёзды не обнуляются: новые уровни открываются по мере накопления. Достижения не исчезают.</p></div>';
   }
   function ikProfile(){
     recordAchievements();
