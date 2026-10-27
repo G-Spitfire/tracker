@@ -123,6 +123,7 @@ const SCHEMA=4;
 /* Ручные оценки сохранены только как резервный архив данных. */
 const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const store=(()=>{
+  let recoveredFromBackup=false;
   function defaults(){return{
     d:{},name:'',asked:0,goal:25,reward:'Семейная награда',x:{},
     av:{e:'🦊',c:'#ffd9c9'},schema:SCHEMA,
@@ -154,6 +155,11 @@ const store=(()=>{
     if(!s.joyChoices||typeof s.joyChoices!=='object'||Array.isArray(s.joyChoices))s.joyChoices={};
     if(!s.joyDone||typeof s.joyDone!=='object'||Array.isArray(s.joyDone))s.joyDone={};
     if(!s.joyWeekNotes||typeof s.joyWeekNotes!=='object'||Array.isArray(s.joyWeekNotes))s.joyWeekNotes={};
+    if(!s.skipped||typeof s.skipped!=='object'||Array.isArray(s.skipped))s.skipped={};
+    for(const [date,ids] of Object.entries(s.skipped)){
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Array.isArray(ids)){delete s.skipped[date];continue}
+      s.skipped[date]=[...new Set(ids.filter(id=>typeof id==='string'&&/^[a-zA-Z0-9_-]{1,70}$/.test(id)))];
+    }
     if(typeof s.joyIntroSeen!=='boolean')s.joyIntroSeen=false;
     if(!Array.isArray(s.rewardChoices))s.rewardChoices=[];
     s.rewardChoices=s.rewardChoices.filter(x=>typeof x==='string'&&x.trim()&&x.length<=50).slice(0,3);
@@ -168,20 +174,33 @@ const store=(()=>{
   }
   function load(){
     let raw=null;try{raw=localStorage.getItem(KEY)}catch(e){}
-    if(!raw)return defaults();
-    let s;try{s=JSON.parse(raw)}catch(e){return defaults()}
-    try{s=migrate(s);s.schema=SCHEMA;return validateAll(s)}
-    catch(e){try{const b=localStorage.getItem(BAK);if(b)return validateAll(JSON.parse(b))}catch(_){}return defaults()}
+    if(raw){
+      try{const s=validateAll(Object.assign(migrate(JSON.parse(raw)),{schema:SCHEMA}));return s}
+      catch(e){window.__iskraBadStore=true}
+    }
+    // A truncated primary record must not hide a valid last-known-good copy.
+    try{
+      const backup=localStorage.getItem(BAK);
+      if(backup){
+        const restored=validateAll(Object.assign(migrate(JSON.parse(backup)),{schema:SCHEMA}));
+        recoveredFromBackup=true;
+        window.__iskraBadStore=false;
+        try{localStorage.setItem(KEY,JSON.stringify(restored))}catch(_){}
+        return restored;
+      }
+    }catch(_){}
+    return defaults();
   }
   let warned=false;
   function save(s){
+    if(window.__iskraBadStore){toast('Сохранение приостановлено. Восстанови данные из файла.');return}
     const json=JSON.stringify(s);
     try{const old=localStorage.getItem(KEY);if(old)localStorage.setItem(BAK,old)}catch(e){}
     try{localStorage.setItem(KEY,json)}
     catch(e){if(!warned){warned=true;toast('Данные не сохраняются — приватный режим?')}}
   }
   function restoreBackup(){try{const b=localStorage.getItem(BAK);if(!b)return null;return validateAll(JSON.parse(b))}catch(e){return null}}
-  return {load,save,restoreBackup,defaults,validateAll};
+  return {load,save,restoreBackup,defaults,validateAll,recoveredFromBackup:()=>recoveredFromBackup};
 })();
 
 /* ===== SCHOOL STORE (изолированный слой) ===== */
@@ -293,6 +312,7 @@ const tasks=d=>{
 };
 const freezeDay=d=>{if(!Array.isArray(S.planHistory[d]))S.planHistory[d]=tasks(d).map(t=>({...t}))};
 const dn=d=>(S.d[d]||[]).filter(i=>tasks(d).some(t=>t.i==i));
+const skipped=d=>(S.skipped?.[d]||[]).filter(i=>tasks(d).some(t=>t.i===i));
 const st=d=>{const n=dn(d).length,required=tasks(d).length;return n+(required>0&&n===required?2:0)+(S.joyChoices?.[d]&&S.joyDone?.[d]?1:0)};
 const ring=(n,m)=>{const C=2*Math.PI*40,ratio=m>0?Math.max(0,Math.min(1,n/m)):0;return`<svg width="96" height="96" viewBox="0 0 96 96" style="flex:none"><circle cx="48" cy="48" r="40" fill="none" stroke="#ffffff55" stroke-width="10"/><circle cx="48" cy="48" r="40" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-ratio)}" transform="rotate(-90 48 48)"/><text x="48" y="56" text-anchor="middle" font-size="24" font-weight="800" fill="#fff">${n}/${m}</text></svg>`};
 const avb=()=>`<button class="av" data-action="profile" style="background:${S.av.c}" aria-label="Мой герой">${S.av.e}</button>`;
@@ -338,7 +358,7 @@ function me(){
 /* ===== RENDER ===== */
 function render(){
   document.querySelectorAll('.bar button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));
-  document.getElementById('m').innerHTML={t:today,g:school.view,r:reward,y:me}[tab]();
+  document.getElementById('m').innerHTML=(window.__iskraBadStore?'<div role="alert" aria-live="assertive" style="margin:0 auto 12px;max-width:520px;padding:12px 14px;border:1px solid #e7b3a2;border-radius:14px;background:#fff2ed;color:#7e3422;font-size:13px;line-height:1.45">Сохранённые данные повреждены. Искра приостановила сохранение, чтобы не затереть их. Восстанови JSON-копию в разделе «Для родителей».</div>':'')+{t:today,g:school.view,r:reward,y:me}[tab]();
 }
 document.querySelector('.bar').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
@@ -432,6 +452,7 @@ function setDone(i,on,silent,date){
   freezeDay(d);
   const a=S.d[d]||(S.d[d]=[]),L=tasks(d),wasAll=dn(d).length===L.length,x=a.indexOf(i);
   if(!L.some(t=>t.i===i))return;
+  if(on&&S.skipped?.[d])S.skipped[d]=S.skipped[d].filter(id=>id!==i);
   const previousDetails=!on&&x>=0&&S.x[d]&&S.x[d][i]?JSON.parse(JSON.stringify(S.x[d][i])):null;
   if(on&&x<0)a.push(i);
   if(!on&&x>=0){a.splice(x,1)} // Details survive an unchecked/rechecked task.
@@ -451,8 +472,8 @@ function openDetails(i){
   renderDetails();
 }
 function renderDetails(){
-  const hw=cur.i==='hw',L=hw?(window.schoolCloud?.subjects?.()||[]):CONFIG.chores,ok=(S.d[iso(new Date())]||[]).includes(cur.i);
-  sheet(`<h2 style="margin-top:0">${hw?'Какие уроки делала?':'Что помогла сделать?'}</h2>${hw?'<p class="mu sm">Предметы берутся из школьного дневника.</p>':''}<div class="chips" style="margin-top:0">${L.map((k,j)=>`<button class="chip ${cur.s.includes(k)?'on':''}" data-action="detailChip" data-id="${j}">${esc(k)}</button>`).join('')}${hw&&!L.length?'<p class="mu sm">Предметы пока не загружены. Отметить выполненные уроки всё равно можно.</p>':''}</div><input id="dn" maxlength="60" placeholder="Что-то ещё? Напиши" value="${esc(cur.n)}"><div data-sheet-footer class="chips"><button class="btn" data-action="saveDetails">Готово</button>${ok?'<button class="btn g" data-action="removeDetails">Убрать отметку</button>':''}</div>`);
+  const hw=cur.i==='hw',L=hw?(window.schoolCloud?.subjects?.()||[]):CONFIG.chores,ok=(S.d[iso(new Date())]||[]).includes(cur.i),isSkipped=skipped(iso(new Date())).includes(cur.i);
+  sheet(`<h2 style="margin-top:0">${hw?'Какие уроки делала?':'Что помогла сделать?'}</h2>${hw?'<p class="mu sm">Предметы берутся из школьного дневника.</p>':''}<div class="chips" style="margin-top:0">${L.map((k,j)=>`<button class="chip ${cur.s.includes(k)?'on':''}" data-action="detailChip" data-id="${j}">${esc(k)}</button>`).join('')}${hw&&!L.length?'<p class="mu sm">Предметы пока не загружены. Отметить выполненные уроки всё равно можно.</p>':''}</div><input id="dn" maxlength="60" placeholder="Что-то ещё? Напиши" value="${esc(cur.n)}"><div data-sheet-footer class="chips"><button class="btn" data-action="saveDetails">Готово</button>${ok?'<button class="btn g" data-action="removeDetails">Убрать отметку</button>':''}${ok?'':'<button class="btn g" data-action="ikSkipToggle" data-id="'+esc(cur.i)+'">'+(isSkipped?'Вернуть в дела':'Пропустить сегодня')+'</button>'}</div>`);
 }
 function saveDetails(){
   const d=iso(new Date());cur.n=document.getElementById('dn').value.trim().slice(0,60);
@@ -472,7 +493,7 @@ function openDay(d){
   const done=dn(d),L=tasks(d),now=iso(new Date()),y=new Date();
   y.setDate(y.getDate()-1);
   const canEdit=d===iso(y);
-  const items=L.map(t=>{const ok=done.includes(t.i),x=(S.x[d]||{})[t.i];const sub=ok&&x?esc([].concat(x.s||[],x.n?[x.n]:[]).join(', ')):'';return`<div class="row"><span>${t.e} ${esc(t.t)}${sub?`<div class="mu sm">${sub}</div>`:''}</span>${canEdit?`<button type="button" class="ik-btn-small" data-action="historyToggle" data-id="${esc(d)}" data-arg="${esc(t.i)}" aria-label="${ok?'Снять':'Отметить'} выполнение">${ok?'✓ Готово':'Отметить'}</button>`:`<span>${ok?'⭐':''}</span>`}</div>`}).join('');
+  const items=L.map(t=>{const ok=done.includes(t.i),isSkipped=skipped(d).includes(t.i),x=(S.x[d]||{})[t.i];const sub=ok&&x?esc([].concat(x.s||[],x.n?[x.n]:[]).join(', ')):'';return`<div class="row"><span>${t.e} ${esc(t.t)}${isSkipped?'<div class="mu sm">Пропущено</div>':''}${sub?`<div class="mu sm">${sub}</div>`:''}</span>${canEdit?`<button type="button" class="ik-btn-small" data-action="historyToggle" data-id="${esc(d)}" data-arg="${esc(t.i)}" aria-label="${ok?'Снять':'Отметить'} выполнение">${ok?'✓ Готово':'Отметить'}</button>`:`<span>${ok?'⭐':isSkipped?'–':''}</span>`}</div>`}).join('');
   sheet(`<div class="hist-day"><h2 style="margin-top:0">${d.split('-').reverse().join('.')}</h2><div class="mu sm" style="margin-bottom:10px">⭐ ${st(d)} звёзд</div>${items||'<div class="mu sm">Дел нет</div>'}${canEdit?'<p class="mu sm">Вчерашние отметки можно исправить после подтверждения взрослого.</p>':''}<p data-sheet-footer style="margin:18px 0 0"><button class="btn g" data-action="closeSheet">Закрыть</button></p></div>`);
 }
 
@@ -532,6 +553,11 @@ function validateBackupPayload(source){
   if(Object.keys(source.d).length>10000)problem();
   for(const [date,entries] of Object.entries(source.d)){
     if(!dateOk(date)||!Array.isArray(entries)||entries.length>60||entries.some(v=>!idOk(v)))problem();
+  }
+  if(source.skipped!==undefined){
+    if(!isObj(source.skipped))problem();
+    for(const [date,ids] of Object.entries(source.skipped))
+      if(!dateOk(date)||!Array.isArray(ids)||ids.length>60||ids.some(id=>!idOk(id)))problem();
   }
   if(source.x!==undefined){
     if(!isObj(source.x))problem();
@@ -632,7 +658,7 @@ function installBackup(o){
   localStorage.setItem(KEY+'_before_restore',before);
   try{localStorage.setItem(KEY+'_school',JSON.stringify(candidate.school));localStorage.setItem(KEY,JSON.stringify(candidate))}
   catch(err){if(oldSchool===null)localStorage.removeItem(KEY+'_school');else localStorage.setItem(KEY+'_school',oldSchool);throw err}
-  S=candidate;render();backupStatus('Данные восстановлены. Предыдущая версия сохранена на устройстве.');
+  window.__iskraBadStore=false;S=candidate;render();backupStatus('Данные восстановлены. Предыдущая версия сохранена на устройстве.');
 }
 
 function backupStatus(message){const e=document.getElementById('backupStatus');if(e)e.textContent=message;else toast(message)}
@@ -716,6 +742,8 @@ window.addEventListener('schoolCloudUpdated',()=>{if(tab==='g')render()});
 
 /* ===== BOOT ===== */
 render();
-if(!S.asked){S.asked=1;save();openProfile()}
+if(store.recoveredFromBackup())toast('Данные восстановлены из резервной копии.');
+else if(window.__iskraBadStore)toast('Сохранение приостановлено: восстанови JSON-копию.');
+if(!S.asked&&!window.__iskraBadStore){S.asked=1;save();openProfile()}
 </script><script src="./iskra-ui.js?v=20261027-7"></script><script src="./iskra-joy.js?v=20261027-4"></script><script type="module" src="./school-cloud.js?v=20261027-6" data-school-cloud="iskra"></script></body></html>
 

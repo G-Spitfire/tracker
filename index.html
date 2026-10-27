@@ -51,6 +51,7 @@
 <script>
 'use strict';
 const STORE='vektor_logic_mvp_2026_10';
+const BACKUP_STORE=STORE+'_bak';
 const LEGACY_STORE='vektor_logic_before_simple_tasks_2026_10';
 const $=sel=>document.querySelector(sel);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -101,17 +102,33 @@ function normalizeState(x,protectOriginal=false){
  return out;
 }
 function load(){
+ let raw=null;
  try{
-   const x=JSON.parse(localStorage.getItem(STORE)||'null');
+   raw=localStorage.getItem(STORE);
+   const x=JSON.parse(raw||'null');
    if(validState(x))return normalizeState(x,true);
    if(x)window.__vectorBadStore=true;
+ }catch(e){}
+ try{
+   const backup=JSON.parse(localStorage.getItem(BACKUP_STORE)||'null');
+   if(validState(backup)){
+     const restored=normalizeState(backup,false);
+     window.__vectorBadStore=false;
+     window.__vectorBackupRecovered=true;
+     try{localStorage.setItem(STORE,JSON.stringify(restored))}catch(e){}
+     return restored;
+   }
  }catch(e){}
  return emptyState();
 }
 let S=load();
 function save(){
  if(window.__vectorBadStore){toast('Сохранение отключено: восстанови резервную копию');return}
- try{localStorage.setItem(STORE,JSON.stringify(S))}
+ try{
+   const previous=localStorage.getItem(STORE);
+   if(previous&&validState(JSON.parse(previous)))localStorage.setItem(BACKUP_STORE,previous);
+   localStorage.setItem(STORE,JSON.stringify(S));
+ }
  catch(e){toast('Браузер не сохранил данные. Проверь настройки хранения.')}
 }
 
@@ -283,4 +300,5 @@ if(e.target.id==='project-form'){
 if(e.target.id==='stage-form'){e.preventDefault();const title=(new FormData(e.target).get('title')||'').trim();const p=project(UI.modal.id);if(p&&title&&p.status==='active'&&p.deadline){p.stages.push({id:uid(),title});UI.modal=null;save();render()}return}});
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&UI.modal){UI.modal=null;renderModal()}});
 render();
+if(window.__vectorBackupRecovered)toast('Данные восстановлены из резервной копии.');
 </script><script src="./vector-school-ui.js?v=20261027-7"></script><script type="module" src="./school-cloud.js?v=20261026-mvp" data-school-cloud="vector"></script><script>window.addEventListener('schoolCloudUpdated',()=>{if(!UI.modal)render()})</script></body></html>

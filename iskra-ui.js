@@ -45,11 +45,11 @@
     recordAchievements();
     const d=iso(new Date()),allTasks=tasks(d),done=dn(d),count=done.length,total=allTasks.length;
     const renderTask=t=>{
-      const yes=done.includes(t.i),x=(S.x[d]||{})[t.i],
+      const yes=done.includes(t.i),skippedToday=skipped(d).includes(t.i),x=(S.x[d]||{})[t.i],
         sub=yes&&x&&((x.s||[]).length||x.n)?[].concat(x.s||[],x.n?[x.n]:[]).join(', '):(t.s||'');
       const details=t.i==='hw'||t.i==='ho';
-      return '<div class="ik-task '+(yes?'done':'')+'"><button class="ik-check '+(yes?'done':'')+'" data-action="toggle" data-id="'+t.i+'" aria-label="'+(yes?'Снять отметку: ':'Выполнить: ')+safe(t.t)+'">'+(yes?'✓':'')+'</button>'+
-        '<span class="ik-task-icon">'+taskIcon(t)+'</span><button class="ik-task-title" data-action="'+(details?'details':'ikTaskInfo')+'" data-id="'+t.i+'">'+safe(t.t)+(sub?'<small>'+safe(sub)+'</small>':'')+'</button>'+
+      return '<div class="ik-task '+(yes?'done ':'')+(skippedToday?'skipped':'')+'"><button class="ik-check '+(yes?'done':'')+'" data-action="toggle" data-id="'+t.i+'" aria-label="'+(yes?'Снять отметку: ':'Выполнить: ')+safe(t.t)+'">'+(yes?'✓':'')+'</button>'+
+        '<span class="ik-task-icon">'+taskIcon(t)+'</span><button class="ik-task-title" data-action="'+(details?'details':'ikTaskInfo')+'" data-id="'+t.i+'">'+safe(t.t)+(skippedToday?'<small class="ik-skip-label">Пропущено сегодня · нажми, чтобы вернуть</small>':sub?'<small>'+safe(sub)+'</small>':'')+'</button>'+
         (S.times[t.i]?'<span class="ik-task-time">'+safe(S.times[t.i])+'</span>':'')+
         '<button class="ik-mini-btn" data-action="'+(details?'details':'ikTaskInfo')+'" data-id="'+t.i+'" aria-label="Подробнее">›</button></div>';
     };
@@ -193,10 +193,22 @@
   ACTIONS.ikWeekDay=(d)=>openDay(d);
   ACTIONS.ikTaskInfo=(id)=>{
     const task=tasks(iso(new Date())).find(t=>t.i===id);if(!task)return;
-    const done=dn(iso(new Date())).includes(id);
-    sheet('<h2>'+safe(task.t)+'</h2><p class="mu sm">'+safe(task.s||'Дело на сегодня')+'</p><p class="mu sm">Время: '+safe(S.times[id]||'не задано')+'</p><div data-sheet-footer><button class="btn" data-action="ikTaskDone" data-id="'+safe(id)+'">'+(done?'Снять отметку':'Отметить выполненным')+'</button></div>');
+    const date=iso(new Date()),done=dn(date).includes(id),isSkipped=skipped(date).includes(id);
+    sheet('<h2>'+safe(task.t)+'</h2><p class="mu sm">'+safe(task.s||'Дело на сегодня')+'</p><p class="mu sm">Время: '+safe(S.times[id]||'не задано')+'</p><div data-sheet-footer><button class="btn" data-action="ikTaskDone" data-id="'+safe(id)+'">'+(done?'Снять отметку':'Отметить выполненным')+'</button>'+(done?'':'<button class="btn g" data-action="ikSkipToggle" data-id="'+safe(id)+'">'+(isSkipped?'Вернуть в дела':'Пропустить сегодня')+'</button>')+'</div>');
   };
   ACTIONS.ikTaskDone=(id)=>{cs();toggleTask(id)};
+  ACTIONS.ikSkipToggle=id=>{
+    const d=iso(new Date());
+    if((S.d[d]||[]).includes(id)){toast('Сначала сними отметку выполнения');return}
+    if(typeof cur==='object'&&cur.i===id){
+      const input=document.getElementById('dn'),note=input?input.value.trim().slice(0,60):cur.n||'';
+      if(cur.s?.length||note)(S.x[d]||(S.x[d]={}))[id]={s:cur.s||[],n:note};
+    }
+    S.skipped=S.skipped&&typeof S.skipped==='object'?S.skipped:{};
+    const list=S.skipped[d]||(S.skipped[d]=[]),at=list.indexOf(id),wasSkipped=at>=0;
+    if(wasSkipped)list.splice(at,1);else list.push(id);
+    save();cs();render();toast(wasSkipped?'Дело вернулось в список':'Отмечено как пропущенное. Звезда за дело не начисляется.');
+  };
   ACTIONS.ikPersonalSettings=()=>sheet('<h2>Мои настройки</h2><button class="btn g" data-action="profile">Имя и аватар</button><button class="btn g" data-action="ikInterests">Мои интересы</button><p class="mu sm">Расписание дел и школьный дневник настраиваются в разделе «Для родителей».</p>');
   // Real-world reward actions are retired. Historical records stay in backups.
   ACTIONS.ikLevels=()=>sheet('<h2>Твои уровни</h2>'+levels.map((lv,i)=>'<div class="row"><b>'+(i+1)+'. '+safe(lv[1])+'</b><span class="mu">'+lv[0]+' ⭐</span></div>').join('')+'<p class="mu sm">Звёзды за выполненные дела помогают переходить на новые уровни.</p>');

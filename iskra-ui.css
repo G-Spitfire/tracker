@@ -53,6 +53,8 @@ h1{font-size:29px;font-weight:850;letter-spacing:-.035em}h2{font-size:21px;font-
 .ik-task-time{color:#9992ab;font-size:12px;white-space:nowrap}
 .ik-mini-btn{width:30px;height:30px;border:0;border-radius:11px;background:#f7f2ff;color:#9875dd;flex:none;cursor:pointer}
 .ik-task.done .ik-task-title{color:#7a719a}
+.ik-task.skipped .ik-task-title{color:#8a829d}
+.ik-skip-label{color:#9b7895!important;font-weight:650!important}
 .ik-time-stat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .ik-time-stat .ik-tile{min-width:0}
 .ik-tile{background:#fff;border:1px solid #f8f0fa;border-radius:19px;box-shadow:var(--ik-shadow);padding:13px 11px;min-width:0}
