@@ -208,3 +208,27 @@ body[data-ik-theme="mint"] .bar button.on{
 @media(prefers-reduced-motion:reduce){
   .ik-joy-pop,.ik-joy-pop .ik-art--reaction{animation:none}
 }
+
+/* Long-term stars and expanded achievement collection. */
+.ik-joy-all-achievements{
+  border:1px solid #eee3f9;border-radius:20px;background:rgba(255,255,255,.78);
+  overflow:hidden;
+}
+.ik-joy-all-achievements>summary{
+  list-style:none;cursor:pointer;min-height:47px;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 15px;font-size:13px;color:#7453b9;font-weight:750
+}
+.ik-joy-all-achievements>summary::-webkit-details-marker{display:none}
+.ik-joy-all-achievements[open]>summary{border-bottom:1px solid #f1e9fa}
+.ik-joy-all-achievements>.ik-achievements{padding:12px 8px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ik-level-summary{min-height:94px;align-items:center}
+.ik-level-summary .ik-btn-small{margin-left:5px;flex:none;align-self:center}
+.ik-reward .ik-main-card .ik-caption{max-width:230px}
+.ik-reward .ik-achievement b{overflow-wrap:anywhere}
+.ik-joy-all-achievements .ik-achievement{min-height:119px}
+@media(max-width:360px){
+ .ik-joy-all-achievements>.ik-achievements{gap:5px;padding:9px 5px}
+ .ik-joy-all-achievements .ik-achievement{padding:7px 3px 8px}
+ .ik-level-summary .ik-btn-small{font-size:10px}
+}
