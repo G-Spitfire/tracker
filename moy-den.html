@@ -105,7 +105,7 @@ body.sheet-open #sc{overflow:hidden}
 @media(min-width:700px){.ov{align-items:center;padding:16px}.sh{border-bottom:1px solid var(--ln);border-radius:24px}}
 @media(max-width:355px){.sh .sheet-head,.sh .sheet-body,.sh .sheet-footer{padding-left:16px;padding-right:16px}.sh .sheet-inline{grid-template-columns:minmax(0,1fr)}.sh .sheet-inline .btn{width:100%}}
 </style><link rel="stylesheet" href="./iskra-ui.css?v=20261027-2"><link rel="stylesheet" href="./iskra-joy.css?v=20261027-3"></head><body><main id="m"></main>
-<nav class="bar"><button data-t="t"><span>☀️</span>Сегодня</button><button data-t="g"><span>📚</span>Оценки</button><button data-t="r"><span>⭐</span>Звёзды</button><button data-t="y"><span>😊</span>Я</button></nav>
+<nav class="bar"><button data-t="t"><span>☀️</span>Сегодня</button><button data-t="g"><span>📚</span>Школа</button><button data-t="r"><span>⭐</span>Звёзды</button><button data-t="y"><span>😊</span>Я</button></nav>
 <div id="tt"></div><div id="s"></div>
 <script>
 /* ===== CONFIG ===== */
@@ -501,7 +501,7 @@ function histPrev(){calMonth.m--;if(calMonth.m<0){calMonth.m=11;calMonth.y--}ren
 function histNext(){calMonth.m++;if(calMonth.m>11){calMonth.m=0;calMonth.y++}renderHistory()}
 
 /* Новые оценки доступны только через автоматическую загрузку. */
-const school={view:()=>window.schoolCloud ? window.schoolCloud.view() : '<div class="ik-page"><h1>Мои оценки</h1><div class="card">Подключаем дневник…</div></div>'};
+const school={view:()=>window.schoolCloud ? window.schoolCloud.view() : '<div class="ik-page"><h1>Школа</h1><div class="card">Подключаем дневник…</div></div>'};
 
 function openParents(){
   sheet(`<h2>Для родителей</h2><p class="mu sm">Звёзды теперь помогают открывать уровни и достижения, а не покупать награды. Дела и звёзды хранятся на этом устройстве — сохраните копию для переноса.</p><h2>Копия данных</h2><div class="chips"><button class="btn g" data-action="exportFile">Сохранить копию файлом</button><button class="btn g" data-action="pickBackupFile">Восстановить из файла</button><input type="file" id="backupFileInput" accept=".json,application/json" data-action="importFile" hidden><div id="backupStatus" class="mu sm" role="status" aria-live="polite"></div><details><summary class="mu sm" style="padding:16px 0">Восстановить старую текстовую копию</summary><textarea id="bk" aria-label="Текст старой копии"></textarea><button class="btn g" data-action="importText">Восстановить из текста</button></details></div><button data-sheet-footer class="btn g" data-action="closeSheet">Закрыть</button>`);
