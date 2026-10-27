@@ -492,7 +492,7 @@ function ikSubjectPage() {
     '<p class="ik-muted">Итоговые оценки показываются отдельно и не участвуют в среднем. Все оценки за работы равновесные.</p></div>';
 }
 function viewIskra() {
-  const title='<div class="ik-heading ik-compact-header ik-subscreen-header"><button type="button" class="ik-header-back" data-action="ikToToday" aria-label="Вернуться к делам">‹</button><h1>Оценки</h1><span class="ik-cloud-pill">☁ Из дневника</span></div>';
+  const title='<div class="ik-heading ik-compact-header ik-subscreen-header"><button type="button" class="ik-header-back" data-action="ikToToday" aria-label="Вернуться к делам">‹</button><h1>Школа</h1><span class="ik-cloud-pill">☁ Из дневника</span></div>';
   if(ikSubject && state.data&&state.user)return ikSubjectPage();
   let html='<div class="ik-page scs-iskra">'+title;
   if(!state.user){
@@ -506,6 +506,10 @@ function viewIskra() {
     html+='<div class="card ik-empty">'+ikStar+'<h2>'+(state.phase==='loading'?'Загружаем оценки…':'Оценок пока нет')+'</h2><p>После выгрузки с MacBook оценки появятся здесь автоматически.</p></div>';
     return html+'</div>';
   }
+  // Show the current term immediately, before the analytics or grade cards.
+  html+='<div class="ik-school-period-lead"><b>Период: '+esc(ikPresets.find(p=>p[0]===ikPeriod)?.[1]||'Школа')+'</b>'+
+    '<small>'+(ikPeriod==='q2'?'Первая четверть завершена · началась вторая':'Оценки школьного дневника')+'</small></div>'+
+    ikPeriodButtons()+ikPeriodEditor();
   const available=ikRange(),all=ikFiltered(),works=ikWorks(all),official=all.filter(r=>officialKind(r));
   const mean=ikMean(works),sorted=ikSort(works),last=sorted.at(-1),tr=ikTrend(works),subjects=new Map();
   all.forEach(r=>{
@@ -518,6 +522,26 @@ function viewIskra() {
   const primarySubject=group=>quarter?(ikSort(group.official).at(-1)?.n??ikMean(group.works)):ikMean(group.works);
   const ordered=[...subjects].sort((a,b)=>(primarySubject(b[1])??-1)-(primarySubject(a[1])??-1)||a[0].localeCompare(b[0],'ru'));
   html+='<div class="ik-main-card ik-hero-split"><div><div class="ik-caption">'+(officialMean!==null?'Средняя итоговая за четверть':'Средний за работы')+'</div><div class="ik-number">'+(officialMean!==null?ikF(officialMean):ikF(mean))+'</div><div class="ik-caption">'+(officialMean!==null?finalMarks.length+' официальных итоговых · ':'')+(ikPeriod==='all'?'текущий учебный год':available?ikDate(available.from)+' — '+ikDate(available.to):'период не настроен')+'</div></div>'+ikStar+'</div>';
+  if(ikPeriod==='q2'){
+    const firstEnd=ikOfficialTermEnds().q1||ikDerivedRange('q1')?.to;
+    const previous=(state.data.grades||[]).filter(r=>
+      ikYearForDate(r.date)===ikYearValue()&&r.date<=firstEnd&&
+      (officialKind(r)==='За четверть'||officialKind(r)==='Итоговая')&&gradeScore(r)!==null
+    ).sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
+    const bySubject=new Map();
+    previous.forEach(r=>{if(!bySubject.has(r.subject))bySubject.set(r.subject,r)});
+    const finals=[...bySubject.values()].sort((a,b)=>a.subject.localeCompare(b.subject,'ru'));
+    if(finals.length){
+      html+='<section class="ik-school-finals"><div class="ik-row-between"><h2 class="ik-sec-title">Итоги 1-й четверти</h2><span class="ik-school-official-chip">Официальные</span></div>'+
+        '<div class="ik-school-finals-grid">'+finals.slice(0,4).map(r=>
+          '<div class="ik-school-final"><span>'+esc(r.subject)+'</span><strong>'+gradeScore(r)+'</strong></div>'
+        ).join('')+'</div>'+
+        '<button type="button" class="ik-school-finals-more" data-ik-period="q1">'+
+        (finals.length>4?'Все '+finals.length+' итоговых':'Смотреть 1-ю четверть')+' ›</button></section>';
+    }else{
+      html+='<div class="ik-school-finals-empty">Итоговые оценки за 1-ю четверть не найдены в последней выгрузке. Проверь дату синхронизации или открой 1-ю четверть.</div>';
+    }
+  }
   // Child-first view: recent school results precede the optional adult-style analytics.
   const latest=ikSort(works).slice(-3).reverse();
   if(latest.length){
@@ -530,7 +554,6 @@ function viewIskra() {
         '<strong class="ik-child-grade-mark grade-'+r.n+'">'+r.n+'</strong></button>').join('')+
       '</div>';
   }
-  html+=ikPeriodButtons()+ikPeriodEditor();
   if(ikPeriod!=='all'&&!available)html+='<div class="ik-issues">Для этого периода пока не указаны даты. После сохранения появятся оценки и график.</div>';
   else {
     html+='<details class="ik-grade-analytics"><summary>График и подробная статистика <span aria-hidden="true">⌄</span></summary>';
