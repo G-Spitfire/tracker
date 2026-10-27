@@ -195,7 +195,7 @@ function projectsView(){if(UI.projectId){let p=project(UI.projectId);if(!p){UI.p
 return `<div class="page-title"><div><h1>Проекты</h1><div class="sub">Большие цели, разбитые на задачи</div></div><button class="button primary" data-action="new-project">+ Проект</button></div><div class="tabs">${[['active','Активные'],['completed','Завершённые']].map(([id,name])=>`<button class="tab ${UI.projFilter===id?'active':''}" data-action="project-filter" data-id="${id}">${name}</button>`).join('')}</div>${S.projects.filter(p=>p.status===UI.projFilter).map(projectCard).join('')||'<div class="empty">Здесь пока нет проектов.</div>'}`}
 function schoolView(){
  return window.VectorSchool
-  ? window.VectorSchool.render({ui:UI,state:S,api:window.schoolCloud,cloudSnapshot,schoolYearFor,schoolRange,gradePrediction})
+  ? window.VectorSchool.render({ui:UI,state:S,api:window.schoolCloud,cloudSnapshot,schoolYearFor,schoolRange,gradePrediction,defaultSchoolQuarter})
   : '<h1>Школа</h1><div class="card">Подключаем школьный дневник… Проверь интернет.</div>';
 }
 function renderModal(){const root=$('#modal-root');if(!UI.modal){root.innerHTML='';return};const m=UI.modal;let inner='';if(m.type==='task'){
@@ -279,4 +279,4 @@ if(e.target.id==='project-form'){
 if(e.target.id==='stage-form'){e.preventDefault();const title=(new FormData(e.target).get('title')||'').trim();const p=project(UI.modal.id);if(p&&title&&p.status==='active'&&p.deadline){p.stages.push({id:uid(),title});UI.modal=null;save();render()}return}});
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&UI.modal){UI.modal=null;renderModal()}});
 render();
-</script><script src="./vector-school-ui.js?v=20261027-6"></script><script type="module" src="./school-cloud.js?v=20261026-mvp" data-school-cloud="vector"></script><script>window.addEventListener('schoolCloudUpdated',()=>{if(!UI.modal)render()})</script></body></html>
+</script><script src="./vector-school-ui.js?v=20261027-7"></script><script type="module" src="./school-cloud.js?v=20261026-mvp" data-school-cloud="vector"></script><script>window.addEventListener('schoolCloudUpdated',()=>{if(!UI.modal)render()})</script></body></html>
