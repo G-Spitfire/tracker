@@ -75,6 +75,20 @@ function rangeRows(snapshot,range) {
 }
 function works(rows) {return rows.filter(g=>!g.official&&Number.isFinite(g.score)&&g.score>=2&&g.score<=5);}
 function average(rows) {return rows.length?rows.reduce((v,g)=>v+g.score,0)/rows.length:null;}
+/* Classification is visual only: it does not affect grade weights or forecasts.
+   Unknown source types keep their original label with no badge. */
+function workBadgeKind(type) {
+ const value=String(type||'').toLocaleLowerCase('ru-RU').replace(/ё/g,'е').trim();
+ if(/контрольн/.test(value)||/(?:^|[^а-яa-z0-9])к[\s./-]*р(?=$|[^а-яa-z0-9])/.test(value))return 'КР';
+ if(/самостоят/.test(value)||/(?:^|[^а-яa-z0-9])с[\s./-]*р(?=$|[^а-яa-z0-9])/.test(value))return 'СР';
+ return '';
+}
+function workBadge(type) {
+ const kind=workBadgeKind(type);
+ if(!kind)return '';
+ const title=kind==='КР'?'Контрольная работа':'Самостоятельная работа';
+ return '<span class="school-work-badge school-work-badge-'+(kind==='КР'?'control':'independent')+'" title="'+title+'" aria-label="'+title+'">'+kind+'</span>';
+}
 function button(label,action,extra='') {return '<button type="button" class="button '+extra+'" data-action="'+action+'">'+esc(label)+'</button>';}
 function header(ui) {
  return '<div class="page-title"><div><h1>Школа</h1><div class="sub">Дневник с аналитикой</div></div></div>'+
@@ -218,7 +232,7 @@ function detail(ui,snapshot,rows,range,periods,helpers) {
  chart([{key:'subject',name:'',color:palette[0],points:cumulative(ordinary)}],range)+
  '<p class="hint">Точки появляются в дни с оценками. Шкала 2–5.</p></div>';
  const marks='<div class="card school-marks"><h3>Оценки за работы</h3>'+
- (ordinary.length?ordinary.slice().sort(compareGrade).reverse().map(g=>'<div class="school-mark-row"><span class="grade g'+g.score+'">'+g.score+'</span><div><b>'+esc(g.type||'Работа в школе')+'</b><small>'+dateLabel(g.date)+'</small></div></div>').join(''):'<div class="empty">За выбранный период оценок за работы нет.</div>')+'</div>';
+ (ordinary.length?ordinary.slice().sort(compareGrade).reverse().map(g=>'<div class="school-mark-row"><span class="grade g'+g.score+'">'+g.score+'</span><div><b class="school-work-title">'+esc(g.type||'Работа в школе')+workBadge(g.type)+'</b><small>'+dateLabel(g.date)+'</small></div></div>').join(''):'<div class="empty">За выбранный период оценок за работы нет.</div>')+'</div>';
  const finalsBlock=official.length?'<div class="card school-official-list"><h3>Официальные оценки периода</h3>'+official.map(g=>'<div class="school-mark-row"><span class="grade g'+g.score+'">'+g.score+'</span><div><b>'+esc(g.officialLabel||'Итог')+'</b><small>'+dateLabel(g.date)+'</small></div></div>').join('')+'</div>':'';
  return '<div class="school-detail-head">'+button('← К предметам','back-school','tiny')+'<h2>'+esc(name)+'</h2></div>'+
  row+graph+marks+summary+finalsBlock;
@@ -263,7 +277,7 @@ function overview(ui,snapshot,rows,range,periods,helpers) {
  }).join(''):'<div class="empty">За выбранный период оценок пока нет.</div>')+'</section>';
  const recent=latest.length?'<details class="school-recent-collapsed"><summary>Последние оценки <span class="school-recent-count">'+latest.length+'</span></summary>'+
  '<div class="school-recent-list">'+latest.map(g=>'<div class="school-recent-row"><span class="grade g'+g.score+'">'+g.score+'</span>'+
- '<div><b>'+esc(g.subject)+'</b><small>'+esc(g.type||'Работа')+' · '+dateLabel(g.date)+'</small></div></div>').join('')+
+ '<div><b>'+esc(g.subject)+'</b><small class="school-work-meta">'+esc(g.type||'Работа')+workBadge(g.type)+' <span>· '+dateLabel(g.date)+'</span></small></div></div>').join('')+
  '</div></details>':'';
  return top+graph+list+recent;
 }
@@ -308,6 +322,6 @@ function handleAction(btn,ctx) {
  ctx.render();
  return true;
 }
-window.VectorSchool={render,handleAction,test:{cumulative,subjectDelta7,linearTrend,officialInQuarter,officialInYear,quarterFromType,gradeQuarter,termState,rangeRows,works,average}};
+window.VectorSchool={render,handleAction,test:{cumulative,subjectDelta7,linearTrend,workBadgeKind,workBadge,officialInQuarter,officialInYear,quarterFromType,gradeQuarter,termState,rangeRows,works,average}};
 if(typeof window.render==='function')window.render();
 })();
