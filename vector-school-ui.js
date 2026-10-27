@@ -83,7 +83,7 @@ function header(ui) {
  return '<div class="page-title"><div><h1>Школа</h1><div class="sub">Дневник с аналитикой</div></div></div>'+
  '<div class="school-tabs" role="group" aria-label="Раздел школы">'+
  ['overview','finals'].map((x,i)=>'<button type="button" data-action="school-view" data-id="'+x+'" class="school-tab '+((ui.schoolScreen||'overview')===x?'active':'')+'">'+(i?'Итоги':'Дневник')+'</button>').join('')+
- '</div><div class="school-year-label hint">Учебный год '+esc(ui.year)+'</div>';
+ '</div>';
 }
 function chart(series,range) {
  const available=series.filter(s=>s.points.length);
@@ -254,7 +254,7 @@ function render(ctx) {
  const snap=cloudSnapshot();
  const status='<div class="school-connection"><span class="hint">'+(snap?.syncedAt&&!Number.isNaN(new Date(snap.syncedAt).getTime())?'Выгрузка: '+new Date(snap.syncedAt).toLocaleString('ru-RU'):'Оценки подключены')+'</span>'+
  '<button type="button" class="link" data-sc-action="refresh" '+(info.loading?'disabled':'')+'>Обновить</button>'+
- '<button type="button" class="link" data-sc-action="logout">Выйти</button></div>'+
+ '</div>'+
  (info.error?'<p class="notice">'+esc(info.error)+'</p>':'')+(info.loading?'<p class="hint">Получаем обновление из Firebase…</p>':'');
  if(!snap)return head+status+'<div class="card">Ожидаем данные из Firebase. Кнопка «Обновить» не запускает сборщик на MacBook.</div>';
  if(!ui.schoolPeriodTouched&&ui.quarter==='year'){
@@ -273,7 +273,7 @@ function render(ctx) {
  }
  const controls=periodUi(ui,s.schoolPeriods||{});
  const range=schoolRange(),rows=rangeRows(snap,range);
- const content=(!range)?'<div class="empty">Чтобы посмотреть четверть, сначала настрой её даты. Пока можно выбрать весь учебный год.</div>':
+ const content=(!range)?'<div class="empty">Даты выбранной четверти не настроены. <button type="button" class="link" data-action="school-period-settings">Настроить четверть</button></div>':
  ui.subject?detail(ui,snap,rows,range,s.schoolPeriods||{}, {gradePrediction}):
  overview(ui,snap,rows,range,s.schoolPeriods||{}, {gradePrediction});
  return status+tabs+controls+content;
