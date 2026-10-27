@@ -43,26 +43,25 @@
   }
   function ikToday(){
     recordAchievements();
-    const d=iso(new Date()), allTasks=tasks(d), done=dn(d), count=done.length, total=allTasks.length;
-    const groups={school:['hw','en','bg'],personal:['cl','ho','ex','rd']};
-    const visible=allTasks;
-    const full=total>0&&count===total;
-    return '<div class="ik-page ik-today">' +
+    const d=iso(new Date()),allTasks=tasks(d),done=dn(d),count=done.length,total=allTasks.length;
+    const renderTask=t=>{
+      const yes=done.includes(t.i),x=(S.x[d]||{})[t.i],
+        sub=yes&&x&&((x.s||[]).length||x.n)?[].concat(x.s||[],x.n?[x.n]:[]).join(', '):(t.s||'');
+      const details=t.i==='hw'||t.i==='ho';
+      return '<div class="ik-task '+(yes?'done':'')+'"><button class="ik-check '+(yes?'done':'')+'" data-action="toggle" data-id="'+t.i+'" aria-label="'+(yes?'Снять отметку: ':'Выполнить: ')+safe(t.t)+'">'+(yes?'✓':'')+'</button>'+
+        '<span class="ik-task-icon">'+taskIcon(t)+'</span><button class="ik-task-title" data-action="'+(details?'details':'ikTaskInfo')+'" data-id="'+t.i+'">'+safe(t.t)+(sub?'<small>'+safe(sub)+'</small>':'')+'</button>'+
+        (S.times[t.i]?'<span class="ik-task-time">'+safe(S.times[t.i])+'</span>':'')+
+        '<button class="ik-mini-btn" data-action="'+(details?'details':'ikTaskInfo')+'" data-id="'+t.i+'" aria-label="Подробнее">›</button></div>';
+    };
+    const waiting=allTasks.filter(t=>!done.includes(t.i)),finished=allTasks.filter(t=>done.includes(t.i)),full=total>0&&count===total;
+    return '<div class="ik-page ik-today">'+
       '<div class="ik-heading-with-star"><div class="ik-greeting-copy"><h1>Привет'+(S.name?', '+safe(S.name):'')+'!</h1><p class="ik-subtitle">Сегодня ещё один замечательный день!</p><span class="ik-date-pill">'+art('history','pill')+' '+safe(fmtDate(d))+'</span></div>'+star+'</div>'+
-      '<div class="ik-main-card ik-today-hero"><div class="ik-sec-title ik-plan-label">План на сегодня</div><div class="ik-row">' +
+      '<div class="ik-main-card ik-today-hero"><div class="ik-sec-title ik-plan-label">План на сегодня</div><div class="ik-row">'+
       '<div class="ik-progress-circle"><svg viewBox="0 0 120 120" role="img" aria-label="Выполнено '+count+' из '+total+' дел"><circle cx="60" cy="60" r="49" fill="none" stroke="#e4d2ff" stroke-width="12"/><circle cx="60" cy="60" r="49" fill="none" stroke="#9161f0" stroke-width="12" stroke-linecap="round" transform="rotate(-90 60 60)" stroke-dasharray="'+(2*Math.PI*49)+'" stroke-dashoffset="'+(2*Math.PI*49*(1-count/Math.max(total,1)))+'"/></svg><div style="position:relative;text-align:center"><strong>'+count+'/'+total+'</strong><span>дел сделано</span></div></div>'+
-      '<div class="ik-progress-side"><strong>'+(full?'Ты всё сделала!':'Ты большая молодец!')+'</strong><p class="ik-caption">⭐ Сегодня '+st(d)+' звёзд</p><div style="height:8px;border-radius:10px;background:#e0cff8;overflow:hidden"><div style="width:'+perc(count,total)+'%;height:100%;background:linear-gradient(90deg,#aa7af7,#7949ec);border-radius:10px"></div></div></div></div></div>'+
-      '<div class="ik-filter-row">'+
-       ''+'</div>'+
-      '<div class="ik-task-list">'+(visible.length?visible.map(t=>{
-        const yes=done.includes(t.i),x=(S.x[d]||{})[t.i],sub=yes&&x&&((x.s||[]).length||x.n)?[].concat(x.s||[],x.n?[x.n]:[]).join(', '):(t.s||'');
-        const details=t.i==='hw'||t.i==='ho';
-        return '<div class="ik-task '+(yes?'done':'')+'"><button class="ik-check '+(yes?'done':'')+'" data-action="toggle" data-id="'+t.i+'" aria-label="'+(yes?'Снять отметку: ':'Выполнить: ')+safe(t.t)+'">'+(yes?'✓':'')+'</button>'+
-          '<span class="ik-task-icon">'+taskIcon(t)+'</span><button class="ik-task-title" data-action="'+(details?'details':'ikTaskInfo')+'" data-id="'+t.i+'">'+safe(t.t)+(sub?'<small>'+safe(sub)+'</small>':'')+'</button>'+
-          (S.times[t.i]?'<span class="ik-task-time">'+safe(S.times[t.i])+'</span>':'')+
-          '<button class="ik-mini-btn" data-action="'+(details?'details':'ikTaskInfo')+'" data-id="'+t.i+'" aria-label="Подробнее">›</button>'+'</div>';
-      }).join(''):'<div class="ik-empty">В этой категории дел сегодня нет.</div>')+'</div>'+
-      '<p class="ik-muted" style="text-align:center">Отмечай выполненные дела и собирай звёзды!</p></div>';
+      '<div class="ik-progress-side"><strong>'+(full?'Ты всё сделала!':'У тебя получится!')+'</strong><p class="ik-caption">⭐ Сегодня '+st(d)+' звёзд</p><div style="height:8px;border-radius:10px;background:#e0cff8;overflow:hidden"><div style="width:'+perc(count,total)+'%;height:100%;background:linear-gradient(90deg,#aa7af7,#7949ec);border-radius:10px"></div></div></div></div></div>'+
+      '<div class="ik-task-list">'+(waiting.length?waiting.map(renderTask).join(''):!finished.length?'<div class="ik-empty">Сегодня дел нет. Можно отдохнуть!</div>':'')+'</div>'+
+      (finished.length?'<details class="ik-joy-completed"><summary>Уже сделано · '+finished.length+' <span aria-hidden="true">⌄</span></summary><div class="ik-task-list">'+finished.map(renderTask).join('')+'</div></details>':'')+
+      '<p class="ik-muted" style="text-align:center">Маленькие шаги тоже считаются!</p></div>';
   }
   function badgeStreak(){
     let streak=0,d=new Date();
@@ -184,7 +183,7 @@
       item('info','О приложении','Искра · твой день и достижения','ikAbout')+'</div></div>';
   }
   today=ikToday;reward=ikReward;me=ikProfile;
-  ACTIONS.ikFilter=(id)=>{filter=id;render()};
+
   ACTIONS.ikToToday=()=>navTo('t');
   ACTIONS.ikToReward=()=>navTo('r');
   ACTIONS.ikJumpAchievements=()=>{
@@ -266,7 +265,7 @@
         ''+
         '<div class="ik-plan-days">'+days.map(([label,wd])=>'<button type="button" class="ik-day-pill '+(schedule.includes(wd)?'on':'')+'" data-action="ikTaskDay" data-id="'+safe(task.i)+'" data-arg="'+wd+'" aria-pressed="'+schedule.includes(wd)+'">'+label+'</button>').join('')+'</div></div>';
     }).join('');
-    sheet('<h2>Расписание дел</h2><p class="mu sm">Настрой дела и нажми «Сохранить». Все изменения начнут действовать завтра. Текущий день и история останутся прежними.</p>'+
+    sheet('<h2>Расписание дел</h2><p class="mu sm">Нажми «Сохранить». Отключённые дела исчезнут сегодня, а изменения дней недели начнут действовать завтра. История сохранится.</p>'+
       html+'<h3>Добавить дело</h3><label class="sheet-field">Название<input maxlength="45" id="ik-new-task" placeholder="Например, Погулять"></label>'+
       ''+
       '<button type="button" class="btn g" data-action="ikAddTask">Добавить дело</button>'+
@@ -299,12 +298,12 @@
     taskEditor();
   };
   ACTIONS.ikAddTask=()=>{
-    const input=document.getElementById('ik-new-task'),selector=document.getElementById('ik-new-category'),name=input?.value.trim().slice(0,45);
+    const input=document.getElementById('ik-new-task'),name=input?.value.trim().slice(0,45);
     if(!name)return toast('Введите название дела');
     if(taskDraftItems().length>=30)return toast('Достигнут лимит 30 дел');
     if(taskDraftItems().some(t=>t.t.toLocaleLowerCase('ru-RU')===name.toLocaleLowerCase('ru-RU')))return toast('Такое дело уже существует');
     const id='user-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,5);
-    taskPlanDraft.customTasks.push({i:id,e:'✨',t:name,category:selector?.value==='school'?'school':'personal'});
+    taskPlanDraft.customTasks.push({i:id,e:'✨',t:name});
     taskEditor();
   };
   ACTIONS.ikPlanSave=()=>{
