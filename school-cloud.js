@@ -374,7 +374,20 @@ const ikValidRange = p => p && /^\d{4}-\d{2}-\d{2}$/.test(p.from||'') &&
 const ikRange=()=>{
   if(ikPeriod==='all')return null;
   const p=ikSavedPeriods[ikTermKey(ikPeriod)];
-  return ikValidRange(p)&&ikYearForDate(p.from)===ikYearValue()&&ikYearForDate(p.to)===ikYearValue()?p:ikDerivedRange(ikPeriod);
+  const manual=ikValidRange(p)&&ikYearForDate(p.from)===ikYearValue()&&ikYearForDate(p.to)===ikYearValue();
+  const schoolEnd=ikOfficialTermEnds();
+  if(manual){
+    // Explicit final marks close a quarter even when an old manual date extends into the next one.
+    if(ikPeriod==='q1'&&schoolEnd.q1&&p.to>schoolEnd.q1)
+      return {...p,to:schoolEnd.q1,corrected:true};
+    // Quarter 2 starts the day after the teacher's official close of quarter 1.
+    if(ikPeriod==='q2'&&schoolEnd.q1){
+      const start=ikDatePlus(schoolEnd.q1,1);
+      return {...p,from:start,to:p.to<start?today():p.to,corrected:true};
+    }
+    return p;
+  }
+  return ikDerivedRange(ikPeriod);
 };
 const ikFiltered = () => {
   if(!state.data)return [];
@@ -440,7 +453,7 @@ function ikPeriodEditor(){
   if(ikPeriod==='all')return '';
   const p=ikRange();
   if(ikPeriod!=='custom'){
-    return p?'<p class="ik-muted ik-period-caption">'+ikDate(p.from)+' — '+ikDate(p.to)+(p.estimated?' · ориентировочно':p.inferred?' · по итоговым оценкам из дневника':'')+'</p>':
+    return p?'<p class="ik-muted ik-period-caption">'+ikDate(p.from)+' — '+ikDate(p.to)+(p.estimated?' · ориентировочно':p.corrected?' · уточнено по итоговым оценкам':p.inferred?' · по итоговым оценкам из дневника':'')+'</p>':
       '<div class="ik-issues">Даты этой четверти пока не настроены. Попроси взрослого настроить учебные периоды в разделе «Для родителей».</div>';
   }
   if(p&&ikEditing!=='custom')return '<div class="ik-row-between"><span class="ik-muted">'+ikDate(p.from)+' — '+ikDate(p.to)+'</span><button type="button" class="ik-btn-small" data-ik-edit-period="1">Изменить даты</button></div>';
