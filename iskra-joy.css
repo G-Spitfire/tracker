@@ -41,7 +41,7 @@ body[data-ik-theme="mint"] .bar button.on{
 .ik-joy-reflection small{display:block;color:#817893;font-size:11px;line-height:1.4;margin-top:3px}
 .ik-joy-welcome>button{
   justify-self:end;min-height:38px;border:0;border-radius:13px;
-  color:#fff;font:750 12px/1.2 inherit;
+  color:#fff;font-size:12px;line-height:1.2;font-weight:750;
   font-family:inherit;background:#9266e8;padding:8px 15px
 }
 .ik-joy-next{
@@ -55,7 +55,7 @@ body[data-ik-theme="mint"] .bar button.on{
 .ik-joy-next-cta{
   flex:0 0 auto;min-height:38px;padding:8px 11px;
   border:0;border-radius:13px;background:#9164ed;color:white;
-  font:750 12px/1.1 inherit;font-family:inherit;cursor:pointer
+  font-size:12px;line-height:1.1;font-weight:750;font-family:inherit;cursor:pointer
 }
 .ik-joy-finished{background:linear-gradient(115deg,#f5ecff,#e5f7f1)}
 .ik-joy-finished>.ik-art{width:45px;height:45px;flex:0 0 45px}
@@ -84,7 +84,7 @@ body[data-ik-theme="mint"] .bar button.on{
   min-width:0;min-height:91px;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:6px;
   background:#fff;border:1px solid #eae0fa;border-radius:16px;
-  padding:10px 4px;color:#4d426a;font:750 11px/1.2 inherit;
+  padding:10px 4px;color:#4d426a;font-size:11px;line-height:1.2;font-weight:750;
   font-family:inherit;cursor:pointer
 }
 .ik-joy-options .ik-art--choice{width:45px;height:45px}
@@ -148,7 +148,7 @@ body[data-ik-theme="mint"] .bar button.on{
 .ik-joy-theme-options button{
   border-radius:17px;min-height:99px;border:2px solid transparent;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:5px;padding:8px 3px;font:750 11px/1.24 inherit;font-family:inherit;
+  gap:5px;padding:8px 3px;font-size:11px;line-height:1.24;font-weight:750;font-family:inherit;
   color:#51476a;cursor:pointer
 }
 .ik-joy-theme-options .ik-art--theme{width:52px;height:52px}
