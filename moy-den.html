@@ -151,6 +151,11 @@ const store=(()=>{
     if(!s.earnedAchievements||typeof s.earnedAchievements!=='object')s.earnedAchievements={};
     if(!s.times||typeof s.times!=='object')s.times={};
     if(typeof s.interests!=='string')s.interests='';
+    if(!s.joyChoices||typeof s.joyChoices!=='object'||Array.isArray(s.joyChoices))s.joyChoices={};
+    if(!s.joyDone||typeof s.joyDone!=='object'||Array.isArray(s.joyDone))s.joyDone={};
+    if(!Array.isArray(s.rewardChoices))s.rewardChoices=[];
+    s.rewardChoices=s.rewardChoices.filter(x=>typeof x==='string'&&x.trim()&&x.length<=50).slice(0,3);
+    if(!['pink','lavender','mint'].includes(s.joyTheme))s.joyTheme='pink';
     return s;
   }
   function migrate(s){
@@ -276,7 +281,7 @@ const tasks=d=>{
 };
 const freezeDay=d=>{if(!Array.isArray(S.planHistory[d]))S.planHistory[d]=tasks(d).map(t=>({...t}))};
 const dn=d=>(S.d[d]||[]).filter(i=>tasks(d).some(t=>t.i==i));
-const st=d=>{const n=dn(d).length;return n+(n&&n==tasks(d).length?2:0)};
+const st=d=>{const n=dn(d).length,required=tasks(d).length;return n+(required>0&&n===required?2:0)+(S.joyChoices?.[d]&&S.joyDone?.[d]?1:0)};
 const ring=(n,m)=>{const C=2*Math.PI*40;return`<svg width="96" height="96" viewBox="0 0 96 96" style="flex:none"><circle cx="48" cy="48" r="40" fill="none" stroke="#ffffff55" stroke-width="10"/><circle cx="48" cy="48" r="40" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-n/m)}" transform="rotate(-90 48 48)"/><text x="48" y="56" text-anchor="middle" font-size="24" font-weight="800" fill="#fff">${n}/${m}</text></svg>`};
 const avb=()=>`<button class="av" data-action="profile" style="background:${S.av.c}" aria-label="Мой герой">${S.av.e}</button>`;
 
@@ -588,6 +593,19 @@ function validateBackupPayload(source){
       if(!dateOk(date)||!isObj(p)||typeof p.name!=='string'||p.name.length>100||
         !Number.isInteger(p.goal)||p.goal<1||p.goal>1000||
         !['earned','received'].includes(p.status))problem();
+  }
+  if(source.joyTheme!==undefined&&!['pink','lavender','mint'].includes(source.joyTheme))problem();
+  if(source.rewardChoices!==undefined&&(!Array.isArray(source.rewardChoices)||source.rewardChoices.length>3||
+    source.rewardChoices.some(v=>typeof v!=='string'||!v.trim()||v.length>50)))problem();
+  if(source.joyChoices!==undefined){
+    if(!isObj(source.joyChoices))problem();
+    for(const [date,choice] of Object.entries(source.joyChoices))
+      if(!dateOk(date)||!['draw','walk','story'].includes(choice))problem();
+  }
+  if(source.joyDone!==undefined){
+    if(!isObj(source.joyDone))problem();
+    for(const [date,done] of Object.entries(source.joyDone))
+      if(!dateOk(date)||typeof done!=='boolean')problem();
   }
   if(source.earnedAchievements!==undefined){
     if(!isObj(source.earnedAchievements))problem();
