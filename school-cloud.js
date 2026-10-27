@@ -299,7 +299,7 @@ const ikReadPeriods = () => {
 };
 const ikSavedPeriods = ikReadPeriods();
 let ikPeriod='all',ikSubject='',ikEditing='',ikPeriodChosen=false;
-const ikPresets=[['all','Все оценки'],['q1','1 четверть'],['q2','2 четверть'],['q3','3 четверть'],['q4','4 четверть'],['custom','Другие даты']];
+const ikPresets=[['all','Всё'],['q1','1 четверть'],['q2','2 четверть'],['q3','3 четверть'],['q4','4 четверть'],['custom','Другие даты']];
 const ikYearForDate=d=>{
   if(!/^\d{4}-\d{2}-\d{2}$/.test(d||''))return '';
   const y=Number(d.slice(0,4))-(Number(d.slice(5,7))<9?1:0);
@@ -313,7 +313,9 @@ const ikTermKey=(period,year=ikYearValue())=>year+'#'+period;
 function ikOfficialTermEnds(){
   const ends={};
   const rows=(state.data?.grades||[]).filter(r=>
-    ikYearForDate(r.date)===ikYearValue()&&officialKind(r)==='За четверть'&&gradeScore(r)!==null
+    ikYearForDate(r.date)===ikYearValue()&&gradeScore(r)!==null&&
+    (officialKind(r)==='За четверть'||
+      (officialKind(r)==='Итоговая'&&/^\d{4}-(10-(?:2[0-9]|3[01])|11-(?:0[1-9]|1[0-5]))$/.test(r.date)))
   ).sort((a,b)=>a.date.localeCompare(b.date));
   const bounds=[['q1',9,11],['q2',12,2],['q3',3,4],['q4',5,8]];
   for(const row of rows){
@@ -326,17 +328,22 @@ function ikOfficialTermEnds(){
 function ikDerivedRange(period){
   if(!/^q[1-4]$/.test(period)||!state.data)return null;
   const year=Number(ikYearValue().split('/')[0]),official=ikOfficialTermEnds();
+  const schoolReportedEnd=official.q1||null;
+  // This school's 2026 autumn break starts after 25 October.
+  // A built-in fallback is only used until official records or parent dates are available.
+  const fallbackEnd=ikYearValue()==='2026/2027'?'2026-10-25':null;
+  const firstEnd=schoolReportedEnd||fallbackEnd;
   const starts={q1:year+'-09-01'};
-  if(official.q1)starts.q2=ikDatePlus(official.q1,1);
+  if(firstEnd)starts.q2=ikDatePlus(firstEnd,1);
   if(official.q2)starts.q3=ikDatePlus(official.q2,1);
   if(official.q3)starts.q4=ikDatePlus(official.q3,1);
-  const ends={q1:official.q1,q2:official.q2,q3:official.q3,q4:official.q4};
+  const ends={q1:firstEnd,q2:official.q2,q3:official.q3,q4:official.q4};
   // Current term is open until today. Without a known boundary, never claim
   // precise dates for a future quarter.
   const start=starts[period];
   if(!start)return null;
   const end=ends[period]||today();
-  return start<=end?{from:start,to:end,inferred:true}:null;
+  return start<=end?{from:start,to:end,inferred:true,estimated:!!fallbackEnd&&!schoolReportedEnd&&(period==='q1'||period==='q2')}:null;
 }
 function ikDatePlus(date,delta){
   const d=new Date(date+'T12:00:00');d.setDate(d.getDate()+delta);
@@ -344,22 +351,22 @@ function ikDatePlus(date,delta){
 }
 function ikAutoPeriod(){
   if(ikPeriodChosen)return;
-  const current=today();
-  const set=['q1','q2','q3','q4'];
-  const saved=set.find(q=>{
+  const current=today(),quarters=['q1','q2','q3','q4'];
+  const official=ikOfficialTermEnds();
+  // Completed quarters outrank a stale parent-entered date range.
+  const closed=quarters.filter(q=>official[q]&&official[q]<current);
+  const next=closed.length?quarters[Math.min(quarters.length-1,quarters.indexOf(closed.at(-1))+1)]:null;
+  if(next&&ikDerivedRange(next)){ikPeriod=next;return}
+  // 2026 autumn quarter is already over. Do not silently reopen Q1.
+  if(ikYearValue()==='2026/2027'&&current>='2026-10-26'&&current<'2027-01-01'&&ikDerivedRange('q2')){
+    ikPeriod='q2';return;
+  }
+  const saved=quarters.find(q=>{
     const p=ikSavedPeriods[ikTermKey(q)];
     return ikValidRange(p)&&ikYearForDate(p.from)===ikYearValue()&&current>=p.from&&current<=p.to;
   });
   if(saved){ikPeriod=saved;return}
-  const official=ikOfficialTermEnds();
-  const done=set.filter(q=>official[q]&&official[q]<current);
-  const next=done.length?set[Math.min(set.length-1,set.indexOf(done.at(-1))+1)]:null;
-  // A teacher's final quarter marks are stronger evidence than an estimated
-  // date. Start quarter 2 after quarter 1 has official final marks.
-  if(next&&ikDerivedRange(next)){ikPeriod=next;return}
-  const inferred=set.find(q=>{
-    const p=ikDerivedRange(q);return p&&current>=p.from&&current<=p.to;
-  });
+  const inferred=quarters.find(q=>{const p=ikDerivedRange(q);return p&&current>=p.from&&current<=p.to});
   ikPeriod=inferred||'all';
 }
 const ikValidRange = p => p && /^\d{4}-\d{2}-\d{2}$/.test(p.from||'') &&
@@ -433,7 +440,7 @@ function ikPeriodEditor(){
   if(ikPeriod==='all')return '';
   const p=ikRange();
   if(ikPeriod!=='custom'){
-    return p?'<p class="ik-muted ik-period-caption">'+ikDate(p.from)+' — '+ikDate(p.to)+(p.inferred?' · по итоговым оценкам из дневника':'')+'</p>':
+    return p?'<p class="ik-muted ik-period-caption">'+ikDate(p.from)+' — '+ikDate(p.to)+(p.estimated?' · ориентировочно':p.inferred?' · по итоговым оценкам из дневника':'')+'</p>':
       '<div class="ik-issues">Даты этой четверти пока не настроены. Попроси взрослого настроить учебные периоды в разделе «Для родителей».</div>';
   }
   if(p&&ikEditing!=='custom')return '<div class="ik-row-between"><span class="ik-muted">'+ikDate(p.from)+' — '+ikDate(p.to)+'</span><button type="button" class="ik-btn-small" data-ik-edit-period="1">Изменить даты</button></div>';
