@@ -242,7 +242,7 @@ const save=()=>store.save(S);
 const sum=a=>a.reduce((x,y)=>x+y,0),esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 const wk=()=>{const d=new Date(),k=(d.getDay()+6)%7;return Array.from({length:7},(_,i)=>{const x=new Date(d);x.setDate(d.getDate()-k+i);return iso(x)})};
 const EX={i:'ex',e:'🤸',t:'Зарядка',s:'5–10 минут',b:'#ffe9d2',c:'#ff9a3c'};
-const T=[{i:'bg',e:'🎒',t:'Собрать портфель',b:'#ffe3d6',c:'#ff8a65'},{i:'cl',e:'👕',t:'Приготовить вещи на завтра',b:'#dff1ff',c:'#4fb3ff'},{i:'hw',e:'✏️',t:'Сделать уроки',s:'нажми ✎, чтобы выбрать предметы',b:'#fff0c2',c:'#f2b300'},{i:'en',e:'🇬🇧',t:'Английский',s:'10–15 минут',b:'#e6defc',c:'#8e6cf0'},{i:'ho',e:'🧹',t:'Помочь по дому',s:'нажми ✎, чтобы рассказать',b:'#d9f6e8',c:'#2fbf8f'}];
+const T=[{i:'bg',e:'🎒',t:'Собрать портфель',b:'#ffe3d6',c:'#ff8a65'},{i:'cl',e:'👕',t:'Приготовить вещи на завтра',b:'#dff1ff',c:'#4fb3ff'},{i:'hw',e:'✏️',t:'Сделать уроки',s:'Выбери уроки из дневника',b:'#fff0c2',c:'#f2b300'},{i:'en',e:'🇬🇧',t:'Английский',s:'10–15 минут',b:'#e6defc',c:'#8e6cf0'},{i:'ho',e:'🧹',t:'Помочь по дому',s:'Расскажи, как помогла',b:'#d9f6e8',c:'#2fbf8f'}];
 const RD={i:'rd',e:'📖',t:'Почитать',s:'на выходных',b:'#ffdcec',c:'#ff6fa5'};
 // Existing histories keep their original task list and star rules.
 const legacyTasks=(d,source=S)=>{const w=new Date(d+'T00:00:00').getDay(),b=d>=source.ex?[EX].concat(T):T;return w===0||w===6?b.concat([RD]):b};
@@ -277,7 +277,7 @@ const tasks=d=>{
   if(Array.isArray(S.planHistory[d])){
     // Switching off a task takes effect immediately today, but never rewrites past dates.
     const current=d===iso(new Date());
-    return current?S.planHistory[d].filter(t=>!S.hiddenTasks.includes(t.i)):S.planHistory[d];
+    return current?S.planHistory[d].filter(t=>!S.hiddenTasks.includes(t.i)||(S.d[d]||[]).includes(t.i)):S.planHistory[d];
   }
   const wd=new Date(d+'T12:00:00').getDay();
   return taskCatalog().filter(t=>
@@ -510,7 +510,7 @@ function histNext(){calMonth.m++;if(calMonth.m>11){calMonth.m=0;calMonth.y++}ren
 const school={view:()=>window.schoolCloud ? window.schoolCloud.view() : '<div class="ik-page"><h1>Мои оценки</h1><div class="card">Подключаем дневник…</div></div>'};
 
 function openParents(){
-  sheet(`<h2>Для родителей</h2><p class="mu sm">Настройте награду вместе с ребёнком. Данные хранятся на этом устройстве — сохраните копию для переноса.</p><button class="btn g" data-action="editReward">Награда и цель по звёздам</button><h2>Копия данных</h2><div class="chips"><button class="btn g" data-action="exportFile">Сохранить копию файлом</button><button class="btn g" data-action="pickBackupFile">Восстановить из файла</button><input type="file" id="backupFileInput" accept=".json,application/json" data-action="importFile" hidden><div id="backupStatus" class="mu sm" role="status" aria-live="polite"></div><details><summary class="mu sm" style="padding:16px 0">Восстановить старую текстовую копию</summary><textarea id="bk" aria-label="Текст старой копии"></textarea><button class="btn g" data-action="importText">Восстановить из текста</button></details></div><button data-sheet-footer class="btn g" data-action="closeSheet">Закрыть</button>`);
+  sheet(`<h2>Для родителей</h2><p class="mu sm">Настройте награду вместе с ребёнком. Данные хранятся на этом устройстве — сохраните копию для переноса.</p><h2>Копия данных</h2><div class="chips"><button class="btn g" data-action="exportFile">Сохранить копию файлом</button><button class="btn g" data-action="pickBackupFile">Восстановить из файла</button><input type="file" id="backupFileInput" accept=".json,application/json" data-action="importFile" hidden><div id="backupStatus" class="mu sm" role="status" aria-live="polite"></div><details><summary class="mu sm" style="padding:16px 0">Восстановить старую текстовую копию</summary><textarea id="bk" aria-label="Текст старой копии"></textarea><button class="btn g" data-action="importText">Восстановить из текста</button></details></div><button data-sheet-footer class="btn g" data-action="closeSheet">Закрыть</button>`);
 }
 function validateBackupPayload(source){
   const isObj=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
