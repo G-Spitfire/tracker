@@ -461,14 +461,28 @@ function viewIskra() {
   });
   const ordered=[...subjects].sort((a,b)=>(ikMean(b[1].works)??-1)-(ikMean(a[1].works)??-1)||a[0].localeCompare(b[0],'ru'));
   html+='<div class="ik-main-card ik-hero-split"><div><div class="ik-caption">Средний балл</div><div class="ik-number">'+ikF(mean)+'</div><div class="ik-caption">'+works.length+' оценок · '+(ikPeriod==='all'?'текущий учебный год':available?ikDate(available.from)+' — '+ikDate(available.to):'период не настроен')+'</div></div>'+ikStar+'</div>';
+  // Child-first view: recent school results precede the optional adult-style analytics.
+  const latest=ikSort(works).slice(-3).reverse();
+  if(latest.length){
+    const kindness=n=>n===5?'Отличный результат!':n===4?'Хорошая работа!':n===3?'Есть что потренировать':'Можно разобраться вместе со взрослым';
+    html+='<div class="ik-child-grades"><div class="ik-row-between"><h2 class="ik-sec-title">Последние оценки</h2>'+
+      '<span class="ik-tab-sublabel">Из дневника</span></div>'+
+      latest.map(r=>'<button type="button" class="ik-child-grade-row" data-ik-subject="'+esc(r.subject)+'">'+
+        '<span class="ik-child-grade-icon">'+ikSubjectSprite(r.subject)+'</span>'+
+        '<span class="ik-child-grade-copy"><b>'+esc(r.subject)+'</b><small>'+esc(kindness(r.n))+' · '+esc(ikDate(r.date))+'</small></span>'+
+        '<strong class="ik-child-grade-mark grade-'+r.n+'">'+r.n+'</strong></button>').join('')+
+      '</div>';
+  }
   html+=ikPeriodButtons()+ikPeriodEditor();
   if(ikPeriod!=='all'&&!available)html+='<div class="ik-issues">Для этого периода пока не указаны даты. После сохранения появятся оценки и график.</div>';
   else {
+    html+='<details class="ik-grade-analytics"><summary>График и подробная статистика <span aria-hidden="true">⌄</span></summary>';
     html+='<div class="card"><div class="ik-graph-label"><b>Динамика среднего балла</b><span class="ik-muted">За работы</span></div>'+tr.html+
       '<p class="ik-kpi-meaning">Сравнение средних за последние 7 дней выбранного периода и предыдущие 7 дней.</p></div>';
     html+='<div class="ik-time-stat"><div class="ik-tile"><div class="ik-tile-icon">↗</div><strong class="'+(tr.growth!==null&&tr.growth>0?'ik-positive':'')+'">'+(tr.growth===null?'—':(tr.growth>0?'+':'')+ikF(tr.growth))+'</strong><small>'+ikDeltaLabel(tr.growth)+'</small></div>'+
       '<div class="ik-tile"><div class="ik-tile-icon"><span class="ik-art ik-art-task_star ik-art--stat" aria-hidden="true"></span></div><strong>'+(last?last.n:'—')+'</strong><small>последняя оценка</small></div>'+
       '<div class="ik-tile"><div class="ik-tile-icon"><span class="ik-art ik-art-nav_grades ik-art--stat" aria-hidden="true"></span></div><strong>'+works.length+'</strong><small>всего оценок</small></div></div>';
+    html+='</details>';
     html+='<div class="ik-row-between"><h2 class="ik-sec-title">Предметы</h2><span class="ik-muted">По среднему ↓</span></div>';
     html+='<div class="ik-list" style="padding:4px 12px">'+(ordered.length?ordered.map(([subject,group])=>{
       const a=ikMean(group.works),end=ikSort(group.official).at(-1),progress=a===null?0:Math.max(0,Math.min(100,(a-2)/3*100));
