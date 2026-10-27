@@ -116,21 +116,6 @@ ACTIONS.ikJoyComplete=()=>{
   S.joyDone[d]=!S.joyDone[d];save();render();
   if(S.joyDone[d])reaction('Ты сама выбрала — и сделала!','+1 ⭐ за своё дело');
 };
-function approvedPrizes(){
-  const arr=S.rewardChoices.filter(x=>typeof x==='string'&&x.trim()).slice(0,3);
-  return [...new Set(arr)];
-}
-function rewardPicker(){
-  const names=approvedPrizes();
-  if(names.length<2)return '';
-  const key=weekStart(todayKey()),plan=weekPlan(key),received=S.rewardHistory?.[key]?.status==='received';
-  return '<div class="ik-joy-prizes"><div class="ik-joy-choice-head">'+sprite('prize_gift','mini')+
-    '<span><b>Какую награду выбираешь?</b><small>Варианты придуманы вместе с родителями</small></span></div>'+
-    '<div class="ik-joy-prize-options">'+names.map((name,i)=>
-      '<button type="button" '+(received?'disabled ':'')+'class="'+(plan.name===name?'active':'')+
-      '" data-action="ikJoyPrize" data-id="'+i+'">'+quote(name)+(plan.name===name?' ✓':'')+'</button>').join('')+
-    '</div>'+(received?'<small>Награда уже получена — выбор сохранён.</small>':'')+'</div>';
-}
 function weekReflection(){
   const d=todayKey(),weekday=new Date(d+'T12:00:00').getDay();
   if(weekday!==0&&weekday!==6)return '';
@@ -148,18 +133,9 @@ reward=function(){
   ensure();
   let html=oldReward();
   // Place the child choice after the reward's weekly strip, above level stats.
-  html=html.replace('<button class="ik-action-row" data-action="ikLevels">',rewardPicker()+weekReflection()+
-    '<button class="ik-action-row" data-action="ikLevels">');
+  html=html.replace('<div class="ik-row-between" id="ik-achievements">',weekReflection()+
+    '<div class="ik-row-between" id="ik-achievements">');
   return html;
-};
-ACTIONS.ikJoyPrize=index=>{
-  const names=approvedPrizes(),name=names[Number(index)],key=weekStart(todayKey());
-  if(!name)return;
-  const plan=weekPlan(key),record=S.rewardHistory?.[key];
-  if(record?.status==='received')return;
-  plan.name=name;
-  if(record?.status==='earned')record.name=name;
-  save();render();reaction('Ты выбрала награду!','Можно идти к своей цели.');
 };
 ACTIONS.ikJoyReflect=index=>{
   const texts=['Я горжусь собой','Было непросто','Хочу попробовать ещё'],val=texts[Number(index)];
@@ -208,29 +184,7 @@ ACTIONS.ikPersonalSettings=()=>{
     body.append(button);
   }
 };
-// Parents approve tangible prize options, instead of exposing free-form child editing.
-const originalParents=ACTIONS.parents;
-ACTIONS.parents=async()=>{
-  await originalParents();
-  const panel=document.querySelector('.sh[data-sheet-key="Для родителей"] .sheet-body');
-  if(!panel||panel.querySelector('#ik-joy-parent-prizes'))return;
-  const names=approvedPrizes();
-  const block=document.createElement('section');
-  block.id='ik-joy-parent-prizes';
-  block.className='ik-joy-parent-prizes';
-  block.innerHTML='<h2>Награды на выбор</h2><p class="mu sm">Предложите до трёх вариантов. Полина сможет выбрать один на этой неделе. Вручение подтверждает взрослый.</p>'+
-    [0,1,2].map(i=>'<label class="sheet-field">Вариант '+(i+1)+'<input maxlength="50" data-ik-reward-choice="'+i+
-    '" value="'+quote(names[i]||(i===0?S.reward:''))+'" placeholder="Например, семейный поход"></label>').join('')+
-    '<button type="button" class="btn g" data-action="ikJoySavePrizes">Сохранить варианты</button>';
-  panel.prepend(block);
-};
-ACTIONS.ikJoySavePrizes=async()=>{
-  if(!window.iskraParentSession?.()&&!await window.iskraParentAuthorize?.())return;
-  const values=[...document.querySelectorAll('[data-ik-reward-choice]')].map(el=>el.value.trim()).filter(Boolean);
-  const unique=[...new Set(values)].slice(0,3);
-  if(!unique.length)return toast('Добавьте хотя бы одну награду');
-  S.rewardChoices=unique;save();render();toast('Варианты наград сохранены');
-};
+// Historical prize choices remain in backups, but the UI no longer offers real-world prizes.
 window.addEventListener('pageshow',()=>{ensure()});
 render();
 })();
