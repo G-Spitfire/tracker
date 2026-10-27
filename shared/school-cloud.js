@@ -402,7 +402,7 @@ const ikF = n => n===null?'—':(Math.abs(n)<0.005?0:n).toFixed(2).replace('.','
 const ikDeltaLabel=n=>n===null?'нет сравнения':n!==0?'к предыдущим 7 дням':'без изменений';
 const ikLocalDate=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const ikDate = iso => /^\d{4}-\d{2}-\d{2}$/.test(iso||'') ? iso.slice(8)+'.'+iso.slice(5,7)+'.'+iso.slice(0,4) : '—';
-const ikStar = '<img class="ik-star" src="./assets/iskra/hero-star.webp" width="94" height="94" decoding="async" alt="" aria-hidden="true">';
+const ikStar = '<img class="ik-star" src="../iskra/assets/hero-star.webp" width="94" height="94" decoding="async" alt="" aria-hidden="true">';
 const ikIcons = {'Русский язык':'📕','Русский':'📕','Математика':'🧮','Литературное чтение':'📖','Чтение':'📖','Английский язык':'🔤','Английский':'🔤','Окружающий мир':'🌿','Физическая культура':'🏃','Физкультура':'🏃','Музыка':'🎵','Изобразительное искусство':'🎨','ИЗО':'🎨','Технология':'🧩','ОРКСЭ':'📚'};
 const ikSubjectIcon = name => ikIcons[name]||'📘';
 const ikSubjectSprite = name => {

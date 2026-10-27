@@ -1,8 +1,8 @@
 /* Iskra 2.0: child-focused screens. Legacy data/IDs remain unchanged. */
 (function(){
   'use strict';
-  const star = '<img class="ik-star" alt="" aria-hidden="true" width="118" height="118" src="./assets/iskra/hero-star.webp" decoding="async">';
-  const starSmall = '<img class="ik-star ik-star-sm" alt="" aria-hidden="true" width="74" height="74" src="./assets/iskra/hero-star.webp" decoding="async">';
+  const star = '<img class="ik-star" alt="" aria-hidden="true" width="118" height="118" src="./assets/hero-star.webp" decoding="async">';
+  const starSmall = '<img class="ik-star ik-star-sm" alt="" aria-hidden="true" width="74" height="74" src="./assets/hero-star.webp" decoding="async">';
   const safe = value => esc(value == null ? '' : String(value));
   const art=(name,kind='')=>'<span class="ik-art ik-art-'+name+(kind?' ik-art--'+kind:'')+'" aria-hidden="true"></span>';
   const taskArt={hw:'task_read',en:'task_english',bg:'nav_today',cl:'task_clothes',ho:'task_clean',ex:'task_walk',rd:'task_book'};

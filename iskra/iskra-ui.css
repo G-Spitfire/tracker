@@ -216,7 +216,7 @@ h1{font-size:29px;font-weight:850;letter-spacing:-.035em}h2{font-size:21px;font-
 .ik-compact-header .ik-cloud-pill{white-space:nowrap}
 
 /* Iskra original illustrated artwork, 35 optimized sprites (2026-10-26). */
-.ik-art{display:inline-block!important;flex:0 0 auto;background-image:url("./assets/iskra/art-atlas.webp");background-size:700% 500%;background-repeat:no-repeat;background-color:transparent!important;border:0;vertical-align:middle;object-fit:contain;width:36px;height:36px;line-height:1}
+.ik-art{display:inline-block!important;flex:0 0 auto;background-image:url("./assets/art-atlas.webp");background-size:700% 500%;background-repeat:no-repeat;background-color:transparent!important;border:0;vertical-align:middle;object-fit:contain;width:36px;height:36px;line-height:1}
 .ik-art-star{background-position:0.0000% 0.0000%}
 .ik-art-star_wave{background-position:16.6667% 0.0000%}
 .ik-art-star_celebrate{background-position:33.3333% 0.0000%}
