@@ -691,3 +691,25 @@ button:focus-visible,[role="button"]:focus-visible,input:focus-visible,select:fo
  .scs-iskra .ik-school-final{padding:7px;gap:4px}
  .scs-iskra .ik-school-final>span{font-size:10px}
 }
+
+/* Parent editor: distinguish today's actual task list from recurring weekdays. */
+.ik-plan-today-row{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  margin:10px 0 8px;padding:8px 10px;
+  background:#f9f4ff;border:1px solid #efe4fc;border-radius:14px
+}
+.ik-plan-today-state{font-size:11px;line-height:1.35;color:#786991;min-width:0}
+.ik-plan-today-button{
+  flex:none;min-height:35px;padding:7px 10px!important;
+  background:#eee4fc!important;color:#7651ad!important;
+  border:1px solid #e1d2f5!important;font-size:11px!important
+}
+.ik-plan-today-button.on{
+  background:#e2f6ec!important;color:#358365!important;
+  border-color:#c7e9d7!important
+}
+@media(max-width:365px){
+  .ik-plan-today-row{gap:5px;padding:7px}
+  .ik-plan-today-state,.ik-plan-today-button{font-size:10px!important}
+  .ik-plan-today-button{padding:6px!important}
+}
