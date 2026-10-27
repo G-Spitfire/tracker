@@ -7,7 +7,7 @@
   const art=(name,kind='')=>'<span class="ik-art ik-art-'+name+(kind?' ik-art--'+kind:'')+'" aria-hidden="true"></span>';
   const taskArt={hw:'task_read',en:'task_english',bg:'nav_today',cl:'task_clothes',ho:'task_clean',ex:'task_walk',rd:'task_book'};
   const taskIcon=t=>art(taskArt[t.i]||'task_star','task');
-  const achievementArt={'Постоянство':'achievement_streak','Отличные оценки':'achievement_grades','Помощник':'achievement_helper','Первый шаг':'achievement_first','Книголюб':'achievement_read','Мастер дел':'achievement_master'};
+  const achievementArt={'Постоянство':'achievement_streak','Усердие':'achievement_grades','Отличные оценки':'achievement_grades','Помощник':'achievement_helper','Первый шаг':'achievement_first','Книголюб':'achievement_read','Мастер дел':'achievement_master'};
 
   const fmtDate = date => new Date(date + 'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'long'});
   const completed = () => Object.keys(S.d||{}).reduce((n,date) => n+dn(date).length,0);
@@ -85,10 +85,10 @@
   }
   function recordAchievements(){
     S.earnedAchievements=S.earnedAchievements&&typeof S.earnedAchievements==='object'?S.earnedAchievements:{};
-    const dates=Object.keys(S.d||{}),clouds=window.schoolCloud?.overallSummary?.();
+    const dates=Object.keys(S.d||{}),studyDays=dates.filter(d=>dn(d).some(id=>id==='hw'||id==='en')).length;
     const conditions={
       'Постоянство':bestStreak()>=7,
-      'Отличные оценки':!!(clouds?.count&&clouds.average>=4.5),
+      'Усердие':studyDays>=10,
       'Помощник':dates.filter(d=>(S.d[d]||[]).includes('ho')).length>=10,
       'Первый шаг':dates.some(d=>dn(d).length>0),
       'Книголюб':dates.filter(d=>(S.d[d]||[]).includes('rd')).length>=10,
@@ -105,7 +105,7 @@
     recordAchievements();
     const achievements=[
       {icon:'🌞',title:'Постоянство',small:'7 дней подряд'},
-      {icon:'🏅',title:'Отличные оценки',small:'Средний от 4,50'},
+      S.earnedAchievements['Отличные оценки']?{icon:'🏅',title:'Отличные оценки',small:'Ранее полученная награда'}:{icon:'🏅',title:'Усердие',small:'Учёба в 10 разных дней'},
       {icon:'💗',title:'Помощник',small:'10 дел по дому'},
       {icon:'👟',title:'Первый шаг',small:'Первое дело'},
       {icon:'📖',title:'Книголюб',small:'10 дней чтения'},
@@ -166,7 +166,8 @@
     sheet('<h2>Награда недели</h2><p><b>'+safe(h?.name||plan.name)+'</b></p><p class="mu sm">Звёзды: '+weekDates().reduce((n,d)=>n+st(d),0)+' из '+(h?.goal||plan.goal)+'</p>'+
     (h?.status==='received'?'<p>Награда уже получена!</p>':h?'<p>Цель выполнена! Получение подтверждает взрослый.</p><button class="btn" data-action="ikClaimReward">Подтвердить получение</button>':'<p>Продолжай собирать звёзды!</p>'));
   };
-  ACTIONS.ikClaimReward=()=>{
+  ACTIONS.ikClaimReward=async()=>{
+    if(!await authorizeParent())return;
     const date=weekDates()[0],h=S.rewardHistory[date];
     if(!h||h.status==='received'||weekDates().reduce((n,d)=>n+st(d),0)<(h.goal||weekPlan(date).goal))return;
     if(!confirm('Родитель подтверждает, что награда уже вручена?'))return;
@@ -179,7 +180,8 @@
       (h.status==='received'?'<b class="ok">✓ Получена</b>':'<button type="button" class="ik-btn-small" data-action="ikClaimPastReward" data-id="'+safe(date)+'">Подтвердить</button>')+'</div>'
     ).join(''):'<p class="mu sm">Первая награда ещё впереди.</p>'));
   };
-  ACTIONS.ikClaimPastReward=week=>{
+  ACTIONS.ikClaimPastReward=async week=>{
+    if(!await authorizeParent())return;
     const reward=S.rewardHistory?.[week];if(!reward||reward.status==='received')return;
     const [yy,mm,dd]=week.split('-').map(Number),start=new Date(yy,mm-1,dd);
     const stars=Array.from({length:7},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);return st(iso(d))}).reduce((a,b)=>a+b,0);
@@ -339,6 +341,8 @@
   document.addEventListener('keydown',e=>{if(e.key==='Escape')parentUnlocked=false});
   window.addEventListener('pageshow',()=>{parentUnlocked=false});
   window.addEventListener('iskraSheetClosed',()=>{parentUnlocked=false});
+  window.iskraParentAuthorize=authorizeParent;
+  window.iskraParentSession=()=>parentUnlocked;
   const baseParents=ACTIONS.parents;
   ACTIONS.parents=async()=>{
     if(!parentUnlocked){
