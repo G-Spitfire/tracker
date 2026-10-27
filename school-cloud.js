@@ -439,7 +439,7 @@ function ikSubjectPage() {
     '<p class="ik-muted">Итоговые оценки показываются отдельно и не участвуют в среднем. Все оценки за работы равновесные.</p></div>';
 }
 function viewIskra() {
-  const title='<div class="ik-heading ik-compact-header"><div><h1>Оценки</h1></div><span class="ik-cloud-pill">☁ Из дневника</span></div>';
+  const title='<div class="ik-heading ik-compact-header ik-subscreen-header"><button type="button" class="ik-header-back" data-action="ikToToday" aria-label="Вернуться к делам">‹</button><h1>Оценки</h1><span class="ik-cloud-pill">☁ Из дневника</span></div>';
   if(ikSubject && state.data&&state.user)return ikSubjectPage();
   let html='<div class="ik-page scs-iskra">'+title;
   if(!state.user){
