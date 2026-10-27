@@ -469,10 +469,11 @@ function ikSubjectPage() {
   const name=ikSubject,all=ikFiltered().filter(r=>r.subject===name),works=ikWorks(all),official=all.filter(r=>officialKind(r));
   const mean=ikMean(works),last=ikSort(works).at(-1),tr=ikTrend(works);
   const officially=ikSort(official).at(-1);
+  const quarter=/^q[1-4]$/.test(ikPeriod),finalGrade=quarter&&officially?.n!==undefined?officially.n:null;
   return '<div class="ik-page scs-iskra ik-detail-page"><div class="ik-row-between"><button type="button" class="ik-btn-small" data-ik-back="1">‹ Назад</button><span class="ik-cloud-pill">☁ Из дневника</span></div>'+
     '<div class="ik-row"><span class="ik-sub-icon">'+ikSubjectSprite(name)+'</span><div><h1 style="font-size:24px">'+esc(name)+'</h1><span class="ik-muted">'+works.length+' оценок за работы</span></div></div>'+
     ikPeriodButtons()+ikPeriodEditor()+
-    '<div class="ik-main-card"><div class="ik-hero-split"><div><div class="ik-caption">Средний балл</div><div class="ik-number">'+ikF(mean)+'</div><div class="ik-caption">По выбранному периоду</div></div>'+ikStar+'</div></div>'+
+    '<div class="ik-main-card"><div class="ik-hero-split"><div><div class="ik-caption">'+(finalGrade!==null?'Итоговая за четверть':'Средний за работы')+'</div><div class="ik-number">'+(finalGrade!==null?finalGrade:ikF(mean))+'</div><div class="ik-caption">'+(finalGrade!==null?'Официально · средний за работы '+ikF(mean):'По выбранному периоду')+'</div></div>'+ikStar+'</div></div>'+
     (officially?'<div class="ik-official"><div><b>🏅 '+esc(officialKind(officially))+'</b><small>Официально · '+ikDate(officially.date)+'</small></div><strong>'+officially.n+'</strong></div>':'')+
     (mean!==null&&/^q[1-4]$/.test(ikPeriod)&&!officially&&ikRange()?'<div class="ik-tile"><small>Прогноз за выбранную четверть (ориентировочно)</small><strong>'+forecast(mean)+'</strong><small>По простому среднему; официальная оценка может отличаться.</small></div>':'')+
     '<div class="card"><div class="ik-graph-label"><b>Динамика среднего балла</b></div>'+tr.html+'</div>'+
@@ -504,8 +505,12 @@ function viewIskra() {
     if(!subjects.has(r.subject))subjects.set(r.subject,{works:[],official:[]});
     subjects.get(r.subject)[officialKind(r)?'official':'works'].push(r);
   });
-  const ordered=[...subjects].sort((a,b)=>(ikMean(b[1].works)??-1)-(ikMean(a[1].works)??-1)||a[0].localeCompare(b[0],'ru'));
-  html+='<div class="ik-main-card ik-hero-split"><div><div class="ik-caption">Средний балл</div><div class="ik-number">'+ikF(mean)+'</div><div class="ik-caption">'+works.length+' оценок · '+(ikPeriod==='all'?'текущий учебный год':available?ikDate(available.from)+' — '+ikDate(available.to):'период не настроен')+'</div></div>'+ikStar+'</div>';
+  const quarter=/^q[1-4]$/.test(ikPeriod);
+  const finalMarks=quarter?[...subjects.values()].map(x=>ikSort(x.official).at(-1)?.n).filter(n=>n!==undefined):[];
+  const officialMean=finalMarks.length?finalMarks.reduce((a,b)=>a+b,0)/finalMarks.length:null;
+  const primarySubject=group=>quarter?(ikSort(group.official).at(-1)?.n??ikMean(group.works)):ikMean(group.works);
+  const ordered=[...subjects].sort((a,b)=>(primarySubject(b[1])??-1)-(primarySubject(a[1])??-1)||a[0].localeCompare(b[0],'ru'));
+  html+='<div class="ik-main-card ik-hero-split"><div><div class="ik-caption">'+(officialMean!==null?'Средняя итоговая за четверть':'Средний за работы')+'</div><div class="ik-number">'+(officialMean!==null?ikF(officialMean):ikF(mean))+'</div><div class="ik-caption">'+(officialMean!==null?finalMarks.length+' официальных итоговых · ':'')+(ikPeriod==='all'?'текущий учебный год':available?ikDate(available.from)+' — '+ikDate(available.to):'период не настроен')+'</div></div>'+ikStar+'</div>';
   // Child-first view: recent school results precede the optional adult-style analytics.
   const latest=ikSort(works).slice(-3).reverse();
   if(latest.length){
@@ -530,10 +535,10 @@ function viewIskra() {
     html+='</details>';
     html+='<div class="ik-row-between"><h2 class="ik-sec-title">Предметы</h2><span class="ik-muted">По среднему ↓</span></div>';
     html+='<div class="ik-list" style="padding:4px 12px">'+(ordered.length?ordered.map(([subject,group])=>{
-      const a=ikMean(group.works),end=ikSort(group.official).at(-1),progress=a===null?0:Math.max(0,Math.min(100,(a-2)/3*100));
+      const a=ikMean(group.works),end=ikSort(group.official).at(-1),primary=quarter&&end?end.n:a,progress=primary===null?0:Math.max(0,Math.min(100,(primary-2)/3*100));
       return '<button type="button" class="ik-grade-row" style="width:100%;border-left:0;border-right:0;border-top:0;text-align:left;cursor:pointer" data-ik-subject="'+esc(subject)+'"><span class="ik-sub-icon">'+ikSubjectSprite(subject)+'</span>'+
-        '<span class="ik-grade-name">'+esc(subject)+(end?'<small class="ik-muted" style="display:block;font-size:10px">Официально: '+end.n+'</small>':'')+'</span>'+
-        '<span class="ik-grade-track"><span style="width:'+progress+'%"></span></span><span class="ik-grade-num">'+ikF(a)+'</span><span class="ik-chevron" style="font-size:17px;margin-left:0">›</span></button>';
+        '<span class="ik-grade-name">'+esc(subject)+(quarter&&end?'<small class="ik-muted" style="display:block;font-size:10px">Итоговая за четверть · средний '+ikF(a)+'</small>':end?'<small class="ik-muted" style="display:block;font-size:10px">Официально: '+end.n+'</small>':'')+'</span>'+
+        '<span class="ik-grade-track"><span style="width:'+progress+'%"></span></span><span class="ik-grade-num">'+(primary===null?'—':quarter&&end?String(end.n):ikF(a))+'</span><span class="ik-chevron" style="font-size:17px;margin-left:0">›</span></button>';
     }).join(''):'<div class="ik-empty">Оценок за этот период пока нет.</div>')+'</div>';
   }
   html+='<p class="ik-muted">Средний рассчитывается по обычным оценкам за работы, без школьных коэффициентов. Официальные итоговые оценки в нём не участвуют. '+official.length+' итоговых показаны отдельно в предметах.</p>';
