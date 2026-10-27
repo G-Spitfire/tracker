@@ -2,7 +2,7 @@
 (function(){
 'use strict';
 const activities={
-  draw:{title:'Порисовать',caption:'Что-нибудь красивое или смешное',icon:'task_creative'},
+  draw:{title:'Порисовать',caption:'Что-нибудь красивое или смешное',icon:'achievement_first'},
   walk:{title:'Прогуляться',caption:'Побыть немного на свежем воздухе',icon:'task_walk'},
   story:{title:'Придумать историю',caption:'Про звёздочку или кого захочешь',icon:'task_book'}
 };
@@ -55,6 +55,11 @@ function nextCard(){
     '<span class="ik-joy-next-copy"><small>Можно начать с этого · осталось '+toDo.length+'</small><b>'+quote(one.t)+'</b></span>'+
     '<button type="button" class="ik-joy-next-cta" data-action="ikJoyNext" data-id="'+quote(one.i)+'">Открыть</button></div>';
 }
+function welcomeCard(){
+  if(S.joyIntroSeen)return '';
+  return '<div class="ik-joy-welcome"><div>'+sprite('star_wave','welcome')+'<span><b>Привет! Это твоя «Искра»</b><small>Отмечай дела, собирай звёзды и иногда выбирай занятие сама. Всё получится!</small></span></div><button type="button" data-action="ikJoyIntroDone">Понятно!</button></div>';
+}
+ACTIONS.ikJoyIntroDone=()=>{S.joyIntroSeen=true;save();render()};
 function choiceCard(){
   const d=todayKey(),choice=S.joyChoices[d],done=!!S.joyDone[d];
   const lead='<div class="ik-joy-choice-head">'+sprite('sparkles','mini')+'<span><b>Моё дело по выбору</b>'+
@@ -84,7 +89,7 @@ today=function(){
       markup=markup.replace(anchor,completed+anchor);
     }
   }
-  markup=markup.replace('<div class="ik-filter-row">',nextCard()+'<div class="ik-filter-row">');
+  markup=markup.replace('<div class="ik-filter-row">',welcomeCard()+nextCard()+'<div class="ik-filter-row">');
   const beforeFooter='<p class="ik-muted" style="text-align:center">';
   return markup.replace(beforeFooter,choiceCard()+beforeFooter);
 };
