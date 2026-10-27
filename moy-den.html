@@ -104,7 +104,7 @@ body.sheet-open #sc{overflow:hidden}
 .sh .sheet-period{font-size:14px;color:var(--mu);margin:0 0 20px}
 @media(min-width:700px){.ov{align-items:center;padding:16px}.sh{border-bottom:1px solid var(--ln);border-radius:24px}}
 @media(max-width:355px){.sh .sheet-head,.sh .sheet-body,.sh .sheet-footer{padding-left:16px;padding-right:16px}.sh .sheet-inline{grid-template-columns:minmax(0,1fr)}.sh .sheet-inline .btn{width:100%}}
-</style><link rel="stylesheet" href="./iskra-ui.css?v=20261027-2"></head><body><main id="m"></main>
+</style><link rel="stylesheet" href="./iskra-ui.css?v=20261027-2"><link rel="stylesheet" href="./iskra-joy.css?v=20261027-1"></head><body><main id="m"></main>
 <nav class="bar"><button data-t="t"><span>☀️</span>Сегодня</button><button data-t="g"><span>📚</span>Оценки</button><button data-t="r"><span>🏆</span>Награда</button><button data-t="y"><span>😊</span>Я</button></nav>
 <div id="tt"></div><div id="s"></div>
 <script>
@@ -153,6 +153,8 @@ const store=(()=>{
     if(typeof s.interests!=='string')s.interests='';
     if(!s.joyChoices||typeof s.joyChoices!=='object'||Array.isArray(s.joyChoices))s.joyChoices={};
     if(!s.joyDone||typeof s.joyDone!=='object'||Array.isArray(s.joyDone))s.joyDone={};
+    if(!s.joyWeekNotes||typeof s.joyWeekNotes!=='object'||Array.isArray(s.joyWeekNotes))s.joyWeekNotes={};
+    if(typeof s.joyIntroSeen!=='boolean')s.joyIntroSeen=false;
     if(!Array.isArray(s.rewardChoices))s.rewardChoices=[];
     s.rewardChoices=s.rewardChoices.filter(x=>typeof x==='string'&&x.trim()&&x.length<=50).slice(0,3);
     if(!['pink','lavender','mint'].includes(s.joyTheme))s.joyTheme='pink';
@@ -607,6 +609,12 @@ function validateBackupPayload(source){
     for(const [date,done] of Object.entries(source.joyDone))
       if(!dateOk(date)||typeof done!=='boolean')problem();
   }
+  if(source.joyIntroSeen!==undefined&&typeof source.joyIntroSeen!=='boolean')problem();
+  if(source.joyWeekNotes!==undefined){
+    if(!isObj(source.joyWeekNotes))problem();
+    for(const [date,note] of Object.entries(source.joyWeekNotes))
+      if(!dateOk(date)||!['Я горжусь собой','Было непросто','Хочу попробовать ещё'].includes(note))problem();
+  }
   if(source.earnedAchievements!==undefined){
     if(!isObj(source.earnedAchievements))problem();
     for(const [name,date] of Object.entries(source.earnedAchievements))
@@ -721,4 +729,4 @@ window.addEventListener('schoolCloudUpdated',()=>{if(tab==='g')render()});
 /* ===== BOOT ===== */
 render();
 if(!S.asked){S.asked=1;save();openProfile()}
-</script><script src="./iskra-ui.js?v=20261027-2"></script><script type="module" src="./school-cloud.js?v=20261027-2" data-school-cloud="iskra"></script></body></html>
+</script><script src="./iskra-ui.js?v=20261027-3"></script><script src="./iskra-joy.js?v=20261027-1"></script><script type="module" src="./school-cloud.js?v=20261027-3" data-school-cloud="iskra"></script></body></html>
