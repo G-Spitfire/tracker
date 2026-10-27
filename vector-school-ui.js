@@ -20,19 +20,16 @@ function cumulative(rows) {
   }
   return points;
 }
-/* Compare two consecutive equally sized blocks of the most recent marks.
-   With 4–5 grades use 2 vs 2; with 6+ grades use 3 vs 3.
-   Do not treat a neutral or unmeasurable subject as improving/declining. */
-/* Difference between the cumulative mean at the end of the period and
-   the cumulative mean 14 calendar days earlier. At least two prior
-   marks and one new mark are needed; never infer a change without new marks. */
-function subjectDelta14(rows,range,now=currentDate()){
+/* Weekly change in the cumulative period average, not the average of
+   a separate seven-day batch. Require at least two earlier marks and
+   one new mark. Official quarter marks do not enter the calculation. */
+function subjectDelta7(rows,range,now=currentDate()){
  if(!range)return null;
  const end=range.to<now?range.to:now;
  if(end<range.from)return null;
  const threshold=new Date(end+'T12:00:00Z');
  if(Number.isNaN(threshold.valueOf()))return null;
- threshold.setUTCDate(threshold.getUTCDate()-14);
+ threshold.setUTCDate(threshold.getUTCDate()-7);
  const cutoff=threshold.toISOString().slice(0,10);
  const all=byDate(works(rows).filter(g=>g.date>=range.from&&g.date<=end));
  const before=all.filter(g=>g.date<=cutoff);
@@ -187,8 +184,11 @@ function detail(ui,snapshot,rows,range,periods,helpers) {
  const info=byQuarter&&state.type==='official'?'<div class="school-result-large"><span>Официальная оценка</span><strong>'+state.value+'</strong><small>Выставлена в журнале</small></div>':
   byQuarter&&state.type==='active'?'<div class="school-result-large"><span>Ориентировочный прогноз</span><strong>'+(prediction??'—')+'</strong><small>Неофициально · порог 0,60</small></div>':
   byQuarter?'<div class="school-result-large"><span>Четвертная оценка</span><strong>—</strong><small>'+esc(state.label)+'</small></div>':'';
- const row='<div class="school-subject-hero card"><div class="school-means"><div><span class="hint">Средний за работы</span><strong>'+fmt(mean)+'</strong><span class="hint">'+ordinary.length+' оценок</span></div>'+info+'</div>'+
- '<p class="hint">Средний простой, без школьных коэффициентов. Официальные отметки в расчёт не входят.</p></div>';
+ const isOfficialQuarter=byQuarter&&state.type==='official';
+ const row='<div class="school-subject-hero card"><div class="school-means">'+
+ (isOfficialQuarter?info:'<div><span class="hint">Средний за работы</span><strong>'+fmt(mean)+'</strong><span class="hint">'+ordinary.length+' оценок</span></div>'+info)+
+ '</div><p class="hint">'+(isOfficialQuarter?'Это официальный результат из школьного журнала. Оценки за работы и динамика — ниже.':
+ 'Средний простой, без школьных коэффициентов. Официальные отметки в расчёт не входят.')+'</p></div>';
  const summary='<div class="card school-quarter-strip"><h3>История итогов</h3><div class="school-quarter-grid">'+[1,2,3,4].map(q=>{
   const score=officialInQuarter(snapshot,periods,ui.year,q,name);
   return '<div class="school-quarter-tile"><span>'+['','I','II','III','IV'][q]+'</span><strong>'+(score?score.score:'—')+'</strong></div>';
@@ -200,7 +200,7 @@ function detail(ui,snapshot,rows,range,periods,helpers) {
  (ordinary.length?ordinary.slice().sort(compareGrade).reverse().map(g=>'<div class="school-mark-row"><span class="grade g'+g.score+'">'+g.score+'</span><div><b>'+esc(g.type||'Работа в школе')+'</b><small>'+dateLabel(g.date)+'</small></div></div>').join(''):'<div class="empty">За выбранный период оценок за работы нет.</div>')+'</div>';
  const finalsBlock=official.length?'<div class="card school-official-list"><h3>Официальные оценки периода</h3>'+official.map(g=>'<div class="school-mark-row"><span class="grade g'+g.score+'">'+g.score+'</span><div><b>'+esc(g.officialLabel||'Итог')+'</b><small>'+dateLabel(g.date)+'</small></div></div>').join('')+'</div>':'';
  return '<div class="school-detail-head">'+button('← К предметам','back-school','tiny')+'<h2>'+esc(name)+'</h2></div>'+
- row+summary+graph+marks+finalsBlock;
+ row+graph+marks+summary+finalsBlock;
 }
 function overview(ui,snapshot,rows,range,periods,helpers) {
  const ordinary=works(rows),mean=average(ordinary);
@@ -213,10 +213,11 @@ function overview(ui,snapshot,rows,range,periods,helpers) {
  chart([{key:'overall',name:'',color:palette[0],points:cumulative(ordinary)}],range)+
  '<p class="hint">Средний по всем оценкам за работы в выбранном периоде.</p></div>';
  const list='<section class="school-subject-list"><div class="school-section-head"><h2>Предметы</h2>'+
- '<p class="hint">Стрелка показывает изменение среднего за последние 14 дней выбранного периода. Нет новых оценок или истории — нет стрелки.</p></div>'+
+ '<p class="hint">Стрелка показывает изменение накопленного среднего за последнюю неделю. Нет новых оценок или истории — нет стрелки.</p></div>'+
  (subjectNames.length?subjectNames.map(name=>{
   const subset=rows.filter(g=>g.subject===name),subjectWorks=works(subset),m=average(subjectWorks);
-  const delta=subjectDelta14(subjectWorks,range);
+  const officialQuarter=isQuarter?officialInQuarter(snapshot,periods,ui.year,current,name):null;
+  const delta=officialQuarter?null:subjectDelta7(subjectWorks,range);
   let trend='';
   if(delta!==null){
    if(delta>0)trend='<span class="school-subject-trend school-trend-up">↑ +'+fmt(delta)+'</span>';
@@ -225,7 +226,7 @@ function overview(ui,snapshot,rows,range,periods,helpers) {
   }
   let right='',context='';
   if(isQuarter){
-   const mark=officialInQuarter(snapshot,periods,ui.year,current,name);
+   const mark=officialQuarter;
    const state=termState(range,mark,currentDate());
    if(state.type==='official'){right=mark.score;context='Итог';}
    else if(state.type==='active'&&m!==null){right=helpers.gradePrediction(m);context='Прогноз';}
@@ -236,8 +237,8 @@ function overview(ui,snapshot,rows,range,periods,helpers) {
   }
   return '<button type="button" class="school-subject-row" data-action="open-subject" data-id="'+esc(name)+'">'+
    '<div class="school-subject-name"><b>'+esc(name)+'</b>'+trend+'</div>'+
-   '<div class="school-number"><strong>'+fmt(m)+'</strong><small>средний</small></div>'+
-   '<div class="school-number"><strong>'+right+'</strong><small>'+esc(context)+'</small></div><span class="school-chevron">›</span></button>';
+   (officialQuarter?'':'<div class="school-number"><strong>'+fmt(m)+'</strong><small>средний</small></div>')+
+   '<div class="school-number '+(officialQuarter?'school-final-only':'')+'"><strong>'+right+'</strong><small>'+esc(context)+'</small></div><span class="school-chevron">›</span></button>';
  }).join(''):'<div class="empty">За выбранный период оценок пока нет.</div>')+'</section>';
  const recent=latest.length?'<details class="school-recent-collapsed"><summary>Последние оценки <span class="school-recent-count">'+latest.length+'</span></summary>'+
  '<div class="school-recent-list">'+latest.map(g=>'<div class="school-recent-row"><span class="grade g'+g.score+'">'+g.score+'</span>'+
