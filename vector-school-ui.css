@@ -128,3 +128,11 @@
 .school-chart-key .school-chart-trend-key{border-color:#c96d28;border-top-style:dashed}
 .school-means .school-result-large:only-child{text-align:left}
 .school-final-only{min-width:60px}
+
+/* Work-type badges: subtle, nonjudgmental emphasis for 15-year-old students. */
+.school-work-title{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.school-work-meta{display:flex;align-items:center;flex-wrap:wrap;gap:5px}
+.school-work-badge{display:inline-flex;align-items:center;justify-content:center;flex:none;font-size:10px;font-weight:750;line-height:1;letter-spacing:.025em;padding:4px 6px;border:1px solid #d5deec;border-radius:5px;background:#f0f4fb;color:#456282;white-space:nowrap}
+.school-work-badge-control{background:#f1f0fa;border-color:#ddd9ef;color:#665398}
+.school-work-badge-independent{background:#eef6f4;border-color:#d6e8e2;color:#2b7466}
+.school-mark-row .school-work-title{font-size:12px}
