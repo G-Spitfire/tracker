@@ -546,3 +546,69 @@ button:focus-visible,[role="button"]:focus-visible,input:focus-visible,select:fo
   .ik-action-row,.ik-mini-btn,.bar button{transition:none!important}
   html{scroll-behavior:auto}
 }
+
+/* Final reference pass: centered subpage headers and inset navigation. */
+.bar{
+  left:50%;transform:translateX(-50%);
+  width:calc(100% - 24px);max-width:456px;
+  border-radius:31px 31px 0 0;
+  border-left:1px solid rgba(245,235,255,.8);
+  border-right:1px solid rgba(245,235,255,.8);
+  padding-left:9px;padding-right:9px;
+}
+.ik-subscreen-header{
+  display:flex!important;justify-content:space-between!important;
+  align-items:center!important;position:relative!important;
+  min-height:43px!important;gap:8px
+}
+.ik-subscreen-header>h1{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  font-size:24px!important;line-height:1.15!important;
+  text-align:center!important;white-space:nowrap;
+  pointer-events:none
+}
+.ik-header-back,.ik-header-spacer{
+  display:grid;place-items:center;flex:0 0 36px;
+  width:36px;height:36px;border:0;border-radius:50%
+}
+.ik-header-back{
+  background:rgba(255,255,255,.86);
+  box-shadow:0 3px 12px rgba(128,92,174,.11);
+  color:#7756bb;font:300 31px/1 inherit;cursor:pointer;padding:0 0 3px
+}
+.ik-header-back:active{background:#f6edff}
+.ik-subscreen-header .ik-cloud-pill{
+  position:static!important;transform:none!important;
+  margin-left:auto;min-height:32px
+}
+.ik-subscreen-header .ik-settings-link{
+  position:static!important;transform:none!important;
+  margin-left:auto;min-height:36px;display:inline-flex;
+  align-items:center;justify-content:center;
+  width:38px;padding:5px;
+  background:rgba(255,255,255,.68);
+  border-radius:13px
+}
+.ik-subscreen-header .ik-settings-link .ik-art--tiny{width:24px;height:24px}
+.ik-settings-text{display:none}
+.ik-achievements-link{margin-left:auto;min-width:36px;justify-content:center}
+.ik-achievements-link .ik-art--tiny{width:23px;height:23px}
+.ik-achievements-text{display:none}
+.scs-iskra .ik-subscreen-header>.ik-cloud-pill{font-size:10px!important}
+.ik-subscreen-header .ik-header-spacer{visibility:hidden}
+/* Make the section headings sit at the same scale across the mockups. */
+.ik-page .ik-sec-title{letter-spacing:-.025em}
+.ik-profile .ik-list .ik-action-row:focus-visible,
+.ik-reward .ik-action-row:focus-visible{outline-offset:-2px}
+@media(min-width:470px){
+  .ik-achievements-text,.ik-settings-text{display:inline}
+  .ik-subscreen-header .ik-settings-link{width:auto;padding:6px 9px}
+  .ik-achievements-link{padding-left:10px;padding-right:10px}
+}
+@media(max-width:330px){
+  .ik-subscreen-header>h1{font-size:22px!important}
+  .scs-iskra .ik-subscreen-header>.ik-cloud-pill{font-size:9px!important}
+  .ik-header-back,.ik-header-spacer{width:32px;height:32px;flex-basis:32px}
+  .bar{width:calc(100% - 12px);padding-left:6px;padding-right:6px}
+}
