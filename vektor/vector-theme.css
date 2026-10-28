@@ -10,7 +10,7 @@ body:after{content:"";position:absolute;z-index:-1;top:0;left:0;right:0;height:3
 .top{padding:6px 0 18px}.top .brand{color:#f3f6ff;text-shadow:0 0 20px #64a5ff42}.header-settings{border:1px solid #7890bd4d;background:#ffffff0a;color:#d6e3ff;border-radius:14px;box-shadow:inset 0 1px #ffffff13}
 h1,h2,h3{color:#f1f5ff}.sub,.hint,.small-note,.task-meta,.muted{color:#a9b6d1}
 .button{border:1px solid #66799b66;background:#202b43;color:#e1e9fa;border-radius:12px;box-shadow:inset 0 1px #ffffff0a}
-.button:hover{background:#293753;border-color:#7894c5}.button.primary{background:linear-gradient(135deg,#4b8ef2,#765ced);border-color:#78a6ff;color:#fff;box-shadow:0 5px 18px #3d77db42}.button.danger{background:#422632;color:#ffb5c0;border-color:#8c4a5b}
+.button:hover{background:#293753;border-color:#7894c5}.button.primary{background:linear-gradient(135deg,#2e6ac9,#5843b3);border-color:#78a6ff;color:#fff;box-shadow:0 5px 18px #3d77db42}.button.danger{background:#422632;color:#ffb5c0;border-color:#8c4a5b}
 .button:disabled{background:#222b3b;color:#77839a;border-color:#38445c;opacity:.56}
 .link{color:#8fb9ff}.pill{background:#222d45;border-color:#435372;color:#c2cde2}.pill.blue{background:#283b60;border-color:#4268a0;color:#a8c9ff}
 .card,.list-card,.stage,.stat{background:linear-gradient(145deg,#202c45ed,#151f34f2);border:1px solid #8196bd30;border-radius:18px;box-shadow:0 10px 28px #050a172e,inset 0 1px #ffffff0d;color:#f1f5ff}
@@ -27,11 +27,10 @@ h1,h2,h3{color:#f1f5ff}.sub,.hint,.small-note,.task-meta,.muted{color:#a9b6d1}
 .tabs{gap:7px}.tab{background:#1d2941;border-color:#435474;color:#bcc9df;border-radius:12px}.tab.active{background:#304a74;color:#e4efff;border-color:#72a5ff;box-shadow:0 0 15px #4b83e922}
 .navbar{background:#111a2beF;border-top:1px solid #8196bd36;backdrop-filter:blur(18px);box-shadow:0 -8px 28px #060a1638}.nav{color:#8796b1}.nav.active{background:#243656;color:#a8caff}.nav .sym{filter:drop-shadow(0 0 6px #6ca8ff55)}
 .modal-cover{background:#050914b8;backdrop-filter:blur(5px)}.modal{background:linear-gradient(155deg,#202d47,#121b2e);border:1px solid #8ca0c33d;color:#f2f5ff}.field label,.field-label{color:#c4d0e4}.field input,.field select,.field textarea,.scs input,.scs-form input{background:#111b2d;color:#edf3ff;border-color:#465775}.field select option{background:#111b2d;color:#edf3ff}.toast{background:#273a5d;border:1px solid #7797cf66;color:#f5f8ff}
-.widget-size-card{padding:13px!important}.widget-size-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:10px}.widget-size-option{min-width:0;min-height:42px;border:1px solid #455473;border-radius:10px;background:#1a253a;color:#7e8ba3;font-size:12px;font-weight:650}.widget-size-option.active{color:#e9f1ff;background:#27436c;border-color:#6ba6ff;box-shadow:0 0 12px #4888e62c}.widget-size-option span{display:block;font-size:9px;color:#9fc4ff;font-weight:500;margin-top:2px}.widget-size-option:disabled{background:#161e2d;color:#717b8e;border-color:#303b50;opacity:.48;cursor:not-allowed}.widget-size-note{margin-top:12px}
 .scs{color:#edf3ff}.scs .mu,.scs .school-muted,.scs .school-filter-label,.scs .school-grade-count,.scs .school-subject-name,.scs .school-result-large span,.scs .school-result-large small{color:#a9b6d1}.scs .btn,.scs .scs-form button{background:#243554;color:#dceaff;border-color:#5875a6}.scs .hero,.scs .school-topline,.scs .school-chart-card,.scs .school-recent-collapsed,.scs .school-source-audit{background:linear-gradient(145deg,#202c45ed,#151f34f2);border:1px solid #8196bd30;color:#edf3ff}.scs .school-tabs{background:#151f33}.scs .school-tab{color:#aab8d1}.scs .school-tab.active{background:#2a3b5a;color:#e5efff;box-shadow:0 1px 9px #04091644}.scs .school-subject-row{background:#1c2941;border-color:#425474;color:#e8efff}.scs .school-subject-row:hover{background:#243554}.scs .school-quarter-tile{background:#1a2740}.scs .school-quarter-tile span,.scs .school-number small,.scs .school-audit-type span:last-child{color:#9eacc4}.scs .school-finals-table thead th,.scs .school-finals-table td:last-child{background:#1b2941;color:#dce5f6}.scs .school-finals-table th,.scs .school-finals-table td{border-bottom-color:#ffffff18}.scs .school-mark-row,.scs .school-archive-row,.scs .school-grade-detail{border-color:#ffffff18}.scs .school-mark-row .grade,.scs .grade{background:#214337;color:#8ce7bd}.scs .school-older-grades summary,.scs .school-source-audit summary,.scs .school-recent-collapsed>summary{color:#9fc2ff}.scs .school-plot line{stroke:#5a6984}.scs .school-plot polyline{stroke:#65aaff}.scs .school-trend-up{color:#5fe0b0}.scs .school-trend-down{color:#ff8f9c}.scs .school-trend-even{color:#aab6d1}
 .stage{border-color:#425474}.stage-title{color:#e8efff}.project-title,.home-project-name{color:#eff3ff}
 @media(max-width:700px){.app{padding:12px 12px 98px}.grid.home-widget-grid{grid-template-columns:1fr;grid-auto-rows:minmax(145px,auto)}.widget.tall{grid-column:1;grid-row:span 2;min-height:300px}.focus-ring{width:76px;height:76px}}
-@media(max-width:400px){.widget-size-options{grid-template-columns:repeat(2,minmax(0,1fr))}.focus-widget-copy strong{font-size:18px}}
+@media(max-width:400px){.focus-widget-copy strong{font-size:18px}}
 
 /* Habits and profile: compact, teen-oriented tracking without streak pressure. */
 .nav-inner{grid-template-columns:repeat(5,minmax(0,1fr));gap:3px}
@@ -55,4 +54,43 @@ h1,h2,h3{color:#f1f5ff}.sub,.hint,.small-note,.task-meta,.muted{color:#a9b6d1}
 .habit-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:13px}.habit-feedback{color:#91e8c7;background:#163c34;border-color:#2d725e}
 .habit-month{margin-top:12px;border-top:1px solid #ffffff14;padding-top:10px;color:#a9b6d1;font-size:12px}.habit-month summary,.habit-archive summary{cursor:pointer;color:#a9c7ff;font-weight:650}.habit-month p{margin:9px 0 0;line-height:1.5}
 .habit-archive{margin-top:18px}.habit-archive .list-card{margin:9px 0 0}.habit-empty{padding:32px 18px}.habit-empty p{margin:8px 0 16px}.habit-days{border:0;padding:0;min-width:0}.habit-days legend{padding:0;margin-bottom:7px}
-@media(max-width:560px){.home-hero-placeholder{min-height:195px;aspect-ratio:auto}.home-hero-placeholder-content{padding:18px}.home-hero-caption{font-size:13px}.habit-card{padding:15px}.habit-dots{gap:3px}.habit-day b{width:31px;height:31px}.nav{font-size:9px}.nav .sym{font-size:20px}}
+@media(max-width:560px){.home-hero-placeholder{min-height:195px;aspect-ratio:auto}.home-hero-placeholder-content{padding:18px}.home-hero-caption{font-size:13px}.habit-card{padding:15px}.habit-day{font-size:12px}.habit-dots{gap:3px}.habit-day b{width:31px;height:31px}.nav{font-size:9px}.nav .sym{font-size:20px}}
+
+/* Readability and spacing refinement. */
+body{font-size:16px}
+.hint,.sub{font-size:14px;line-height:1.5}
+.small-note,.task-meta{font-size:13px}
+.link,.widget .card-head .link{font-size:13px}
+.empty{font-size:14px;line-height:1.5}
+.button{min-height:44px}
+.button.tiny{min-height:38px;font-size:13px}
+.widget.tall{min-height:270px}
+.grid.home-widget-grid{grid-auto-rows:minmax(130px,auto)}
+.home-widget-grid .widget .card-head .link{font-size:13px}
+.home-page-title h1{font-size:19px}
+.nav{font-size:11px}
+.profile-intro{margin:0 0 12px}
+.profile-settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.profile-settings-grid .button{height:100%;font-size:13px}
+.profile-backup{display:grid;gap:8px;margin-top:14px;padding:12px;border:1px solid #8196bd36;border-radius:14px;background:#151f34}
+.profile-backup-row{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+.profile-backup-row>.button{flex:none}
+.profile-backup-note{flex:1;min-width:180px;color:#bdc9df;font-size:12px;line-height:1.4}
+.profile-restore{width:100%}
+.profile-danger{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}
+.profile-danger>span{color:#c1cbe0;font-size:12px;line-height:1.4}
+.task-list{margin:0}.task-explainer{margin-top:11px}
+.habit-empty{padding:24px 18px}.habit-empty p{margin:6px 0 0}
+@media(min-width:700px){.modal-cover{align-items:center;padding:24px}.modal{width:min(100%,560px);max-height:min(88vh,780px);border-radius:18px}}
+@media(max-width:700px){.widget.tall{min-height:250px}.grid.home-widget-grid{grid-auto-rows:minmax(125px,auto)}}
+@media(max-width:560px){
+ .nav{font-size:10px;padding:6px 0}
+ .nav .sym{font-size:21px}
+ .button.tiny{min-height:40px}
+ .profile-settings-grid{grid-template-columns:1fr}
+ .profile-backup-note{min-width:140px}
+ .home-page-title h1{font-size:18px}
+}
+@media(max-width:360px){.nav{font-size:10px}.nav .sym{font-size:19px}.profile-backup-row{align-items:flex-start}}
+.scs .school-chart-key,.scs .school-data-check>summary{color:#b7c5dd}
+.scs .school-chart-key .school-chart-trend-key{border-color:#f0a66a}

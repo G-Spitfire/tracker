@@ -136,3 +136,14 @@
 .school-work-badge-control{background:#f1f0fa;border-color:#ddd9ef;color:#665398}
 .school-work-badge-independent{background:#eef6f4;border-color:#d6e8e2;color:#2b7466}
 .school-mark-row .school-work-title{font-size:12px}
+
+/* Keep labels and chart notes comfortably readable on phone screens. */
+.school-number small{font-size:12px}
+.school-result-large small{font-size:12px}
+.school-chart-card>.hint,.school-chart-card>p.hint,.school-subject-list .school-section-head .hint{font-size:12px}
+.school-subject-trend{font-size:12px}
+.school-year-label{font-size:13px}
+.school-tab{min-height:44px}
+.school-audit-type{font-size:13px}
+.school-audit-type span:last-child{font-size:12px}
+@media(max-width:560px){.school-number small{font-size:11px}.school-subject-trend{font-size:11px}}
