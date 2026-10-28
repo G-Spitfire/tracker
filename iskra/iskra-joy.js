@@ -1,11 +1,6 @@
 /* Iskra: gentle, child-led daily interactions. Extends the existing screens, never replaces history. */
 (function(){
 'use strict';
-const activities={
-  draw:{title:'Порисовать',caption:'Что-нибудь красивое или смешное',icon:'achievement_first'},
-  walk:{title:'Прогуляться',caption:'Побыть немного на свежем воздухе',icon:'task_walk'},
-  story:{title:'Придумать историю',caption:'Про звёздочку или кого захочешь',icon:'task_book'}
-};
 const themes={pink:'Розовые облака',lavender:'Сиреневое небо',mint:'Мятный сад'};
 const sprite=(name,kind='')=>'<span aria-hidden="true" class="ik-art ik-art-'+name+(kind?' ik-art--'+kind:'')+'"></span>';
 const quote=v=>esc(v==null?'':String(v));
@@ -40,69 +35,20 @@ setDone=function(id,on,silent,date){
   oldSetDone(id,on,silent||celebrate,date);
   if(celebrate&&dn(d).includes(id)){
     const remaining=tasks(d).length-dn(d).length;
-    reaction(remaining===0?'Все дела сделаны!':'Звёздочка радуется!',
-      '+1 ⭐'+(remaining===0?' · и 2 бонусные звезды!':' · Осталось '+remaining+' дел'));
+    reaction(remaining===0?'Привычки на сегодня готовы!':'Звёздочка радуется!',
+      '+1 ⭐'+(remaining===0?' · и 2 бонусные звезды!':' · Осталось '+remaining+' привычек'));
   }
 };
 const originalToday=today;
-function nextCard(){
-  const d=todayKey(),toDo=tasks(d).filter(t=>!dn(d).includes(t.i));
-  if(!toDo.length){
-    return '<div class="ik-joy-next ik-joy-finished">'+sprite('achievement_master','next')+
-      '<span><b>Ты справилась со всеми делами!</b><small>Отдохни и порадуйся своим успехам.</small></span>'+
-      '<button type="button" class="ik-joy-next-cta" data-action="ikToReward">Звёзды</button></div>';
-  }
-  const one=toDo[0];
-  const icons={ex:'task_walk',bg:'nav_today',cl:'task_clothes',hw:'task_read',en:'task_english',ho:'task_clean',rd:'task_book'};
-  return '<div class="ik-joy-next"><span class="ik-joy-next-icon">'+sprite(icons[one.i]||'task_star','next')+'</span>'+
-    '<span class="ik-joy-next-copy"><small>Можно начать с этого · осталось '+toDo.length+'</small><b>'+quote(one.t)+'</b></span>'+
-    '<button type="button" class="ik-joy-next-cta" data-action="ikJoyNext" data-id="'+quote(one.i)+'">Открыть</button></div>';
-}
 function welcomeCard(){
   if(S.joyIntroSeen)return '';
-  return '<div class="ik-joy-welcome"><div>'+sprite('star_wave','welcome')+'<span><b>Привет! Это твоя «Искра»</b><small>Отмечай дела, собирай звёзды и иногда выбирай занятие сама. Всё получится!</small></span></div><button type="button" data-action="ikJoyIntroDone">Понятно!</button></div>';
+  return '<div class="ik-joy-welcome"><div>'+sprite('star_wave','welcome')+'<span><b>Привет! Это твоя «Искра»</b><small>Отмечай привычки, собирай звёзды и выбирай то, что тебе подходит. Всё получится!</small></span></div><button type="button" data-action="ikJoyIntroDone">Понятно!</button></div>';
 }
 ACTIONS.ikJoyIntroDone=()=>{S.joyIntroSeen=true;save();render()};
-function choiceCard(){
-  const d=todayKey(),choice=S.joyChoices[d],done=!!S.joyDone[d];
-  const lead='<div class="ik-joy-choice-head">'+sprite('sparkles','mini')+'<span><b>Моё дело по выбору</b>'+
-    '<small>Необязательно. За выполнение — ещё 1 ⭐</small></span></div>';
-  if(!choice||!activities[choice]){
-    return '<div class="ik-joy-choice">'+lead+'<div class="ik-joy-options">'+Object.entries(activities).map(([id,a])=>
-      '<button type="button" data-action="ikJoyPick" data-id="'+id+'">'+sprite(a.icon,'choice')+'<span>'+quote(a.title)+'</span></button>').join('')+'</div></div>';
-  }
-  const a=activities[choice];
-  return '<div class="ik-joy-choice">'+lead+'<div class="ik-joy-selected">'+sprite(a.icon,'choice')+
-    '<span><b>'+quote(a.title)+'</b><small>'+quote(a.caption)+'</small></span>'+
-    '<button type="button" class="'+(done?'ik-joy-selected-done':'')+'" data-action="ikJoyComplete">'+(done?'✓ Готово':'Сделано!')+'</button></div>'+
-    (!done?'<button class="ik-joy-change" data-action="ikJoyChange">Выбрать другое</button>':'<p class="ik-joy-thanks">+1 ⭐ уже в твоей копилке. Здорово!</p>')+
-    '</div>';
-}
 today=function(){
   ensure();
   let markup=originalToday();
-  markup=markup.replace('<div class="ik-task-list">',welcomeCard()+nextCard()+'<div class="ik-task-list">');
-  const beforeFooter='<p class="ik-muted" style="text-align:center">';
-  return markup.replace(beforeFooter,choiceCard()+beforeFooter);
-};
-ACTIONS.ikJoyNext=id=>{
-  if(!tasks(todayKey()).some(t=>t.i===id))return;
-  (id==='hw'||id==='ho'?ACTIONS.details:ACTIONS.ikTaskInfo)(id);
-};
-ACTIONS.ikJoyPick=id=>{
-  ensure();
-  if(!activities[id]||S.joyDone[todayKey()])return;
-  S.joyChoices[todayKey()]=id;save();render();
-};
-ACTIONS.ikJoyChange=()=>{
-  if(S.joyDone[todayKey()])return;
-  delete S.joyChoices[todayKey()];save();render();
-};
-ACTIONS.ikJoyComplete=()=>{
-  ensure();
-  const d=todayKey();if(!activities[S.joyChoices[d]])return;
-  S.joyDone[d]=!S.joyDone[d];save();render();
-  if(S.joyDone[d])reaction('Ты сама выбрала — и сделала!','+1 ⭐ за своё дело');
+  return markup.replace('<div class="ik-task-list">',welcomeCard()+'<div class="ik-task-list">');
 };
 function weekReflection(){
   const d=todayKey(),weekday=new Date(d+'T12:00:00').getDay();
@@ -110,7 +56,7 @@ function weekReflection(){
   const key=weekStart(d),already=S.joyWeekNotes[key],dates=wk();
   const done=dates.reduce((n,k)=>n+dn(k).length,0),starTotal=dates.reduce((n,k)=>n+st(k),0);
   return '<div class="ik-joy-reflection">'+sprite('achievement_streak','reflection')+
-    '<div><b>Как прошла твоя неделя?</b><small>'+done+' дел · '+starTotal+' ⭐. Даже маленькие шаги — это здорово.</small></div>'+
+    '<div><b>Как прошла твоя неделя?</b><small>'+done+' привычек · '+starTotal+' ⭐. Даже маленькие шаги — это здорово.</small></div>'+
     (already?'<p>Ты выбрала: '+quote(already)+'. Спасибо, что поделилась!</p>':
     '<div class="ik-joy-reflect-options">'+['Я горжусь собой','Было непросто','Хочу попробовать ещё'].map((t,i)=>
       '<button type="button" data-action="ikJoyReflect" data-id="'+i+'">'+quote(t)+'</button>').join('')+'</div>')+
@@ -120,7 +66,7 @@ const oldReward=reward;
 reward=function(){
   ensure();
   let html=oldReward();
-  // Place the child choice after the reward's weekly strip, above level stats.
+  // Keep the weekly reflection after the reward strip; historical choice data remains available.
   html=html.replace('<div class="ik-row-between" id="ik-achievements">',weekReflection()+
     '<div class="ik-row-between" id="ik-achievements">');
   return html;
@@ -133,7 +79,7 @@ ACTIONS.ikJoyReflect=index=>{
 function collection(){
   const count=Object.keys(S.d||{}).reduce((a,d)=>a+dn(d).length,0)+(Object.values(S.joyDone||{}).filter(Boolean).length);
   const items=[{n:1,icon:'achievement_first',title:'Первый шаг'},
-    {n:10,icon:'achievement_helper',title:'Первые 10 дел'},
+    {n:10,icon:'achievement_helper',title:'Первые 10 привычек'},
     {n:30,icon:'achievement_streak',title:'30 маленьких побед'}];
   return '<div class="ik-joy-collection"><div class="ik-row-between"><h2 class="ik-sec-title">Моя коллекция</h2>'+
     '<span class="ik-tab-sublabel">'+items.filter(x=>count>=x.n).length+' из '+items.length+'</span></div>'+
@@ -160,7 +106,7 @@ ACTIONS.ikJoyTheme=id=>{
   if(!themes[id])return;
   S.joyTheme=id;save();ensure();ACTIONS.ikJoyStyle();render();
 };
-// Add a personal-style shortcut to the child's own settings, without parent PIN.
+// Keep the personal-style shortcut available in the child's profile settings.
 const originalPersonal=ACTIONS.ikPersonalSettings;
 ACTIONS.ikPersonalSettings=()=>{
   originalPersonal();

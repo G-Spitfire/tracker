@@ -104,8 +104,8 @@ body.sheet-open #sc{overflow:hidden}
 .sh .sheet-period{font-size:14px;color:var(--mu);margin:0 0 20px}
 @media(min-width:700px){.ov{align-items:center;padding:16px}.sh{border-bottom:1px solid var(--ln);border-radius:24px}}
 @media(max-width:355px){.sh .sheet-head,.sh .sheet-body,.sh .sheet-footer{padding-left:16px;padding-right:16px}.sh .sheet-inline{grid-template-columns:minmax(0,1fr)}.sh .sheet-inline .btn{width:100%}}
-</style><link rel="stylesheet" href="./iskra-ui.css?v=20261027-7"><link rel="stylesheet" href="./iskra-joy.css?v=20261027-3"></head><body><main id="m"></main>
-<nav class="bar"><button data-t="t"><span>☀️</span>Сегодня</button><button data-t="g"><span>📚</span>Школа</button><button data-t="r"><span>⭐</span>Звёзды</button><button data-t="y"><span>😊</span>Я</button></nav>
+</style><link rel="stylesheet" href="./iskra-ui.css?v=20261028-2"><link rel="stylesheet" href="./iskra-joy.css?v=20261028-2"></head><body><main id="m"></main>
+<nav class="bar"><button data-t="t"><span>☀️</span>Сегодня</button><button data-t="g"><span>📚</span>Школа</button><button data-t="r"><span>⭐</span>Звёзды</button><button data-t="y"><span>😊</span>Профиль</button></nav>
 <div id="tt"></div><div id="s"></div>
 <script>
 /* ===== CONFIG ===== */
@@ -125,7 +125,7 @@ const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+Stri
 const store=(()=>{
   let recoveredFromBackup=false;
   function defaults(){return{
-    d:{},name:'',asked:0,goal:25,reward:'Семейная награда',x:{},
+    d:{},name:'',asked:0,goal:25,reward:'Семейная награда',x:{},starBonusHistory:{},starBonusTargets:{},
     av:{e:'🦊',c:'#ffd9c9'},schema:SCHEMA,
   }}
   function validateAll(s){
@@ -146,6 +146,12 @@ const store=(()=>{
     if(!Array.isArray(s.hiddenTasks))s.hiddenTasks=[];
     if(!Array.isArray(s.customTasks))s.customTasks=[];
     if(!s.rewardHistory||typeof s.rewardHistory!=='object'||Array.isArray(s.rewardHistory))s.rewardHistory={};
+    if(!s.starBonusHistory||typeof s.starBonusHistory!=='object'||Array.isArray(s.starBonusHistory))s.starBonusHistory={};
+    for(const [date,bonus] of Object.entries(s.starBonusHistory))
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||bonus!==true)delete s.starBonusHistory[date];
+    if(!s.starBonusTargets||typeof s.starBonusTargets!=='object'||Array.isArray(s.starBonusTargets))s.starBonusTargets={};
+    for(const [date,target] of Object.entries(s.starBonusTargets))
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isInteger(target)||target<0||target>100)delete s.starBonusTargets[date];
     if(!s.weekPlans||typeof s.weekPlans!=='object'||Array.isArray(s.weekPlans))s.weekPlans={};
     if(!s.taskCategories||typeof s.taskCategories!=='object'||Array.isArray(s.taskCategories))s.taskCategories={};
     if(!['all','30','7'].includes(s.profileStatsWindow))s.profileStatsWindow='all';
@@ -313,7 +319,7 @@ const tasks=d=>{
 const freezeDay=d=>{if(!Array.isArray(S.planHistory[d]))S.planHistory[d]=tasks(d).map(t=>({...t}))};
 const dn=d=>(S.d[d]||[]).filter(i=>tasks(d).some(t=>t.i==i));
 const skipped=d=>(S.skipped?.[d]||[]).filter(i=>tasks(d).some(t=>t.i===i));
-const st=d=>{const n=dn(d).length,required=tasks(d).length;return n+(required>0&&n===required?2:0)+(S.joyChoices?.[d]&&S.joyDone?.[d]?1:0)};
+const st=d=>{const n=dn(d).length,required=tasks(d).length,target=Math.max(required,S.starBonusTargets?.[d]||0),bonus=S.starBonusHistory?.[d]===true||(target>0&&n>=target);return n+(bonus?2:0)+(S.joyChoices?.[d]&&S.joyDone?.[d]?1:0)};
 const ring=(n,m)=>{const C=2*Math.PI*40,ratio=m>0?Math.max(0,Math.min(1,n/m)):0;return`<svg width="96" height="96" viewBox="0 0 96 96" style="flex:none"><circle cx="48" cy="48" r="40" fill="none" stroke="#ffffff55" stroke-width="10"/><circle cx="48" cy="48" r="40" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-ratio)}" transform="rotate(-90 48 48)"/><text x="48" y="56" text-anchor="middle" font-size="24" font-weight="800" fill="#fff">${n}/${m}</text></svg>`};
 const avb=()=>`<button class="av" data-action="profile" style="background:${S.av.c}" aria-label="Мой герой">${S.av.e}</button>`;
 
@@ -346,7 +352,7 @@ function stats(id){
   return Object.entries(all).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k,n])=>`<div class="row"><span>${esc(k)}</span><span><b>${n}</b>${w[k]?` <span class="mu sm">+${w[k]} за неделю</span>`:''}</span></div>`).join('')||'<div class="mu sm">Пока пусто</div>';
 }
 function me(){
-  return`<h1 style="margin:4px 0 14px">Я</h1>
+  return`<h1 style="margin:4px 0 14px">Профиль</h1>
   <div class="card" style="display:flex;gap:14px;align-items:center"><div class="av" style="background:${S.av.c}">${S.av.e}</div><div style="flex:1"><b>${S.name?esc(S.name):'Без имени'}</b></div><button class="btn g" data-action="profile">Изменить</button></div>
   <div class="card" style="display:flex;gap:14px;align-items:center"><div style="font-size:36px">📅</div><div style="flex:1"><b>История</b><div class="mu sm">Что было в прошлые дни</div></div><button class="btn g" data-action="history">Открыть</button></div>
   <div class="card"><b>Мои уроки</b><div class="mu sm" style="margin-bottom:6px">сколько раз за всё время</div>${stats('hw')}</div>
@@ -460,7 +466,7 @@ function setDone(i,on,silent,date){
   // No new tangible rewards are accrued; historic reward records remain in backups.
   save();render();
   if(silent)return;
-  if(on&&x<0)toast(all&&!wasAll?'🎉 Все дела готовы! +2 бонусные звезды':'⭐ +1 звезда');
+  if(on&&x<0)toast(all&&!wasAll?'🎉 Все привычки на сегодня выполнены! +2 бонусные звезды':'⭐ +1 звезда');
   else if(!on&&x>=0)toast('Отметка снята',{action:'Вернуть',onAction:()=>{
     setDone(i,true,true,d);
     if(previousDetails){(S.x[d]||(S.x[d]={}))[i]=previousDetails;save();render()}
@@ -473,7 +479,7 @@ function openDetails(i){
 }
 function renderDetails(){
   const hw=cur.i==='hw',L=hw?(window.schoolCloud?.subjects?.()||[]):CONFIG.chores,ok=(S.d[iso(new Date())]||[]).includes(cur.i),isSkipped=skipped(iso(new Date())).includes(cur.i);
-  sheet(`<h2 style="margin-top:0">${hw?'Какие уроки делала?':'Что помогла сделать?'}</h2>${hw?'<p class="mu sm">Предметы берутся из школьного дневника.</p>':''}<div class="chips" style="margin-top:0">${L.map((k,j)=>`<button class="chip ${cur.s.includes(k)?'on':''}" data-action="detailChip" data-id="${j}">${esc(k)}</button>`).join('')}${hw&&!L.length?'<p class="mu sm">Предметы пока не загружены. Отметить выполненные уроки всё равно можно.</p>':''}</div><input id="dn" maxlength="60" placeholder="Что-то ещё? Напиши" value="${esc(cur.n)}"><div data-sheet-footer class="chips"><button class="btn" data-action="saveDetails">Готово</button>${ok?'<button class="btn g" data-action="removeDetails">Убрать отметку</button>':''}${ok?'':'<button class="btn g" data-action="ikSkipToggle" data-id="'+esc(cur.i)+'">'+(isSkipped?'Вернуть в дела':'Пропустить сегодня')+'</button>'}</div>`);
+  sheet(`<h2 style="margin-top:0">${hw?'Какие уроки делала?':'Что помогла сделать?'}</h2>${hw?'<p class="mu sm">Предметы берутся из школьного дневника.</p>':''}<div class="chips" style="margin-top:0">${L.map((k,j)=>`<button class="chip ${cur.s.includes(k)?'on':''}" data-action="detailChip" data-id="${j}">${esc(k)}</button>`).join('')}${hw&&!L.length?'<p class="mu sm">Предметы пока не загружены. Отметить выполненные уроки всё равно можно.</p>':''}</div><input id="dn" maxlength="60" placeholder="Что-то ещё? Напиши" value="${esc(cur.n)}"><div data-sheet-footer class="chips"><button class="btn" data-action="saveDetails">Готово</button>${ok?'<button class="btn g" data-action="removeDetails">Убрать отметку</button>':''}${ok?'':'<button class="btn g" data-action="ikSkipToggle" data-id="'+esc(cur.i)+'">'+(isSkipped?'Вернуть в список':'Пропустить сегодня')+'</button>'}</div>`);
 }
 function saveDetails(){
   const d=iso(new Date());cur.n=document.getElementById('dn').value.trim().slice(0,60);
@@ -518,10 +524,10 @@ function renderHistory(){
     cells.push(`<button class="${hasHab?'has':''} ${ds===td?'today':''} ${fut?'future':''}" ${fut?'disabled aria-disabled="true"':''} data-action="histDay" data-id="${ds}">${d}${dots}</button>`);
   }
   const monthName=first.toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
-  sheet(`<h2 style="margin-top:0">История</h2>
+  sheet(`<h2 style="margin-top:0">История привычек</h2>
     <div class="months"><button data-action="histPrev" aria-label="Предыдущий месяц">‹</button><b>${monthName}</b><button data-action="histNext" aria-label="Следующий месяц">›</button></div>
     <div class="cal">${DN.map(d=>`<div class="wd">${d}</div>`).join('')}${cells.join('')}</div>
-    <div class="sm mu">Кружок — сегодня. Оранжевая точка — выполненные дела.</div>
+    <div class="sm mu">Кружок — сегодня. Оранжевая точка — выполненные привычки.</div>
     <p data-sheet-footer style="margin:18px 0 0"><button class="btn g" data-action="closeSheet">Закрыть</button></p>`);
 }
 function histPrev(){calMonth.m--;if(calMonth.m<0){calMonth.m=11;calMonth.y--}renderHistory()}
@@ -599,6 +605,16 @@ function validateBackupPayload(source){
     if(!isObj(source.taskCategories))problem();
     for(const [id,cat] of Object.entries(source.taskCategories))
       if(!idOk(id)||!['school','personal'].includes(cat))problem();
+  }
+  if(source.starBonusHistory!==undefined){
+    if(!isObj(source.starBonusHistory))problem();
+    for(const [date,bonus] of Object.entries(source.starBonusHistory))
+      if(!dateOk(date)||bonus!==true)problem();
+  }
+  if(source.starBonusTargets!==undefined){
+    if(!isObj(source.starBonusTargets))problem();
+    for(const [date,target] of Object.entries(source.starBonusTargets))
+      if(!dateOk(date)||!Number.isInteger(target)||target<0||target>100)problem();
   }
   if(source.times!==undefined){
     if(!isObj(source.times))problem();
@@ -708,7 +724,7 @@ const ACTIONS={
   historyToggle:(d,i)=>{
     const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
     if(d!==iso(yesterday)||!tasks(d).some(t=>t.i===i))return;
-    if(!confirm('Взрослый подтверждает исправление вчерашнего дела?'))return;
+    if(!confirm('Взрослый подтверждает исправление вчерашней отметки?'))return;
     setDone(i,!(S.d[d]||[]).includes(i),true,d);
     openDay(d);
   },
@@ -745,4 +761,4 @@ render();
 if(store.recoveredFromBackup())toast('Данные восстановлены из резервной копии.');
 else if(window.__iskraBadStore)toast('Сохранение приостановлено: восстанови JSON-копию.');
 if(!S.asked&&!window.__iskraBadStore){S.asked=1;save();openProfile()}
-</script><script src="./iskra-ui.js?v=20261027-7"></script><script src="./iskra-joy.js?v=20261027-4"></script><script type="module" src="../shared/school-cloud.js?v=20261027-6" data-school-cloud="iskra"></script></body></html>
+</script><script src="./iskra-ui.js?v=20261028-2"></script><script src="./iskra-joy.js?v=20261028-2"></script><script type="module" src="../shared/school-cloud.js?v=20261027-6" data-school-cloud="iskra"></script></body></html>

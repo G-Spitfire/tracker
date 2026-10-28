@@ -16,13 +16,11 @@ body[data-ik-theme="mint"]{
     radial-gradient(ellipse at 91% 24%,#f4e6ff 0%,transparent 50%),#fcfffc;
 }
 body[data-ik-theme="mint"] .ik-filter.active,
-body[data-ik-theme="mint"] .ik-joy-next-cta,
-body[data-ik-theme="mint"] .ik-joy-selected button,
 body[data-ik-theme="mint"] .bar button.on{
   background:linear-gradient(130deg,#8bcfbd,#55bba5);
   color:#163f39;
 }
-.ik-joy-welcome,.ik-joy-next,.ik-joy-choice,.ik-joy-prizes,
+.ik-joy-welcome,.ik-joy-prizes,
 .ik-joy-reflection,.ik-joy-collection,.ik-child-grades{
   border:1px solid rgba(255,255,255,.94);border-radius:23px;
   box-shadow:0 7px 20px rgba(111,77,152,.075);
@@ -35,33 +33,15 @@ body[data-ik-theme="mint"] .bar button.on{
 .ik-joy-welcome>div{display:flex;gap:12px;align-items:center}
 .ik-joy-welcome .ik-art--welcome{width:53px;height:53px;flex-shrink:0}
 .ik-joy-welcome span:not(.ik-art){flex:1;min-width:0}
-.ik-joy-welcome b,.ik-joy-next-copy b,.ik-joy-choice-head b,
+.ik-joy-welcome b,
 .ik-joy-reflection b{display:block;font-size:14px;color:#2a214f;line-height:1.35}
-.ik-joy-welcome small,.ik-joy-next-copy small,.ik-joy-choice-head small,
+.ik-joy-welcome small,
 .ik-joy-reflection small{display:block;color:#817893;font-size:11px;line-height:1.4;margin-top:3px}
 .ik-joy-welcome>button{
   justify-self:end;min-height:38px;border:0;border-radius:13px;
   color:#fff;font-size:12px;line-height:1.2;font-weight:750;
   font-family:inherit;background:#9266e8;padding:8px 15px
 }
-.ik-joy-next{
-  display:flex;align-items:center;gap:10px;padding:12px 12px 12px 10px;
-  background:linear-gradient(110deg,#ffffff,#faf3ff);
-}
-.ik-joy-next-icon{display:grid;place-items:center;flex:0 0 46px}
-.ik-joy-next .ik-art--next{width:45px;height:45px}
-.ik-joy-next-copy{flex:1;min-width:0}
-.ik-joy-next-copy b{font-size:14px;margin-top:3px}
-.ik-joy-next-cta{
-  flex:0 0 auto;min-height:38px;padding:8px 11px;
-  border:0;border-radius:13px;background:#9164ed;color:white;
-  font-size:12px;line-height:1.1;font-weight:750;font-family:inherit;cursor:pointer
-}
-.ik-joy-finished{background:linear-gradient(115deg,#f5ecff,#e5f7f1)}
-.ik-joy-finished>.ik-art{width:45px;height:45px;flex:0 0 45px}
-.ik-joy-finished>span:not(.ik-art){flex:1;min-width:0}
-.ik-joy-finished b{display:block;font-size:13px}
-.ik-joy-finished small{display:block;font-size:11px;color:#827796;margin-top:4px}
 .ik-joy-completed{
   background:rgba(255,255,255,.83);border-radius:20px;
   border:1px solid #f0e6fc;overflow:hidden;
@@ -75,31 +55,6 @@ body[data-ik-theme="mint"] .bar button.on{
 .ik-joy-completed[open]>summary{background:#faf7ff;border-bottom:1px solid #f1eafa}
 .ik-joy-completed .ik-task-list{box-shadow:none;border:0;border-radius:0}
 .ik-joy-completed .ik-task{opacity:.8}
-.ik-joy-choice{padding:15px;background:linear-gradient(135deg,#fffdfb,#fbf5ff)}
-.ik-joy-choice-head{display:flex;align-items:center;gap:9px;margin-bottom:12px}
-.ik-joy-choice-head>span:last-child{min-width:0;flex:1}
-.ik-joy-choice-head .ik-art--mini{width:33px;height:33px;flex:0 0 33px}
-.ik-joy-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
-.ik-joy-options button{
-  min-width:0;min-height:91px;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:6px;
-  background:#fff;border:1px solid #eae0fa;border-radius:16px;
-  padding:10px 4px;color:#4d426a;font-size:11px;line-height:1.2;font-weight:750;
-  font-family:inherit;cursor:pointer
-}
-.ik-joy-options .ik-art--choice{width:45px;height:45px}
-.ik-joy-selected{display:flex;gap:10px;align-items:center;min-width:0}
-.ik-joy-selected .ik-art--choice{width:48px;height:48px;flex:0 0 48px}
-.ik-joy-selected>span:not(.ik-art){flex:1;min-width:0}
-.ik-joy-selected b{font-size:13px;display:block}
-.ik-joy-selected small{font-size:11px;display:block;color:#817c97;margin-top:3px;line-height:1.25}
-.ik-joy-selected button{
-  border:0;border-radius:13px;background:#9365e9;color:#fff;
-  min-height:38px;padding:9px;font-size:11px;font-weight:750
-}
-.ik-joy-selected button.ik-joy-selected-done{color:#377f67;background:#e2f5eb}
-.ik-joy-change{border:0;background:transparent;margin-top:9px;color:#8965bb;font-size:11px;min-height:30px;padding:5px 3px}
-.ik-joy-thanks{font-size:11px;color:#6a9781;margin:11px 0 0}
 .ik-joy-pop{
   position:fixed;left:50%;bottom:calc(94px + env(safe-area-inset-bottom,0px));
   transform:translateX(-50%);width:min(390px,calc(100% - 30px));
@@ -152,6 +107,61 @@ body[data-ik-theme="mint"] .bar button.on{
 .ik-joy-collection-list small{font-size:10px;line-height:1.2;color:#6a608a}
 .ik-joy-collection-list .locked{filter:grayscale(.85);opacity:.43}
 .ik-joy-style-row{background:transparent!important;border-radius:0!important;box-shadow:none!important}
+
+/* Habit tracker: visible child controls, forgiving removal and large touch targets. */
+.ik-add-habit{
+  width:100%;min-height:50px;border:1px dashed var(--joy-tone);border-radius:17px;
+  background:rgba(255,255,255,.76);color:var(--joy-tone);font:inherit;font-size:15px;font-weight:750;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px
+}
+.ik-add-habit span{font-size:22px;line-height:1}
+.ik-habit-manager h3{margin:20px 0 9px;color:#39285d;font-size:16px}
+.ik-habit-manager>p{line-height:1.45}
+.ik-habit-manage-list{display:grid;gap:8px}
+.ik-habit-manage-row{
+  display:flex;align-items:center;gap:8px;min-height:58px;padding:8px;
+  border:1px solid #eee6f8;border-radius:16px;background:#fff
+}
+.ik-habit-manage-icon{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border-radius:12px;background:#f7f0ff;font-size:19px}
+.ik-habit-manage-copy{min-width:0;flex:1}
+.ik-habit-manage-copy b{display:block;font-size:13px;line-height:1.25;overflow-wrap:anywhere;color:#30244f}
+.ik-habit-manage-copy small{display:block;margin-top:3px;color:#716984;font-size:12px}
+.ik-habit-days-button,.ik-habit-remove,.ik-habit-restore{
+  min-height:44px;flex:0 0 auto;border:1px solid #e7def3;border-radius:12px;
+  background:#faf7ff;color:#6844a5;font:inherit;font-size:12px;font-weight:700;padding:8px 10px;cursor:pointer
+}
+.ik-habit-remove{color:#8b5360;background:#fff7f7;border-color:#f1dfe2}
+.ik-habit-restore{color:#326f5d;background:#effaf5;border-color:#d7eee4}
+.ik-habit-archive{margin-top:12px;padding:0 12px;border:1px solid #eee6f8;border-radius:15px;background:#fff}
+.ik-habit-archive>summary{min-height:46px;display:flex;align-items:center;color:#6f5d8d;font-size:13px;font-weight:700;cursor:pointer}
+.ik-habit-archive .ik-habit-manage-list{padding:0 0 12px}
+.ik-habit-ideas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.ik-habit-idea{
+  display:flex;min-width:0;min-height:88px;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  border:1px solid #e8def5;border-radius:17px;background:#fff;color:#43365f;font:inherit;text-align:center;padding:10px;cursor:pointer
+}
+.ik-habit-idea>span{font-size:25px;line-height:1}
+.ik-habit-idea b{font-size:13px;line-height:1.25}
+.ik-habit-own{background:linear-gradient(135deg,#fff,#f6edff);color:#6846a2}
+.ik-habit-form{display:grid;gap:17px}
+.ik-habit-form>p{margin:0;line-height:1.45}
+.ik-habit-day-group{display:grid;gap:9px}
+.ik-habit-day-group>b{font-size:14px;color:#44365e}
+.ik-habit-day-picker{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.ik-habit-day{
+  min-width:0;min-height:44px;border:1px solid #e4dcef;border-radius:13px;background:#fff;color:#635873;
+  font:inherit;font-size:12px;font-weight:700;cursor:pointer
+}
+.ik-habit-day.on{background:var(--joy-tone);border-color:var(--joy-tone);color:#fff}
+body[data-ik-theme="mint"] .ik-habit-day.on{color:#163f39}
+.ik-habit-form .sheet-field{color:#4d4268;font-weight:700}
+.ik-habit-form .sheet-field .mu{font-weight:400}
+.ik-task-emoji{font-size:25px!important}
+@media(max-width:370px){
+  .ik-habit-manage-row{gap:6px;padding:7px}
+  .ik-habit-days-button,.ik-habit-remove,.ik-habit-restore{padding:7px 8px;font-size:11px}
+  .ik-habit-day-picker{gap:4px}
+}
 .ik-joy-theme-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .ik-joy-theme-options button{
   border-radius:17px;min-height:99px;border:2px solid transparent;
@@ -194,17 +204,6 @@ body[data-ik-theme="mint"] .bar button.on{
 .ik-grade-analytics[open]>summary{border-bottom:1px solid #eee5f7;margin-bottom:10px}
 .ik-grade-analytics .card{margin-bottom:8px}
 .ik-grade-analytics .ik-time-stat{margin:0 0 7px}
-@media(max-width:365px){
-  .ik-joy-next{padding:9px 8px;gap:6px}
-  .ik-joy-next-icon{flex-basis:39px}
-  .ik-joy-next .ik-art--next{width:38px;height:38px}
-  .ik-joy-next-cta{font-size:10px;padding:8px}
-  .ik-joy-next-copy b{font-size:12px}
-  .ik-joy-options button{font-size:10px}
-  .ik-joy-selected{gap:5px}
-  .ik-joy-selected .ik-art--choice{width:42px;height:42px;flex-basis:42px}
-  .ik-joy-selected button{font-size:10px}
-}
 @media(prefers-reduced-motion:reduce){
   .ik-joy-pop,.ik-joy-pop .ik-art--reaction{animation:none}
 }
@@ -231,4 +230,53 @@ body[data-ik-theme="mint"] .bar button.on{
  .ik-joy-all-achievements>.ik-achievements{gap:5px;padding:9px 5px}
  .ik-joy-all-achievements .ik-achievement{padding:7px 3px 8px}
  .ik-level-summary .ik-btn-small{font-size:10px}
+}
+
+/* Final interaction polish: retain Iskra's soft illustrated look. */
+.ik-empty{
+  display:grid;justify-items:center;gap:5px;
+  padding:18px 16px;color:#6f6486;text-align:center
+}
+.ik-empty .ik-art--empty{width:52px;height:52px;margin-bottom:2px}
+.ik-empty b{font-size:14px;line-height:1.3;color:#4e3c70}
+.ik-empty small{max-width:250px;font-size:12px;line-height:1.45;color:#70677f}
+.ik-add-habit{
+  border-color:#d9c5fb;background:linear-gradient(135deg,#fff,#fbf7ff);
+  box-shadow:0 4px 14px rgba(120,83,173,.07)
+}
+.ik-habit-idea,.ik-habit-days-button,.ik-habit-remove,.ik-habit-restore,
+.ik-add-habit,.ik-habit-day,.ik-check,.ik-mini-btn,.ik-filter,.bar button,.btn{
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .14s ease,box-shadow .16s ease,background-color .16s ease,border-color .16s ease
+}
+.ik-habit-manager h3{padding-bottom:7px;border-bottom:1px solid #f0e8f8}
+.ik-habit-manage-row{box-shadow:0 2px 8px rgba(88,61,125,.035)}
+.ik-habit-day-button:focus-visible,.ik-habit-remove:focus-visible,
+.ik-habit-restore:focus-visible,.ik-habit-day:focus-visible,
+.ik-habit-idea:focus-visible,.ik-add-habit:focus-visible{
+  outline:3px solid #8d64e8;outline-offset:2px
+}
+.ik-habit-day[aria-pressed="true"]{box-shadow:0 3px 9px rgba(106,65,181,.2)}
+.ik-today .ik-check.done{box-shadow:0 3px 9px rgba(107,70,184,.18)}
+.ik-today .ik-task:focus-within{background:#fcf9ff}
+.ik-joy-completed>summary:focus-visible,.ik-habit-archive>summary:focus-visible,
+.ik-joy-all-achievements>summary:focus-visible{outline:3px solid #8d64e8;outline-offset:-3px;border-radius:14px}
+@media(hover:hover){
+  .ik-add-habit:hover,.ik-habit-idea:hover,.ik-habit-days-button:hover,
+  .ik-habit-restore:hover,.ik-habit-remove:hover{box-shadow:0 5px 14px rgba(111,76,153,.12);transform:translateY(-1px)}
+  .ik-habit-day:not(.on):hover{background:#f8f3ff;border-color:#d6c5ef}
+  .bar button:not(.on):hover{background:#faf7ff;color:#7555b2}
+}
+.ik-add-habit:active,.ik-habit-idea:active,.ik-habit-days-button:active,
+.ik-habit-remove:active,.ik-habit-restore:active,.ik-habit-day:active,
+.ik-today .ik-check:active,.ik-today .ik-mini-btn:active,.ik-filter:active,.btn:active{
+  transform:scale(.98)
+}
+@media(prefers-reduced-motion:reduce){
+  .ik-habit-idea,.ik-habit-days-button,.ik-habit-remove,.ik-habit-restore,
+  .ik-add-habit,.ik-habit-day,.ik-check,.ik-mini-btn,.ik-filter,.bar button,.btn{transition:none}
+}
+@media(forced-colors:active){
+  .ik-habit-day.on,.ik-today .ik-check.done{border:2px solid Highlight}
+  .ik-add-habit,.ik-habit-idea,.ik-habit-days-button,.ik-habit-remove,.ik-habit-restore{border:1px solid ButtonText}
 }
