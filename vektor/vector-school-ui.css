@@ -1,5 +1,5 @@
 /* School diary: lightweight read-only dashboards, mobile first. */
-.school-connection{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end;margin:4px 0 15px;font-size:12px}
+.school-connection{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin:18px 0 2px;font-size:12px;color:#75849b}
 .school-connection>.hint{margin-right:auto}
 .school-tabs{display:grid;grid-template-columns:1fr 1fr;padding:4px;background:#eaf0f8;border-radius:12px;gap:5px;margin:5px 0 14px}
 .school-tab{border:0;border-radius:9px;background:transparent;color:#55687f;min-height:40px;font-weight:700}
@@ -101,6 +101,12 @@
 .school-trend-down{color:#b14355}
 .school-trend-even{color:#748296}
 .school-period-hint{margin:8px 0}
+.school-period-footer{margin:20px 0 4px;padding-top:12px;border-top:1px solid #e3eaf3;color:#718198;font-size:12px}
+.school-period-current{margin-bottom:8px}
+.school-period-control{margin:0}
+.school-trend-summary{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;padding:10px 13px;border-radius:10px;background:#f4f7fb;font-size:13px}
+.school-trend-summary strong{font-size:15px}
+.school-trend-summary small{color:#718198}
 .school-recent-collapsed{margin:15px 0;background:#fff;border:1px solid #e3eaf3;border-radius:13px;padding:12px}
 .school-recent-collapsed>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;font-weight:700;color:#425874}
 .school-recent-collapsed>summary::-webkit-details-marker{display:none}

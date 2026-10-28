@@ -94,3 +94,7 @@ body{font-size:16px}
 @media(max-width:360px){.nav{font-size:10px}.nav .sym{font-size:19px}.profile-backup-row{align-items:flex-start}}
 .scs .school-chart-key,.scs .school-data-check>summary{color:#b7c5dd}
 .scs .school-chart-key .school-chart-trend-key{border-color:#f0a66a}
+.scs .school-connection{color:#a9b6d1}
+.scs .school-period-footer{border-color:#ffffff22;color:#a9b6d1}
+.scs .school-trend-summary{background:#1a2740}
+.scs .school-trend-summary small{color:#a9b6d1}

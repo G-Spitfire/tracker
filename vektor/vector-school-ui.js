@@ -154,7 +154,9 @@ function periodUi(ui,periods) {
   '<option value="'+v+'" '+(String(ui.quarter)===v?'selected':'')+'>'+name+'</option>').join('')+'</select></label>';
  const q=String(ui.quarter),period=periods?.[ui.year]?.[q];
  const note=q!=='year'&&!period?'<p class="school-period-hint hint">Даты этой четверти пока не заданы. <button type="button" class="link" data-action="school-period-settings">Настроить</button></p>':'';
- return '<div class="school-period-control">'+select+note+'</div>';
+ const label=q==='year'?'Весь учебный год · '+ui.year.replace('-','/'):['','I','II','III','IV'][Number(q)]+' четверть';
+ const dates=period?' · '+dateLabel(period.from)+'–'+dateLabel(period.to):'';
+ return '<div class="school-period-footer"><div class="school-period-current">'+label+dates+'</div><div class="school-period-control">'+select+note+'</div></div>';
 }
 function finals(ui,snapshot,periods) {
  const year=ui.year,qs=[1,2,3,4],first=Number(year.slice(0,4));
@@ -231,11 +233,13 @@ function detail(ui,snapshot,rows,range,periods,helpers) {
  const graph='<div class="card school-chart-card"><h3>Как менялся средний</h3>'+
  chart([{key:'subject',name:'',color:palette[0],points:cumulative(ordinary)}],range)+
  '<p class="hint">Точки появляются в дни с оценками. Шкала 2–5.</p></div>';
+ const delta=subjectDelta7(ordinary,range);
+ const trend=delta===null?'': '<div class="school-trend-summary"><span class="school-trend-label">Изменение среднего за неделю</span><strong class="school-trend-'+(delta>0?'up':delta<0?'down':'even')+'">'+(delta>0?'↑ +'+fmt(delta):delta<0?'↓ −'+fmt(Math.abs(delta)):'→ Без изменений')+'</strong><small>к накопленному среднему до этой недели</small></div>';
  const marks='<div class="card school-marks"><h3>Оценки за работы</h3>'+
  (ordinary.length?ordinary.slice().sort(compareGrade).reverse().map(g=>'<div class="school-mark-row"><span class="grade g'+g.score+'">'+g.score+'</span><div><b class="school-work-title">'+esc(g.type||'Работа в школе')+workBadge(g.type)+'</b><small>'+dateLabel(g.date)+'</small></div></div>').join(''):'<div class="empty">За выбранный период оценок за работы нет.</div>')+'</div>';
  const finalsBlock=official.length?'<div class="card school-official-list"><h3>Официальные оценки периода</h3>'+official.map(g=>'<div class="school-mark-row"><span class="grade g'+g.score+'">'+g.score+'</span><div><b>'+esc(g.officialLabel||'Итог')+'</b><small>'+dateLabel(g.date)+'</small></div></div>').join('')+'</div>':'';
  return '<div class="school-detail-head">'+button('← К предметам','back-school','tiny')+'<h2>'+esc(name)+'</h2></div>'+
- row+graph+marks+summary+finalsBlock;
+ row+graph+trend+marks+summary+finalsBlock;
 }
 function overview(ui,snapshot,rows,range,periods,helpers) {
  const ordinary=works(rows),mean=average(ordinary);
@@ -288,11 +292,12 @@ function render(ctx) {
  let head='<div class="page-title"><div><h1>Школа</h1><div class="sub">Дневник с аналитикой</div></div></div>';
  if(!connection.isConnected)return head+'<div class="card"><b>Подключение оценок</b><p class="hint">Войди в аккаунт Firebase для Матвея, чтобы получать реальные школьные оценки.</p>'+ (api.loginHtml?.()||'')+(info.error?'<p class="notice">'+esc(info.error)+'</p>':'')+'</div>';
  const snap=cloudSnapshot();
- const status='<div class="school-connection"><span class="hint">'+(snap?.syncedAt&&!Number.isNaN(new Date(snap.syncedAt).getTime())?'Выгрузка: '+new Date(snap.syncedAt).toLocaleString('ru-RU'):'Оценки подключены')+'</span>'+
+ const syncedAt=snap?.syncedAt?new Date(snap.syncedAt):null;
+ const status='<div class="school-connection"><span class="hint">'+(syncedAt&&!Number.isNaN(syncedAt.getTime())?'Данные · '+syncedAt.toLocaleDateString('ru-RU',{day:'numeric',month:'short'})+' · '+syncedAt.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}):'Оценки подключены')+'</span>'+
  '<button type="button" class="link" data-sc-action="refresh" '+(info.loading?'disabled':'')+'>Обновить</button>'+
  '</div>'+
  (info.error?'<p class="notice">'+esc(info.error)+'</p>':'')+(info.loading?'<p class="hint">Получаем обновление из Firebase…</p>':'');
- if(!snap)return head+status+'<div class="card">Ожидаем данные из Firebase. Кнопка «Обновить» не запускает сборщик на MacBook.</div>';
+ if(!snap)return head+'<div class="card">Ожидаем данные из Firebase. Кнопка «Обновить» не запускает сборщик на MacBook.</div>'+status;
  // School year and the default term are automatic. Manual term choices remain
  // respected until a new page session or the school-year rollover.
  const now=currentDate(),targetYear=schoolYearFor(now);
@@ -305,14 +310,14 @@ function render(ctx) {
  const tabs=header(ui);
  if(ui.schoolScreen==='finals'){
   if(ui.subject){ui.subject='';}
-  return status+tabs+finals(ui,snap,s.schoolPeriods||{});
+  return head+tabs+finals(ui,snap,s.schoolPeriods||{})+status;
  }
  const controls=periodUi(ui,s.schoolPeriods||{});
  const range=schoolRange(),rows=rangeRows(snap,range);
  const content=(!range)?'<div class="empty">Даты выбранной четверти не настроены. <button type="button" class="link" data-action="school-period-settings">Настроить четверть</button></div>':
  ui.subject?detail(ui,snap,rows,range,s.schoolPeriods||{}, {gradePrediction}):
  overview(ui,snap,rows,range,s.schoolPeriods||{}, {gradePrediction});
- return status+tabs+controls+content;
+ return head+tabs+content+controls+status;
 }
 function handleAction(btn,ctx) {
  const ui=ctx.ui,act=btn.dataset.action,id=btn.dataset.id;
