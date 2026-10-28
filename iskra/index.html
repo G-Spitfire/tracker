@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 14433)
-Total output lines: 766
-
 <!doctype html><html lang="ru"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
@@ -278,7 +275,133 @@ S.planHistory=S.planHistory&&typeof S.planHistory==='object'?S.planHistory:{};
 S.taskDays=S.taskDays&&typeof S.taskDays==='object'?S.taskDays:{};
 S.hiddenTasks=Array.isArray(S.hiddenTasks)?S.hiddenTasks:[];
 S.customTasks=Array.isArray(S.customTasks)?S.customTasks:[];
-S.rewardHistory=S.rewardHistory&&typeof S.rewardHistory==='object'?S.rewardHistory:{}…2433 tokens truncated…"sheet-head"><h2 id="sheetTitle" tabindex="-1"></h2><button type="button" class="sheet-close" data-action="closeSheet" aria-label="Закрыть окно">×</button></header><div class="sheet-body"></div><footer class="sheet-footer"></footer></section>';
+S.rewardHistory=S.rewardHistory&&typeof S.rewardHistory==='object'?S.rewardHistory:{};
+S.weekPlans=S.weekPlans&&typeof S.weekPlans==='object'?S.weekPlans:{};
+S.taskCategories=S.taskCategories&&typeof S.taskCategories==='object'?S.taskCategories:{};
+S.earnedAchievements=S.earnedAchievements&&typeof S.earnedAchievements==='object'?S.earnedAchievements:{};
+// Preserve past earned stars even when a parent's future schedule changes.
+for(const date of Object.keys(S.d||{})){
+  if(!Object.hasOwn(S.planHistory,date))S.planHistory[date]=legacyTasks(date);
+}
+const defaultDays={bg:[0,1,2,3,4],cl:[0,1,2,3,4],hw:[1,2,3,4,5],en:[1,2,3,4,5],ho:[0,1,2,3,4,5,6],ex:[0,1,2,3,4,5,6],rd:[0,6]};
+const weekStart=d=>{const date=new Date(d+'T12:00:00');date.setDate(date.getDate()-(date.getDay()+6)%7);return iso(date)};
+const weekPlan=week=>{
+  const awarded=S.rewardHistory[week];
+  if(!S.weekPlans||typeof S.weekPlans!=='object')S.weekPlans={};
+  if(!S.weekPlans[week]){
+    S.weekPlans[week]={
+      name:awarded?.name||S.reward||'Семейная награда',
+      goal:awarded?.goal||S.goal||25
+    };
+    store.save(S);
+  }
+  return S.weekPlans[week];
+};
+const taskCatalog=()=>[EX,...T,RD,...S.customTasks];
+const tasks=d=>{
+  if(Array.isArray(S.planHistory[d])){
+    // Switching off a task takes effect immediately today, but never rewrites past dates.
+    const current=d===iso(new Date());
+    if(!current)return S.planHistory[d];
+    const catalog=taskCatalog(),wd=new Date(d+'T12:00:00').getDay();
+    const enabled=t=>(t.i!=='ex'||d>=S.ex)&&!S.hiddenTasks.includes(t.i)&&
+      (Array.isArray(S.taskDays[t.i])?S.taskDays[t.i]:(defaultDays[t.i]||[0,1,2,3,4,5,6])).includes(wd);
+    const retained=S.planHistory[d].filter(t=>enabled(t)||(S.d[d]||[]).includes(t.i));
+    const ids=new Set(retained.map(t=>t.i));
+    return retained.concat(catalog.filter(t=>enabled(t)&&!ids.has(t.i)).map(t=>({...t,category:S.taskCategories[t.i]||t.category})));
+  }
+  const wd=new Date(d+'T12:00:00').getDay();
+  return taskCatalog().filter(t=>
+    (t.i!=='ex'||d>=S.ex)&&!S.hiddenTasks.includes(t.i)&&
+    (Array.isArray(S.taskDays[t.i])?S.taskDays[t.i]:(defaultDays[t.i]||[0,1,2,3,4,5,6])).includes(wd)
+  ).map(t=>({...t,category:S.taskCategories[t.i]||t.category}));
+};
+const freezeDay=d=>{if(!Array.isArray(S.planHistory[d]))S.planHistory[d]=tasks(d).map(t=>({...t}))};
+const dn=d=>(S.d[d]||[]).filter(i=>tasks(d).some(t=>t.i==i));
+const skipped=d=>(S.skipped?.[d]||[]).filter(i=>tasks(d).some(t=>t.i===i));
+const st=d=>{const n=dn(d).length,required=tasks(d).length,target=Math.max(required,S.starBonusTargets?.[d]||0),bonus=S.starBonusHistory?.[d]===true||(target>0&&n>=target);return n+(bonus?2:0)+(S.joyChoices?.[d]&&S.joyDone?.[d]?1:0)};
+const ring=(n,m)=>{const C=2*Math.PI*40,ratio=m>0?Math.max(0,Math.min(1,n/m)):0;return`<svg width="96" height="96" viewBox="0 0 96 96" style="flex:none"><circle cx="48" cy="48" r="40" fill="none" stroke="#ffffff55" stroke-width="10"/><circle cx="48" cy="48" r="40" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-ratio)}" transform="rotate(-90 48 48)"/><text x="48" y="56" text-anchor="middle" font-size="24" font-weight="800" fill="#fff">${n}/${m}</text></svg>`};
+const avb=()=>`<button class="av" data-action="profile" style="background:${S.av.c}" aria-label="Мой герой">${S.av.e}</button>`;
+
+/* ===== VIEWS ===== */
+function today(){
+  const d=iso(new Date()),L=tasks(d),done=dn(d),n=done.length,all=L.length>0&&n===L.length,X=S.x[d]||{};
+  const ph=all?'Ура! Ты справилась!':!n?'Привет! С чего начнём?':n*2>=L.length?'Уже почти всё!':'Отлично, продолжаем!';
+  return`<div class="hd">${avb()}<h1>Привет${S.name?', '+esc(S.name):''}!</h1></div>
+  <div class="hero">${ring(n,L.length)}<div><div class="ph">${ph}</div><div class="sm">⭐ сегодня: ${st(d)}</div></div></div>
+  ${L.map(t=>{
+    const x=X[t.i],ok=done.includes(t.i);
+    const sub=ok&&x&&((x.s&&x.s.length)||x.n)?esc([].concat(x.s||[],x.n?[x.n]:[]).join(', ')):(t.s||'');
+    const editable=(t.i=='hw'||t.i=='ho');
+    return`<div class="task ${ok?'on':''}" style="--b:${t.b};--c:${t.c}">
+      <button class="ic" data-action="toggle" data-id="${t.i}" aria-label="${esc(t.t)}" style="border:0;cursor:pointer">${t.e}</button>
+      <button class="nm" data-action="toggle" data-id="${t.i}" style="background:none;border:0;text-align:left;color:inherit;font:inherit;padding:0;cursor:pointer">${t.t}${sub?`<small>${sub}</small>`:''}</button>
+      ${editable?`<button class="ed" data-action="details" data-id="${t.i}" aria-label="Подробнее">✎</button>`:''}
+      <button class="ck" data-action="toggle" data-id="${t.i}" aria-label="Отметить">${ok?'✓':''}</button>
+    </div>`}).join('')}`;
+}
+function reward(){
+  const W=wk(),tot=sum(Object.keys(S.d).map(st)),lv=CONFIG.levels.filter(x=>x[0]<=tot).pop(),nx=CONFIG.levels.find(x=>x[0]>tot);
+  return '<h1>Мои звёзды</h1><div class="card"><b>⭐ '+tot+' звёзд</b><p>'+esc(lv?.[1]||'Звёздочка')+'</p>'+
+    '<p class="mu sm">'+(nx?'До следующего уровня: '+(nx[0]-tot)+' звёзд':'Все уровни открыты!')+'</p></div>'+
+    '<h2>Эта неделя</h2><div class="days">'+W.map((d,i)=>'<div class="dy"><button class="c" data-action="dayHistory" data-id="'+d+'">'+st(d)+' ⭐</button><div class="sm">'+DN[i]+'</div></div>').join('')+'</div>';
+}
+function stats(id){
+  const all={},w={},W=wk();
+  Object.keys(S.x).forEach(d=>{const e=S.x[d][id];if(!e)return;(e.s||[]).concat(e.n?[e.n.toLowerCase()]:[]).forEach(k=>{all[k]=(all[k]||0)+1;if(W.includes(d))w[k]=(w[k]||0)+1})});
+  return Object.entries(all).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k,n])=>`<div class="row"><span>${esc(k)}</span><span><b>${n}</b>${w[k]?` <span class="mu sm">+${w[k]} за неделю</span>`:''}</span></div>`).join('')||'<div class="mu sm">Пока пусто</div>';
+}
+function me(){
+  return`<h1 style="margin:4px 0 14px">Профиль</h1>
+  <div class="card" style="display:flex;gap:14px;align-items:center"><div class="av" style="background:${S.av.c}">${S.av.e}</div><div style="flex:1"><b>${S.name?esc(S.name):'Без имени'}</b></div><button class="btn g" data-action="profile">Изменить</button></div>
+  <div class="card" style="display:flex;gap:14px;align-items:center"><div style="font-size:36px">📅</div><div style="flex:1"><b>История</b><div class="mu sm">Что было в прошлые дни</div></div><button class="btn g" data-action="history">Открыть</button></div>
+  <div class="card"><b>Мои уроки</b><div class="mu sm" style="margin-bottom:6px">сколько раз за всё время</div>${stats('hw')}</div>
+  <div class="card"><b>Помощь по дому</b><div class="mu sm" style="margin-bottom:6px">сколько раз за всё время</div>${stats('ho')}</div>
+  <button class="btn g" data-action="parents">Для родителей</button>
+  <div class="mu sm">Искра · схема v${SCHEMA}</div>`;
+}
+
+/* ===== RENDER ===== */
+function render(){
+  document.querySelectorAll('.bar button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));
+  document.getElementById('m').innerHTML=(window.__iskraBadStore?'<div role="alert" aria-live="assertive" style="margin:0 auto 12px;max-width:520px;padding:12px 14px;border:1px solid #e7b3a2;border-radius:14px;background:#fff2ed;color:#7e3422;font-size:13px;line-height:1.45">Сохранённые данные повреждены. Искра приостановила сохранение, чтобы не затереть их. Восстанови JSON-копию в разделе «Для родителей».</div>':'')+{t:today,g:school.view,r:reward,y:me}[tab]();
+}
+document.querySelector('.bar').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.t==='g'&&tab!=='g')window.schoolCloud?.resetSubject?.();
+  tab=b.dataset.t;render();scrollTo(0,0);
+});
+
+/* ===== SHEET ===== */
+let sheetOpener=null,sheetPageY=0;
+function sheetViewport(){
+  const v=window.visualViewport,s=document.getElementById('s');
+  s.style.setProperty('--sheet-vh',(v?v.height:window.innerHeight)+'px');
+  s.style.setProperty('--sheet-top',(v?v.offsetTop:0)+'px');
+}
+function sheet(h,key=''){
+  const s=document.getElementById('s'),old=s.querySelector('.sh');
+  if(!h){
+    if(!old)return;
+    s.replaceChildren();
+    document.querySelectorAll('main,.bar').forEach(el=>el.inert=false);
+    document.body.classList.remove('sheet-open');document.body.style.removeProperty('--sheet-scroll-top');
+    window.scrollTo(0,sheetPageY);
+    if(sheetOpener&&sheetOpener.isConnected)sheetOpener.focus({preventScroll:true});
+    sheetOpener=null;return;
+  }
+  const template=document.createElement('template');template.innerHTML=h;
+  const heading=template.content.querySelector('h2'),title=heading?heading.textContent:'Настройки';
+  const identity=key||title,same=old&&old.dataset.sheetKey===identity;
+  const scroll=same?old.querySelector('.sheet-body').scrollTop:0;
+  const active=same&&old.contains(document.activeElement)?document.activeElement:null;
+  const focusId=active&&active.id;
+  let selection=null;
+  if(active)try{if(typeof active.selectionStart==='number')selection=[active.selectionStart,active.selectionEnd]}catch(_){/* Some native input types do not expose a text selection. */}
+  if(heading)heading.remove();
+  const actions=template.content.querySelector('[data-sheet-footer]');
+  const dialog=document.createElement('div');dialog.className='ov';dialog.dataset.close='1';
+  dialog.innerHTML='<section class="sh" role="dialog" aria-modal="true" aria-labelledby="sheetTitle"><header class="sheet-head"><h2 id="sheetTitle" tabindex="-1"></h2><button type="button" class="sheet-close" data-action="closeSheet" aria-label="Закрыть окно">×</button></header><div class="sheet-body"></div><footer class="sheet-footer"></footer></section>';
   const panel=dialog.querySelector('.sh'),body=dialog.querySelector('.sheet-body'),footer=dialog.querySelector('.sheet-footer');
   panel.dataset.sheetKey=identity;dialog.querySelector('h2').textContent=title;
   if(actions){
@@ -640,4 +763,4 @@ render();
 if(store.recoveredFromBackup())toast('Данные восстановлены из резервной копии.');
 else if(window.__iskraBadStore)toast('Сохранение приостановлено: восстанови JSON-копию.');
 if(!S.asked&&!window.__iskraBadStore){S.asked=1;save();openProfile()}
-</script><script src="./iskra-ui.js?v=20261028-3"></script><script src="./iskra-joy.js?v=20261028-2"></script><script type="module" src="../shared/school-cloud.js?v=20261028-7" data-school-cloud="iskra"></script></body></html>
+</script><script src="./iskra-ui.js?v=20261028-3"></script><script src="./iskra-joy.js?v=20261028-2"></script><script type="module" src="../shared/school-cloud.js?v=20261028-8" data-school-cloud="iskra"></script></body></html>
