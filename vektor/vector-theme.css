@@ -32,3 +32,27 @@ h1,h2,h3{color:#f1f5ff}.sub,.hint,.small-note,.task-meta,.muted{color:#a9b6d1}
 .stage{border-color:#425474}.stage-title{color:#e8efff}.project-title,.home-project-name{color:#eff3ff}
 @media(max-width:700px){.app{padding:12px 12px 98px}.grid.home-widget-grid{grid-template-columns:1fr;grid-auto-rows:minmax(145px,auto)}.widget.tall{grid-column:1;grid-row:span 2;min-height:300px}.focus-ring{width:76px;height:76px}}
 @media(max-width:400px){.widget-size-options{grid-template-columns:repeat(2,minmax(0,1fr))}.focus-widget-copy strong{font-size:18px}}
+
+/* Habits and profile: compact, teen-oriented tracking without streak pressure. */
+.nav-inner{grid-template-columns:repeat(5,minmax(0,1fr));gap:3px}
+.nav{font-size:10px;min-width:0}
+.profile-access{display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:6px 12px;border-radius:999px;background:#ffffff0a;border-color:#7890bd55;color:#e7efff}
+.profile-avatar{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(140deg,#4b8ef2,#765ced);color:white;font-size:13px;font-weight:800}
+.home-hero-placeholder{aspect-ratio:16/7;min-height:230px;max-height:380px;border-style:solid}
+.home-hero-placeholder-content{width:min(100%,620px);display:grid;justify-items:stretch;gap:12px;padding:24px}
+.home-hero-brand-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.home-hero-brand{font-size:clamp(32px,7vw,56px);font-weight:800;letter-spacing:-1.8px;color:#f4f7ff;text-shadow:0 3px 18px #07101f99}
+.home-hero-caption{font-size:14px;color:#c0cee6;text-align:left}
+.habit-list{display:grid;gap:12px}
+.habit-card{padding:17px 18px;border:1px solid #8196bd30;border-radius:18px;background:linear-gradient(145deg,#202c45ed,#151f34f2);box-shadow:0 10px 28px #050a172e,inset 0 1px #ffffff0d}
+.habit-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.habit-card h2{font-size:18px;line-height:1.3}.habit-card-head .hint{margin:5px 0 0}
+.habit-dots{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;margin:16px 0 12px}
+.habit-day{display:grid;justify-items:center;gap:5px;color:#8f9db7;font-size:11px}
+.habit-day b{display:grid;place-items:center;width:34px;height:34px;border:1px solid #435372;border-radius:50%;font-size:17px;color:#9aa8c1;background:#1a253b}
+.habit-day.done b{background:#164638;border-color:#347f68;color:#8ce7bd}.habit-day.skip b{background:#413744;border-color:#685970;color:#d5b9df}.habit-day.open b{border-color:#8b9bbb;color:#d1ddf2}.habit-day.today b{border-color:#65aaff;color:#8fc8ff}.habit-day.off b,.habit-day.before b{opacity:.28}
+.habit-stats-line{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:12px;color:#a9b6d1}.habit-stats-line strong{font-size:15px;color:#edf3ff}
+.habit-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:13px}.habit-feedback{color:#91e8c7;background:#163c34;border-color:#2d725e}
+.habit-month{margin-top:12px;border-top:1px solid #ffffff14;padding-top:10px;color:#a9b6d1;font-size:12px}.habit-month summary,.habit-archive summary{cursor:pointer;color:#a9c7ff;font-weight:650}.habit-month p{margin:9px 0 0;line-height:1.5}
+.habit-archive{margin-top:18px}.habit-archive .list-card{margin:9px 0 0}.habit-empty{padding:32px 18px}.habit-empty p{margin:8px 0 16px}.habit-days{border:0;padding:0;min-width:0}.habit-days legend{padding:0;margin-bottom:7px}
+@media(max-width:560px){.home-hero-placeholder{min-height:195px;aspect-ratio:auto}.home-hero-placeholder-content{padding:18px}.home-hero-caption{font-size:13px}.habit-card{padding:15px}.habit-dots{gap:3px}.habit-day b{width:31px;height:31px}.nav{font-size:9px}.nav .sym{font-size:20px}}

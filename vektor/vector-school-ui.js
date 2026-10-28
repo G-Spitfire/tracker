@@ -215,9 +215,9 @@ function detail(ui,snapshot,rows,range,periods,helpers) {
  const quarter=String(ui.quarter),byQuarter=quarter!=='year';
  const officialTerm=byQuarter?officialInQuarter(snapshot,periods,ui.year,quarter,name):null;
  const state=byQuarter?termState(range,officialTerm,currentDate()):{type:'year',label:'Весь учебный год'};
- const prediction=byQuarter&&state.type==='active'&&mean!==null?helpers.gradePrediction(mean):null;
+ const prediction=byQuarter&&state.type==='active'&&mean!==null?helpers.gradePrediction(mean,ordinary.length):null;
  const info=byQuarter&&state.type==='official'?'<div class="school-result-large"><span>Официальная оценка</span><strong>'+state.value+'</strong><small>Выставлена в журнале</small></div>':
-  byQuarter&&state.type==='active'?'<div class="school-result-large"><span>Ориентировочный прогноз</span><strong>'+(prediction??'—')+'</strong><small>Неофициально · порог 0,60</small></div>':
+  byQuarter&&state.type==='active'?'<div class="school-result-large"><span>Ориентировочный прогноз</span><strong>'+(prediction??'—')+'</strong><small>'+(prediction===null?'Ориентир после 3 оценок · '+ordinary.length+' из 3':'Неофициально · по '+ordinary.length+' оценкам')+'</small></div>':
   byQuarter?'<div class="school-result-large"><span>Четвертная оценка</span><strong>—</strong><small>'+esc(state.label)+'</small></div>':'';
  const isOfficialQuarter=byQuarter&&state.type==='official';
  const row='<div class="school-subject-hero card"><div class="school-means">'+
@@ -264,7 +264,7 @@ function overview(ui,snapshot,rows,range,periods,helpers) {
    const mark=officialQuarter;
    const state=termState(range,mark,currentDate());
    if(state.type==='official'){right=mark.score;context='Итог';}
-   else if(state.type==='active'&&m!==null){right=helpers.gradePrediction(m);context='Прогноз';}
+   else if(state.type==='active'&&m!==null){right=helpers.gradePrediction(m,subjectWorks.length)??'—';context=subjectWorks.length>=3?'Прогноз':subjectWorks.length+' из 3 оценок';}
    else{right='—';context=state.label;}
   }else{
    const mark=officialInYear(snapshot,ui.year,name);
