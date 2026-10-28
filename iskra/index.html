@@ -104,7 +104,7 @@ body.sheet-open #sc{overflow:hidden}
 .sh .sheet-period{font-size:14px;color:var(--mu);margin:0 0 20px}
 @media(min-width:700px){.ov{align-items:center;padding:16px}.sh{border-bottom:1px solid var(--ln);border-radius:24px}}
 @media(max-width:355px){.sh .sheet-head,.sh .sheet-body,.sh .sheet-footer{padding-left:16px;padding-right:16px}.sh .sheet-inline{grid-template-columns:minmax(0,1fr)}.sh .sheet-inline .btn{width:100%}}
-</style><link rel="stylesheet" href="./iskra-ui.css?v=20261028-2"><link rel="stylesheet" href="./iskra-joy.css?v=20261028-2"></head><body><main id="m"></main>
+</style><link rel="stylesheet" href="./iskra-ui.css?v=20261028-3"><link rel="stylesheet" href="./iskra-joy.css?v=20261028-2"></head><body><main id="m"></main>
 <nav class="bar"><button data-t="t"><span>☀️</span>Сегодня</button><button data-t="g"><span>📚</span>Школа</button><button data-t="r"><span>⭐</span>Звёзды</button><button data-t="y"><span>😊</span>Профиль</button></nav>
 <div id="tt"></div><div id="s"></div>
 <script>
@@ -395,7 +395,9 @@ function sheet(h,key=''){
   const identity=key||title,same=old&&old.dataset.sheetKey===identity;
   const scroll=same?old.querySelector('.sheet-body').scrollTop:0;
   const active=same&&old.contains(document.activeElement)?document.activeElement:null;
-  const focusId=active&&active.id,selection=active&&typeof active.selectionStart==='number'?[active.selectionStart,active.selectionEnd]:null;
+  const focusId=active&&active.id;
+  let selection=null;
+  if(active)try{if(typeof active.selectionStart==='number')selection=[active.selectionStart,active.selectionEnd]}catch(_){/* Some native input types do not expose a text selection. */}
   if(heading)heading.remove();
   const actions=template.content.querySelector('[data-sheet-footer]');
   const dialog=document.createElement('div');dialog.className='ov';dialog.dataset.close='1';
@@ -761,4 +763,4 @@ render();
 if(store.recoveredFromBackup())toast('Данные восстановлены из резервной копии.');
 else if(window.__iskraBadStore)toast('Сохранение приостановлено: восстанови JSON-копию.');
 if(!S.asked&&!window.__iskraBadStore){S.asked=1;save();openProfile()}
-</script><script src="./iskra-ui.js?v=20261028-2"></script><script src="./iskra-joy.js?v=20261028-2"></script><script type="module" src="../shared/school-cloud.js?v=20261027-6" data-school-cloud="iskra"></script></body></html>
+</script><script src="./iskra-ui.js?v=20261028-3"></script><script src="./iskra-joy.js?v=20261028-2"></script><script type="module" src="../shared/school-cloud.js?v=20261027-6" data-school-cloud="iskra"></script></body></html>

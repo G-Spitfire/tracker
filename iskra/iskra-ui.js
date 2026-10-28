@@ -219,15 +219,6 @@
   ACTIONS.ikAbout=()=>sheet('<h2>Об Искре</h2><p>«Искра» помогает замечать свои привычки, радоваться достижениям и узнавать школьные оценки.</p><p class="mu sm">Оценки загружаются из школьного дневника через защищённое подключение. Звёзды и отметки привычек сохраняются на этом устройстве.</p>');
   ACTIONS.ikInterests=()=>sheet('<h2>Мои интересы</h2><p class="mu sm">Что тебе нравится? Например, чтение, спорт или рисование.</p><input id="ikInterestInput" maxlength="100" value="'+safe(S.interests)+'" placeholder="Мои увлечения"><button data-sheet-footer class="btn" data-action="ikSaveInterests">Сохранить</button>');
   ACTIONS.ikSaveInterests=()=>{const x=document.getElementById('ikInterestInput');if(x)S.interests=x.value.trim().slice(0,100);save();cs();render()};
-  function createTimeSheet(){
-    const current=taskCatalog().filter(t=>!S.hiddenTasks.includes(t.i));
-    sheet('<h2>Время привычек</h2><p class="mu sm">Необязательно: время появится рядом с привычкой. Напоминания пока не отправляются.</p>'+
-    current.map(t=>'<label class="sheet-field">'+safe(t.t)+'<input type="time" data-ik-task-time="'+t.i+'" value="'+safe(S.times[t.i]||'')+'"></label>').join('')+
-    '<button data-sheet-footer class="btn" data-action="ikSaveTimes">Сохранить</button>');
-  }
-  ACTIONS.ikTaskTimes=()=>createTimeSheet();
-  ACTIONS.ikSaveTimes=()=>{document.querySelectorAll('[data-ik-task-time]').forEach(input=>{if(input.value)S.times[input.dataset.ikTaskTime]=input.value;else delete S.times[input.dataset.ikTaskTime]});save();cs();render()};
-
   // Child-facing habit management. Existing task IDs and frozen daily records are kept intact.
   const quickHabitIdeas=[
     {id:'draw',title:'Порисовать 10 минут',icon:'🎨'},
@@ -254,7 +245,7 @@
     const catalog=taskCatalog(),date=iso(new Date());
     const active=catalog.filter(t=>!S.hiddenTasks.includes(t.i)&&(t.i!=='ex'||date>=S.ex));
     const archived=catalog.filter(t=>S.hiddenTasks.includes(t.i));
-    const activeRows=active.length?active.map(t=>'<div class="ik-habit-manage-row"><span class="ik-habit-manage-icon">'+safe(t.e||'✨')+'</span><span class="ik-habit-manage-copy"><b>'+safe(t.t)+'</b><small>'+safe(daysLabel(daysForHabit(t.i)))+'</small></span><button type="button" class="ik-habit-days-button" data-action="ikHabitSchedule" data-id="'+safe(t.i)+'">Дни</button><button type="button" class="ik-habit-remove" data-action="ikHabitHide" data-id="'+safe(t.i)+'" aria-label="Убрать привычку '+safe(t.t)+'">Убрать</button></div>').join(''):'<p class="mu sm">Пока нет привычек. Выбери идею ниже или придумай свою.</p>';
+    const activeRows=active.length?active.map(t=>'<div class="ik-habit-manage-row"><span class="ik-habit-manage-icon">'+safe(t.e||'✨')+'</span><span class="ik-habit-manage-copy"><b>'+safe(t.t)+'</b><small>'+safe(daysLabel(daysForHabit(t.i)))+(S.times[t.i]?' · '+safe(S.times[t.i]):'')+'</small></span><button type="button" class="ik-habit-days-button" data-action="ikHabitSchedule" data-id="'+safe(t.i)+'" aria-label="Дни и время привычки '+safe(t.t)+'">Дни</button><button type="button" class="ik-habit-remove" data-action="ikHabitHide" data-id="'+safe(t.i)+'" aria-label="Убрать привычку '+safe(t.t)+'">Убрать</button></div>').join(''):'<p class="mu sm">Пока нет привычек. Выбери идею ниже или придумай свою.</p>';
     const archivedRows=archived.map(t=>'<div class="ik-habit-manage-row"><span class="ik-habit-manage-icon">'+safe(t.e||'✨')+'</span><span class="ik-habit-manage-copy"><b>'+safe(t.t)+'</b><small>Прошлые отметки сохранены</small></span><button type="button" class="ik-habit-restore" data-action="ikHabitRestore" data-id="'+safe(t.i)+'">Вернуть</button></div>').join('');
     const ideaTiles=quickHabitIdeas.map(item=>'<button type="button" class="ik-habit-idea" data-action="ikHabitPreset" data-id="'+item.id+'"><span aria-hidden="true">'+item.icon+'</span><b>'+safe(item.title)+'</b></button>').join('');
     sheet('<h2>Привычки</h2><div class="ik-habit-manager"><p class="mu sm">Выбирай привычки сама. Убранные привычки можно вернуть, а прошлые отметки останутся.</p><h3>Мои привычки</h3><div class="ik-habit-manage-list">'+activeRows+'</div>'+
@@ -317,24 +308,30 @@
   function renderChildSchedule(){
     if(!childScheduleDraft)return;
     const task=taskCatalog().find(t=>t.i===childScheduleDraft.id);if(!task)return habitManager();
-    sheet('<h2>Дни привычки</h2><div class="ik-habit-form"><p class="mu sm">'+safe(task.t)+' будет появляться в выбранные дни.</p><div class="ik-habit-day-picker">'+habitDays.map(([label,wd])=>'<button type="button" id="ik-habit-day-'+wd+'" class="ik-habit-day '+(childScheduleDraft.days.includes(wd)?'on':'')+'" data-action="ikHabitScheduleDay" data-arg="'+wd+'" aria-pressed="'+childScheduleDraft.days.includes(wd)+'">'+label+'</button>').join('')+'</div></div><div data-sheet-footer><button type="button" class="btn g" data-action="ikHabitBackToManage">Назад</button><button type="button" class="btn" data-action="ikHabitScheduleSave">Сохранить</button></div>','ik-habit-schedule');
+    sheet('<h2>Дни и время</h2><div class="ik-habit-form"><p class="mu sm">'+safe(task.t)+' будет появляться в выбранные дни. Время можно не задавать.</p><div class="ik-habit-day-group"><b>В какие дни?</b><div class="ik-habit-day-picker">'+habitDays.map(([label,wd])=>'<button type="button" id="ik-habit-day-'+wd+'" class="ik-habit-day '+(childScheduleDraft.days.includes(wd)?'on':'')+'" data-action="ikHabitScheduleDay" data-arg="'+wd+'" aria-pressed="'+childScheduleDraft.days.includes(wd)+'">'+label+'</button>').join('')+'</div></div><label class="sheet-field">Во сколько? <span class="mu sm">Необязательно · напоминание не отправляется</span><input type="time" id="ik-habit-time" value="'+safe(childScheduleDraft.time)+'"></label></div><div data-sheet-footer><button type="button" class="btn g" data-action="ikHabitBackToManage">Назад</button><button type="button" class="btn" data-action="ikHabitScheduleSave">Сохранить</button></div>','ik-habit-schedule');
   }
   ACTIONS.ikHabitSchedule=id=>{
     if(!taskCatalog().some(t=>t.i===id))return;
-    childScheduleDraft={id,days:daysForHabit(id).slice()};renderChildSchedule();
+    childScheduleDraft={id,days:daysForHabit(id).slice(),time:S.times[id]||''};renderChildSchedule();
   };
+  function captureChildSchedule(){
+    const input=document.getElementById('ik-habit-time');
+    if(childScheduleDraft&&input)childScheduleDraft.time=input.value;
+  }
   ACTIONS.ikHabitScheduleDay=(_,__,el)=>{
-    if(!childScheduleDraft)return;const day=Number(el.dataset.arg);if(!Number.isInteger(day)||day<0||day>6)return;
+    if(!childScheduleDraft)return;captureChildSchedule();const day=Number(el.dataset.arg);if(!Number.isInteger(day)||day<0||day>6)return;
     const at=childScheduleDraft.days.indexOf(day);if(at>=0)childScheduleDraft.days.splice(at,1);else childScheduleDraft.days.push(day);
     renderChildSchedule();
   };
   ACTIONS.ikHabitBackToManage=()=>{childScheduleDraft=null;habitManager()};
   ACTIONS.ikHabitScheduleSave=()=>{
     if(!childScheduleDraft)return;
+    captureChildSchedule();
     if(!childScheduleDraft.days.length)return toast('Оставь хотя бы один день или убери привычку из списка');
     const id=childScheduleDraft.id;preserveTodayStarBonus();S.taskDays[id]=childScheduleDraft.days.slice();
+    if(childScheduleDraft.time)S.times[id]=childScheduleDraft.time;else delete S.times[id];
     const task=taskCatalog().find(t=>t.i===id);if(task&&!S.hiddenTasks.includes(id))snapshotHabitToday(task,childScheduleDraft.days);
-    save();childScheduleDraft=null;render();habitManager();toast('Дни сохранены');
+    save();childScheduleDraft=null;render();habitManager();toast('Расписание сохранено');
   };
   ACTIONS.ikGradePeriods=()=>{
     const html=window.schoolCloud?.termSettingsHtml?.();
@@ -362,7 +359,7 @@
     const status=session?.isConnected
       ? '<p class="mu sm">Подключено: '+safe(session.email||'учётная запись Полины')+'</p><button class="btn g" type="button" data-sc-action="logout">Выйти из дневника</button>'
       : '<p class="mu sm">Подключи дневник один раз — дальше оценки загружаются автоматически.</p>'+ (window.schoolCloud?.loginHtml?.()||'');
-    extra.innerHTML='<h2>Привычки</h2><button class="btn g" data-action="ikManageHabits">Привычки и дни недели</button><button class="btn g" data-action="ikTaskTimes">Время привычек</button><h2>Периоды школьных оценок</h2><button class="btn g" data-action="ikGradePeriods">Границы четвертей</button><h2>Школьный дневник</h2>'+status+
+    extra.innerHTML='<h2>Периоды школьных оценок</h2><button class="btn g" data-action="ikGradePeriods">Границы четвертей</button><h2>Школьный дневник</h2>'+status+
       '<div class="ik-parent-offline"><p class="mu sm">Офлайн-копия оценок: '+(window.schoolCloud?.offlineEnabled?.()?'включена':'выключена')+'. Если включить, оценки сохраняются на этом устройстве без шифрования.</p><button class="btn g" data-action="ikOfflineToggle">'+(window.schoolCloud?.offlineEnabled?.()?'Отключить офлайн-копию':'Разрешить офлайн-копию')+'</button></div>';
     b.prepend(extra);
   };
