@@ -104,7 +104,7 @@ body.sheet-open #sc{overflow:hidden}
 .sh .sheet-period{font-size:14px;color:var(--mu);margin:0 0 20px}
 @media(min-width:700px){.ov{align-items:center;padding:16px}.sh{border-bottom:1px solid var(--ln);border-radius:24px}}
 @media(max-width:355px){.sh .sheet-head,.sh .sheet-body,.sh .sheet-footer{padding-left:16px;padding-right:16px}.sh .sheet-inline{grid-template-columns:minmax(0,1fr)}.sh .sheet-inline .btn{width:100%}}
-</style><link rel="stylesheet" href="./iskra-ui.css?v=20261028-7"><link rel="stylesheet" href="./iskra-joy.css?v=20261028-2"></head><body><main id="m"></main>
+</style><link rel="stylesheet" href="./iskra-ui.css?v=20261028-9"><link rel="stylesheet" href="./iskra-joy.css?v=20261028-3"></head><body><main id="m"></main>
 <nav class="bar"><button data-t="t"><span>☀️</span>Сегодня</button><button data-t="g"><span>📚</span>Школа</button><button data-t="r"><span>⭐</span>Звёзды</button><button data-t="y"><span>😊</span>Профиль</button></nav>
 <div id="tt"></div><div id="s"></div>
 <script>
@@ -488,8 +488,8 @@ function openDetails(i){
   renderDetails();
 }
 function renderDetails(){
-  const hw=cur.i==='hw',L=hw?(window.schoolCloud?.subjects?.()||[]):CONFIG.chores,ok=(S.d[iso(new Date())]||[]).includes(cur.i),isSkipped=skipped(iso(new Date())).includes(cur.i);
-  sheet(`<h2 style="margin-top:0">${hw?'Какие уроки делала?':'Что помогла сделать?'}</h2>${hw?'<p class="mu sm">Предметы берутся из школьного дневника.</p>':''}<div class="chips" style="margin-top:0">${L.map((k,j)=>`<button class="chip ${cur.s.includes(k)?'on':''}" data-action="detailChip" data-id="${j}">${esc(k)}</button>`).join('')}${hw&&!L.length?'<p class="mu sm">Предметы пока не загружены. Отметить выполненные уроки всё равно можно.</p>':''}</div><input id="dn" maxlength="60" placeholder="Что-то ещё? Напиши" value="${esc(cur.n)}"><div data-sheet-footer class="chips"><button class="btn" data-action="saveDetails">Готово</button>${ok?'<button class="btn g" data-action="removeDetails">Убрать отметку</button>':''}${ok?'':'<button class="btn g" data-action="ikSkipToggle" data-id="'+esc(cur.i)+'">'+(isSkipped?'Вернуть в список':'Пропустить сегодня')+'</button>'}</div>`);
+  const hw=cur.i==='hw',L=hw?(window.schoolCloud?.subjects?.()||[]):CONFIG.chores,ok=(S.d[iso(new Date())]||[]).includes(cur.i);
+  sheet(`<h2 style="margin-top:0">${hw?'Какие уроки делала?':'Что помогла сделать?'}</h2>${hw?'<p class="mu sm">Предметы берутся из школьного дневника.</p>':''}<div class="chips" style="margin-top:0">${L.map((k,j)=>`<button class="chip ${cur.s.includes(k)?'on':''}" data-action="detailChip" data-id="${j}">${esc(k)}</button>`).join('')}${hw&&!L.length?'<p class="mu sm">Предметы пока не загружены. Отметить выполненные уроки всё равно можно.</p>':''}</div><input id="dn" maxlength="60" placeholder="Что-то ещё? Напиши" value="${esc(cur.n)}"><div data-sheet-footer class="chips"><button class="btn" data-action="saveDetails">Готово</button>${ok?'<button class="btn g" data-action="removeDetails">Убрать отметку</button>':''}</div>`);
 }
 function saveDetails(){
   const d=iso(new Date());cur.n=document.getElementById('dn').value.trim().slice(0,60);
@@ -780,4 +780,4 @@ render();
 if(store.recoveredFromBackup())toast('Данные восстановлены из резервной копии.');
 else if(window.__iskraBadStore)toast('Сохранение приостановлено: восстанови JSON-копию.');
 if(!S.asked&&!window.__iskraBadStore){S.asked=1;save();openProfile()}
-</script><script src="./iskra-ui.js?v=20261028-6"></script><script src="./iskra-joy.js?v=20261028-2"></script><script type="module" src="../shared/school-cloud.js?v=20261028-8" data-school-cloud="iskra"></script></body></html>
+</script><script src="./iskra-ui.js?v=20261028-8"></script><script src="./iskra-joy.js?v=20261028-2"></script><script type="module" src="../shared/school-cloud.js?v=20261028-9" data-school-cloud="iskra"></script></body></html>

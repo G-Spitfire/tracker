@@ -399,7 +399,6 @@ const ikWorks = rows => rows.filter(r=>!officialKind(r));
 const ikSort = rows => rows.slice().sort((a,b)=>a.date.localeCompare(b.date)||a.id.localeCompare(b.id));
 const ikMean = rows => rows.length ? rows.reduce((total,r)=>total+r.n,0)/rows.length : null;
 const ikF = n => n===null?'—':(Math.abs(n)<0.005?0:n).toFixed(2).replace('.',',');
-const ikDeltaLabel=n=>n===null?'нет сравнения':n!==0?'к предыдущим 7 дням':'без изменений';
 const ikLocalDate=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const ikDate = iso => /^\d{4}-\d{2}-\d{2}$/.test(iso||'') ? iso.slice(8)+'.'+iso.slice(5,7)+'.'+iso.slice(0,4) : '—';
 const ikStar = '<img class="ik-star" src="../iskra/assets/hero-star.webp" width="94" height="94" decoding="async" alt="" aria-hidden="true">';
@@ -448,7 +447,7 @@ function ikTrend(rows) {
   return {html:svg,growth:raw===null?null:Math.abs(raw)<.005?0:raw};
 }
 function ikPeriodButtons(){
-  return '<div class="ik-period-control"><label class="ik-period-select-label" for="ik-period-select">Показываем</label><select id="ik-period-select" class="ik-period-select" data-ik-period-select>'+ikPresets.map(([id,name])=>'<option value="'+id+'" '+(ikPeriod===id?'selected':'')+'>'+name+'</option>').join('')+'</select></div>';
+  return '<div class="ik-period-control"><label class="ik-period-select-label" for="ik-period-select">Период</label><select id="ik-period-select" class="ik-period-select" data-ik-period-select>'+ikPresets.map(([id,name])=>'<option value="'+id+'" '+(ikPeriod===id?'selected':'')+'>'+name+'</option>').join('')+'</select></div>';
 }
 function ikPeriodEditor(){
   if(ikPeriod==='all')return '';
@@ -480,7 +479,22 @@ function ikFreshness() {
   if(!Number.isFinite(date.getTime()))return 'Дата последней выгрузки неизвестна';
   const stamp=date.toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
   const stale=Date.now()-date.getTime()>24*3600*1000;
-  return (state.offline?'Офлайн-копия':'Выгрузка из школы')+' · '+stamp+(stale?' · может устареть':'');
+  return (state.offline?'Офлайн-копия':'Обновлено')+' · '+stamp+(stale?' · проверь обновление':'');
+}
+function ikSchoolDataDetails(){
+  const range=ikRange();
+  const editor=ikPeriod==='all'||range||ikPeriod==='custom'?ikPeriodEditor():'';
+  return '<details class="ik-school-settings"><summary><b>Период и обновление</b><span aria-hidden="true">⌄</span></summary><div class="ik-school-settings-content">'+
+    ikPeriodButtons()+editor+
+    '<div class="ik-school-sync-row"><span>'+esc(ikFreshness())+'</span><button type="button" class="ik-btn-small" data-sc-action="refresh" '+(state.loading?'disabled':'')+'>↻ Проверить</button></div></div></details>';
+}
+function ikSchoolTrendBadge(value){
+  const direction=value>0?'up':value<0?'down':'flat';
+  const arrow=value>0?'↑':value<0?'↓':'→';
+  const amount=(value>0?'+':value<0?'−':'')+ikF(Math.abs(value));
+  const meaning=value>0?'выше':value<0?'ниже':'не изменился';
+  const accessible='Средний балл '+meaning+(value===0?'': ' на '+ikF(Math.abs(value)))+' по сравнению с предыдущими 7 днями';
+  return '<span class="ik-school-trend ik-school-trend--'+direction+'" role="img" aria-label="'+esc(accessible)+'"><b><span aria-hidden="true">'+arrow+'</span> '+amount+'</b><small>'+(value===0?'без изменений':'к прошлым 7 дням')+'</small></span>';
 }
 function ikGradeList(rows) {
   if(!rows.length)return '<div class="ik-empty">Записей пока нет.</div>';
@@ -506,15 +520,13 @@ function viewIskra() {
       '<p class="ik-muted">'+(state.phase==='init'?'Проверяем подключение…':'Попроси взрослого подключить школьный дневник в разделе «Профиль».')+'</p>'+
       (state.error?'<p class="scs-warning">'+esc(state.error)+'</p>':'')+'</div></div>';
   }
-  html+='<div class="ik-row-between"><span class="ik-muted">'+esc(ikFreshness())+'</span><button type="button" class="ik-btn-small" data-sc-action="refresh" '+(state.loading?'disabled':'')+'>↻ Проверить</button></div>';
   if(state.error)html+='<div class="ik-issues" role="status">'+esc(state.error)+(state.data?' Показаны последние полученные данные.':'')+'</div>';
   if(!state.data){
-    html+='<div class="card ik-empty">'+ikStar+'<h2>'+(state.phase==='loading'?'Загружаем оценки…':'Оценок пока нет')+'</h2><p>Когда в дневнике появятся оценки, они отобразятся здесь.</p></div>';
+    html+='<div class="ik-school-sync-row"><span>'+esc(ikFreshness())+'</span><button type="button" class="ik-btn-small" data-sc-action="refresh" '+(state.loading?'disabled':'')+'>↻ Проверить</button></div><div class="card ik-empty">'+ikStar+'<h2>'+(state.phase==='loading'?'Загружаем оценки…':'Оценок пока нет')+'</h2><p>Когда в дневнике появятся оценки, они отобразятся здесь.</p></div>';
     return html+'</div>';
   }
   // Make the selected period and school results easy to scan at a glance.
-  html+='<div class="ik-school-period-lead"><b>Школьные результаты</b><small>Оценки за работы и четвертные итоги</small></div>'+
-    ikPeriodButtons()+ikPeriodEditor();
+  html+='<div class="ik-school-period-lead"><b>Школьные результаты</b><small>Оценки за работы и четвертные итоги</small></div>';
   const available=ikRange(),all=ikFiltered(),works=ikWorks(all),official=all.filter(r=>officialKind(r));
   const mean=ikMean(works),sorted=ikSort(works),last=sorted.at(-1),tr=ikTrend(works),subjects=new Map();
   all.forEach(r=>{
@@ -524,9 +536,10 @@ function viewIskra() {
   const quarter=/^q[1-4]$/.test(ikPeriod);
   const finalMarks=quarter?[...subjects.values()].map(x=>ikSort(x.official).at(-1)?.n).filter(n=>n!==undefined):[];
   const officialMean=finalMarks.length?finalMarks.reduce((a,b)=>a+b,0)/finalMarks.length:null;
+  const selectedPeriodName=ikPresets.find(p=>p[0]===ikPeriod)?.[1]||'Выбранный период';
   const primarySubject=group=>quarter?(ikSort(group.official).at(-1)?.n??ikMean(group.works)):ikMean(group.works);
   const ordered=[...subjects].sort((a,b)=>(primarySubject(b[1])??-1)-(primarySubject(a[1])??-1)||a[0].localeCompare(b[0],'ru'));
-  html+='<div class="ik-main-card ik-hero-split"><div><div class="ik-caption">'+(officialMean!==null?'Средняя итоговая за четверть':'Средний за работы')+'</div><div class="ik-number">'+(officialMean!==null?ikF(officialMean):ikF(mean))+'</div><div class="ik-caption">'+(officialMean!==null?finalMarks.length+' официальных итоговых · ':'')+(ikPeriod==='all'?'текущий учебный год':available?ikDate(available.from)+' — '+ikDate(available.to):'период не настроен')+'</div></div>'+ikStar+'</div>';
+  html+='<div class="ik-main-card ik-hero-split"><div><div class="ik-caption">'+(officialMean!==null?'Итоговая · ':'Средний за работы · ')+esc(selectedPeriodName)+'</div><div class="ik-number">'+(officialMean!==null?ikF(officialMean):ikF(mean))+'</div><div class="ik-caption">'+(officialMean!==null?'По официальным итогам':'Оценок за работы: '+works.length)+'</div></div>'+ikStar+'</div>';
   if(ikPeriod==='q2'){
     const firstEnd=ikOfficialTermEnds().q1||ikDerivedRange('q1')?.to;
     const previous=(state.data.grades||[]).filter(r=>
@@ -549,8 +562,7 @@ function viewIskra() {
   }
   if(ikPeriod!=='all'&&!available)html+='<div class="ik-issues">Для этого периода пока не указаны даты. Попроси взрослого настроить четверть в разделе «Профиль».</div>';
   else {
-    html+='<section class="card ik-school-chart-card"><div class="ik-graph-label"><b>Динамика среднего балла</b><span class="ik-muted">За работы</span></div>'+tr.html+'</section>';
-    if(tr.growth!==null)html+='<p class="ik-school-chart-note">Среднее за последние 7 дней: '+(tr.growth>0?'+':'')+ikF(tr.growth)+' '+esc(ikDeltaLabel(tr.growth))+'.</p>';
+    html+='<section class="card ik-school-chart-card"><div class="ik-school-chart-heading"><div><b>Динамика среднего балла</b><span>Среднее за работы</span></div>'+(tr.growth!==null?ikSchoolTrendBadge(tr.growth):'')+'</div>'+tr.html+'</section>';
   }
   // Keep the chart visible and let the child scan the latest work without extra text.
   const latest=ikSort(works).slice(-3).reverse();
@@ -573,6 +585,7 @@ function viewIskra() {
     }).join(''):'<div class="ik-empty">Оценок за этот период пока нет.</div>')+'</div>';
   }
   html+='<p class="ik-muted ik-grade-note">Официальные итоги показываются отдельно и не входят в среднее за работы.</p>';
+  html+=ikSchoolDataDetails();
   return html+'</div>';
 }
 

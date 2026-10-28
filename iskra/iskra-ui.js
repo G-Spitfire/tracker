@@ -47,23 +47,25 @@
         const snapshot=Array.isArray(S.planHistory[date])?S.planHistory[date].some(x=>x.i===task.i):null;
         let event=null;for(const e of events)if(e.from<=date)event=e;else break;
         const planned=snapshot===true?true:snapshot===false?false:event&&event.from<=date?event.days.includes(new Date(date+'T12:00:00').getDay()):null;
-        const done=dn(date).includes(task.i),skipped=(S.skipped?.[date]||[]).includes(task.i);
-        const state=done?'done':skipped?'skip':planned===true?(date===today?'today':'missed'):planned===false?'off':'unknown';
+        const done=dn(date).includes(task.i);
+        // Old skip records remain stored for backup compatibility, but now mean
+        // the same thing as any other uncompleted scheduled day.
+        const state=done?'done':planned===true?(date===today?'today':'missed'):planned===false?'off':'unknown';
         return {date,state,planned};
       });
-      const counted=days.filter(x=>x.planned===true&&(x.date<today||x.state==='done'||x.state==='skip')),done=counted.filter(x=>x.state==='done').length,skips=counted.filter(x=>x.state==='skip').length;
+      const counted=days.filter(x=>x.planned===true&&(x.date<today||x.state==='done')),done=counted.filter(x=>x.state==='done').length;
       const totalKnown=days.filter(x=>x.state==='done').length;
-      const status=counted.length?('Выполнено '+done+' из '+counted.length+' дней по расписанию'+(skips?' · пропущено '+skips:'')):
+      const status=counted.length?('Выполнено '+done+' из '+counted.length+' дней по расписанию'):
         totalKnown?'Есть '+totalKnown+' отмет. в истории · расписание отслеживается с сегодняшнего дня':'';
-      const symbols={done:'✓',skip:'–',missed:'·',today:'○',off:'',unknown:''};
-      const cells=days.map(x=>'<span class="ik-habit-dot ik-habit-dot--'+x.state+'" title="'+safe(fmtDate(x.date))+': '+safe(({done:'выполнено',skip:'пропущено',missed:'не отмечено',today:'сегодня',off:'не по расписанию',unknown:'расписание раньше не записывалось'})[x.state])+'" aria-label="'+safe(shortDay[new Date(x.date+'T12:00:00').getDay()]+' '+new Date(x.date+'T12:00:00').getDate()+': '+({done:'выполнено',skip:'пропущено',missed:'не отмечено',today:'сегодня',off:'не по расписанию',unknown:'нет данных о расписании'})[x.state])+'">'+symbols[x.state]+'</span>').join('');
+      const symbols={done:'✓',missed:'·',today:'○',off:'',unknown:''};
+      const cells=days.map(x=>'<span class="ik-habit-dot ik-habit-dot--'+x.state+'" title="'+safe(fmtDate(x.date))+': '+safe(({done:'выполнено',missed:'не выполнено',today:'сегодня',off:'не по расписанию',unknown:'расписание раньше не записывалось'})[x.state])+'" aria-label="'+safe(shortDay[new Date(x.date+'T12:00:00').getDay()]+' '+new Date(x.date+'T12:00:00').getDate()+': '+({done:'выполнено',missed:'не выполнено',today:'сегодня',off:'не по расписанию',unknown:'нет данных о расписании'})[x.state])+'">'+symbols[x.state]+'</span>').join('');
       return '<article class="ik-habit-stat-card"><div class="ik-habit-stat-heading"><span>'+safe(task.e||'✨')+'</span><b>'+safe(task.t)+'</b></div><div class="ik-habit-dots" role="group" aria-label="Отметки за последние 14 дней">'+cells+'</div><div class="ik-habit-dates"><span>2 недели назад</span><span>сегодня</span></div>'+(status?'<p>'+safe(status)+'</p>':'')+'</article>';
     }).join('');
     const hasObservedDays=habits.some(task=>dates.some(date=>date<today&&(dn(date).includes(task.i)||(S.skipped?.[date]||[]).includes(task.i)||Array.isArray(S.planHistory[date])&&S.planHistory[date].some(x=>x.i===task.i))));
     const week=weekStart(today),previousDate=new Date();previousDate.setDate(previousDate.getDate()-7);
     const recall=S.habitRecall?.[week]||'',previousRecall=S.habitRecall?.[weekStart(iso(previousDate))]||'',recallLabels={easy:'Уже легко',sometimes:'Иногда забываю',hard:'Пока трудно'},choices=[['easy','🙂','Уже легко'],['sometimes','😐','Иногда забываю'],['hard','🤔','Пока трудно']];
     const recallHtml=hasObservedDays?'<div class="ik-habit-recall"><b>А тебе как вспоминать о привычках?</b><small>Здесь нет правильного ответа. Это не влияет на звёзды.</small><div>'+choices.map(([key,face,label])=>'<button type="button" data-action="ikHabitRecall" data-arg="'+key+'" aria-pressed="'+(recall===key)+'" class="'+(recall===key?'selected':'')+'"><span>'+face+'</span>'+label+'</button>').join('')+'</div>'+(recall?'<small role="status">Спасибо, записала твой ответ на эту неделю.</small>':'')+(previousRecall?'<small>На прошлой неделе: '+safe(recallLabels[previousRecall])+'.</small>':'')+'</div>':'';
-    const contents=hasObservedDays?'<p class="ik-habit-stats-note">Смотри, как часто получается возвращаться к привычке. Перерыв не стирает прошлые шаги. Это показывает регулярность, а не ставит оценку.</p>'+cards+'<div class="ik-habit-legend"><span><i class="ik-habit-dot ik-habit-dot--done">✓</i> сделано</span><span><i class="ik-habit-dot ik-habit-dot--skip">–</i> пропущено</span><span><i class="ik-habit-dot ik-habit-dot--missed">·</i> день по расписанию</span><span><i class="ik-habit-dot ik-habit-dot--today">○</i> сегодня</span><span><i class="ik-habit-dot ik-habit-dot--unknown"></i> расписание неизвестно</span><span><i class="ik-habit-dot ik-habit-dot--off"></i> не по расписанию</span></div>'+recallHtml:'<div class="ik-habit-stats-empty">Первые отметки появятся здесь. Начинаем наблюдать с сегодняшнего дня.</div>';
+    const contents=hasObservedDays?'<p class="ik-habit-stats-note">Смотри, как часто получается возвращаться к привычке. Перерыв не стирает прошлые шаги. Это показывает регулярность, а не ставит оценку.</p>'+cards+'<div class="ik-habit-legend"><span><i class="ik-habit-dot ik-habit-dot--done">✓</i> сделано</span><span><i class="ik-habit-dot ik-habit-dot--missed">·</i> день по расписанию без отметки</span><span><i class="ik-habit-dot ik-habit-dot--today">○</i> сегодня</span><span><i class="ik-habit-dot ik-habit-dot--unknown"></i> расписание неизвестно</span><span><i class="ik-habit-dot ik-habit-dot--off"></i> не по расписанию</span></div>'+recallHtml:'<div class="ik-habit-stats-empty">Первые отметки появятся здесь. Начинаем наблюдать с сегодняшнего дня.</div>';
     return '<details class="ik-habit-stats"><summary><span><b>Регулярность привычек</b><small>'+(hasObservedDays?'Отметки за 14 дней':'Статистика начнётся с первых отметок')+'</small></span><span class="ik-habit-stats-chevron" aria-hidden="true">⌄</span></summary><div class="ik-habit-stats-content">'+contents+'</div></details>';
   }
   ACTIONS.ikHabitRecall=(_,value)=>{
@@ -89,13 +91,13 @@
     recordAchievements();
     const d=iso(new Date()),allTasks=tasks(d),done=dn(d),count=done.length,total=allTasks.length,hasAnyHabit=taskCatalog().some(t=>!S.hiddenTasks.includes(t.i));
     const renderTask=t=>{
-      const yes=done.includes(t.i),skippedToday=skipped(d).includes(t.i),x=(S.x[d]||{})[t.i],
+      const yes=done.includes(t.i),x=(S.x[d]||{})[t.i],
         sub=yes&&x&&((x.s||[]).length||x.n)?[].concat(x.s||[],x.n?[x.n]:[]).join(', '):(t.s||'');
       const details=t.i==='hw'||t.i==='ho';
-      return '<div class="ik-task '+(yes?'done ':'')+(skippedToday?'skipped':'')+'"><button class="ik-check '+(yes?'done':'')+'" data-action="toggle" data-id="'+t.i+'" aria-label="'+(yes?'Снять отметку: ':'Отметить привычку: ')+safe(t.t)+'" aria-pressed="'+yes+'">'+(yes?'✓':'')+'</button>'+
-        (S.customTasks.some(custom=>custom.i===t.i)?'<span class="ik-task-icon ik-task-emoji" aria-hidden="true">'+safe(t.e||'✨')+'</span>':'<span class="ik-task-icon">'+taskIcon(t)+'</span>')+'<button class="ik-task-title" data-action="'+(details?'details':'ikTaskInfo')+'" data-id="'+t.i+'">'+safe(t.t)+(skippedToday?'<small class="ik-skip-label">Пропущено сегодня · нажми, чтобы вернуть</small>':sub?'<small>'+safe(sub)+'</small>':'')+'</button>'+
+      return '<div class="ik-task '+(yes?'done':'')+'"><button class="ik-check '+(yes?'done':'')+'" data-action="toggle" data-id="'+t.i+'" aria-label="'+(yes?'Снять отметку: ':'Отметить привычку: ')+safe(t.t)+'" aria-pressed="'+yes+'">'+(yes?'✓':'')+'</button>'+
+        (S.customTasks.some(custom=>custom.i===t.i)?'<span class="ik-task-icon ik-task-emoji" aria-hidden="true">'+safe(t.e||'✨')+'</span>':'<span class="ik-task-icon">'+taskIcon(t)+'</span>')+'<button class="ik-task-title" data-action="'+(details?'details':'ikTaskInfo')+'" data-id="'+t.i+'">'+safe(t.t)+(sub?'<small>'+safe(sub)+'</small>':'')+'</button>'+
         (S.times[t.i]?'<span class="ik-task-time">'+safe(S.times[t.i])+'</span>':'')+
-        '<button class="ik-mini-btn" data-action="'+(details?'details':'ikTaskInfo')+'" data-id="'+t.i+'" aria-label="Подробнее о привычке: '+safe(t.t)+'">›</button></div>';
+        '</div>';
     };
     const waiting=allTasks.filter(t=>!done.includes(t.i)),finished=allTasks.filter(t=>done.includes(t.i)),full=total>0&&count===total;
     return '<div class="ik-page ik-today">'+
@@ -105,7 +107,7 @@
       '<div class="ik-progress-side"><strong>'+(total===0?(hasAnyHabit?'Сегодня нет привычек по расписанию':'Выбери свою первую привычку'):full?'Ты всё сделала!':'У тебя получится!')+'</strong><p class="ik-caption">⭐ Сегодня '+st(d)+' звёзд</p><div style="height:8px;border-radius:10px;background:#e0cff8;overflow:hidden"><div style="width:'+perc(count,total)+'%;height:100%;background:linear-gradient(90deg,#aa7af7,#7949ec);border-radius:10px"></div></div></div></div></div>'+
       '<div class="ik-task-list">'+(waiting.length?waiting.map(renderTask).join(''):!finished.length?'<div class="ik-empty">'+art('star_wave','empty')+'<b>'+(hasAnyHabit?'Сегодня день без привычек':'Начни с маленькой привычки')+'</b><small>'+(hasAnyHabit?'По расписанию сегодня перерыв — можно отдохнуть.':'Добавь то, что тебе хочется попробовать.')+'</small></div>':'')+'</div>'+
       (finished.length?'<details class="ik-joy-completed"><summary>Уже выполнено · '+finished.length+' <span aria-hidden="true">⌄</span></summary><div class="ik-task-list">'+finished.map(renderTask).join('')+'</div></details>':'')+
-      '<button type="button" class="ik-add-habit" data-action="ikManageHabits"><span aria-hidden="true">＋</span> Добавить привычку</button>'+
+      '<button type="button" class="ik-add-habit" data-action="ikManageHabits"><span aria-hidden="true">✎</span> Редактировать привычки</button>'+
       '<p class="ik-muted" style="text-align:center">Маленькие шаги тоже считаются!</p></div>';
   }
   function badgeStreak(){
@@ -198,11 +200,16 @@
     const count=achievementDefs.filter(x=>S.earnedAchievements[achievementKey(x)]).length;
     const legacy=S.earnedAchievements['Отличные оценки'];
     const tile=a=>{const key=achievementKey(a);return '<div class="ik-achievement '+(S.earnedAchievements[key]?'':'locked')+'"><span class="icon">'+art(a.icon,'achievement')+'</span><b>'+safe(a.title)+'</b><small>'+safe(S.earnedAchievements[key]?'Получено '+S.earnedAchievements[key]:a.small)+'</small></div>'};
+    const weekDay=(date,i)=>{
+      const planned=tasks(date),done=planned.filter(task=>dn(date).includes(task.i)).length,required=planned.length,pct=required?Math.round(100*done/required):0;
+      const label=required?DN[i]+': выполнено '+done+' из '+required+' привычек':DN[i]+': привычек по расписанию не было';
+      return '<button class="ik-week-day" data-action="ikWeekDay" data-id="'+date+'" aria-label="'+label+'"><div class="ik-week-progress '+(required?'':'is-empty')+'" '+(required?'style="--ik-week-progress:'+pct+'%"':'')+' aria-hidden="true"><b>'+(required?done+'/'+required:'—')+'</b></div><span>'+DN[i]+'</span></button>';
+    };
     return '<div class="ik-page ik-reward"><div class="ik-heading ik-subscreen-header"><button class="ik-header-back" data-action="ikToToday" aria-label="Вернуться к привычкам">‹</button><h1>Звёзды</h1><button class="ik-cloud-pill ik-achievements-link" data-action="ikJumpAchievements" aria-label="Мои достижения">'+art('task_star','tiny')+'<span class="ik-achievements-text">Достижения</span></button></div>'+
       '<div class="ik-main-card ik-reward-hero">'+art('cloud','decor-cloud')+art('sparkles','decor-sparkles')+
       '<div class="ik-hero-split">'+star+'<div style="flex:1"><b>Мои звёзды</b><div class="ik-row" style="gap:7px"><span class="ik-number" style="font-size:43px">'+total+'</span><span style="font-size:25px">⭐</span></div><div class="ik-caption">Собирай звёзды и открывай новые уровни!</div></div></div>'+
       '<div class="ik-level-track"><div style="width:'+progress+'%"></div></div></div>'+
-      '<div class="card ik-week">'+dates.map((date,i)=>{const n=st(date),has=dn(date).length>0;return '<button class="ik-week-day" data-action="ikWeekDay" data-id="'+date+'" aria-label="'+DN[i]+': '+n+' звёзд"><div class="ik-week-star">'+(has?art('task_star','week'):'☆')+'</div><span>'+DN[i]+'</span><small>'+n+' ★</small></button>'}).join('')+'</div>'+
+      '<div class="card ik-week">'+dates.map(weekDay).join('')+'</div>'+
       '<div class="ik-action-row ik-level-summary" role="group"><span class="ik-action-icon">'+art('achievement_master','action')+'</span><span style="flex:1"><b>'+safe(levels[l][1])+'</b><small>Уровень '+(l+1)+' · '+tw+' ⭐ за неделю</small><div class="ik-level-track"><div style="width:'+progress+'%"></div></div><small>'+(next?'До следующего уровня: '+Math.max(0,next[0]-total)+' звёзд':'Высший уровень!')+'</small></span><button class="ik-btn-small" data-action="ikLevels">Уровни ›</button></div>'+
       '<div class="ik-row-between" id="ik-achievements"><h2 class="ik-sec-title">Достижения</h2><span class="ik-tab-sublabel">'+count+' из '+achievementDefs.length+'</span></div>'+
       '<div class="ik-achievements">'+achievementDefs.slice(0,6).map(tile).join('')+'</div>'+
@@ -240,22 +247,10 @@
   ACTIONS.ikWeekDay=(d)=>openDay(d);
   ACTIONS.ikTaskInfo=(id)=>{
     const task=tasks(iso(new Date())).find(t=>t.i===id);if(!task)return;
-    const date=iso(new Date()),done=dn(date).includes(id),isSkipped=skipped(date).includes(id);
-    sheet('<h2>'+safe(task.t)+'</h2><p class="mu sm">'+safe(task.s||'Привычка на сегодня')+'</p><p class="mu sm">Время: '+safe(S.times[id]||'не задано')+'</p><div data-sheet-footer><button class="btn" data-action="ikTaskDone" data-id="'+safe(id)+'">'+(done?'Снять отметку':'Отметить выполненной')+'</button>'+(done?'':'<button class="btn g" data-action="ikSkipToggle" data-id="'+safe(id)+'">'+(isSkipped?'Вернуть в список':'Пропустить сегодня')+'</button>')+'<button class="btn g" data-action="ikHabitHide" data-id="'+safe(id)+'">Убрать из привычек</button></div>');
+    const done=dn(iso(new Date())).includes(id);
+    sheet('<h2>'+safe(task.t)+'</h2><p class="mu sm">'+safe(task.s||'Привычка на сегодня')+'</p><p class="mu sm">Время: '+safe(S.times[id]||'не задано')+'</p><div data-sheet-footer><button class="btn" data-action="ikTaskDone" data-id="'+safe(id)+'">'+(done?'Снять отметку':'Отметить выполненной')+'</button><button class="btn g" data-action="ikHabitHide" data-id="'+safe(id)+'">Убрать из привычек</button></div>');
   };
   ACTIONS.ikTaskDone=(id)=>{cs();toggleTask(id)};
-  ACTIONS.ikSkipToggle=id=>{
-    const d=iso(new Date());
-    if((S.d[d]||[]).includes(id)){toast('Сначала сними отметку выполнения');return}
-    if(typeof cur==='object'&&cur.i===id){
-      const input=document.getElementById('dn'),note=input?input.value.trim().slice(0,60):cur.n||'';
-      if(cur.s?.length||note)(S.x[d]||(S.x[d]={}))[id]={s:cur.s||[],n:note};
-    }
-    S.skipped=S.skipped&&typeof S.skipped==='object'?S.skipped:{};
-    const list=S.skipped[d]||(S.skipped[d]=[]),at=list.indexOf(id),wasSkipped=at>=0;
-    if(wasSkipped)list.splice(at,1);else list.push(id);
-    save();cs();render();toast(wasSkipped?'Привычка вернулась в список':'Сегодня пропущено. Отметка и история сохранены.');
-  };
   ACTIONS.ikPersonalSettings=()=>sheet('<h2>Мои настройки</h2><button class="btn g" data-action="profile">Имя и аватар</button><button class="btn g" data-action="ikInterests">Мои интересы</button><p class="mu sm">Привычки можно добавлять и менять на главной.</p>');
   // Real-world reward actions are retired. Historical records stay in backups.
   ACTIONS.ikLevels=()=>sheet('<h2>Твои уровни</h2>'+levels.map((lv,i)=>'<div class="row"><b>'+(i+1)+'. '+safe(lv[1])+'</b><span class="mu">'+lv[0]+' ⭐</span></div>').join('')+'<p class="mu sm">Звёзды за привычки помогают переходить на новые уровни.</p>');

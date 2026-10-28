@@ -269,7 +269,7 @@ body[data-ik-theme="mint"] .ik-habit-day.on{color:#163f39}
 }
 .ik-add-habit:active,.ik-habit-idea:active,.ik-habit-days-button:active,
 .ik-habit-remove:active,.ik-habit-restore:active,.ik-habit-day:active,
-.ik-today .ik-check:active,.ik-today .ik-mini-btn:active,.ik-filter:active,.btn:active{
+.ik-today .ik-check:active,.ik-filter:active,.btn:active{
   transform:scale(.98)
 }
 @media(prefers-reduced-motion:reduce){
