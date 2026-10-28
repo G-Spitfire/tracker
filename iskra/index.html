@@ -104,7 +104,7 @@ body.sheet-open #sc{overflow:hidden}
 .sh .sheet-period{font-size:14px;color:var(--mu);margin:0 0 20px}
 @media(min-width:700px){.ov{align-items:center;padding:16px}.sh{border-bottom:1px solid var(--ln);border-radius:24px}}
 @media(max-width:355px){.sh .sheet-head,.sh .sheet-body,.sh .sheet-footer{padding-left:16px;padding-right:16px}.sh .sheet-inline{grid-template-columns:minmax(0,1fr)}.sh .sheet-inline .btn{width:100%}}
-</style><link rel="stylesheet" href="./iskra-ui.css?v=20261028-4"><link rel="stylesheet" href="./iskra-joy.css?v=20261028-2"></head><body><main id="m"></main>
+</style><link rel="stylesheet" href="./iskra-ui.css?v=20261028-6"><link rel="stylesheet" href="./iskra-joy.css?v=20261028-2"></head><body><main id="m"></main>
 <nav class="bar"><button data-t="t"><span>☀️</span>Сегодня</button><button data-t="g"><span>📚</span>Школа</button><button data-t="r"><span>⭐</span>Звёзды</button><button data-t="y"><span>😊</span>Профиль</button></nav>
 <div id="tt"></div><div id="s"></div>
 <script>
@@ -143,6 +143,12 @@ const store=(()=>{
     if(!s.ex)s.ex=iso(new Date());
     if(!s.planHistory||typeof s.planHistory!=='object'||Array.isArray(s.planHistory))s.planHistory={};
     if(!s.taskDays||typeof s.taskDays!=='object'||Array.isArray(s.taskDays))s.taskDays={};
+    if(!s.habitScheduleHistory||typeof s.habitScheduleHistory!=='object'||Array.isArray(s.habitScheduleHistory))s.habitScheduleHistory={};
+    for(const [id,events] of Object.entries(s.habitScheduleHistory)){
+      if(!/^[a-zA-Z0-9_-]{1,70}$/.test(id)||!Array.isArray(events)){delete s.habitScheduleHistory[id];continue}
+      s.habitScheduleHistory[id]=events.filter(e=>e&&/^\d{4}-\d{2}-\d{2}$/.test(e.from)&&Array.isArray(e.days)&&e.days.every(d=>Number.isInteger(d)&&d>=0&&d<=6))
+        .map(e=>({from:e.from,days:[...new Set(e.days)]})).sort((a,b)=>a.from.localeCompare(b.from));
+    }
     if(!Array.isArray(s.hiddenTasks))s.hiddenTasks=[];
     if(!Array.isArray(s.customTasks))s.customTasks=[];
     if(!s.rewardHistory||typeof s.rewardHistory!=='object'||Array.isArray(s.rewardHistory))s.rewardHistory={};
@@ -161,6 +167,8 @@ const store=(()=>{
     if(!s.joyChoices||typeof s.joyChoices!=='object'||Array.isArray(s.joyChoices))s.joyChoices={};
     if(!s.joyDone||typeof s.joyDone!=='object'||Array.isArray(s.joyDone))s.joyDone={};
     if(!s.joyWeekNotes||typeof s.joyWeekNotes!=='object'||Array.isArray(s.joyWeekNotes))s.joyWeekNotes={};
+    if(!s.habitRecall||typeof s.habitRecall!=='object'||Array.isArray(s.habitRecall))s.habitRecall={};
+    for(const [week,value] of Object.entries(s.habitRecall))if(!/^\d{4}-\d{2}-\d{2}$/.test(week)||!['easy','sometimes','hard'].includes(value))delete s.habitRecall[week];
     if(!s.skipped||typeof s.skipped!=='object'||Array.isArray(s.skipped))s.skipped={};
     for(const [date,ids] of Object.entries(s.skipped)){
       if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Array.isArray(ids)){delete s.skipped[date];continue}
@@ -603,6 +611,11 @@ function validateBackupPayload(source){
     for(const [id,days] of Object.entries(source.taskDays))
       if(!idOk(id)||!Array.isArray(days)||days.some(v=>!Number.isInteger(v)||v<0||v>6))problem();
   }
+  if(source.habitScheduleHistory!==undefined){
+    if(!isObj(source.habitScheduleHistory))problem();
+    for(const [id,events] of Object.entries(source.habitScheduleHistory))
+      if(!idOk(id)||!Array.isArray(events)||events.length>500||events.some(e=>!isObj(e)||!dateOk(e.from)||!Array.isArray(e.days)||e.days.length>7||e.days.some(d=>!Number.isInteger(d)||d<0||d>6)))problem();
+  }
   if(source.taskCategories!==undefined){
     if(!isObj(source.taskCategories))problem();
     for(const [id,cat] of Object.entries(source.taskCategories))
@@ -654,6 +667,10 @@ function validateBackupPayload(source){
     if(!isObj(source.joyWeekNotes))problem();
     for(const [date,note] of Object.entries(source.joyWeekNotes))
       if(!dateOk(date)||!['Я горжусь собой','Было непросто','Хочу попробовать ещё'].includes(note))problem();
+  }
+  if(source.habitRecall!==undefined){
+    if(!isObj(source.habitRecall))problem();
+    for(const [week,value] of Object.entries(source.habitRecall))if(!dateOk(week)||!['easy','sometimes','hard'].includes(value))problem();
   }
   if(source.earnedAchievements!==undefined){
     if(!isObj(source.earnedAchievements))problem();
@@ -763,4 +780,4 @@ render();
 if(store.recoveredFromBackup())toast('Данные восстановлены из резервной копии.');
 else if(window.__iskraBadStore)toast('Сохранение приостановлено: восстанови JSON-копию.');
 if(!S.asked&&!window.__iskraBadStore){S.asked=1;save();openProfile()}
-</script><script src="./iskra-ui.js?v=20261028-3"></script><script src="./iskra-joy.js?v=20261028-2"></script><script type="module" src="../shared/school-cloud.js?v=20261028-8" data-school-cloud="iskra"></script></body></html>
+</script><script src="./iskra-ui.js?v=20261028-5"></script><script src="./iskra-joy.js?v=20261028-2"></script><script type="module" src="../shared/school-cloud.js?v=20261028-8" data-school-cloud="iskra"></script></body></html>

@@ -183,6 +183,34 @@ h1{font-size:29px;font-weight:850;letter-spacing:-.035em}h2{font-size:21px;font-
 .ik-profile .ik-time-stat .ik-tile{padding:11px 9px}
 .ik-profile .ik-time-stat .ik-tile strong{font-size:20px}
 .ik-profile .ik-time-stat .ik-tile small{font-size:10px}
+.ik-habit-stats{display:grid;gap:9px}
+.ik-habit-stats-note{margin:0;color:#777397;font-size:12px;line-height:1.4}
+.ik-habit-range{padding:5px 9px;border-radius:12px;background:#f5efff;color:#7654b2;font-size:11px;font-weight:750;white-space:nowrap}
+.ik-habit-stat-card{padding:11px 12px;border:1px solid #eee7f7;border-radius:17px;background:#fff;box-shadow:0 4px 14px rgba(99,71,149,.045)}
+.ik-habit-stat-heading{display:flex;align-items:center;gap:8px;min-width:0;color:#342751}
+.ik-habit-stat-heading>span{font-size:19px}
+.ik-habit-stat-heading>b{font-size:13px;line-height:1.25;overflow-wrap:anywhere}
+.ik-habit-dots{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;margin-top:10px}
+.ik-habit-dot{display:grid;place-items:center;aspect-ratio:1;min-width:0;border-radius:50%;font-size:10px;font-style:normal;font-weight:800;color:#938aa2;background:#f2eff5}
+.ik-habit-dot--done{color:#fff;background:#42ae8a}
+.ik-habit-dot--skip{color:#835b3d;background:#ffedcf}
+.ik-habit-dot--missed{color:#8d829f;background:#eee8f4}
+.ik-habit-dot--today{color:#8057ef;background:#f1eaff;border:1px solid #aa8bec}
+.ik-habit-dot--off{background:#fff}
+.ik-habit-dot--unknown{background:#f6f4f8}
+.ik-habit-dates{display:flex;justify-content:space-between;margin-top:3px;color:#9991a8;font-size:9px}
+.ik-habit-stat-card>p{margin:8px 0 0;color:#655a7d;font-size:11px;line-height:1.35}
+.ik-habit-legend{display:flex;flex-wrap:wrap;gap:7px 12px;color:#776d8d;font-size:10px}
+.ik-habit-legend>span{display:inline-flex;align-items:center;gap:4px}
+.ik-habit-legend .ik-habit-dot{width:17px;height:17px;font-size:9px}
+.ik-habit-recall{display:grid;gap:7px;padding:12px;border-radius:16px;background:#f8f3ff;border:1px solid #eee5fb}
+.ik-habit-recall>b{font-size:13px;color:#44345f}
+.ik-habit-recall>small{font-size:10px;color:#7b718e}
+.ik-habit-recall>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.ik-habit-recall button{display:grid;justify-items:center;gap:3px;min-height:52px;padding:7px 3px;border:1px solid #e7def2;border-radius:12px;background:#fff;color:#5e526f;font-family:inherit;font-size:10px;font-weight:600;line-height:1.2;cursor:pointer}
+.ik-habit-recall button span{font-size:18px}
+.ik-habit-recall button.selected{border-color:#956ee4;background:#efe7ff;color:#633fb3}
+.ik-habit-recall button:focus-visible{outline:3px solid #5d38ae;outline-offset:2px}
 .ik-profile .ik-profile-card{padding:15px 17px}
 @media(max-width:365px){
   .ik-compact-header>.ik-cloud-pill{font-size:9px}

@@ -27,6 +27,47 @@
   function navTo(id){tab=id;render();window.scrollTo(0,0)}
   const profileWindow=()=>['all','30','7'].includes(S.profileStatsWindow)?S.profileStatsWindow:'all';
   const profileWindowLabel=()=>({all:'За всё время','30':'За 30 дней','7':'За 7 дней'})[profileWindow()];
+  const shortDay=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+  function ensureHabitScheduleTracking(){
+    S.habitScheduleHistory=S.habitScheduleHistory&&typeof S.habitScheduleHistory==='object'?S.habitScheduleHistory:{};
+    const today=iso(new Date());let changed=false;
+    for(const task of taskCatalog())if(!S.habitScheduleHistory[task.i]?.length&&!S.hiddenTasks.includes(task.i)){
+      S.habitScheduleHistory[task.i]=[{from:today,days:daysForHabit(task.i).slice()}];changed=true;
+    }
+    if(changed)save();
+  }
+  function habitRegularity(){
+    ensureHabitScheduleTracking();
+    const today=iso(new Date()),dates=[];
+    for(let offset=13;offset>=0;offset--){const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-offset);dates.push(iso(d))}
+    const habits=taskCatalog().filter(t=>!S.hiddenTasks.includes(t.i));
+    if(!habits.length)return '<section class="ik-habit-stats"><h2 class="ik-sec-title">Как растут привычки?</h2><p class="ik-habit-stats-note">Добавь привычку — и здесь появится её история.</p></section>';
+    const cards=habits.map(task=>{
+      const events=S.habitScheduleHistory[task.i]||[],days=dates.map(date=>{
+        const snapshot=Array.isArray(S.planHistory[date])?S.planHistory[date].some(x=>x.i===task.i):null;
+        let event=null;for(const e of events)if(e.from<=date)event=e;else break;
+        const planned=snapshot===true?true:snapshot===false?false:event&&event.from<=date?event.days.includes(new Date(date+'T12:00:00').getDay()):null;
+        const done=dn(date).includes(task.i),skipped=(S.skipped?.[date]||[]).includes(task.i);
+        const state=done?'done':skipped?'skip':planned===true?(date===today?'today':'missed'):planned===false?'off':'unknown';
+        return {date,state,planned};
+      });
+      const counted=days.filter(x=>x.planned===true&&(x.date<today||x.state==='done'||x.state==='skip')),done=counted.filter(x=>x.state==='done').length,skips=counted.filter(x=>x.state==='skip').length;
+      const totalKnown=days.filter(x=>x.state==='done').length;
+      const status=counted.length?('Выполнено '+done+' из '+counted.length+' дней по расписанию'+(skips?' · пропущено '+skips:'')):
+        totalKnown?'Есть '+totalKnown+' отмет. в истории · расписание отслеживается с сегодняшнего дня':'Начинаем наблюдать с сегодняшнего дня';
+      const symbols={done:'✓',skip:'–',missed:'·',today:'○',off:'',unknown:''};
+      const cells=days.map(x=>'<span class="ik-habit-dot ik-habit-dot--'+x.state+'" title="'+safe(fmtDate(x.date))+': '+safe(({done:'выполнено',skip:'пропущено',missed:'не отмечено',today:'сегодня',off:'не по расписанию',unknown:'расписание раньше не записывалось'})[x.state])+'" aria-label="'+safe(shortDay[new Date(x.date+'T12:00:00').getDay()]+' '+new Date(x.date+'T12:00:00').getDate()+': '+({done:'выполнено',skip:'пропущено',missed:'не отмечено',today:'сегодня',off:'не по расписанию',unknown:'нет данных о расписании'})[x.state])+'">'+symbols[x.state]+'</span>').join('');
+      return '<article class="ik-habit-stat-card"><div class="ik-habit-stat-heading"><span>'+safe(task.e||'✨')+'</span><b>'+safe(task.t)+'</b></div><div class="ik-habit-dots" role="group" aria-label="Отметки за последние 14 дней">'+cells+'</div><div class="ik-habit-dates"><span>2 недели назад</span><span>сегодня</span></div><p>'+safe(status)+'</p></article>';
+    }).join('');
+    const week=weekStart(today),previousDate=new Date();previousDate.setDate(previousDate.getDate()-7);
+    const recall=S.habitRecall?.[week]||'',previousRecall=S.habitRecall?.[weekStart(iso(previousDate))]||'',recallLabels={easy:'Уже легко',sometimes:'Иногда забываю',hard:'Пока трудно'},choices=[['easy','🙂','Уже легко'],['sometimes','😐','Иногда забываю'],['hard','🤔','Пока трудно']];
+    const recallHtml='<div class="ik-habit-recall"><b>А тебе как вспоминать о привычках?</b><small>Здесь нет правильного ответа. Это не влияет на звёзды.</small><div>'+choices.map(([key,face,label])=>'<button type="button" data-action="ikHabitRecall" data-arg="'+key+'" aria-pressed="'+(recall===key)+'" class="'+(recall===key?'selected':'')+'"><span>'+face+'</span>'+label+'</button>').join('')+'</div>'+(recall?'<small role="status">Спасибо, записала твой ответ на эту неделю.</small>':'')+(previousRecall?'<small>На прошлой неделе: '+safe(recallLabels[previousRecall])+'.</small>':'')+'</div>';
+    return '<section class="ik-habit-stats"><div class="ik-row-between"><h2 class="ik-sec-title">Как растут привычки?</h2><span class="ik-habit-range">14 дней</span></div><p class="ik-habit-stats-note">Смотри, как часто получается возвращаться к привычке. Перерыв не стирает прошлые шаги. Это показывает регулярность, а не ставит оценку.</p>'+cards+'<div class="ik-habit-legend"><span><i class="ik-habit-dot ik-habit-dot--done">✓</i> сделано</span><span><i class="ik-habit-dot ik-habit-dot--skip">–</i> пропущено</span><span><i class="ik-habit-dot ik-habit-dot--missed">·</i> день по расписанию</span><span><i class="ik-habit-dot ik-habit-dot--today">○</i> сегодня</span></div>'+recallHtml+'</section>';
+  }
+  ACTIONS.ikHabitRecall=(_,value)=>{
+    if(!['easy','sometimes','hard'].includes(value))return;
+    S.habitRecall=S.habitRecall||{};S.habitRecall[weekStart(iso(new Date()))]=value;save();render();
+  };
   function statsTiles(){
     const windowDays=profileWindow()==='all'?null:Number(profileWindow());
     const now=new Date(),fromDate=new Date(now);
@@ -173,7 +214,7 @@
     function item(icon,title,subtitle,action){return '<button class="ik-action-row" data-action="'+action+'"><span class="ik-action-icon">'+art(icon,'action')+'</span><span style="flex:1"><b>'+title+'</b>'+(subtitle?'<small>'+safe(subtitle)+'</small>':'')+'</span><span class="ik-chevron">›</span></button>'}
     return '<div class="ik-page ik-profile"><div class="ik-heading ik-subscreen-header"><span class="ik-header-spacer" aria-hidden="true"></span><h1>Профиль</h1><button class="ik-top-link ik-settings-link" data-action="ikPersonalSettings" aria-label="Личные настройки">'+art('settings','tiny')+'<span class="ik-settings-text">Настройки</span></button></div>'+
       '<div class="card ik-profile-card"><div class="ik-avatar" aria-label="Аватар">'+art('portrait','avatar')+'<span class="ik-avatar-choice" aria-label="Выбранный символ">'+safe(S.av.e)+'</span></div><div class="ik-profile-body"><strong>'+safe(S.name||'Полина')+' ✨</strong><small>'+safe(levels[l][1])+' · уровень '+(l+1)+'</small><div class="ik-level-track"><div style="width:'+prog+'%"></div></div><small>'+(next?Math.max(0,gained)+' из '+step+' звёзд до уровня':'Все уровни пройдены')+'</small></div><button class="ik-mini-btn" data-action="profile" aria-label="Изменить профиль">✎</button></div>'+
-      '<div class="ik-row-between"><h2 class="ik-sec-title">Моя статистика</h2><button class="ik-top-link" data-action="ikProfileWindow">'+profileWindowLabel()+' ▾</button></div>'+statsTiles()+
+      '<div class="ik-row-between"><h2 class="ik-sec-title">Моя статистика</h2><button class="ik-top-link" data-action="ikProfileWindow">'+profileWindowLabel()+' ▾</button></div>'+statsTiles()+habitRegularity()+
       '<div class="ik-list">'+item('heart','Мои интересы',S.interests||'Добавь то, что тебе нравится','ikInterests')+
       item('history','История привычек','Что было в прошлые дни','history')+
       item('task_star','Мои звёзды','Уровни и достижения','ikToReward')+
@@ -300,6 +341,7 @@
     preserveTodayStarBonus();
     const task={i:id,e:habitFormDraft.icon||'✨',t:name,...(cue?{s:cue}:{})};
     S.customTasks.push(task);S.taskDays[id]=days.slice();S.taskCategories[id]='personal';S.hiddenTasks=S.hiddenTasks.filter(x=>x!==id);
+    S.habitScheduleHistory=S.habitScheduleHistory||{};S.habitScheduleHistory[id]=[{from:date,days:days.slice()}];
     snapshotHabitToday(task,days);
     save();habitFormDraft=null;render();habitManager();toast('Привычка добавлена');
   };
@@ -329,6 +371,10 @@
     captureChildSchedule();
     if(!childScheduleDraft.days.length)return toast('Оставь хотя бы один день или убери привычку из списка');
     const id=childScheduleDraft.id;preserveTodayStarBonus();S.taskDays[id]=childScheduleDraft.days.slice();
+    S.habitScheduleHistory=S.habitScheduleHistory||{};S.habitScheduleHistory[id]=S.habitScheduleHistory[id]||[];
+    const today=iso(new Date()),history=S.habitScheduleHistory[id],entry={from:today,days:childScheduleDraft.days.slice()};
+    const existing=history.findIndex(e=>e.from===today);if(existing>=0)history[existing]=entry;else history.push(entry);
+    history.sort((a,b)=>a.from.localeCompare(b.from));
     if(childScheduleDraft.time)S.times[id]=childScheduleDraft.time;else delete S.times[id];
     const task=taskCatalog().find(t=>t.i===id);if(task&&!S.hiddenTasks.includes(id))snapshotHabitToday(task,childScheduleDraft.days);
     save();childScheduleDraft=null;render();habitManager();toast('Расписание сохранено');
