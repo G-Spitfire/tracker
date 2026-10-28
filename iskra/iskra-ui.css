@@ -156,12 +156,9 @@ h1{font-size:29px;font-weight:850;letter-spacing:-.035em}h2{font-size:21px;font-
 .scs-iskra .ik-main-card{padding:14px 17px;min-height:110px}
 .scs-iskra .ik-main-card .ik-star{width:85px;height:85px}
 .scs-iskra .ik-main-card .ik-number{font-size:43px}
-.scs-iskra .ik-filter-row{display:grid;grid-template-columns:1fr 1fr 1fr 1.13fr;gap:5px;overflow:visible}
-.scs-iskra .ik-filter{min-width:0;white-space:nowrap;flex:none;font-size:10px;padding:9px 2px;line-height:1.15}
 .scs-iskra .ik-graph-label{margin-bottom:0}
 .scs-iskra>.card{padding:13px 15px}
 .scs-iskra .ik-chart{height:auto;max-height:123px}
-.scs-iskra .ik-kpi-meaning{font-size:10px;margin:2px 0 0}
 .scs-iskra .ik-time-stat{gap:7px}
 .scs-iskra .ik-time-stat .ik-tile{padding:9px 8px;border-radius:15px}
 .scs-iskra .ik-time-stat .ik-tile-icon{height:21px;font-size:19px}
@@ -189,7 +186,6 @@ h1{font-size:29px;font-weight:850;letter-spacing:-.035em}h2{font-size:21px;font-
 .ik-profile .ik-profile-card{padding:15px 17px}
 @media(max-width:365px){
   .ik-compact-header>.ik-cloud-pill{font-size:9px}
-  .scs-iskra .ik-filter{font-size:9px}
   .scs-iskra .ik-grade-track{width:32px}
   .scs-iskra .ik-main-card .ik-star{width:73px;height:73px}
 }
@@ -205,8 +201,6 @@ h1{font-size:29px;font-weight:850;letter-spacing:-.035em}h2{font-size:21px;font-
 .ik-week-day small{font-size:10px;color:#7768a0}
 .ik-year-row{display:flex;gap:10px;justify-content:space-between;align-items:center}
 .ik-year-select{min-height:36px;border:1px solid #e6def3;border-radius:13px;padding:5px 10px;color:#583e89;background:#fff;font:600 12px system-ui}
-.scs-iskra .ik-filter-row{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity}
-.scs-iskra .ik-filter{flex:0 0 auto;min-width:67px;padding:10px 9px;scroll-snap-align:start}
 .ik-term-field{border:1px solid #e8def4;border-radius:14px;padding:10px;display:grid;gap:6px;min-width:0}
 .ik-term-field legend{font-size:13px;font-weight:750;color:#5c4882}
 .ik-term-field label{display:grid;gap:4px;color:#766c8c;font-size:12px}
@@ -497,20 +491,8 @@ button:focus-visible,[role="button"]:focus-visible,input:focus-visible,select:fo
 .scs-iskra .ik-chart .dot{stroke:#fff;stroke-width:1.2}
 .scs-iskra .ik-graph-label b{font-size:14px}
 .scs-iskra>.card{border-radius:24px;padding:16px 17px}
-.scs-iskra .ik-time-stat{gap:8px}
-.scs-iskra .ik-time-stat .ik-tile{min-height:88px;border-radius:20px;padding:10px 9px}
-.scs-iskra .ik-time-stat .ik-tile strong{font-size:22px;margin:5px 0 2px}
-.scs-iskra .ik-time-stat .ik-tile small{font-size:10px}
 .scs-iskra .ik-grade-row{min-height:57px;padding:10px 2px}
 .scs-iskra .ik-grade-name{font-size:13px}
-.scs-iskra .ik-filter-row{
-  display:flex;gap:6px;overflow-x:auto!important;
-  padding:2px 1px 5px;scrollbar-width:none
-}
-.scs-iskra .ik-filter{
-  border-radius:17px;flex:0 0 auto;min-width:79px;
-  padding:10px 13px;font-size:11px;line-height:1.15
-}
 .scs-iskra .ik-official{border-radius:18px;padding:12px 14px}
 .scs-iskra .ik-official b{display:block;line-height:1.35}
 .scs-iskra .ik-official small{display:block;line-height:1.35;margin-top:3px}
@@ -541,7 +523,6 @@ button:focus-visible,[role="button"]:focus-visible,input:focus-visible,select:fo
   .ik-profile .ik-time-stat .ik-tile{padding:10px 7px}
   .scs-iskra .ik-main-card .ik-star{width:80px!important;height:80px!important}
   .scs-iskra .ik-main-card .ik-number{font-size:40px!important}
-  .scs-iskra .ik-filter{font-size:10px;min-width:75px}
 }
 @media(prefers-reduced-motion:reduce){
   .ik-action-row,.ik-mini-btn,.bar button{transition:none!important}
@@ -719,4 +700,34 @@ button:focus-visible,[role="button"]:focus-visible,input:focus-visible,select:fo
   .ik-plan-today-row{gap:5px;padding:7px}
   .ik-plan-today-state,.ik-plan-today-button{font-size:10px!important}
   .ik-plan-today-button{padding:6px!important}
+}
+
+/* School screen refresh: keep period choice compact and the real grade trend in view. */
+.scs-iskra .ik-period-control{
+  display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:12px
+}
+.scs-iskra .ik-period-select-label{
+  color:#75698d;font-size:12px;font-weight:700
+}
+.scs-iskra .ik-period-select{
+  width:100%;min-height:44px;padding:9px 38px 9px 13px;border:1px solid #e9def5;
+  border-radius:15px;background:#fff;color:#5c458f;font:inherit;font-size:14px;font-weight:750;
+  box-shadow:0 2px 7px rgba(119,88,162,.04)
+}
+.scs-iskra .ik-period-select:focus-visible{
+  outline:3px solid rgba(139,98,238,.3);outline-offset:2px
+}
+.scs-iskra .ik-school-period-lead{margin-bottom:0}
+.scs-iskra .ik-school-chart-card{padding:13px 14px!important}
+.scs-iskra .ik-school-chart-card .ik-chart{max-height:220px}
+.scs-iskra .ik-school-chart-note{margin:-5px 2px 0;color:#74688a;font-size:11px;line-height:1.4}
+.scs-iskra .ik-grade-note{font-size:11px;line-height:1.45;margin:0 3px 5px}
+.scs-iskra .ik-subject-work-list .ik-row-between{margin-bottom:8px}
+.scs-iskra .ik-subject-work-list .ik-detail-type{min-width:0;overflow-wrap:anywhere}
+.scs-iskra .ik-detail-page .ik-row-between:first-child{margin-bottom:2px}
+.scs-iskra .ik-detail-page .ik-main-card{margin-top:1px}
+.scs-iskra .ik-child-grade-copy small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+@media(max-width:365px){
+  .scs-iskra .ik-school-chart-card{padding:11px 10px!important}
+  .scs-iskra .ik-period-select{min-height:46px;font-size:14px}
 }
