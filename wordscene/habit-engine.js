@@ -21,7 +21,7 @@ function takePraise(h,at=Date.now()){
  const st=stats(h,at),d=h.days[st.today];if(!d?.qualified||d.praised)return null;d.praised=true;
  const n=st.current,milestone=[3,7,14,30].includes(n);
  const title=n===1?'Первый день есть!':n+' '+(n%10===1&&n%100!==11?'день':n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?'дня':'дней')+' подряд!';
- const text=n===7?'Ты находила время для английского всю неделю.':n===14?'Уже две недели ты каждый день возвращаешься к английскому.':n===30?'Тридцать дней занятий — шаг за шагом!':n===3?'Ты возвращаешься к словам. Уже третий день подряд!':d.newDone?'Сегодня ты позанималась английским. Ещё один шаг!':'Сегодня ты повторила знакомые слова. Ещё один день в копилку!';
+ const text=n===7?'Целая неделя занятий английским.':n===14?'Уже две недели ты каждый день возвращаешься к английскому.':n===30?'Тридцать дней занятий — шаг за шагом!':n===3?'Ты возвращаешься к словам. Уже третий день подряд!':d.newDone?'Сегодня занятие английским завершено. Ещё один шаг!':'Сегодня знакомые слова повторены. Ещё один день в копилке!';
  return {day:st.today,title,text,milestone,count:n};
 }
 const api={day,shift,ensure,stats,record,takePraise};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.WordSceneHabit=api;
