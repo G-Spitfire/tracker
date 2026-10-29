@@ -475,9 +475,13 @@ function ikFreshness() {
   if(!state.data?.syncedAt)return 'Дата последней выгрузки неизвестна';
   const date=new Date(state.data.syncedAt);
   if(!Number.isFinite(date.getTime()))return 'Дата последней выгрузки неизвестна';
-  const stamp=date.toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  const isToday=date.toDateString()===new Date().toDateString();
+  const stamp=isToday
+    ? date.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})
+    : date.toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
   const stale=Date.now()-date.getTime()>24*3600*1000;
-  return (state.offline?'Офлайн-копия':'Обновлено')+' · '+stamp+(stale?' · проверь обновление':'');
+  const label=state.offline?'Офлайн-копия':isToday?'Обновлено сегодня':'Обновлено';
+  return label+' · '+stamp+(stale?' · проверь обновление':'');
 }
 function ikSchoolDataDetails(){
   const range=ikRange();
@@ -598,7 +602,8 @@ function viewIskra() {
   });
   const countWord=works.length===1?'оценка':works.length<5?'оценки':'оценок';
   const periodLabel=ikPeriodRangeLabel(ikPeriod);
-  html+='<div class="ik-school-sync-row ik-school-sync-top"><span><i aria-hidden="true">✓</i>'+esc(ikFreshness())+'</span><button type="button" class="ik-btn-small" data-sc-action="refresh" '+(state.loading?'disabled':'')+'>↻ Обновить</button></div>';
+  const freshness=ikFreshness(),syncWarning=!!state.offline||!!state.error||freshness.includes('проверь обновление');
+  html+='<div class="ik-school-sync-row ik-school-sync-top"><span role="status"><i class="'+(syncWarning?'is-warning':'')+'" aria-hidden="true">'+(syncWarning?'!':'✓')+'</i>'+esc(freshness)+'</span><button type="button" class="ik-btn-small" data-sc-action="refresh" '+(state.loading?'disabled':'')+'>↻ Обновить</button></div>';
   html+='<section class="ik-school-summary">'+
     '<div class="ik-school-summary-average"><span class="ik-school-kpi-icon" aria-hidden="true">▮</span><div><small>Средний балл</small><strong>'+ikF(mean)+'</strong><span>'+works.length+' '+countWord+' за выбранный период</span></div></div>'+
     '<div class="ik-school-summary-period"><span class="ik-school-kpi-icon" aria-hidden="true">▣</span><div><small>Период</small><strong>'+esc(periodLabel)+'</strong></div></div></section>';
