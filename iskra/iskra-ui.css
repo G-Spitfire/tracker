@@ -790,3 +790,196 @@ button:focus-visible,[role="button"]:focus-visible,input:focus-visible,select:fo
 .scs-iskra .ik-school-trend--down{color:#b04e62;background:#fff0f2}
 .scs-iskra .ik-school-trend--flat{color:#7558a5;background:#f3edfb}
 @media(max-width:365px){.scs-iskra .ik-school-trend{padding:4px 6px}.scs-iskra .ik-school-trend small{font-size:8px}}
+
+
+/* School grades redesign: compact overview, current-quarter outcomes, responsive subject cards. */
+.scs-iskra .ik-school-header{
+  display:flex;align-items:center;gap:9px;padding:2px 2px 0;min-width:0
+}
+.scs-iskra .ik-school-header .ik-header-back{
+  flex:none;width:32px;height:38px;border:0;border-radius:12px;background:#ffffff9c;
+  color:#7652ba;font-size:27px;line-height:1;cursor:pointer
+}
+.scs-iskra .ik-school-header>div{min-width:0}
+.scs-iskra .ik-school-header h1{
+  margin:0;color:#291344;font-size:28px;line-height:1.08;letter-spacing:-.035em;font-weight:850
+}
+.scs-iskra .ik-school-header small{
+  display:block;margin-top:3px;color:#917b9f;font-size:12px;font-weight:700
+}
+.scs-iskra .ik-school-sync-top{
+  min-height:48px;padding:6px 8px 6px 12px;border:1px solid #fff;
+  border-radius:26px;background:rgba(255,255,255,.78);box-shadow:0 5px 15px rgba(116,73,129,.08)
+}
+.scs-iskra .ik-school-sync-top>span{
+  display:flex;align-items:center;gap:8px;color:#57456e;font-size:12px;white-space:nowrap
+}
+.scs-iskra .ik-school-sync-top>span i{
+  display:grid;place-items:center;width:26px;height:26px;border-radius:50%;
+  background:#48b87a;color:#fff;font-style:normal;font-size:15px;font-weight:900;flex:none
+}
+.scs-iskra .ik-school-sync-top .ik-btn-small{
+  min-height:36px;border-radius:20px;background:#fff;color:#7138c9;
+  box-shadow:0 2px 7px rgba(91,52,143,.12);padding:6px 12px;font-size:12px;font-weight:800
+}
+.scs-iskra .ik-school-summary{
+  display:grid;grid-template-columns:1.12fr .88fr;align-items:center;gap:0;
+  padding:14px 12px;border:1px solid #fff;border-radius:22px;
+  background:rgba(255,255,255,.93);box-shadow:0 7px 20px rgba(111,77,152,.08)
+}
+.scs-iskra .ik-school-summary-average,.scs-iskra .ik-school-summary-period{
+  display:flex;align-items:flex-start;gap:9px;min-width:0
+}
+.scs-iskra .ik-school-summary-period{
+  min-height:72px;padding:8px 0 8px 12px;border-left:1px solid #eee7f3
+}
+.scs-iskra .ik-school-kpi-icon{
+  width:30px;height:30px;display:grid;place-items:center;border-radius:10px;
+  background:#f3eaff;color:#8755d5;font-size:17px;font-weight:800;flex:none
+}
+.scs-iskra .ik-school-summary small{
+  display:block;color:#77698b;font-size:12px;line-height:1.35
+}
+.scs-iskra .ik-school-summary-average strong{
+  display:block;color:#712bc9;font-size:38px;line-height:1.03;letter-spacing:-1px;font-weight:850;font-variant-numeric:tabular-nums
+}
+.scs-iskra .ik-school-summary-average div>span{
+  display:block;margin-top:4px;color:#80748e;font-size:10px;line-height:1.25
+}
+.scs-iskra .ik-school-summary-period strong{
+  display:block;margin-top:7px;color:#282047;font-size:12px;line-height:1.35;font-weight:800
+}
+.scs-iskra .ik-school-chart-card{padding:14px 13px!important}
+.scs-iskra .ik-school-chart-heading{align-items:center;margin-bottom:5px}
+.scs-iskra .ik-school-chart-heading>div:first-child>b{font-size:15px;line-height:1.25}
+.scs-iskra .ik-school-chart-heading .ik-period-control{display:block;flex:none;max-width:54%}
+.scs-iskra .ik-school-chart-heading .ik-period-select{
+  min-height:35px;padding:6px 29px 6px 10px;border:0;border-radius:20px;
+  background:#f6f2fa;font-size:10px;font-weight:650
+}
+.scs-iskra .ik-school-chart-note{
+  display:flex;align-items:center;gap:6px;margin-top:4px;color:#817793;font-size:10px
+}
+.scs-iskra .ik-school-chart-note span{font-size:14px}
+.scs-iskra .ik-school-quarter-card{
+  padding:14px 13px 11px;border:1px solid #fff;border-radius:22px;
+  background:rgba(255,255,255,.94);box-shadow:0 7px 20px rgba(111,77,152,.08)
+}
+.scs-iskra .ik-school-quarter-heading{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:7px
+}
+.scs-iskra .ik-school-quarter-heading h2{
+  margin:0;color:#221746;font-size:16px;line-height:1.25;letter-spacing:-.02em;font-weight:850
+}
+.scs-iskra .ik-quarter-label{
+  flex:none;padding:5px 7px;border-radius:12px;background:#f4edff;color:#7954b4;
+  font-size:9px;font-weight:750;white-space:nowrap
+}
+.scs-iskra .ik-school-quarter-layout{
+  display:grid;grid-template-columns:96px minmax(115px,1fr) minmax(100px,.9fr);
+  align-items:center;gap:7px;margin-top:9px
+}
+.scs-iskra .ik-quarter-donut{
+  width:90px;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;position:relative;margin:auto
+}
+.scs-iskra .ik-quarter-donut:before{
+  content:"";position:absolute;inset:21px;border-radius:50%;background:#fff
+}
+.scs-iskra .ik-quarter-donut>span{
+  position:relative;z-index:1;display:block;text-align:center;color:#5b4a72;font-size:9px;line-height:1.15
+}
+.scs-iskra .ik-quarter-donut b{
+  display:block;color:#211344;font-size:18px;line-height:1.1;font-variant-numeric:tabular-nums
+}
+.scs-iskra .ik-quarter-legend{display:grid;gap:8px;min-width:0}
+.scs-iskra .ik-quarter-legend-row{
+  display:grid;grid-template-columns:12px 12px minmax(0,1fr);align-items:center;gap:6px;
+  color:#3d3158;font-size:11px;line-height:1.2
+}
+.scs-iskra .ik-quarter-legend-row small{color:#857990;font-size:9px}
+.scs-iskra .ik-quarter-swatch{width:11px;height:11px;border-radius:50%}
+.scs-iskra .ik-quarter-swatch--5{background:#4cb57a}
+.scs-iskra .ik-quarter-swatch--4{background:#f6bb4b}
+.scs-iskra .ik-quarter-swatch--3{background:#f27f68}
+.scs-iskra .ik-quarter-swatch--2{background:#9c78dd}
+.scs-iskra .ik-quarter-praise{
+  position:relative;min-height:65px;display:flex;align-items:center;gap:4px;padding:10px 8px;
+  border-radius:17px;background:linear-gradient(135deg,#f7eaff,#f2e4ff);
+  color:#553473;font-size:12px;line-height:1.3;font-weight:650
+}
+.scs-iskra .ik-quarter-praise .ik-star{width:32px;height:32px;object-fit:contain;flex:none}
+.scs-iskra .ik-quarter-note{
+  margin:8px 2px 0;color:#80748d;font-size:9px;line-height:1.35
+}
+.scs-iskra .ik-school-subject-heading{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 1px -3px
+}
+.scs-iskra .ik-school-subject-heading .ik-sec-title{
+  margin:0;color:#34114f;font-size:21px;font-weight:850
+}
+.scs-iskra .ik-school-sort-label select{
+  max-width:145px;min-height:34px;padding:5px 26px 5px 10px;border:0;border-radius:19px;
+  appearance:auto;background:rgba(255,255,255,.78);color:#594071;font:inherit;font-size:11px
+}
+.scs-iskra .ik-visually-hidden{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0,0,0,0);white-space:nowrap;border:0
+}
+.scs-iskra .ik-school-subject-grid{display:grid;grid-template-columns:1fr;gap:8px}
+.scs-iskra .ik-school-subject-card{
+  width:100%;min-width:0;display:grid;grid-template-columns:34px minmax(0,1fr) 12px;
+  align-items:start;gap:3px 8px;position:relative;padding:12px 13px 11px;
+  border:1px solid #fff;border-radius:19px;background:rgba(255,255,255,.96);
+  box-shadow:0 6px 16px rgba(112,70,115,.08);text-align:left;color:#211344;font:inherit;cursor:pointer
+}
+.scs-iskra .ik-school-card-icon{
+  grid-column:1;grid-row:1;display:grid;place-items:center;width:32px;height:32px;
+  border-radius:10px;background:#e8f3ff;font-size:20px
+}
+.scs-iskra .ik-school-card-icon .ik-art--grade{width:31px;height:31px}
+.scs-iskra .ik-school-card-main{grid-column:2;grid-row:1;min-width:0;display:grid}
+.scs-iskra .ik-school-card-main>b{
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#241744;font-size:14px;line-height:1.25;font-weight:850
+}
+.scs-iskra .ik-school-card-main>small{margin-top:2px;color:#877b96;font-size:10px}
+.scs-iskra .ik-school-card-main>strong{
+  margin-top:1px;color:#4e197d;font-size:21px;line-height:1.08;font-weight:850;font-variant-numeric:tabular-nums
+}
+.scs-iskra .ik-school-card-chevron{
+  grid-column:3;grid-row:1;color:#9888ae;font-size:21px;line-height:1.1
+}
+.scs-iskra .ik-school-card-latest{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:6px}
+.scs-iskra .ik-school-card-latest>small{width:100%;color:#897d98;font-size:10px;line-height:1.2}
+.scs-iskra .ik-school-card-latest>span{display:flex;gap:6px}
+.scs-iskra .ik-school-card-latest i{
+  display:grid;place-items:center;width:25px;height:25px;border-radius:50%;
+  background:#ddf2e1;color:#326143;font-size:13px;font-style:normal;font-weight:850
+}
+.scs-iskra .ik-school-card-latest i.grade-4{background:#ffedc8;color:#785318}
+.scs-iskra .ik-school-card-latest i.grade-3{background:#ffe0d9;color:#a14938}
+.scs-iskra .ik-school-card-latest i.grade-2{background:#f4dff0;color:#8c4383}
+.scs-iskra .ik-school-result-badge{
+  grid-column:2/4;grid-row:2;justify-self:start;margin-top:5px;padding:6px 8px;
+  border-radius:12px;font-size:10px;line-height:1.15;font-weight:750;white-space:nowrap
+}
+.scs-iskra .ik-school-result-badge.is-official{background:#fff0dd;color:#8b5420}
+.scs-iskra .ik-school-result-badge.is-forecast{background:#f2e8ff;color:#6533af}
+.scs-iskra .ik-school-subject-card:focus-visible{outline:3px solid #8d64e8;outline-offset:2px}
+.scs-iskra .ik-school-settings{margin-top:1px}
+.scs-iskra .ik-school-settings-content{gap:8px}
+@media(max-width:420px){
+  .scs-iskra .ik-school-quarter-layout{grid-template-columns:82px minmax(0,1fr);gap:7px}
+  .scs-iskra .ik-quarter-donut{width:78px}
+  .scs-iskra .ik-quarter-donut:before{inset:18px}
+  .scs-iskra .ik-quarter-praise{grid-column:1/-1;min-height:44px;padding:7px 10px}
+  .scs-iskra .ik-quarter-praise .ik-star{width:28px;height:28px}
+  .scs-iskra .ik-school-summary-average strong{font-size:34px}
+  .scs-iskra .ik-school-header h1{font-size:26px}
+  .scs-iskra .ik-school-chart-heading>div:first-child>b{font-size:13px}
+  .scs-iskra .ik-school-chart-heading .ik-period-select{font-size:9px}
+  .scs-iskra .ik-school-sync-top>span{font-size:10px}
+}
+@media(min-width:700px){
+  main:has(.scs-iskra){max-width:760px}
+  .scs-iskra .ik-school-subject-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
