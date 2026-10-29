@@ -18,13 +18,14 @@ function valid(data,count){
   if(!Object.entries(h.days).every(([key,d])=>date(key)&&object(d)&&Array.isArray(d.reviews)&&d.reviews.every(w=>typeof w==='string')))return false;
  }
  const s=data.session;if(s===undefined||s===null)return true;
- if(!object(s)||!['new','review'].includes(s.part)||!['learn','test','round','writing','between','result'].includes(s.phase))return false;
+ if(!object(s)||!['new','review','writing'].includes(s.part)||!['learn','test','round','writing','between','result'].includes(s.phase))return false;
  if(!Array.isArray(s.ids)||!s.ids.length||!s.ids.every(i=>index(i,count))||new Set(s.ids).size!==s.ids.length)return false;
  if(!['completed','errors','partErrors'].every(k=>Array.isArray(s[k])))return false;
  if(s.newIds!==undefined&&(!Array.isArray(s.newIds)||!s.newIds.every(i=>index(i,count))))return false;
  if(s.phase==='learn'&&!index(s.learnIndex,s.ids.length))return false;
  if(s.part==='new'&&['test','round'].includes(s.phase)&&(![0,1].includes(s.dir)||!Array.isArray(s.history)||!Array.isArray(s.history[0])||!Array.isArray(s.history[1])))return false;
  if(s.phase==='test'&&(!Array.isArray(s.queue)||!index(s.pos,s.queue.length)||!s.queue.every(t=>object(t)&&s.ids.includes(t.i)&&[0,1].includes(t.dir))))return false;
+ if(s.writingVersion===2&&(![0,1,2].includes(s.writingPass)||!Array.isArray(s.writingFirstErrors)||!s.writingFirstErrors.every(i=>s.ids.includes(i))||!object(s.writingRetryResults)||!Object.values(s.writingRetryResults).every(a=>Array.isArray(a)&&a.length<=2&&a.every(v=>['correct','incorrect','forgot'].includes(v)))))return false;
  if(s.phase==='writing'&&(!Array.isArray(s.writingIds)||!index(s.writingIndex,s.writingIds.length)||!s.writingIds.every(i=>s.ids.includes(i))))return false;
  return true;
 }
