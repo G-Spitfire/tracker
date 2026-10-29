@@ -421,7 +421,7 @@
   window.addEventListener('schoolCloudUpdated',recordAchievements);
   document.querySelectorAll('.bar button').forEach((b,i)=>{
     const icon=['nav_today','nav_grades','task_star','avatar_girl'][i];
-    const text=['Сегодня','Школа','Звёзды','Профиль'][i];
+    const text=['Сегодня','Оценки','Звёзды','Профиль'][i];
     b.innerHTML=art(icon,'nav')+text;
   });
   let lastViewedDate=iso(new Date());
