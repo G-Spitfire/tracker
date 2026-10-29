@@ -20,7 +20,6 @@
   const perc = (n,d) => Math.max(0,Math.min(100,d?100*n/d:0));
   const timeIcon = id => ({bg:'🎒',cl:'👕',hw:'📚',en:'🔤',ho:'🧹',ex:'🤸',rd:'📖'})[id]||'✨';
   let filter='all';
-  S.times=S.times && typeof S.times==='object' ? S.times : {};
   if(typeof S.interests!=='string')S.interests='';
   if(!S.ex){S.ex=iso(new Date());save();}
   const weekDates=()=>wk();
@@ -96,7 +95,6 @@
       const details=t.i==='hw'||t.i==='ho';
       return '<div class="ik-task '+(yes?'done':'')+'"><button class="ik-check '+(yes?'done':'')+'" data-action="toggle" data-id="'+t.i+'" aria-label="'+(yes?'Снять отметку: ':'Отметить привычку: ')+safe(t.t)+'" aria-pressed="'+yes+'">'+(yes?'✓':'')+'</button>'+
         (S.customTasks.some(custom=>custom.i===t.i)?'<span class="ik-task-icon ik-task-emoji" aria-hidden="true">'+safe(t.e||'✨')+'</span>':'<span class="ik-task-icon">'+taskIcon(t)+'</span>')+'<button class="ik-task-title" data-action="'+(details?'details':'ikTaskInfo')+'" data-id="'+t.i+'">'+safe(t.t)+(sub?'<small>'+safe(sub)+'</small>':'')+'</button>'+
-        (S.times[t.i]?'<span class="ik-task-time">'+safe(S.times[t.i])+'</span>':'')+
         '</div>';
     };
     const waiting=allTasks.filter(t=>!done.includes(t.i)),finished=allTasks.filter(t=>done.includes(t.i)),full=total>0&&count===total;
@@ -105,8 +103,9 @@
       '<div class="ik-main-card ik-today-hero"><div class="ik-sec-title ik-plan-label">Привычки на сегодня</div><div class="ik-row">'+
       '<div class="ik-progress-circle"><svg viewBox="0 0 120 120" role="img" aria-label="'+(total?'Выполнено '+count+' из '+total+' привычек':'Сегодня нет привычек по расписанию')+'"><circle cx="60" cy="60" r="49" fill="none" stroke="#e4d2ff" stroke-width="12"/><circle cx="60" cy="60" r="49" fill="none" stroke="#9161f0" stroke-width="12" stroke-linecap="round" transform="rotate(-90 60 60)" stroke-dasharray="'+(2*Math.PI*49)+'" stroke-dashoffset="'+(2*Math.PI*49*(1-count/Math.max(total,1)))+'"/></svg><div style="position:relative;text-align:center"><strong>'+ (total?count+'/'+total:'—')+'</strong><span>привычек</span></div></div>'+
       '<div class="ik-progress-side"><strong>'+(total===0?(hasAnyHabit?'Сегодня нет привычек по расписанию':'Выбери свою первую привычку'):full?'Ты всё сделала!':'У тебя получится!')+'</strong><p class="ik-caption">⭐ Сегодня '+st(d)+' звёзд</p><div style="height:8px;border-radius:10px;background:#e0cff8;overflow:hidden"><div style="width:'+perc(count,total)+'%;height:100%;background:linear-gradient(90deg,#aa7af7,#7949ec);border-radius:10px"></div></div></div></div></div>'+
-      '<div class="ik-task-list">'+(waiting.length?waiting.map(renderTask).join(''):!finished.length?'<div class="ik-empty">'+art('star_wave','empty')+'<b>'+(hasAnyHabit?'Сегодня день без привычек':'Начни с маленькой привычки')+'</b><small>'+(hasAnyHabit?'По расписанию сегодня перерыв — можно отдохнуть.':'Добавь то, что тебе хочется попробовать.')+'</small></div>':'')+'</div>'+
-      (finished.length?'<details class="ik-joy-completed"><summary>Уже выполнено · '+finished.length+' <span aria-hidden="true">⌄</span></summary><div class="ik-task-list">'+finished.map(renderTask).join('')+'</div></details>':'')+
+      (waiting.length?'<p class="ik-muted" style="margin:10px 4px 0;text-align:center">Сегодня не получилось? Оставь привычку без отметки — завтра появится новый список.</p>':'')+
+      '<div class="ik-task-list">'+(waiting.length?waiting.map(renderTask).join(''):!finished.length?'<div class="ik-empty">'+art('star_wave','empty')+'<b>'+(hasAnyHabit?'Сегодня день без привычек':'Начни с маленькой привычки')+'</b><small>'+(hasAnyHabit?'По расписанию сегодня перерыв — можно отдохнуть.':'Добавь то, что тебе хочется попробовать.')+'</small></div>':'')+
+      (finished.length?'<p class="ik-muted" style="margin:12px 4px 4px">Уже выполнено</p>'+finished.map(renderTask).join(''):'')+'</div>'+
       '<button type="button" class="ik-add-habit" data-action="ikManageHabits"><span aria-hidden="true">✎</span> Редактировать привычки</button>'+
       '<p class="ik-muted" style="text-align:center">Маленькие шаги тоже считаются!</p></div>';
   }
@@ -224,7 +223,8 @@
     return '<div class="ik-page ik-profile"><div class="ik-heading ik-subscreen-header"><span class="ik-header-spacer" aria-hidden="true"></span><h1>Профиль</h1><button class="ik-top-link ik-settings-link" data-action="ikPersonalSettings" aria-label="Личные настройки">'+art('settings','tiny')+'<span class="ik-settings-text">Настройки</span></button></div>'+
       '<div class="card ik-profile-card"><div class="ik-avatar" aria-label="Аватар">'+art('portrait','avatar')+'<span class="ik-avatar-choice" aria-label="Выбранный символ">'+safe(S.av.e)+'</span></div><div class="ik-profile-body"><strong>'+safe(S.name||'Полина')+' ✨</strong><small>'+safe(levels[l][1])+' · уровень '+(l+1)+'</small><div class="ik-level-track"><div style="width:'+prog+'%"></div></div><small>'+(next?Math.max(0,gained)+' из '+step+' звёзд до уровня':'Все уровни пройдены')+'</small></div><button class="ik-mini-btn" data-action="profile" aria-label="Изменить профиль">✎</button></div>'+
       '<div class="ik-row-between"><h2 class="ik-sec-title">Моя статистика</h2><button class="ik-top-link" data-action="ikProfileWindow">'+profileWindowLabel()+' ▾</button></div>'+statsTiles()+habitRegularity()+
-      '<div class="ik-list">'+item('heart','Мои интересы',S.interests||'Добавь то, что тебе нравится','ikInterests')+
+      '<div class="ik-list">'+item('task_star','Мои привычки','Добавить привычку или изменить дни','ikManageHabits')+
+      item('heart','Мои интересы',S.interests||'Добавь то, что тебе нравится','ikInterests')+
       item('history','История привычек','Что было в прошлые дни','history')+
       item('task_star','Мои звёзды','Уровни и достижения','ikToReward')+
       item('nav_grades','Школа','Предметы и отметки из дневника','ikToGrades')+'</div>'+
@@ -248,10 +248,10 @@
   ACTIONS.ikTaskInfo=(id)=>{
     const task=tasks(iso(new Date())).find(t=>t.i===id);if(!task)return;
     const done=dn(iso(new Date())).includes(id);
-    sheet('<h2>'+safe(task.t)+'</h2><p class="mu sm">'+safe(task.s||'Привычка на сегодня')+'</p><p class="mu sm">Время: '+safe(S.times[id]||'не задано')+'</p><div data-sheet-footer><button class="btn" data-action="ikTaskDone" data-id="'+safe(id)+'">'+(done?'Снять отметку':'Отметить выполненной')+'</button><button class="btn g" data-action="ikHabitHide" data-id="'+safe(id)+'">Убрать из привычек</button></div>');
+    sheet('<h2>'+safe(task.t)+'</h2><p class="mu sm">'+safe(task.s||'Привычка на сегодня')+'</p><div data-sheet-footer><button class="btn" data-action="ikTaskDone" data-id="'+safe(id)+'">'+(done?'Снять отметку':'Отметить выполненной')+'</button><button class="btn g" data-action="ikHabitHide" data-id="'+safe(id)+'">Убрать из привычек</button></div>');
   };
   ACTIONS.ikTaskDone=(id)=>{cs();toggleTask(id)};
-  ACTIONS.ikPersonalSettings=()=>sheet('<h2>Мои настройки</h2><button class="btn g" data-action="profile">Имя и аватар</button><button class="btn g" data-action="ikInterests">Мои интересы</button><p class="mu sm">Привычки можно добавлять и менять на главной.</p>');
+  ACTIONS.ikPersonalSettings=()=>sheet('<h2>Мои настройки</h2><button class="btn g" data-action="profile">Имя и аватар</button><button class="btn g" data-action="ikInterests">Мои интересы</button><p class="mu sm">Управление привычками — в профиле, в разделе «Мои привычки».</p>');
   // Real-world reward actions are retired. Historical records stay in backups.
   ACTIONS.ikLevels=()=>sheet('<h2>Твои уровни</h2>'+levels.map((lv,i)=>'<div class="row"><b>'+(i+1)+'. '+safe(lv[1])+'</b><span class="mu">'+lv[0]+' ⭐</span></div>').join('')+'<p class="mu sm">Звёзды за привычки помогают переходить на новые уровни.</p>');
   ACTIONS.ikAbout=()=>sheet('<h2>Об Искре</h2><p>«Искра» помогает замечать свои привычки, радоваться достижениям и узнавать школьные оценки.</p><p class="mu sm">Оценки загружаются из школьного дневника через защищённое подключение. Звёзды и отметки привычек сохраняются на этом устройстве.</p>');
@@ -283,7 +283,7 @@
     const catalog=taskCatalog(),date=iso(new Date());
     const active=catalog.filter(t=>!S.hiddenTasks.includes(t.i)&&(t.i!=='ex'||date>=S.ex));
     const archived=catalog.filter(t=>S.hiddenTasks.includes(t.i));
-    const activeRows=active.length?active.map(t=>'<div class="ik-habit-manage-row"><span class="ik-habit-manage-icon">'+safe(t.e||'✨')+'</span><span class="ik-habit-manage-copy"><b>'+safe(t.t)+'</b><small>'+safe(daysLabel(daysForHabit(t.i)))+(S.times[t.i]?' · '+safe(S.times[t.i]):'')+'</small></span><button type="button" class="ik-habit-days-button" data-action="ikHabitSchedule" data-id="'+safe(t.i)+'" aria-label="Дни и время привычки '+safe(t.t)+'">Дни</button><button type="button" class="ik-habit-remove" data-action="ikHabitHide" data-id="'+safe(t.i)+'" aria-label="Убрать привычку '+safe(t.t)+'">Убрать</button></div>').join(''):'<p class="mu sm">Пока нет привычек. Выбери идею ниже или придумай свою.</p>';
+    const activeRows=active.length?active.map(t=>'<div class="ik-habit-manage-row"><span class="ik-habit-manage-icon">'+safe(t.e||'✨')+'</span><span class="ik-habit-manage-copy"><b>'+safe(t.t)+'</b><small>'+safe(daysLabel(daysForHabit(t.i)))+'</small></span><button type="button" class="ik-habit-days-button" data-action="ikHabitSchedule" data-id="'+safe(t.i)+'" aria-label="Дни привычки '+safe(t.t)+'">Дни</button><button type="button" class="ik-habit-remove" data-action="ikHabitHide" data-id="'+safe(t.i)+'" aria-label="Убрать привычку '+safe(t.t)+'">Убрать</button></div>').join(''):'<p class="mu sm">Пока нет привычек. Выбери идею ниже или придумай свою.</p>';
     const archivedRows=archived.map(t=>'<div class="ik-habit-manage-row"><span class="ik-habit-manage-icon">'+safe(t.e||'✨')+'</span><span class="ik-habit-manage-copy"><b>'+safe(t.t)+'</b><small>Прошлые отметки сохранены</small></span><button type="button" class="ik-habit-restore" data-action="ikHabitRestore" data-id="'+safe(t.i)+'">Вернуть</button></div>').join('');
     const ideaTiles=quickHabitIdeas.map(item=>'<button type="button" class="ik-habit-idea" data-action="ikHabitPreset" data-id="'+item.id+'"><span aria-hidden="true">'+item.icon+'</span><b>'+safe(item.title)+'</b></button>').join('');
     sheet('<h2>Привычки</h2><div class="ik-habit-manager"><p class="mu sm">Выбирай привычки сама. Убранные привычки можно вернуть, а прошлые отметки останутся.</p><h3>Мои привычки</h3><div class="ik-habit-manage-list">'+activeRows+'</div>'+
@@ -293,17 +293,35 @@
   function habitForm(){
     if(!habitFormDraft)return habitManager();
     const d=habitFormDraft;
-    sheet('<h2>Новая привычка</h2><div class="ik-habit-form"><p class="mu sm">Небольшую привычку легче повторять. Выбери дни и, если хочешь, напиши, когда удобно её делать.</p>'+
+    sheet('<h2>Новая привычка</h2><div class="ik-habit-form"><p class="mu sm">Выбери дни. Подсказку для себя можно добавить по желанию.</p>'+
       '<label class="sheet-field">Название привычки<input id="ik-habit-name" maxlength="45" value="'+safe(d.name)+'" placeholder="Например, почитать 10 минут"></label>'+
-      '<label class="sheet-field">Когда удобно? <span class="mu sm">Необязательно</span><input id="ik-habit-cue" maxlength="50" value="'+safe(d.cue)+'" placeholder="Например, после ужина"></label>'+
+      '<label class="sheet-field">Подсказка для себя <span class="mu sm">Необязательно</span><input id="ik-habit-cue" maxlength="50" value="'+safe(d.cue)+'" placeholder="Например, после ужина"></label>'+
       '<div class="ik-habit-day-group"><b>В какие дни?</b><div class="ik-habit-day-picker">'+habitDays.map(([label,wd])=>'<button type="button" id="ik-habit-day-'+wd+'" class="ik-habit-day '+(d.days.includes(wd)?'on':'')+'" data-action="ikHabitFormDay" data-arg="'+wd+'" aria-pressed="'+d.days.includes(wd)+'">'+label+'</button>').join('')+'</div></div></div>'+
-      '<div data-sheet-footer><button type="button" class="btn g" data-action="ikHabitBack">Назад</button><button type="button" class="btn" data-action="ikHabitSave">Добавить</button></div>','ik-habit-form');
+      '<div data-sheet-footer><button type="button" class="btn g" data-action="ikHabitBack">Отмена</button><button type="button" class="btn" data-action="ikHabitSave">Добавить</button></div>','ik-habit-form');
   }
   function captureHabitForm(){
     const name=document.getElementById('ik-habit-name'),cue=document.getElementById('ik-habit-cue');
     if(habitFormDraft&&name)habitFormDraft.name=name.value;
     if(habitFormDraft&&cue)habitFormDraft.cue=cue.value;
   }
+  function openHabitForm(draft){
+    draft.initial={name:draft.name,cue:draft.cue,days:draft.days.slice()};
+    habitFormDraft=draft;habitForm();
+  }
+  function sameDays(a,b){return a.length===b.length&&a.every(day=>b.includes(day))}
+  function canLeaveHabitDraft(){
+    let dirty=false;
+    if(habitFormDraft){
+      captureHabitForm();
+      const original=habitFormDraft.initial;
+      dirty=habitFormDraft.name!==original.name||habitFormDraft.cue!==original.cue||!sameDays(habitFormDraft.days,original.days);
+    }else if(childScheduleDraft){
+      dirty=!sameDays(childScheduleDraft.days,daysForHabit(childScheduleDraft.id));
+    }
+    if(dirty&&!confirm('Выйти без сохранения? Изменения пропадут.'))return false;
+    habitFormDraft=null;childScheduleDraft=null;return true;
+  }
+  window.ikHabitCanCloseSheet=canLeaveHabitDraft;
   function setHabitHidden(id,hidden,showToast=true){
     const task=taskCatalog().find(t=>t.i===id);if(!task)return;
     preserveTodayStarBonus();
@@ -318,10 +336,10 @@
   ACTIONS.ikManageHabits=()=>{habitFormDraft=null;childScheduleDraft=null;habitManager()};
   ACTIONS.ikHabitPreset=id=>{
     const item=quickHabitIdeas.find(x=>x.id===id);if(!item)return;
-    habitFormDraft={name:item.title,cue:'',icon:item.icon,days:[1,2,3,4,5]};habitForm();
+    openHabitForm({name:item.title,cue:'',icon:item.icon,days:[1,2,3,4,5]});
   };
-  ACTIONS.ikHabitCustom=()=>{habitFormDraft={name:'',cue:'',icon:'✨',days:[1,2,3,4,5]};habitForm()};
-  ACTIONS.ikHabitBack=()=>{habitFormDraft=null;habitManager()};
+  ACTIONS.ikHabitCustom=()=>openHabitForm({name:'',cue:'',icon:'✨',days:[1,2,3,4,5]});
+  ACTIONS.ikHabitBack=()=>{if(canLeaveHabitDraft())habitManager()};
   ACTIONS.ikHabitFormDay=(_,__,el)=>{
     captureHabitForm();const day=Number(el.dataset.arg);if(!Number.isInteger(day)||day<0||day>6)return;
     const at=habitFormDraft.days.indexOf(day);if(at>=0)habitFormDraft.days.splice(at,1);else habitFormDraft.days.push(day);
@@ -347,32 +365,26 @@
   function renderChildSchedule(){
     if(!childScheduleDraft)return;
     const task=taskCatalog().find(t=>t.i===childScheduleDraft.id);if(!task)return habitManager();
-    sheet('<h2>Дни и время</h2><div class="ik-habit-form"><p class="mu sm">'+safe(task.t)+' будет появляться в выбранные дни. Время можно не задавать.</p><div class="ik-habit-day-group"><b>В какие дни?</b><div class="ik-habit-day-picker">'+habitDays.map(([label,wd])=>'<button type="button" id="ik-habit-day-'+wd+'" class="ik-habit-day '+(childScheduleDraft.days.includes(wd)?'on':'')+'" data-action="ikHabitScheduleDay" data-arg="'+wd+'" aria-pressed="'+childScheduleDraft.days.includes(wd)+'">'+label+'</button>').join('')+'</div></div><label class="sheet-field">Во сколько? <span class="mu sm">Необязательно · напоминание не отправляется</span><input type="time" id="ik-habit-time" value="'+safe(childScheduleDraft.time)+'"></label></div><div data-sheet-footer><button type="button" class="btn g" data-action="ikHabitBackToManage">Назад</button><button type="button" class="btn" data-action="ikHabitScheduleSave">Сохранить</button></div>','ik-habit-schedule');
+    sheet('<h2>Дни привычки</h2><div class="ik-habit-form"><p class="mu sm">'+safe(task.t)+' будет появляться в выбранные дни.</p><div class="ik-habit-day-group"><b>В какие дни?</b><div class="ik-habit-day-picker">'+habitDays.map(([label,wd])=>'<button type="button" id="ik-habit-day-'+wd+'" class="ik-habit-day '+(childScheduleDraft.days.includes(wd)?'on':'')+'" data-action="ikHabitScheduleDay" data-arg="'+wd+'" aria-pressed="'+childScheduleDraft.days.includes(wd)+'">'+label+'</button>').join('')+'</div></div></div><div data-sheet-footer><button type="button" class="btn g" data-action="ikHabitBackToManage">Отмена</button><button type="button" class="btn" data-action="ikHabitScheduleSave">Сохранить</button></div>','ik-habit-schedule');
   }
   ACTIONS.ikHabitSchedule=id=>{
     if(!taskCatalog().some(t=>t.i===id))return;
-    childScheduleDraft={id,days:daysForHabit(id).slice(),time:S.times[id]||''};renderChildSchedule();
+    childScheduleDraft={id,days:daysForHabit(id).slice()};renderChildSchedule();
   };
-  function captureChildSchedule(){
-    const input=document.getElementById('ik-habit-time');
-    if(childScheduleDraft&&input)childScheduleDraft.time=input.value;
-  }
   ACTIONS.ikHabitScheduleDay=(_,__,el)=>{
-    if(!childScheduleDraft)return;captureChildSchedule();const day=Number(el.dataset.arg);if(!Number.isInteger(day)||day<0||day>6)return;
+    if(!childScheduleDraft)return;const day=Number(el.dataset.arg);if(!Number.isInteger(day)||day<0||day>6)return;
     const at=childScheduleDraft.days.indexOf(day);if(at>=0)childScheduleDraft.days.splice(at,1);else childScheduleDraft.days.push(day);
     renderChildSchedule();
   };
-  ACTIONS.ikHabitBackToManage=()=>{childScheduleDraft=null;habitManager()};
+  ACTIONS.ikHabitBackToManage=()=>{if(canLeaveHabitDraft())habitManager()};
   ACTIONS.ikHabitScheduleSave=()=>{
     if(!childScheduleDraft)return;
-    captureChildSchedule();
     if(!childScheduleDraft.days.length)return toast('Оставь хотя бы один день или убери привычку из списка');
     const id=childScheduleDraft.id;preserveTodayStarBonus();S.taskDays[id]=childScheduleDraft.days.slice();
     S.habitScheduleHistory=S.habitScheduleHistory||{};S.habitScheduleHistory[id]=S.habitScheduleHistory[id]||[];
     const today=iso(new Date()),history=S.habitScheduleHistory[id],entry={from:today,days:childScheduleDraft.days.slice()};
     const existing=history.findIndex(e=>e.from===today);if(existing>=0)history[existing]=entry;else history.push(entry);
     history.sort((a,b)=>a.from.localeCompare(b.from));
-    if(childScheduleDraft.time)S.times[id]=childScheduleDraft.time;else delete S.times[id];
     const task=taskCatalog().find(t=>t.i===id);if(task&&!S.hiddenTasks.includes(id))snapshotHabitToday(task,childScheduleDraft.days);
     save();childScheduleDraft=null;render();habitManager();toast('Расписание сохранено');
   };
@@ -417,7 +429,7 @@
     const current=iso(new Date());
     if(current!==lastViewedDate){lastViewedDate=current;if(tab==='t'||tab==='r')render()}
   };
-  window.addEventListener('pageshow',()=>{S=store.load();S.times=S.times||{};S.interests=S.interests||'';refreshDate();render()});
+  window.addEventListener('pageshow',()=>{S=store.load();S.interests=S.interests||'';refreshDate();render()});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshDate()});
   setInterval(()=>{if(!document.hidden)refreshDate()},60000);
   render();
