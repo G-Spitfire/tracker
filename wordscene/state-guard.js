@@ -9,7 +9,7 @@ function valid(data,count){
  for(const p of Object.values(data.words)){
   if(!object(p))return false;
   for(const key of ['attempts','errors','sessions','hesitations'])if(p[key]!==undefined&&(!Number.isFinite(p[key])||p[key]<0))return false;
-  if(p.times!==undefined&&(!object(p.times)||![0,1].every(d=>Array.isArray(p.times[d]))))return false;
+  if(p.times!==undefined&&((!object(p.times)&&!Array.isArray(p.times))||![0,1].every(d=>Array.isArray(p.times[d]))))return false;
   const r=p.schedule;if(r===undefined||r===null)continue;
   if(!object(r)||!['daily','spaced','repair'].includes(r.stage)||!date(r.nextDay)||!Array.isArray(r.days)||!Array.isArray(r.checks)||!index(r.interval,4))return false;
   if(!r.days.every(d=>object(d)&&date(d.day)&&typeof d.clean==='boolean')||!r.checks.every(c=>object(c)&&typeof c.id==='string'&&date(c.day)&&Number.isFinite(c.at)))return false;

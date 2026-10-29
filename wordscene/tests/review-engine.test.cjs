@@ -23,5 +23,5 @@ const data={};H.ensure(data,at('2026-10-01'));for(let i=0;i<5;i++)H.record(data.
 H.record(data.habit,{kind:'new',at:at('2026-10-02')});assert.equal(H.stats(data.habit,at('2026-10-03')).current,2);assert.equal(H.stats(data.habit,at('2026-10-04')).current,0);assert.equal(H.stats(data.habit,at('2026-10-04')).best,2);
 const small={};H.ensure(small,at('2026-10-01'));H.record(small.habit,{kind:'review',word:'a',available:2,at:at('2026-10-01')});H.record(small.habit,{kind:'review',word:'a',available:2,at:at('2026-10-01')});assert.equal(H.stats(small.habit,at('2026-10-01')).done,false);H.record(small.habit,{kind:'review',word:'b',available:2,at:at('2026-10-01')});assert.equal(H.stats(small.habit,at('2026-10-01')).done,true);
 for(const bad of [null,[],{words:null},{words:{a:{schedule:{}}}},{words:{},session:{phase:'test',ids:[500]}}])assert.equal(S.valid(bad,500),false);
-assert.equal(S.valid({words:{}},500),true);assert.equal(S.valid({words:{a:p},habit:data.habit},500),true);
+assert.equal(S.valid({words:{mug:{times:[[],[]]}}},500),true);assert.equal(S.valid({words:{}},500),true);assert.equal(S.valid({words:{a:p},habit:data.habit},500),true);
 console.log('PASS: daily/spaced/repair schedule, same-day errors, early repeats, idempotence, skipped dates, calendar boundaries, regularity and state validation.');
