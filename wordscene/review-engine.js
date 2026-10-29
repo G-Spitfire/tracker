@@ -22,7 +22,7 @@ function finish(p,{id,at=Date.now(),directions,clean}){
  const firstDay=r.firstLearnedAt===null?null:day(r.firstLearnedAt);
  // Same-day return is useful but does not stand in for tomorrow's check.
  if(firstDay!==today){const existing=r.days.find(d=>d.day===today);if(existing)existing.clean=existing.clean&&ok;else r.days.push({day:today,clean:ok});r.days.sort((a,b)=>a.day.localeCompare(b.day))}
- p.needsWork=!ok;
+ p.needsWork=!ok||r.days.some(d=>d.day===today&&!d.clean)||r.checks.some(c=>c.day===today&&!c.clean);
  if(!ok){if(r.stage==='spaced')r.stage='repair';r.interval=0;r.nextDay=addDays(today,1);r.repairSince=today;return true}
  // Repeating before the due date or several times today cannot advance stages.
  if(hadToday||today<previousDue){return true}

@@ -1,0 +1,27 @@
+const assert=require('node:assert/strict');
+const R=require('../review-engine.js'),H=require('../habit-engine.js'),S=require('../state-guard.js');
+const at=d=>new Date(d+'T12:00:00').getTime();
+const word=()=>{const p={};R.introduce(p,at('2026-10-01'));return p};
+function finish(p,d,clean=true,id=d){return R.finish(p,{id,at:at(d),directions:{0:clean,1:clean}})}
+const p=word();assert.equal(p.schedule.nextDay,'2026-10-02');assert.equal(R.due(p,at('2026-10-01')),false);
+for(let d=2;d<=8;d++)finish(p,`2026-10-0${d}`);
+assert.equal(p.schedule.stage,'spaced');assert.equal(p.schedule.nextDay,'2026-10-11');
+finish(p,'2026-10-09',true,'early');assert.equal(p.schedule.nextDay,'2026-10-11');
+finish(p,'2026-10-11');assert.equal(p.schedule.nextDay,'2026-10-18');
+finish(p,'2026-10-18');assert.equal(p.schedule.nextDay,'2026-11-01');
+finish(p,'2026-11-01');assert.equal(p.schedule.nextDay,'2026-12-01');
+finish(p,'2026-11-03',false);assert.equal(p.schedule.stage,'repair');assert.equal(p.schedule.nextDay,'2026-11-04');
+finish(p,'2026-11-03',true,'same-day');assert.equal(p.schedule.stage,'repair');
+assert.equal(p.needsWork,true,'A later prompted success must not hide today’s failure');
+finish(p,'2026-11-04');assert.equal(p.schedule.stage,'repair');finish(p,'2026-11-05');assert.equal(p.schedule.stage,'spaced');assert.equal(p.schedule.nextDay,'2026-11-08');
+const d=word();finish(d,'2026-10-02',false,'bad');finish(d,'2026-10-02',true,'good');assert.equal(d.schedule.days[0].clean,false);assert.equal(d.needsWork,true);
+const n=d.schedule.checks.length;assert.equal(finish(d,'2026-10-02',true,'good'),false);assert.equal(d.schedule.checks.length,n);
+const q=word();finish(q,'2026-10-20');assert.equal(q.schedule.days.length,1,'Missed dates cannot be fabricated');
+assert.equal(R.optional(word(),at('2026-10-01')+29*60000),false);assert.equal(R.optional(word(),at('2026-10-01')+30*60000),true);
+assert.equal(R.addDays('2026-12-31',1),'2027-01-01');assert.equal(R.addDays('2028-02-28',1),'2028-02-29');
+const data={};H.ensure(data,at('2026-10-01'));for(let i=0;i<5;i++)H.record(data.habit,{kind:'review',word:'w'+i,at:at('2026-10-01')});assert.equal(H.stats(data.habit,at('2026-10-01')).total,1);assert.ok(H.takePraise(data.habit,at('2026-10-01')));assert.equal(H.takePraise(data.habit,at('2026-10-01')),null);
+H.record(data.habit,{kind:'new',at:at('2026-10-02')});assert.equal(H.stats(data.habit,at('2026-10-03')).current,2);assert.equal(H.stats(data.habit,at('2026-10-04')).current,0);assert.equal(H.stats(data.habit,at('2026-10-04')).best,2);
+const small={};H.ensure(small,at('2026-10-01'));H.record(small.habit,{kind:'review',word:'a',available:2,at:at('2026-10-01')});H.record(small.habit,{kind:'review',word:'a',available:2,at:at('2026-10-01')});assert.equal(H.stats(small.habit,at('2026-10-01')).done,false);H.record(small.habit,{kind:'review',word:'b',available:2,at:at('2026-10-01')});assert.equal(H.stats(small.habit,at('2026-10-01')).done,true);
+for(const bad of [null,[],{words:null},{words:{a:{schedule:{}}}},{words:{},session:{phase:'test',ids:[500]}}])assert.equal(S.valid(bad,500),false);
+assert.equal(S.valid({words:{}},500),true);assert.equal(S.valid({words:{a:p},habit:data.habit},500),true);
+console.log('PASS: daily/spaced/repair schedule, same-day errors, early repeats, idempotence, skipped dates, calendar boundaries, regularity and state validation.');
