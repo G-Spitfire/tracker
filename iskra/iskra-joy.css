@@ -42,19 +42,6 @@ body[data-ik-theme="mint"] .bar button.on{
   color:#fff;font-size:12px;line-height:1.2;font-weight:750;
   font-family:inherit;background:#9266e8;padding:8px 15px
 }
-.ik-joy-completed{
-  background:rgba(255,255,255,.83);border-radius:20px;
-  border:1px solid #f0e6fc;overflow:hidden;
-}
-.ik-joy-completed>summary{
-  padding:14px 16px;cursor:pointer;color:#7966a2;
-  font-size:12px;font-weight:750;list-style:none;
-  display:flex;justify-content:space-between;align-items:center
-}
-.ik-joy-completed>summary::-webkit-details-marker{display:none}
-.ik-joy-completed[open]>summary{background:#faf7ff;border-bottom:1px solid #f1eafa}
-.ik-joy-completed .ik-task-list{box-shadow:none;border:0;border-radius:0}
-.ik-joy-completed .ik-task{opacity:.8}
 .ik-joy-pop{
   position:fixed;left:50%;bottom:calc(94px + env(safe-area-inset-bottom,0px));
   transform:translateX(-50%);width:min(390px,calc(100% - 30px));
@@ -259,7 +246,7 @@ body[data-ik-theme="mint"] .ik-habit-day.on{color:#163f39}
 .ik-habit-day[aria-pressed="true"]{box-shadow:0 3px 9px rgba(106,65,181,.2)}
 .ik-today .ik-check.done{box-shadow:0 3px 9px rgba(107,70,184,.18)}
 .ik-today .ik-task:focus-within{background:#fcf9ff}
-.ik-joy-completed>summary:focus-visible,.ik-habit-archive>summary:focus-visible,
+.ik-habit-archive>summary:focus-visible,
 .ik-joy-all-achievements>summary:focus-visible{outline:3px solid #8d64e8;outline-offset:-3px;border-radius:14px}
 @media(hover:hover){
   .ik-add-habit:hover,.ik-habit-idea:hover,.ik-habit-days-button:hover,

@@ -104,7 +104,7 @@ body.sheet-open #sc{overflow:hidden}
 .sh .sheet-period{font-size:14px;color:var(--mu);margin:0 0 20px}
 @media(min-width:700px){.ov{align-items:center;padding:16px}.sh{border-bottom:1px solid var(--ln);border-radius:24px}}
 @media(max-width:355px){.sh .sheet-head,.sh .sheet-body,.sh .sheet-footer{padding-left:16px;padding-right:16px}.sh .sheet-inline{grid-template-columns:minmax(0,1fr)}.sh .sheet-inline .btn{width:100%}}
-</style><link rel="stylesheet" href="./iskra-ui.css?v=20261028-9"><link rel="stylesheet" href="./iskra-joy.css?v=20261028-3"></head><body><main id="m"></main>
+</style><link rel="stylesheet" href="./iskra-ui.css?v=20261029-1"><link rel="stylesheet" href="./iskra-joy.css?v=20261029-1"></head><body><main id="m"></main>
 <nav class="bar"><button data-t="t"><span>☀️</span>Сегодня</button><button data-t="g"><span>📚</span>Школа</button><button data-t="r"><span>⭐</span>Звёзды</button><button data-t="y"><span>😊</span>Профиль</button></nav>
 <div id="tt"></div><div id="s"></div>
 <script>
@@ -439,7 +439,7 @@ if(window.visualViewport){
 }
 document.addEventListener('keydown',e=>{
   const panel=document.querySelector('.sh');if(!panel)return;
-  if(e.key==='Escape'){e.preventDefault();cs();render();return}
+  if(e.key==='Escape'){e.preventDefault();if(window.ikHabitCanCloseSheet&&!window.ikHabitCanCloseSheet()){e.stopImmediatePropagation();return}cs();render();return}
   if(e.key!=='Tab')return;
   const focusable=[...panel.querySelectorAll('button,input,select,textarea,a[href],summary,[tabindex="0"]')].filter(el=>!el.disabled&&el.getClientRects().length);
   const first=focusable[0],last=focusable[focusable.length-1];
@@ -730,7 +730,7 @@ const ACTIONS={
   detailChip:(j)=>{cur.n=document.getElementById('dn').value;const list=cur.i==='hw'?(window.schoolCloud?.subjects?.()||[]):CONFIG.chores;const k=list[+j];if(!k)return;const x=cur.s.indexOf(k);x<0?cur.s.push(k):cur.s.splice(x,1);renderDetails()},
   saveDetails:()=>saveDetails(),
   removeDetails:()=>removeDetails(),
-  closeSheet:()=>{cs();render()},
+  closeSheet:()=>{if(window.ikHabitCanCloseSheet&&!window.ikHabitCanCloseSheet())return;cs();render()},
   parents:()=>openParents(),
   exportFile:()=>exportBackupFile(),
   pickBackupFile:()=>document.getElementById('backupFileInput').click(),
@@ -756,7 +756,7 @@ function toggleTask(i){
 /* ===== DELEGATION ===== */
 document.addEventListener('click',e=>{
   const closeEl=e.target.closest('[data-close]');
-  if(closeEl&&e.target===closeEl){cs();return}
+  if(closeEl&&e.target===closeEl){if(window.ikHabitCanCloseSheet&&!window.ikHabitCanCloseSheet()){e.preventDefault();e.stopImmediatePropagation();return}cs();return}
   const el=e.target.closest('[data-action]');
   if(!el)return;
   const {action,id,arg,arg2}=el.dataset;
@@ -780,4 +780,4 @@ render();
 if(store.recoveredFromBackup())toast('Данные восстановлены из резервной копии.');
 else if(window.__iskraBadStore)toast('Сохранение приостановлено: восстанови JSON-копию.');
 if(!S.asked&&!window.__iskraBadStore){S.asked=1;save();openProfile()}
-</script><script src="./iskra-ui.js?v=20261028-8"></script><script src="./iskra-joy.js?v=20261028-2"></script><script type="module" src="../shared/school-cloud.js?v=20261028-9" data-school-cloud="iskra"></script></body></html>
+</script><script src="./iskra-ui.js?v=20261029-1"></script><script src="./iskra-joy.js?v=20261028-2"></script><script type="module" src="../shared/school-cloud.js?v=20261028-9" data-school-cloud="iskra"></script></body></html>
