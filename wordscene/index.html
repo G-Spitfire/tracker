@@ -459,4 +459,4 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 $('brand-berry').innerHTML=berryArt().replace('0 0 200 180','52 18 92 120');save();updateSoundButton();home();
 
 if('serviceWorker' in navigator && location.protocol!=='file:') navigator.serviceWorker.register('./sw.js').catch(()=>{});
-</script></body></html>
+</script><script src="./cloud-firestore.js"></script><script type="module" src="./cloud-ui.js"></script></body></html>
