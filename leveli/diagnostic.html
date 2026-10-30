@@ -5,7 +5,7 @@
 <p>Подключение к существующему Firebase-проекту выполняется автоматически.</p>
 <label>Email<input id="email" type="email" autocomplete="username"></label>
 <label>Пароль<input id="password" type="password" autocomplete="current-password"></label>
-<button id="tests">Запустить тесты обработки оценок</button><button id="login" disabled>Войти</button><button id="load" disabled>Проверить школьные данные</button><button id="shape" disabled>Показать структуру grades без значений</button><button id="codes" disabled>Показать коды и типы без оценок</button><button id="mapping" disabled>Проверить соответствие кодов</button><button id="logout" disabled>Выйти</button>
+<button id="tests">Запустить тесты обработки оценок</button><button id="subjects-test">Тест группировки по предметам</button><button id="login" disabled>Войти</button><button id="load" disabled>Проверить школьные данные</button><button id="shape" disabled>Показать структуру grades без значений</button><button id="codes" disabled>Показать коды и типы без оценок</button><button id="mapping" disabled>Проверить соответствие кодов</button><button id="logout" disabled>Выйти</button>
 <pre id="status" role="status" aria-live="polite">Подключение к Firebase…</pre>
 <small>Пароль не записывается в репозиторий или localStorage этой страницы. Firebase Auth может сохранять сессию согласно настройкам SDK. Не делитесь скриншотами с личными данными.</small>
 <script type="module">
@@ -14,6 +14,7 @@ import {firebaseConfig} from "./core/config.js";
 import {signIn,signOutUser,observeUser} from "./core/auth.js";
 import {loadOwnSchoolGrades} from "./core/school.js";
 import {normalizeGrade,normalizeSchoolDocument,averageGrade} from "./core/grades.js";
+import {groupGradesBySubject} from "./core/subjects.js";
 const $=id=>document.getElementById(id),show=msg=>$("status").textContent=msg;
 let unsubscribe=null;
 async function startFirebase(){
@@ -113,6 +114,22 @@ $("tests").onclick=()=>{
     check(normalizeGrade({type:"Посещаемость",valueCode:"5/5"}).kind==="attendance","приоритет посещаемости");
     show("Тесты обработки оценок пройдены: 7 из 7. Тестовые данные вымышленные.");
   }catch(e){show("Ошибка тестов: "+e.message)}
+};
+$("subjects-test").onclick=()=>{
+  try{
+    const rows=[
+      {subjectId:"a",subject:"Математика",type:"Работа на уроке",valueCode:"5/5"},
+      {subjectId:"a",subject:"Математика",type:"Тест",valueCode:"3/5"},
+      {subjectId:"a",subject:"Математика",type:"1 четверть",valueCode:"4/5"},
+      {subjectId:"a",subject:"Математика",type:"Посещаемость",valueCode:"493"},
+      {subjectId:"b",subject:"Русский язык",type:"Работа на уроке",valueCode:"4/5"}
+    ];
+    const subjects=groupGradesBySubject({grades:rows});
+    const math=subjects.find(x=>x.subjectId==="a");
+    const russian=subjects.find(x=>x.subjectId==="b");
+    if(subjects.length!==2||math.average!==4||math.current.length!==2||math.finals.length!==1||math.attendance.length!==1||russian.average!==4)throw new Error("Некорректная группировка");
+    show("Тест группировки пройден: 2 предмета, средние баллы и итоговые оценки рассчитаны корректно. Данные вымышленные.");
+  }catch(e){show("Ошибка группировки: "+e.message)}
 };
 $("logout").onclick=async()=>{try{await signOutUser();show("Выход выполнен.")}catch(e){show("Ошибка выхода: "+e.message)}};
 </script></body></html>
