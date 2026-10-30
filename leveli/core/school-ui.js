@@ -7,6 +7,14 @@ import {groupGradesBySubject} from "./subjects.js";
 const $=id=>document.getElementById(id);
 const login=$("school-login"),results=$("school-results"),state=$("school-state"),error=$("school-error"),list=$("school-subjects");
 let userId=null, requestId=0;
+function updateProfile(user){
+  const name=user?.displayName?.trim()||"";
+  $("home-greeting").textContent=user?(name?"Привет, "+name+"!":"Привет!"):"Привет!";
+  $("profile-name").textContent=user?(name||"Мой профиль"):"Гость";
+  $("profile-status").textContent=user?"Аккаунт подключён. Школьные оценки доступны в разделе «Школа».":"Войди в аккаунт через раздел «Школа», чтобы увидеть свои данные.";
+  $("profile-logout").hidden=!user;
+}
+$("profile-logout").addEventListener("click",async()=>{try{await signOutUser()}catch(e){sayError(e)}});
 const sayError=e=>{error.textContent=e?.code||e?.message||"Не удалось загрузить данные";};
 function render(subjects){
   list.replaceChildren();
@@ -55,7 +63,7 @@ $("school-logout").addEventListener("click",async()=>{try{await signOutUser()}ca
 try{
   await initializeFirebase(firebaseConfig);
   await observeUser(user=>{
-    userId=user?.uid??null;++requestId;
+    userId=user?.uid??null;++requestId;updateProfile(user);
     login.hidden=!!user;results.hidden=!user;error.textContent="";
     if(user)refresh();else list.replaceChildren();
   });
