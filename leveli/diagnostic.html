@@ -5,7 +5,7 @@
 <p>Подключение к существующему Firebase-проекту выполняется автоматически.</p>
 <label>Email<input id="email" type="email" autocomplete="username"></label>
 <label>Пароль<input id="password" type="password" autocomplete="current-password"></label>
-<button id="login" disabled>Войти</button><button id="load" disabled>Проверить школьные данные</button><button id="shape" disabled>Показать структуру grades без значений</button><button id="codes" disabled>Показать коды и типы без оценок</button><button id="logout" disabled>Выйти</button>
+<button id="login" disabled>Войти</button><button id="load" disabled>Проверить школьные данные</button><button id="shape" disabled>Показать структуру grades без значений</button><button id="codes" disabled>Показать коды и типы без оценок</button><button id="mapping" disabled>Проверить соответствие кодов</button><button id="logout" disabled>Выйти</button>
 <pre id="status" role="status" aria-live="polite">Подключение к Firebase…</pre>
 <small>Пароль не записывается в репозиторий или localStorage этой страницы. Firebase Auth может сохранять сессию согласно настройкам SDK. Не делитесь скриншотами с личными данными.</small>
 <script type="module">
@@ -24,6 +24,7 @@ async function startFirebase(){
       $("load").disabled=!user;
       $("shape").disabled=!user;
       $("codes").disabled=!user;
+      $("mapping").disabled=!user;
       $("logout").disabled=!user;
     });
   }catch(e){show("Ошибка подключения: "+(e.code||e.message))}
@@ -67,6 +68,26 @@ $("codes").onclick=async()=>{
     },Object.create(null))).sort((a,b)=>b[1]-a[1]);
     // Only metadata categories; never show grade values, dates, subjects or IDs.
     show("Количество записей: "+grades.length+"\\nТипы type: "+JSON.stringify(summarize("type"))+"\\nКоды valueCode: "+JSON.stringify(summarize("valueCode")));
+  }catch(e){show("Ошибка анализа: "+(e.code||e.message))}
+};
+$("mapping").onclick=async()=>{
+  try{
+    show("Проверка соответствия кодов…");
+    const result=await loadOwnSchoolGrades();
+    if(result.status!=="ok"||!Array.isArray(result.data.grades)){show("Массив grades не найден.");return}
+    const grades=result.data.grades;
+    // Only aggregate pairs of type and valueCode. Never display raw value,
+    // subject, date, IDs or individual records.
+    const pairs=new Map();
+    for(const grade of grades){
+      const type=String(grade?.type??"(пусто)");
+      const code=String(grade?.valueCode??"(пусто)");
+      const key=JSON.stringify([type,code]);
+      pairs.set(key,(pairs.get(key)||0)+1);
+    }
+    const rows=[...pairs.entries()].map(([key,count])=>({type:JSON.parse(key)[0],valueCode:JSON.parse(key)[1],count}));
+    rows.sort((a,b)=>a.type.localeCompare(b.type,"ru")||b.count-a.count);
+    show("Сочетания типа и кода (без значений оценок):\\n"+JSON.stringify(rows,null,2));
   }catch(e){show("Ошибка анализа: "+(e.code||e.message))}
 };
 $("logout").onclick=async()=>{try{await signOutUser();show("Выход выполнен.")}catch(e){show("Ошибка выхода: "+e.message)}};
