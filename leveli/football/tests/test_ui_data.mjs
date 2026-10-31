@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {normalizeSnapshot, snapshotsFromDocuments, isValidSnapshotCache, isFreshSnapshot} from '../snapshot_data.mjs';
+import {normalizeSnapshot, snapshotsFromDocuments, isValidSnapshotCache, isFreshSnapshot, localSnapshotFileNames, snapshotsFromLocalFiles, snapshotSeasons} from '../snapshot_data.mjs';
 import {favoritesDocumentPath, normalizeFavorites, mergeFavorites, createFavoritesDocument} from '../favorites_sync.mjs';
 
 const at='2026-10-30T18:00:00Z';
@@ -60,4 +60,28 @@ test('favorites payload is owner-bound and does not accept untrusted metadata',(
     {revision:2,updatedAt:at,deviceId:'local-device'});
   assert.equal(payload.ownerUid,'owner-uid'); assert.equal(payload.favorites.teams[0].id,4);
   assert.throws(()=>createFavoritesDocument('owner-uid',{}, {revision:-1,updatedAt:at,deviceId:'x'}));
+});
+
+test('local files load six leagues and expose only real available seasons',()=>{
+  const expected=['PL','PD','SA','BL1','FL1','CL'];
+  const names=[...expected.map(league=>league+'_2026_matches.json'),'PL_2025_standings.json','PL_2026_standings.json','notes.json'];
+  const accepted=localSnapshotFileNames(names);
+  assert.equal(accepted.length,8);
+  const files=accepted.filter(name=>name!=='notes.json').map(name=>{
+    const [,league,year,endpoint]=/^([A-Z0-9]+)_(\\d{4})_(standings|matches)\\.json$/.exec(name);
+    const base={schemaVersion:1,source:'football-data.org',league,season:Number(year),endpoint,fetchedAt:at};
+    if(endpoint==='standings')base.items=[{type:'TOTAL',team:{id:100+expected.indexOf(league),name:league},points:12,goalsFor:null,goalsAgainst:null}];
+    else base.items=[];
+    return {name,data:base};
+  });
+  const snapshots=snapshotsFromLocalFiles(files);
+  assert.deepEqual(expected.map(league=>snapshots[league+'_2026_matches']?.league),expected);
+  assert.deepEqual(snapshotSeasons(snapshots,'PL'),[2026,2025]);
+  assert.deepEqual(snapshotSeasons(snapshots,'CL'),[2026]);
+  assert.equal(snapshots.PL_2026_standings.items[0].goalsFor,null);
+  assert.equal(snapshotSeasons(snapshots,'UNKNOWN').length,0);
+});
+test('local snapshot loader rejects a file whose contents do not match its filename',()=>{
+  const files=[{name:'PL_2026_matches.json',data:{schemaVersion:1,source:'football-data.org',league:'PL',season:2025,endpoint:'matches',fetchedAt:at,items:[]}}];
+  assert.deepEqual(snapshotsFromLocalFiles(files),{});
 });
