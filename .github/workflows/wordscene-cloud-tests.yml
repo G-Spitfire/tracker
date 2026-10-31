@@ -17,6 +17,7 @@ jobs:
       - name: Syntax check
         run: |
           node --check wordscene/cloud-firestore.js
+          node --check wordscene/cloud-sync.js
           node --check wordscene/state-guard.js
           node --check wordscene/cloud-ui.js
       - name: Unit tests

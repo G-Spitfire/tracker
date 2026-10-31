@@ -55,3 +55,10 @@ test('preserves state after conflicting remote revision',async()=>{
  await assert.rejects(h.api.write({...state,mode:'review'},0),e=>e.code==='wordscene/conflict');
  assert.deepEqual((await h.api.read()).payload,state);
 });
+
+test('rejects payloads before reaching the Firestore document-size limit',async()=>{
+ const h=harness();
+ const oversized={...state,extra:'x'.repeat(900*1024)};
+ await assert.rejects(h.api.write(oversized,0),/safe Firestore document size/);
+ assert.equal(h.getSaved(),null);
+});
