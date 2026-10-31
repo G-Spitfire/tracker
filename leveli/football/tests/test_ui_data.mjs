@@ -66,7 +66,8 @@ test('local files load six leagues and expose only real available seasons',()=>{
   const expected=['PL','PD','SA','BL1','FL1','CL'];
   const names=[...expected.map(league=>league+'_2026_matches.json'),'PL_2025_standings.json','PL_2026_standings.json','CL_2026_standings.json','notes.json'];
   const accepted=localSnapshotFileNames(names);
-  assert.equal(accepted.length,8);\n  assert.deepEqual(localSnapshotFileNames(['CL_2026_standings.json']),[]);
+  assert.equal(accepted.length,8);
+  assert.deepEqual(localSnapshotFileNames(['CL_2026_standings.json']),[]);
   const files=accepted.filter(name=>name!=='notes.json').map(name=>{
     const [league,year,endpoint]=name.replace('.json','').split('_');
     const base={schemaVersion:1,source:'football-data.org',league,season:Number(year),endpoint,fetchedAt:at};
