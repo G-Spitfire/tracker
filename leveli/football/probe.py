@@ -8,7 +8,6 @@ import argparse
 import getpass
 import json
 import os
-import sys
 
 from adapter import FootballDataClient, ProviderError
 from normalize import LEAGUES
@@ -46,7 +45,7 @@ def main():
     if not token.strip():
         parser.error("Не указан API-ключ")
     try:
-        client = FootballDataClient(token.strip())
+        client = FootballDataClient(token.strip(), timeout=12, max_retries=1)
     except ProviderError as error:
         parser.error(str(error))
 
