@@ -1,0 +1,9 @@
+{
+  "firestore": {
+    "rules": "wordscene/tests/emulator/firestore.rules"
+  },
+  "emulators": {
+    "firestore": { "port": 8088, "host": "127.0.0.1", "singleProjectMode": true },
+    "ui": { "enabled": false }
+  }
+}

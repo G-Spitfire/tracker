@@ -16,7 +16,7 @@ function create({storage,validate,makeId,now=()=>Date.now()}){
   const progress=parse(activeRaw);if(!progress||!validate(progress))throw new Error('Active save is invalid; original bytes preserved');
   const target=key(uid),currentRaw=storage.getItem(target);
   const cleanProgress=progressOnly(progress);
-  if(currentRaw!==null){const current=parse(currentRaw);if(!current||current.version!==VERSION||current.uid!==uid||typeof current.baselineId!=='string'||!validate(current.progress))throw new Error('Stored baseline is invalid; original bytes preserved');return {status:stable(current.progress)===stable(cleanProgress)?'same':'different',baselineId:current.baselineId,baseline:clone(current.progress),backupKey:current.backupKey}}
+  if(currentRaw!==null){const current=parse(currentRaw);if(!current||current.version!==VERSION||current.uid!==uid||typeof current.baselineId!=='string'||!validate(current.progress))throw new Error('Stored baseline is invalid; original bytes preserved');const same=stable(current.progress)===stable(cleanProgress);if(!same){const recovery=captureMismatch(uid,activeKey);return {status:'different',baselineId:current.baselineId,baseline:clone(current.progress),backupKey:current.backupKey,recovery}}return {status:'same',baselineId:current.baselineId,baseline:clone(current.progress),backupKey:current.backupKey}}
   const baselineId=makeId?makeId():fingerprint(cleanProgress);if(typeof baselineId!=='string'||!baselineId||baselineId.includes('/'))throw new Error('Invalid baseline ID');
   const backupKey=activeKey+'-before-event-v2-'+encodeURIComponent(uid)+'-'+baselineId;
   const envelope={format:'wordscene-event-baseline',version:VERSION,uid,baselineId,createdAt:now(),backupKey,progress:cleanProgress};
@@ -27,7 +27,26 @@ function create({storage,validate,makeId,now=()=>Date.now()}){
  }
  function inspect(uid){const raw=storage.getItem(key(uid));if(raw===null)return null;const value=parse(raw);if(!value||value.format!=='wordscene-event-baseline'||value.version!==VERSION||value.uid!==uid||typeof value.baselineId!=='string'||!validate(value.progress))throw new Error('Stored baseline is invalid; original bytes preserved');return {baselineId:value.baselineId,baseline:clone(value.progress),backupKey:value.backupKey,createdAt:value.createdAt}}
  function restore(uid){const record=inspect(uid);if(!record)throw new Error('Baseline is missing');const raw=storage.getItem(record.backupKey);const progress=parse(raw);if(!raw||!progress||!validate(progress)||stable(progressOnly(progress))!==stable(record.baseline))throw new Error('Baseline backup is missing or does not match');return clone(progress)}
- return {prepare,inspect,restore,key,VERSION};
+ // Preserve both sides of a legacy mismatch before any future adult recovery
+ // action. This routine deliberately does not choose, merge, or apply either.
+ function captureMismatch(uid,activeKey='word-scenes-v5'){
+  const record=inspect(uid);if(!record)throw new Error('Baseline is missing');
+  const raw=storage.getItem(activeKey);if(raw===null)throw new Error('Active save is missing');
+  const progress=parse(raw);if(!progress||!validate(progress))throw new Error('Active save is invalid; original bytes preserved');
+  if(stable(record.baseline)===stable(progressOnly(progress)))return {status:'same',baselineBackupKey:record.backupKey,activeBackupKey:null};
+  const fingerprintNow=fingerprint({baseline:record.baseline,active:progressOnly(progress)});
+  const activeBackupKey=`${activeKey}-mismatch-${encodeURIComponent(uid)}-${fingerprintNow}`;
+  const archiveKey=`${KEY}recovery-${encodeURIComponent(uid)}-${fingerprintNow}`;
+  const activeExisting=storage.getItem(activeBackupKey);
+  if(activeExisting!==null&&activeExisting!==raw)throw new Error('Recovery backup collision; original bytes preserved');
+  if(activeExisting===null){storage.setItem(activeBackupKey,raw);if(storage.getItem(activeBackupKey)!==raw)throw new Error('Active recovery backup verification failed')}
+  const archive={format:'wordscene-baseline-mismatch',version:1,uid,baselineId:record.baselineId,createdAt:now(),baselineBackupKey:record.backupKey,activeBackupKey};
+  const archiveRaw=JSON.stringify(archive),archiveExisting=storage.getItem(archiveKey);
+  if(archiveExisting!==null&&archiveExisting!==archiveRaw)throw new Error('Recovery archive collision; original bytes preserved');
+  if(archiveExisting===null){storage.setItem(archiveKey,archiveRaw);if(storage.getItem(archiveKey)!==archiveRaw)throw new Error('Recovery archive verification failed')}
+  return {status:'different',baselineBackupKey:record.backupKey,activeBackupKey,archiveKey};
+ }
+ return {prepare,inspect,restore,captureMismatch,key,VERSION};
 }
 const api={create,VERSION,KEY,fingerprint};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.WordSceneEventBaseline=api;
