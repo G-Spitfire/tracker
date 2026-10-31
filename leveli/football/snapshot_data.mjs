@@ -56,7 +56,11 @@ const LOCAL_SNAPSHOT_FILE = /^([A-Z0-9]+)_([0-9]{4})_(standings|matches|scorers)
 
 export function localSnapshotFileNames(files) {
   if (!Array.isArray(files)) return [];
-  return [...new Set(files.filter(name => typeof name === 'string' && LOCAL_SNAPSHOT_FILE.test(name)))].sort();
+  return [...new Set(files.filter(name => {
+    if (typeof name !== 'string') return false;
+    const match = LOCAL_SNAPSHOT_FILE.exec(name);
+    return !!match && !(match[1] === 'CL' && match[3] === 'standings');
+  }))].sort();
 }
 
 export function snapshotsFromLocalFiles(files) {
@@ -65,6 +69,7 @@ export function snapshotsFromLocalFiles(files) {
     const match = LOCAL_SNAPSHOT_FILE.exec(file?.name || '');
     if (!match) continue;
     const [, league, seasonText, endpoint] = match;
+    if (league === 'CL' && endpoint === 'standings') continue;
     const season = Number(seasonText);
     const data = normalizeSnapshot(file.data, {league, season, endpoint});
     if (!data) continue;
