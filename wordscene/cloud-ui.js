@@ -136,8 +136,27 @@ async function syncOnce(){
   if(remote.revision!==settings.revision){
    if(fingerprint===remoteFingerprint){localStorage.setItem(SYNC_KEY,JSON.stringify({uid,revision:remote.revision,baseline:fingerprint}));return}
    if(fingerprint===settings.baseline){
-    // Never overwrite an active app session. Let the user restore explicitly.
-    localStorage.removeItem(SYNC_KEY);message('Облако обновилось на другом устройстве. Автосинхронизация остановлена. Нажмите «Восстановить из облака», чтобы принять новую версию.');syncLabel();return;
+    // Only apply remote changes if the local copy is unchanged and neither
+    // side is in the middle of a learning session.
+    if(localState.session||remote.payload.session){
+     message('Облако обновилось на другом устройстве. Завершите занятие и обновите вкладку для безопасной проверки.');
+     return;
+    }
+    const backupKey=KEY+'-before-auto-cloud-'+Date.now();
+    localStorage.setItem(backupKey,raw);
+    if(localStorage.getItem(backupKey)!==raw)throw new Error('Не удалось сохранить локальную резервную копию');
+    // A concurrent local edit must never be overwritten.
+    if(localStorage.getItem(KEY)!==raw){message('Локальный прогресс изменился во время проверки. Повторим позже.');return}
+    const next=JSON.stringify(remote.payload);
+    localStorage.setItem(KEY,next);
+    if(localStorage.getItem(KEY)!==next){
+     localStorage.setItem(KEY,raw);
+     throw new Error('Не удалось проверить запись облачного прогресса');
+    }
+    localStorage.setItem(SYNC_KEY,JSON.stringify({uid,revision:remote.revision,baseline:remoteFingerprint}));
+    message('Получен новый прогресс из облака. Обновляем приложение.');
+    location.reload();
+    return;
    }
    localStorage.removeItem(SYNC_KEY);message('Конфликт: прогресс изменён на двух устройствах. Автосинхронизация остановлена, данные сохранены. Выберите версию вручную.');syncLabel();return;
   }
