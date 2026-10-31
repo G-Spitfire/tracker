@@ -3,6 +3,7 @@
 
 No Firebase writes, no persistent API key, no output of personal data.
 Usage: python3 leveli/football/probe.py --league PL
+       python3 leveli/football/probe.py --league PL --allow-deep-data
        python3 leveli/football/probe.py --all
 """
 import argparse
@@ -14,9 +15,11 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+from adapter import _NoRedirect
+
 BASE = "https://api.football-data.org/v4"
 LEAGUES = ("PL", "PD", "SA", "BL1", "FL1", "CL")
-ENDPOINTS = ("standings", "matches", "scorers")
+BASE_ENDPOINTS = ("standings", "matches")
 
 
 def fetch(league, endpoint, token, season, timeout=25):
@@ -31,7 +34,7 @@ def fetch(league, endpoint, token, season, timeout=25):
     })
     for attempt in range(3):
         try:
-            with urllib.request.urlopen(request, timeout=timeout) as response:
+            with urllib.request.build_opener(_NoRedirect()).open(request, timeout=timeout) as response:
                 return response.status, json.load(response)
         except urllib.error.HTTPError as error:
             code = error.code
@@ -48,7 +51,7 @@ def fetch(league, endpoint, token, season, timeout=25):
         except (urllib.error.URLError, TimeoutError, OSError, ValueError) as error:
             if attempt == 2:
                 return None, {"error": type(error).__name__}
-            time.sleep(5 * (attempt + 1))
+            time.sleep(6.1 * (attempt + 1))
     return None, {"error": "Retries exhausted"}
 
 
@@ -82,16 +85,19 @@ def main():
     selection.add_argument("--all", action="store_true")
     parser.add_argument("--season", type=int, default=2026)
     parser.add_argument("--delay", type=float, default=7)
+    parser.add_argument("--allow-deep-data", action="store_true",
+                        help="Дополнительно запросить scorers из платного Deep Data после согласования стоимости")
     args = parser.parse_args()
     token = os.environ.get("FOOTBALL_KEY") or getpass.getpass("API-ключ (не отображается): ")
     if not token.strip():
         parser.error("Не указан API-ключ")
     leagues = LEAGUES if args.all else (args.league,)
+    endpoints = BASE_ENDPOINTS + (("scorers",) if args.allow_deep_data else ())
     for league in leagues:
-        for endpoint in ENDPOINTS:
+        for endpoint in endpoints:
             status, payload = fetch(league, endpoint, token.strip(), args.season)
             print(json.dumps(summarize(league, endpoint, status, payload), ensure_ascii=False))
-            time.sleep(max(0, args.delay))
+            time.sleep(max(6.1, args.delay))
     print("Проверка завершена. Firebase и файлы не изменялись.")
 
 

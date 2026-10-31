@@ -48,6 +48,30 @@ class NormalizeTests(unittest.TestCase):
         payload = {"scorers": [{"player": {"id": 1}, "goals": True}]}
         self.assertIsNone(normalize("PL", 2026, "scorers", payload, self.at)["items"][0]["goals"])
 
+    def test_invalid_rows_do_not_become_plausible_stats(self):
+        payload = {"standings": [{"type": "TOTAL", "table": [
+            {"position": -1, "team": {"id": 1, "name": "  North  Club  "}, "points": -3},
+            {"position": 1, "team": {"id": 0, "name": "Bad id"}, "points": 8},
+        ]}, {"type": "GROUP", "table": None}]}
+        items = normalize("PL", 2026, "standings", payload, self.at)["items"]
+        self.assertEqual(len(items), 1)
+        self.assertIsNone(items[0]["position"])
+        self.assertIsNone(items[0]["points"])
+        self.assertEqual(items[0]["team"]["name"], "North Club")
+
+    def test_timestamp_normalization_and_invalid_naive_time(self):
+        self.assertEqual(normalize("PL", 2026, "matches", {"matches": []}, "2026-10-31T12:00:00+03:00")["fetchedAt"],
+                         "2026-10-31T09:00:00Z")
+        with self.assertRaises(ValueError):
+            normalize("PL", 2026, "matches", {"matches": []}, "2026-10-31T12:00:00")
+
+    def test_entity_text_is_cleaned_and_provider_graphics_are_omitted(self):
+        payload = {"scorers": [{"player": {"id": 4, "name": "\n"},
+                                "team": {"id": 2, "name": "Team", "crest": "https://crests.example.test/a.svg"}}]}
+        item = normalize("PL", 2026, "scorers", payload, self.at)["items"][0]
+        self.assertIsNone(item["player"]["name"])
+        self.assertNotIn("crest", item["team"])
+
 
 if __name__ == "__main__":
     unittest.main()

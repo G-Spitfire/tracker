@@ -6,6 +6,7 @@
 
 | Приложение | Назначение | Адрес | Документация |
 | --- | --- | --- | --- |
+| Левели | Детское приложение: школа, обучение и персональные модули | [Открыть](https://g-spitfire.github.io/tracker/leveli/) | [Футбольный модуль](leveli/football/README.md) |
 | Форма | Трекер тренировок | [Открыть](https://g-spitfire.github.io/tracker/forma/) | [README](forma/README.md) |
 | WordScene | Английские слова · Полина | [Открыть](https://g-spitfire.github.io/tracker/wordscene/) | [README](wordscene/README.md) |
 | Покер с нуля | Интерактивная инструкция | [Открыть](https://g-spitfire.github.io/tracker/poker/) | [README](poker/README.md) |
