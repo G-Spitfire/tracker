@@ -9,7 +9,7 @@ function create({auth,db,sdk,validate,now=()=>Date.now()}){
  const copy=x=>JSON.parse(JSON.stringify(x));
  // Firestore rejects arrays directly nested in arrays. Encode only those arrays
  // as tagged maps; restore the original structure on reads.
- const TAG='__wordsceneNestedArrayV1__';
+ const TAG='wordsceneNestedArrayV1';
  function encode(value,inArray=false){
   if(Array.isArray(value)){
    const items=value.map(item=>encode(item,true));
