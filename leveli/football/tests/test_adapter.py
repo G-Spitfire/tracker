@@ -3,22 +3,21 @@ import json
 import sys
 import tempfile
 import unittest
-import urllib.error
+import subprocess
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from adapter import FootballDataClient, ProviderError, SnapshotCache, _NoRedirect, prepare_firebase_document, refresh_one
+from adapter import FootballDataClient, ProviderError, SnapshotCache, prepare_firebase_document, refresh_one
 from firebase_sync import assert_emulator_only, import_documents
 from normalize import normalize
 from probe import BASE_ENDPOINTS, FREE_ENDPOINTS
 
 
-class Response:
-    status = 200
-    def __init__(self, data): self.data = data
-    def __enter__(self): return self
-    def __exit__(self, *_): return False
-    def read(self, size=-1): return json.dumps(self.data).encode()[:size]
+def curl_result(status=200, payload=None, headers="", returncode=0):
+    body = json.dumps(payload or {"matches": []})
+    response = f"HTTP/2 {status}\\r\\n{headers}\\r\\n{body}"
+    output = f"{response}\\n__LEVELI_HTTP_STATUS__:{status}\\n".encode()
+    return subprocess.CompletedProcess([], returncode, output, b"")
 
 
 class FakeFirebaseAdmin:
@@ -76,7 +75,7 @@ class AdapterTests(unittest.TestCase):
         moment=[0.0]
         waits=[]
         def sleep(seconds): waits.append(seconds); moment[0]+=seconds
-        client=FootballDataClient("test",opener=lambda *_args,**_kwargs:Response({"matches":[]}),
+        client=FootballDataClient("test",runner=lambda *_args,**_kwargs:curl_result(payload={"matches":[]}),
                                  clock=lambda:moment[0],sleep=sleep,min_interval=6.1)
         client.fetch("PL","matches",2026); client.fetch("PL","matches",2026)
         self.assertAlmostEqual(waits[0],6.1)
