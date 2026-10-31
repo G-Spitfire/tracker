@@ -109,7 +109,7 @@ class FootballDataClient:
             "silent\n"
         )
         command = [
-            self.curl_binary, "--config", "-", "--silent", "--show-error",
+            self.curl_binary, "--disable", "--config", "-", "--silent", "--show-error",
             "--max-time", str(self.timeout),
             "--connect-timeout", str(min(8.0, self.timeout)),
             "--max-filesize", str(MAX_RESPONSE_BYTES),
