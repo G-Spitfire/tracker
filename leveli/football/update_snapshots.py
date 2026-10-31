@@ -61,11 +61,11 @@ def main():
     leagues = sorted(LEAGUES) if args.all else list(dict.fromkeys(args.league))
     cache = SnapshotCache(args.cache_dir)
     args.export_dir.mkdir(parents=True, exist_ok=True)
-    total = len(leagues) * len(endpoints)
+    endpoints_by_league = {league: tuple(endpoint for endpoint in requested_endpoints\n        if endpoint != "standings" or league != "CL") for league in leagues}\n    total = sum(len(endpoints) for endpoints in endpoints_by_league.values())
     completed = 0
     failed = False
     for league in leagues:
-        for endpoint in endpoints:
+        if "standings" in requested_endpoints and league == "CL":\n            print("CL/standings: пропущено (метод таблицы недоступен для кубкового турнира)", flush=True)\n        for endpoint in endpoints_by_league[league]:
             completed += 1
             print(f"[{completed}/{total}] Загружаю {league}/{endpoint}…", flush=True)
             try:
