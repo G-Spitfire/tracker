@@ -1,0 +1,25 @@
+name: WordScene cloud tests
+on:
+  push:
+    branches: [feature/wordscene-cloud-sync, feature/wordscene-auto-backup]
+    paths:
+      - 'wordscene/**'
+      - '.github/workflows/wordscene-cloud-tests.yml'
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check
+        run: |
+          node --check wordscene/profile-store.js
+          node --check wordscene/cloud-firestore.js
+          node --check wordscene/cloud-sync.js
+          node --check wordscene/state-guard.js
+          node --check wordscene/cloud-ui.js
+      - name: Unit tests
+        run: node --test wordscene/tests/*.test.cjs
