@@ -26,9 +26,10 @@ document.addEventListener('click',e=>{const target=e.target.closest('[data-tab],
 document.getElementById('wordscene').addEventListener('click',()=>{location.href='../wordscene/'});
 addEventListener('hashchange',()=>navigate(location.hash.slice(1)));navigate(location.hash.slice(1)||'home');
 </script><script type="module">
-import {initializeApp} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js';
-import {getAuth, setPersistence, browserLocalPersistence, onAuthStateChanged, signInWithEmailAndPassword, signOut} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js';
-import {getFirestore, doc, getDocFromServer, collection, getDocs, query, limit} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js';
+if(new URLSearchParams(location.search).get('football-local')!=='1'){
+const {initializeApp}=await import('https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js');
+const {getAuth,setPersistence,browserLocalPersistence,onAuthStateChanged,signInWithEmailAndPassword,signOut}=await import('https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js');
+const {getFirestore,doc,getDocFromServer,collection,getDocs,query,limit}=await import('https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js');
 const firebaseConfig={apiKey:"AIzaSyCs3gfUXcrlTJLZqxXQ0cgXpfuqNBkNIsU",authDomain:"family-school-grades.firebaseapp.com",projectId:"family-school-grades",storageBucket:"family-school-grades.firebasestorage.app",messagingSenderId:"1005917864241",appId:"1:1005917864241:web:4192a263b8ad39fdb3f010"};
 const app=initializeApp(firebaseConfig,'leveli-school');
 const auth=getAuth(app), db=getFirestore(app);
@@ -82,4 +83,4 @@ document.getElementById('school-form').addEventListener('submit',async e=>{e.pre
 document.getElementById('school-refresh').addEventListener('click',load);
 document.getElementById('school-logout').addEventListener('click',()=>signOut(auth).catch(showError));
 onAuthStateChanged(auth,user=>{login.hidden=!!user;results.hidden=!user;error.textContent='';updateIdentity(user);if(user){loadProfile(user);load()}else {firestoreProfileName='';cachedGrades=[];subjects.replaceChildren()}},showError);
-</script><script type="module" src="./football/ui.js"></script></body></html>
+}\n</script><script type="module" src="./football/ui.js"></script></body></html>
