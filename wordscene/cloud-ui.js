@@ -24,10 +24,11 @@ const login=document.createElement('button');login.textContent='Войти';logi
 const logout=document.createElement('button');logout.textContent='Выйти';logout.type='button';
 const upload=document.createElement('button');upload.textContent='Создать облачную копию';upload.type='button';
 const download=document.createElement('button');download.textContent='Скачать облачную копию';download.type='button';
+const restore=document.createElement('button');restore.textContent='Восстановить из облака';restore.type='button';
 const verify=document.createElement('button');verify.textContent='Проверить восстановление';verify.type='button';
 const inspect=document.createElement('button');inspect.textContent='Проверить облако';inspect.type='button';
 const info=document.createElement('p');info.style.whiteSpace='pre-wrap';
-panel.append(status,form,logout,inspect,verify,upload,download,info);form.append(email,password,login);
+panel.append(status,form,logout,inspect,verify,restore,upload,download,info);form.append(email,password,login);
 function message(value){info.textContent=value}
 function local(){
  const raw=localStorage.getItem(KEY);
@@ -37,7 +38,7 @@ function local(){
  return value;
 }
 async function guarded(task){
- for(const el of [login,logout,inspect,verify,upload,download])el.disabled=true;
+ for(const el of [login,logout,inspect,verify,restore,upload,download])el.disabled=true;
  try{await task()}catch(e){console.error('[WordScene cloud] Подробности ошибки:',e);message('Ошибка: '+(e.code||'неизвестная')+'\n'+(e.message||'Нет описания')+'\n'+(e.stack||''))}
  finally{for(const el of [login,logout,inspect,upload,download])el.disabled=false}
 }
@@ -69,6 +70,20 @@ verify.onclick=()=>guarded(async()=>{
  if(!same)compare(original,restored);
  message(same?'Проверка успешна: облачная копия полностью совпадает с локальным сохранением. Ревизия '+remote.revision+'. Данные не изменены.':'Облачная копия корректна, но отличается от локального прогресса. Поля: '+differences.join(', ')+'. Ничего не изменено.');
 });
+restore.onclick=()=>guarded(async()=>{
+ const remote=await cloud.read();
+ if(!remote.exists)throw new Error('Облачная копия отсутствует');
+ if(!window.WordSceneState.valid(remote.payload,500))throw new Error('Облачные данные повреждены');
+ const currentRaw=localStorage.getItem(KEY);
+ if(currentRaw!==null){const current=JSON.parse(currentRaw);if(!window.WordSceneState.valid(current,500))throw new Error('Локальные данные повреждены: восстановление остановлено');}
+ if(!window.confirm('Восстановить прогресс из облака (ревизия '+remote.revision+')? Текущий локальный прогресс будет сохранён в отдельной резервной копии.'))return;
+ const backupKey=KEY+'-before-cloud-restore-'+Date.now();
+ if(currentRaw!==null){localStorage.setItem(backupKey,currentRaw);if(localStorage.getItem(backupKey)!==currentRaw)throw new Error('Не удалось сохранить резервную копию');}
+ const next=JSON.stringify(remote.payload);
+ try{localStorage.setItem(KEY,next);if(localStorage.getItem(KEY)!==next)throw new Error('Не удалось проверить локальное сохранение')}
+ catch(error){if(currentRaw!==null)localStorage.setItem(KEY,currentRaw);else localStorage.removeItem(KEY);throw error}
+ message('Прогресс восстановлен из облака (ревизия '+remote.revision+'). '+(currentRaw!==null?'Резервная копия: '+backupKey+'. ':'')+'Перезагрузите страницу для применения.');
+});
 download.onclick=()=>guarded(async()=>{
  const remote=await cloud.read();
  if(!remote.exists){message('Облачная копия отсутствует.');return}
@@ -91,5 +106,5 @@ upload.onclick=()=>guarded(async()=>{
 });
 onAuthStateChanged(auth,user=>{
  status.textContent=user?'Аккаунт: '+(user.email||'выполнен вход'):'Гостевой режим: прогресс только на этом устройстве';
- form.hidden=!!user;logout.hidden=!user;inspect.hidden=!user;verify.hidden=!user;upload.hidden=!user;download.hidden=!user;
+ form.hidden=!!user;logout.hidden=!user;inspect.hidden=!user;verify.hidden=!user;restore.hidden=!user;upload.hidden=!user;download.hidden=!user;
 });
