@@ -37,7 +37,7 @@ function local(){
 }
 async function guarded(task){
  for(const el of [login,logout,inspect,upload,download])el.disabled=true;
- try{await task()}catch(e){message('Ошибка: '+(e.code||e.message||'неизвестная'))}
+ try{await task()}catch(e){console.error('[WordScene cloud] Подробности ошибки:',e);message('Ошибка: '+(e.code||'неизвестная')+'\n'+(e.message||'Нет описания')+'\n'+(e.stack||''))}
  finally{for(const el of [login,logout,inspect,upload,download])el.disabled=false}
 }
 form.onsubmit=e=>{e.preventDefault();guarded(async()=>{await setPersistence(auth,browserLocalPersistence);await signInWithEmailAndPassword(auth,email.value,password.value);password.value='';message('Вход выполнен. Данные пока не отправлены.')})};
