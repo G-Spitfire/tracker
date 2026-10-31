@@ -23,7 +23,7 @@ def local_snapshot_names(directory: Path | None = None) -> list[str]:
         names = [
             path.name for path in directory.iterdir()
             if SNAPSHOT_NAME.fullmatch(path.name)
-            and not path.name.startswith('CL_') or False
+            and not (path.name.startswith('CL_') and path.name.endswith('_standings.json'))
             and path.is_file()
             and path.resolve().parent == directory.resolve()
         ]
@@ -52,7 +52,8 @@ class LocalFootballHandler(SimpleHTTPRequestHandler):
             return
         if path.startswith(SNAPSHOT_PREFIX):
             name = unquote(path[len(SNAPSHOT_PREFIX):])
-            if not SNAPSHOT_NAME.fullmatch(name):
+            if (not SNAPSHOT_NAME.fullmatch(name)
+                    or (name.startswith('CL_') and name.endswith('_standings.json'))):
                 self._send_json(b'{"error":"not found"}', 404)
                 return
             target = (EXPORT_DIR / name).resolve()
