@@ -83,4 +83,5 @@ document.getElementById('school-form').addEventListener('submit',async e=>{e.pre
 document.getElementById('school-refresh').addEventListener('click',load);
 document.getElementById('school-logout').addEventListener('click',()=>signOut(auth).catch(showError));
 onAuthStateChanged(auth,user=>{login.hidden=!!user;results.hidden=!user;error.textContent='';updateIdentity(user);if(user){loadProfile(user);load()}else {firestoreProfileName='';cachedGrades=[];subjects.replaceChildren()}},showError);
-}\n</script><script type="module" src="./football/ui.js"></script></body></html>
+}
+</script><script type="module" src="./football/ui.js"></script></body></html>
