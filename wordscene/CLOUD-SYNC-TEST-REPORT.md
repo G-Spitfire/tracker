@@ -22,7 +22,7 @@ node --check wordscene/profile-store.js        PASS
 node --check wordscene/cloud-ui.js             PASS
 node --check wordscene/cloud-sync.js           PASS
 node --check wordscene/cloud-firestore.js      PASS
-node --test wordscene/tests/*.test.cjs         PASS — 29 тестов, 0 ошибок
+node --test wordscene/tests/*.test.cjs         PASS — 30 тестов, 0 ошибок
 git diff --check                               PASS
 ```
 

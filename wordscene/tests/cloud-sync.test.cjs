@@ -83,6 +83,16 @@ test('conflict cannot overwrite either copy until a current backup is marked dow
  await assert.rejects(h.engine.resolve('local'),/Копии изменились после скачивания/);
  assert.deepEqual((await h.cloud.read()).payload,start);
 });
+test('a newer conflict archives the unresolved older pair per account',async()=>{
+ const h=harness();await h.cloud.write(start,0);
+ const local={...start,local:'first'};h.storage.setItem('word-scenes-v5',JSON.stringify(local));
+ await h.engine.prepareConflict();const old=await h.engine.exportConflict();h.engine.markConflictExported(old);
+ const newerRemote={...start,remote:'second'};await h.cloud.write(newerRemote,1);
+ await h.engine.prepareConflict();
+ const history=h.engine.getConflictHistory('A');assert.equal(history.length,1);
+ assert.deepEqual(history[0].local.progress,local);assert.deepEqual(history[0].cloud.progress,start);
+ assert.equal((await h.engine.getConflict()).cloud.revision,2);
+});
 test('offline failure preserves the local save and retry settings',async()=>{
  const h=harness();await h.cloud.write(start,0);await h.engine.enable();
  h.cloud.read=async()=>{throw Error('offline')};
