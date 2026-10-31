@@ -1,6 +1,6 @@
 {
   "firestore": {
-    "rules": "wordscene/tests/emulator/firestore.rules"
+    "rules": "tests/emulator/firestore.rules"
   },
   "emulators": {
     "firestore": {
