@@ -1,3 +1,5 @@
+import {normalizeSnapshot, snapshotsFromDocuments, isValidSnapshotCache, isFreshSnapshot, FOOTBALL_LEAGUES} from './snapshot_data.mjs';
+import {normalizeFavorites} from './favorites_sync.mjs';
 const $ = (selector, root = document) => root.querySelector(selector);
 const view = $('#football-view');
 const status = $('#football-status');
@@ -5,7 +7,7 @@ const leagueSelect = $('#football-league');
 const seasonSelect = $('#football-season');
 const DEMO = new URLSearchParams(location.search).get('football-demo') === '1';
 const cacheKey = 'leveli-football-snapshots-v1';
-const leagues = ['PL', 'PD', 'SA', 'BL1', 'FL1', 'CL'];
+const leagues = FOOTBALL_LEAGUES;
 const leagueNames = {PL:'Английская Премьер-лига',PD:'Ла Лига',SA:'Серия А',BL1:'Бундеслига',FL1:'Лига 1',CL:'Лига чемпионов УЕФА'};
 let snapshots = {};
 let activeTab = 'overview';
@@ -18,10 +20,7 @@ let firebaseListenerStarted = false;
 let currentUser = null;
 
 const docId = (league, season, endpoint) => `${league}_${season}_${endpoint}`;
-const isFresh = data => {
-  const age=Date.now()-Date.parse(data?.fetchedAt||'');
-  return Number.isFinite(age)&&age>=-5*60_000&&age<=36*3600_000;
-};
+const isFresh = data => isFreshSnapshot(data);
 const safeRead = key => { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } };
 const safeWrite = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} };
 function setStatus(message, kind = '') {
@@ -43,16 +42,13 @@ function dataAgeKind(data) {
 }
 function loadLocalCache() {
   const cached = safeRead(cacheKey);
-  if (cached && cached.schemaVersion === 1 && cached.snapshots && typeof cached.snapshots === 'object') {
-    snapshots=Object.fromEntries(Object.entries(cached.snapshots).filter(([,item])=>item&&item.schemaVersion===1&&item.source==='football-data.org'
-      &&leagues.includes(item.league)&&Number.isInteger(item.season)&&['standings','matches','scorers'].includes(item.endpoint)
-      &&Array.isArray(item.items)&&Number.isFinite(Date.parse(item.fetchedAt||''))));
-  }
+  if (isValidSnapshotCache(cached)) snapshots=Object.fromEntries(Object.entries(cached.snapshots)
+    .map(([key,item])=>[key,normalizeSnapshot(item)]).filter(([,item])=>!!item));
 }
 function saveFavorites() { safeWrite(`leveli-football-favorites-v1:${userKey}`, favorites); }
 function loadFavorites() {
   const saved = safeRead(`leveli-football-favorites-v1:${userKey}`);
-  favorites = {teams: Array.isArray(saved?.teams) ? saved.teams.slice(0,3) : [], players: Array.isArray(saved?.players) ? saved.players.slice(0,3) : []};
+  favorites = normalizeFavorites(saved);
   const stored = safeRead(`leveli-football-compare-v1:${userKey}`);
   compare = {teams: Array.isArray(stored?.teams) ? stored.teams.slice(0,2) : [], players: Array.isArray(stored?.players) ? stored.players.slice(0,2) : []};
   updateHomeSummary();
@@ -354,22 +350,33 @@ async function loadFirebaseSnapshots() {
 async function readFirebaseSnapshots() {
   const sdk=window.leveliFirebase;
   if(DEMO||!sdk?.db||!currentUser)return;
-  const tasks=[];
-  for(const league of leagues){
-    const seasons=[...new Set(Object.values(snapshots).filter(item=>item?.league===league).map(item=>item.season))];
-    const season=seasons[0]||new Date().getUTCFullYear();
-    for(const endpoint of ['standings','matches','scorers'])tasks.push([league,season,endpoint]);
-  }
-  const results=await Promise.allSettled(tasks.map(([league,season,endpoint])=>
-    sdk.getDocFromServer(sdk.doc(sdk.db,'footballSnapshots',docId(league,season,endpoint)))));
+  const uid=currentUser.uid;
   let loaded=false;
-  results.forEach((result,index)=>{
-    if(result.status!=='fulfilled'||!result.value.exists())return;
-    const [league,season,endpoint]=tasks[index],data=result.value.data();
-    if(data.schemaVersion!==1||data.source!=='football-data.org'||data.league!==league||data.season!==season
-      ||data.endpoint!==endpoint||!Array.isArray(data.items)||!Number.isFinite(Date.parse(data.fetchedAt||'')))return;
-    snapshots[docId(league,season,endpoint)]=data;loaded=true;
-  });
+  if(sdk.collection&&sdk.getDocs&&sdk.query&&sdk.limit){
+    try {
+      const listing=await sdk.getDocs(sdk.query(sdk.collection(sdk.db,'footballSnapshots'),sdk.limit(120)));
+      if(currentUser?.uid!==uid)return;
+      const discovered=snapshotsFromDocuments(listing.docs);
+      Object.assign(snapshots,discovered);
+      loaded=Object.keys(discovered).length>0;
+    } catch { /* Some existing rules allow direct gets but not collection listing. */ }
+  }
+  if(!loaded){
+    const currentYear=new Date().getUTCFullYear();
+    const cachedSeasons=Object.values(snapshots).map(item=>item.season);
+    const seasons=[...new Set([currentYear,currentYear-1,...cachedSeasons])].slice(0,4);
+    const tasks=leagues.flatMap(league=>seasons.flatMap(season=>['standings','matches','scorers'].map(endpoint=>[league,season,endpoint])));
+    const results=await Promise.allSettled(tasks.map(([league,season,endpoint])=>
+      sdk.getDocFromServer(sdk.doc(sdk.db,'footballSnapshots',docId(league,season,endpoint)))));
+    if(currentUser?.uid!==uid)return;
+    results.forEach((result,index)=>{
+      if(result.status!=='fulfilled'||!result.value.exists())return;
+      const [league,season,endpoint]=tasks[index];
+      const data=normalizeSnapshot(result.value.data(),{league,season,endpoint});
+      if(!data)return;
+      snapshots[docId(league,season,endpoint)]=data;loaded=true;
+    });
+  }
   if(loaded)safeWrite(cacheKey,{schemaVersion:1,snapshots,savedAt:Date.now()});
   refreshSeasonOptions();updateHomeSummary();render();
 }

@@ -28,11 +28,11 @@ addEventListener('hashchange',()=>navigate(location.hash.slice(1)));navigate(loc
 </script><script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js';
 import {getAuth, setPersistence, browserLocalPersistence, onAuthStateChanged, signInWithEmailAndPassword, signOut} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js';
-import {getFirestore, doc, getDocFromServer} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js';
+import {getFirestore, doc, getDocFromServer, collection, getDocs, query, limit} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js';
 const firebaseConfig={apiKey:"AIzaSyCs3gfUXcrlTJLZqxXQ0cgXpfuqNBkNIsU",authDomain:"family-school-grades.firebaseapp.com",projectId:"family-school-grades",storageBucket:"family-school-grades.firebasestorage.app",messagingSenderId:"1005917864241",appId:"1:1005917864241:web:4192a263b8ad39fdb3f010"};
 const app=initializeApp(firebaseConfig,'leveli-school');
 const auth=getAuth(app), db=getFirestore(app);
-window.leveliFirebase={auth,db,doc,getDocFromServer,onAuthStateChanged};
+window.leveliFirebase={auth,db,doc,getDocFromServer,collection,getDocs,query,limit,onAuthStateChanged};
 window.dispatchEvent(new Event('leveliFirebaseReady'));
 const login=document.getElementById('school-login'), results=document.getElementById('school-results'), error=document.getElementById('school-error'), status=document.getElementById('school-status'), subjects=document.getElementById('school-subjects');
 let firestoreProfileName='';function updateIdentity(user,grades){const email=user?.email||'';const display=firestoreProfileName||user?.displayName?.trim()||'';const known=display||(/polina|polya|полин/i.test(email)?'Полина':/matvey|matvei|матвей/i.test(email)?'Матвей':'');const name=known||'ученик';document.getElementById('home-greeting').textContent='Привет, '+(known||'друг')+'!';document.getElementById('profile-name').textContent=user?(known||'Ученик'):'Гость';document.getElementById('profile-account').textContent=user?'Аккаунт: '+email:'Войди в разделе «Школа», чтобы подключить профиль.';document.getElementById('profile-actions').hidden=!user;document.getElementById('profile-school').textContent=user?'Школьных записей: '+(grades?.length??'загружаются…'):'';document.getElementById('learning-status').textContent=user?'Школа подключена. Прогресс WordScene пока хранится локально и не синхронизирован.':'Войди в аккаунт в разделе «Школа», чтобы подключить учебные данные.';document.title='Левели · '+(known||'Мой мир')}
