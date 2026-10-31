@@ -50,3 +50,26 @@ export function isFreshSnapshot(data, now = Date.now()) {
   const age=now-Date.parse(data?.fetchedAt||'');
   return Number.isFinite(age)&&age>=-5*60_000&&age<=36*3600_000;
 }
+
+
+const LOCAL_SNAPSHOT_FILE = /^([A-Z0-9]+)_(\\d{4})_(standings|matches|scorers)\\.json$/;
+
+export function localSnapshotFileNames(files) {
+  if (!Array.isArray(files)) return [];
+  return [...new Set(files.filter(name => typeof name === 'string' && LOCAL_SNAPSHOT_FILE.test(name)))].sort();
+}
+
+export function snapshotsFromLocalFiles(files) {
+  const snapshots = {};
+  for (const file of files || []) {
+    const match = LOCAL_SNAPSHOT_FILE.exec(file?.name || '');
+    if (!match) continue;
+    const [, league, seasonText, endpoint] = match;
+    const season = Number(seasonText);
+    const data = normalizeSnapshot(file.data, {league, season, endpoint});
+    if (!data) continue;
+    const id = `${league}_${season}_${endpoint}`;
+    snapshots[id] = data;
+  }
+  return snapshots;
+}
