@@ -10,15 +10,21 @@ function harness(initial={}){
  return {store:profiles.create({storage,validate:valid,now:()=>999}),storage};
 }
 test('first account login isolates the existing guest save without deleting it',()=>{
- const guest=state('guest'),h=harness({'word-scenes-v5':JSON.stringify(guest)});
+ const guest={...state('guest'),words:{cup:{started:true}}},h=harness({'word-scenes-v5':JSON.stringify(guest)});
  assert.deepEqual(h.store.switchTo('A'),{changed:true,profile:'user:A'});
  assert.deepEqual(JSON.parse(h.storage.getItem('word-scenes-v5-guest')),guest);
  assert.equal(JSON.parse(h.storage.getItem('word-scenes-v5')).marker,undefined);
  assert.equal(h.store.matches('A'),true);assert.equal(h.store.matches('B'),false);
  assert.equal(h.store.hasGuestProgress(),true);
 });
+test('empty guest initialization is not offered as a progress import',()=>{
+ const h=harness({'word-scenes-v5':JSON.stringify(profiles.EMPTY)});
+ h.store.switchTo('A');assert.equal(h.store.hasGuestProgress(),false);
+ const guest={...state('guest'),words:{cup:{started:true}}};h.storage.setItem('word-scenes-v5-guest',JSON.stringify(guest));
+ h.store.switchTo(null);assert.equal(h.store.hasGuestProgress(),true);
+});
 test('different Firebase accounts and guest mode receive separate local saves',()=>{
- const guest=state('guest'),h=harness({'word-scenes-v5':JSON.stringify(guest)});
+ const guest={...profiles.EMPTY,words:{cup:{started:true}}},h=harness({'word-scenes-v5':JSON.stringify(guest)});
  h.store.switchTo('A');const dataA=state('A');h.storage.setItem('word-scenes-v5',JSON.stringify(dataA));
  h.store.switchTo('B');assert.equal(JSON.parse(h.storage.getItem('word-scenes-v5')).marker,undefined);
  h.storage.setItem('word-scenes-v5',JSON.stringify(state('B')));

@@ -52,7 +52,11 @@ function create({storage,validate,now=()=>Date.now()}){
   }
   return {changed:true,profile:target};
  }
- function hasGuestProgress(){const raw=storage.getItem(profileKey('guest'));return !!raw&&validate(parse(raw))}
+ function hasGuestProgress(){
+  const raw=storage.getItem(profileKey('guest')),value=parse(raw);if(!value||!validate(value))return false;
+  if(value.session||value.reviewCycle?.length||Object.keys(value.habit?.days||{}).length)return true;
+  return Object.values(value.words||{}).some(p=>p.started||p.trained||p.attempts>0||p.errors>0||p.sessions>0||p.hesitations>0||p.needsWork||p.writingNeedsWork||p.schedule?.checks?.length||p.writingResults?.length);
+ }
  function importGuest(uid){
   if(!uid||!matches(uid))throw new Error('Сначала откройте профиль нужного аккаунта');
   const guestRaw=storage.getItem(profileKey('guest'));if(!guestRaw||!validate(parse(guestRaw)))throw new Error('Сохранённый гостевой прогресс не найден или повреждён');
