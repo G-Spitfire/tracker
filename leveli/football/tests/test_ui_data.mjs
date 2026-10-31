@@ -68,7 +68,7 @@ test('local files load six leagues and expose only real available seasons',()=>{
   const accepted=localSnapshotFileNames(names);
   assert.equal(accepted.length,8);
   const files=accepted.filter(name=>name!=='notes.json').map(name=>{
-    const [,league,year,endpoint]=/^([A-Z0-9]+)_(\\d{4})_(standings|matches)\\.json$/.exec(name);
+    const [league,year,endpoint]=name.replace('.json','').split('_');
     const base={schemaVersion:1,source:'football-data.org',league,season:Number(year),endpoint,fetchedAt:at};
     if(endpoint==='standings')base.items=[{type:'TOTAL',team:{id:100+expected.indexOf(league),name:league},points:12,goalsFor:null,goalsAgainst:null}];
     else base.items=[];
