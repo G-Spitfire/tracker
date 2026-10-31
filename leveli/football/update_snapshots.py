@@ -41,14 +41,12 @@ def main():
     parser.add_argument("--season", type=int, required=True, help="Год начала сезона")
     parser.add_argument("--endpoint", choices=("standings", "matches", "scorers"), action="append",
                         default=None, help="По умолчанию бесплатные таблицы и матчи")
-    parser.add_argument("--allow-deep-data", action="store_true",
-                        help="Не используется при первом бесплатном запуске")
     parser.add_argument("--cache-dir", type=Path, default=ROOT / ".cache" / "snapshots")
     parser.add_argument("--export-dir", type=Path, default=ROOT / ".cache" / "firebase-export")
     args = parser.parse_args()
 
-    endpoints = list(dict.fromkeys(args.endpoint or ["standings", "matches"]))
-    if "scorers" in endpoints:
+    requested_endpoints = list(dict.fromkeys(args.endpoint or ["standings", "matches"]))
+    if "scorers" in requested_endpoints:
         parser.error("scorers не входит в бесплатные методы; удалите --endpoint scorers")
     token = os.environ.get("FOOTBALL_KEY") or getpass.getpass("API-ключ (ввод скрыт): ")
     if not token.strip():
@@ -61,11 +59,18 @@ def main():
     leagues = sorted(LEAGUES) if args.all else list(dict.fromkeys(args.league))
     cache = SnapshotCache(args.cache_dir)
     args.export_dir.mkdir(parents=True, exist_ok=True)
-    endpoints_by_league = {league: tuple(endpoint for endpoint in requested_endpoints\n        if endpoint != "standings" or league != "CL") for league in leagues}\n    total = sum(len(endpoints) for endpoints in endpoints_by_league.values())
+    endpoints_by_league = {
+        league: tuple(endpoint for endpoint in requested_endpoints
+                      if endpoint != "standings" or league != "CL")
+        for league in leagues
+    }
+    total = sum(len(endpoints) for endpoints in endpoints_by_league.values())
     completed = 0
     failed = False
     for league in leagues:
-        if "standings" in requested_endpoints and league == "CL":\n            print("CL/standings: пропущено (метод таблицы недоступен для кубкового турнира)", flush=True)\n        for endpoint in endpoints_by_league[league]:
+        if "standings" in requested_endpoints and league == "CL":
+            print("CL/standings: пропущено (таблицы для кубкового турнира недоступны)", flush=True)
+        for endpoint in endpoints_by_league[league]:
             completed += 1
             print(f"[{completed}/{total}] Загружаю {league}/{endpoint}…", flush=True)
             try:
