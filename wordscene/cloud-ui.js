@@ -39,7 +39,6 @@ const uiStyle=document.createElement('style');uiStyle.textContent='section[aria-
 
 const SYNC_KEY='wordscene-sync-v1';
 let syncBusy=false;
-let lastObserved=null;
 function syncSettings(){try{return JSON.parse(localStorage.getItem(SYNC_KEY)||'null')}catch{return null}}
 function syncEnabled(){const u=auth.currentUser?.uid,settings=syncSettings();return !!u&&settings?.uid===u&&Number.isSafeInteger(settings.revision)&&settings.revision>0}
 function syncLabel(){sync.textContent=syncEnabled()?'Отключить автосинхронизацию':'Включить автосинхронизацию';syncNow.hidden=!syncEnabled()}
@@ -55,7 +54,7 @@ function local(){
 async function guarded(task){
  for(const el of [login,logout,inspect,verify,restore,upload,sync,syncNow,download])el.disabled=true;
  try{await task()}catch(e){console.error('[WordScene cloud] Подробности ошибки:',e);message('Ошибка: '+(e.code||'неизвестная')+'\n'+(e.message||'Нет описания')+'\n'+(e.stack||''))}
- finally{for(const el of [login,logout,inspect,upload,download])el.disabled=false}
+ finally{for(const el of [login,logout,inspect,verify,restore,upload,sync,syncNow,download])el.disabled=false;syncLabel()}
 }
 form.onsubmit=e=>{e.preventDefault();guarded(async()=>{await setPersistence(auth,browserLocalPersistence);await signInWithEmailAndPassword(auth,email.value,password.value);password.value='';message('Вход выполнен. Данные пока не отправлены.')})};
 logout.onclick=()=>guarded(async()=>{await signOut(auth);message('Вы вышли. Локальный прогресс сохранён.')});
