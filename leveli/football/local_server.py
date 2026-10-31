@@ -17,7 +17,8 @@ MANIFEST_PATH = "/__leveli_local__/manifest.json"
 SNAPSHOT_PREFIX = "/__leveli_local__/snapshots/"
 
 
-def local_snapshot_names(directory: Path = EXPORT_DIR) -> list[str]:
+def local_snapshot_names(directory: Path | None = None) -> list[str]:
+    directory = EXPORT_DIR if directory is None else directory
     try:
         names = [
             path.name for path in directory.iterdir()
