@@ -72,7 +72,7 @@ class LocalFootballHandler(SimpleHTTPRequestHandler):
 
 def main():
     server = ThreadingHTTPServer(("127.0.0.1", 0), LocalFootballHandler)
-    url = "http://127.0.0.1:" + str(server.server_address[1]) + "/leveli/?football-local=1"
+    url = "http://127.0.0.1:" + str(server.server_address[1]) + "/leveli/?football-local=1#football"
     print("Локальный модуль «Левели» запущен: " + url, flush=True)
     print("Сервер доступен только на этом Mac. Остановить: Ctrl+C.", flush=True)
     threading.Thread(target=webbrowser.open, args=(url,), daemon=True).start()
