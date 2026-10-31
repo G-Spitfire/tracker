@@ -1,11 +1,13 @@
-import {normalizeSnapshot, snapshotsFromDocuments, isValidSnapshotCache, isFreshSnapshot, FOOTBALL_LEAGUES} from './snapshot_data.mjs';
+import {normalizeSnapshot, snapshotsFromDocuments, isValidSnapshotCache, isFreshSnapshot, FOOTBALL_LEAGUES, localSnapshotFileNames, snapshotsFromLocalFiles} from './snapshot_data.mjs';
 import {normalizeFavorites} from './favorites_sync.mjs';
 const $ = (selector, root = document) => root.querySelector(selector);
 const view = $('#football-view');
 const status = $('#football-status');
 const leagueSelect = $('#football-league');
 const seasonSelect = $('#football-season');
-const DEMO = new URLSearchParams(location.search).get('football-demo') === '1';
+const params = new URLSearchParams(location.search);
+const DEMO = params.get('football-demo') === '1';
+const LOCAL = !DEMO && params.get('football-local') === '1';
 const cacheKey = 'leveli-football-snapshots-v1';
 const leagues = FOOTBALL_LEAGUES;
 const leagueNames = {PL:'Английская Премьер-лига',PD:'Ла Лига',SA:'Серия А',BL1:'Бундеслига',FL1:'Лига 1',CL:'Лига чемпионов УЕФА'};
@@ -18,6 +20,7 @@ let teamMetric = 'points';
 let playerView = 'list';
 let firebaseListenerStarted = false;
 let currentUser = null;
+let localLoadMessage = '';
 
 const docId = (league, season, endpoint) => `${league}_${season}_${endpoint}`;
 const isFresh = data => isFreshSnapshot(data);
@@ -313,6 +316,8 @@ function render() {
   const data=currentData('standings')||currentData('matches')||currentData('scorers');
   const latest=[currentData('standings'),currentData('matches'),currentData('scorers')].filter(Boolean).sort((a,b)=>String(b.fetchedAt).localeCompare(String(a.fetchedAt)))[0]||data;
   if(DEMO)setStatus(`Искусственные данные для проверки интерфейса · ${sourceLine(latest)}`,'demo');
+  else if(LOCAL && latest)setStatus(sourceLine(latest)+(localLoadMessage?' · '+localLoadMessage:''),dataAgeKind(latest));
+  else if(LOCAL)setStatus(localLoadMessage||'Локальные данные не найдены. Сначала загрузите JSON-файлы в кеш футбольного модуля.','stale');
   else if(latest)setStatus(sourceLine(latest),dataAgeKind(latest));
   else setStatus(navigator.onLine?'Нет подключённых данных. Показывается пустое состояние.':'Офлайн: локального снимка пока нет.');
   if(activeTab==='overview')renderOverview();
@@ -336,6 +341,37 @@ async function loadDemo() {
     leagueSelect.value=data.league;refreshSeasonOptions();
   } catch { setStatus('Демо-данные не загрузились. Откройте страницу через локальный веб-сервер.'); }
 }
+async function loadLocalFiles() {
+  snapshots={};
+  localLoadMessage='Ищу локальные JSON-файлы…';
+  setStatus(localLoadMessage);
+  try {
+    const response=await fetch('/__leveli_local__/manifest.json',{cache:'no-store'});
+    if(!response.ok)throw new Error('manifest unavailable');
+    const manifest=await response.json();
+    const names=localSnapshotFileNames(manifest?.files);
+    if(!names.length){
+      localLoadMessage='Локальные JSON-файлы не найдены. Запустите загрузчик статистики и откройте эту страницу снова.';
+      refreshSeasonOptions();render();return;
+    }
+    localLoadMessage='Загружаю '+names.length+' локальных снимков…';
+    setStatus(localLoadMessage);
+    const results=await Promise.allSettled(names.map(async name=>{
+      const file=await fetch('/__leveli_local__/snapshots/'+encodeURIComponent(name),{cache:'no-store'});
+      if(!file.ok)throw new Error('snapshot unavailable');
+      return {name,data:await file.json()};
+    }));
+    const files=results.filter(result=>result.status==='fulfilled').map(result=>result.value);
+    const failed=results.length-files.length;
+    snapshots=snapshotsFromLocalFiles(files);
+    const invalid=files.length-Object.keys(snapshots).length;
+    localLoadMessage='Загружено локальных снимков: '+Object.keys(snapshots).length
+      +(failed+invalid?'; пропущено файлов: '+(failed+invalid):'')+'.';
+  } catch {
+    localLoadMessage='Не удалось прочитать локальные данные. Проверьте, что скрипт запущен из папки репозитория.';
+  }
+  refreshSeasonOptions();updateHomeSummary();render();
+}
 async function loadFirebaseSnapshots() {
   const sdk=window.leveliFirebase;
   if(!sdk?.auth||!sdk?.db||firebaseListenerStarted)return;
@@ -349,7 +385,7 @@ async function loadFirebaseSnapshots() {
 }
 async function readFirebaseSnapshots() {
   const sdk=window.leveliFirebase;
-  if(DEMO||!sdk?.db||!currentUser)return;
+  if(DEMO||LOCAL||!sdk?.db||!currentUser)return;
   const uid=currentUser.uid;
   let loaded=false;
   if(sdk.collection&&sdk.getDocs&&sdk.query&&sdk.limit){
@@ -404,6 +440,7 @@ leagueSelect.addEventListener('change',()=>{refreshSeasonOptions();render();});
 seasonSelect.addEventListener('change',render);
 document.addEventListener('click',event=>{const target=event.target.closest('[data-go="football"]');if(target){activeTab='overview';render();}});
 window.addEventListener('online',()=>{render();void readFirebaseSnapshots();});window.addEventListener('offline',render);
-loadLocalCache();loadFavorites();
-if(DEMO)loadDemo().then(render);
+if(!LOCAL)loadLocalCache();loadFavorites();
+if(LOCAL){ refreshSeasonOptions(); render(); void loadLocalFiles(); }
+else if(DEMO)loadDemo().then(render);
 else { refreshSeasonOptions(); render(); if(window.leveliFirebase)loadFirebaseSnapshots(); else window.addEventListener('leveliFirebaseReady',loadFirebaseSnapshots,{once:true}); }
