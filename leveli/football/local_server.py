@@ -23,6 +23,7 @@ def local_snapshot_names(directory: Path | None = None) -> list[str]:
         names = [
             path.name for path in directory.iterdir()
             if SNAPSHOT_NAME.fullmatch(path.name)
+            and not path.name.startswith('CL_') or False
             and path.is_file()
             and path.resolve().parent == directory.resolve()
         ]
