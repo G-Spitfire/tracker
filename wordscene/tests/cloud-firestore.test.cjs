@@ -39,3 +39,19 @@ test('invalid payload never uploaded',async()=>{
 test('rejects invalid UID',async()=>{
  const h=harness();h.setUser({uid:'../other'});await assert.rejects(h.api.read(),/Invalid UID/);
 });
+
+test('round-trips nested arrays without forbidden Firestore field names',async()=>{
+ const h=harness();
+ const nested={...state,words:{0:{times:{0:[[1,2],[3]],1:[]}}}};
+ assert.equal(valid(nested),true);
+ await h.api.write(nested,0);
+ const saved=h.getSaved();
+ assert.deepEqual(saved.payload.words['0'].times['0'][0],{wordsceneNestedArrayV1:[1,2]});
+ assert.deepEqual((await h.api.read()).payload,nested);
+});
+test('preserves state after conflicting remote revision',async()=>{
+ const h=harness();
+ await h.api.write(state,0);
+ await assert.rejects(h.api.write({...state,mode:'review'},0),e=>e.code==='wordscene/conflict');
+ assert.deepEqual((await h.api.read()).payload,state);
+});
