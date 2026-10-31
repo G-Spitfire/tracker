@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from adapter import FootballDataClient, ProviderError, SnapshotCache, _NoRedirect, prepare_firebase_document, refresh_one
 from firebase_sync import assert_emulator_only, import_documents
 from normalize import normalize
-from probe import BASE_ENDPOINTS
+from probe import BASE_ENDPOINTS, FREE_ENDPOINTS
 
 
 class Response:
@@ -45,7 +45,7 @@ class FakeFirestore:
 
 class AdapterTests(unittest.TestCase):
     def test_probe_default_excludes_paid_scorers_endpoint(self):
-        self.assertEqual(BASE_ENDPOINTS,("standings","matches"))
+        self.assertEqual(BASE_ENDPOINTS,("standings","matches"))\n        self.assertEqual(FREE_ENDPOINTS["CL"],("matches",))\n        self.assertEqual(FREE_ENDPOINTS["PL"],("standings","matches"))
 
     def test_missing_token_fails_closed(self):
         with self.assertRaisesRegex(ProviderError, "FOOTBALL_KEY"):
