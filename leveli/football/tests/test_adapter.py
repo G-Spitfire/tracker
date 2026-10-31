@@ -16,7 +16,7 @@ from probe import BASE_ENDPOINTS, FREE_ENDPOINTS
 def curl_result(status=200, payload=None, headers="", returncode=0):
     body = json.dumps(payload or {"matches": []}).encode("utf-8")
     crlf = bytes((13, 10))
-    output = (f"HTTP/2 {status}".encode() + crlf + headers.encode() + crlf + body
+    output = (f"HTTP/2 {status}".encode() + crlf + headers.encode() + crlf + crlf + body
               + b"\n__LEVELI_HTTP_STATUS__:" + str(status).encode() + b"\n")
     return subprocess.CompletedProcess([], returncode, output, b"")
 
