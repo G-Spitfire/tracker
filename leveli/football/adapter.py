@@ -8,10 +8,8 @@ from __future__ import annotations
 import email.utils
 import json
 import os
+import subprocess
 import time
-import urllib.error
-import urllib.parse
-import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -21,12 +19,7 @@ BASE_URL = "https://api.football-data.org/v4"
 SCHEMA_VERSION = 1
 MAX_RETRIES = 2
 MAX_RESPONSE_BYTES = 2_000_000
-
-
-class _NoRedirect(urllib.request.HTTPRedirectHandler):
-    """Keep X-Auth-Token confined to the configured provider host."""
-    def redirect_request(self, req, fp, code, msg, headers, newurl):
-        return None
+_CURL_STATUS_MARKER = b"\n__LEVELI_HTTP_STATUS__:"
 
 
 class ProviderError(Exception):
@@ -56,16 +49,45 @@ def _retry_after(value: str | None, now: float) -> float:
     return min(60.0, max(1.0, delay))
 
 
-class FootballDataClient:
-    """Small rate-limited client. Ten calls/min is the provider's free-plan cap."""
+def _curl_config_quote(value: str) -> str:
+    if "\r" in value or "\n" in value:
+        raise ProviderError("API token contains an unsupported line break")
+    return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
-    def __init__(self, token: str | None = None, *, opener=None, clock=time.monotonic,
-                 sleep=time.sleep, timeout: float = 15, min_interval: float = 6.1,
+
+def _parse_curl_output(stdout: bytes) -> tuple[int, bytes, dict[str, str]]:
+    before, marker, code_text = stdout.rpartition(_CURL_STATUS_MARKER)
+    if not marker:
+        raise ProviderError("System curl returned no HTTP status", retryable=True)
+    try:
+        status = int(code_text.strip().splitlines()[0])
+    except (ValueError, IndexError):
+        raise ProviderError("System curl returned an invalid HTTP status", retryable=True) from None
+    header_bytes, separator, body = before.partition(b"\r\n\r\n")
+    if not separator:
+        header_bytes, separator, body = before.partition(b"\n\n")
+    headers: dict[str, str] = {}
+    if separator:
+        for line in header_bytes.decode("iso-8859-1").splitlines()[1:]:
+            if ":" in line:
+                name, value = line.split(":", 1)
+                headers[name.strip().lower()] = value.strip()
+    else:
+        body = before
+    return status, body, headers
+
+
+class FootballDataClient:
+    """Rate-limited client using the operating system's curl/TLS configuration."""
+
+    def __init__(self, token: str | None = None, *, runner=subprocess.run, curl_binary: str = "curl",
+                 clock=time.monotonic, sleep=time.sleep, timeout: float = 15, min_interval: float = 6.1,
                  max_retries: int = MAX_RETRIES):
         self.token = (token if token is not None else os.environ.get("FOOTBALL_KEY", "")).strip()
         if not self.token:
             raise ProviderError("FOOTBALL_KEY is not configured")
-        self.opener = opener or urllib.request.build_opener(_NoRedirect()).open
+        self.runner = runner
+        self.curl_binary = curl_binary
         self.clock = clock
         self.sleep = sleep
         self.timeout = timeout
@@ -80,6 +102,49 @@ class FootballDataClient:
                 self.sleep(wait)
         self.last_request_at = self.clock()
 
+    def _request(self, url: str) -> tuple[int, bytes, dict[str, str]]:
+        config = (
+            "header = " + _curl_config_quote("X-Auth-Token: " + self.token) + "\n"
+            'header = "Accept: application/json"\n'
+            "silent\n"
+        )
+        command = [
+            self.curl_binary, "--config", "-", "--silent", "--show-error",
+            "--max-time", str(self.timeout),
+            "--connect-timeout", str(min(8.0, self.timeout)),
+            "--max-filesize", str(MAX_RESPONSE_BYTES),
+            "--dump-header", "-",
+            "--write-out", "\n__LEVELI_HTTP_STATUS__:%{http_code}\n",
+            url,
+        ]
+        try:
+            result = self.runner(command, input=config.encode("utf-8"), capture_output=True,
+                                 timeout=self.timeout + 3, check=False)
+        except subprocess.TimeoutExpired:
+            raise ProviderError("System curl request timed out", retryable=True) from None
+        except FileNotFoundError:
+            raise ProviderError("System curl was not found; install curl and try again") from None
+        except OSError:
+            raise ProviderError("System curl could not start", retryable=True) from None
+
+        if result.returncode != 0:
+            # curl 35/60 are TLS negotiation/certificate errors and will not heal by retrying.
+            if result.returncode == 60:
+                raise ProviderError("TLS certificate verification failed (curl exit 60)")
+            if result.returncode == 35:
+                raise ProviderError("TLS handshake failed (curl exit 35)")
+            if result.returncode == 63:
+                raise ProviderError("Provider response is larger than the 2 MB safety limit")
+            raise ProviderError(f"System curl request failed (exit {result.returncode})", retryable=True)
+
+        stdout = result.stdout
+        if isinstance(stdout, str):
+            stdout = stdout.encode("utf-8")
+        status, body, headers = _parse_curl_output(stdout)
+        if len(body) > MAX_RESPONSE_BYTES:
+            raise ProviderError("Provider response is larger than the 2 MB safety limit", status=status)
+        return status, body, headers
+
     def fetch(self, league: str, endpoint: str, season: int) -> dict:
         if league not in LEAGUES:
             raise ValueError("Unsupported league")
@@ -90,44 +155,36 @@ class FootballDataClient:
         query = {"season": str(season)}
         if endpoint == "scorers":
             query["limit"] = "20"
-        url = f"{BASE_URL}/competitions/{league}/{endpoint}?{urllib.parse.urlencode(query)}"
-        request = urllib.request.Request(url, headers={
-            "X-Auth-Token": self.token,
-            "Accept": "application/json",
-            "User-Agent": "Leveli-football/1.0",
-        })
+        url = f"{BASE_URL}/competitions/{league}/{endpoint}?season={season}"
+        if endpoint == "scorers":
+            url += "&limit=20"
+
         for attempt in range(self.max_retries + 1):
             self._pace()
             try:
-                with self.opener(request, timeout=self.timeout) as response:
-                    if response.status != 200:
-                        raise ProviderError("Provider returned an unexpected status", status=response.status,
-                                            retryable=response.status >= 500)
-                    raw = response.read(MAX_RESPONSE_BYTES + 1)
-                    if len(raw) > MAX_RESPONSE_BYTES:
-                        raise ProviderError("Provider response is too large", status=200)
-                    try:
-                        payload = json.loads(raw.decode("utf-8"))
-                    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-                        raise ProviderError("Provider returned invalid JSON", status=200) from exc
-                    if not isinstance(payload, dict):
-                        raise ProviderError("Provider returned an invalid response", status=200)
-                    return payload
-            except urllib.error.HTTPError as exc:
-                if exc.code == 429 and attempt < self.max_retries:
-                    self.sleep(_retry_after(exc.headers.get("Retry-After"), time.time()))
-                    continue
-                if exc.code >= 500 and attempt < self.max_retries:
+                status, raw, headers = self._request(url)
+            except ProviderError as exc:
+                if exc.retryable and attempt < self.max_retries:
                     self.sleep(2 ** attempt)
                     continue
-                # Never include response body or request headers in surfaced errors.
-                raise ProviderError("Provider rejected the request or data is unavailable", status=exc.code,
-                                    retryable=exc.code == 429 or exc.code >= 500) from None
-            except (urllib.error.URLError, TimeoutError, OSError) as exc:
-                if attempt < self.max_retries:
-                    self.sleep(2 ** attempt)
-                    continue
-                raise ProviderError("Provider connection failed", retryable=True) from None
+                raise
+
+            if status == 429 and attempt < self.max_retries:
+                self.sleep(_retry_after(headers.get("retry-after"), time.time()))
+                continue
+            if status >= 500 and attempt < self.max_retries:
+                self.sleep(2 ** attempt)
+                continue
+            if status != 200:
+                raise ProviderError("Provider rejected the request or data is unavailable", status=status,
+                                    retryable=status == 429 or status >= 500) from None
+            try:
+                payload = json.loads(raw.decode("utf-8"))
+            except (UnicodeDecodeError, json.JSONDecodeError):
+                raise ProviderError("Provider returned invalid JSON", status=200) from None
+            if not isinstance(payload, dict):
+                raise ProviderError("Provider returned an invalid response", status=200)
+            return payload
         raise ProviderError("Provider retries exhausted", retryable=True)
 
 
