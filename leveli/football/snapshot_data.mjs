@@ -73,3 +73,9 @@ export function snapshotsFromLocalFiles(files) {
   }
   return snapshots;
 }
+
+export function snapshotSeasons(snapshots, league) {
+  return [...new Set(Object.values(snapshots || {})
+    .filter(item => item?.league === league && Number.isInteger(item.season))
+    .map(item => item.season))].sort((a, b) => b - a);
+}
