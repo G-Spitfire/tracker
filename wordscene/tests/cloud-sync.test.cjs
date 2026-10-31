@@ -39,6 +39,7 @@ test('two-device conflict keeps both snapshots and pauses automatic writes',asyn
  assert.deepEqual(h.getRemote().payload,remote);
  const conflict=await h.engine.exportConflict();
  assert.deepEqual(conflict.local.progress,local);assert.deepEqual(conflict.cloud.progress,remote);
+ h.engine.markConflictExported(conflict);
  assert.equal((await h.engine.resolve('local')).status,'kept-local');
  assert.deepEqual(h.getRemote().payload,local);
  assert.equal(h.engine.enabled(),true);
@@ -46,7 +47,7 @@ test('two-device conflict keeps both snapshots and pauses automatic writes',asyn
 test('conflict resolution refuses stale backup if local or cloud changes',async()=>{
  const h=harness();await h.cloud.write(start,0);await h.engine.enable();
  h.storage.setItem('word-scenes-v5',JSON.stringify({...start,localChange:true}));
- await h.cloud.write({...start,remoteChange:true},1);await h.engine.syncOnce();await h.engine.exportConflict();
+ await h.cloud.write({...start,remoteChange:true},1);await h.engine.syncOnce();const capture=await h.engine.exportConflict();h.engine.markConflictExported(capture);
  h.storage.setItem('word-scenes-v5',JSON.stringify({...start,localChange:true,lateChange:true}));
  await assert.rejects(h.engine.resolve('local'),/изменились после скачивания/);
 });
@@ -60,6 +61,28 @@ test('transaction race captures both copies for the conflict screen',async()=>{
  assert.deepEqual(await h.engine.syncOnce(),{status:'conflict',revision:2});
  const capture=await h.engine.exportConflict();assert.deepEqual(capture.local.progress,local);assert.deepEqual(capture.cloud.progress,remote);
 });
+test('manual comparison offers recovery when local and cloud copies already differ',async()=>{
+ const h=harness();await h.cloud.write(start,0);
+ const local={...start,localChange:true};h.storage.setItem('word-scenes-v5',JSON.stringify(local));
+ assert.deepEqual(await h.engine.prepareConflict(),{status:'conflict',revision:1});
+ const downloaded=await h.engine.exportConflict();
+ assert.deepEqual(downloaded.local.progress,local);assert.deepEqual(downloaded.cloud.progress,start);
+ h.engine.markConflictExported(downloaded);
+ assert.equal((await h.engine.resolve('cloud')).status,'kept-cloud');
+ assert.deepEqual(JSON.parse(h.storage.getItem('word-scenes-v5')),start);
+ assert.deepEqual(JSON.parse(h.storage.getItem('word-scenes-v5-before-cloud-restore-123456')),local);
+});
+test('conflict cannot overwrite either copy until a current backup is marked downloaded',async()=>{
+ const h=harness();await h.cloud.write(start,0);
+ h.storage.setItem('word-scenes-v5',JSON.stringify({...start,keep:'local'}));await h.engine.prepareConflict();
+ await assert.rejects(h.engine.resolve('local'),/Сначала скачайте актуальный файл/);
+ const capture=await h.engine.exportConflict();
+ const local=JSON.parse(h.storage.getItem('word-scenes-v5'));
+ h.engine.markConflictExported(capture);
+ h.storage.setItem('word-scenes-v5',JSON.stringify({...local,changedAfterDownload:true}));
+ await assert.rejects(h.engine.resolve('local'),/Копии изменились после скачивания/);
+ assert.deepEqual((await h.cloud.read()).payload,start);
+});
 test('offline failure preserves the local save and retry settings',async()=>{
  const h=harness();await h.cloud.write(start,0);await h.engine.enable();
  h.cloud.read=async()=>{throw Error('offline')};
@@ -72,6 +95,14 @@ test('account switch cannot push another account local state',async()=>{
  const h=harness();await h.cloud.write(start,0);await h.engine.enable();
  h.setUser({uid:'B'});h.storage.setItem('word-scenes-v5',JSON.stringify({...start,changed:true}));
  assert.deepEqual(await h.engine.syncOnce(),{status:'idle'});
+ assert.equal(h.getRemote().revision,1);
+});
+test('sync engine refuses a UID whose isolated local profile is not active',async()=>{
+ const h=harness();await h.cloud.write(start,0);let profileUid='B';
+ const isolated=sync.create({auth:{get currentUser(){return {uid:'A'}}},cloud:h.cloud,storage:h.storage,validate:valid,canSync:uid=>uid===profileUid});
+ h.storage.setItem('wordscene-sync-v1',JSON.stringify({uid:'A',revision:1,baseline:sync.stable(start)}));
+ assert.equal(isolated.enabled(),false);assert.deepEqual(await isolated.syncOnce(),{status:'idle'});
+ await assert.rejects(isolated.enable(),/профиль не принадлежит/);
  assert.equal(h.getRemote().revision,1);
 });
 test('active session defers remote snapshot application',async()=>{

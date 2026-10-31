@@ -1,51 +1,48 @@
-# WordScene cloud sync — test report
+# WordScene cloud sync — итоговый отчёт по feature-ветке
 
-**Date:** 31 October 2026
-**Branch:** `feature/wordscene-cloud-sync`
-**Production deployment:** none
+**Дата:** 31 октября 2026 года
+**Ветка:** `feature/wordscene-cloud-sync`
+**Рабочее приложение и `main`:** не изменялись
 
-## Changes in this preview
+## Что проверено фактически
 
-- Local-first Firebase Firestore transport with revision-checked transactions, account-UID path validation, payload validation, nested-array encoding and a 900 KiB payload guard.
-- Opt-in two-way snapshot sync on tab return, network recovery and a 30-second interval. Guest learning and local saves remain available offline.
-- Remote-only changes are applied only when the local snapshot has not changed and neither copy contains an active session. Both copies are preserved when a conflict is found; no automatic merge is attempted.
-- Added conflict download and explicit local/cloud selection. Resolution checks that both snapshots still match the downloaded set; cloud restore backs up the local state first.
-- Account buttons regain their enabled state after each operation; sync controls follow the current authenticated UID.
-- Added unit tests for sync, transport, offline retries, UID switching, conflict resolution, nested arrays and document-size limits.
+- Пользователь ранее проверил тестовую сборку в браузере на `127.0.0.1:8765` с тестовым Firebase-аккаунтом: вход Authentication прошёл, чтение Firestore вернуло ожидаемое отсутствие документа.
+- Первая запись обнаружила Firestore-ограничение на вложенные массивы (`invalid-argument`). После обратимого кодирования таких массивов запись прошла: ревизия 1; проверка показала полное совпадение облачной и локальной копий. Это подтверждает реальный Auth sign-in и read/write для собственного документа тестового UID на той версии.
+- В текущей доработке разделены локальные профили гостя и каждого UID; добавлены явный перенос гостевого прогресса, обработка переключения профиля и UID-gate для облачных операций.
+- Автоматические сценарии проверяют разные Firestore-документы на два UID, гостевой режим, переключение A→B→guest→A, раздельные sync-настройки, импорт гостевого прогресса с резервом, отмену переключения, одновременные записи, офлайн-повтор и разрешение конфликта.
+- Перед разрешением конфликта обе версии и история конфликтов должны быть скачаны. Система проверяет, что скачанный набор всё ещё соответствует текущей локальной копии и облачной ревизии; при изменениях кнопки выбора не разрешают перезапись.
+- Текущую сборку повторно открыть в браузере из этой среды не удалось: браузерный контейнер получил `ERR_CONNECTION_REFUSED` при обращении к локальному HTTP-серверу. Поэтому последние изменения профилей и кнопок аккаунта ещё не проверены в интерфейсе.
 
-## Automated results
+## Автоматические тесты
 
-Executed locally from the repository root:
+Последний локальный запуск:
 
 ```text
-node --check wordscene/cloud-ui.js        PASS
-node --check wordscene/cloud-sync.js      PASS
-node --check wordscene/cloud-firestore.js  PASS
-node --test wordscene/tests/*.test.cjs    PASS — 19 tests, 0 failures
-git diff --check                          PASS
+node --check wordscene/profile-store.js        PASS
+node --check wordscene/cloud-ui.js             PASS
+node --check wordscene/cloud-sync.js           PASS
+node --check wordscene/cloud-firestore.js      PASS
+node --test wordscene/tests/*.test.cjs         PASS — 29 тестов, 0 ошибок
+git diff --check                               PASS
 ```
 
-These tests use a deterministic in-memory Firestore adapter. They confirm the client logic; they do not establish that the deployed Firebase project accepts the current rules or Authentication configuration.
+Тесты используют in-memory адаптер для транзакций. Они проверяют клиентскую логику, а не серверные Firestore Rules.
 
-## Browser and Firebase checks still required
+## Что ещё не подтверждено
 
-- The browser tool could not reach the local preview server (`ERR_CONNECTION_REFUSED`). No branch preview URL is configured, so the edited branch has not yet been exercised in a browser.
-- Firebase Authentication sign-in and a real Firestore read/write were not performed. The repository contains no Firebase Rules file or Emulator configuration, and no disposable test-account session was available. Existing production rules were not changed.
-- Consequently, testing with two real signed-in devices/accounts and the live Firebase project remains pending. Do not treat this report as production approval.
+- Новое разделение локальных профилей и все кнопки аккаунта после него не прошли браузерную проверку.
+- Реальная синхронизация между двумя браузерными профилями, офлайн-изменение с последующим восстановлением сети и конфликт двух реальных устройств пока подтверждены только автоматическими тестами.
+- Для разных UID клиент формирует отдельные пути и это проверено тестом с двумя документами. Фактический запрет доступа к документу другого UID Rules не тестировался. Правила Firebase в этой доработке не менялись и их полная текущая версия недоступна.
+- Конфликты разрешаются явным выбором одного снимка после скачивания файла с обеими версиями; автоматического слияния нет.
+- Payload больше 900 KiB блокируется клиентом, разделения большого прогресса на документы пока нет.
 
-## Limits
+## Единственная необходимая пользовательская проверка
 
-- Conflict resolution is explicit snapshot selection with a downloadable backup; the app does not merge simultaneous changes field by field.
-- The current Firestore rules must restrict each user's document to their own UID and permit only `users/{uid}/wordscene/state`. Their live state must be inspected before a real write.
-- Payloads above 900 KiB are refused client-side. The app does not split large progress into multiple documents.
+Обновить локальный тестовый клон до этой ветки и открыть его по прежнему адресу `http://127.0.0.1:8765/` (сервировать каталог `wordscene/` через HTTP). Использовать только тестовый аккаунт и синтетический прогресс.
 
-## One final user check
+1. В первом профиле войти в тестовый аккаунт. Старое неразмеченное локальное сохранение должно остаться гостевым; аккаунт откроет собственный профиль. Нажать «Восстановить из облака», подтвердить сохранение локальной копии и после перезагрузки проверить ревизию 1.
+2. Во втором профиле браузера войти в тот же тестовый аккаунт, восстановить облачную копию и включить синхронизацию на обоих устройствах. Изменить одно тестовое слово в первом профиле и убедиться, что второй получил изменение; затем сделать обратное.
+3. В первом профиле выйти из аккаунта: должен появиться отдельный гостевой прогресс. Снова войти — должен вернуться профиль аккаунта. Кнопка «Перенести гостевой прогресс в аккаунт» должна оставлять гостевую копию и резерв аккаунта; не подтверждать перенос, если он не нужен.
+4. По возможности отключить сеть второго устройства, сделать одно тестовое изменение и включить сеть. При одновременных изменениях обоих профилей приложение должно остановить автосинхронизацию и предложить скачать обе версии перед выбором.
 
-After making the feature branch available at a test URL (or serving this folder locally over HTTP), use two separate browser profiles signed in to the same test account:
-
-1. On profile A, sign in, inspect the cloud, create the first cloud copy, and enable auto-sync.
-2. On profile B, sign in, restore that copy while preserving its local backup, reload, then enable auto-sync.
-3. Complete one short word action on A and wait up to 30 seconds for B to receive it. On B, complete a different action and confirm A receives it.
-4. Briefly take B offline, make a local change, reconnect, and confirm the change uploads. If both profiles changed while offline, confirm the conflict screen offers a download of both copies and requires an explicit choice.
-
-Use a disposable account and synthetic progress for this check. Do not test with the child's only real progress until the downloadable backup and restore paths have been confirmed.
+Не использовать единственный реальный прогресс ребёнка в качестве тестовых данных. Рабочую версию не публиковать до проверки этого сценария.

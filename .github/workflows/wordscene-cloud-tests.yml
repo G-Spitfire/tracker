@@ -16,6 +16,7 @@ jobs:
           node-version: '22'
       - name: Syntax check
         run: |
+          node --check wordscene/profile-store.js
           node --check wordscene/cloud-firestore.js
           node --check wordscene/cloud-sync.js
           node --check wordscene/state-guard.js

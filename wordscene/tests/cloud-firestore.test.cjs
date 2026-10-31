@@ -5,18 +5,18 @@ const guard=require('../state-guard.js');
 const valid=x=>guard.valid(x,500);
 const state={version:5,words:{},session:null};
 function harness(){
- let saved=null,user={uid:'test-user'};
+ const saved=new Map();let user={uid:'test-user'};
  const auth={get currentUser(){return user}};
  const sdk={
   doc:(_db,...segments)=>segments.join('/'),
-  getDoc:async()=>({exists:()=>saved!==null,data:()=>saved}),
+  getDoc:async(path)=>({exists:()=>saved.has(path),data:()=>saved.get(path)}),
   serverTimestamp:()=>({server:true}),
   runTransaction:async(_db,callback)=>callback({
-   get:async()=>({exists:()=>saved!==null,data:()=>saved}),
-   set:(_ref,value)=>{saved=value}
+   get:async(path)=>({exists:()=>saved.has(path),data:()=>saved.get(path)}),
+   set:(path,value)=>{saved.set(path,value)}
   })
  };
- return {api:cloud.create({auth,db:{},sdk,validate:valid}),setUser:v=>{user=v},getSaved:()=>saved};
+ return {api:cloud.create({auth,db:{},sdk,validate:valid}),setUser:v=>{user=v},getSaved:(uid='test-user')=>saved.get(`users/${uid}/wordscene/state`)||null};
 }
 test('requires sign-in and preserves empty cloud',async()=>{
  const h=harness();h.setUser(null);await assert.rejects(h.api.read(),/Sign-in/);
@@ -61,4 +61,16 @@ test('rejects payloads before reaching the Firestore document-size limit',async(
  const oversized={...state,extra:'x'.repeat(900*1024)};
  await assert.rejects(h.api.write(oversized,0),/safe Firestore document size/);
  assert.equal(h.getSaved(),null);
+});
+
+test('each authenticated UID reads and writes a separate document',async()=>{
+ const h=harness();
+ await h.api.write({...state,owner:'A'},0);
+ h.setUser({uid:'second-user'});
+ assert.deepEqual(await h.api.read(),{exists:false,revision:0});
+ await h.api.write({...state,owner:'B'},0);
+ assert.equal(h.getSaved('test-user').payload.owner,'A');
+ assert.equal(h.getSaved('second-user').payload.owner,'B');
+ h.setUser({uid:'test-user'});
+ assert.equal((await h.api.read()).payload.owner,'A');
 });
