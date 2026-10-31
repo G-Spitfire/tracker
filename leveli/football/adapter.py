@@ -152,9 +152,6 @@ class FootballDataClient:
             raise ValueError("Unsupported endpoint")
         if type(season) is not int or not 2000 <= season <= 2100:
             raise ValueError("Invalid season")
-        query = {"season": str(season)}
-        if endpoint == "scorers":
-            query["limit"] = "20"
         url = f"{BASE_URL}/competitions/{league}/{endpoint}?season={season}"
         if endpoint == "scorers":
             url += "&limit=20"
