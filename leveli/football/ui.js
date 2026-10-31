@@ -1,4 +1,4 @@
-import {normalizeSnapshot, snapshotsFromDocuments, isValidSnapshotCache, isFreshSnapshot, FOOTBALL_LEAGUES, localSnapshotFileNames, snapshotsFromLocalFiles} from './snapshot_data.mjs';
+import {normalizeSnapshot, snapshotsFromDocuments, isValidSnapshotCache, isFreshSnapshot, FOOTBALL_LEAGUES, localSnapshotFileNames, snapshotsFromLocalFiles, snapshotSeasons} from './snapshot_data.mjs';
 import {normalizeFavorites} from './favorites_sync.mjs';
 const $ = (selector, root = document) => root.querySelector(selector);
 const view = $('#football-view');
@@ -326,7 +326,7 @@ function render() {
 }
 function setTab(tab) { activeTab=tab; render(); }
 function refreshSeasonOptions() {
-  const seasons=[...new Set(Object.values(snapshots).filter(item=>item?.league===leagueSelect.value).map(item=>item.season))].sort((a,b)=>b-a);
+  const seasons=snapshotSeasons(snapshots,leagueSelect.value);
   const selected=Number(seasonSelect.value)||seasons[0]||new Date().getUTCFullYear();
   seasonSelect.replaceChildren(...(seasons.length?seasons:[selected]).map(year=>new Option(String(year),String(year))));
   seasonSelect.value=String(seasons.includes(selected)?selected:seasons[0]||selected);
