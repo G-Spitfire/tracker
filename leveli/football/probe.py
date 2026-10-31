@@ -13,7 +13,8 @@ import sys
 from adapter import FootballDataClient, ProviderError
 from normalize import LEAGUES
 
-ENDPOINTS = ("standings", "matches")
+BASE_ENDPOINTS = ("standings", "matches")
+FREE_ENDPOINTS = {league: (("matches",) if league == "CL" else BASE_ENDPOINTS) for league in LEAGUES}
 
 
 def describe_error(error):
@@ -50,11 +51,11 @@ def main():
         parser.error(str(error))
 
     leagues = sorted(LEAGUES) if args.all else [args.league]
-    total = len(leagues) * len(ENDPOINTS)
+    total = sum(len(FREE_ENDPOINTS[league]) for league in leagues)
     completed = 0
     failed = False
     for league in leagues:
-        for endpoint in ENDPOINTS:
+        for endpoint in FREE_ENDPOINTS[league]:
             completed += 1
             print(f"[{completed}/{total}] Запрос {league}/{endpoint}…", flush=True)
             try:
