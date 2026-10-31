@@ -52,7 +52,7 @@ export function isFreshSnapshot(data, now = Date.now()) {
 }
 
 
-const LOCAL_SNAPSHOT_FILE = /^([A-Z0-9]+)_(\\d{4})_(standings|matches|scorers)\\.json$/;
+const LOCAL_SNAPSHOT_FILE = /^([A-Z0-9]+)_([0-9]{4})_(standings|matches|scorers)\.json$/;
 
 export function localSnapshotFileNames(files) {
   if (!Array.isArray(files)) return [];
