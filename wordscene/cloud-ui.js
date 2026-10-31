@@ -26,10 +26,25 @@ const upload=document.createElement('button');upload.textContent='Создать
 const download=document.createElement('button');download.textContent='Скачать облачную копию';download.type='button';
 const restore=document.createElement('button');restore.textContent='Восстановить из облака';restore.type='button';
 const verify=document.createElement('button');verify.textContent='Проверить восстановление';verify.type='button';
+const sync=document.createElement('button');sync.textContent='Включить автосинхронизацию';sync.type='button';
+const syncNow=document.createElement('button');syncNow.textContent='Синхронизировать сейчас';syncNow.type='button';
 const inspect=document.createElement('button');inspect.textContent='Проверить облако';inspect.type='button';
 const info=document.createElement('p');info.style.whiteSpace='pre-wrap';
-panel.append(status,form,logout,inspect,verify,restore,upload,download,info);form.append(email,password,login);
+panel.append(status,form,logout,inspect,verify,restore,upload,sync,syncNow,download,info);form.append(email,password,login);
+for(const b of [login,logout,inspect,verify,restore,upload,sync,syncNow,download]){
+ b.style.cssText='display:block;width:100%;min-height:42px;margin:7px 0;padding:9px 12px;background:#6554b8;color:#fff;border:1px solid #6554b8;border-radius:10px;font:600 14px system-ui;opacity:1;cursor:pointer';
+}
+for(const b of [logout,inspect,verify,download]){b.style.background='#f1eafa';b.style.color='#342b49';}
+const uiStyle=document.createElement('style');uiStyle.textContent='section[aria-label="Облачная копия WordScene"] button:disabled{opacity:.5!important;cursor:wait!important}section[aria-label="Облачная копия WordScene"] button[hidden]{display:none!important}';document.head.append(uiStyle);
+
+const SYNC_KEY='wordscene-sync-v1';
+let syncBusy=false;
+let lastObserved=null;
+function syncSettings(){try{return JSON.parse(localStorage.getItem(SYNC_KEY)||'null')}catch{return null}}
+function syncEnabled(){const u=auth.currentUser?.uid,settings=syncSettings();return !!u&&settings?.uid===u&&Number.isSafeInteger(settings.revision)&&settings.revision>0}
+function syncLabel(){sync.textContent=syncEnabled()?'Отключить автосинхронизацию':'Включить автосинхронизацию';syncNow.hidden=!syncEnabled()}
 function message(value){info.textContent=value}
+
 function local(){
  const raw=localStorage.getItem(KEY);
  if(!raw)throw new Error('Локальное сохранение отсутствует');
@@ -38,7 +53,7 @@ function local(){
  return value;
 }
 async function guarded(task){
- for(const el of [login,logout,inspect,verify,restore,upload,download])el.disabled=true;
+ for(const el of [login,logout,inspect,verify,restore,upload,sync,syncNow,download])el.disabled=true;
  try{await task()}catch(e){console.error('[WordScene cloud] Подробности ошибки:',e);message('Ошибка: '+(e.code||'неизвестная')+'\n'+(e.message||'Нет описания')+'\n'+(e.stack||''))}
  finally{for(const el of [login,logout,inspect,upload,download])el.disabled=false}
 }
@@ -82,6 +97,7 @@ restore.onclick=()=>guarded(async()=>{
  const next=JSON.stringify(remote.payload);
  try{localStorage.setItem(KEY,next);if(localStorage.getItem(KEY)!==next)throw new Error('Не удалось проверить локальное сохранение')}
  catch(error){if(currentRaw!==null)localStorage.setItem(KEY,currentRaw);else localStorage.removeItem(KEY);throw error}
+ localStorage.removeItem(SYNC_KEY);syncLabel();
  message('Прогресс восстановлен из облака (ревизия '+remote.revision+'). '+(currentRaw!==null?'Резервная копия: '+backupKey+'. ':'')+'Перезагрузите страницу для применения.');
 });
 download.onclick=()=>guarded(async()=>{
@@ -104,7 +120,55 @@ upload.onclick=()=>guarded(async()=>{
  await cloud.write(state,0);
  message('Облачная копия создана. Локальный прогресс не изменён.');
 });
+async function syncOnce(){
+ if(syncBusy||!syncEnabled())return;
+ syncBusy=true;
+ try{
+  const settings=syncSettings(),uid=auth.currentUser?.uid;
+  if(!settings||settings.uid!==uid)return;
+  const remote=await cloud.read();
+  if(!remote.exists)throw new Error('Облачная копия исчезла: синхронизация остановлена');
+  const raw=localStorage.getItem(KEY);
+  if(!raw)throw new Error('Локальное сохранение отсутствует');
+  const localState=JSON.parse(raw);
+  if(!window.WordSceneState.valid(localState,500))throw new Error('Локальные данные повреждены');
+  const stable=x=>JSON.stringify(x,(_k,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).sort(([a],[b])=>a.localeCompare(b))):v);
+  const fingerprint=stable(localState),remoteFingerprint=stable(remote.payload);
+  if(remote.revision!==settings.revision){
+   if(fingerprint===remoteFingerprint){localStorage.setItem(SYNC_KEY,JSON.stringify({uid,revision:remote.revision,baseline:fingerprint}));return}
+   if(fingerprint===settings.baseline){
+    // Never overwrite an active app session. Let the user restore explicitly.
+    localStorage.removeItem(SYNC_KEY);message('Облако обновилось на другом устройстве. Автосинхронизация остановлена. Нажмите «Восстановить из облака», чтобы принять новую версию.');syncLabel();return;
+   }
+   localStorage.removeItem(SYNC_KEY);message('Конфликт: прогресс изменён на двух устройствах. Автосинхронизация остановлена, данные сохранены. Выберите версию вручную.');syncLabel();return;
+  }
+  if(fingerprint===remoteFingerprint){
+   if(settings.baseline!==fingerprint)localStorage.setItem(SYNC_KEY,JSON.stringify({uid,revision:remote.revision,baseline:fingerprint}));
+   return;
+  }
+  if(settings.baseline!==remoteFingerprint){localStorage.removeItem(SYNC_KEY);message('Конфликт исходных данных. Синхронизация остановлена без перезаписи.');syncLabel();return}
+  const result=await cloud.write(localState,remote.revision);
+  localStorage.setItem(SYNC_KEY,JSON.stringify({uid,revision:result.revision,baseline:fingerprint}));
+  message('Прогресс отправлен в облако. Ревизия '+result.revision+'.');
+ }catch(e){if(e.code==='wordscene/conflict'){localStorage.removeItem(SYNC_KEY);message('Конфликт ревизий. Автосинхронизация остановлена.')}else{console.error('[WordScene sync]',e);message('Ошибка синхронизации: '+(e.message||e.code||'неизвестная')+'. Повторим при соединении.')}}
+ finally{syncBusy=false;syncLabel()}
+}
+sync.onclick=()=>guarded(async()=>{
+ if(syncEnabled()){localStorage.removeItem(SYNC_KEY);syncLabel();message('Автосинхронизация отключена. Прогресс остаётся локально.');return}
+ const remote=await cloud.read();
+ if(!remote.exists)throw new Error('Сначала создайте облачную копию');
+ const state=local();
+ const stable=x=>JSON.stringify(x,(_k,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).sort(([a],[b])=>a.localeCompare(b))):v);
+ if(stable(state)!==stable(remote.payload))throw new Error('Локальная и облачная копии отличаются. Сначала выберите нужную версию; автоматическое объединение запрещено.');
+ if(!window.confirm('Включить синхронизацию изменений с этим аккаунтом? При расхождении версий синхронизация остановится, чтобы не потерять данные.'))return;
+ localStorage.setItem(SYNC_KEY,JSON.stringify({uid:auth.currentUser.uid,revision:remote.revision,baseline:stable(state)}));
+ syncLabel();message('Автосинхронизация включена. Изменения проверяются при возвращении на вкладку и периодически.');
+});
+syncNow.onclick=()=>guarded(syncOnce);
+window.addEventListener('online',()=>{void syncOnce()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)void syncOnce()});
+setInterval(()=>{if(!document.hidden)void syncOnce()},30000);
 onAuthStateChanged(auth,user=>{
  status.textContent=user?'Аккаунт: '+(user.email||'выполнен вход'):'Гостевой режим: прогресс только на этом устройстве';
- form.hidden=!!user;logout.hidden=!user;inspect.hidden=!user;verify.hidden=!user;restore.hidden=!user;upload.hidden=!user;download.hidden=!user;
+ form.hidden=!!user;logout.hidden=!user;inspect.hidden=!user;verify.hidden=!user;restore.hidden=!user;upload.hidden=!user;sync.hidden=!user;download.hidden=!user;syncLabel();
 });
