@@ -50,9 +50,24 @@ verify.onclick=()=>guarded(async()=>{
  const restored=remote.payload;
  if(!window.WordSceneState.valid(restored,500))throw new Error('Облачные данные не прошли проверку');
  const original=local();
- const canonical=x=>JSON.stringify(x);
+ const canonical=x=>JSON.stringify(x,(_key,value)=>value&&typeof value==='object'&&!Array.isArray(value)?Object.fromEntries(Object.entries(value).sort(([a],[b])=>a.localeCompare(b))):value);
  const same=canonical(original)===canonical(restored);
- message(same?'Проверка успешна: облачная копия полностью совпадает с локальным сохранением. Ревизия '+remote.revision+'. Данные не изменены.':'Облачная копия корректна, но отличается от текущего локального прогресса. Ничего не изменено.');
+ const differences=[];
+ function compare(a,b,path='root'){
+  if(differences.length>=12)return;
+  if(canonical(a)===canonical(b))return;
+  if(!a||!b||typeof a!=='object'||typeof b!=='object'||Array.isArray(a)!==Array.isArray(b)){
+   differences.push(path+' (значения различаются)');return;
+  }
+  const keys=new Set([...Object.keys(a),...Object.keys(b)]);
+  for(const key of keys){
+   if(!(key in a)||!(key in b))differences.push(path+'.'+key+' (поле отсутствует)');
+   else compare(a[key],b[key],path+'.'+key);
+   if(differences.length>=12)break;
+  }
+ }
+ if(!same)compare(original,restored);
+ message(same?'Проверка успешна: облачная копия полностью совпадает с локальным сохранением. Ревизия '+remote.revision+'. Данные не изменены.':'Облачная копия корректна, но отличается от локального прогресса. Поля: '+differences.join(', ')+'. Ничего не изменено.');
 });
 download.onclick=()=>guarded(async()=>{
  const remote=await cloud.read();
