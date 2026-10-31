@@ -1,7 +1,9 @@
 # WordScene — отчёт проверки облачного резервирования
 
-**Дата:** 31 октября 2026 года  
-**Ветка:** `feature/wordscene-auto-backup` от актуального `main`  
+**Дата:** 31 октября 2026 года
+
+**Ветка:** `feature/wordscene-auto-backup` от актуального `main`
+
 **Feature flag:** `AUTO_BACKUP_ENABLED=false` — автоматическая отправка в приложение не включена.
 
 ## Реализовано
