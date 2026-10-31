@@ -63,7 +63,7 @@ body.is-writing main{height:calc(var(--writing-vh,100dvh) - 76px - env(safe-area
 select{display:block;width:100%;max-width:100%;min-height:46px;border:1px solid var(--border);border-radius:12px;padding:10px;background:#fffdf8;color:var(--ink);font:inherit;font-size:14px}.dictionary-selects{display:grid;gap:12px;margin:18px 0}.dictionary-selects label{font-size:13px;color:var(--muted)}.dictionary-status{display:grid;grid-template-columns:1fr 1fr;gap:6px}.dictionary-status button{min-height:44px;white-space:normal}.topic-grid{display:grid;gap:14px;margin:12px 0}.topic-card,.topic-summary{padding:17px;background:#eee7f7;border:1px solid var(--border);border-radius:20px;text-align:left;color:var(--ink)}.topic-card h2,.topic-summary h2{font-size:23px;margin:0 0 10px}.topic-card p,.topic-summary p{font-size:14px;margin:8px 0}.topic-card .note,.topic-summary .note{font-size:12px}.topic-card>span{color:#6554b8;font-size:13px}.topic-card progress,.topic-summary progress{width:100%;height:8px;accent-color:#6554b8}.word-themes{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0}.word-themes button{min-height:36px;border-radius:12px;padding:7px 10px;background:#eee7f7;color:#6554b8;font-size:12px}.habit-card h2{font-size:23px}#writing-practice:not(:empty){margin-bottom:12px}.writing-card>.eyebrow{white-space:normal}
 .dictionary-filter-group{margin:12px 0}.dictionary-filter-title{font-size:12px;color:var(--muted);margin:0 0 7px}.dictionary-filter-group .filters{gap:7px}.dictionary-filter-group .filters button{min-height:40px;padding:8px 12px}.dictionary-filter-note{margin:7px 0 12px}
 .home-content>h1{font-size:30px;margin-bottom:10px}.home-tagline{text-align:center;font-size:14px;line-height:1.5;color:var(--muted);margin:0 0 20px}@media(max-width:360px){.home-content>h1{font-size:27px}}
-</style></head><body><header><button class="brand" onclick="pause()" aria-label="На главную">WordScene</button><span id="brand-berry" aria-hidden="true"></span><div class="header-tools"><button id="sound-toggle" class="sound-toggle" onclick="toggleSound()" aria-pressed="true" aria-label="Выключить сигналы ответов">Сигналы вкл</button></div></header><main id="app"></main><nav id="bottom-nav" class="bottom-nav" aria-label="Основная навигация"></nav><div id="toast" role="status"></div><script src="./review-engine.js"></script><script src="./habit-engine.js"></script><script src="./state-guard.js"></script><script src="./writing-engine.js"></script><script src="./topics.js"></script><script src="./content-500-v14.js"></script><script>
+</style></head><body><header><button class="brand" onclick="pause()" aria-label="На главную">WordScene</button><span id="brand-berry" aria-hidden="true"></span><div class="header-tools"><button id="sound-toggle" class="sound-toggle" onclick="toggleSound()" aria-pressed="true" aria-label="Выключить сигналы ответов">Сигналы вкл</button></div></header><main id="app"></main><nav id="bottom-nav" class="bottom-nav" aria-label="Основная навигация"></nav><div id="toast" role="status"></div><script src="./review-engine.js"></script><script src="./habit-engine.js"></script><script src="./state-guard.js"></script><script src="./writing-engine.js"></script><script src="./topics.js"></script><script src="./content-500-v14.js"></script><script src="./event-outbox.js"></script><script src="./event-ledger.js"></script><script src="./learning-events.js"></script><script src="./event-baseline.js"></script><script src="./event-reducer.js"></script><script>
 const words=[
 {en:'mug',ru:'кружка',ipa:'/mʌɡ/',cue:'маг',scene:'Маг взмахивает палочкой — и из огромной кружки вылетает искристый фонтан. Кружка размером с самого мага!',hint:'Представь ручку кружки, мага рядом и вспышку из кружки.'},
 {en:'fist',ru:'кулак',ipa:'/fɪst/',cue:'фисташка',scene:'Огромный кулак разбивает гигантскую фисташку. Скорлупа разлетается во все стороны с громким хрустом.',hint:'Почувствуй удар кулака и услышь хруст скорлупы.'},
@@ -216,6 +216,14 @@ words.push(...WordSceneContent.cards);
 const KEY='word-scenes-v5';
 const PROFILE_KEY='wordscene-active-profile-v1';
 const loadedProfile=localStorage.getItem(PROFILE_KEY)||'guest';
+const eventProfile=loadedProfile.startsWith('user:')?loadedProfile.slice(5):'guest';
+const eventBaseline=WordSceneEventBaseline.create({storage:localStorage,validate:state=>WordSceneState.valid(state,500)});
+const eventOutbox=WordSceneOutbox.create({storage:localStorage,uid:()=>eventProfile,deviceId:()=>localStorage.getItem(WordSceneLearningEvents.DEVICE_KEY)||'missing',baselineId:()=>eventBaseline.prepare(eventProfile,KEY).baselineId,makeId:()=>globalThis.crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`});
+const eventLedger=WordSceneEventLedger.create({storage:localStorage,profile:()=>eventProfile});
+const learningEvents=WordSceneLearningEvents.create({storage:localStorage,outbox:eventOutbox,ledger:eventLedger,profile:()=>loadedProfile});
+let eventJournalFailed=localStorage.getItem('wordscene-v2-journal-error-'+encodeURIComponent(eventProfile))==='1';
+function markEventJournalFailure(){eventJournalFailed=true;try{localStorage.setItem('wordscene-v2-journal-error-'+encodeURIComponent(eventProfile),'1')}catch{}}
+function recordLearningEvent(kind,wordId,sessionId,actionId,payload){try{if(kind==='writing-check'&&payload.pass>=2&&payload.result==='correct'&&payload.needsWork===false){const known=[...eventLedger.list(),...eventOutbox.list()],resolves=known.filter(e=>e.kind==='writing-check'&&e.wordId===wordId&&e.payload.result!=='correct').map(e=>e.eventId),base=eventBaseline.inspect(eventProfile)?.baseline?.words?.[wordId];if(base?.writingNeedsWork||['incorrect','forgot'].includes(base?.writing))resolves.push(`baseline:${wordId}`);payload={...payload,resolves:[...new Set(resolves)]}}learningEvents.record({kind,wordId,sessionId,actionId,payload})}catch(error){markEventJournalFailure();console.warn('[WordScene local event journal]',error)}}
 const R=WordSceneReview;
 const W=WordSceneWriting,T=WordSceneTopics;
 const $=id=>document.getElementById(id);
@@ -239,6 +247,8 @@ if(!storageBlock&&data.reviewVersion!==1){try{const previous=localStorage.getIte
 words.forEach((_,i)=>R.ensure(record(i)));
 
 const H=window.WordSceneHabit;H.ensure(data);
+const eventReducer=WordSceneEventReducer.create({review:R,habit:H,validate:state=>WordSceneState.valid(state,words.length)});
+try{const baseline=eventBaseline.inspect(eventProfile);if(baseline){const events=eventLedger.merge(eventOutbox.list());data=eventReducer.reduce({baseline:baseline.baseline,baselineId:baseline.baselineId,events,uid:eventProfile,localState:data})}}catch(error){markEventJournalFailure();console.warn('[WordScene event recovery]',error)}
 let s=data.session,screen='home',cardStarted=0,toastTimer,wordFilter='all',wordQuery='',wordTopic='all',wordIssue='all',writingAttempt=null;
 if(s?.phase==='test'&&!s.revealed){s.ignoreTiming=true;s.roundValid=false}
 function blockStorage(reason){if(storageBlock)return;storageBlock=reason;storageOK=false;queueMicrotask(()=>home())}
@@ -331,13 +341,13 @@ function startRound(){s.phase='test';s.round++;s.queue=shuffled(s.ids).map(i=>({
 function test(){const t=s.queue[s.pos],w=words[t.i],n=s.part==='review'?s.queue.length:s.ids.length;frame(`${s.part==='review'?'Повторение':'Проход '+s.round} · ${s.pos+1} из ${n}`,s.pos/n*100,`<div class="recall-screen"><div class="recall-prompt"><p class="eyebrow">${t.dir===1?'Скажи по-английски':'Назови значение по-русски'}</p><div class="word">${t.dir===1?w.ru:w.en}</div><div class="answer" id="answer">${s.revealed?(t.dir===1?w.en:w.ru):''}</div></div><div id="repair"></div><div id="controls" class="rating-actions"></div><p class="note center">Ответь вслух до подсказки. Если не вспомнил — после открытия ответа нажми «Не получилось».</p></div>`);controls();if(!s.revealed)cardStarted=performance.now()}
 function controls(){if(s.feedback){const w=words[s.queue[s.pos].i];$('controls').innerHTML='';$('repair').innerHTML=`<div class="repair"><div class="repair-art">${illustration(w.en)}</div><p>${w.scene}</p><span class="cue">${w.cue} → ${w.en}</span><p class="note">Представь сцену и произнеси слово три раза.</p><div class="bottom-actions">${btn('Продолжить →','advance()')}</div></div>`}else $('controls').innerHTML=s.revealed?btn('Верно','grade(true)','success-button')+btn('Не получилось','grade(false)','secondary'):btn('Показать ответ','reveal()');dockActions()}
 function reveal(){if(s.revealed)return;const elapsed=(performance.now()-cardStarted)/1000;s.cardTime=!s.ignoreTiming&&Number.isFinite(elapsed)&&elapsed>=0?elapsed:null;s.revealed=true;save();test()}
-function logAnswer(ok,easy){const t=s.queue[s.pos],p=record(t.i);p.started=true;p.attempts++;if(!ok){p.errors++;if(!s.errors.includes(t.i))s.errors.push(t.i);if(!s.partErrors.includes(t.i))s.partErrors.push(t.i)}else{if(!easy)p.hesitations++;if(s.cardTime!==null&&s.cardTime!==undefined){p.times[t.dir]??=[];p.times[t.dir].push(s.cardTime);if(p.times[t.dir].length>60)p.times[t.dir].shift();}}p.lastAt=Date.now()}
+function logAnswer(ok,easy){const t=s.queue[s.pos],p=record(t.i);p.started=true;p.attempts++;if(!ok){p.errors++;if(!s.errors.includes(t.i))s.errors.push(t.i);if(!s.partErrors.includes(t.i))s.partErrors.push(t.i)}else{if(!easy)p.hesitations++;if(s.cardTime!==null&&s.cardTime!==undefined){p.times[t.dir]??=[];p.times[t.dir].push(s.cardTime);if(p.times[t.dir].length>60)p.times[t.dir].shift();}}p.lastAt=Date.now();recordLearningEvent('answer',words[t.i].en,s.id,`answer-${s.part}-${s.phase}-${s.round||0}-${s.pos}`,{direction:t.dir,correct:!!ok,easy:!!easy,elapsedSeconds:Number.isFinite(s.cardTime)?s.cardTime:null})}
 function finishReviewedWord(i,legacy=false){
  const token='review:'+i;if(s.completed.includes(token))return;
  const first=s.reviewProgress?.[i]?.first;
  if(!legacy&&(!first||!(0 in first)||!(1 in first)))return;
  const p=record(i),clean=legacy?!s.partErrors.includes(i):first[0]&&first[1];
- if(R.finish(p,{id:s.id+'/'+token,directions:legacy?null:first,clean})){p.sessions++;p.lastAt=Date.now()}
+ if(R.finish(p,{id:s.id+'/'+token,directions:legacy?null:first,clean})){p.sessions++;p.lastAt=Date.now();recordLearningEvent('review-check',words[i].en,s.id,`review-${i}`,{day:R.day(),directions:legacy?null:first,clean:!!clean,available:trainedIds().length})}
  s.completed.push(token);H.record(data.habit,{kind:'review',word:words[i].en,available:trainedIds().length});
 }
 function trackReview(t,ok){
@@ -407,7 +417,7 @@ function checkWriting(forgot=false){
  const input=$('writing-answer'),value=input.value;
  if(!forgot&&!value.trim()){toast('Напиши слово или нажми «Не помню».');input.focus();return}
  writingAttempt=forgot?null:value.trim();const i=s.writingIds[s.writingIndex],p=record(i),outcome=forgot?'forgot':normalizeWriting(value)===normalizeWriting(words[i].en)?'correct':'incorrect';
- W.mark(s,p,i,outcome);p.writingCheckedAt=Date.now();input.value='';save();if(p.writing==='correct')sound();writing();
+ W.mark(s,p,i,outcome);p.writingCheckedAt=Date.now();recordLearningEvent('writing-check',words[i].en,s.id,`writing-${s.writingPass}-${s.writingIndex}`,{pass:s.writingPass,result:outcome,needsWork:W.needs(p),sessionId:s.id});input.value='';save();if(p.writing==='correct')sound();writing();
 }
 function nextWriting(){
  if(!s||s.phase!=='writing')return;
@@ -426,7 +436,7 @@ function openWritingErrors(){if(s&&!['result','between'].includes(s.phase)){toas
 
 function completePart(){if(s.part==='writing'){sound('finish');s.phase='result';save();result();return}if(s.part==='new'&&!s.writingDone){beginWriting();return}sound('finish');for(const i of s.ids){
  if(s.part==='review'){finishReviewedWord(i,!s.schedulerVersion);continue}
- const token='new:'+i;if(s.completed.includes(token))continue;const p=record(i);R.introduce(p);p.sessions++;p.started=true;p.needsWork=s.partErrors.includes(i);p.lastAt=Date.now();s.completed.push(token);
+ const token='new:'+i;if(s.completed.includes(token))continue;const p=record(i);R.introduce(p);p.sessions++;p.started=true;p.needsWork=s.partErrors.includes(i);p.lastAt=Date.now();s.completed.push(token);recordLearningEvent('new-completion',words[i].en,s.id,`new-complete-${i}`,{day:R.day(),firstLearnedAt:p.schedule?.firstLearnedAt??null,needsWork:p.needsWork});
  }if(s.part==='new')H.record(data.habit,{kind:'new'});s.phase='result';save();result()}
 
 function between(){s.phase='result';save();result()}

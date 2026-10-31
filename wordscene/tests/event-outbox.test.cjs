@@ -4,7 +4,7 @@ const {create}=require('../event-outbox.js');
 function harness(){
  const values=new Map();let uid='A',counter=0;
  const storage={getItem:k=>values.has(k)?values.get(k):null,setItem:(k,v)=>values.set(k,String(v)),removeItem:k=>values.delete(k)};
- const outbox=create({storage,uid:()=>uid,makeId:()=>String(++counter),now:()=>123});
+ const outbox=create({storage,uid:()=>uid,deviceId:()=>`device-${uid}`,baselineId:()=>`baseline-${uid}`,makeId:()=>String(++counter),now:()=>123});
  return {outbox,storage,setUid:x=>uid=x};
 }
 test('persists events and removes only acknowledged IDs',()=>{
@@ -36,5 +36,12 @@ test('write failure does not acknowledge an event',()=>{
 });
 test('does not allow guest events to enter signed-in outbox',()=>{
  const h=harness();h.setUid(null);
- assert.throws(()=>h.outbox.append({wordId:'1',kind:'answer',payload:{}}),/UID required/);
+ assert.throws(()=>h.outbox.append({wordId:'1',kind:'answer',payload:{}}),/Profile required/);
+});
+test('repeated action IDs are idempotent and reject changed content',()=>{
+ const h=harness(),first=h.outbox.append({wordId:'1',kind:'answer',payload:{correct:true},eventId:'stable-action'});
+ assert.deepEqual(h.outbox.append({wordId:'1',kind:'answer',payload:{correct:true},eventId:'stable-action'}),first);
+ assert.equal(h.outbox.list().length,1);
+ assert.throws(()=>h.outbox.append({wordId:'1',kind:'answer',payload:{correct:false},eventId:'stable-action'}),/different content/);
+ assert.deepEqual(h.outbox.list(),[first]);
 });
