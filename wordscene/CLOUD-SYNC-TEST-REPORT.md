@@ -26,7 +26,7 @@ node --test wordscene/tests/*.test.cjs         PASS — 30 тестов, 0 ош�
 git diff --check                               PASS
 ```
 
-GitHub Actions, run #3 для коммита `310e7a5`, тоже завершился успешно: [результат CI](https://github.com/G-Spitfire/tracker/actions/runs/41179080063).
+GitHub Actions, run #5 для коммита `0f2d338`, тоже завершился успешно: [результат CI](https://github.com/G-Spitfire/tracker/actions/runs/41179201159).
 
 Тесты используют in-memory адаптер для транзакций. Они проверяют клиентскую логику, а не серверные Firestore Rules.
 
