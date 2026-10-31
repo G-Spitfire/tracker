@@ -317,7 +317,7 @@ function render() {
   const latest=[currentData('standings'),currentData('matches'),currentData('scorers')].filter(Boolean).sort((a,b)=>String(b.fetchedAt).localeCompare(String(a.fetchedAt)))[0]||data;
   if(DEMO)setStatus(`Искусственные данные для проверки интерфейса · ${sourceLine(latest)}`,'demo');
   else if(LOCAL && latest)setStatus(sourceLine(latest)+(localLoadMessage?' · '+localLoadMessage:''),dataAgeKind(latest));
-  else if(LOCAL)setStatus(localLoadMessage||'Локальные данные не найдены. Сначала загрузите JSON-файлы в кеш футбольного модуля.','stale');
+  else if(LOCAL)setStatus(Object.keys(snapshots).length?'Для выбранного турнира и сезона локальных снимков нет. '+localLoadMessage:(localLoadMessage||'Локальные данные не найдены. Сначала загрузите JSON-файлы в кеш футбольного модуля.'));
   else if(latest)setStatus(sourceLine(latest),dataAgeKind(latest));
   else setStatus(navigator.onLine?'Нет подключённых данных. Показывается пустое состояние.':'Офлайн: локального снимка пока нет.');
   if(activeTab==='overview')renderOverview();
