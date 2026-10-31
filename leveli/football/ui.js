@@ -440,7 +440,7 @@ leagueSelect.addEventListener('change',()=>{refreshSeasonOptions();render();});
 seasonSelect.addEventListener('change',render);
 document.addEventListener('click',event=>{const target=event.target.closest('[data-go="football"]');if(target){activeTab='overview';render();}});
 window.addEventListener('online',()=>{render();void readFirebaseSnapshots();});window.addEventListener('offline',render);
-if(!LOCAL)loadLocalCache();loadFavorites();
+if(!LOCAL&&!DEMO)loadLocalCache();loadFavorites();
 if(LOCAL){ refreshSeasonOptions(); render(); void loadLocalFiles(); }
 else if(DEMO)loadDemo().then(render);
 else { refreshSeasonOptions(); render(); if(window.leveliFirebase)loadFirebaseSnapshots(); else window.addEventListener('leveliFirebaseReady',loadFirebaseSnapshots,{once:true}); }
