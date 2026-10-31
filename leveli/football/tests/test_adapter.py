@@ -62,6 +62,7 @@ class AdapterTests(unittest.TestCase):
         self.assertEqual(client.fetch("PL", "matches", 2026), {"matches": []})
         args, kwargs = calls[0]
         self.assertIn("--config", args)
+        self.assertIn("--disable", args)
         self.assertNotIn("--location", args)
         self.assertNotIn("secret-test-token", " ".join(args))
         self.assertIn(b"X-Auth-Token: secret-test-token", kwargs["input"])
