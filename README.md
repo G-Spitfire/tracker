@@ -8,6 +8,7 @@
 | --- | --- | --- | --- |
 | Форма | Трекер тренировок | [Открыть](https://g-spitfire.github.io/tracker/forma/) | [README](forma/README.md) |
 | WordScene | Английские слова · Полина | [Открыть](https://g-spitfire.github.io/tracker/wordscene/) | [README](wordscene/README.md) |
+| Мои слова | Карточки английских слов · MVP | [Открыть](https://g-spitfire.github.io/tracker/moi-slova/) | [README](moi-slova/README.md) |
 | Покер с нуля | Интерактивная инструкция | [Открыть](https://g-spitfire.github.io/tracker/poker/) | [README](poker/README.md) |
 
 ## Данные и разработка
