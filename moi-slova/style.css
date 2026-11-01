@@ -6,3 +6,25 @@
 
 .scene-art{display:block;width:100%;max-width:330px;aspect-ratio:18/11;object-fit:contain;border-radius:20px;margin:8px 0;pointer-events:none}.sound-link{margin:0;font-size:13px;color:#6d7e6a}.card{box-shadow:0 9px 0 -3px #e5e8dc,0 17px 0 -6px #edf0e5;transition:transform .18s ease-out,background .18s;isolation:isolate}.card[data-intent]::after{content:attr(data-intent);position:absolute;top:18px;left:50%;transform:translateX(-50%);white-space:nowrap;background:#294f3e;color:white;padding:8px 14px;border-radius:30px;font-size:14px;font-weight:650;box-shadow:0 2px 12px #243c3210}.card[data-intent="Буду учить"]::after,.card[data-intent="Повторить"]::after{background:#95694e}.card.revealed{padding-top:28px}.sound{display:flex;align-items:center;justify-content:center}.lesson-header{border-bottom:1px solid #e4e8de;padding-bottom:8px}.scene-art+.association{max-width:300px}.card .word{font-size:40px}.card .translation{font-size:24px}.primary{box-shadow:0 5px 15px #294f3e14}.primary:active{transform:scale(.985)}#app>h1{animation:arrive .2s ease-out}@keyframes arrive{from{opacity:.5;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}@media(prefers-reduced-motion:reduce){*{animation:none!important}}
 
+
+/* Stage geometry and type hierarchy */
+.card[data-stage="sort"],.card[data-stage="test"]{height:340px;min-height:340px;display:grid;grid-template-rows:62px 46px 40px;align-content:center;justify-items:center;gap:12px;padding:30px 18px}
+.card[data-stage="sort"]{background:#f5f8f7;border-color:#dce6e0}
+.card[data-stage="intro"],.card[data-stage="feedback"]{height:460px;min-height:460px;display:grid;grid-template-rows:44px 34px 190px 56px 20px;align-content:center;justify-items:center;gap:8px;padding:24px 18px;background:#fffdf8}
+.card .word{font-weight:750;font-size:40px;line-height:1.1;letter-spacing:-1px;margin:0;text-align:center}
+.card .translation{font-size:25px;line-height:1.3;color:#526754;margin:0;text-align:center}
+.card .hint{margin:0;line-height:1.5;text-align:center}
+.hidden-answer{visibility:hidden}
+.card .scene-art{width:100%;height:190px;margin:0;object-fit:contain}
+.card .association{align-self:center;font-size:17px;line-height:1.4;margin:0}
+.card .sound-link{align-self:center;font-size:12px;margin:0}
+.lesson-header .muted{padding:6px 9px;border-radius:20px;background:#e8ede2;font-size:11px}
+.translation:not(.hidden-answer){animation:answer-in .16s ease-out}
+@keyframes answer-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.eyebrow{font-size:13px;color:#69806b;margin:38px 0 12px}.today-result{background:#e9eee1;border-radius:20px;padding:18px 20px;margin:24px 0}.today-result p{margin:8px 0 0}
+.word-row,.retention-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0;border-bottom:1px solid #e0e6d9}.retention-row{align-items:flex-start;font-size:14px}.retention-row b{text-align:right;max-width:48%}.word-row small{display:block;color:#7a827a;font-size:12px;margin-top:7px}
+.word-detail{border-bottom:1px solid #e0e6d9;padding:16px 0}.word-detail summary{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;font-size:15px}.status-label{font-size:11px;color:#6d7e6a;white-space:nowrap}.word-detail[open] summary{margin-bottom:16px}.day-dots{display:flex;gap:8px}.day-dots span{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#e6eade;color:#8c9687;font-size:12px}.day-dots .filled{background:#527349;color:white}.history-detail{margin:28px 0;font-size:14px;color:#6d7e6a}.text-button:disabled{opacity:.45;cursor:default}
+@media(max-width:350px){.card .word{font-size:34px}.day-dots{gap:5px}.day-dots span{width:28px;height:28px}.card .association{font-size:15px}}
+@media(prefers-reduced-motion:reduce){.translation{animation:none!important}}
+
+.card.revealed .word{font-size:40px}@media(max-width:350px){.card.revealed .word{font-size:34px}}
