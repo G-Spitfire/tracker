@@ -9,11 +9,11 @@ function harness(initial={}){
  const storage={getItem:k=>values.has(k)?values.get(k):null,setItem:(k,v)=>values.set(k,String(v)),removeItem:k=>values.delete(k)};
  return {store:profiles.create({storage,validate:valid,now:()=>999}),storage};
 }
-test('first account login isolates the existing guest save without deleting it',()=>{
+test('first account login copies existing guest progress without deleting it',()=>{
  const guest={...state('guest'),words:{cup:{started:true}}},h=harness({'word-scenes-v5':JSON.stringify(guest)});
  assert.deepEqual(h.store.switchTo('A'),{changed:true,profile:'user:A'});
  assert.deepEqual(JSON.parse(h.storage.getItem('word-scenes-v5-guest')),guest);
- assert.equal(JSON.parse(h.storage.getItem('word-scenes-v5')).marker,undefined);
+ assert.deepEqual(JSON.parse(h.storage.getItem('word-scenes-v5')),guest);
  assert.equal(h.store.matches('A'),true);assert.equal(h.store.matches('B'),false);
  assert.equal(h.store.hasGuestProgress(),true);
 });
