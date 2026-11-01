@@ -2,47 +2,32 @@ const assert=require('node:assert/strict');
 const I=require('../learning-insights.js');
 const at=d=>new Date(d+'T12:00:00').getTime();
 const day='2026-11-01',now=at(day);
-const records=Array.from({length:80},()=>({started:true,trained:true,schedule:{stage:'daily',firstLearnedAt:at('2026-10-01'),checks:[]}}));
-assert.equal(I.newAllowance(records,80,now),0,'backlog first requires review');
-for(let i=0;i<15;i++)records[i].schedule.checks.push({id:'r'+i,day,at:now+i,clean:i<13,directions:{0:i<13,1:i<13}});
-assert.equal(I.stats(records,now).reviewedToday,15);
-assert.equal(I.canLearnNew(records,65,now),true,'successful daily portion unlocks new words');
-assert.equal(I.newAllowance(records,65,now),5);
-assert.equal(I.stats(records,now).accuracy7,87);
-for(let i=15;i<20;i++)records[i].schedule.firstLearnedAt=now;
-assert.equal(I.stats(records,now).newToday,5);
-assert.equal(I.newAllowance(records,65,now),0,'daily cap is enforced across batches');
-assert.equal(I.newAllowance(records,0,now),5,'without backlog a new batch remains available');
-assert.equal(I.stats(records,now).week.at(-1).count,15);
-assert.equal(I.stats(records,now).week.at(-1).active,20);
-assert.equal(I.stats(records,now).reviewedThisWeek,15);
-assert.equal(I.speedFeedback([{time:45,errors:2,valid:true},{time:35,errors:0,valid:true}]).kind,'accuracy-first');
-assert.equal(I.speedFeedback([{time:40,errors:5,valid:true},{time:20,errors:5,valid:true}]).kind,'accuracy-first','faster errors cannot be praised');
-assert.equal(I.speedFeedback([{time:40,errors:0,valid:true},{time:30,errors:0,valid:true}]).kind,'faster');
-assert.equal(I.speedFeedback([{time:40,errors:0,valid:true},{time:39,errors:0,valid:true}]).kind,'plateau');
-assert.equal(I.speedFeedback([{time:45,errors:0,valid:false},{time:35,errors:0,valid:true}]).kind,'unknown','pauses invalidate speed comparison');
-assert.equal(I.speedFeedback([{time:45,errors:0,valid:true},{time:35,errors:2,valid:true}]).kind,'accuracy-first');
-assert.equal(I.roundRecommendation([{time:50,errors:3,valid:true},{time:40,errors:1,valid:true},{time:35,errors:1,valid:true}]).suggestRest,true);
-const speedUp=I.roundRecommendation([{time:45,errors:1,valid:true},{time:35,errors:0,valid:true},{time:25,errors:0,valid:true}]);
-assert.equal(speedUp.clean,true);
-assert.equal(speedUp.canAdvance,false);
-assert.equal(speedUp.suggestAnother,true);
-const plateau=I.roundRecommendation([{time:40,errors:1,valid:true},{time:31,errors:0,valid:true},{time:30,errors:0,valid:true}]);
-assert.equal(plateau.plateau,true);
-assert.equal(plateau.canAdvance,true);
-const interrupted=I.roundRecommendation([{time:40,errors:1,valid:true},{time:31,errors:0,valid:false},{time:30,errors:0,valid:true}]);
-assert.equal(interrupted.canAdvance,true,'interrupted measurement does not lock progression');
-const maxed=I.roundRecommendation([{time:50,errors:1,valid:true},{time:45,errors:0,valid:true},{time:36,errors:0,valid:true},{time:29,errors:0,valid:true},{time:22,errors:0,valid:true}]);
-assert.equal(maxed.maxed,true);
-assert.equal(maxed.canAdvance,true);
-assert.equal(I.stats(records,now).week[0].day,'2026-10-26');
-assert.equal(I.stats(records,now).week[6].day,day);
-const backlog=Array.from({length:80},()=>({trained:true,schedule:{stage:'daily',firstLearnedAt:at('2026-10-01'),checks:[]}}));
-for(let i=0;i<15;i++)backlog[i].schedule.checks.push({id:'hard'+i,day,at:now+i,clean:i<8});
-assert.equal(I.newAllowance(backlog,65,now),0,'large backlog and low recall => consolidate');
-assert.equal(I.newAllowance(backlog,25,now),5,'small backlog does not lock new words');
-const newOnly=[{started:true,trained:true,schedule:{stage:'daily',firstLearnedAt:now,checks:[]}}];
-assert.equal(I.stats(newOnly,now).newToday,1);
-assert.equal(I.stats(newOnly,now).reviewedToday,0);
-assert.equal(I.stats(newOnly,now).week.at(-1).active,1);
-console.log('PASS: child metrics, accurate speed, daily cap, adaptive load and pause cases.');
+
+const records=Array.from({length:5},(_,i)=>({started:true,trained:i<2,schedule:{stage:i===0?'spaced':'daily',firstLearnedAt:i===0?now:at('2026-10-01'),checks:[]}}));
+records[0].schedule.checks.push({id:'r1',day,at:now,clean:true,directions:{0:true,1:true}});
+assert.equal(I.stats(records,now).newToday,1);
+assert.equal(I.stats(records,now).reviewedToday,1);
+assert.equal(I.stats(records,now).accuracy7,100);
+assert.equal(I.stats(records,now).week.at(-1).active,1);
+
+for(const count of [3,22,30,47,83,100]){
+ const due=Array.from({length:count},(_,i)=>i),visited=[];
+ while(true){
+  const next=I.portion(due,visited);
+  if(!next.length)break;
+  assert.ok(next.length<=30,`${count}: portion exceeds 30`);
+  assert.equal(new Set(next).size,next.length,`${count}: duplicates in a portion`);
+  assert.ok(next.every(i=>!visited.includes(i)),`${count}: repeated completed word`);
+  visited.push(...next);
+ }
+ assert.deepEqual(visited,due,`${count}: portions must cover the complete queue`);
+}
+assert.deepEqual(I.portion([1,2,3,4,5],[1,2],3),[3,4,5]);
+assert.equal(I.NEW_BATCH,5);
+assert.equal(I.REVIEW_PORTION,30);
+
+const cards=I.pairedCards([7,8,9]);
+assert.equal(cards.length,6);
+for(const id of [7,8,9])assert.deepEqual(cards.filter(c=>c.i===id).map(c=>c.dir).sort(),[0,1]);
+assert.equal(I.pairedCards([7,7,8]).length,4,'one card pair per unique word');
+console.log('PASS: daily metrics, five-word batches, paired checks and 30-word portions.');

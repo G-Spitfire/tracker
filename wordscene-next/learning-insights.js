@@ -1,7 +1,7 @@
-/* Child-first analytics and learning suggestions: no network or storage writes. */
+/* Child-first progress metrics and card-batch helpers. */
 (function(root){
 'use strict';
-const DAILY_REVIEW_PORTION=15,NEW_WHILE_BACKLOG=5,MAX_SPEED_ROUNDS=5;
+const REVIEW_PORTION=30,NEW_BATCH=5;
 function day(at=Date.now()){const d=new Date(at);return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
 function shift(date,amount){const [y,m,d]=date.split('-').map(Number);return new Date(Date.UTC(y,m-1,d+amount)).toISOString().slice(0,10)}
 function checks(p){return Array.isArray(p?.schedule?.checks)?p.schedule.checks:[]}
@@ -27,36 +27,15 @@ function stats(records,at=Date.now()){
  const week=days.map(d=>({day:d,count:sets[d].size,active:activeSets[d].size}));
  return {...totals,today,reviewedToday:sets[today].size,reviewedThisWeek:week.reduce((s,d)=>s+d.count,0),accuracy7:attempted?Math.round(100*clean/attempted):null,checks7:attempted,recovered,week};
 }
-function newAllowance(records,dueCount,at=Date.now()){
- if(dueCount===0)return NEW_WHILE_BACKLOG;
- const s=stats(records,at);
- if(s.reviewedToday<DAILY_REVIEW_PORTION)return 0;
- // Large overdue queues together with weak recalls are a reason to consolidate, not add more.
- if(dueCount>=45&&s.checks7>=5&&s.accuracy7<70)return 0;
- return Math.max(0,NEW_WHILE_BACKLOG-s.newToday);
+function portion(ids,excluded=[],limit=REVIEW_PORTION){
+ const skipped=new Set(excluded),selected=[],seen=new Set();
+ for(const id of ids){if(skipped.has(id)||seen.has(id))continue;seen.add(id);selected.push(id);if(selected.length>=limit)break}
+ return selected;
 }
-function canLearnNew(records,dueCount,at=Date.now()){return newAllowance(records,dueCount,at)>0}
-function validSpeedRound(round){return round&&round.valid!==false&&Number.isFinite(round.time)&&round.time>0}
-function speedFeedback(history){
- const h=Array.isArray(history)?history:[],current=h.at(-1),previous=h.at(-2);
- if(!validSpeedRound(previous)||!validSpeedRound(current))return {kind:'unknown',pauseSuggested:false,comparable:false};
- const change=(previous.time-current.time)/previous.time;
- const measure={change:Math.round(change*100),previousSeconds:Math.round(previous.time),currentSeconds:Math.round(current.time),comparable:true};
- if(current.errors>0||previous.errors>0)return {...measure,kind:'accuracy-first',pauseSuggested:false,comparable:false};
- const kind=Math.abs(change)<.10?'plateau':change>=.10?'faster':'slower';
- return {...measure,kind,pauseSuggested:false};
+function pairedCards(ids,shuffle=items=>items){
+ const cards=[...new Set(ids)].flatMap(i=>[{i,dir:1},{i,dir:0}]);
+ return shuffle(cards);
 }
-function roundRecommendation(history){
- const h=Array.isArray(history)?history:[],last=h.slice(-2);
- const clean=h.length>=3&&last.length===2&&last.every(r=>r?.errors===0);
- const speed=speedFeedback(h);
- const plateau=clean&&speed.kind==='plateau';
- const maxed=clean&&h.length>=MAX_SPEED_ROUNDS;
- const canAdvance=clean&&(speed.kind!=='faster'||maxed);
- // Treat missing timing as non-blocking, e.g. after a call, tab switch or pause.
- const suggestRest=h.length>=3&&!clean&&h.at(-1)?.errors>0;
- return {clean,plateau,maxed,canAdvance,suggestAnother:clean&&speed.kind==='faster'&&!maxed,suggestRest,speed};
-}
-const api={day,shift,stats,newAllowance,canLearnNew,speedFeedback,roundRecommendation,DAILY_REVIEW_PORTION,NEW_WHILE_BACKLOG,MAX_SPEED_ROUNDS};
+const api={day,shift,stats,portion,pairedCards,REVIEW_PORTION,NEW_BATCH};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.WordSceneInsights=api;
 })(typeof globalThis!=='undefined'?globalThis:this);

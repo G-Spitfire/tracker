@@ -22,9 +22,12 @@ function valid(data,count){
  if(!Array.isArray(s.ids)||!s.ids.length||!s.ids.every(i=>index(i,count))||new Set(s.ids).size!==s.ids.length)return false;
  if(!['completed','errors','partErrors'].every(k=>Array.isArray(s[k])))return false;
  if(s.newIds!==undefined&&(!Array.isArray(s.newIds)||!s.newIds.every(i=>index(i,count))))return false;
+ if(s.cardFlowVersion!==undefined&&s.cardFlowVersion!==1)return false;
+ if(s.reviewSessionSeen!==undefined&&(!Array.isArray(s.reviewSessionSeen)||!s.reviewSessionSeen.every(i=>index(i,count))||new Set(s.reviewSessionSeen).size!==s.reviewSessionSeen.length))return false;
  if(s.phase==='learn'&&!index(s.learnIndex,s.ids.length))return false;
- if(s.part==='new'&&['test','round'].includes(s.phase)&&(![0,1].includes(s.dir)||!Array.isArray(s.history)||!Array.isArray(s.history[0])||!Array.isArray(s.history[1])))return false;
+ if(s.part==='new'&&['test','round'].includes(s.phase)&&s.cardFlowVersion!==1&&(![0,1].includes(s.dir)||!Array.isArray(s.history)||!Array.isArray(s.history[0])||!Array.isArray(s.history[1])))return false;
  if(s.phase==='test'&&(!Array.isArray(s.queue)||!index(s.pos,s.queue.length)||!s.queue.every(t=>object(t)&&s.ids.includes(t.i)&&[0,1].includes(t.dir))))return false;
+ if(s.part==='new'&&s.cardFlowVersion===1&&s.phase==='test'&&new Set(s.queue.map(t=>t.i+':'+t.dir)).size!==s.queue.length)return false;
  if(s.writingVersion===2&&(![0,1,2].includes(s.writingPass)||!Array.isArray(s.writingFirstErrors)||!s.writingFirstErrors.every(i=>s.ids.includes(i))||!object(s.writingRetryResults)||!Object.values(s.writingRetryResults).every(a=>Array.isArray(a)&&a.length<=2&&a.every(v=>['correct','incorrect','forgot'].includes(v)))))return false;
  if(s.phase==='writing'&&(!Array.isArray(s.writingIds)||!index(s.writingIndex,s.writingIds.length)||!s.writingIds.every(i=>s.ids.includes(i))))return false;
  return true;
