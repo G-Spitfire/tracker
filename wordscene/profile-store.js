@@ -38,7 +38,10 @@ function create({storage,validate,now=()=>Date.now()}){
   // Preserve the active profile before selecting another one.
   storage.setItem(profileKey(from),sourceRaw);
   const savedTarget=storage.getItem(profileKey(target));
-  const targetRaw=savedTarget===null?JSON.stringify(EMPTY):(assertState(savedTarget),savedTarget);
+  // On the first sign-in, carry the existing guest progress into the new account.
+  // Keep the original guest save untouched, and never replace an existing account profile.
+  const firstAccountLogin=!!uid&&from==='guest'&&savedTarget===null;
+  const targetRaw=firstAccountLogin?sourceRaw:(savedTarget===null?JSON.stringify(EMPTY):(assertState(savedTarget),savedTarget));
   const previousSync=parse(storage.getItem(SYNC));
   // Only carry an active sync preference when it belongs to the profile being saved.
   if(previousMarker&&from.startsWith('user:')&&previousSync?.uid===from.slice(5))storage.setItem(syncProfileKey(from.slice(5)),JSON.stringify(previousSync));
