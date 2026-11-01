@@ -13,6 +13,25 @@ const cloud=window.WordSceneFirestore.create({auth,db,sdk:{doc,getDoc,runTransac
 const profiles=window.WordSceneProfiles.create({storage:localStorage,validate});
 const syncEngine=window.WordSceneCloudSync.create({auth,cloud,storage:localStorage,validate,reload:()=>location.reload(),canSync:uid=>profiles.matches(uid),onSettings:value=>localStorage.setItem(profiles.syncProfileKey(value.uid),JSON.stringify(value)),onDisable:uid=>localStorage.removeItem(profiles.syncProfileKey(uid))});
 const KEY='word-scenes-v5';
+const OFFER_KEY='wordscene-cloud-offer-v1';
+function offerCloudLogin(){
+ if(localStorage.getItem(OFFER_KEY)||auth.currentUser)return;
+ const overlay=document.createElement('div');
+ overlay.style.cssText='position:fixed;inset:0;z-index:1000;background:#0008;display:grid;place-items:center;padding:20px';
+ const dialog=document.createElement('div');
+ dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-label','Сохранение прогресса');
+ dialog.style.cssText='background:#fff;color:#222;border-radius:18px;padding:24px;max-width:360px;width:100%;font:16px system-ui;text-align:center;box-shadow:0 12px 40px #0003';
+ const title=document.createElement('h2');title.textContent='Сохраним твои успехи?';
+ const desc=document.createElement('p');desc.textContent='Прогресс уже хранится на этом iPhone. Чтобы дополнительно сохранять его в облаке, попроси родителя помочь со входом.';
+ const enter=document.createElement('button');enter.textContent='Войти в аккаунт';
+ const skip=document.createElement('button');skip.textContent='Продолжить без аккаунта';
+ for(const b of [enter,skip])b.style.cssText='display:block;width:100%;padding:12px;margin-top:10px;border-radius:10px;border:1px solid #6554b8;font:600 15px system-ui;cursor:pointer';
+ enter.style.background='#6554b8';enter.style.color='#fff';skip.style.background='#fff';skip.style.color='#342b49';
+ enter.onclick=()=>{localStorage.setItem(OFFER_KEY,'seen');overlay.remove();panel.style.display='block';email.focus()};
+ skip.onclick=()=>{localStorage.setItem(OFFER_KEY,'seen');overlay.remove()};
+ dialog.append(title,desc,enter,skip);overlay.append(dialog);document.body.append(overlay);
+}
+
 let authReady=false;
 const panel=document.createElement('section');panel.setAttribute('aria-label','Облачная копия WordScene');
 panel.style.cssText='position:fixed;right:12px;bottom:76px;z-index:40;max-width:min(360px,calc(100vw - 24px));max-height:70vh;overflow:auto;padding:12px;border:1px solid #b8b8b8;border-radius:12px;background:#fff;color:#222;box-shadow:0 4px 20px #0002;font:14px system-ui;display:none';
@@ -60,6 +79,6 @@ onAuthStateChanged(auth,user=>{
  try{
   const result=profiles.switchTo(user?.uid||null);
   if(result.changed){authReady=false;document.body.classList.add('profile-switch-blocked');status.textContent='Сохраняем данные предыдущего профиля и открываем отдельный профиль…';location.reload();return}
-  authReady=true;document.body.classList.remove('profile-switch-blocked');status.textContent=user?'Аккаунт: '+(user.email||'выполнен вход'):'Гостевой режим: прогресс только на этом устройстве';refreshButtons();if(user)void runSync()
+  authReady=true;document.body.classList.remove('profile-switch-blocked');status.textContent=user?'Аккаунт: '+(user.email||'выполнен вход'):'Гостевой режим: прогресс только на этом устройстве';refreshButtons();if(user)void runSync();else offerCloudLogin()
  }catch(e){authReady=false;document.body.classList.add('profile-switch-blocked');status.textContent='Не удалось безопасно переключить профиль. Данные не перезаписаны.';message(e.message||'Хранилище недоступно');refreshButtons()}
 });
