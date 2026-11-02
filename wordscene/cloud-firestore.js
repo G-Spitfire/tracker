@@ -1,4 +1,4 @@
-/* WordScene Firestore transport, intentionally not loaded by index.html.
+/* WordScene Firestore transport used by the optional account panel.
    Firebase modular SDK functions are injected; no credentials are embedded. */
 (function(root){
 'use strict';

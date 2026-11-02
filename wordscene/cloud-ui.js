@@ -12,7 +12,6 @@ const validate=x=>window.WordSceneState.valid(x,500);
 const cloud=window.WordSceneFirestore.create({auth,db,sdk:{doc,getDoc,runTransaction,serverTimestamp},validate});
 const profiles=window.WordSceneProfiles.create({storage:localStorage,validate});
 const syncEngine=window.WordSceneCloudSync.create({auth,cloud,storage:localStorage,validate,reload:()=>location.reload(),canSync:uid=>profiles.matches(uid),onSettings:value=>localStorage.setItem(profiles.syncProfileKey(value.uid),JSON.stringify(value)),onDisable:uid=>localStorage.removeItem(profiles.syncProfileKey(uid))});
-const KEY='word-scenes-v5';
 const OFFER_KEY='wordscene-cloud-offer-v1';
 function offerCloudLogin(){
  if(localStorage.getItem(OFFER_KEY)||auth.currentUser)return;
@@ -22,7 +21,7 @@ function offerCloudLogin(){
  dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-label','Сохранение прогресса');
  dialog.style.cssText='background:#fff;color:#222;border-radius:18px;padding:24px;max-width:360px;width:100%;font:16px system-ui;text-align:center;box-shadow:0 12px 40px #0003';
  const title=document.createElement('h2');title.textContent='Сохраним твои успехи?';
- const desc=document.createElement('p');desc.textContent='Прогресс уже хранится на этом iPhone. Чтобы дополнительно сохранять его в облаке, попроси родителя помочь со входом.';
+ const desc=document.createElement('p');desc.textContent='Прогресс уже хранится на этом устройстве. Чтобы дополнительно сохранять его в облаке, попроси родителя помочь со входом.';
  const enter=document.createElement('button');enter.textContent='Войти в аккаунт';
  const skip=document.createElement('button');skip.textContent='Продолжить без аккаунта';
  for(const b of [enter,skip])b.style.cssText='display:block;width:100%;padding:12px;margin-top:10px;border-radius:10px;border:1px solid #6554b8;font:600 15px system-ui;cursor:pointer';
@@ -42,19 +41,19 @@ const form=document.createElement('form');
 const email=document.createElement('input');email.type='email';email.setAttribute('aria-label','Электронная почта');email.placeholder='Электронная почта';email.required=true;email.autocomplete='username';email.style.width='100%';
 const password=document.createElement('input');password.type='password';password.setAttribute('aria-label','Пароль');password.placeholder='Пароль';password.required=true;password.autocomplete='current-password';password.style.width='100%';
 const button=(label,type='button')=>{const b=document.createElement('button');b.type=type;b.textContent=label;return b};
-const login=button('Войти','submit'),logout=button('Выйти'),restore=button('Восстановить из облака'),download=button('Скачать облачную копию'),exportConflict=button('Скачать обе версии'),keepLocal=button('Оставить копию этого устройства'),keepCloud=button('Восстановить облачную копию'),importGuest=button('Перенести гостевой прогресс');
+const saveCloud=button('Сохранить прогресс'),login=button('Войти','submit'),logout=button('Выйти'),restore=button('Восстановить из облака'),download=button('Скачать облачную копию'),exportConflict=button('Скачать обе версии'),keepLocal=button('Оставить копию этого устройства'),keepCloud=button('Восстановить облачную копию'),importGuest=button('Перенести гостевой прогресс');
 const info=document.createElement('p');info.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere';
-panel.append(status,form,logout,restore,download,importGuest,exportConflict,keepLocal,keepCloud,info);form.append(email,password,login);
-const allButtons=[login,logout,restore,download,importGuest,exportConflict,keepLocal,keepCloud];
+panel.append(status,form,saveCloud,logout,restore,download,importGuest,exportConflict,keepLocal,keepCloud,info);form.append(email,password,login);
+const allButtons=[saveCloud,login,logout,restore,download,importGuest,exportConflict,keepLocal,keepCloud];
 for(const b of allButtons)b.style.cssText='display:block;width:100%;min-height:42px;margin:7px 0;padding:9px 12px;background:#6554b8;color:#fff;border:1px solid #6554b8;border-radius:10px;font:600 14px system-ui;opacity:1;cursor:pointer';
 for(const b of [logout,download,exportConflict]){b.style.background='#f1eafa';b.style.color='#342b49'}
 for(const b of [exportConflict,keepLocal,keepCloud,importGuest])b.hidden=true;
 for(const b of allButtons)b.disabled=true;login.disabled=false;
 const uiStyle=document.createElement('style');uiStyle.textContent='section[aria-label="Облачная копия WordScene"] button:disabled{opacity:.5!important;cursor:wait!important}section[aria-label="Облачная копия WordScene"] button[hidden]{display:none!important}body.profile-switch-blocked>header,body.profile-switch-blocked>#app,body.profile-switch-blocked>.bottom-nav{visibility:hidden!important}';document.head.append(uiStyle);
 function message(value){info.textContent=value}
-function local(){const raw=localStorage.getItem(KEY);if(!raw)throw new Error('Локальное сохранение отсутствует');const state=JSON.parse(raw);if(!validate(state))throw new Error('Локальные данные повреждены');return state}
+
 function assertProfile(uid){if(!uid||auth.currentUser?.uid!==uid||!profiles.matches(uid))throw new Error('Аккаунт или локальный профиль изменился; действие остановлено')}
-function refreshButtons(){const user=auth.currentUser;form.hidden=!!user;logout.hidden=!user;restore.hidden=!user;download.hidden=!user;const conflict=localStorage.getItem(user?syncEngine.conflictKey(user.uid):'');const validConflict=authReady&&!!user&&(()=>{try{return JSON.parse(conflict||'null')?.uid===user.uid}catch{return false}})();exportConflict.hidden=!validConflict;const canResolve=validConflict&&syncEngine.isConflictExported();keepLocal.hidden=!canResolve;keepCloud.hidden=!canResolve;importGuest.hidden=!(authReady&&user&&profiles.hasGuestProgress());for(const b of allButtons)b.disabled=!authReady;login.disabled=false}
+function refreshButtons(){const user=auth.currentUser;form.hidden=!!user;logout.hidden=!user;restore.hidden=!user;download.hidden=!user;const conflict=localStorage.getItem(user?syncEngine.conflictKey(user.uid):'');const validConflict=authReady&&!!user&&(()=>{try{return JSON.parse(conflict||'null')?.uid===user.uid}catch{return false}})();exportConflict.hidden=!validConflict;const canResolve=validConflict&&syncEngine.isConflictExported();keepLocal.hidden=!canResolve;keepCloud.hidden=!canResolve;importGuest.hidden=!(authReady&&user&&profiles.hasGuestProgress());for(const b of allButtons)b.disabled=!authReady;saveCloud.disabled=!authReady||!user;login.disabled=false}
 async function withBusy(task,allowBeforeReady=false){if(!authReady&&!allowBeforeReady){message('Проверяем аккаунт и локальный профиль.');return}for(const b of allButtons)b.disabled=true;try{await task()}catch(e){console.error('[WordScene cloud]',e);message('Ошибка: '+(e.code||'неизвестная')+'\n'+(e.message||'Нет описания'))}finally{refreshButtons()}}
 form.onsubmit=e=>{e.preventDefault();void withBusy(async()=>{await setPersistence(auth,browserLocalPersistence);await signInWithEmailAndPassword(auth,email.value,password.value);password.value='';message('Вход выполнен. Подготавливаем отдельный локальный профиль.')},true)};
 logout.onclick=()=>void withBusy(async()=>{await signOut(auth);message('Вы вышли. Локальный прогресс сохранён.')});
@@ -62,16 +61,47 @@ restore.onclick=()=>void withBusy(async()=>{const r=await syncEngine.prepareConf
 function summary(x){const w=Object.values(x.words||{});return 'обучено '+w.filter(p=>p.trained).length+', ответов '+w.reduce((n,p)=>n+(p.attempts||0),0)+', дней '+Object.keys(x.habit?.days||{}).length+', занятие '+(x.session?'не завершено':'завершено')}
 
 download.onclick=()=>void withBusy(async()=>{const uid=auth.currentUser?.uid;assertProfile(uid);const remote=await cloud.read();assertProfile(uid);if(!remote.exists){message('Облачной копии нет.');return}const envelope={format:'wordscene-backup',version:1,createdAt:new Date().toISOString(),uid,progress:remote.payload};const blob=new Blob([JSON.stringify(envelope,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);try{const link=document.createElement('a');link.href=url;link.download='wordscene-cloud-backup.json';document.body.append(link);link.click();link.remove()}finally{setTimeout(()=>URL.revokeObjectURL(url),30000)}message('Подготовлена копия облачного прогресса. Локальные данные не менялись.')});
-let backupBusy=false,backupRequested=false;
-async function runSync(bootstrap=false){if(!AUTO_BACKUP_ENABLED)return;if(backupBusy){backupRequested=true;return}backupBusy=true;backupRequested=false;try{const result=(bootstrap||!syncEngine.enabled())?await syncEngine.bootstrapBackup():await syncEngine.syncOnce();if(result.status==='conflict'||result.status==='conflict-race')message('Есть несколько версий прогресса. Они сохранены; взрослый сможет помочь с восстановлением.');else if(result.status==='remote-newer'||result.status==='restore-available')message('В облаке сохранён прогресс с другого устройства. Локальные занятия не изменены; восстановление доступно взрослому.');else if(result.status==='pushed')message('Прогресс сохранён.');else if(result.status==='same')message('Прогресс сохранён на этом устройстве и в облаке.');refreshButtons()}catch(e){console.error('[WordScene backup]',e);message('Занятие сохранено на этом устройстве. Облачная копия обновится, когда появится связь.')}finally{backupBusy=false;if(backupRequested){backupRequested=false;backupTimer=setTimeout(()=>void runSync(),1000)}}}
+let backupTask=null,backupRequested=false,backupTimer=0;
+const BACKUP_DELAY=60000;
+function queueBackup(delay){
+ if(backupTimer)clearTimeout(backupTimer);
+ backupTimer=setTimeout(()=>{backupTimer=0;void runSync()},delay);
+}
+function runSync(){
+ if(!AUTO_BACKUP_ENABLED||!authReady||!auth.currentUser)return Promise.resolve({status:'idle'});
+ if(backupTask){backupRequested=true;return backupTask}
+ clearTimeout(backupTimer);backupTimer=0;backupRequested=false;
+ backupTask=(async()=>{
+  try{
+   const result=syncEngine.enabled()?await syncEngine.syncOnce():await syncEngine.bootstrapBackup();
+   if(result.status==='conflict'||result.status==='conflict-race')message('Есть несколько версий прогресса. Обе сохранены. Откройте восстановление, чтобы сравнить их.');
+   else if(result.status==='remote-newer'||result.status==='restore-available')message('В облаке есть другая копия. Она не заменена. Выберите «Восстановить из облака», чтобы сравнить прогресс.');
+   else if(result.status==='pushed'||result.status==='same')message('Прогресс сохранён на устройстве и в облаке.');
+   else if(result.status==='local-changed'){backupRequested=true;message('Копия отправлена. Новые ответы сохраняются следом.');}
+   refreshButtons();return result;
+  }catch(e){
+   console.error('[WordScene backup]',e);
+   const offline=e.code==='unavailable'||e.code==='auth/network-request-failed'||e.message==='Failed to fetch'||e.message==='offline';
+   message(offline?'Не удалось отправить копию. Повторим при возвращении связи.':'Не удалось обновить облачную копию: '+(e.message||e.code||'неизвестная ошибка')+'. Локальный прогресс не заменён.');
+   return {status:'error'};
+  }finally{backupTask=null;if(backupRequested)queueBackup(1000)}
+ })();
+ return backupTask;
+}
+saveCloud.onclick=()=>void withBusy(async()=>{message('Сохраняем прогресс в облаке…');await runSync()});
 exportConflict.onclick=()=>void withBusy(async()=>{const capture=await syncEngine.exportConflict();const versions=[...syncEngine.getConflictHistory(capture.uid),capture];const blob=new Blob([JSON.stringify({format:'wordscene-conflict',version:1,uid:capture.uid,versions},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);try{const link=document.createElement('a');link.href=url;link.download='wordscene-conflict-backup.json';document.body.append(link);link.click();link.remove()}finally{setTimeout(()=>URL.revokeObjectURL(url),30000)}syncEngine.markConflictExported(capture);message('Сохранены обе версии. Это устройство: '+summary(capture.local.progress)+'\nОблако (ревизия '+capture.cloud.revision+'): '+summary(capture.cloud.progress)+'\nВыберите источник. Замена не объединяет результаты.')});
 keepLocal.onclick=()=>void withBusy(async()=>{if(!confirm('Использовать текущий прогресс этого устройства? Актуальная облачная версия останется в скачанном файле конфликта.'))return;const result=await syncEngine.resolve('local');message('Прогресс устройства сохранён в облаке. Ревизия '+result.revision+'.')});
 keepCloud.onclick=()=>void withBusy(async()=>{if(!confirm('Заменить локальную копию актуальной облачной? Текущая локальная версия останется в резервной копии и в скачанном файле конфликта.'))return;await syncEngine.resolve('cloud');message('Локальная копия обновлена. Перезагрузите приложение для применения.')});
 importGuest.onclick=()=>void withBusy(async()=>{const uid=auth.currentUser?.uid;assertProfile(uid);if(!confirm('Перенести сохранённый гостевой прогресс в профиль этого аккаунта? Гостевая копия останется отдельно, а текущая копия аккаунта сохранится в резерве. Облачная копия автоматически не перезаписывается.'))return;assertProfile(uid);const result=profiles.importGuest(uid);message('Гостевой прогресс скопирован в аккаунт. Резерв текущего профиля: '+result.backupKey+'. Проверьте копии перед включением синхронизации.');location.reload()});
-let backupTimer=0;
-function scheduleBackup(){if(!AUTO_BACKUP_ENABLED||!authReady||!auth.currentUser)return;backupRequested=true;clearTimeout(backupTimer);backupTimer=setTimeout(()=>{backupRequested=false;void runSync()},2200)}
-window.WordSceneCloudBackup={enabled:AUTO_BACKUP_ENABLED,schedule:scheduleBackup};
-window.addEventListener('online',()=>void runSync());document.addEventListener('visibilitychange',()=>{if(!document.hidden)void runSync()});
+function scheduleBackup({immediate=false}={}){
+ if(!AUTO_BACKUP_ENABLED||!authReady||!auth.currentUser)return;
+ backupRequested=true;
+ if(backupTask)return;
+ if(immediate)queueBackup(0);else if(!backupTimer)queueBackup(BACKUP_DELAY);
+}
+function flushBackup(){if(backupRequested)void runSync()}
+window.WordSceneCloudBackup={enabled:AUTO_BACKUP_ENABLED,schedule:scheduleBackup,flush:flushBackup};
+window.addEventListener('online',()=>void runSync());document.addEventListener('visibilitychange',()=>{if(document.hidden)flushBackup();else void runSync()});
 onAuthStateChanged(auth,user=>{
  try{
   const result=profiles.switchTo(user?.uid||null);

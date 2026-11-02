@@ -89,7 +89,8 @@ function create({auth,cloud,storage,validate,now=()=>Date.now(),reload=()=>{},ca
   const confirmed=await cloud.read();
   if(uid()!==user||!canSync(user))return {status:'account-changed'};
   if(!confirmed.exists||confirmed.revision!==result.revision||stable(confirmed.payload)!==current.fingerprint)throw new Error('Облачную копию не удалось подтвердить');
-  saveSettings({uid:user,revision:result.revision,baseline:current.fingerprint});return {status:'pushed',revision:result.revision};
+  saveSettings({uid:user,revision:result.revision,baseline:current.fingerprint});
+  return {status:local().raw===current.raw?'pushed':'local-changed',revision:result.revision};
  }
  async function prepareConflict(){
   const user=uid();if(!user)throw new Error('Сначала войдите в аккаунт');if(!canSync(user))throw new Error('Локальный профиль не принадлежит текущему аккаунту');
@@ -120,8 +121,10 @@ function create({auth,cloud,storage,validate,now=()=>Date.now(),reload=()=>{},ca
    const confirmed=await cloud.read();
    if(uid()!==initial||!canSync(initial))return {status:'account-changed'};
    if(!confirmed.exists||confirmed.revision!==result.revision||stable(confirmed.payload)!==current.fingerprint)throw new Error('Облачную копию не удалось подтвердить; повторим позже');
-   const latest=local();if(latest.raw!==current.raw)return {status:'local-changed',revision:result.revision};
-   saveSettings({uid:initial,revision:result.revision,baseline:current.fingerprint});return {status:'pushed',revision:result.revision};
+   // The confirmed upload is our new baseline even if another local answer
+   // arrived during the request. The next backup uploads that newer answer.
+   saveSettings({uid:initial,revision:result.revision,baseline:current.fingerprint});
+   const latest=local();if(latest.raw!==current.raw)return {status:'local-changed',revision:result.revision};return {status:'pushed',revision:result.revision};
   }catch(error){
    if(error.code==='wordscene/conflict'){
     try{const remote=await cloud.read();if(remote.exists&&uid()===syncUid&&canSync(syncUid)){captureConflict(local(),remote);return {status:'conflict',revision:remote.revision}}}catch{}

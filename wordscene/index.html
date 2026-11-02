@@ -1,70 +1,405 @@
-<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#6554b8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="WordScene"><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./assets/icon-180.png"><title>WordScene — английские слова в образах</title><style>:root{--ink:#28223b;--green:#6554b8;--paper:#f7f5ff;--muted:#756d89;--sage:#eae3f8;--border:#dfd7ee;--gold:#e9b44c}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.5}button,input{font:inherit}button{cursor:pointer;border:0;-webkit-tap-highlight-color:transparent;transition:background-color .12s,border-color .12s}button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:3px}button:disabled{opacity:.35;cursor:default}header{max-width:600px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:calc(16px + env(safe-area-inset-top)) 22px 15px;border-bottom:1px solid var(--border);gap:15px}.brand{font-weight:750;font-size:20px;letter-spacing:-.8px;background:none;color:var(--ink);padding:0}.brand span{color:#8063b0}.pill{font-size:11px;background:var(--sage);padding:6px 10px;border-radius:20px;white-space:nowrap}main{max-width:600px;margin:auto;padding:22px 20px calc(24px + env(safe-area-inset-bottom))}.app-screen{min-height:calc(100svh - 136px);display:flex;flex-direction:column}h1{font-size:34px;letter-spacing:-1.4px;line-height:1.13;margin:12px 0 27px}h2{font-size:25px;line-height:1.23;letter-spacing:-.6px;margin:16px 0}p{margin:10px 0 16px}.eyebrow{font-size:11px;letter-spacing:1.25px;text-transform:uppercase;color:#807097;font-weight:650;margin:0}.note{font-size:12px;color:var(--muted);line-height:1.6}.center{text-align:center}.topline{display:flex;justify-content:space-between;align-items:center;gap:12px}.quiet{background:none;color:#77658e;padding:10px 6px;font-size:13px}.primary,.secondary,.soft{display:flex;align-items:center;justify-content:center;gap:10px;min-height:54px;border-radius:14px;padding:14px 18px;font-weight:650;text-align:center}.primary{background:var(--green);color:#fff}.primary:hover{background:#51419c}.secondary{background:#fffdfb;border:1px solid var(--border);color:var(--ink)}.soft{background:var(--sage);color:var(--ink)}.wide{width:100%}.focus-card{background:var(--sage);border:1px solid #e1d9f0;border-radius:23px;padding:24px;margin:12px 0 22px}.focus-card h2{font-size:27px;margin:12px 0}.focus-card p{color:#756589;font-size:15px}.focus-card>.primary{width:100%;margin-top:22px}.focus-card.small{padding:18px;margin:22px 0}.focus-card.small p{margin-bottom:0}.mode-pick{display:grid;grid-template-columns:1fr 1fr 1fr;background:#ece6f6;padding:4px;border-radius:13px;gap:2px;margin-bottom:6px}.mode-pick button{background:none;color:#7b6d90;border-radius:10px;min-height:45px;padding:7px 3px;font-size:13px;font-weight:600}.mode-pick button.selected{background:var(--green);color:#fff;box-shadow:none}.portion-dots{display:flex;gap:10px;margin:23px 0}.portion-dots i{width:17px;height:17px;background:#cfc2e8;border-radius:50%}.portion-dots i.active{background:var(--gold)}.line{height:5px;background:#e8e0f3;border-radius:8px;overflow:hidden;margin:17px 0 22px}.line i{display:block;background:#8772c9;height:100%;transition:width .2s}.overview{padding:0 3px}.overview .line{margin:12px 0}.home-links{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:auto;padding-top:22px}.home-links>*{flex:1}.word-heading{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:0 0 16px}.word-heading h1{margin-bottom:4px}.word{font-size:50px;line-height:1.15;font-weight:700;letter-spacing:-1.2px;margin:8px 0;overflow-wrap:anywhere}.translation{font-size:20px;margin:4px 0}.phonetic{font-size:14px;color:var(--muted)}.sound{width:48px;height:48px;min-width:48px;background:var(--sage);border-radius:50%;color:var(--green);font-size:19px}.learning{display:flex;flex-direction:column;flex:1}.scene-box{background:#f0eaf9;border-radius:23px;padding:15px 16px}.scene-box p{font-size:15px;line-height:1.6;margin:12px 0}.scene-svg{display:block;width:100%;height:auto;max-height:225px}.cue{display:block;font-size:13px;color:#756d89;margin:12px 0 4px}#scene-empty{min-height:335px;display:flex;flex-direction:column;justify-content:center;text-align:center}#scene-empty[hidden],#scene-content[hidden]{display:none}.mental-symbol{font-size:70px;line-height:1.4;color:#9a86ce;font-weight:300}.bottom-actions{display:flex;flex-direction:column;gap:10px;margin-top:auto;padding-top:22px}.bottom-actions>.sound{align-self:center}.interlude{display:flex;flex:1;flex-direction:column;justify-content:center;padding-top:10px}.interlude>.mental-symbol{margin-top:35px}.interlude>.bottom-actions{margin-top:30px}.recall-screen{display:flex;flex-direction:column;flex:1}.recall-prompt{display:flex;flex-direction:column;justify-content:center;text-align:center;min-height:245px;flex:1;padding:35px 0 25px}.recall-prompt .word{font-size:clamp(36px,9vw,52px);margin:22px 0 14px}.answer{font-size:30px;font-weight:600;color:#6554b8;min-height:46px}.rating-actions{display:grid;gap:10px;min-height:118px;align-content:end}.rating-actions:empty{min-height:0}.recall-screen>.note{margin-top:20px}.repair{background:#f7edda;border-radius:20px;padding:18px;margin-bottom:15px}.repair-art{max-width:300px;margin:auto}.repair p{font-size:15px}.repair .bottom-actions{padding-top:10px}.search-label{display:block;font-size:12px;color:var(--muted);margin:8px 0 14px}input{display:block;width:100%;margin-top:6px;min-height:48px;border-radius:12px;border:1px solid var(--border);background:#fffdfb;padding:12px;color:var(--ink);font-size:16px}.page-title{margin:15px 0}.filters{display:flex;gap:7px;flex-wrap:wrap}.filters button{padding:9px 13px;border-radius:20px;background:var(--sage);color:#7c6c94;font-size:12px}.filters button.selected{background:var(--green);color:white}.word-list{display:grid;gap:10px}.word-row{display:block;width:100%;background:#fffdfb;color:var(--ink);border:1px solid var(--border);border-radius:17px;padding:17px;text-align:left}.row-heading{display:flex;justify-content:space-between;gap:12px;align-items:center}.row-heading strong{display:block;font-size:20px}.row-translation{display:block;color:var(--muted);font-size:14px;margin-top:2px}.status{font-size:11px;background:#eee9f5;color:#8c809d;border-radius:20px;padding:5px 10px;white-space:nowrap}.status.studied{background:#e9e1f8;color:#6c5197}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;border-top:1px solid #eee8f6;margin-top:14px;padding-top:12px}.metrics>span{display:block;font-size:10px;color:#91869f}.metrics b{display:block;font-size:16px;font-weight:600;color:#6f5795;margin-bottom:2px}.stats-detail{background:#fffdfb;border-radius:16px;padding:8px 17px}.stats-detail p{display:flex;justify-content:space-between;gap:20px;font-size:14px;border-bottom:1px solid #eee8f6;padding-bottom:10px;margin:12px 0}.stats-detail p:last-child{border:0;padding-bottom:0}.prose h2{font-size:20px;margin-top:28px}.prose p{font-size:15px;color:#736382;line-height:1.7}.empty{padding:25px;text-align:center;color:var(--muted)}.error{background:#f5e6dc;padding:15px;border-radius:12px;font-size:13px}#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:white;border-radius:12px;padding:14px 18px;display:none;z-index:99;width:max-content;max-width:90%;font-size:13px}button svg{pointer-events:none}@media(min-width:700px){main{padding-top:30px}.app-screen{min-height:690px}body{background:#eeebf6}header,main{background:var(--paper)}header{margin-top:25px;border-radius:25px 25px 0 0}main{border-radius:0 0 25px 25px;margin-bottom:30px;padding-left:35px;padding-right:35px}.scene-svg{max-height:250px}}@media(max-height:740px)and(max-width:700px){main{padding-top:14px}.word-heading{margin-bottom:10px}.word{font-size:43px}.scene-svg{max-height:180px}.scene-box p{font-size:14px;line-height:1.5}.bottom-actions{padding-top:15px}.recall-prompt{min-height:190px}h1{font-size:31px;margin-bottom:20px}}
-.practice-reminder{font-size:15px;line-height:1.5;padding:12px 14px;border-left:3px solid var(--gold);background:#eee6fa;border-radius:0 10px 10px 0;margin:14px 0 0}.learning .scene-svg{max-height:200px}.learning .bottom-actions{padding-top:15px}
-/* WordScene · Черника и сливки */
-body{background:radial-gradient(ellipse at 10% 0%,#eee5ff 0,transparent 54%),radial-gradient(ellipse at 100% 65%,#fff3d9 0,transparent 55%),#f8f5ff}header{border-bottom:0;padding-top:calc(21px + env(safe-area-inset-top));padding-bottom:8px}.brand{font-size:25px;font-weight:850;letter-spacing:-1.1px}.brand:before{content:'✦';display:inline-block;color:#e6ad42;margin-right:7px;font-size:23px}.brand span{color:#7760bd}.pill{background:#ede6fa;border:1px solid #e1d5f1;color:#76618f;font-size:10px;letter-spacing:.3px;padding:6px 9px}h1,h2,.word{font-family:ui-rounded,'Arial Rounded MT Bold',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-weight:800}h1{font-size:36px;letter-spacing:-1.1px}h2{letter-spacing:-.7px}.primary{background:#6554b8;box-shadow:none;border:1px solid #6554b8;border-radius:17px;min-height:55px}.primary:hover{background:#5948a5}.primary:active{background:#4f3e96;transform:none;box-shadow:none}.secondary{background:#fffdfb;border-color:#ded2ef;border-radius:17px;box-shadow:none}.soft{background:#eae3f8;border-radius:17px}.mode-pick{background:#eae1f7;border:1px solid #ddd0ef;border-radius:17px;padding:4px}.mode-pick button{border-radius:12px}.mode-pick button.selected{background:#6554b8;box-shadow:none}.focus-card{position:relative;overflow:hidden;background:radial-gradient(ellipse at 100% 0%,#fdf6e7 0,transparent 60%),linear-gradient(135deg,#f1e9ff,#e7dbf6);border:1px solid #dfd0ef;border-radius:28px;box-shadow:0 10px 26px #6c419613,inset 0 1px 0 #ffffffbd;padding:25px;margin-top:15px}.focus-card h2{position:relative;font-size:28px;max-width:84%;margin-top:10px}.focus-card p{position:relative;font-size:15px;max-width:90%;color:#75638b}.focus-card>.primary{position:relative}.home-screen>.eyebrow{font-size:10px;letter-spacing:1px}.home-screen>h1{margin:9px 0 26px}.book-art{float:right;width:100px;height:91px;margin:-13px -12px -15px 5px;transform:rotate(8deg);filter:drop-shadow(0 7px 6px #7950ad24)}.portion-dots{gap:9px;margin:23px 0 25px}.portion-dots i{width:14px;height:14px;background:#d6c8ec;border:2px solid #e8def7;box-shadow:0 1px 3px #5b379919}.portion-dots i.active{background:linear-gradient(#fbd77b,#e9b44c);border-color:#f7da95;box-shadow:0 2px 6px #c8993a40}.overview{background:#fffdfb99;border:1px solid #e9e0f1;padding:17px 18px 5px;border-radius:22px}.overview .topline{font-size:14px}.overview .topline span{color:#8b74aa;font-weight:700}.line{height:7px;background:#e8dff3}.line i{background:linear-gradient(90deg,#b79be1,#7959bb);border-radius:8px}.overview .note{font-size:12px}.home-links{padding-top:22px;padding-bottom:8px}.word-heading{background:linear-gradient(120deg,#fffcf8b8,#f0e8fa99);border:1px solid #e5d9ef;border-radius:22px;padding:14px 20px;margin:3px 0 16px}.word-heading .word{color:#55408f;margin:0;font-size:48px}.word-heading .translation{font-size:21px;color:#5f5274}.phonetic{font-size:14px;color:#9785a9}.scene-box{background:linear-gradient(140deg,#f1e7fa,#faf3e9);border:1px solid #e4d5ef;border-radius:25px;padding:12px;box-shadow:0 8px 23px #6842920c}.scene-svg{border-radius:17px}.scene-photo{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:contain;border-radius:17px;background:#eee0f6}.learning .scene-photo{max-height:248px;object-fit:cover}.scene-box p{padding:0 3px;margin:12px 0 9px}.cue{background:#ffffff78;border-radius:10px;padding:7px 10px;font-size:12px;margin-top:8px}.practice-reminder{border:1px solid #eadbb9;border-left:4px solid #e9b44c;background:linear-gradient(120deg,#fff5db,#fcf6e8);border-radius:14px;padding:12px 14px;color:#806637;font-size:14px;margin-top:13px}.bottom-actions{padding-bottom:6px}.repair{background:linear-gradient(135deg,#fff5db,#f5e8ed);border:1px solid #eadcbd}.repair-art .scene-photo{max-height:220px;object-fit:contain}.mental-symbol{color:#9b7ec9;text-shadow:0 4px 16px #bda1e440}.word-row{background:linear-gradient(135deg,#fffdfb,#f9f5ff);box-shadow:none;border-color:#e6dcf0;border-radius:21px}.status{background:#eee7f6}.word-row .row-heading strong{color:#5c4489}.search-label input{background:#fffdfbba;border-radius:16px}.stats-detail{border:1px solid #e6dcf0;border-radius:20px}.recall-prompt{border-radius:26px;background:radial-gradient(ellipse at 50% 45%,#eee4fb8c,transparent 70%);margin:10px 0}.recall-prompt .word{color:#46355f}.answer{color:#8161bf}.home-screen .focus-card.small h2{max-width:none}
-@media(min-width:700px){header,main{background:#fbf8ffef}header{box-shadow:0 -8px 50px #9b78bf15}main{box-shadow:0 18px 40px #7e5d9c15}.home-screen{min-height:675px}.home-screen>h1{font-size:40px}.book-art{width:116px;height:104px}.learning .scene-photo{max-height:290px;object-fit:contain}}
-@media(max-width:370px){header{padding-left:16px;padding-right:16px}.brand{font-size:23px}main{padding-left:15px;padding-right:15px}.pill{font-size:9px}.focus-card{padding:21px}h1{font-size:32px}.focus-card h2{font-size:26px}}
-@media(max-height:740px)and(max-width:700px){.word-heading{padding:9px 16px;margin-bottom:12px}.word-heading .word{font-size:39px}.learning .scene-photo{max-height:190px}.practice-reminder{font-size:13px;padding:10px}.learning .bottom-actions{padding-top:12px}.home-screen>h1{margin-bottom:20px}.focus-card{padding:21px}.home-links{padding-top:15px}}
-
-@media(max-width:700px){.app-screen>.line{margin:11px 0 13px;height:5px}.word-heading{padding:9px 17px;margin-bottom:13px}.word-heading .word{font-size:43px}.word-heading .translation{font-size:19px;margin:1px 0}.learning .scene-photo{max-height:205px;object-fit:contain}.scene-box p{font-size:14px;line-height:1.5}.practice-reminder{font-size:13px;padding:10px 12px}.learning .bottom-actions{padding-top:13px}.home-screen>h1{margin-bottom:22px}.home-screen>.focus-card{padding:22px;margin-bottom:19px}.home-screen .portion-dots{margin:18px 0}.home-screen .focus-card>.primary{margin-top:16px}.home-screen>.overview{padding-top:14px}.home-screen .home-links{padding-top:17px}}
-
-/* v9: content scrolls independently; the next action always stays in view. */
-.header-tools{display:flex;align-items:center;gap:7px}.sound-toggle{font-size:11px;font-weight:650;min-height:44px;padding:8px 10px;border-radius:14px;background:#eee6fa;color:#69518f;border:1px solid #dfd3ee;white-space:nowrap}
-header{height:calc(64px + env(safe-area-inset-top));padding-top:calc(8px + env(safe-area-inset-top));padding-bottom:8px;flex-shrink:0}main{height:calc(100dvh - 64px - env(safe-area-inset-top));padding-top:8px;padding-bottom:calc(10px + env(safe-area-inset-bottom))}.app-screen{height:100%;min-height:0;overflow-y:auto;overscroll-behavior-y:contain}.training-screen{overflow:hidden}.training-screen>.topline{flex-shrink:0;min-height:38px}.training-screen>.line{flex-shrink:0;margin:5px 0 10px;height:5px}.training-body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior-y:contain;padding:0 1px 4px}.action-dock{flex-shrink:0;position:relative;background:var(--paper);padding:9px 1px 6px;border-top:1px solid #e6dcef;z-index:2}.action-dock:empty{display:none}.action-dock .bottom-actions{padding:0;margin:0;gap:8px}.action-dock .rating-actions{min-height:0;gap:8px}.action-dock .rating-actions:empty{display:none}.action-dock button{min-height:46px;padding:10px 12px;font-size:14px}.action-dock .primary{margin-bottom:0}.training-body .word-heading{padding:8px 14px;margin:0 0 10px;border-radius:18px}.training-body .word-heading>div{display:grid;grid-template-columns:1fr auto;column-gap:12px;align-items:center;width:100%}.training-body .word-heading .word{font-size:38px}.training-body .translation{font-size:18px;margin:0}.training-body .phonetic{grid-column:1/-1;font-size:12px}.training-body .scene-box{padding:9px;border-radius:20px}.learning .scene-svg{max-height:165px}.learning .scene-photo{max-height:190px;object-fit:contain}.scene-box p{font-size:14px;line-height:1.5;margin:9px 0}.cue{margin:7px 0 0;padding:6px 9px}.practice-reminder{margin:10px 0 0;padding:9px 11px;font-size:13px}.training-body #scene-empty{min-height:175px}.training-body .interlude{padding-top:0;min-height:100%;justify-content:center}.training-body .interlude>.mental-symbol{font-size:45px;margin:0;line-height:1.3}.training-body .interlude h2{margin:10px 0}.training-body .interlude p{margin:8px 0;font-size:15px}.training-body .focus-card.small{padding:14px;margin:12px 0}.training-body .recall-prompt{min-height:190px;margin:0;padding:20px 0}.training-body .recall-screen>.note{margin:10px 0 5px}.training-body .repair-art{max-width:230px}.training-body .repair-art .scene-svg,.training-body .repair-art .scene-photo{max-height:150px}.training-body .repair{padding:12px;margin-bottom:0}.home-screen{padding-bottom:4px}.home-screen>h1{font-size:32px;margin:6px 0 18px}.home-screen .focus-card{padding:19px;margin:12px 0 16px}.home-screen .focus-card h2{font-size:25px}.home-screen .portion-dots{margin:15px 0}.home-screen .home-links{padding-top:14px}.home-screen .overview{padding-top:13px}.home-screen .note{font-size:11px}.home-screen .book-art{height:80px;width:88px}
-@media(min-width:700px){header{margin-top:20px}main{height:calc(100dvh - 110px - env(safe-area-inset-top));margin-bottom:20px}.learning .scene-photo{max-height:225px}.learning .scene-svg{max-height:210px}}
-@media(max-width:410px){.header-tools>.pill{display:none}.brand{font-size:23px}}
-@media(max-height:700px){.learning .scene-photo,.learning .scene-svg{max-height:140px}.training-body .word-heading .word{font-size:31px}.training-body .scene-box p{font-size:13px}.training-body .interlude>.mental-symbol{font-size:35px}.training-body .interlude h2{font-size:23px}.training-body .focus-card.small{margin:8px 0;padding:10px}.training-body .recall-prompt{min-height:140px;padding:12px 0}.action-dock button{min-height:44px}.training-body #scene-empty{min-height:130px}}
-
-.status{white-space:normal;text-align:right;max-width:130px}.home-screen .focus-card h2{max-width:85%;font-size:26px}.result-body h2{font-size:25px}
-@media(max-width:700px){.home-screen>.focus-card{flex-shrink:0}}
-
-/* Warm cream surfaces with blueberry, teal and apricot states. */
-:root{--paper:#fffaf3;--green:#674db8;--sage:#f5efe8;--border:#eadbd0;--muted:#756b7f;--ink:#292338;--gold:#eab64a}
-body{background:radial-gradient(ellipse at 8% 0%,#f5eeff 0,transparent 47%),radial-gradient(ellipse at 96% 65%,#fff1d8 0,transparent 48%),#fffaf3}
-.focus-card{background:radial-gradient(ellipse at 100% 0%,#fff6e8 0,transparent 58%),linear-gradient(135deg,#fff9ee,#f8f0e8);border-color:#efddd1}
-.overview{background:#fffdfa;border-color:#eddfd7}
-.line{background:#d6ebe5}.line i{background:linear-gradient(90deg,#69c4b5,#319c8e)}
-.word-heading{background:linear-gradient(120deg,#fffdf9,#f7f0e9);border-color:#eadfd7}
-.scene-box{background:linear-gradient(140deg,#fff8ef,#fbf2e8);border-color:#ecdcd0}
-.word-row{background:linear-gradient(135deg,#fffdfa,#fff8ef);border-color:#ecdfd6}
-.success-button{display:flex;align-items:center;justify-content:center;gap:10px;min-height:54px;padding:14px 18px;font-weight:650;text-align:center;background:#3d9b8d;color:#fff;box-shadow:none;border:1px solid #3d9b8d;border-radius:17px}.action-dock .success-button{min-height:46px;padding:10px 12px;font-size:14px}
+<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#6554b8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="WordScene"><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./assets/icon-180.png"><title>WordScene — английские слова в образах</title><style>
+/* Current WordScene styles; source order and responsive cascade are preserved. */
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.5}
+button{font:inherit}
+input{font:inherit}
+button{cursor:pointer;border:0;-webkit-tap-highlight-color:transparent;transition:background-color .12s,border-color .12s}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+input:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+button:disabled{opacity:.35;cursor:default}
+header{margin:auto;display:flex;align-items:center;justify-content:space-between;padding:calc(16px + env(safe-area-inset-top)) 22px 15px}
+.brand{background:none;padding:0}
+.pill{border-radius:20px;white-space:nowrap}
+main{margin:auto}
+.app-screen{display:flex;flex-direction:column}
+h1{line-height:1.13;margin:12px 0 27px}
+h2{font-size:25px;line-height:1.23;margin:16px 0}
+p{margin:10px 0 16px}
+.eyebrow{font-size:11px;letter-spacing:1.25px;text-transform:uppercase;color:#807097;font-weight:650;margin:0}
+.note{font-size:12px;color:var(--muted);line-height:1.6}
+.center{text-align:center}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.quiet{background:none;padding:10px 6px;font-size:13px}
+.primary{display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 18px;font-weight:650;text-align:center}
+.secondary{display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 18px;font-weight:650;text-align:center}
+.primary{color:#fff}
+.wide{width:100%}
+.line{border-radius:8px;overflow:hidden;margin:17px 0 22px}
+.line i{display:block;height:100%;transition:width .2s}
+.word-heading{display:flex;align-items:center;justify-content:space-between;gap:18px}
+.word-heading h1{margin-bottom:4px}
+.word{font-size:50px;line-height:1.15;letter-spacing:-1.2px;margin:8px 0;overflow-wrap:anywhere}
+.translation{font-size:20px;margin:4px 0}
+.learning{display:flex;flex-direction:column;flex:1}
+.scene-svg{display:block;width:100%;height:auto;max-height:225px}
+.cue{display:block;color:#756d89}
+#scene-empty{min-height:335px;display:flex;flex-direction:column;justify-content:center;text-align:center}
+#scene-empty[hidden]{display:none}
+#scene-content[hidden]{display:none}
+.mental-symbol{font-size:70px;line-height:1.4;font-weight:300}
+.bottom-actions{display:flex;flex-direction:column;gap:10px;margin-top:auto;padding-top:22px}
+.interlude{display:flex;flex:1;flex-direction:column;justify-content:center;padding-top:10px}
+.interlude>.mental-symbol{margin-top:35px}
+.interlude>.bottom-actions{margin-top:30px}
+.recall-screen{display:flex;flex-direction:column;flex:1}
+.recall-prompt{display:flex;flex-direction:column;justify-content:center;text-align:center;min-height:245px;flex:1;padding:35px 0 25px}
+.recall-prompt .word{font-size:clamp(36px,9vw,52px);margin:22px 0 14px}
+.answer{font-size:30px;font-weight:600;min-height:46px}
+.rating-actions{display:grid;gap:10px;min-height:118px;align-content:end}
+.rating-actions:empty{min-height:0}
+.recall-screen>.note{margin-top:20px}
+.repair{border-radius:20px;padding:18px;margin-bottom:15px}
+.repair-art{max-width:300px;margin:auto}
+.repair p{font-size:15px}
+.repair .bottom-actions{padding-top:10px}
+.search-label{display:block;font-size:12px;color:var(--muted);margin:8px 0 14px}
+input{display:block;width:100%;margin-top:6px;min-height:48px;border-radius:12px;border:1px solid var(--border);background:#fffdfb;padding:12px;color:var(--ink);font-size:16px}
+.page-title{margin:15px 0}
+.filters{display:flex;gap:7px;flex-wrap:wrap}
+.filters button{padding:9px 13px;border-radius:20px;background:var(--sage);color:#7c6c94;font-size:12px}
+.filters button.selected{background:var(--green);color:white}
+.word-list{display:grid;gap:10px}
+.word-row{display:block;width:100%;color:var(--ink);border:1px solid var(--border);padding:17px;text-align:left}
+.row-heading{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.row-heading strong{display:block;font-size:20px}
+.row-translation{display:block;color:var(--muted);font-size:14px;margin-top:2px}
+.status{font-size:11px;color:#8c809d;border-radius:20px;padding:5px 10px}
+.status.studied{background:#e9e1f8;color:#6c5197}
+.metrics{display:grid;border-top:1px solid #eee8f6;margin-top:14px;padding-top:12px}
+.metrics>span{display:block;font-size:10px;color:#91869f}
+.metrics b{display:block;font-size:16px;font-weight:600;color:#6f5795;margin-bottom:2px}
+.stats-detail{background:#fffdfb;padding:8px 17px}
+.stats-detail p{display:flex;justify-content:space-between;gap:20px;font-size:14px;border-bottom:1px solid #eee8f6;padding-bottom:10px;margin:12px 0}
+.stats-detail p:last-child{border:0;padding-bottom:0}
+.prose h2{font-size:20px;margin-top:28px}
+.prose p{font-size:15px;color:#736382;line-height:1.7}
+.empty{padding:25px;text-align:center;color:var(--muted)}
+.error{background:#f5e6dc;padding:15px;border-radius:12px;font-size:13px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);background:var(--ink);color:white;border-radius:12px;padding:14px 18px;display:none;z-index:99;width:max-content;max-width:90%;font-size:13px}
+button svg{pointer-events:none}
+@media(min-width:700px){main{padding-top:30px}}
+@media(min-width:700px){.app-screen{min-height:690px}}
+@media(min-width:700px){body{background:#eeebf6}}
+@media(min-width:700px){main{padding-left:35px;padding-right:35px}}
+@media(min-width:700px){.scene-svg{max-height:250px}}
+@media(max-height:740px)and(max-width:700px){main{padding-top:14px}}
+@media(max-height:740px)and(max-width:700px){.word{font-size:43px}}
+@media(max-height:740px)and(max-width:700px){.scene-svg{max-height:180px}}
+@media(max-height:740px)and(max-width:700px){.scene-box p{font-size:14px;line-height:1.5}}
+@media(max-height:740px)and(max-width:700px){.bottom-actions{padding-top:15px}}
+@media(max-height:740px)and(max-width:700px){.recall-prompt{min-height:190px}}
+@media(max-height:740px)and(max-width:700px){h1{font-size:31px;margin-bottom:20px}}
+.practice-reminder{line-height:1.5}
+.learning .bottom-actions{padding-top:15px}
+header{border-bottom:0}
+.brand:before{content:'✦';color:#e6ad42;margin-right:7px;font-size:23px}
+.pill{background:#ede6fa;border:1px solid #e1d5f1;color:#76618f;font-size:10px;letter-spacing:.3px;padding:6px 9px}
+.word{font-weight:800}
+h1{font-size:36px}
+.primary{border:1px solid #6554b8}
+.primary:active{box-shadow:none}
+.secondary{border-color:#ded2ef}
+.line{height:7px}
+.line i{border-radius:8px}
+.word-heading{border:1px solid #e5d9ef;border-radius:22px;padding:14px 20px;margin:3px 0 16px}
+.word-heading .word{color:#55408f;margin:0;font-size:48px}
+.word-heading .translation{font-size:21px;color:#5f5274}
+.phonetic{font-size:14px;color:#9785a9}
+.scene-box{border:1px solid #e4d5ef;border-radius:25px;padding:12px;box-shadow:0 8px 23px #6842920c}
+.scene-svg{border-radius:17px}
+.scene-photo{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:contain;border-radius:17px;background:#eee0f6}
+.scene-box p{padding:0 3px}
+.cue{background:#ffffff78;border-radius:10px;font-size:12px;margin-top:8px}
+.practice-reminder{border:1px solid #eadbb9;border-left:4px solid #e9b44c;border-radius:14px;margin-top:13px}
+.bottom-actions{padding-bottom:6px}
+.repair{border:1px solid #eadcbd}
+.repair-art .scene-photo{max-height:220px;object-fit:contain}
+.mental-symbol{color:#9b7ec9;text-shadow:0 4px 16px #bda1e440}
+.word-row{border-radius:21px}
+.word-row .row-heading strong{color:#5c4489}
+.search-label input{background:#fffdfbba;border-radius:16px}
+.stats-detail{border:1px solid #e6dcf0;border-radius:20px}
+.recall-prompt{border-radius:26px;background:radial-gradient(ellipse at 50% 45%,#eee4fb8c,transparent 70%);margin:10px 0}
+.recall-prompt .word{color:#46355f}
+.answer{color:#8161bf}
+@media(min-width:700px){header{background:#fbf8ffef}}
+@media(min-width:700px){main{background:#fbf8ffef}}
+@media(min-width:700px){header{box-shadow:0 -8px 50px #9b78bf15}}
+@media(min-width:700px){main{box-shadow:0 18px 40px #7e5d9c15}}
+@media(min-width:700px){.home-screen{min-height:675px}}
+@media(min-width:700px){.learning .scene-photo{object-fit:contain}}
+@media(max-width:370px){header{padding-left:16px;padding-right:16px}}
+@media(max-width:370px){.brand{font-size:23px}}
+@media(max-width:370px){main{padding-left:15px;padding-right:15px}}
+@media(max-width:370px){.pill{font-size:9px}}
+@media(max-width:370px){h1{font-size:32px}}
+@media(max-height:740px)and(max-width:700px){.word-heading{padding:9px 16px;margin-bottom:12px}}
+@media(max-height:740px)and(max-width:700px){.word-heading .word{font-size:39px}}
+@media(max-height:740px)and(max-width:700px){.learning .scene-photo{max-height:190px}}
+@media(max-height:740px)and(max-width:700px){.practice-reminder{font-size:13px;padding:10px}}
+@media(max-height:740px)and(max-width:700px){.learning .bottom-actions{padding-top:12px}}
+@media(max-width:700px){.app-screen>.line{margin:11px 0 13px;height:5px}}
+@media(max-width:700px){.word-heading{padding:9px 17px;margin-bottom:13px}}
+@media(max-width:700px){.word-heading .word{font-size:43px}}
+@media(max-width:700px){.word-heading .translation{font-size:19px;margin:1px 0}}
+@media(max-width:700px){.learning .scene-photo{max-height:205px;object-fit:contain}}
+@media(max-width:700px){.scene-box p{font-size:14px;line-height:1.5}}
+@media(max-width:700px){.practice-reminder{font-size:13px;padding:10px 12px}}
+@media(max-width:700px){.learning .bottom-actions{padding-top:13px}}
+.header-tools{display:flex;align-items:center}
+.sound-toggle{font-weight:650;min-height:44px;border-radius:14px;white-space:nowrap}
+header{padding-top:calc(8px + env(safe-area-inset-top));padding-bottom:8px;flex-shrink:0}
+main{padding-top:8px;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+.app-screen{height:100%;min-height:0;overflow-y:auto;overscroll-behavior-y:contain}
+.training-screen{overflow:hidden}
+.training-screen>.topline{flex-shrink:0;min-height:38px}
+.training-screen>.line{flex-shrink:0;margin:5px 0 10px;height:5px}
+.training-body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior-y:contain;padding:0 1px 4px}
+.action-dock{flex-shrink:0;position:relative;padding:9px 1px 6px;border-top:1px solid #e6dcef;z-index:2}
+.action-dock:empty{display:none}
+.action-dock .bottom-actions{padding:0;margin:0;gap:8px}
+.action-dock .rating-actions{min-height:0;gap:8px}
+.action-dock .rating-actions:empty{display:none}
+.action-dock button{min-height:46px;padding:10px 12px;font-size:14px}
+.action-dock .primary{margin-bottom:0}
+.training-body .word-heading{padding:8px 14px;margin:0 0 10px;border-radius:18px}
+.training-body .word-heading>div{grid-template-columns:1fr auto;column-gap:12px;align-items:center;width:100%}
+.training-body .translation{font-size:18px;margin:0}
+.training-body .phonetic{grid-column:1/-1;font-size:12px}
+.training-body .scene-box{padding:9px;border-radius:20px}
+.learning .scene-svg{max-height:165px}
+.learning .scene-photo{max-height:190px;object-fit:contain}
+.scene-box p{font-size:14px;line-height:1.5;margin:9px 0}
+.cue{margin:7px 0 0;padding:6px 9px}
+.practice-reminder{margin:10px 0 0;padding:9px 11px;font-size:13px}
+.training-body #scene-empty{min-height:175px}
+.training-body .interlude{padding-top:0;min-height:100%;justify-content:center}
+.training-body .interlude>.mental-symbol{font-size:45px;margin:0;line-height:1.3}
+.training-body .interlude h2{margin:10px 0}
+.training-body .interlude p{margin:8px 0;font-size:15px}
+.training-body .recall-prompt{min-height:190px;margin:0;padding:20px 0}
+.training-body .recall-screen>.note{margin:10px 0 5px}
+.training-body .repair-art{max-width:230px}
+.training-body .repair-art .scene-svg{max-height:150px}
+.training-body .repair-art .scene-photo{max-height:150px}
+.training-body .repair{padding:12px;margin-bottom:0}
+.home-screen{padding-bottom:4px}
+.home-screen .note{font-size:11px}
+@media(min-width:700px){main{margin-bottom:20px}}
+@media(min-width:700px){.learning .scene-photo{max-height:225px}}
+@media(min-width:700px){.learning .scene-svg{max-height:210px}}
+@media(max-width:410px){.brand{font-size:23px}}
+@media(max-height:700px){.learning .scene-photo{max-height:140px}}
+@media(max-height:700px){.learning .scene-svg{max-height:140px}}
+@media(max-height:700px){.training-body .word-heading .word{font-size:31px}}
+@media(max-height:700px){.training-body .scene-box p{font-size:13px}}
+@media(max-height:700px){.training-body .interlude>.mental-symbol{font-size:35px}}
+@media(max-height:700px){.training-body .interlude h2{font-size:23px}}
+@media(max-height:700px){.training-body .recall-prompt{min-height:140px;padding:12px 0}}
+@media(max-height:700px){.action-dock button{min-height:44px}}
+@media(max-height:700px){.training-body #scene-empty{min-height:130px}}
+.status{white-space:normal;text-align:right;max-width:130px}
+.result-body h2{font-size:25px}
+:root{--gold:#eab64a}
+.success-button{display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 18px;font-weight:650;text-align:center;background:#3d9b8d;color:#fff;border:1px solid #3d9b8d}
+.action-dock .success-button{min-height:46px;padding:10px 12px;font-size:14px}
 .success-button:hover{background:#348a7e}
 .success-button:active{background:#287c70;transform:none;box-shadow:none}
 .rating-actions>.secondary{background:#fff1e7;border-color:#efd2c1;color:#94583f}
 .repair{background:linear-gradient(135deg,#fff3e8,#ffefe1);border-color:#efd4c1}
-.practice-reminder{border-color:#efd9c3;border-left-color:#cf8058;background:linear-gradient(120deg,#fff3e5,#fff8ef);color:#8f5a3e}
+.practice-reminder{border-color:#efd9c3;border-left-color:#cf8058;color:#8f5a3e}
 .result-body .mental-symbol{color:#3d9b8d}
-
-/* v11: lightweight written check and compact word statistics. */
-.metrics{grid-template-columns:minmax(52px,.7fr) minmax(52px,.7fr) minmax(0,1.6fr);gap:10px}.metrics .writing-metric b{font-size:13px;line-height:1.35;overflow-wrap:anywhere}.writing-card{display:flex;flex-direction:column;justify-content:center;min-height:100%;padding:14px 8px}.writing-card>.eyebrow{text-align:center}.writing-prompt{position:sticky;top:0;z-index:3;background:var(--paper);padding:8px 4px 10px;margin:0 0 12px;font-size:clamp(28px,7vw,40px);text-align:center;overflow-wrap:anywhere}.writing-card form label{font-size:13px;color:var(--muted)}#writing-answer{font-size:22px;min-height:56px;text-align:center;letter-spacing:.5px;background:#fffdf9}.writing-feedback{border:1px solid #eadbb9;background:#fff7e6;border-radius:20px;text-align:center;padding:20px}.writing-feedback strong{display:block;font-size:36px;color:#5c438d;overflow-wrap:anywhere}.writing-feedback p{margin:6px 0}.writing-correct{background:#eaf7f0;border-color:#b6d9c6}.writing-correct strong{color:#287b62}.writing-mistake{background:#fff8f6;border-color:#e4b9b6}.writing-feedback-title{font-size:20px;font-weight:700}.writing-correct .writing-feedback-title{color:#287b62}.writing-mistake .writing-feedback-title{color:#a13f43}.writing-letters{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:3px;min-height:52px;padding:7px;border:2px solid;border-radius:14px;background:#fffdf8;color:#352044;overflow-wrap:anywhere}.writing-letters-wrong{border-color:#bb4a4d;background:#fff2ef;color:#5b2a31}.writing-letters-correct{border-color:#3d9675;background:#eaf7f0;color:#28634f}.writing-char{display:grid;place-items:center;min-width:22px;height:31px;padding:0 3px;border-radius:6px;font-size:21px;font-weight:650}.writing-letters-correct .writing-char{color:#28634f}.writing-char.mark-wrong,.writing-char.mark-extra{background:#f2cecc;color:#9d3238;text-decoration:underline 2px;text-underline-offset:3px}.writing-char.mark-extra{text-decoration:line-through 2px}.writing-char.mark-right{background:#cce8d7;color:#216d52;text-decoration:underline 2px;text-underline-offset:3px}.writing-char.writing-gap{min-width:22px;border:2px dashed #c34f53;background:#fff;color:#a33f43}.writing-diagnosis{margin:12px 0 7px!important;padding:9px 11px;border-radius:12px;background:#fff0ed;color:#81353b;font-size:14px;line-height:1.45}body.is-writing main{height:calc(var(--writing-vh,100dvh) - 64px - env(safe-area-inset-top))}.is-writing .training-body{scroll-padding-bottom:12px}@media(min-width:700px){body.is-writing main{height:calc(var(--writing-vh,100dvh) - 110px - env(safe-area-inset-top))}}@media(max-height:650px){.writing-card{padding:6px 3px}.writing-prompt{font-size:28px;padding:5px 4px;margin-bottom:8px}.writing-feedback{padding:12px}.writing-feedback strong{font-size:29px}#writing-answer{min-height:48px}}
-
-.result-screen>.topline,.result-screen>.line{display:none}.result-screen .training-body{padding-top:8px}
-/* v13 · blueberry and cream reference, flat controls and persistent tabs. */
+.metrics{grid-template-columns:minmax(52px,.7fr) minmax(52px,.7fr) minmax(0,1.6fr);gap:10px}
+.metrics .writing-metric b{font-size:13px;line-height:1.35;overflow-wrap:anywhere}
+.writing-card{display:flex;flex-direction:column;justify-content:center;min-height:100%;padding:14px 8px}
+.writing-card>.eyebrow{text-align:center}
+.writing-prompt{position:sticky;top:0;z-index:3;background:var(--paper);padding:8px 4px 10px;margin:0 0 12px;font-size:clamp(28px,7vw,40px);text-align:center;overflow-wrap:anywhere}
+.writing-card form label{font-size:13px;color:var(--muted)}
+#writing-answer{font-size:22px;min-height:56px;text-align:center;letter-spacing:.5px;background:#fffdf9}
+.writing-feedback{border:1px solid #eadbb9;background:#fff7e6;border-radius:20px;text-align:center;padding:20px}
+.writing-feedback p{margin:6px 0}
+.writing-correct{background:#eaf7f0;border-color:#b6d9c6}
+.writing-mistake{background:#fff8f6;border-color:#e4b9b6}
+.writing-feedback-title{font-size:20px;font-weight:700}
+.writing-correct .writing-feedback-title{color:#287b62}
+.writing-mistake .writing-feedback-title{color:#a13f43}
+.writing-letters{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:3px;min-height:52px;padding:7px;border:2px solid;border-radius:14px;background:#fffdf8;color:#352044;overflow-wrap:anywhere}
+.writing-letters-wrong{border-color:#bb4a4d;background:#fff2ef;color:#5b2a31}
+.writing-letters-correct{border-color:#3d9675;background:#eaf7f0;color:#28634f}
+.writing-char{display:grid;place-items:center;min-width:22px;height:31px;padding:0 3px;border-radius:6px;font-size:21px;font-weight:650}
+.writing-letters-correct .writing-char{color:#28634f}
+.writing-char.mark-wrong{background:#f2cecc;color:#9d3238;text-decoration:underline 2px;text-underline-offset:3px}
+.writing-char.mark-extra{background:#f2cecc;color:#9d3238;text-underline-offset:3px}
+.writing-char.mark-extra{text-decoration:line-through 2px}
+.writing-char.mark-right{background:#cce8d7;color:#216d52;text-decoration:underline 2px;text-underline-offset:3px}
+.writing-char.writing-gap{min-width:22px;border:2px dashed #c34f53;background:#fff;color:#a33f43}
+.writing-diagnosis{margin:12px 0 7px!important;padding:9px 11px;border-radius:12px;background:#fff0ed;color:#81353b;font-size:14px;line-height:1.45}
+.is-writing .training-body{scroll-padding-bottom:12px}
+@media(max-height:650px){.writing-card{padding:6px 3px}}
+@media(max-height:650px){.writing-prompt{font-size:28px;padding:5px 4px;margin-bottom:8px}}
+@media(max-height:650px){.writing-feedback{padding:12px}}
+@media(max-height:650px){#writing-answer{min-height:48px}}
+.result-screen>.topline{display:none}
+.result-screen>.line{display:none}
+.result-screen .training-body{padding-top:8px}
 :root{--paper:#fffaf2;--ink:#352044;--green:#6554b8;--sage:#eee7f7;--border:#e7ddee;--muted:#786588}
-body{background:#f4efe7}header,main{background:var(--paper);box-shadow:none}header{position:relative;max-width:520px;padding-left:24px;padding-right:24px;gap:4px;height:calc(76px + env(safe-area-inset-top));border-radius:0;margin-top:0}
-.brand{font-family:Georgia,'Times New Roman',serif;font-size:31px!important;font-weight:700;letter-spacing:-1.3px;color:var(--green)}.brand:before{display:none}#brand-berry{margin-right:auto;width:43px;height:48px;display:flex;align-items:center}#brand-berry svg{width:48px;height:48px}.header-tools{gap:0}.sound-toggle{border:0;background:none;color:#806d92;font-size:10px;padding:8px 2px;min-width:52px}
-h1,h2{font-family:Georgia,'Times New Roman',serif;color:#3d214f;font-weight:700;letter-spacing:-.7px}.word{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-main{max-width:520px;height:calc(100dvh - 76px - env(safe-area-inset-top));padding:8px 24px calc(10px + env(safe-area-inset-bottom));margin-bottom:0;border-radius:0;box-shadow:none}.with-nav main{height:calc(100dvh - 76px - 70px - env(safe-area-inset-top) - env(safe-area-inset-bottom));padding-bottom:8px}
-.bottom-nav{height:calc(70px + env(safe-area-inset-bottom));padding:4px 20px calc(4px + env(safe-area-inset-bottom));display:flex;max-width:520px;margin:auto;background:var(--paper);border-top:1px solid #e9e0e3}.bottom-nav[hidden]{display:none}.nav-item{width:50%;display:flex;align-items:center;flex-direction:column;justify-content:center;gap:2px;background:none;color:#82718e;font-size:12px;position:relative;min-height:56px}.nav-item svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.nav-item.active{color:#6554b8;font-weight:700}.nav-item.active:after{content:'';height:3px;width:26px;border-radius:2px;background:currentColor;position:absolute;bottom:0}.nav-item.active:first-child svg{fill:currentColor;stroke:currentColor}
-.primary,.secondary,.soft,.success-button{box-shadow:none;background-image:none;border-radius:16px;font-size:16px;min-height:50px}.primary{background:#6554b8}.primary:hover{background:#5948a5}.primary:active{transform:none;background:#4f3e96}.secondary{background:transparent;border:1px solid #7660b7;color:#6554b8}.soft{background:#eee7f7}.quiet{color:#6554b8}.focus-card,.overview,.word-row{box-shadow:none;background-image:none}.focus-card{background:#eee7f7;border-color:#e6dcf1}.word-row{background:#fffdf8;border-color:#e9e0ee}.line{background:#e9e1f1}.line i{background:#9c82c8}.scene-box{background:#f5edf6;border-color:#e8dcec}.word-heading{background:#fffdf8;border-color:#e8dfeb}.practice-reminder{background:#fbf1dc}.status{background:#eee7f6}.action-dock{background:var(--paper)}
-.home-screen{overflow:hidden;padding:0}.home-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior-y:contain;padding:0 1px 8px}.home-content{flex:0 0 auto;min-height:auto;overflow:visible;padding:0}.home-content>h1{font-size:32px;margin:13px 0 24px;text-align:center;line-height:1.14}.habit-card{background:#eee7f7;border-radius:23px;padding:18px 19px;margin:0 0 19px}.habit-card h2{font-size:25px;margin:0 0 16px}.habit-card p{font-size:13px;color:#78658d;margin:14px 0 0}.habit-week{display:flex;gap:7px;justify-content:space-between}.habit-day{flex:1;min-width:0;text-align:center;color:#806e91}.habit-day>span{display:flex;align-items:center;justify-content:center;width:32px;height:32px;max-width:100%;border:1.5px solid #c8b9df;border-radius:50%;margin:auto;color:transparent;font-family:Arial,sans-serif;font-size:22px}.habit-day small{display:block;font-size:11px;margin-top:8px}.habit-day.done>span{background:#735bc0;border-color:#735bc0;color:#fff}.habit-day.today>span{outline:2px solid #a18bca;outline-offset:3px}.habit-day.future{opacity:.55}.today-card{background:#fffdf9;border:1px solid #f2e9e4;border-radius:23px;padding:19px;min-height:132px;overflow:hidden}.today-card h2{font-size:29px;margin:0 0 10px}.today-card p{font-size:15px;line-height:1.6;color:#69537e;margin:0}.today-card.compact{min-height:0;padding:12px 15px}.today-card.compact h2{font-size:21px;margin:0 0 3px}.today-card.compact p{font-size:13px;line-height:1.4}.berry-art{display:block;width:180px;height:162px;margin:auto}.today-card>.berry-art{float:right;width:96px;height:112px;margin:0 -10px -6px 0}.today-card .note{font-size:11px}.home-progress{display:flex;justify-content:space-between;gap:6px;font-size:10px;color:#806c8b;margin:14px 3px 4px}.home-progress b{font-weight:650}.home-actions{display:flex;flex-direction:column;flex-shrink:0;gap:3px;padding-top:8px;background:var(--paper)}.home-actions>.primary{width:100%}.home-actions .quiet{min-height:40px;font-size:14px;font-weight:650}.parent-link{background:none;color:#8c7c95;font-size:11px;align-self:center;min-height:32px;padding:4px 14px}.return-hero>.berry-art{height:125px}.return-hero p{text-align:center;color:#78648b;font-size:16px;margin:3px 0 19px}.habit-totals{display:flex;background:#eee7f7;border-radius:22px;padding:18px 12px;text-align:center}.habit-totals>span{flex:1;color:#78638a;font-size:13px}.habit-totals>span+span{border-left:1px solid #d8cce6}.habit-totals b{display:block;font-family:Georgia,serif;font-size:40px;color:#442657;line-height:1.3}.home-content:has(.return-hero) .today-card{display:none}
-.habit-praise{text-align:center}.habit-praise>.berry-art{height:100px;width:135px}.habit-praise.milestone>.berry-art{height:170px;width:200px}.habit-praise h2{font-size:32px;margin:4px 0 10px}.habit-praise>p{font-size:16px;line-height:1.5;color:#78648b;max-width:340px;margin:0 auto 20px}.habit-praise .habit-week{max-width:360px;margin:20px auto}.day-earned{display:inline-block;background:#e7eddc;color:#536546;border-radius:16px;padding:8px 16px;font-size:13px;margin:0 0 10px}.result-body .habit-praise h2{font-size:33px}.training-body .result-body{justify-content:center}.result-counts{font-size:12px!important;color:var(--muted)}.result-berry .berry-art{height:145px}.home-content>.habit-praise{background:#eee7f7;border-radius:22px;padding:12px;margin-bottom:16px}.home-content>.habit-praise .berry-art{height:80px}.home-content>.habit-praise h2{font-size:27px}.home-content>.habit-praise .habit-week{margin:10px 0}.home-content>.habit-praise p{font-size:14px;margin-bottom:10px}
-body.is-writing main{height:calc(var(--writing-vh,100dvh) - 76px - env(safe-area-inset-top))}#toast{bottom:90px}
-@media(min-width:700px){header{margin-top:16px;border-radius:26px 26px 0 0}main{height:calc(100dvh - 108px - env(safe-area-inset-top));border-radius:0 0 26px 26px}.with-nav main{height:calc(100dvh - 178px - env(safe-area-inset-top) - env(safe-area-inset-bottom));border-radius:0}.bottom-nav{border-radius:0 0 26px 26px}.home-content>h1{font-size:36px}body.is-writing main{height:calc(var(--writing-vh,100dvh) - 108px - env(safe-area-inset-top))}}
-@media(max-height:740px){.home-content>h1{font-size:28px;margin:8px 0 16px}.habit-card{padding:15px;margin-bottom:13px}.habit-card h2{font-size:23px;margin-bottom:12px}.habit-card p{font-size:12px;margin-top:12px}.today-card{min-height:112px;padding:15px}.today-card.compact{min-height:0;padding:10px 13px}.today-card h2{font-size:26px;margin-bottom:6px}.today-card.compact h2{font-size:19px;margin-bottom:2px}.today-card.compact p{font-size:12px}.today-card>.berry-art{height:90px;width:83px}.home-progress{margin-top:10px}.habit-praise.milestone>.berry-art{height:125px}.habit-praise .habit-week{margin:12px auto}.habit-praise>p{font-size:15px;margin-bottom:12px}.result-body .habit-praise h2{font-size:29px}.return-hero>.berry-art{height:100px}}
-@media(max-width:360px){header{padding-left:18px;padding-right:18px}main{padding-left:18px;padding-right:18px}.brand{font-size:28px!important}.habit-day>span{width:28px;height:28px}.habit-week{gap:5px}.today-card p{font-size:14px}.home-progress{font-size:9px}}
+body{background:#f4efe7}
+header{background:var(--paper);box-shadow:none}
+main{background:var(--paper)}
+header{position:relative;max-width:520px;padding-left:24px;padding-right:24px;gap:4px;height:calc(76px + env(safe-area-inset-top));border-radius:0;margin-top:0}
+.brand{font-family:Georgia,'Times New Roman',serif;font-size:31px!important;font-weight:700;letter-spacing:-1.3px;color:var(--green)}
+.brand:before{display:none}
+#brand-berry{margin-right:auto;width:43px;height:48px;display:flex;align-items:center}
+#brand-berry svg{width:48px;height:48px}
+.header-tools{gap:0}
+.sound-toggle{border:0;background:none;color:#806d92;font-size:10px;padding:8px 2px;min-width:52px}
+h1{font-family:Georgia,'Times New Roman',serif;color:#3d214f;font-weight:700;letter-spacing:-.7px}
+h2{font-family:Georgia,'Times New Roman',serif;color:#3d214f;font-weight:700;letter-spacing:-.7px}
+.word{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+main{max-width:520px;height:calc(100dvh - 76px - env(safe-area-inset-top));padding:8px 24px calc(10px + env(safe-area-inset-bottom));margin-bottom:0;border-radius:0;box-shadow:none}
+.with-nav main{height:calc(100dvh - 76px - 70px - env(safe-area-inset-top) - env(safe-area-inset-bottom));padding-bottom:8px}
+.bottom-nav{height:calc(70px + env(safe-area-inset-bottom));padding:4px 20px calc(4px + env(safe-area-inset-bottom));display:flex;max-width:520px;margin:auto;background:var(--paper);border-top:1px solid #e9e0e3}
+.bottom-nav[hidden]{display:none}
+.nav-item{width:50%;display:flex;align-items:center;flex-direction:column;justify-content:center;gap:2px;background:none;color:#82718e;font-size:12px;position:relative;min-height:56px}
+.nav-item svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.nav-item.active{color:#6554b8;font-weight:700}
+.nav-item.active:after{content:'';height:3px;width:26px;border-radius:2px;background:currentColor;position:absolute;bottom:0}
+.nav-item.active:first-child svg{fill:currentColor;stroke:currentColor}
+.primary{box-shadow:none;background-image:none;border-radius:16px;font-size:16px;min-height:50px}
+.secondary{box-shadow:none;background-image:none;border-radius:16px;font-size:16px;min-height:50px}
+.success-button{box-shadow:none;background-image:none;border-radius:16px;font-size:16px;min-height:50px}
+.primary{background:#6554b8}
+.primary:hover{background:#5948a5}
+.primary:active{transform:none;background:#4f3e96}
+.secondary{background:transparent;border:1px solid #7660b7;color:#6554b8}
+.quiet{color:#6554b8}
+.word-row{box-shadow:none;background-image:none}
+.word-row{background:#fffdf8;border-color:#e9e0ee}
+.line{background:#e9e1f1}
+.line i{background:#9c82c8}
+.scene-box{background:#f5edf6;border-color:#e8dcec}
+.word-heading{background:#fffdf8;border-color:#e8dfeb}
+.practice-reminder{background:#fbf1dc}
+.status{background:#eee7f6}
+.action-dock{background:var(--paper)}
+.home-screen{overflow:hidden;padding:0}
+.home-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior-y:contain;padding:0 1px 8px}
+.home-content{flex:0 0 auto;min-height:auto;overflow:visible;padding:0}
+.home-content>h1{margin:13px 0 24px;text-align:center;line-height:1.14}
+.habit-card{background:#eee7f7;border-radius:23px;padding:18px 19px;margin:0 0 19px}
+.habit-card h2{margin:0 0 16px}
+.habit-card p{font-size:13px;color:#78658d;margin:14px 0 0}
+.habit-week{display:flex;gap:7px;justify-content:space-between}
+.habit-day{flex:1;min-width:0;text-align:center;color:#806e91}
+.habit-day>span{display:flex;align-items:center;justify-content:center;width:32px;height:32px;max-width:100%;border:1.5px solid #c8b9df;border-radius:50%;margin:auto;color:transparent;font-family:Arial,sans-serif;font-size:22px}
+.habit-day small{display:block;font-size:11px;margin-top:8px}
+.habit-day.done>span{background:#735bc0;border-color:#735bc0;color:#fff}
+.habit-day.today>span{outline:2px solid #a18bca;outline-offset:3px}
+.habit-day.future{opacity:.55}
+.today-card{background:#fffdf9;border:1px solid #f2e9e4;border-radius:23px;padding:19px;min-height:132px;overflow:hidden}
+.today-card h2{font-size:29px;margin:0 0 10px}
+.today-card p{font-size:15px;line-height:1.6;color:#69537e;margin:0}
+.today-card.compact{min-height:0;padding:12px 15px}
+.today-card.compact h2{font-size:21px;margin:0 0 3px}
+.today-card.compact p{font-size:13px;line-height:1.4}
+.berry-art{display:block;width:180px;height:162px;margin:auto}
+.today-card>.berry-art{float:right;width:96px;height:112px;margin:0 -10px -6px 0}
+.today-card .note{font-size:11px}
+.home-progress{display:flex;justify-content:space-between;gap:6px;font-size:10px;color:#806c8b;margin:14px 3px 4px}
+.home-progress b{font-weight:650}
+.home-actions{display:flex;flex-direction:column;flex-shrink:0;gap:3px;padding-top:8px;background:var(--paper)}
+.home-actions>.primary{width:100%}
+.home-actions .quiet{min-height:40px;font-size:14px;font-weight:650}
+.parent-link{background:none;color:#8c7c95;font-size:11px;align-self:center;min-height:32px;padding:4px 14px}
+.return-hero>.berry-art{height:125px}
+.return-hero p{text-align:center;color:#78648b;font-size:16px;margin:3px 0 19px}
+.habit-totals{display:flex;background:#eee7f7;border-radius:22px;padding:18px 12px;text-align:center}
+.habit-totals>span{flex:1;color:#78638a;font-size:13px}
+.habit-totals>span+span{border-left:1px solid #d8cce6}
+.habit-totals b{display:block;font-family:Georgia,serif;font-size:40px;color:#442657;line-height:1.3}
+.home-content:has(.return-hero) .today-card{display:none}
+.habit-praise{text-align:center}
+.habit-praise>.berry-art{height:100px;width:135px}
+.habit-praise.milestone>.berry-art{height:170px;width:200px}
+.habit-praise h2{font-size:32px;margin:4px 0 10px}
+.habit-praise>p{font-size:16px;line-height:1.5;color:#78648b;max-width:340px;margin:0 auto 20px}
+.habit-praise .habit-week{max-width:360px;margin:20px auto}
+.day-earned{display:inline-block;background:#e7eddc;color:#536546;border-radius:16px;padding:8px 16px;font-size:13px;margin:0 0 10px}
+.result-body .habit-praise h2{font-size:33px}
+.training-body .result-body{justify-content:center}
+.result-counts{font-size:12px!important;color:var(--muted)}
+.result-berry .berry-art{height:145px}
+.home-content>.habit-praise{background:#eee7f7;border-radius:22px;padding:12px;margin-bottom:16px}
+.home-content>.habit-praise .berry-art{height:80px}
+.home-content>.habit-praise h2{font-size:27px}
+.home-content>.habit-praise .habit-week{margin:10px 0}
+.home-content>.habit-praise p{font-size:14px;margin-bottom:10px}
+body.is-writing main{height:calc(var(--writing-vh,100dvh) - 76px - env(safe-area-inset-top))}
+#toast{bottom:90px}
+@media(min-width:700px){header{margin-top:16px;border-radius:26px 26px 0 0}}
+@media(min-width:700px){main{height:calc(100dvh - 108px - env(safe-area-inset-top));border-radius:0 0 26px 26px}}
+@media(min-width:700px){.with-nav main{height:calc(100dvh - 178px - env(safe-area-inset-top) - env(safe-area-inset-bottom));border-radius:0}}
+@media(min-width:700px){.bottom-nav{border-radius:0 0 26px 26px}}
+@media(min-width:700px){.home-content>h1{font-size:36px}}
+@media(min-width:700px){body.is-writing main{height:calc(var(--writing-vh,100dvh) - 108px - env(safe-area-inset-top))}}
+@media(max-height:740px){.home-content>h1{font-size:28px;margin:8px 0 16px}}
+@media(max-height:740px){.habit-card{padding:15px;margin-bottom:13px}}
+@media(max-height:740px){.habit-card h2{font-size:23px;margin-bottom:12px}}
+@media(max-height:740px){.habit-card p{font-size:12px;margin-top:12px}}
+@media(max-height:740px){.today-card{min-height:112px;padding:15px}}
+@media(max-height:740px){.today-card.compact{min-height:0;padding:10px 13px}}
+@media(max-height:740px){.today-card h2{font-size:26px;margin-bottom:6px}}
+@media(max-height:740px){.today-card.compact h2{font-size:19px;margin-bottom:2px}}
+@media(max-height:740px){.today-card.compact p{font-size:12px}}
+@media(max-height:740px){.today-card>.berry-art{height:90px;width:83px}}
+@media(max-height:740px){.home-progress{margin-top:10px}}
+@media(max-height:740px){.habit-praise.milestone>.berry-art{height:125px}}
+@media(max-height:740px){.habit-praise .habit-week{margin:12px auto}}
+@media(max-height:740px){.habit-praise>p{font-size:15px;margin-bottom:12px}}
+@media(max-height:740px){.result-body .habit-praise h2{font-size:29px}}
+@media(max-height:740px){.return-hero>.berry-art{height:100px}}
+@media(max-width:360px){header{padding-left:18px;padding-right:18px}}
+@media(max-width:360px){main{padding-left:18px;padding-right:18px}}
+@media(max-width:360px){.brand{font-size:28px!important}}
+@media(max-width:360px){.habit-day>span{width:28px;height:28px}}
+@media(max-width:360px){.habit-week{gap:5px}}
+@media(max-width:360px){.today-card p{font-size:14px}}
+@media(max-width:360px){.home-progress{font-size:9px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
-
-
-/* v15: readable learning headings and a clear route through a lesson. */
-.training-body .word-heading>div{display:block;min-width:0}.training-body .word-heading .word{font-size:clamp(28px,8vw,38px);line-height:1.2;overflow-wrap:anywhere}.training-body .word-heading .translation{margin-top:6px}.lesson-stage{flex-shrink:0;font-size:12px;line-height:1.4;color:var(--muted);margin:0 0 5px}.help-link{min-height:44px;background:none;color:#6554b8;font-size:13px}.topline>.quiet{min-height:44px}.error{overflow-wrap:anywhere}
-
-/* v16: dictionary-only topics, combined filters and bounded writing repair. */
-select{display:block;width:100%;max-width:100%;min-height:46px;border:1px solid var(--border);border-radius:12px;padding:10px;background:#fffdf8;color:var(--ink);font:inherit;font-size:14px}.dictionary-selects{display:grid;gap:12px;margin:18px 0}.dictionary-selects label{font-size:13px;color:var(--muted)}.dictionary-status{display:grid;grid-template-columns:1fr 1fr;gap:6px}.dictionary-status button{min-height:44px;white-space:normal}.topic-grid{display:grid;gap:14px;margin:12px 0}.topic-card,.topic-summary{padding:17px;background:#eee7f7;border:1px solid var(--border);border-radius:20px;text-align:left;color:var(--ink)}.topic-card h2,.topic-summary h2{font-size:23px;margin:0 0 10px}.topic-card p,.topic-summary p{font-size:14px;margin:8px 0}.topic-card .note,.topic-summary .note{font-size:12px}.topic-card>span{color:#6554b8;font-size:13px}.topic-card progress,.topic-summary progress{width:100%;height:8px;accent-color:#6554b8}.word-themes{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0}.word-themes button{min-height:36px;border-radius:12px;padding:7px 10px;background:#eee7f7;color:#6554b8;font-size:12px}.habit-card h2{font-size:23px}#writing-practice:not(:empty){margin-bottom:12px}.writing-card>.eyebrow{white-space:normal}
-.dictionary-filter-group{margin:12px 0}.dictionary-filter-title{font-size:12px;color:var(--muted);margin:0 0 7px}.dictionary-filter-group .filters{gap:7px}.dictionary-filter-group .filters button{min-height:40px;padding:8px 12px}.dictionary-filter-note{margin:7px 0 12px}
-.home-content>h1{font-size:30px;margin-bottom:10px}.home-tagline{text-align:center;font-size:14px;line-height:1.5;color:var(--muted);margin:0 0 20px}@media(max-width:360px){.home-content>h1{font-size:27px}}
-
-/* Keep the primary navigation pinned while screen content scrolls. */
+.training-body .word-heading>div{display:block;min-width:0}
+.training-body .word-heading .word{font-size:clamp(28px,8vw,38px);line-height:1.2;overflow-wrap:anywhere}
+.training-body .word-heading .translation{margin-top:6px}
+.lesson-stage{flex-shrink:0;font-size:12px;line-height:1.4;color:var(--muted);margin:0 0 5px}
+.help-link{min-height:44px;background:none;color:#6554b8;font-size:13px}
+.topline>.quiet{min-height:44px}
+.error{overflow-wrap:anywhere}
+select{display:block;width:100%;max-width:100%;min-height:46px;border:1px solid var(--border);border-radius:12px;padding:10px;background:#fffdf8;color:var(--ink);font:inherit;font-size:14px}
+.topic-grid{display:grid;gap:14px;margin:12px 0}
+.topic-card{padding:17px;background:#eee7f7;border:1px solid var(--border);border-radius:20px;text-align:left;color:var(--ink)}
+.topic-summary{padding:17px;background:#eee7f7;border:1px solid var(--border);border-radius:20px;text-align:left;color:var(--ink)}
+.topic-card h2{font-size:23px;margin:0 0 10px}
+.topic-summary h2{font-size:23px;margin:0 0 10px}
+.topic-card p{font-size:14px;margin:8px 0}
+.topic-summary p{font-size:14px;margin:8px 0}
+.topic-card .note{font-size:12px}
+.topic-summary .note{font-size:12px}
+.topic-card>span{color:#6554b8;font-size:13px}
+.topic-card progress{width:100%;height:8px;accent-color:#6554b8}
+.topic-summary progress{width:100%;height:8px;accent-color:#6554b8}
+.word-themes{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0}
+.word-themes button{min-height:36px;border-radius:12px;padding:7px 10px;background:#eee7f7;color:#6554b8;font-size:12px}
+.habit-card h2{font-size:23px}
+#writing-practice:not(:empty){margin-bottom:12px}
+.writing-card>.eyebrow{white-space:normal}
+.dictionary-filter-group{margin:12px 0}
+.dictionary-filter-title{font-size:12px;color:var(--muted);margin:0 0 7px}
+.dictionary-filter-group .filters{gap:7px}
+.dictionary-filter-group .filters button{min-height:40px;padding:8px 12px}
+.dictionary-filter-note{margin:7px 0 12px}
+.home-content>h1{font-size:30px;margin-bottom:10px}
+.home-tagline{text-align:center;font-size:14px;line-height:1.5;color:var(--muted);margin:0 0 20px}
+@media(max-width:360px){.home-content>h1{font-size:27px}}
 .bottom-nav:not([hidden]){position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:100%;z-index:40}
 .with-nav main{overflow:hidden}
 .with-nav .app-screen{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
@@ -221,32 +556,37 @@ words.push(...WordSceneContent.cards);
 const KEY='word-scenes-v5';
 const R=WordSceneReview;
 const W=WordSceneWriting,T=WordSceneTopics;
+const wordSearch=words.map(w=>(w.en+'\n'+w.ru).toLowerCase());
 const $=id=>document.getElementById(id);
 const btn=(label,action,cls='primary',disabled=false)=>`<button class="${cls}" onclick="${action}" ${disabled?'disabled':''}>${label}</button>`;
 let data={version:5,words:{},reviewCycle:[],session:null,mode:'new'},storageOK=true;
-let migrated=false,savedRaw=null,storageBlock=null;
+let savedRaw=null,storageBlock=null;
 try{
  const current=localStorage.getItem(KEY);savedRaw=current;
  if(current!==null){const loaded=JSON.parse(current);if(!WordSceneState.valid(loaded,words.length))throw new Error("Invalid saved state");data=loaded;}
  else{
   const old=JSON.parse(localStorage.getItem('word-scenes-v3')||'null');
-  if(old){migrated=true;for(const [en,p]of Object.entries(old.words||{}))if(p.seen)data.words[en]={started:true,trained:true,legacy:true};
+  if(old){for(const [en,p]of Object.entries(old.words||{}))if(p.seen)data.words[en]={started:true,trained:true,legacy:true};
    const pending=old.session?.fresh?.filter(i=>words[i]&&!data.words[words[i].en]?.trained)||[];
    if(pending.length&&old.session.phase!=='result')data.session={id:'migrated-'+Date.now(),mode:'new',part:'new',phase:'learn',ids:pending,newIds:pending,learnIndex:old.session.phase==='learn'?Math.min(old.session.learnIndex||0,pending.length-1):0,completed:[],errors:[],partErrors:[]};
   }else {const oldest=JSON.parse(localStorage.getItem('word-scenes-v1')||'null');if(oldest?.learned)words.slice(0,10).forEach(w=>data.words[w.en]={started:true,trained:true,legacy:true});}
  }
 }catch(e){storageOK=false;storageBlock='read'}
 data.words??={};data.reviewCycle??=[];
-function record(i){const w=words[i];let p=data.words[w.en];if(!p)p=data.words[w.en]={};return Object.assign(p,{started:!!p.started,trained:!!p.trained,sessions:p.sessions||0,attempts:p.attempts||0,errors:p.errors||0,hesitations:p.hesitations||0,times:p.times||{0:[],1:[]},lastAt:p.lastAt||0,needsWork:!!p.needsWork})}
+// Read-only views never create an unstarted word in the saved progress.
+const EMPTY_RECORD=Object.freeze({started:false,trained:false,sessions:0,attempts:0,errors:0,hesitations:0,lastAt:0,needsWork:false});
+function normalizeRecord(p){return Object.assign(p,{started:!!p.started,trained:!!p.trained,sessions:p.sessions||0,attempts:p.attempts||0,errors:p.errors||0,hesitations:p.hesitations||0,times:p.times||{0:[],1:[]},lastAt:p.lastAt||0,needsWork:!!p.needsWork})}
+function progress(i){return data.words[words[i].en]||EMPTY_RECORD}
+function record(i){const key=words[i].en;return data.words[key]??=(normalizeRecord({}))}
 if(!storageBlock&&data.reviewVersion!==1){try{const previous=localStorage.getItem(KEY);if(previous&&!localStorage.getItem(KEY+'-before-review-v1'))localStorage.setItem(KEY+'-before-review-v1',previous)}catch(e){storageOK=false}data.reviewVersion=1}
-words.forEach((_,i)=>R.ensure(record(i)));
+words.forEach(w=>{const p=data.words[w.en];if(p)R.ensure(normalizeRecord(p))});
 
 const H=window.WordSceneHabit;H.ensure(data);
 let s=data.session,screen='home',cardStarted=0,toastTimer,wordFilter='all',wordQuery='',wordTopic='all',wordIssue='all',writingAttempt=null;
 if(s?.phase==='test'&&!s.revealed){s.ignoreTiming=true;s.roundValid=false}
 function blockStorage(reason){if(storageBlock)return;storageBlock=reason;storageOK=false;queueMicrotask(()=>home())}
 function storageNotice(){return storageBlock?`<p class="error" role="alert">${storageBlock==='read'?'Сохранение не удалось прочитать. Прежний прогресс не перезаписан. Позови взрослого; данные браузера очищать не нужно.':'Прогресс изменился в другой вкладке. Загрузи актуальное сохранение, чтобы продолжить.'}</p>`:!storageOK?'<p class="error" role="alert">Не удалось сохранить прогресс. Не закрывай вкладку и позови взрослого.</p>':''}
-function save(){if(storageBlock)return false;data.session=s;try{if(localStorage.getItem(KEY)!==savedRaw){blockStorage('conflict');return false}const raw=JSON.stringify(data);localStorage.setItem(KEY,raw);savedRaw=raw;storageOK=true;if(window.WordSceneCloudBackup?.enabled)window.WordSceneCloudBackup.schedule();return true}catch(e){storageOK=false;toast('Не удалось сохранить прогресс. Оставь вкладку открытой.');return false}}
+function save(){if(storageBlock)return false;data.session=s;try{if(localStorage.getItem(KEY)!==savedRaw){blockStorage('conflict');return false}const raw=JSON.stringify(data);if(raw===savedRaw){storageOK=true;return true}localStorage.setItem(KEY,raw);savedRaw=raw;storageOK=true;if(window.WordSceneCloudBackup?.enabled)window.WordSceneCloudBackup.schedule({immediate:s?.phase==='result'});return true}catch(e){storageOK=false;toast('Не удалось сохранить прогресс. Оставь вкладку открытой.');return false}}
 function toast(t){$('toast').textContent=t;$('toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.display='none',4500)}
 let soundContext;
 function sound(kind='correct'){
@@ -263,20 +603,19 @@ function shuffled(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(M
 const WORD_GROUPS={bucket:['whale'],blanket:['whale'],sheep:['spike'],ship:['spike'],mug:['vessel'],cup:['vessel'],book:['tree'],tree:['tree']};
 function conflictTags(w){return [...(WORD_GROUPS[w.en]||[]),...(w.props||[]).map(p=>'image:'+p),'cue:'+w.cue.toLocaleLowerCase('ru').trim()]}
 function conflicts(a,b){const tags=conflictTags(b);return a.en[0].toLowerCase()===b.en[0].toLowerCase()||conflictTags(a).some(t=>tags.includes(t))}
-function freshIds(){const pending=words.map((_,i)=>i).filter(i=>!record(i).trained),picked=[];
+function freshIds(){const pending=words.map((_,i)=>i).filter(i=>!progress(i).trained),picked=[];
  // Balance the remaining initials so a rare initial is not exhausted too early.
  const counts={};for(const i of pending)counts[words[i].en[0]]=(counts[words[i].en[0]]||0)+1;
  pending.sort((a,b)=>counts[words[b].en[0]]-counts[words[a].en[0]]||a-b);
  for(const i of pending){if(picked.every(j=>!conflicts(words[i],words[j])))picked.push(i);if(picked.length===5)break}return picked}
 
-function trainedIds(){return words.map((_,i)=>i).filter(i=>record(i).trained)}
-function requiredIds(){return R.queue(words.map((_,i)=>record(i)))}
-function optionalIds(){return words.map((_,i)=>i).filter(i=>R.optional(record(i)))}
-function reviewIds(){const due=requiredIds();if(due.length)return due.slice(0,15);const optional=optionalIds();if(optional.length)return optional.slice(0,15);return trainedIds().sort((a,b)=>(record(a).schedule.checks.at(-1)?.at||0)-(record(b).schedule.checks.at(-1)?.at||0)||a-b).slice(0,15)}
+function trainedIds(){return words.map((_,i)=>i).filter(i=>progress(i).trained)}
+function requiredIds(){return R.queue(words.map((_,i)=>progress(i)))}
+function optionalIds(){return words.map((_,i)=>i).filter(i=>R.optional(progress(i)))}
+function reviewIds(){const due=requiredIds();if(due.length)return due.slice(0,15);const optional=optionalIds();if(optional.length)return optional.slice(0,15);return trainedIds().sort((a,b)=>(progress(a).schedule.checks.at(-1)?.at||0)-(progress(b).schedule.checks.at(-1)?.at||0)||a-b).slice(0,15)}
 
-function availableMode(){return requiredIds().length?'review':freshIds().length?'new':'review'}
 
-function pause(){if(s?.phase==='test'&&!s.revealed){s.ignoreTiming=true;s.roundValid=false}save();home()}
+function pause(){if(s?.phase==='test'&&!s.revealed){s.ignoreTiming=true;s.roundValid=false}save();window.WordSceneCloudBackup?.flush?.();home()}
 function writingViewport(){const height=window.visualViewport?.height||window.innerHeight;if(height)document.documentElement?.style.setProperty('--writing-vh',height+'px');if(screen==='writing')window.requestAnimationFrame?.(()=>{const input=$('writing-answer');if(input&&document.activeElement===input)input.scrollIntoView({block:'nearest'})})}
 function shell(content){window.dispatchEvent(new Event('wordscene-screen-change'));$('app').innerHTML=content;navigation();document.body?.classList.toggle('is-writing',screen==='writing');writingViewport();window.scrollTo?.(0,0)}
 function dockActions(){const dock=$('action-dock');if(!dock)return;const actions=document.querySelector('.training-body .bottom-actions')||document.querySelector('.training-body #controls');if(actions)dock.append(actions)}
@@ -303,7 +642,7 @@ function habitCard(){const st=H.stats(data.habit),available=trainedIds().length,
  return `<div class="habit-card"><h2>Занятия на этой неделе</h2>${habitWeek()}<p>${st.done?'Сегодня занятие засчитано.':'Сегодня занятие ещё не засчитано.'}</p>${!st.done?`<p class="note">Закончи новую подборку${available?` или повтори ${goal} ${goal===1?'знакомое слово':goal<5?'знакомых слова':'знакомых слов'} в обе стороны`:''}, чтобы отметить сегодняшний день.</p>`:''}</div>`;
 }
 function habitPraise(p){return `<div class="habit-praise ${p.milestone?'milestone':''}" role="status">${berryArt(p.milestone?'bunch':'sprout')}<h2>${p.title}</h2><p>${p.text}</p><p class="note">Занятия на этой неделе</p>${habitWeek()}<span class="day-earned">Сегодня засчитано</span></div>`}
-function home(){screen='home';const fresh=freshIds(),trained=trainedIds(),due=requiredIds(),active=s&&!['result','between'].includes(s.phase),st=H.stats(data.habit),praise=H.takePraise(data.habit);save();
+function home(){screen='home';const fresh=freshIds(),trained=trainedIds(),due=requiredIds(),active=s&&!['result','between'].includes(s.phase),st=H.stats(data.habit),praise=H.takePraise(data.habit);if(praise)save();
  const returning=st.returning&&!praise;
  const title=active?'Продолжим занятие?':'Сегодня';
  const message=active?'Место сохранено. Продолжим с той же карточки.':due.length?`Повторить знакомые слова: ${due.length}${fresh.length?'<br>Затем — '+fresh.length+' новых':''}`:fresh.length?`Выучить ${fresh.length} новых слов<br><span class="note">${optionalIds().length?'Можно повторить сегодняшние слова':'Обязательных повторений пока нет'}</span>`:`Все ${words.length} слов прошли первое обучение!<br>Можно повторить знакомое`;
@@ -331,9 +670,9 @@ function imagine(){sceneHidden=true;$('scene-content').hidden=true;$('scene-empt
 function lookAgain(){learn()}
 function nextLearn(){if(!sceneHidden)return;s.learnIndex++;if(s.learnIndex<s.ids.length){save();learn()}else{s.dir=1;s.history=[[],[]];s.round=0;startRound()}}
 function startRound(){s.phase='test';s.round++;s.queue=shuffled(s.ids).map(i=>({i,dir:s.dir}));s.pos=0;s.roundTime=0;s.roundErrors=0;s.hesitations=0;s.roundValid=true;s.revealed=false;s.feedback=false;s.ignoreTiming=false;save();test()}
-function test(){const t=s.queue[s.pos],w=words[t.i],n=s.part==='review'?s.queue.length:s.ids.length;frame(`${s.part==='review'?'Повторение':'Проход '+s.round} · ${s.pos+1} из ${n}`,s.pos/n*100,`<div class="recall-screen"><div class="recall-prompt"><p class="eyebrow">${t.dir===1?'Скажи по-английски':'Назови значение по-русски'}</p><div class="word">${t.dir===1?w.ru:w.en}</div><div class="answer" id="answer">${s.revealed?(t.dir===1?w.en:w.ru):''}</div></div><div id="repair"></div><div id="controls" class="rating-actions"></div><p class="note center">Ответь вслух до подсказки. Если не вспомнил — после открытия ответа нажми «Не получилось».</p></div>`);controls();if(!s.revealed)cardStarted=performance.now()}
+function test(){const t=s.queue[s.pos],w=words[t.i],n=s.part==='review'?s.queue.length:s.ids.length;frame(`${s.part==='review'?'Повторение':'Проход '+s.round} · ${s.pos+1} из ${n}`,s.pos/n*100,`<div class="recall-screen"><div class="recall-prompt"><p class="eyebrow">${t.dir===1?'Скажи по-английски':'Назови значение по-русски'}</p><div class="word">${t.dir===1?w.ru:w.en}</div><div class="answer" id="answer" role="status">${s.revealed?(t.dir===1?w.en:w.ru):''}</div></div><div id="repair"></div><div id="controls" class="rating-actions"></div><p class="note center">Ответь вслух до подсказки. Если не вспомнил — после открытия ответа нажми «Не получилось».</p></div>`);controls();if(!s.revealed)cardStarted=performance.now()}
 function controls(){if(s.feedback){const w=words[s.queue[s.pos].i];$('controls').innerHTML='';$('repair').innerHTML=`<div class="repair"><div class="repair-art">${illustration(w.en)}</div><p>${w.scene}</p><span class="cue">${w.cue} → ${w.en}</span><p class="note">Представь сцену и произнеси слово три раза.</p><div class="bottom-actions">${btn('Продолжить →','advance()')}</div></div>`}else $('controls').innerHTML=s.revealed?btn('Верно','grade(true)','success-button')+btn('Не получилось','grade(false)','secondary'):btn('Показать ответ','reveal()');dockActions()}
-function reveal(){if(s.revealed)return;const elapsed=(performance.now()-cardStarted)/1000;s.cardTime=!s.ignoreTiming&&Number.isFinite(elapsed)&&elapsed>=0?elapsed:null;s.revealed=true;save();test()}
+function reveal(){if(s.revealed)return;const elapsed=(performance.now()-cardStarted)/1000;s.cardTime=!s.ignoreTiming&&Number.isFinite(elapsed)&&elapsed>=0?elapsed:null;s.revealed=true;save();const t=s.queue[s.pos];$('answer').textContent=t.dir===1?words[t.i].en:words[t.i].ru;controls()}
 function logAnswer(ok,easy){const t=s.queue[s.pos],p=record(t.i);p.started=true;p.attempts++;if(!ok){p.errors++;if(!s.errors.includes(t.i))s.errors.push(t.i);if(!s.partErrors.includes(t.i))s.partErrors.push(t.i)}else{if(!easy)p.hesitations++;if(s.cardTime!==null&&s.cardTime!==undefined){p.times[t.dir]??=[];p.times[t.dir].push(s.cardTime);if(p.times[t.dir].length>60)p.times[t.dir].shift();}}p.lastAt=Date.now()}
 function finishReviewedWord(i,legacy=false){
  const token='review:'+i;if(s.completed.includes(token))return;
@@ -434,7 +773,6 @@ function completePart(){if(s.part==='writing'){sound('finish');s.phase='result';
 
 function between(){s.phase='result';save();result()}
 
-function finishMixedEarly(){s.phase='result';save();result()}
 function result(){if(s.part==='writing'){const pending=s.ids.filter(i=>W.needs(record(i))).length;frame('Написание проверено',100,`<div class="interlude center result-body"><h2>Два прохода завершены</h2><p>Проверили слов: ${s.ids.length}.</p><p>${pending?`Нужно ещё закрепить: ${pending}. Они остаются в фильтре ошибок написания.`:'Все слова в этом подходе написаны правильно два раза.'}</p><p class="note">Устные результаты и расписание повторений не изменились.</p><p class="note">Для отметки дня пройди обычное занятие с главной.</p><div class="bottom-actions">${btn('К ошибкам написания','openWritingErrors()')}${btn('На главную','endApproach()','secondary')}</div></div>`);return}const trained=trainedIds().length,newCount=s.completed.filter(t=>t.startsWith('new:')).length,reviewCount=s.completed.filter(t=>t.startsWith('review:')).length,due=requiredIds(),fresh=freshIds();
  const praise=H.takePraise(data.habit);if(praise){s.habitPraise=praise;save()}
  const celebration=s.habitPraise?.day===H.day()?s.habitPraise:null;
@@ -445,16 +783,23 @@ function continueWith(intent){if(s&&!['result','between'].includes(s.phase)){ren
 
 function oralNeeds(p){return p.needsWork||p.schedule?.stage==='repair'}
 function inTopic(w,id=wordTopic){return id==='all'||T.forWord(w.en).includes(id)}
-function topicStats(id){const items=words.map((w,i)=>({w,p:record(i)})).filter(x=>inTopic(x.w,id));return {total:items.length,trained:items.filter(x=>x.p.trained).length,learning:items.filter(x=>x.p.started&&!x.p.trained).length,fresh:items.filter(x=>!x.p.started&&!x.p.trained).length,familiar:items.filter(x=>x.p.schedule?.stage==='spaced').length,oral:items.filter(x=>oralNeeds(x.p)).length,writing:items.filter(x=>W.needs(x.p)).length}}
+function topicStats(id){const items=words.map((w,i)=>({w,p:progress(i)})).filter(x=>inTopic(x.w,id));return {total:items.length,trained:items.filter(x=>x.p.trained).length,learning:items.filter(x=>x.p.started&&!x.p.trained).length,fresh:items.filter(x=>!x.p.started&&!x.p.trained).length,familiar:items.filter(x=>x.p.schedule?.stage==='spaced').length,oral:items.filter(x=>oralNeeds(x.p)).length,writing:items.filter(x=>W.needs(x.p)).length}}
 function topicProgress(id){const st=topicStats(id);return `<p>Прошли первое обучение: <b>${st.trained} из ${st.total}</b></p><progress max="${st.total||1}" value="${st.trained}" aria-label="Прошли первое обучение"></progress><p class="note">Из них перешли к интервальному повторению: ${st.familiar}.<br>Учим: ${st.learning} · Не начинали: ${st.fresh}.<br>Нужно повторить: устно — ${st.oral}, написание — ${st.writing}.</p>`}
 function topicOverview(){screen='topics';shell(`<section class="app-screen"><div class="topline">${btn('← Словарь','myWords()','quiet')}</div><h1 class="page-title">Темы и прогресс</h1><p class="note">Одно слово может относиться к нескольким темам. Карточка и прогресс общие. Темы не меняют состав занятий.</p><p class="note">«Прошли обучение» — закончили первое занятие. Интервальное повторение начинается после закрепления в разные дни.</p><div class="topic-grid">${T.topics.map(t=>`<article class="topic-card"><h2>${t.name}</h2>${topicProgress(t.id)}${btn('Открыть слова →',`openTopic('${t.id}')`,'quiet topic-open')}</article>`).join('')}</div></section>`)}
 function openTopic(id){wordTopic=id;wordFilter='all';wordIssue='all';wordQuery='';myWords()}
-function myWords(){screen='words';const topic=T.topics.find(t=>t.id===wordTopic);shell(`<section class="app-screen"><div class="topline">${btn('← Главная','home()','quiet')}<span class="pill">${words.length} слов</span></div><h1 class="page-title">Словарь</h1>${btn('Темы и прогресс','topicOverview()','secondary wide')}<label class="search-label">Найти слово<input id="word-search" type="search" placeholder="Слово или перевод" value="" oninput="wordQuery=this.value;updateList()"></label><div class="dictionary-filter-group"><p class="dictionary-filter-title">Ошибки</p><div class="filters">${[['all','Все слова'],['writing','Ошибки написания'],['oral','Устные ошибки']].map(([id,name])=>btn(name,`filterIssue('${id}')`,wordIssue===id?'selected':'')).join('')}</div><p class="note dictionary-filter-note">Ошибки написания можно повторить отдельно; устные ошибки подсказывают, какие слова сейчас трудные.</p></div><div class="dictionary-filter-group"><p class="dictionary-filter-title">Статус обучения</p><div class="filters">${[['all','Все'],['trained','Прошли обучение'],['learning','Учим'],['fresh','Не учили']].map(([key,name])=>btn(name,`filterWords('${key}')`,wordFilter===key?'selected':'')).join('')}</div></div>${topic?`<div class="topic-summary"><h2>${topic.name}</h2>${topicProgress(wordTopic)}</div>`:''}<div id="writing-practice"></div><p class="note" id="word-count"></p><div id="word-list" class="word-list"></div></section>`);$('word-search').value=wordQuery;updateList()}
-function filterWords(filter){wordFilter=filter;myWords()}
-function filterIssue(issue){wordIssue=issue;myWords()}
-function updateList(){const q=wordQuery.toLowerCase().trim();const list=words.map((w,i)=>({w,i,p:record(i)})).filter(({w,p})=>inTopic(w)&&(!q||w.en.toLowerCase().includes(q)||w.ru.toLowerCase().includes(q))&&(wordIssue==='all'||wordIssue==='writing'&&W.needs(p)||wordIssue==='oral'&&oralNeeds(p))&&(wordFilter==='all'||wordFilter==='trained'&&p.trained||wordFilter==='learning'&&p.started&&!p.trained||wordFilter==='fresh'&&!p.started&&!p.trained));const total=words.filter(w=>inTopic(w)).length;$('word-count').textContent=`Показано: ${list.length} из ${total}${wordTopic==='all'?' слов':' слов темы'}`;$('writing-practice').innerHTML=wordIssue==='writing'&&list.length?btn('Повторить написание · '+Math.min(15,list.length),`startWritingPractice([${list.map(x=>x.i).join(',')}])`,'secondary wide'):'';$('word-list').innerHTML=list.length?list.map(({w,i,p})=>`<button class="word-row" onclick="openWord(${i})"><span class="row-heading"><span><strong>${w.en}</strong><span class="row-translation">${w.ru}</span></span><span class="status ${p.trained?'studied':''}">${R.label(p)}</span></span><span class="metrics"><span><b>${p.attempts||'—'}</b>Ответы</span><span><b>${p.attempts?p.errors:'—'}</b>Ошибки</span><span class="writing-metric"><b>${writingLabel(p)}</b>Написание</span></span></button>`).join(''):'<p class="empty">По этим фильтрам слов нет.</p>'}
+let wordRows=new Map();
+function myWords(){screen='words';wordRows.clear();const topic=T.topics.find(t=>t.id===wordTopic);shell(`<section class="app-screen"><div class="topline">${btn('← Главная','home()','quiet')}<span class="pill">${words.length} слов</span></div><h1 class="page-title">Словарь</h1>${btn('Темы и прогресс','topicOverview()','secondary wide')}<label class="search-label">Найти слово<input id="word-search" type="search" placeholder="Слово или перевод" value="" oninput="wordQuery=this.value;updateList()"></label><div class="dictionary-filter-group"><p class="dictionary-filter-title">Ошибки</p><div class="filters">${[['all','Все слова'],['writing','Ошибки написания'],['oral','Устные ошибки']].map(([id,name])=>btn(name,`filterIssue('${id}')`,wordIssue===id?'selected':'')).join('')}</div><p class="note dictionary-filter-note">Ошибки написания можно повторить отдельно; устные ошибки подсказывают, какие слова сейчас трудные.</p></div><div class="dictionary-filter-group"><p class="dictionary-filter-title">Статус обучения</p><div class="filters">${[['all','Все'],['trained','Прошли обучение'],['learning','Учим'],['fresh','Не учили']].map(([key,name])=>btn(name,`filterWords('${key}')`,wordFilter===key?'selected':'')).join('')}</div></div>${topic?`<div class="topic-summary"><h2>${topic.name}</h2>${topicProgress(wordTopic)}</div>`:''}<div id="writing-practice"></div><p class="note" id="word-count"></p><div id="word-list" class="word-list"></div></section>`);$('word-search').value=wordQuery;updateList()}
+function filterWords(filter){wordFilter=filter;for(const b of document.querySelectorAll('button[onclick^="filterWords("]'))b.classList.toggle('selected',b.getAttribute('onclick')===`filterWords('${filter}')`);updateList()}
+function filterIssue(issue){wordIssue=issue;for(const b of document.querySelectorAll('button[onclick^="filterIssue("]'))b.classList.toggle('selected',b.getAttribute('onclick')===`filterIssue('${issue}')`);updateList()}
+function updateList(){const q=wordQuery.toLowerCase().trim();const list=words.map((w,i)=>({w,i,p:progress(i)})).filter(({w,i,p})=>inTopic(w)&&(!q||wordSearch[i].includes(q))&&(wordIssue==='all'||wordIssue==='writing'&&W.needs(p)||wordIssue==='oral'&&oralNeeds(p))&&(wordFilter==='all'||wordFilter==='trained'&&p.trained||wordFilter==='learning'&&p.started&&!p.trained||wordFilter==='fresh'&&!p.started&&!p.trained));const total=words.filter(w=>inTopic(w)).length;$('word-count').textContent=`Показано: ${list.length} из ${total}${wordTopic==='all'?' слов':' слов темы'}`;$('writing-practice').innerHTML=wordIssue==='writing'&&list.length?btn('Повторить написание · '+Math.min(15,list.length),`startWritingPractice([${list.map(x=>x.i).join(',')}])`,'secondary wide'):'';const container=$('word-list');
+ const rows=list.map(({w,i,p})=>{let row=wordRows.get(i);if(!row){const holder=document.createElement('div');holder.innerHTML=`<button class="word-row" onclick="openWord(${i})"><span class="row-heading"><span><strong>${w.en}</strong><span class="row-translation">${w.ru}</span></span><span class="status ${p.trained?'studied':''}">${R.label(p)}</span></span><span class="metrics"><span><b>${p.attempts||'—'}</b>Ответы</span><span><b>${p.attempts?p.errors:'—'}</b>Ошибки</span><span class="writing-metric"><b>${writingLabel(p)}</b>Написание</span></span></button>`;row=holder.firstElementChild;wordRows.set(i,row)}return row});
+ if(!rows.length){if(!container.querySelector('.empty'))container.innerHTML='<p class="empty">По этим фильтрам слов нет.</p>';return}
+ let cursor=container.firstChild;
+ for(const row of rows){if(row===cursor)cursor=cursor.nextSibling;else container.insertBefore(row,cursor)}
+ while(cursor){const next=cursor.nextSibling;cursor.remove();cursor=next}
+}
 
-function openWord(i){screen='word';const w=words[i],p=record(i);shell(`<section class="app-screen"><div class="topline">${btn('← Мои слова','myWords()','quiet')}<span class="pill">${R.label(p)}</span></div><div class="word-heading"><div><h1>${w.en}</h1><p class="translation">${w.ru} <small class="phonetic">${w.ipa}</small></p></div></div><div class="scene-box">${illustration(w.en)}<p>${w.scene}</p><span class="cue">Созвучие: ${w.cue}</span></div><div class="word-themes">${T.forWord(w.en).map(id=>`<button onclick="openTopic('${id}')">${T.topics.find(t=>t.id===id).name}</button>`).join('')}</div>${W.needs(p)?btn('Повторить написание',`startWritingPractice([${i}])`,'secondary wide'):''}<h2>Статистика слова</h2><div class="stats-detail"><p>Статус <b>${R.label(p)}</b></p><p>Ответы · устные <b>${p.attempts}</b></p><p>Ошибки · устные <b>${p.errors}</b></p><p>Написание <b>${writingLabel(p)}</b></p></div><p class="note">После ошибки написание проверяется ещё два раза. Если оба дополнительных ответа правильные, отметка «Нужно повторить» снимается. Письменные проверки не меняют устные ошибки и интервалы. Введённый текст не сохраняется.</p>${p.legacy?'<p class="note">Слово учили в старой версии; устные счётчики показывают только известные результаты.</p>':''}<p class="note">Просмотр карточки не засчитывается как обучение.</p></section>`)}
+function openWord(i){screen='word';const w=words[i],p=progress(i);shell(`<section class="app-screen"><div class="topline">${btn('← Мои слова','myWords()','quiet')}<span class="pill">${R.label(p)}</span></div><div class="word-heading"><div><h1>${w.en}</h1><p class="translation">${w.ru} <small class="phonetic">${w.ipa}</small></p></div></div><div class="scene-box">${illustration(w.en)}<p>${w.scene}</p><span class="cue">Созвучие: ${w.cue}</span></div><div class="word-themes">${T.forWord(w.en).map(id=>`<button onclick="openTopic('${id}')">${T.topics.find(t=>t.id===id).name}</button>`).join('')}</div>${W.needs(p)?btn('Повторить написание',`startWritingPractice([${i}])`,'secondary wide'):''}<h2>Статистика слова</h2><div class="stats-detail"><p>Статус <b>${R.label(p)}</b></p><p>Ответы · устные <b>${p.attempts}</b></p><p>Ошибки · устные <b>${p.errors}</b></p><p>Написание <b>${writingLabel(p)}</b></p></div><p class="note">После ошибки написание проверяется ещё два раза. Если оба дополнительных ответа правильные, отметка «Нужно повторить» снимается. Письменные проверки не меняют устные ошибки и интервалы. Введённый текст не сохраняется.</p>${p.legacy?'<p class="note">Слово учили в старой версии; устные счётчики показывают только известные результаты.</p>':''}<p class="note">Просмотр карточки не засчитывается как обучение.</p></section>`)}
 function help(){screen='help';shell(`<section class="app-screen"><div class="topline">${btn('← Главная','home()','quiet')}</div><h1>Как заниматься</h1><div class="prose"><h2>1. Представь</h2><p>Рассмотри историю. Представь сцену и произнеси английское слово три раза. Спрячь картинку и вспомни сцену.</p><h2>2. Вспомни и сравни</h2><p>Ответь вслух, затем открой ответ. Честно выбери «Верно» или «Не получилось».</p><h2>3. Напиши</h2><p>В конце новой подборки напиши слова. Если забыл — нажми «Не помню». Ошибки можно повторить в словаре.</p><h2>Отдыхай</h2><p>Нажми «Паузу»: место сохранится. В другой день начинай с предложенного повторения. Перед первым занятием попроси взрослого помочь с произношением.</p></div></section>`)}
 
 function settings(){screen='parents';shell(`<section class="app-screen"><div class="topline">${btn('← Главная','home()','quiet')}</div><h1>Настройки</h1>${btn('Аккаунт и сохранение',"window.dispatchEvent(new Event('wordscene-open-settings'))",'secondary wide')}${btn('Помощь родителю','parents()','quiet wide')}</section>`)}

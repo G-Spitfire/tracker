@@ -22,6 +22,19 @@ test('local-first change uploads and updates its revision baseline',async()=>{
  assert.deepEqual(await h.engine.syncOnce(),{status:'pushed',revision:2});
  assert.deepEqual(h.getRemote().payload,changed);
 });
+for(const bootstrap of [false,true])test(`answers saved during ${bootstrap?'first':'subsequent'} upload remain pending without a false conflict`,async()=>{
+ const h=harness();
+ if(!bootstrap){await h.cloud.write(start,0);await h.engine.enable()}
+ const first={...start,words:{mug:{attempts:1}}},second={...start,words:{mug:{attempts:2}}};
+ h.storage.setItem('word-scenes-v5',JSON.stringify(first));
+ const write=h.cloud.write;let advance=true;
+ h.cloud.write=async(payload,revision)=>{const result=await write(payload,revision);if(advance){advance=false;h.storage.setItem('word-scenes-v5',JSON.stringify(second))}return result};
+ assert.equal((await (bootstrap?h.engine.bootstrapBackup():h.engine.syncOnce())).status,'local-changed');
+ assert.equal(h.engine.enabled(),true);
+ assert.equal((await h.engine.syncOnce()).status,'pushed');
+ assert.deepEqual(h.getRemote().payload,second);
+ assert.equal(await h.engine.getConflict(),null);
+});
 test('newer cloud revision is never pulled over the local save in backup-only mode',async()=>{
  const h=harness();await h.cloud.write(start,0);await h.engine.enable();
  await h.cloud.write({...start,mode:'review'},1);
