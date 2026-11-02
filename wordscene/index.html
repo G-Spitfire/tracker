@@ -502,6 +502,30 @@ body.is-writing .training-body{min-height:0;overflow-y:auto;overscroll-behavior:
 body.is-writing .writing-card{min-height:0}
 body.is-writing #writing-answer{scroll-margin-block:12px}
 @media(min-width:700px){body.is-writing main{height:calc(var(--writing-vh,100dvh) - 108px - env(safe-area-inset-top))}}
+
+/* Achievements: scoped styles; preserve existing word illustrations and navigation. */
+.achievement-preview{margin:14px 0 4px;padding:15px;border:1px solid var(--border);border-radius:21px;background:#fffdf8}
+.achievement-preview h2{font-size:19px;margin:0 0 11px}
+.achievement-total{padding:12px;background:var(--primary-soft);border-radius:15px;text-align:center}
+.achievement-total b{display:block;font-size:34px;line-height:1.2;color:var(--primary)}
+.achievement-total span,.achievement-metric span{display:block;font-size:12px;color:var(--muted)}
+.achievement-mini{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:9px}
+.achievement-metric{padding:11px;background:#fff;border:1px solid var(--border);border-radius:14px}
+.achievement-metric b{display:block;font-size:24px;color:var(--ink)}
+.achievement-link{display:block;margin:10px 0 0;padding:8px 2px;background:none;color:var(--primary);font-weight:700;text-align:left;width:100%}
+.achievement-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+.achievement-tile{padding:11px 5px;border:1px solid var(--border);border-radius:15px;background:#fffdf8;text-align:center}
+.achievement-tile b{display:block;font-size:24px;color:var(--primary)}
+.achievement-tile span{display:block;font-size:11px;color:var(--muted)}
+.achievement-panel{margin:14px 0;padding:15px;border:1px solid var(--border);border-radius:19px;background:#fffdf8}
+.achievement-panel h2{font-size:18px;margin:0 0 12px}
+.achievement-chart{display:block;width:100%;height:auto}
+.achievement-bars{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;align-items:end}
+.achievement-bar-col{text-align:center;min-width:0;font-size:11px;color:var(--muted)}
+.achievement-bar-track{height:100px;display:flex;align-items:flex-end;justify-content:center;background:var(--primary-soft);border-radius:8px;margin:5px auto;width:100%;max-width:38px;overflow:hidden}
+.achievement-bar-fill{width:100%;background:var(--success);border-radius:7px 7px 0 0}
+.achievement-bar-col b{color:var(--ink);font-size:12px}
+.achievement-note{font-size:12px;color:var(--muted);line-height:1.5}
 </style></head><body><header><button class="brand" onclick="pause()" aria-label="На главную">WordScene</button><span id="brand-berry" aria-hidden="true"></span><div class="header-tools"><button class="header-help" onclick="help()" aria-label="Как заниматься" title="Как заниматься"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.3-3 4"/><path d="M12 17h.01"/></svg></button><button id="settings-toggle" class="settings-toggle" onclick="settings()" aria-label="Открыть настройки" title="Настройки"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l-1.86 1.86A1.7 1.7 0 0 0 16 18.4l-.6.25A1.7 1.7 0 0 0 14.35 20.2V21h-4.7v-.8a1.7 1.7 0 0 0-1.05-1.55L8 18.4a1.7 1.7 0 0 0-1.88.34l-1.86-1.86A1.7 1.7 0 0 0 4.6 15l-.25-.6A1.7 1.7 0 0 0 2.8 13.35h-.8v-2.7h.8A1.7 1.7 0 0 0 4.35 9.6L4.6 9a1.7 1.7 0 0 0-.34-1.88l1.86-1.86A1.7 1.7 0 0 0 8 5.6l.6-.25A1.7 1.7 0 0 0 9.65 3.8V3h4.7v.8a1.7 1.7 0 0 0 1.05 1.55l.6.25a1.7 1.7 0 0 0 1.88-.34l1.86 1.86A1.7 1.7 0 0 0 19.4 9l.25.6a1.7 1.7 0 0 0 1.55 1.05h.8v2.7h-.8a1.7 1.7 0 0 0-1.55 1.05Z"/></svg></button></div></header><main id="app"></main><nav id="bottom-nav" class="bottom-nav" aria-label="Основная навигация"></nav><div id="toast" role="status"></div><script src="./review-engine.js"></script><script src="./habit-engine.js"></script><script src="./state-guard.js"></script><script src="./writing-engine.js"></script><script src="./topics.js"></script><script src="./content.js"></script><script>
 const words=[
 {en:'mug',ru:'кружка',ipa:'/mʌɡ/',cue:'маг',scene:'Маг взмахивает палочкой — и из огромной кружки вылетает искристый фонтан. Кружка размером с самого мага!',hint:'Представь ручку кружки, мага рядом и вспышку из кружки.'},
@@ -746,6 +770,40 @@ function habitCard(){const st=H.stats(data.habit),available=trainedIds().length,
  return `<div class="habit-card"><h2>Прогресс за неделю</h2>${habitWeek()}<p>${st.done?'Сегодня занятие засчитано.':'Сегодня занятие ещё не засчитано.'}</p>${!st.done?`<p class="note">Закончи новую подборку${available?` или повтори ${goal} ${goal===1?'знакомое слово':goal<5?'знакомых слова':'знакомых слов'} в обе стороны`:''}, чтобы отметить сегодняшний день.</p>`:''}</div>`;
 }
 function habitPraise(p){return `<div class="habit-praise ${p.milestone?'milestone':''}" role="status">${berryArt(p.milestone?'bunch':'sprout')}<h2>${p.title}</h2><p>${p.text}</p><p class="note">Прогресс за неделю</p>${habitWeek()}<span class="day-earned">Сегодня засчитано</span></div>`}
+
+/* Counts use saved word records. Old migrated words without a first date are not placed on a timeline. */
+function achievementData(){
+ const today=H.day(),yesterday=H.shift(today,-1),monday=H.shift(today,-((new Date().getDay()+6)%7)),lastMonday=H.shift(monday,-7),lastSunday=H.shift(monday,-1);
+ const dated=[],unknown=[],origins={known:0,learned:0,unknown:0};
+ for(const w of words){const p=data.words[w.en];if(!p?.trained)continue;
+  const origin=p.learningOrigin==='known'||p.learningOrigin==='learned'?p.learningOrigin:'unknown';origins[origin]++;
+  const at=p.schedule?.firstLearnedAt;
+  if(Number.isFinite(at)&&at>0){const date=H.day(at);if(date<=today)dated.push({date,origin})}
+  else unknown.push(w.en);
+ }
+ const count=(from,to)=>dated.filter(x=>x.date>=from&&x.date<=to).length;
+ const days=Array.from({length:7},(_,i)=>H.shift(monday,i));
+ return {total:origins.known+origins.learned+origins.unknown,origins,dated,unknown:unknown.length,today,yesterday,monday,lastMonday,lastSunday,week:count(monday,today),yesterdayCount:count(yesterday,yesterday),lastWeek:count(lastMonday,lastSunday),days,counts:days.map(d=>count(d,d))};
+}
+function achievementPreview(){
+ const a=achievementData();
+ return `<section class="achievement-preview" aria-label="Мои достижения"><h2>Мои достижения</h2><div class="achievement-total"><b>${a.total}</b><span>слов изучено в WordScene</span></div><div class="achievement-mini"><div class="achievement-metric"><span>На этой неделе</span><b>+${a.week}</b></div><div class="achievement-metric"><span>Вчера</span><b>+${a.yesterdayCount}</b></div></div><button class="achievement-link" onclick="achievements()">Вся статистика →</button></section>`;
+}
+function achievementLine(a){
+ const days=Array.from({length:28},(_,i)=>H.shift(a.today,i-27)),values=days.map(d=>a.dated.filter(x=>x.date<=d).length);
+ const max=Math.max(1,...values),w=320,h=130,left=12,right=12,top=12,bottom=24;
+ const points=values.map((v,i)=>[left+i*(w-left-right)/27,top+(max-v)*(h-top-bottom)/max]);
+ const line=points.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+ const labels=[0,7,14,21,27].map(i=>`<text x="${points[i][0]}" y="124" text-anchor="middle" font-size="10" fill="#786588">${days[i].slice(5).replace('-','.')}</text>`).join('');
+ return `<svg class="achievement-chart" viewBox="0 0 320 135" role="img" aria-label="Накопительный график слов с известной датой за 28 дней"><path d="M12 106H308" stroke="#e7ddee"/><path d="${line}" fill="none" stroke="#6554b8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>${labels}</svg>`;
+}
+function achievements(){
+ screen='parents';const a=achievementData(),labels=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],max=Math.max(1,...a.counts);
+ const bars=a.counts.map((n,i)=>`<div class="achievement-bar-col"><b>${a.days[i]>a.today?'—':n}</b><div class="achievement-bar-track"><div class="achievement-bar-fill" style="height:${a.days[i]>a.today?0:n/max*100}%"></div></div><span>${labels[i]}</span></div>`).join('');
+ const legacyNote=a.unknown?`<p class="achievement-note">${a.unknown} слов без сохранённой даты первого изучения не включены в графики и подсчёты по дням. Они учтены в общем количестве.</p>`:'';
+ shell(`<section class="app-screen ios-settings"><div class="topline">${btn('← Настройки','settings()','quiet')}</div><h1>Мои достижения</h1><div class="achievement-grid"><div class="achievement-tile"><b>${a.origins.known}</b><span>Уже знал</span></div><div class="achievement-tile"><b>${a.origins.learned}</b><span>Выучил здесь</span></div><div class="achievement-tile"><b>${a.total}</b><span>Всего изучено</span></div></div>${a.origins.unknown? `<p class="achievement-note">Для ${a.origins.unknown} ранее изученных слов не сохранено, знал ли ты их до WordScene. Они включены в общий результат.</p>`:''}<div class="achievement-panel"><h2>Мой словарь растёт</h2>${achievementLine(a)}<p class="achievement-note">Показаны слова с сохранённой датой первого изучения за последние 28 дней. Ранние данные могут быть неполными.</p></div><div class="achievement-panel"><h2>Эта неделя</h2><div class="achievement-bars">${bars}</div></div><div class="achievement-panel"><h2>По дням и неделям</h2><div class="achievement-mini"><div class="achievement-metric"><span>Вчера</span><b>${a.yesterdayCount}</b></div><div class="achievement-metric"><span>Эта неделя</span><b>${a.week}</b></div><div class="achievement-metric"><span>Прошлая неделя</span><b>${a.lastWeek}</b></div><div class="achievement-metric"><span>Всего</span><b>${a.total}</b></div></div></div>${legacyNote}</section>`);
+}
+
 function home(){screen='home';const fresh=freshIds(),trained=trainedIds(),due=requiredIds(),active=s&&!['result','between'].includes(s.phase),st=H.stats(data.habit),praise=H.takePraise(data.habit);if(praise)save();
  const returning=st.returning&&!praise;
  const today=data.habit.days[st.today]||{},newDone=!!today.newDone,reviewDone=(today.reviews?.length||0)>0;
@@ -760,7 +818,7 @@ function home(){screen='home';const fresh=freshIds(),trained=trainedIds(),due=re
  else if(canReview)message='Можно повторить знакомые слова.';
  else message='Пока нет слов для занятия.';
 
- shell(`<section class="app-screen home-screen"><div class="home-scroll"><div class="home-content"><h1 class="home-title">${data.profileName?`Привет, ${escapeName(data.profileName)}!`:"Привет!"} 👋</h1>${praise?habitPraise(praise):returning?`<div class="return-hero">${berryArt()}<p>Продолжим со знакомых слов</p></div><div class="habit-totals"><span>Всего дней<b>${st.total}</b></span><span>Лучшая серия<b>${st.best}</b></span></div><p class="note center">Новую серию начнём сегодня</p>`:habitCard()}<div class="today-card"><h2>Сегодня</h2><p>${message}</p></div>${storageNotice()}</div><div class="home-actions">${storageBlock?btn('Загрузить сохранение заново','location.reload()','secondary'):btn(active?'Продолжить':returning&&trained.length?'Начать повторение':'Начать занятие',active?'render()':returning&&trained.length?"startSelected('review')":"startSelected('auto')")}${!storageBlock&&!active&&trained.length&&fresh.length&&!returning?btn('Только повторить знакомые слова',"startSelected('review')",'quiet wide'):''}</div></div></section>`);
+ shell(`<section class="app-screen home-screen"><div class="home-scroll"><div class="home-content"><h1 class="home-title">${data.profileName?`Привет, ${escapeName(data.profileName)}!`:"Привет!"} 👋</h1>${praise?habitPraise(praise):returning?`<div class="return-hero">${berryArt()}<p>Продолжим со знакомых слов</p></div><div class="habit-totals"><span>Всего дней<b>${st.total}</b></span><span>Лучшая серия<b>${st.best}</b></span></div><p class="note center">Новую серию начнём сегодня</p>`:habitCard()}<div class="today-card"><h2>Сегодня</h2><p>${message}</p></div>${achievementPreview()}${storageNotice()}</div><div class="home-actions">${storageBlock?btn('Загрузить сохранение заново','location.reload()','secondary'):btn(active?'Продолжить':returning&&trained.length?'Начать повторение':'Начать занятие',active?'render()':returning&&trained.length?"startSelected('review')":"startSelected('auto')")}${!storageBlock&&!active&&trained.length&&fresh.length&&!returning?btn('Только повторить знакомые слова',"startSelected('review')",'quiet wide'):''}</div></div></section>`);
 }
 
 function endApproach(){if(s&&!['result','between'].includes(s.phase)){pause();return}s=null;writingAttempt=null;save();home()}
@@ -784,7 +842,7 @@ function sortStack(){if(!s?.sorting)return;screen='learn';const w=words[s.newIds
 function animateSort(known){const card=$('stack-card');if(!s?.sorting||!card||card.dataset.leaving)return;card.dataset.leaving='1';document.querySelectorAll('.stack-actions button').forEach(b=>b.disabled=true);card.style.transition='transform .26s ease-in, opacity .26s ease-in';card.style.transform=`translateX(${known?'120':'-120'}vw) rotate(${known?'18':'-18'}deg)`;card.style.opacity='0';setTimeout(()=>{if(s?.sorting)sortAnswer(known)},270)}
 
 function revealStack(){const el=$('stack-translation');if(el)el.hidden=false}
-function sortAnswer(known){if(!s?.sorting)return;const i=s.newIds[s.sortIndex];(known?s.sortKnown:s.sortUnknown).push(i);s.sortIndex++;if(s.sortIndex<s.newIds.length){save();sortStack();return}const knownIds=[...s.sortKnown],unknownIds=[...s.sortUnknown];for(const id of knownIds){const p=record(id);R.introduce(p);p.started=true;p.sessions++;p.lastAt=Date.now()}s.sorting=false;s.sortIndex=0;s.ids=unknownIds.length?unknownIds:knownIds;s.newIds=unknownIds;s.learnIndex=0;save();if(unknownIds.length)learn();else{beginReview()}}
+function sortAnswer(known){if(!s?.sorting)return;const i=s.newIds[s.sortIndex];(known?s.sortKnown:s.sortUnknown).push(i);s.sortIndex++;if(s.sortIndex<s.newIds.length){save();sortStack();return}const knownIds=[...s.sortKnown],unknownIds=[...s.sortUnknown];for(const id of knownIds){const p=record(id);R.introduce(p);p.learningOrigin??="known";p.started=true;p.sessions++;p.lastAt=Date.now()}s.sorting=false;s.sortIndex=0;s.ids=unknownIds.length?unknownIds:knownIds;s.newIds=unknownIds;s.learnIndex=0;save();if(unknownIds.length)learn();else{beginReview()}}
 
 function learn(){screen='learn';sceneHidden=false;const i=s.ids[s.learnIndex],w=words[i];markStarted(i);frame(`Новое слово · ${s.learnIndex+1} из ${s.ids.length}`,s.learnIndex/s.ids.length*100,`<div class="learning"><div class="word-heading"><div><div class="word">${w.en}</div><div class="translation">${w.ru}</div><div class="phonetic pronunciation-row">${w.ipa}<button class="speak-button" type="button" onclick="speakWord(${JSON.stringify(w.en)})" aria-label="Произнести слово ${w.en}" title="Прослушать произношение"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15 9a5 5 0 0 1 0 6M18 6a9 9 0 0 1 0 12"/></svg></button></div></div></div><div class="scene-box"><div id="scene-content">${illustration(w.en)}<p>${w.scene}</p><span class="cue">Созвучие: <b>${w.cue}</b></span></div><div id="scene-empty" hidden><div class="mental-symbol">◌</div><h2>Теперь представь сцену</h2><p>Удерживай сцену в воображении.</p></div></div><div class="bottom-actions">${btn('Представить без картинки','imagine()')}</div></div>`)}
 function imagine(){sceneHidden=true;$('scene-content').hidden=true;$('scene-empty').hidden=false;document.querySelector('.bottom-actions').innerHTML=btn(s.learnIndex===s.ids.length-1?'Вспомнить слова →':'Готово · дальше →','nextLearn()')+btn('Ещё раз посмотреть','lookAgain()','quiet')}
@@ -890,7 +948,7 @@ function openWritingErrors(){if(s&&!['result','between'].includes(s.phase)){toas
 
 function completePart(){if(s.part==='writing'){sound('finish');s.phase='result';save();result();return}if(s.part==='new'&&!s.writingDone){beginWriting();return}sound('finish');for(const i of s.ids){
  if(s.part==='review'){finishReviewedWord(i,!s.schedulerVersion);continue}
- const token='new:'+i;if(s.completed.includes(token))continue;const p=record(i);R.introduce(p);p.sessions++;p.started=true;p.needsWork=s.partErrors.includes(i);p.lastAt=Date.now();s.completed.push(token);
+ const token='new:'+i;if(s.completed.includes(token))continue;const p=record(i);R.introduce(p);p.learningOrigin??="learned";p.sessions++;p.started=true;p.needsWork=s.partErrors.includes(i);p.lastAt=Date.now();s.completed.push(token);
  }if(s.part==='new')H.record(data.habit,{kind:'new'});s.phase='result';save();result()}
 
 function between(){s.phase='result';save();result()}
@@ -925,7 +983,7 @@ function openWord(i){screen='word';const w=words[i],p=progress(i);shell(`<sectio
 function help(){screen='help';shell(`<section class="app-screen"><div class="topline">${btn('← Главная','home()','quiet')}</div><h1>Как заниматься</h1><div class="prose"><h2>1. Представь</h2><p>Рассмотри историю. Представь сцену и произнеси английское слово три раза. Спрячь картинку и вспомни сцену.</p><h2>2. Вспомни и сравни</h2><p>Ответь вслух, затем открой ответ. Честно выбери «Верно» или «Не получилось».</p><h2>3. Напиши</h2><p>В конце новой подборки напиши слова. Если забыл — нажми «Не помню». Ошибки можно повторить в словаре.</p><h2>Отдыхай</h2><p>Нажми «Паузу»: место сохранится. В другой день начинай с предложенного повторения. Перед первым занятием попроси взрослого помочь с произношением.</p></div></section>`)}
 
 function escapeName(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function settings(){screen='parents';shell(`<section class="app-screen ios-settings"><div class="topline">${btn('← Главная','home()','quiet')}</div><h1>Настройки</h1><div class="ios-settings-group"><button class="ios-settings-row" onclick="profileSettings()"><span class="ios-settings-label">Профиль и данные<small>Имя, аккаунт, сохранение</small></span><span class="ios-chevron" aria-hidden="true">›</span></button><label class="ios-settings-row ios-toggle-row"><span>Звуковые сигналы</span><input id="sound-toggle" type="checkbox" role="switch" onchange="toggleSound()" aria-label="Звуковые сигналы"><span class="ios-switch" aria-hidden="true"></span></label><button class="ios-settings-row" onclick="parents()"><span>Помощь родителю</span><span class="ios-chevron" aria-hidden="true">›</span></button></div></section>`);updateSoundButton()}
+function settings(){screen='parents';shell(`<section class="app-screen ios-settings"><div class="topline">${btn('← Главная','home()','quiet')}</div><h1>Настройки</h1><div class="ios-settings-group"><button class="ios-settings-row" onclick="achievements()"><span class="ios-settings-label">Мои достижения<small>Слова, недели и графики</small></span><span class="ios-chevron" aria-hidden="true">›</span></button><button class="ios-settings-row" onclick="profileSettings()"><span class="ios-settings-label">Профиль и данные<small>Имя, аккаунт, сохранение</small></span><span class="ios-chevron" aria-hidden="true">›</span></button><label class="ios-settings-row ios-toggle-row"><span>Звуковые сигналы</span><input id="sound-toggle" type="checkbox" role="switch" onchange="toggleSound()" aria-label="Звуковые сигналы"><span class="ios-switch" aria-hidden="true"></span></label><button class="ios-settings-row" onclick="parents()"><span>Помощь родителю</span><span class="ios-chevron" aria-hidden="true">›</span></button></div></section>`);updateSoundButton()}
 function profileSettings(){screen='parents';shell(`<section class="app-screen ios-settings"><div class="topline">${btn('← Настройки','settings()','quiet')}</div><h1>Профиль и данные</h1><div class="ios-settings-group"><button class="ios-settings-row" onclick="editProfileName()"><span>Имя</span><span class="ios-settings-value">${data.profileName?escapeName(data.profileName):'Не указано'} <span class="ios-chevron" aria-hidden="true">›</span></span></button><button class="ios-settings-row" onclick="window.dispatchEvent(new Event('wordscene-open-settings'))"><span>Аккаунт и сохранение</span><span class="ios-chevron" aria-hidden="true">›</span></button></div></section>`)}
 function editProfileName(){screen='parents';shell(`<section class="app-screen ios-settings"><div class="topline">${btn('← Профиль','profileSettings()','quiet')}</div><h1>Имя</h1><form class="ios-name-form" onsubmit="event.preventDefault();saveProfileName()"><label for="profile-name">Как тебя зовут?</label><input id="profile-name" type="text" maxlength="25" autocomplete="nickname" placeholder="Твоё имя" value="${escapeName(data.profileName||'')}"><p class="note">Имя можно указать без аккаунта. Оно сохранится на этом устройстве.</p><button class="primary" type="submit">Готово</button></form></section>`)}
 function saveProfileName(){const value=$('profile-name')?.value.trim().replace(/\\s+/g,' ').slice(0,25)||'';data.profileName=value;if(save())profileSettings()}
