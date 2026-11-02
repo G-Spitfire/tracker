@@ -804,8 +804,9 @@ function habitPraise(p){return `<div class="habit-praise ${p.milestone?'mileston
 /* Counts use saved word records. Old migrated words without a first date are not placed on a timeline. */
 function achievementData(){
  const today=H.day(),yesterday=H.shift(today,-1),monday=H.shift(today,-((new Date().getDay()+6)%7)),lastMonday=H.shift(monday,-7),lastSunday=H.shift(monday,-1);
- const dated=[],unknown=[],origins={known:0,learned:0,unknown:0};
+ const dated=[],unknown=[],origins={known:0,learned:0,unknown:0};let mastered=0;
  for(const w of words){const p=data.words[w.en];if(!p?.trained)continue;
+  if(Number.isFinite(p.schedule?.masteredAt)&&p.schedule.masteredAt>0)mastered++;
   const origin=p.learningOrigin==='known'||p.learningOrigin==='learned'?p.learningOrigin:'unknown';origins[origin]++;
   const at=p.schedule?.firstLearnedAt;
   if(Number.isFinite(at)&&at>0){const date=H.day(at);if(date<=today)dated.push({date,origin})}
@@ -813,7 +814,7 @@ function achievementData(){
  }
  const count=(from,to)=>dated.filter(x=>x.origin!=='known'&&x.date>=from&&x.date<=to).length;
  const days=Array.from({length:7},(_,i)=>H.shift(monday,i));
- return {total:origins.known+origins.learned+origins.unknown,origins,dated,unknown:unknown.length,today,yesterday,monday,lastMonday,lastSunday,todayCount:count(today,today),week:count(monday,today),yesterdayCount:count(yesterday,yesterday),lastWeek:count(lastMonday,lastSunday),days,counts:days.map(d=>count(d,d))};
+ return {total:origins.known+origins.learned+origins.unknown,mastered,origins,dated,unknown:unknown.length,today,yesterday,monday,lastMonday,lastSunday,todayCount:count(today,today),week:count(monday,today),yesterdayCount:count(yesterday,yesterday),lastWeek:count(lastMonday,lastSunday),days,counts:days.map(d=>count(d,d))};
 }
 function achievementPreview(){
  const a=achievementData();
@@ -831,7 +832,7 @@ function achievements(){
  screen='parents';const a=achievementData(),labels=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],max=Math.max(1,...a.counts);
  const bars=a.counts.map((n,i)=>`<div class="achievement-bar-col"><b>${a.days[i]>a.today?'—':n}</b><div class="achievement-bar-track"><div class="achievement-bar-fill" style="height:${a.days[i]>a.today?0:n/max*100}%"></div></div><span>${labels[i]}</span></div>`).join('');
  const legacyNote=a.unknown?`<p class="achievement-note">${a.unknown} слов без сохранённой даты первого изучения не включены в графики и подсчёты по дням. Они учтены в общем количестве.</p>`:'';
- shell(`<section class="app-screen ios-settings"><div class="topline">${btn('← Настройки','settings()','quiet')}</div><h1>Мои достижения</h1><div class="achievement-grid"><div class="achievement-tile"><b>${a.origins.known}</b><span>Уже знал</span></div><div class="achievement-tile"><b>${a.origins.learned}</b><span>Выучил здесь</span></div><div class="achievement-tile"><b>${a.total}</b><span>Всего изучено</span></div></div>${a.origins.unknown? `<p class="achievement-note">Для ${a.origins.unknown} ранее изученных слов не сохранено, знал ли ты их до WordScene. Они включены в общий результат.</p>`:''}<div class="achievement-panel"><h2>Мой словарь растёт</h2>${achievementLine(a)}<p class="achievement-note">Показаны слова, выученные в WordScene, с подтверждённой датой. Старые записи с датой, но без категории учитываются как изученные; среди них могут быть ранее знакомые слова.</p></div><div class="achievement-panel"><h2>Эта неделя</h2><div class="achievement-bars">${bars}</div></div><div class="achievement-panel"><h2>По дням и неделям</h2><div class="achievement-mini"><div class="achievement-metric"><span>Вчера</span><b>${a.yesterdayCount}</b></div><div class="achievement-metric"><span>Эта неделя</span><b>${a.week}</b></div><div class="achievement-metric"><span>Прошлая неделя</span><b>${a.lastWeek}</b></div><div class="achievement-metric"><span>Всего</span><b>${a.total}</b></div></div></div>${legacyNote}</section>`);
+ shell(`<section class="app-screen ios-settings"><div class="topline">${btn('← Настройки','settings()','quiet')}</div><h1>Мои достижения</h1><div class="achievement-grid"><div class="achievement-tile"><b>${a.origins.known}</b><span>Уже знал</span></div><div class="achievement-tile"><b>${a.origins.learned}</b><span>Выучил здесь</span></div><div class="achievement-tile"><b>${a.total}</b><span>Всего изучено</span></div><div class="achievement-tile"><b>${a.mastered}</b><span>Закрепил</span></div></div>${a.origins.unknown? `<p class="achievement-note">Для ${a.origins.unknown} ранее изученных слов не сохранено, знал ли ты их до WordScene. Они включены в общий результат.</p>`:''}<div class="achievement-panel"><h2>Мой словарь растёт</h2>${achievementLine(a)}<p class="achievement-note">Показаны слова, выученные в WordScene, с подтверждённой датой. Старые записи с датой, но без категории учитываются как изученные; среди них могут быть ранее знакомые слова.</p></div><div class="achievement-panel"><h2>Эта неделя</h2><div class="achievement-bars">${bars}</div></div><div class="achievement-panel"><h2>По дням и неделям</h2><div class="achievement-mini"><div class="achievement-metric"><span>Вчера</span><b>${a.yesterdayCount}</b></div><div class="achievement-metric"><span>Эта неделя</span><b>${a.week}</b></div><div class="achievement-metric"><span>Прошлая неделя</span><b>${a.lastWeek}</b></div><div class="achievement-metric"><span>Всего</span><b>${a.total}</b></div></div></div>${legacyNote}</section>`);
 }
 
 function home(){screen='home';const fresh=freshIds(),trained=trainedIds(),due=requiredIds(),active=s&&!['result','between'].includes(s.phase),st=H.stats(data.habit),praise=H.takePraise(data.habit);if(praise)save();
