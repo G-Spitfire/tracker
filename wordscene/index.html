@@ -526,6 +526,36 @@ body.is-writing #writing-answer{scroll-margin-block:12px}
 .achievement-bar-fill{width:100%;background:var(--success);border-radius:7px 7px 0 0}
 .achievement-bar-col b{color:var(--ink);font-size:12px}
 .achievement-note{font-size:12px;color:var(--muted);line-height:1.5}
+/* Compact home layout only: leave learning, settings and achievements untouched. */
+.home-screen .home-content>h1{font-size:clamp(23px,5vw,29px);margin:4px 0 9px;text-align:left}
+.home-screen .habit-card{padding:11px 13px;margin:0 0 9px;border-radius:16px}
+.home-screen .habit-card h2{font-size:16px;margin:0 0 7px}
+.home-screen .habit-card p{font-size:11px;margin:6px 0 0;line-height:1.3}
+.home-screen .habit-card p.note{display:none}
+.home-screen .habit-ring-day svg{width:33px;height:33px}
+.home-screen .habit-ring-day small{font-size:10px}
+.home-screen .habit-ring-legend{font-size:10px;margin-top:4px}
+.home-screen .today-card{padding:10px 13px;min-height:0;border-radius:15px}
+.home-screen .today-card h2{font-size:16px;margin:0 0 3px}
+.home-screen .today-card p{font-size:12px;line-height:1.35}
+.home-screen .achievement-preview{margin:9px 0 4px;padding:10px 12px;border-radius:16px}
+.home-screen .achievement-heading{display:flex;justify-content:space-between;align-items:center;width:100%;padding:0;background:none;color:var(--ink);font-size:16px;font-weight:800;text-align:left}
+.home-screen .achievement-heading span{color:var(--primary);font-size:22px;line-height:1}
+.home-screen .achievement-mini{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin-top:7px}
+.home-screen .achievement-metric{padding:4px 2px;text-align:center;border:0;background:transparent}
+.home-screen .achievement-metric+.achievement-metric{border-left:1px solid var(--border);border-radius:0}
+.home-screen .achievement-metric b{font-size:23px;line-height:1.2;color:var(--primary)}
+.home-screen .achievement-metric span{font-size:10px;white-space:nowrap}
+.home-screen .home-actions{padding-top:4px}
+.home-screen .home-actions>.primary{min-height:46px}
+.home-screen .habit-praise>.berry-art{height:54px;width:90px}
+.home-screen .habit-praise h2{font-size:19px;margin:2px 0}
+.home-screen .habit-praise p{font-size:12px;margin:2px 0}
+.home-screen .return-hero>.berry-art{height:64px}
+.home-screen .return-hero p{font-size:12px;margin:0 0 6px}
+.home-screen .habit-totals{padding:8px;border-radius:14px}
+.home-screen .habit-totals b{font-size:24px}
+@media(max-height:740px){.home-screen .home-content>h1{margin:1px 0 6px}.home-screen .habit-card{padding:8px 11px}.home-screen .achievement-preview{padding:8px 10px;margin:6px 0 3px}.home-screen .today-card{padding:8px 11px}}
 </style></head><body><header><button class="brand" onclick="pause()" aria-label="На главную">WordScene</button><span id="brand-berry" aria-hidden="true"></span><div class="header-tools"><button class="header-help" onclick="help()" aria-label="Как заниматься" title="Как заниматься"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.3-3 4"/><path d="M12 17h.01"/></svg></button><button id="settings-toggle" class="settings-toggle" onclick="settings()" aria-label="Открыть настройки" title="Настройки"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l-1.86 1.86A1.7 1.7 0 0 0 16 18.4l-.6.25A1.7 1.7 0 0 0 14.35 20.2V21h-4.7v-.8a1.7 1.7 0 0 0-1.05-1.55L8 18.4a1.7 1.7 0 0 0-1.88.34l-1.86-1.86A1.7 1.7 0 0 0 4.6 15l-.25-.6A1.7 1.7 0 0 0 2.8 13.35h-.8v-2.7h.8A1.7 1.7 0 0 0 4.35 9.6L4.6 9a1.7 1.7 0 0 0-.34-1.88l1.86-1.86A1.7 1.7 0 0 0 8 5.6l.6-.25A1.7 1.7 0 0 0 9.65 3.8V3h4.7v.8a1.7 1.7 0 0 0 1.05 1.55l.6.25a1.7 1.7 0 0 0 1.88-.34l1.86 1.86A1.7 1.7 0 0 0 19.4 9l.25.6a1.7 1.7 0 0 0 1.55 1.05h.8v2.7h-.8a1.7 1.7 0 0 0-1.55 1.05Z"/></svg></button></div></header><main id="app"></main><nav id="bottom-nav" class="bottom-nav" aria-label="Основная навигация"></nav><div id="toast" role="status"></div><script src="./review-engine.js"></script><script src="./habit-engine.js"></script><script src="./state-guard.js"></script><script src="./writing-engine.js"></script><script src="./topics.js"></script><script src="./content.js"></script><script>
 const words=[
 {en:'mug',ru:'кружка',ipa:'/mʌɡ/',cue:'маг',scene:'Маг взмахивает палочкой — и из огромной кружки вылетает искристый фонтан. Кружка размером с самого мага!',hint:'Представь ручку кружки, мага рядом и вспышку из кружки.'},
@@ -787,7 +817,7 @@ function achievementData(){
 }
 function achievementPreview(){
  const a=achievementData();
- return `<section class="achievement-preview" aria-label="Мои достижения"><h2>Мои достижения</h2><div class="achievement-total"><b>${a.total}</b><span>слов изучено в WordScene</span></div><div class="achievement-mini"><div class="achievement-metric"><span>Выучил сегодня</span><b>+${a.todayCount}</b></div><div class="achievement-metric"><span>За эту неделю</span><b>+${a.week}</b></div></div><button class="achievement-link" onclick="achievements()">Вся статистика →</button></section>`;
+ return `<section class="achievement-preview" aria-label="Мои достижения"><button class="achievement-heading" onclick="achievements()">Мои достижения <span aria-hidden="true">›</span></button><div class="achievement-mini"><div class="achievement-metric"><b>${a.total}</b><span>Всего слов</span></div><div class="achievement-metric"><b>+${a.todayCount}</b><span>Сегодня</span></div><div class="achievement-metric"><b>+${a.week}</b><span>Неделя</span></div></div></section>`;
 }
 function achievementLine(a){
  const days=Array.from({length:28},(_,i)=>H.shift(a.today,i-27)),values=days.map(d=>a.dated.filter(x=>x.origin!=='known'&&x.date<=d).length);
@@ -818,7 +848,7 @@ function home(){screen='home';const fresh=freshIds(),trained=trainedIds(),due=re
  else if(canReview)message='Можно повторить знакомые слова.';
  else message='Пока нет слов для занятия.';
 
- shell(`<section class="app-screen home-screen"><div class="home-scroll"><div class="home-content"><h1 class="home-title">${data.profileName?`Привет, ${escapeName(data.profileName)}!`:"Привет!"} 👋</h1>${praise?habitPraise(praise):returning?`<div class="return-hero">${berryArt()}<p>Продолжим со знакомых слов</p></div><div class="habit-totals"><span>Всего дней<b>${st.total}</b></span><span>Лучшая серия<b>${st.best}</b></span></div><p class="note center">Новую серию начнём сегодня</p>`:habitCard()}<div class="today-card"><h2>Сегодня</h2><p>${message}</p></div>${achievementPreview()}${storageNotice()}</div><div class="home-actions">${storageBlock?btn('Загрузить сохранение заново','location.reload()','secondary'):btn(active?'Продолжить':returning&&trained.length?'Начать повторение':'Начать занятие',active?'render()':returning&&trained.length?"startSelected('review')":"startSelected('auto')")}${!storageBlock&&!active&&trained.length&&fresh.length&&!returning?btn('Только повторить знакомые слова',"startSelected('review')",'quiet wide'):''}</div></div></section>`);
+ shell(`<section class="app-screen home-screen"><div class="home-scroll"><div class="home-content compact-home"><h1 class="home-title">${data.profileName?`Привет, ${escapeName(data.profileName)}!`:"Привет!"} 👋</h1>${praise?habitPraise(praise):returning?`<div class="return-hero">${berryArt()}<p>Продолжим со знакомых слов</p></div><div class="habit-totals"><span>Всего дней<b>${st.total}</b></span><span>Лучшая серия<b>${st.best}</b></span></div><p class="note center">Новую серию начнём сегодня</p>`:habitCard()}<div class="today-card compact"><h2>Сегодня</h2><p>${message}</p></div>${achievementPreview()}${storageNotice()}</div><div class="home-actions">${storageBlock?btn('Загрузить сохранение заново','location.reload()','secondary'):btn(active?'Продолжить':returning&&trained.length?'Начать повторение':'Начать занятие',active?'render()':returning&&trained.length?"startSelected('review')":"startSelected('auto')")}${!storageBlock&&!active&&trained.length&&fresh.length&&!returning?btn('Только повторить знакомые слова',"startSelected('review')",'quiet wide'):''}</div></div></section>`);
 }
 
 function endApproach(){if(s&&!['result','between'].includes(s.phase)){pause();return}s=null;writingAttempt=null;save();home()}
