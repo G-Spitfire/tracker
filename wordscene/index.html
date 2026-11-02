@@ -558,7 +558,10 @@ body.is-writing #writing-answer{scroll-margin-block:12px}
 @media(max-height:740px){.home-screen .home-content>h1{margin:1px 0 6px}.home-screen .habit-card{padding:8px 11px}.home-screen .achievement-preview{padding:8px 10px;margin:6px 0 3px}.home-screen .today-card{padding:8px 11px}}
 .home-screen .achievement-delta{display:inline-block;margin-left:3px;font-size:10px;font-weight:800;color:var(--muted)}.home-screen .achievement-metric:last-child span{white-space:normal}.home-screen .achievement-metric:last-child b{color:var(--primary)}
 /* While typing on iPhone, give the answer field priority over large action buttons. The keyboard's Done key submits the form. */
-body.is-writing.writing-keyboard .action-dock{display:none}
+body.is-writing.writing-keyboard .action-dock{display:block;padding:4px 1px 2px;border-top:0}
+body.is-writing.writing-keyboard .action-dock .bottom-actions{gap:0}
+body.is-writing.writing-keyboard .action-dock .bottom-actions .secondary{display:none}
+body.is-writing.writing-keyboard .action-dock .primary{display:block;width:100%;min-height:42px;padding:8px 12px;font-size:15px}
 body.is-writing.writing-keyboard .writing-card{padding:0 4px;min-height:0}
 body.is-writing.writing-keyboard .writing-card>.eyebrow{font-size:11px;margin:0}
 body.is-writing.writing-keyboard .writing-prompt{font-size:clamp(23px,6vw,31px);margin:0 0 4px;padding:2px}
