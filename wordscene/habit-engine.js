@@ -13,6 +13,8 @@ function stats(h,at=Date.now()){
 function record(h,{kind,word,available=5,at=Date.now()}){
  const today=day(at),d=h.days[today]??={reviews:[],newDone:false,qualified:false,praised:false};
  if(kind==='new')d.newDone=true;
+ else if(kind==='newActivity')d.newActivity=true;
+ else if(kind==='reviewActivity')d.reviewActivity=true;
  else if(kind==='review'&&word&&!d.reviews.includes(word))d.reviews.push(word);
  const goal=Math.max(1,Math.min(5,available));
  if(!d.qualified&&(d.newDone||d.reviews.length>=goal)){d.qualified=true;return true}return false;
