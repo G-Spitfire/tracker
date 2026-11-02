@@ -318,7 +318,7 @@ main{max-width:520px;height:calc(100dvh - 76px - env(safe-area-inset-top));paddi
 .habit-totals>span{flex:1;color:#78638a;font-size:13px}
 .habit-totals>span+span{border-left:1px solid #d8cce6}
 .habit-totals b{display:block;font-family:Georgia,serif;font-size:40px;color:#442657;line-height:1.3}
-.home-content:has(.return-hero) .today-card{display:none}
+/* The Today card remains visible after a break as well. */
 .habit-praise{text-align:center}
 .habit-praise>.berry-art{height:100px;width:135px}
 .habit-praise.milestone>.berry-art{height:170px;width:200px}
@@ -426,6 +426,66 @@ body.home-page-scroll .home-content{overflow:visible}
 .pronunciation-row{display:flex;align-items:center;gap:9px}.speak-button{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;border:0;border-radius:12px;background:#eee7f7;color:#6554b8;cursor:pointer}.stack-screen{display:flex;flex-direction:column;flex:1;min-height:0}.stack-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:250px;flex:1;max-height:410px;border:2px solid #e5d9ef;border-radius:24px;background:#fffdf8;touch-action:pan-y;user-select:none;cursor:pointer;padding:25px}.stack-word{font-size:clamp(40px,10vw,66px);font-weight:800}.stack-translation{font-size:23px;color:#6554b8}.stack-translation[hidden]{display:none}.stack-card{will-change:transform,opacity}@media(prefers-reduced-motion:reduce){.stack-card{transition:none!important}}.stack-actions{display:flex;flex-direction:row;gap:10px}.stack-actions button{flex:1;min-width:0}
 .ios-settings-group{overflow:hidden;border:1px solid var(--border);border-radius:16px;background:var(--card,#fff);margin-top:18px}.ios-settings-row{appearance:none;width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:60px;padding:12px 16px;background:transparent;color:var(--ink);border:0;border-radius:0;text-align:left;font:inherit;cursor:pointer}.ios-settings-row+.ios-settings-row{border-top:1px solid var(--border)}.ios-settings-label{display:flex;flex-direction:column;gap:3px}.ios-settings-label small,.ios-settings-value{color:var(--muted);font-size:13px}.ios-settings-value{display:flex;align-items:center;gap:10px}.ios-chevron{font-size:26px;line-height:1;color:var(--muted)}.ios-toggle-row{position:relative;cursor:pointer}.ios-toggle-row input{position:absolute;right:16px;width:49px;height:30px;opacity:0;cursor:pointer}.ios-switch{position:relative;flex:none;width:49px;height:30px;border-radius:20px;background:#b8bac4;transition:background .15s}.ios-switch:after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:white;box-shadow:0 1px 3px #0003;transition:transform .15s}.ios-toggle-row input:checked+.ios-switch{background:#35a86a}.ios-toggle-row input:checked+.ios-switch:after{transform:translateX(19px)}.ios-toggle-row input:focus-visible+.ios-switch{outline:3px solid #6554b8;outline-offset:3px}.ios-name-form{display:flex;flex-direction:column;gap:12px;margin-top:20px}.ios-name-form input{width:100%;min-height:48px;border:1px solid var(--border);border-radius:12px;padding:12px 14px;font:inherit;background:#fff;color:var(--ink)}.ios-name-form button{align-self:stretch}
 .habit-rings{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.habit-ring-day{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0}.habit-ring-day svg{width:100%;max-width:44px;height:auto;overflow:visible}.habit-ring-day small{font-size:11px;color:var(--muted)}.habit-ring-day.today small{font-weight:700;color:var(--ink)}.habit-ring-day.future{opacity:.55}.habit-ring-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 16px;margin-top:10px;font-size:12px;color:var(--muted)}.habit-ring-legend span{display:inline-flex;align-items:center;gap:5px}.habit-ring-legend i{display:inline-block;width:10px;height:10px;border-radius:50%}.habit-ring-legend .new{background:#e3ab48}.habit-ring-legend .review{background:#5a9c83}
+
+/* Responsive layout hardening across all screens; no visual asset or font changes. */
+html,body{max-width:100%;overflow-x:hidden}
+.app-screen,.training-body,.home-content,.recall-screen,.learning,.writing-card,.interlude{min-width:0}
+.app-screen{overflow-wrap:break-word}
+.topline>*{min-width:0}
+.topline .lesson-stage{overflow-wrap:anywhere}
+.home-title{overflow-wrap:anywhere;word-break:normal}
+.today-card{min-height:0}
+.today-card p{overflow-wrap:anywhere}
+.word-heading,.word-heading>div,.word-row,.row-heading,.row-heading>div{min-width:0}
+.row-heading{flex-wrap:wrap}
+.row-heading strong,.row-translation,.status{overflow-wrap:anywhere}
+.word-row .status{max-width:100%}
+.stack-card{min-width:0;min-height:min(250px,42dvh);overflow:hidden}
+.stack-word,.stack-translation{max-width:100%;overflow-wrap:anywhere;text-align:center}
+.stack-actions button{white-space:normal;padding-inline:8px}
+.training-body .learning,.training-body .recall-screen{min-height:0}
+.training-body .scene-box,.training-body .repair{max-width:100%;overflow-wrap:anywhere}
+.training-body .scene-photo,.training-body .scene-svg{max-width:100%}
+.training-body .recall-prompt{flex-shrink:0;min-height:clamp(130px,27dvh,190px)}
+.recall-prompt .word,.answer{overflow-wrap:anywhere}
+.training-body .repair-art{max-width:min(230px,100%)}
+.result-body,.result-body .habit-praise{max-width:100%;min-width:0}
+.result-body .bottom-actions{width:100%}
+.ios-settings-row>span{min-width:0;overflow-wrap:anywhere}
+.ios-settings-value{flex-shrink:1;text-align:right}
+.prose{min-width:0;overflow-wrap:break-word}
+.prose p{max-width:68ch}
+.dictionary-filter-group .filters button{white-space:normal}
+.writing-card form{min-width:0}
+.writing-prompt{overflow-wrap:anywhere}
+#writing-answer{min-width:0}
+@media(max-width:380px){
+ header{gap:5px;padding-left:12px;padding-right:12px}
+ .brand{font-size:clamp(20px,6vw,24px)!important;white-space:nowrap}
+ .brand:before{margin-right:3px}
+ .header-help{width:40px;min-width:40px}
+ .settings-toggle{min-width:40px;padding:6px}
+ main{padding-left:12px;padding-right:12px}
+ .home-content>h1{font-size:clamp(23px,7vw,28px)}
+ .habit-card{padding:14px 12px}
+ .today-card{padding:14px}
+ .today-card h2{font-size:24px}
+ .stack-actions{gap:7px}
+ .stack-actions button{font-size:13px}
+ .writing-letters{gap:2px;padding:5px}
+ .writing-char{min-width:18px;font-size:18px}
+}
+@media(max-height:650px){
+ .training-body .recall-prompt{min-height:112px;padding:8px 0}
+ .training-body .recall-prompt .word{margin:8px 0}
+ .training-body .scene-photo,.training-body .scene-svg{max-height:120px}
+ .training-body .repair-art .scene-photo,.training-body .repair-art .scene-svg{max-height:100px}
+ .training-body .word-heading{margin-bottom:7px}
+ .training-body .scene-box p{margin:5px 0}
+ .stack-card{min-height:125px}
+ .writing-card{padding-top:0}
+ .writing-prompt{font-size:clamp(25px,6vw,34px);margin-bottom:5px}
+}
 </style></head><body><header><button class="brand" onclick="pause()" aria-label="На главную">WordScene</button><span id="brand-berry" aria-hidden="true"></span><div class="header-tools"><button class="header-help" onclick="help()" aria-label="Как заниматься" title="Как заниматься">?</button><button id="settings-toggle" class="settings-toggle" onclick="settings()" aria-label="Открыть настройки" title="Настройки"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/><path d="M19.4 15a1.8 1.8 0 0 0 .36 2l-1.7 1.7a1.8 1.8 0 0 0-2-.36l-.6.25a1.8 1.8 0 0 0-1.1 1.65V21h-2.4v-.76a1.8 1.8 0 0 0-1.1-1.65l-.6-.25a1.8 1.8 0 0 0-2 .36l-1.7-1.7a1.8 1.8 0 0 0 .36-2l-.25-.6A1.8 1.8 0 0 0 5 13.3h-.76v-2.4H5a1.8 1.8 0 0 0 1.65-1.1l.25-.6a1.8 1.8 0 0 0-.36-2l1.7-1.7a1.8 1.8 0 0 0 2 .36l.6-.25a1.8 1.8 0 0 0 1.1-1.65V3h2.4v.76a1.8 1.8 0 0 0 1.1 1.65l.6.25a1.8 1.8 0 0 0 2-.36l1.7 1.7a1.8 1.8 0 0 0-.36 2l.25.6A1.8 1.8 0 0 0 21 10.9h.76v2.4H21a1.8 1.8 0 0 0-1.65 1.1Z"/></svg></button></div></header><main id="app"></main><nav id="bottom-nav" class="bottom-nav" aria-label="Основная навигация"></nav><div id="toast" role="status"></div><script src="./review-engine.js"></script><script src="./habit-engine.js"></script><script src="./state-guard.js"></script><script src="./writing-engine.js"></script><script src="./topics.js"></script><script src="./content.js"></script><script>
 const words=[
 {en:'mug',ru:'кружка',ipa:'/mʌɡ/',cue:'маг',scene:'Маг взмахивает палочкой — и из огромной кружки вылетает искристый фонтан. Кружка размером с самого мага!',hint:'Представь ручку кружки, мага рядом и вспышку из кружки.'},
