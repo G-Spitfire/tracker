@@ -149,3 +149,10 @@ test('active local session is never replaced by a newer remote snapshot',async()
  assert.deepEqual(await h.engine.syncOnce(),{status:'remote-newer',revision:2});
  assert.deepEqual(JSON.parse(h.storage.getItem('word-scenes-v5')),session);
 });
+test('cloud restore retains an accessible portable rollback before reloading',async()=>{
+ const h=harness();await h.cloud.write({...start,mode:'review'},0);
+ await h.engine.prepareConflict();const capture=await h.engine.exportConflict();h.engine.markConflictExported(capture);
+ const before=h.storage.getItem('word-scenes-v5');await h.engine.resolve('cloud');
+ assert.deepEqual(JSON.parse(h.storage.getItem('wordscene-rollback-v1-guest')).progress,JSON.parse(before));
+ assert.equal(JSON.parse(h.storage.getItem('word-scenes-v5')).mode,'review');assert.equal(h.reloads(),1);
+});

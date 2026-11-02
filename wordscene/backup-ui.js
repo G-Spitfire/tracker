@@ -1,0 +1,18 @@
+/* Local settings remain available even when Firebase cannot load. */
+(function(){
+'use strict';
+const panel=document.createElement('section');panel.setAttribute('role','dialog');panel.setAttribute('aria-label','Аккаунт и сохранение');panel.style.cssText='display:none;position:fixed;inset:8vh 12px;z-index:50;max-width:480px;margin:auto;overflow:auto;padding:20px;background:#fff;color:#222;border:1px solid #aaa;border-radius:16px;box-shadow:0 4px 30px #0003;font:15px system-ui';
+const title=document.createElement('h2');title.textContent='Аккаунт и сохранение';const close=document.createElement('button');close.textContent='Закрыть';close.onclick=()=>panel.style.display='none';const slot=document.createElement('div');slot.id='wordscene-cloud-slot';slot.textContent='Аккаунт и облако подключаются при наличии связи. Файлы устройства доступны ниже.';const info=document.createElement('p');info.style.whiteSpace='pre-wrap';info.setAttribute('role','status');const explanation=document.createElement('p');explanation.textContent='Гость и каждый аккаунт имеют отдельный прогресс. При входе или выходе текущий профиль сохраняется и открывается другой. Гостевые занятия можно перенести отдельно. В аккаунте копии создаются после занятий при наличии связи. Разные версии требуют выбора взрослого.';panel.append(title,close,explanation,slot,info);document.body.append(panel);
+const button=label=>{const b=document.createElement('button');b.textContent=label;b.style.cssText='display:block;width:100%;min-height:44px;margin:8px 0';return b};
+const message=x=>info.textContent=x;
+const summary=x=>{const w=Object.values(x.words||{});return 'обучено '+w.filter(p=>p.trained).length+', ответов '+w.reduce((n,p)=>n+(p.attempts||0),0)+', дней '+Object.keys(x.habit?.days||{}).length+', занятие '+(x.session?'не завершено':'завершено')};
+window.addEventListener('wordscene-open-settings',()=>{panel.style.display='block';close.focus()});window.addEventListener('wordscene-screen-change',()=>panel.style.display='none');
+
+const validate=x=>window.WordSceneState.valid(x,500);const device=window.WordSceneBackup.create({storage:localStorage,validate,disable:()=>{localStorage.removeItem('wordscene-sync-v1');const id=localStorage.getItem('wordscene-active-profile-v1');if(id?.startsWith('user:'))localStorage.removeItem('wordscene-sync-v1-profile-'+encodeURIComponent(id.slice(5)))}});
+const deviceExport=button('Экспорт этого устройства'),fileInput=document.createElement('input'),undo=button('Восстановить предыдущую копию');fileInput.type='file';fileInput.accept='.json,application/json';fileInput.setAttribute('aria-label','Восстановить из файла JSON');panel.append(deviceExport,fileInput,undo);
+function applyFile(ticket){if(document.body.classList.contains('profile-switch-blocked'))throw Error('Дождитесь переключения профиля');const comparison='Это устройство: '+summary(device.exportCurrent().progress)+'\nВыбранная копия: '+summary(ticket.backup.progress);message(comparison);if(!confirm(comparison+'\nЗаменить прогресс? Предыдущая копия сохранится для отката.'))return;device.restore(ticket);location.reload()}
+deviceExport.onclick=()=>{try{const url=URL.createObjectURL(new Blob([JSON.stringify(device.exportCurrent(),null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='wordscene-device-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),30000)}catch(e){message(e.message)}};
+fileInput.onchange=async()=>{try{const file=fileInput.files[0];if(!file)return;if(file.size>5*1024*1024)throw Error('Файл слишком большой');applyFile(device.preview(await file.text()))}catch(e){message(e.message)}finally{fileInput.value=''}};
+undo.onclick=()=>{try{applyFile(device.rollback())}catch(e){message(e.message)}};
+
+})();

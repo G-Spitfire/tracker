@@ -134,17 +134,19 @@ function create({auth,cloud,storage,validate,now=()=>Date.now(),reload=()=>{},ca
   const user=uid();if(!user)throw new Error('Сначала войдите в аккаунт');if(!canSync(user))throw new Error('Локальный профиль не принадлежит текущему аккаунту');
   const conflict=await getConflict();if(!conflict||conflict.uid!==user)throw new Error('Для этого аккаунта нет сохранённого конфликта');
   const latest=await cloud.read();if(uid()!==user||!canSync(user))throw new Error('Аккаунт изменился');if(!latest.exists)throw new Error('Облачная копия отсутствует');
-  const current=local();if(conflict.cloud.revision!==latest.revision||stable(conflict.local.progress)!==current.fingerprint)throw new Error('Копии изменились после скачивания. Скачайте актуальный набор обеих версий ещё раз.');
+  const current=local();if(conflict.cloud.revision!==latest.revision||stable(conflict.cloud.progress)!==stable(latest.payload)||stable(conflict.local.progress)!==current.fingerprint)throw new Error('Копии изменились после скачивания. Скачайте актуальный набор обеих версий ещё раз.');
   const exported=JSON.parse(storage.getItem(exportKey(user))||'null');if(exported?.uid!==user||exported.revision!==latest.revision||exported.localFingerprint!==current.fingerprint)throw new Error('Сначала скачайте актуальный файл с обеими версиями конфликта.');
   const selected=choice==='local'?current.value:choice==='cloud'?latest.payload:null;if(!selected||!validate(selected))throw new Error('Неизвестный вариант прогресса');
   archiveConflict(user,conflict);
   if(choice==='local'){
    const result=await cloud.write(selected,latest.revision);if(uid()!==user||!canSync(user))throw new Error('Аккаунт изменился; проверьте облачную копию');
+   const confirmed=await cloud.read();if(uid()!==user||!canSync(user)||!confirmed.exists||confirmed.revision!==result.revision||stable(confirmed.payload)!==current.fingerprint)throw new Error('Не удалось подтвердить облачную копию; обе версии сохранены');
    const afterWrite=local();if(afterWrite.fingerprint!==current.fingerprint){await exportConflict();throw new Error('Локальный прогресс изменился во время записи. Скачайте обе версии ещё раз.')}
    saveSettings({uid:user,revision:result.revision,baseline:current.fingerprint});clearConflict(user);return {status:'kept-local',revision:result.revision};
   }
   const currentRaw=storage.getItem('word-scenes-v5');if(currentRaw!==null&&!validate(JSON.parse(currentRaw)))throw new Error('Локальные данные повреждены: восстановление остановлено');
   if(currentRaw!==null){const key='word-scenes-v5-before-cloud-restore-'+now();storage.setItem(key,currentRaw);if(storage.getItem(key)!==currentRaw)throw new Error('Не удалось сохранить резервную копию')}
+  const rollback=JSON.stringify({format:'wordscene-backup',version:1,profile:storage.getItem('wordscene-active-profile-v1')||'guest',progress:current.value});const rollbackKey='wordscene-rollback-v1-'+encodeURIComponent(storage.getItem('wordscene-active-profile-v1')||'guest');storage.setItem(rollbackKey,rollback);if(storage.getItem(rollbackKey)!==rollback)throw new Error('Не удалось проверить откатную копию');
   const next=JSON.stringify(selected);storage.setItem('word-scenes-v5',next);if(storage.getItem('word-scenes-v5')!==next){if(currentRaw!==null)storage.setItem('word-scenes-v5',currentRaw);throw new Error('Не удалось проверить восстановление')}
   disable();clearConflict(user);reload();return {status:'kept-cloud',revision:latest.revision};
  }
