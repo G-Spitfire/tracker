@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "source": "football-data.org",
+  "league": "PL",
+  "season": 2026,
+  "fetchedAt": "2026-10-30T18:00:00Z",
+  "standings": {
+    "schemaVersion": 1,
+    "source": "football-data.org",
+    "league": "PL",
+    "season": 2026,
+    "endpoint": "standings",
+    "fetchedAt": "2026-10-30T18:00:00Z",
+    "count": 4,
+    "items": [
+      {"type":"TOTAL","stage":"LEAGUE_STAGE","group":null,"position":1,"team":{"id":91001,"name":"Север","shortName":"Север","crest":null},"playedGames":4,"won":3,"draw":1,"lost":0,"points":10,"goalsFor":8,"goalsAgainst":3,"goalDifference":5},
+      {"type":"TOTAL","stage":"LEAGUE_STAGE","group":null,"position":2,"team":{"id":91002,"name":"Восток","shortName":"Восток","crest":null},"playedGames":4,"won":3,"draw":0,"lost":1,"points":9,"goalsFor":7,"goalsAgainst":4,"goalDifference":3},
+      {"type":"TOTAL","stage":"LEAGUE_STAGE","group":null,"position":3,"team":{"id":91003,"name":"Запад","shortName":"Запад","crest":null},"playedGames":4,"won":2,"draw":1,"lost":1,"points":7,"goalsFor":5,"goalsAgainst":4,"goalDifference":1},
+      {"type":"TOTAL","stage":"LEAGUE_STAGE","group":null,"position":4,"team":{"id":91004,"name":"Юг","shortName":"Юг","crest":null},"playedGames":4,"won":1,"draw":1,"lost":2,"points":4,"goalsFor":4,"goalsAgainst":7,"goalDifference":-3}
+    ]
+  },
+  "matches": {
+    "schemaVersion": 1,
+    "source": "football-data.org",
+    "league": "PL",
+    "season": 2026,
+    "endpoint": "matches",
+    "fetchedAt": "2026-10-30T18:00:00Z",
+    "count": 5,
+    "items": [
+      {"id":92001,"utcDate":"2026-10-05T15:00:00Z","status":"FINISHED","stage":"LEAGUE_STAGE","group":null,"matchday":1,"homeTeam":{"id":91001,"name":"Север","shortName":"Север","crest":null},"awayTeam":{"id":91002,"name":"Восток","shortName":"Восток","crest":null},"fullTime":{"home":2,"away":1}},
+      {"id":92002,"utcDate":"2026-10-05T17:00:00Z","status":"FINISHED","stage":"LEAGUE_STAGE","group":null,"matchday":1,"homeTeam":{"id":91003,"name":"Запад","shortName":"Запад","crest":null},"awayTeam":{"id":91004,"name":"Юг","shortName":"Юг","crest":null},"fullTime":{"home":1,"away":1}},
+      {"id":92003,"utcDate":"2026-10-12T15:00:00Z","status":"FINISHED","stage":"LEAGUE_STAGE","group":null,"matchday":2,"homeTeam":{"id":91002,"name":"Восток","shortName":"Восток","crest":null},"awayTeam":{"id":91003,"name":"Запад","shortName":"Запад","crest":null},"fullTime":{"home":2,"away":0}},
+      {"id":92004,"utcDate":"2026-10-19T15:00:00Z","status":"FINISHED","stage":"LEAGUE_STAGE","group":null,"matchday":3,"homeTeam":{"id":91001,"name":"Север","shortName":"Север","crest":null},"awayTeam":{"id":91004,"name":"Юг","shortName":"Юг","crest":null},"fullTime":{"home":3,"away":0}},
+      {"id":92005,"utcDate":"2026-11-02T15:00:00Z","status":"SCHEDULED","stage":"LEAGUE_STAGE","group":null,"matchday":5,"homeTeam":{"id":91001,"name":"Север","shortName":"Север","crest":null},"awayTeam":{"id":91003,"name":"Запад","shortName":"Запад","crest":null},"fullTime":{"home":null,"away":null}}
+    ]
+  },
+  "scorers": {
+    "schemaVersion": 1,
+    "source": "football-data.org",
+    "league": "PL",
+    "season": 2026,
+    "endpoint": "scorers",
+    "fetchedAt": "2026-10-30T18:00:00Z",
+    "count": 3,
+    "items": [
+      {"player":{"id":93001,"name":"Алексей Соколов","shortName":null,"crest":null},"team":{"id":91001,"name":"Север","shortName":"Север","crest":null},"playedMatches":4,"goals":5,"assists":2,"penalties":0},
+      {"player":{"id":93002,"name":"Михаил Орлов","shortName":null,"crest":null},"team":{"id":91002,"name":"Восток","shortName":"Восток","crest":null},"playedMatches":4,"goals":4,"assists":null,"penalties":1},
+      {"player":{"id":93003,"name":"Илья Волков","shortName":null,"crest":null},"team":{"id":91003,"name":"Запад","shortName":"Запад","crest":null},"playedMatches":3,"goals":3,"assists":1,"penalties":0}
+    ]
+  }
+}

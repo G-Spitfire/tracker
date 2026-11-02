@@ -241,7 +241,7 @@ let s=data.session,screen='home',cardStarted=0,toastTimer,wordFilter='all',wordQ
 if(s?.phase==='test'&&!s.revealed){s.ignoreTiming=true;s.roundValid=false}
 function blockStorage(reason){if(storageBlock)return;storageBlock=reason;storageOK=false;queueMicrotask(()=>home())}
 function storageNotice(){return storageBlock?`<p class="error" role="alert">${storageBlock==='read'?'Сохранение не удалось прочитать. Прежний прогресс не перезаписан. Позови взрослого; данные браузера очищать не нужно.':'Прогресс изменился в другой вкладке. Загрузи актуальное сохранение, чтобы продолжить.'}</p>`:!storageOK?'<p class="error" role="alert">Не удалось сохранить прогресс. Не закрывай вкладку и позови взрослого.</p>':''}
-function save(){if(storageBlock)return false;data.session=s;try{if(localStorage.getItem(KEY)!==savedRaw){blockStorage('conflict');return false}const raw=JSON.stringify(data);localStorage.setItem(KEY,raw);savedRaw=raw;storageOK=true;return true}catch(e){storageOK=false;toast('Не удалось сохранить прогресс. Оставь вкладку открытой.');return false}}
+function save(){if(storageBlock)return false;data.session=s;try{if(localStorage.getItem(KEY)!==savedRaw){blockStorage('conflict');return false}const raw=JSON.stringify(data);localStorage.setItem(KEY,raw);savedRaw=raw;storageOK=true;if(window.WordSceneCloudBackup?.enabled)window.WordSceneCloudBackup.schedule();return true}catch(e){storageOK=false;toast('Не удалось сохранить прогресс. Оставь вкладку открытой.');return false}}
 function toast(t){$('toast').textContent=t;$('toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').style.display='none',4500)}
 let soundContext;
 function sound(kind='correct'){
@@ -459,4 +459,4 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 $('brand-berry').innerHTML=berryArt().replace('0 0 200 180','52 18 92 120');save();updateSoundButton();home();
 
 if('serviceWorker' in navigator && location.protocol!=='file:') navigator.serviceWorker.register('./sw.js').catch(()=>{});
-</script></body></html>
+</script><script src="./profile-store.js"></script><script src="./cloud-firestore.js"></script><script src="./cloud-sync.js"></script><script type="module" src="./cloud-ui.js"></script></body></html>

@@ -1,0 +1,59 @@
+rules_version = '2';
+
+// Candidate rules for the paths present in this repository. Review before deployment.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function owner(uid) { return signedIn() && request.auth.uid == uid; }
+
+    // Trusted diary ingestion uses Admin SDK/IAM. Browsers cannot edit school data.
+    match /schoolGrades/{uid} {
+      allow get: if owner(uid);
+      allow list, write: if false;
+    }
+    match /profiles/{uid} {
+      allow get: if owner(uid);
+      allow list, write: if false;
+    }
+
+    // Public sports facts behind existing sign-in; only trusted ingestion writes them.
+    match /footballSnapshots/{snapshotId} {
+      allow get: if signedIn();
+      allow list: if signedIn() && request.query.limit != null
+                  && request.query.limit <= 120;
+      allow write: if false;
+    }
+
+    match /users/{uid}/wordscene/{documentId} {
+      function validPayload(p) {
+        // Keep legacy fields in the payload; do not silently discard saved progress.
+        return p is map && p.keys().hasAll(['version', 'words'])
+          && p.keys().size() <= 32 && p.version == 5
+          && p.words is map && p.words.size() <= 500
+          && (!('session' in p) || p.session == null || p.session is map)
+          && (!('reviewCycle' in p) || (p.reviewCycle is list && p.reviewCycle.size() <= 500))
+          && (!('habit' in p) || (p.habit is map && p.habit.days is map))
+          && (!('reviewVersion' in p) || p.reviewVersion == 1)
+          && (!('soundEnabled' in p) || p.soundEnabled is bool);
+      }
+      function validState() {
+        let d = request.resource.data;
+        return d.keys().hasAll(['schemaVersion', 'revision', 'updatedAt', 'clientSavedAt', 'payload'])
+          && d.keys().hasOnly(['schemaVersion', 'revision', 'updatedAt', 'clientSavedAt', 'payload'])
+          && d.schemaVersion == 1
+          && d.revision is int && d.revision > 0
+          && d.updatedAt == request.time
+          && d.clientSavedAt is int && d.clientSavedAt >= 0
+          && validPayload(d.payload);
+      }
+      function ownState() { return owner(uid) && documentId == 'state'; }
+      allow get: if ownState();
+      allow list, delete: if false;
+      allow create: if ownState() && validState() && request.resource.data.revision == 1;
+      allow update: if ownState() && validState()
+                    && request.resource.data.revision == resource.data.revision + 1;
+    }
+
+    match /{path=**} { allow read, write: if false; }
+  }
+}

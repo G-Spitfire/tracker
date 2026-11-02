@@ -6,6 +6,7 @@
 
 | Приложение | Назначение | Адрес | Документация |
 | --- | --- | --- | --- |
+| Левели | Школа, обучение и футбол | [Открыть](https://g-spitfire.github.io/tracker/leveli/) | [README](leveli/README.md) |
 | Форма | Трекер тренировок | [Открыть](https://g-spitfire.github.io/tracker/forma/) | [README](forma/README.md) |
 | WordScene | Английские слова · Полина | [Открыть](https://g-spitfire.github.io/tracker/wordscene/) | [README](wordscene/README.md) |
 | Мои слова | Карточки английских слов · MVP | [Открыть](https://g-spitfire.github.io/tracker/moi-slova/) | [README](moi-slova/README.md) |
