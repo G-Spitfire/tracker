@@ -55,3 +55,18 @@ test('dictionary search retains matching card nodes and filters without creating
  assert.equal(result.firstCount,'Показано: 2 из 500 слов');assert.equal(result.finalCount,'Показано: 1 из 500 слов');
  assert.equal(result.created,2);assert.equal(result.reused,true);assert.equal(result.records,0);
 });
+test('the stricter guard accepts every saved phase of a complete real lesson',()=>{
+ const h=harness();
+ h.run('learn=()=>{};test=()=>{};roundResult=()=>{};writing=()=>{};result=()=>{};startSelected()');
+ const check=()=>assert.equal(h.run('WordSceneState.valid(JSON.parse(localStorage.getItem(KEY)),words.length)'),true);
+ check();for(let i=0;i<5;i++){h.run('sceneHidden=true;nextLearn()');check()}
+ for(let direction=0;direction<2;direction++){
+  for(let round=0;round<3;round++){
+   for(let word=0;word<5;word++){h.run('s.revealed=true;grade(true)');check()}
+   if(round<2){h.run('startRound()');check()}
+  }
+  h.run('nextDirection()');check();
+ }
+ for(let i=0;i<5;i++){h.run("W.mark(s,record(s.writingIds[s.writingIndex]),s.writingIds[s.writingIndex],'correct');save();nextWriting()");check()}
+ assert.equal(h.run('s.phase'),'result');assert.equal(h.run('trainedIds().length'),5);
+});

@@ -99,7 +99,7 @@ test('manual comparison offers recovery when local and cloud copies already diff
  h.engine.markConflictExported(downloaded);
  assert.equal((await h.engine.resolve('cloud')).status,'kept-cloud');
  assert.deepEqual(JSON.parse(h.storage.getItem('word-scenes-v5')),start);
- assert.deepEqual(JSON.parse(h.storage.getItem('word-scenes-v5-before-cloud-restore-123456')),local);
+ assert.deepEqual(JSON.parse(h.storage.getItem('wordscene-rollback-v1-guest')).progress,local);
 });
 test('conflict cannot overwrite either copy until a current backup is marked downloaded',async()=>{
  const h=harness();await h.cloud.write(start,0);

@@ -25,3 +25,8 @@ test('manual save sends now and clears the pending periodic timer',async()=>{
 test('an answer arriving during upload requests another backup',async()=>{
  const h=harness();h.setReply({status:'local-changed'});await h.run('runSync()');assert.equal(h.timers.size,1);assert.equal([...h.timers.values()][0].delay,1000);
 });
+test('restore pauses automatic writes until the user cancels or completes the choice',async()=>{
+ const h=harness();h.run('scheduleBackup()');await h.run('pauseBackup()');
+ assert.equal(h.timers.size,0);assert.equal((await h.run('runSync()')).status,'idle');assert.equal(h.calls(),0);
+ h.run('resumeBackup()');assert.equal([...h.timers.values()][0].delay,60000);
+});

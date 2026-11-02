@@ -52,7 +52,7 @@ test('guest import keeps the guest source and backs up account-local progress',(
  const result=h.store.importGuest('A');
  assert.deepEqual(JSON.parse(h.storage.getItem('word-scenes-v5')),guest);
  assert.deepEqual(JSON.parse(h.storage.getItem('word-scenes-v5-guest')),guest);
- assert.deepEqual(JSON.parse(h.storage.getItem(result.backupKey)),account);
+ assert.deepEqual(JSON.parse(h.storage.getItem(result.backupKey)).progress,account);
  assert.equal(h.storage.getItem('wordscene-sync-v1'),null);
  assert.equal(h.storage.getItem('wordscene-sync-v1-profile-A'),null);
 });
@@ -61,6 +61,17 @@ test('invalid account-local save blocks switching and leaves previous active dat
  assert.throws(()=>h.store.switchTo('B'),/повреждены/);
  assert.deepEqual(JSON.parse(h.storage.getItem('word-scenes-v5')),guest);
  assert.equal(h.store.matches(null),true);
+});
+test('explicit account recovery selects the damaged account without losing the previous profile',()=>{
+ const values=new Map([['word-scenes-v5',JSON.stringify({version:5,words:{},session:null,marker:'guest'})],['wordscene-active-profile-v1','guest'],['word-scenes-v5-profile-A','{broken']]);
+ const storage={getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,String(v)),removeItem:k=>values.delete(k)};
+ const profiles=require('../profile-store').create({storage,validate:x=>require('../state-guard').valid(x,500)});
+ profiles.switchTo('A',{recoverDamagedTarget:true});
+ assert.equal(profiles.matches('A'),true);assert.equal(storage.getItem('word-scenes-v5'),'{broken');
+ assert.equal(JSON.parse(storage.getItem('word-scenes-v5-guest')).marker,'guest');
+ const backup=require('../backup-local').create({storage,validate:x=>require('../state-guard').valid(x,500)});
+ backup.restore(backup.preview(JSON.stringify({format:'wordscene-backup',version:1,progress:{version:5,words:{},session:null,marker:'cloud-A'}})));
+ assert.equal(JSON.parse(storage.getItem('word-scenes-v5')).marker,'cloud-A');assert.equal(JSON.parse(storage.getItem(backup.damagedKey())).raw,'{broken');
 });
 test('interrupted profile switch rolls back the active pointer without losing either copy',()=>{
  const guest=state('guest'),values=new Map([['word-scenes-v5',JSON.stringify(guest)]]);let fail=true;

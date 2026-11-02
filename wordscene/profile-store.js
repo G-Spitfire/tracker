@@ -23,11 +23,11 @@ function create({storage,validate,now=()=>Date.now()}){
   const raw=uid?storage.getItem(syncProfileKey(uid)):null,setting=parse(raw);
   if(uid&&setting?.uid===uid)storage.setItem(SYNC,raw);else storage.removeItem(SYNC);
  }
- function switchTo(uid){
+ function switchTo(uid,{recoverDamagedTarget=false}={}){
   recover();
   const target=identity(uid),previousMarker=storage.getItem(ACTIVE),from=previousMarker||'guest',previousRaw=storage.getItem(KEY);
-  if(previousRaw!==null)assertState(previousRaw);
   if(from===target){
+   if(previousRaw!==null)assertState(previousRaw);
    const activeRaw=previousRaw||JSON.stringify(EMPTY);if(previousRaw===null)storage.setItem(KEY,activeRaw);
    const activeProfile=profileKey(from);if(storage.getItem(activeProfile)!==activeRaw)storage.setItem(activeProfile,activeRaw);
    storage.setItem(ACTIVE,target);
@@ -40,8 +40,8 @@ function create({storage,validate,now=()=>Date.now()}){
   const savedTarget=storage.getItem(profileKey(target));
   // On the first sign-in, carry the existing guest progress into the new account.
   // Keep the original guest save untouched, and never replace an existing account profile.
-  const firstAccountLogin=!!uid&&previousMarker===null&&from==='guest'&&savedTarget===null;
-  const targetRaw=firstAccountLogin?sourceRaw:(savedTarget===null?JSON.stringify(EMPTY):(assertState(savedTarget),savedTarget));
+  const firstAccountLogin=!!uid&&previousMarker===null&&from==='guest'&&savedTarget===null&&!!validate(parse(sourceRaw));
+  const targetRaw=firstAccountLogin?sourceRaw:(savedTarget===null?JSON.stringify(EMPTY):(recoverDamagedTarget?savedTarget:(assertState(savedTarget),savedTarget)));
   const previousSync=parse(storage.getItem(SYNC));
   // Only carry an active sync preference when it belongs to the profile being saved.
   if(previousMarker&&from.startsWith('user:')&&previousSync?.uid===from.slice(5))storage.setItem(syncProfileKey(from.slice(5)),JSON.stringify(previousSync));
@@ -63,14 +63,10 @@ function create({storage,validate,now=()=>Date.now()}){
  function importGuest(uid){
   if(!uid||!matches(uid))throw new Error('Сначала откройте профиль нужного аккаунта');
   const guestRaw=storage.getItem(profileKey('guest'));if(!guestRaw||!validate(parse(guestRaw)))throw new Error('Сохранённый гостевой прогресс не найден или повреждён');
-  const current=storage.getItem(KEY);if(current!==null)assertState(current);
-  const currentRaw=current||JSON.stringify(EMPTY),backupKey=KEY+'-before-guest-import-'+encodeURIComponent(uid)+'-'+now();
-  storage.setItem(profileKey(identity(uid)),currentRaw);storage.setItem(backupKey,currentRaw);
-  if(storage.getItem(backupKey)!==currentRaw)throw new Error('Не удалось проверить резервную копию профиля');
-  storage.setItem(PENDING,JSON.stringify({from:identity(uid),to:identity(uid),previousRaw:currentRaw,targetRaw:guestRaw}));
-  try{storage.setItem(KEY,guestRaw);storage.setItem(ACTIVE,identity(uid));storage.removeItem(SYNC);storage.removeItem(syncProfileKey(uid));storage.removeItem(PENDING)}
-  catch(error){storage.setItem(KEY,currentRaw);storage.removeItem(PENDING);throw error}
-  return {backupKey};
+  const B=typeof module!=='undefined'&&module.exports?require('./backup-local.js'):root.WordSceneBackup;
+  const device=B.create({storage,validate,now,disable:()=>{storage.removeItem(SYNC);storage.removeItem(syncProfileKey(uid))}});
+  device.restore(device.preview(JSON.stringify({format:'wordscene-backup',version:1,progress:parse(guestRaw)})));
+  return {backupKey:device.rollbackKey()};
  }
  return {switchTo,matches,activeId,hasGuestProgress,importGuest,profileKey,syncProfileKey,ACTIVE,PENDING,KEY};
 }

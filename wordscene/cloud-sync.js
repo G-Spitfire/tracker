@@ -10,6 +10,8 @@ const exportKey=uid=>CONFLICT_KEY+'-exported-'+encodeURIComponent(uid);
 function create({auth,cloud,storage,validate,now=()=>Date.now(),reload=()=>{},canSync=()=>true,onSettings=()=>{},onDisable=()=>{}}){
  if(!auth||!cloud||!storage||typeof validate!=='function')throw new Error('Missing sync dependencies');
  let busy=false;
+ const B=typeof module!=='undefined'&&module.exports?require('./backup-local.js'):root.WordSceneBackup;
+ const device=B.create({storage,validate,now,disable:()=>disable()});
  const uid=()=>auth.currentUser?.uid||null;
  const settings=()=>{try{return JSON.parse(storage.getItem(KEY)||'null')}catch{return null}};
  const saveSettings=value=>{storage.setItem(KEY,JSON.stringify(value));onSettings(value)};
@@ -26,8 +28,9 @@ function create({auth,cloud,storage,validate,now=()=>Date.now(),reload=()=>{},ca
   try{history=JSON.parse(storage.getItem(key)||'[]')}catch{}
   if(!Array.isArray(history))history=[];
   const signature=r=>JSON.stringify([r?.cloud?.revision,stable(r?.local?.progress),stable(r?.cloud?.progress)]);
-  if(history.some(item=>signature(item)===signature(record)))return;
-  history.push(copy(record));const raw=JSON.stringify(history);storage.setItem(key,raw);
+  if(!history.some(item=>signature(item)===signature(record)))history.push(copy(record));
+  while(history.length>3||(history.length>1&&new TextEncoder().encode(JSON.stringify(history)).length>2*1024*1024))history.shift();
+  const raw=JSON.stringify(history);if(new TextEncoder().encode(raw).length>2*1024*1024)throw Error('Снимок слишком большой. Сохраните его в файл перед заменой.');storage.setItem(key,raw);
   if(storage.getItem(key)!==raw)throw new Error('Не удалось сохранить резерв конфликтной версии');
  }
  function captureConflict(localCopy,remote){
@@ -147,13 +150,41 @@ function create({auth,cloud,storage,validate,now=()=>Date.now(),reload=()=>{},ca
    const afterWrite=local();if(afterWrite.fingerprint!==current.fingerprint){await exportConflict();throw new Error('Локальный прогресс изменился во время записи. Скачайте обе версии ещё раз.')}
    saveSettings({uid:user,revision:result.revision,baseline:current.fingerprint});clearConflict(user);return {status:'kept-local',revision:result.revision};
   }
-  const currentRaw=storage.getItem('word-scenes-v5');if(currentRaw!==null&&!validate(JSON.parse(currentRaw)))throw new Error('Локальные данные повреждены: восстановление остановлено');
-  if(currentRaw!==null){const key='word-scenes-v5-before-cloud-restore-'+now();storage.setItem(key,currentRaw);if(storage.getItem(key)!==currentRaw)throw new Error('Не удалось сохранить резервную копию')}
-  const rollback=JSON.stringify({format:'wordscene-backup',version:1,profile:storage.getItem('wordscene-active-profile-v1')||'guest',progress:current.value});const rollbackKey='wordscene-rollback-v1-'+encodeURIComponent(storage.getItem('wordscene-active-profile-v1')||'guest');storage.setItem(rollbackKey,rollback);if(storage.getItem(rollbackKey)!==rollback)throw new Error('Не удалось проверить откатную копию');
-  const next=JSON.stringify(selected);storage.setItem('word-scenes-v5',next);if(storage.getItem('word-scenes-v5')!==next){if(currentRaw!==null)storage.setItem('word-scenes-v5',currentRaw);throw new Error('Не удалось проверить восстановление')}
-  disable();clearConflict(user);reload();return {status:'kept-cloud',revision:latest.revision};
+  device.restore(device.preview(JSON.stringify({format:'wordscene-backup',version:1,progress:selected})));
+  clearConflict(user);reload();return {status:'kept-cloud',revision:latest.revision};
  }
- return {enable,disable,enabled,syncOnce,bootstrapBackup,getConflict,getConflictHistory,exportConflict,markConflictExported,isConflictExported,prepareConflict,resolve,stable,conflictKey:scopedKey};
+ async function prepareRestore(){
+  const user=uid();if(!user||!canSync(user))throw Error('Сначала войдите в нужный аккаунт');
+  const remote=await cloud.read();if(uid()!==user||!canSync(user))throw Error('Аккаунт изменился');
+  if(!remote.exists)throw Error('Облачной копии пока нет');
+  const ticket=device.preview(JSON.stringify({format:'wordscene-backup',version:1,uid:user,progress:remote.payload}));
+  return {uid:user,revision:remote.revision,remoteFingerprint:stable(remote.payload),ticket,local:device.inspect().progress};
+ }
+ async function checkPrepared(prepared){
+  if(!prepared||uid()!==prepared.uid||!canSync(prepared.uid))throw Error('Аккаунт изменился');
+  const remote=await cloud.read();
+  if(uid()!==prepared.uid||!canSync(prepared.uid))throw Error('Аккаунт изменился');
+  if(!remote.exists||remote.revision!==prepared.revision||stable(remote.payload)!==prepared.remoteFingerprint||stable(prepared.ticket.backup.progress)!==prepared.remoteFingerprint)throw Error('Облачная копия изменилась. Сравните её заново.');
+  if(prepared.ticket.previous!==storage.getItem('word-scenes-v5')||prepared.ticket.profile!==(storage.getItem('wordscene-active-profile-v1')||'guest'))throw Error('Прогресс устройства изменился. Сравните копии заново.');
+  return remote;
+ }
+ async function restorePrepared(prepared){
+  await checkPrepared(prepared);
+  device.restore(prepared.ticket);clearConflict(prepared.uid);reload();
+  return {status:'kept-cloud',revision:prepared.revision};
+ }
+ async function keepPrepared(prepared){
+  const remote=await checkPrepared(prepared),current=local();
+  // Retain the remote version locally before replacing it; no download is required.
+  captureConflict(current,remote);archiveConflict(prepared.uid,readConflict(prepared.uid));
+  const result=await cloud.write(current.value,remote.revision);
+  if(uid()!==prepared.uid||!canSync(prepared.uid))throw Error('Аккаунт изменился; проверьте облачную копию');
+  const confirmed=await cloud.read();
+  if(uid()!==prepared.uid||!canSync(prepared.uid)||!confirmed.exists||confirmed.revision!==result.revision||stable(confirmed.payload)!==current.fingerprint)throw Error('Не удалось подтвердить отправку. Обе версии сохранены.');
+  saveSettings({uid:prepared.uid,revision:result.revision,baseline:current.fingerprint});clearConflict(prepared.uid);
+  return {status:local().raw===current.raw?'pushed':'local-changed',revision:result.revision};
+ }
+ return {prepareRestore,restorePrepared,keepPrepared,enable,disable,enabled,syncOnce,bootstrapBackup,getConflict,getConflictHistory,exportConflict,markConflictExported,isConflictExported,prepareConflict,resolve,stable,conflictKey:scopedKey};
 }
 const api={create,KEY,CONFLICT_KEY,stable,conflictKey:scopedKey};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.WordSceneCloudSync=api;
