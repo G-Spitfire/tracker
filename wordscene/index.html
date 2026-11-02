@@ -403,6 +403,16 @@ select{display:block;width:100%;max-width:100%;min-height:46px;border:1px solid 
 .bottom-nav:not([hidden]){position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:100%;z-index:40}
 .with-nav main{overflow:hidden}
 .with-nav .app-screen{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
+/* Home: scroll the whole document (including header); only bottom navigation stays fixed. */
+body.home-page-scroll{overflow-y:auto;min-height:100dvh}
+body.home-page-scroll.with-nav main{height:auto;min-height:0;overflow:visible;padding-bottom:calc(82px + env(safe-area-inset-bottom))}
+body.home-page-scroll .home-screen{height:auto;min-height:0;overflow:visible}
+body.home-page-scroll .home-scroll{height:auto;min-height:0;overflow:visible;overscroll-behavior:auto}
+body.home-page-scroll .home-content{overflow:visible}
+@media(min-width:700px){
+ body.home-page-scroll.with-nav main{height:auto;min-height:0;margin-bottom:0;border-radius:0}
+ body.home-page-scroll .home-screen{min-height:0}
+}
 </style></head><body><header><button class="brand" onclick="pause()" aria-label="На главную">WordScene</button><span id="brand-berry" aria-hidden="true"></span><div class="header-tools"><button id="sound-toggle" class="sound-toggle" onclick="toggleSound()" aria-pressed="true" aria-label="Выключить сигналы ответов">Сигналы вкл</button></div></header><main id="app"></main><nav id="bottom-nav" class="bottom-nav" aria-label="Основная навигация"></nav><div id="toast" role="status"></div><script src="./review-engine.js"></script><script src="./habit-engine.js"></script><script src="./state-guard.js"></script><script src="./writing-engine.js"></script><script src="./topics.js"></script><script src="./content.js"></script><script>
 const words=[
 {en:'mug',ru:'кружка',ipa:'/mʌɡ/',cue:'маг',scene:'Маг взмахивает палочкой — и из огромной кружки вылетает искристый фонтан. Кружка размером с самого мага!',hint:'Представь ручку кружки, мага рядом и вспышку из кружки.'},
@@ -629,7 +639,7 @@ function berryArt(kind='sprout'){
  return `<svg viewBox="0 0 200 180" class="berry-art berry-${kind}" aria-hidden="true">${art}</svg>`;
 }
 function navigation(){
- const visible=['home','words','word','topics','parents','help'].includes(screen);document.body.classList.toggle('with-nav',visible);
+ const visible=['home','words','word','topics','parents','help'].includes(screen);document.body.classList.toggle('with-nav',visible);document.body.classList.toggle('home-page-scroll',screen==='home');
  const nav=$('bottom-nav');nav.hidden=!visible;const inWords=['words','word','topics'].includes(screen);
  const house='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v11h-6v-7H9v7H3Z"/></svg>';
  const list='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M9 7h6M9 12h6M9 17h4"/></svg>';
