@@ -335,7 +335,7 @@ main{max-width:520px;height:calc(100dvh - 76px - env(safe-area-inset-top));paddi
 .home-content>.habit-praise h2{font-size:27px}
 .home-content>.habit-praise .habit-week{margin:10px 0}
 .home-content>.habit-praise p{font-size:14px;margin-bottom:10px}
-body.is-writing main{height:calc(var(--writing-vh,100dvh) - 76px - env(safe-area-inset-top))}
+body.is-writing main{height:calc(var(--writing-vh,100dvh) - 76px - env(safe-area-inset-top));min-height:0}body.is-writing .writing-card{justify-content:flex-start;min-height:0;padding-top:8px}body.is-writing .writing-prompt{position:relative;top:auto;flex-shrink:0}body.is-writing .training-body{overflow-y:auto;scroll-padding-top:8px}body.is-writing .action-dock{flex-shrink:0}
 #toast{bottom:90px}
 @media(min-width:700px){header{margin-top:16px;border-radius:26px 26px 0 0}}
 @media(min-width:700px){main{height:calc(100dvh - 108px - env(safe-area-inset-top));border-radius:0 0 26px 26px}}
@@ -639,7 +639,7 @@ function reviewIds(){const due=requiredIds();if(due.length)return due.slice(0,15
 
 
 function pause(){if(s?.phase==='test'&&!s.revealed){s.ignoreTiming=true;s.roundValid=false}save();window.WordSceneCloudBackup?.flush?.();home()}
-function writingViewport(){const height=window.visualViewport?.height||window.innerHeight;if(height)document.documentElement?.style.setProperty('--writing-vh',height+'px');if(screen==='writing')window.requestAnimationFrame?.(()=>{const input=$('writing-answer');if(input&&document.activeElement===input)input.scrollIntoView({block:'nearest'})})}
+function writingViewport(){const viewport=window.visualViewport;const height=viewport?.height||window.innerHeight;if(height)document.documentElement?.style.setProperty('--writing-vh',height+'px')}
 function shell(content){window.dispatchEvent(new Event('wordscene-screen-change'));$('app').innerHTML=content;navigation();document.body?.classList.toggle('is-writing',screen==='writing');writingViewport();window.scrollTo?.(0,0)}
 function dockActions(){const dock=$('action-dock');if(!dock)return;const actions=document.querySelector('.training-body .bottom-actions')||document.querySelector('.training-body #controls');if(actions)dock.append(actions)}
 function lessonStage(){if(!s||['result','between'].includes(s.phase))return '';const parts=['Запоминание','На английском','На русском','Написание'];const at=s.part==='review'?-1:s.phase==='learn'?0:s.phase==='writing'?3:s.dir===1?1:2;return `<p class="lesson-stage">${s.part==='writing'?'Написание · повтор ошибок':s.part==='review'?'Повторение · каждое слово в обе стороны':`Шаг ${at+1} из 4 · ${parts[at]}${['test','round'].includes(s.phase)?' · проход '+s.round+' (минимум 3)':''}`}</p>`}
@@ -663,7 +663,7 @@ function navigation(){
 }
 function habitWeek(){const st=H.stats(data.habit),date=new Date(),offset=(date.getDay()+6)%7,monday=H.shift(st.today,-offset);
  const ring=(radius,color,on,width)=>`<circle cx="22" cy="22" r="${radius}" fill="none" stroke="${on?color:'currentColor'}" stroke-opacity="${on?'1':'.12'}" stroke-width="${width}"/>`;
- return `<div class="habit-week habit-rings" aria-label="Прогресс за неделю">${['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map((name,i)=>{const day=H.shift(monday,i),d=data.habit.days[day]||{},done=!!d.qualified,today=day===st.today,future=day>st.today,learned=!!d.newDone||!!d.newActivity,reviewed=(d.reviews?.length||0)>0||!!d.reviewActivity;const status=future?'впереди':[learned?'новые слова':'',reviewed?'повторение':'',done?'дневная норма выполнена':''].filter(Boolean).join(', ')||'нет активности';
+ return `<div class="habit-week habit-rings" aria-label="Прогресс за неделю">${['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map((name,i)=>{const day=H.shift(monday,i),d=data.habit.days[day]||{},today=day===st.today,future=day>st.today,learned=!!d.newDone||!!d.newActivity,reviewed=(d.reviews?.length||0)>0||!!d.reviewActivity,done=learned&&reviewed;const status=future?'впереди':[learned?'новые слова':'',reviewed?'повторение':'',done?'новые слова и повторение выполнены':''].filter(Boolean).join(', ')||'нет активности';
  return `<div class="habit-ring-day ${today?'today':''} ${future?'future':''}" aria-label="${name}: ${status}"><svg viewBox="0 0 44 44" aria-hidden="true">${ring(17.5,'#e3ab48',learned,5)}${ring(11.5,'#5a9c83',reviewed,4)}${done?'<path d="M17 22l3.5 3.5 7-8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>':''}</svg><small>${name}</small></div>`}).join('')}</div><div class="habit-ring-legend"><span><i class="new"></i>Новые слова</span><span><i class="review"></i>Повторение</span></div>`;
 }
 function habitCard(){const st=H.stats(data.habit),available=trainedIds().length,goal=Math.max(1,Math.min(5,available));
@@ -777,7 +777,7 @@ function writing(){
  if(s.writingBreak){frame('Повтор написания',0,`<div class="interlude center"><h2>${s.writingPass===1?'Вернёмся к ошибкам':'Ещё одна проверка'}</h2><p>Проверим написание слов: ${s.writingIds.length}.</p><p>Дополнительный проход ${s.writingPass} из 2. Вспомни слово самостоятельно, без подсказки.</p><div class="bottom-actions">${btn('Продолжить','resumeWritingPass()')}</div></div>`);return}
  const i=s.writingIds[s.writingIndex],w=words[i],p=record(i),checked=s.writingChecked,label=s.writingPass?`Повтор ${s.writingPass} из 2`:'Первый проход';
  frame(`Написание · ${label} · ${s.writingIndex+1} из ${s.writingIds.length}`,s.writingIndex/s.writingIds.length*100,`<div class="writing-card"><p class="eyebrow">${checked?'Сверь написание':'Напиши по-английски'}</p><h1 class="writing-prompt">${w.ru}</h1>${checked?writingFeedback(p,w):`<form id="writing-form" onsubmit="checkWriting();return false"><label for="writing-answer">Английское слово</label><input id="writing-answer" name="wordscene-writing" type="text" lang="en" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="done" maxlength="80" placeholder="Введи слово"><p class="note">${s.writingPass?'Вспомни без подсказки. Если не помнишь — нажми «Не помню».':'Слова с ошибками и «Не помню» проверим ещё два раза.'}</p></form>`}<div class="bottom-actions">${checked?btn(s.writingIndex===s.writingIds.length-1?(s.writingPass===2||!s.writingPass&&!s.writingFirstErrors.length?'Завершить →':'К следующему проходу →'):'Дальше →','nextWriting()'):`<button class="primary" type="submit" form="writing-form">Проверить</button>${btn('Не помню','checkWriting(true)','secondary')}`}</div></div>`);
- if(!checked)$('writing-answer').focus({preventScroll:true});
+ // Do not auto-open the mobile keyboard: the prompt and input must remain visible first.
 }
 function resumeWritingPass(){if(!s?.writingBreak)return;s.writingBreak=false;save();writing()}
 function checkWriting(forgot=false){
