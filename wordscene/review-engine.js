@@ -34,7 +34,7 @@ function finish(p,{id,at=Date.now(),directions,clean}){
   const recent=r.days.filter(d=>d.day>(r.repairSince||'')).slice(-2);
   if(recent.length===2&&recent.every(d=>d.clean)){r.stage='spaced';r.interval=0;r.nextDay=addDays(today,INTERVALS[0])}
   else r.nextDay=addDays(today,1);
- }else{r.interval=Math.min(r.interval+1,INTERVALS.length-1);r.nextDay=addDays(today,INTERVALS[r.interval])}
+ }else{if(r.interval===INTERVALS.length-1&&!r.masteredAt)r.masteredAt=at;r.interval=Math.min(r.interval+1,INTERVALS.length-1);r.nextDay=addDays(today,INTERVALS[r.interval])}
  return true;
 }
 function due(p,at=Date.now()){const r=ensure(p,at);return !!r&&r.nextDay<=day(at)}
