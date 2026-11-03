@@ -12,11 +12,11 @@ panel.append(title,close,explanation,slot,info);document.body.append(panel);
 function open(){if(!panel.open)panel.showModal()}
 window.addEventListener('wordscene-open-settings',open);window.addEventListener('wordscene-screen-change',()=>{if(panel.open)panel.close()});
 const device=B.create({storage:localStorage,validate,disable:()=>{localStorage.removeItem('wordscene-sync-v1');const id=localStorage.getItem('wordscene-active-profile-v1');if(id?.startsWith('user:'))localStorage.removeItem('wordscene-sync-v1-profile-'+encodeURIComponent(id.slice(5)))}});
-const details=document.createElement('details'),summary=document.createElement('summary'),advancedCloud=document.createElement('div');summary.textContent='Восстановление прогресса';details.append(summary,advancedCloud);details.hidden=true;panel.append(details);
+const recoveryPanel=document.createElement('dialog');recoveryPanel.setAttribute('aria-label','Восстановление прогресса');recoveryPanel.style.cssText=panel.style.cssText;const recoveryTitle=document.createElement('h2');recoveryTitle.textContent='Восстановление прогресса';const recoveryClose=document.createElement('button');recoveryClose.textContent='Закрыть';recoveryClose.className='quiet';recoveryClose.onclick=()=>recoveryPanel.close();const advancedCloud=document.createElement('div');recoveryPanel.append(recoveryTitle,recoveryClose,advancedCloud);document.body.append(recoveryPanel);
 const button=label=>{const b=document.createElement('button');b.textContent=label;b.className='secondary wide';b.style.margin='8px 0';return b};
 const deviceExport=button('Скачать копию устройства'),fileInput=document.createElement('input'),undo=button('Отменить последнее восстановление');fileInput.type='file';fileInput.accept='.json,application/json';fileInput.setAttribute('aria-label','Восстановить из файла JSON');
 const choices=document.createElement('select');choices.setAttribute('aria-label','Версия из файла');choices.hidden=true;const importButton=button('Восстановить выбранную версию');importButton.hidden=true;
-const recoveryLabel=document.createElement('h3');recoveryLabel.textContent='Файлы и аварийное восстановление';details.append(recoveryLabel,deviceExport,fileInput,choices,importButton,undo);let selected=[];
+const recoveryLabel=document.createElement('h3');recoveryLabel.textContent='Файлы и аварийное восстановление';recoveryPanel.append(recoveryLabel,deviceExport,fileInput,choices,importButton,undo);let selected=[];
 async function applyFile(ticket){
  if(document.body.dataset.wordsceneProfileState==='switching')throw Error('Дождитесь переключения профиля');
  await window.WordSceneCloudBackup?.pause?.();
@@ -34,6 +34,6 @@ fileInput.onchange=async()=>{
 };
 importButton.onclick=async()=>{try{const item=selected[Number(choices.value)||0];if(!item)throw Error('Сначала выберите файл');await applyFile(device.preview(JSON.stringify(item.backup)))}catch(e){info.textContent=e.message}};
 undo.onclick=async()=>{try{await applyFile(device.rollback())}catch(e){info.textContent=e.message}};
-function showRecovery(){details.hidden=false;details.open=true;open()}
+function showRecovery(){if(!recoveryPanel.open)recoveryPanel.showModal()}
 window.WordSceneBackupUI={open,device,advancedCloud,showRecovery};
 })();
