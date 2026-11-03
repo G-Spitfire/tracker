@@ -848,15 +848,17 @@ function achievementPreview(){
 }
 function achievementLine(a){
  const learned=a.dated.filter(x=>x.origin==='learned').sort((x,y)=>x.date.localeCompare(y.date));
- if(!learned.length)return `<div class="achievement-empty">${a.origins.learned||a.origins.unknown?'История первых занятий не сохранилась. Новые выученные слова появятся на графике.':'Пока нет выученных здесь слов. Начни учить — и график появится!'}</div>`;
- const start=learned[0].date;
+ const undated=Math.max(0,a.origins.learned-learned.length);
+ const history=Object.keys(data.habit.days||{}).filter(d=>d<=a.today&&(data.habit.days[d].newDone||data.habit.days[d].newActivity)).sort();
+ if(!learned.length&&!undated)return `<div class="achievement-empty">Пока нет слов с сохранённой датой обучения. Новые слова появятся здесь после занятий.</div>`;
+ const start=[learned[0]?.date,history[0],a.today].filter(Boolean).sort()[0];
  const dateAt=d=>new Date(d+'T12:00:00');
  const elapsed=Math.max(0,Math.round((dateAt(a.today)-dateAt(start))/86400000));
  const mode=elapsed<=45?'day':elapsed<=365?'week':'month';
- const dates=[start],counts=[0];let total=0;
+ const dates=[start],counts=[undated];let total=undated;
  for(const item of learned){total++;if(item.date===dates.at(-1))counts[counts.length-1]=total;else{dates.push(item.date);counts.push(total)}}
  if(dates.at(-1)!==a.today){dates.push(a.today);counts.push(total)}
- if(dates.length===1){dates.unshift(H.shift(start,-1));counts.unshift(0)}
+ if(dates.length===1){dates.unshift(H.shift(start,-1));counts.unshift(total)}
  const w=320,h=150,left=16,right=27,top=21,bottom=38,max=Math.max(1,total);
  const span=Math.max(1,dateAt(a.today)-dateAt(dates[0]));
  const points=dates.map((d,i)=>[left+(dateAt(d)-dateAt(dates[0]))/span*(w-left-right),top+(max-counts[i])*(h-top-bottom)/max]);
@@ -865,12 +867,12 @@ function achievementLine(a){
  const ticks=Array.from({length:Math.min(5,elapsed+1)},(_,i)=>i/(Math.min(5,elapsed+1)-1||1));
  const labels=ticks.map(f=>{const d=H.shift(start,Math.round(elapsed*f));return `<text x="${(left+f*(w-left-right)).toFixed(1)}" y="141" text-anchor="${f===0?'start':f===1?'end':'middle'}" font-size="10" fill="#786588">${fmt(d)}</text>`}).join('');
  const last=points.at(-1);
- return `<svg class="achievement-chart" viewBox="0 0 320 150" role="img" aria-label="Рост словаря с первого выученного слова"><path d="M16 112H293" stroke="#e7ddee"/><text x="5" y="16" font-size="10" fill="#786588">Слов</text><path d="${line}" fill="none" stroke="#6554b8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>${labels}<circle cx="${last[0]}" cy="${last[1]}" r="4" fill="#6554b8"/><text x="${last[0]-7}" y="${Math.max(14,last[1]-9)}" text-anchor="end" font-size="13" font-weight="700" fill="#352044">${total}</text></svg>`;
+ return `<svg class="achievement-chart" viewBox="0 0 320 150" role="img" aria-label="Рост словаря с первого выученного слова"><path d="M16 112H293" stroke="#e7ddee"/><text x="5" y="16" font-size="10" fill="#786588">Слов</text><path d="${line}" fill="none" stroke="#6554b8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>${labels}<circle cx="${last[0]}" cy="${last[1]}" r="4" fill="#6554b8"/><text x="${last[0]-7}" y="${Math.max(14,last[1]-9)}" text-anchor="end" font-size="13" font-weight="700" fill="#352044">${total}</text></svg>${undated?`<p class="achievement-note">${undated} ${undated===1?'слово учтено':'слов учтено'} в начальном результате без точной даты изучения.</p>`:''}`;
 }
 function achievements(){
  screen='parents';const a=achievementData(),labels=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],monday=weekMonday(achievementsWeekOffset),days=Array.from({length:7},(_,i)=>H.shift(monday,i)),counts=days.map(d=>a.dated.filter(x=>x.origin==='learned'&&x.date===d).length),max=Math.max(1,...counts);
  const bars=counts.map((n,i)=>`<div class="achievement-bar-col"><b>${days[i]>a.today?'—':n}</b><div class="achievement-bar-track"><div class="achievement-bar-fill" style="height:${days[i]>a.today?0:n/max*100}%"></div></div><span>${labels[i]}</span></div>`).join('');
- shell(`<section class="app-screen ios-settings"><div class="topline">${btn('← Настройки','settings()','quiet')}</div><h1>Мои достижения</h1><div class="achievement-grid"><div class="achievement-tile"><b>${a.origins.known}</b><span>Знал раньше</span></div><div class="achievement-tile"><b>${a.origins.learned}</b><span>Выучил здесь</span></div><div class="achievement-tile"><b>${a.total}</b><span>Всего знаю</span></div></div><div class="achievement-panel"><h2>Как растёт мой словарь</h2>${achievementLine(a)}<p class="achievement-note">С начала обучения · только выученные здесь слова</p></div><div class="achievement-panel"><h2>Сколько слов я учил каждый день</h2>${weekSwitcher(achievementsWeekOffset,"changeAchievementsWeek")}<div class="achievement-bars">${bars}</div></div></section>`);
+ shell(`<section class="app-screen ios-settings"><div class="topline">${btn('← Настройки','settings()','quiet')}</div><h1>Мои достижения</h1><div class="achievement-grid"><div class="achievement-tile"><b>${a.origins.known}</b><span>Знал раньше</span></div><div class="achievement-tile"><b>${a.origins.learned}</b><span>Выучил здесь</span></div><div class="achievement-tile"><b>${a.total}</b><span>Всего знаю</span></div></div><div class="achievement-panel"><h2>Как растёт мой словарь</h2>${achievementLine(a)}<p class="achievement-note">Вся доступная история · только выученные здесь слова</p></div><div class="achievement-panel"><h2>Сколько слов я учил каждый день</h2>${weekSwitcher(achievementsWeekOffset,"changeAchievementsWeek")}<div class="achievement-bars">${bars}</div></div></section>`);
 }
 
 function home(){screen='home';const fresh=freshIds(),trained=trainedIds(),due=requiredIds(),active=s&&!['result','between'].includes(s.phase),st=H.stats(data.habit),praise=H.takePraise(data.habit);if(praise)save();
