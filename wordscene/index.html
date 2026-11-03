@@ -621,6 +621,44 @@ body.is-writing.writing-keyboard #writing-answer{min-height:44px;font-size:20px}
 .statistics-recent .achievement-metric b{font-size:20px;color:var(--primary);font-variant-numeric:tabular-nums}
 .statistics-recent .achievement-metric span{white-space:normal;line-height:1.3}
 .statistics-recent .achievement-delta{display:inline-block;font-size:10px;color:var(--muted)}
+
+/* Child-friendly statistics. Layout only; word counts and stored history are unchanged. */
+.statistics-screen{gap:0}
+.statistics-screen>h1{font-size:26px;margin-bottom:16px}
+.statistics-summary{background:var(--primary-soft);border-radius:20px;padding:16px;margin-bottom:17px}
+.statistics-summary h2,.statistics-section h2{font-size:17px;margin:0 0 9px}
+.statistics-total{display:flex;align-items:baseline;gap:7px;margin-bottom:11px}
+.statistics-total strong{font-size:43px;line-height:1.1;color:var(--primary);font-variant-numeric:tabular-nums}
+.statistics-total span{font-size:16px;color:var(--muted)}
+.statistics-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.statistics-summary-grid>div{display:flex;flex-direction:column;align-items:center;gap:3px;padding:11px 7px;border-radius:13px;background:#fffdfd;text-align:center;min-width:0}
+.statistics-summary-grid strong{font-size:24px;color:var(--ink);font-variant-numeric:tabular-nums}
+.statistics-summary-grid span{font-size:11px;color:var(--muted)}
+.statistics-unknown{font-size:12px;color:var(--muted);margin:10px 0 0}
+.statistics-section{margin-bottom:12px}
+.statistics-recent{margin-bottom:0}
+.statistics-recent .achievement-metric{background:#fffdfd;border:1px solid var(--border)}
+.statistics-recent .achievement-metric b{display:block;font-size:25px}
+.statistics-recent .achievement-metric span{display:block;font-size:11px;color:var(--ink);font-weight:700}
+.statistics-recent .achievement-metric>small{display:block;font-size:10px;color:var(--muted);line-height:1.35}
+.statistics-recent .achievement-metric .achievement-delta{margin-top:3px}
+.habit-calendar{margin-top:4px;margin-bottom:13px}
+.habit-calendar .habit-ring-legend{justify-content:center;gap:9px;margin-top:13px;font-size:11px}
+.habit-calendar .habit-ring-legend i{width:10px;height:10px}
+.calendar-hint{margin:13px 0 0;color:var(--muted);font-size:12px;text-align:center}
+.month-day{background:transparent;border:0;padding:0;cursor:pointer;border-radius:9px}
+.month-day:focus-visible{outline:2px solid var(--primary);outline-offset:1px}
+.month-day.selected{background:rgba(120,81,184,.15)}
+.month-day.future{cursor:default}
+.calendar-day-details{background:#fffdfd;border-radius:13px;padding:13px;margin-top:11px}
+.calendar-day-details strong{font-size:14px;color:var(--ink)}
+.calendar-day-details p{font-size:13px;margin:6px 0 0;color:var(--muted);line-height:1.5}
+.calendar-day-details .calendar-day-complete{color:#267b4a;font-weight:700}
+.statistics-growth{margin-top:0}
+.statistics-growth-total{display:flex;align-items:baseline;gap:8px;margin:0 0 9px}
+.statistics-growth-total strong{font-size:26px;color:var(--primary);font-variant-numeric:tabular-nums}
+.statistics-growth-total span{font-size:12px;color:var(--muted)}
+@media(max-width:360px){.statistics-summary{padding:13px}.statistics-recent .achievement-metric{padding:8px 2px}.statistics-recent .achievement-metric b{font-size:23px}}
 </style></head><body><header><button class="brand" onclick="pause()" aria-label="На главную">WordScene</button></header><main id="app"></main><nav id="bottom-nav" class="bottom-nav" aria-label="Основная навигация"></nav><div id="toast" role="status"></div><script src="./review-engine.js"></script><script src="./habit-engine.js"></script><script src="./state-guard.js"></script><script src="./writing-engine.js"></script><script src="./topics.js"></script><script src="./content.js"></script><script>
 const words=[
 {en:'mug',ru:'кружка',ipa:'/mʌɡ/',cue:'маг',scene:'Маг взмахивает палочкой — и из огромной кружки вылетает искристый фонтан. Кружка размером с самого мага!',hint:'Представь ручку кружки, мага рядом и вспышку из кружки.'},
@@ -866,19 +904,29 @@ function navigation(){
 
 function weekMonday(){const today=H.day(),dow=(new Date(today+'T12:00:00').getDay()+6)%7;return H.shift(today,-dow)}
 function weekHeading(){const start=weekMonday(),end=H.shift(start,6),fmt=d=>{const [,m,day]=d.split('-').map(Number);return day+' '+['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'][m-1]};return fmt(start)+' — '+fmt(end)}
-let statisticsMonth=null;
+let statisticsMonth=null,selectedStatisticsDay=null;
+function renderStatisticsCalendar(){
+ const current=document.querySelector('.habit-calendar');
+ if(current)current.outerHTML=statisticsCalendar();
+}
 function changeStatisticsMonth(delta){
  const current=H.day().slice(0,7),month=statisticsMonth||current,[y,m]=month.split('-').map(Number);
  const next=new Date(Date.UTC(y,m-1+delta,1)).toISOString().slice(0,7);
- if(next>current)return;statisticsMonth=next;achievements();
+ if(next>current||next<'1900-01')return;
+ statisticsMonth=next;selectedStatisticsDay=null;renderStatisticsCalendar();
 }
 function chooseStatisticsMonth(value){
  if(!/^\d{4}-\d{2}$/.test(value))return;
  const [y,m]=value.split('-').map(Number);
  if(y<1900||m<1||m>12||value>H.day().slice(0,7))return;
- statisticsMonth=value;achievements();
+ statisticsMonth=value;selectedStatisticsDay=null;renderStatisticsCalendar();
 }
-
+function showStatisticsDay(date){
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||date>H.day()||date.slice(0,7)!==statisticsMonth)return;
+ selectedStatisticsDay=selectedStatisticsDay===date?null:date;
+ const current=document.querySelector('.habit-calendar');
+ if(current)current.outerHTML=statisticsCalendar();
+}
 function habitDayState(date){
  const d=data.habit.days?.[date]||{};
  return {learned:!!d.newDone||!!d.newActivity,reviewed:(d.reviews?.length||0)>0||!!d.reviewActivity,done:!!d.qualified};
@@ -892,6 +940,16 @@ function habitDayDescription(date){
  const state=habitDayState(date);
  return [state.learned?'новые слова':'',state.reviewed?'повторение':'',state.done?'занятие засчитано':''].filter(Boolean).join(', ')||'нет отмеченных занятий';
 }
+function statisticsDayDetails(date){
+ const state=habitDayState(date),parts=[];
+ if(state.learned)parts.push('учил новые слова');
+ if(state.reviewed)parts.push('повторял знакомые');
+ const summary=parts.length?('Ты '+parts.join(' и ')+'.'):'В этот день занятий пока не отмечено.';
+ const status=state.done?'<p class="calendar-day-complete">✓ Занятие засчитано</p>':'';
+ const [year,month,day]=date.split('-').map(Number);
+ const heading=new Date(year,month-1,day).toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
+ return '<div class="calendar-day-details" id="calendar-day-details" role="status"><strong>'+heading+'</strong><p>'+summary+'</p>'+status+'</div>';
+}
 function statisticsCalendar(){
  const current=H.day().slice(0,7),month=statisticsMonth&&statisticsMonth<=current?statisticsMonth:current;
  statisticsMonth=month;
@@ -899,12 +957,12 @@ function statisticsCalendar(){
  const monthLabel=new Date(y,m-1,15).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
  const days=Array.from({length:offset},()=>'<div class="month-empty" aria-hidden="true"></div>');
  for(let day=1;day<=count;day++){
-  const date=month+'-'+String(day).padStart(2,'0'),future=date>H.day();
-  days.push('<div class="month-day'+(date===H.day()?' today':'')+(future?' future':'')+'" aria-label="'+day+' '+monthLabel+': '+(future?'впереди':habitDayDescription(date))+'">'+habitDayRings(date)+'<span>'+day+'</span></div>');
+  const date=month+'-'+String(day).padStart(2,'0'),future=date>H.day(),selected=selectedStatisticsDay===date;
+  days.push('<button type="button" class="month-day'+(date===H.day()?' today':'')+(future?' future':'')+(selected?' selected':'')+'" aria-label="'+day+' '+monthLabel+': '+(future?'впереди':habitDayDescription(date))+'" '+(future?'disabled':('onclick="showStatisticsDay(\''+date+'\')" aria-pressed="'+selected+'"'))+'>'+habitDayRings(date)+'<span>'+day+'</span></button>');
  }
  while(days.length%7)days.push('<div class="month-empty" aria-hidden="true"></div>');
- const legend='<div class="habit-ring-legend"><span><i class="new"></i>Новые</span><span><i class="review"></i>Повторение</span></div>';
- return '<section class="achievement-panel habit-calendar"><div class="calendar-header"><h2>Календарь занятий</h2>'+legend+'</div><div class="calendar-controls"><button type="button" onclick="changeStatisticsMonth(-1)" aria-label="Предыдущий месяц">‹</button><label class="calendar-month-label" for="calendar-month">'+monthLabel+'</label><input id="calendar-month" type="month" aria-label="Выбрать месяц" max="'+current+'" value="'+month+'" onchange="chooseStatisticsMonth(this.value)"><button type="button" onclick="changeStatisticsMonth(1)" aria-label="Следующий месяц" '+(month>=current?'disabled':'')+'>›</button></div><div class="calendar-weekdays">'+['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(d=>'<span>'+d+'</span>').join('')+'</div><div class="calendar-days">'+days.join('')+'</div></section>';
+ const legend='<div class="habit-ring-legend"><span><i class="new"></i>Учил новые</span><span><i class="review"></i>Повторял</span></div>';
+ return '<section class="achievement-panel habit-calendar"><div class="calendar-header"><h2>Мои занятия</h2></div><div class="calendar-controls"><button type="button" onclick="changeStatisticsMonth(-1)" aria-label="Предыдущий месяц">‹</button><label class="calendar-month-label" for="calendar-month">'+monthLabel+'</label><input id="calendar-month" type="month" aria-label="Выбрать месяц" max="'+current+'" value="'+month+'" onchange="chooseStatisticsMonth(this.value)"><button type="button" onclick="changeStatisticsMonth(1)" aria-label="Следующий месяц" '+(month>=current?'disabled':'')+'>›</button></div><div class="calendar-weekdays">'+['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(d=>'<span>'+d+'</span>').join('')+'</div><div class="calendar-days">'+days.join('')+'</div>'+legend+'<p class="calendar-hint">Нажми на день и узнай, чем занимался</p>'+(selectedStatisticsDay&&selectedStatisticsDay.slice(0,7)===month?statisticsDayDetails(selectedStatisticsDay):'')+'</section>';
 }
 function habitWeek(){const st=H.stats(data.habit),monday=weekMonday();
  return `<div class="habit-week habit-rings" aria-label="Прогресс за неделю">${['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map((name,i)=>{const day=H.shift(monday,i),d=data.habit.days[day]||{},today=day===st.today,future=day>st.today,learned=!!d.newDone||!!d.newActivity,reviewed=(d.reviews?.length||0)>0||!!d.reviewActivity,done=!!d.qualified;const status=future?'впереди':[learned?'новые слова':'',reviewed?'повторение':'',done?'новые слова и повторение выполнены':''].filter(Boolean).join(', ')||'нет активности';
@@ -964,12 +1022,22 @@ function achievementLine(a){
 function achievements(){
  screen='statistics';const a=achievementData();
  const delta=a.todayCount-a.yesterdayCount,trend=delta>0?'▲ +'+delta:delta<0?'▼ −'+Math.abs(delta):'= 0';
- shell(`<section class="app-screen ios-settings statistics-screen"><h1>Статистика</h1>
- <section aria-label="Мои достижения"><h2 class="statistics-section-heading">Мои достижения</h2><div class="achievement-grid"><div class="achievement-tile"><b>${a.origins.known}</b><span>Знал раньше</span></div><div class="achievement-tile"><b>${a.origins.learned}</b><span>Выучил здесь</span></div><div class="achievement-tile"><b>${a.total}</b><span>Всего знаю</span></div></div>
- <div class="achievement-mini statistics-recent"><div class="achievement-metric"><b>+${a.week}</b><span>Неделя</span></div><div class="achievement-metric"><b>${a.yesterdayCount}</b><span>Вчера</span></div><div class="achievement-metric"><b>${a.todayCount}</b><span>Сегодня <small class="achievement-delta">${trend}</small></span></div></div></section>
+ shell(`<section class="app-screen ios-settings statistics-screen"><h1>Мои успехи</h1>
+ <section class="statistics-summary" aria-label="Сколько слов я знаю">
+  <h2>Сколько слов я знаю</h2>
+  <div class="statistics-total"><strong>${a.total}</strong><span>слов</span></div>
+  <div class="statistics-summary-grid"><div><strong>${a.origins.known}</strong><span>Знал раньше</span></div><div><strong>${a.origins.learned}</strong><span>Выучил в WordScene</span></div></div>
+  ${a.origins.unknown?'<p class="statistics-unknown">Ещё '+a.origins.unknown+' слов без информации об их происхождении.</p>':''}
+ </section>
+ <section class="statistics-section" aria-label="Что я выучил недавно">
+  <h2>Что я выучил недавно</h2>
+  <div class="achievement-mini statistics-recent"><div class="achievement-metric"><b>${a.week}</b><span>За неделю</span><small>новых слов</small></div><div class="achievement-metric"><b>${a.yesterdayCount}</b><span>Вчера</span><small>новых слов</small></div><div class="achievement-metric"><b>${a.todayCount}</b><span>Сегодня</span><small>новых слов</small><small class="achievement-delta">${trend} к вчера</small></div></div>
+ </section>
  ${statisticsCalendar()}
- <div class="achievement-panel"><h2>Как растёт мой словарь</h2>${achievementLine(a)}<p class="achievement-note">Вся доступная история · только выученные здесь слова</p></div></section>`);
+ <section class="achievement-panel statistics-growth"><h2>Мой словарь растёт!</h2><div class="statistics-growth-total"><strong>${a.origins.learned}</strong><span>слов выучил в WordScene</span></div>${achievementLine(a)}<p class="achievement-note">Чем выше линия, тем больше слов ты выучил в WordScene.</p>${a.origins.unknown?'<p class="achievement-note">Для некоторых старых слов нет точной истории изучения.</p>':''}</section>
+ </section>`);
 }
+
 function home(){screen='home';const fresh=freshIds(),trained=trainedIds(),due=requiredIds(),active=s&&!['result','between'].includes(s.phase),st=H.stats(data.habit),praise=H.takePraise(data.habit);if(praise)save();
  const returning=st.returning&&!praise;
  const today=data.habit.days[st.today]||{},newDone=!!today.newDone,reviewDone=(today.reviews?.length||0)>0;
