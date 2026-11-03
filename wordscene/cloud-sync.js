@@ -59,24 +59,6 @@ function create({auth,cloud,storage,validate,now=()=>Date.now(),reload=()=>{},ca
   const raw=JSON.stringify(capture);storage.setItem(scopedKey(user),raw);if(storage.getItem(scopedKey(user))!==raw)throw new Error('Не удалось сохранить актуальную пару копий');
   storage.removeItem(exportKey(user));return copy(capture);
  }
- function markConflictExported(capture){
-  const user=uid();if(!user||!canSync(user)||capture?.uid!==user)throw new Error('Аккаунт изменился');
-  const current=local(),stored=readConflict(user);
-  if(!stored||stored.cloud.revision!==capture.cloud?.revision||stable(current.value)!==stable(capture.local?.progress))throw new Error('Конфликт изменился; сначала скачайте актуальные версии');
-  const marker={uid:user,revision:capture.cloud.revision,localFingerprint:current.fingerprint,exportedAt:new Date(now()).toISOString()};
-  storage.setItem(exportKey(user),JSON.stringify(marker));return marker;
- }
- function isConflictExported(){
-  const user=uid();if(!user||!canSync(user))return false;
-  try{const conflict=readConflict(user),marker=JSON.parse(storage.getItem(exportKey(user))||'null'),current=local();return !!conflict&&marker?.uid===user&&marker.revision===conflict.cloud.revision&&marker.localFingerprint===current.fingerprint&&stable(conflict.local.progress)===current.fingerprint}catch{return false}
- }
- async function enable(){
-  const user=uid();if(!user)throw new Error('Сначала войдите в аккаунт');if(!canSync(user))throw new Error('Локальный профиль не принадлежит текущему аккаунту');
-  const remote=await cloud.read();if(!remote.exists)throw new Error('Сначала создайте облачную копию');
-  if(uid()!==user||!canSync(user))throw new Error('Аккаунт или локальный профиль изменился');
-  const current=local();if(current.fingerprint!==stable(remote.payload))throw new Error('Локальная и облачная копии отличаются. Сначала разрешите конфликт.');
-  saveSettings({uid:user,revision:remote.revision,baseline:current.fingerprint});return remote.revision;
- }
  async function bootstrapBackup(){
   const user=uid();if(!user||!canSync(user))return {status:'idle'};
   const remote=await cloud.read();if(uid()!==user||!canSync(user))return {status:'account-changed'};
@@ -112,13 +94,6 @@ function create({auth,cloud,storage,validate,now=()=>Date.now(),reload=()=>{},ca
   saveSettings({uid:user,revision:result.revision,baseline:current.fingerprint});
   return {status:local().raw===current.raw?'pushed':'local-changed',revision:result.revision};
  }
- async function prepareConflict(){
-  const user=uid();if(!user)throw new Error('Сначала войдите в аккаунт');if(!canSync(user))throw new Error('Локальный профиль не принадлежит текущему аккаунту');
-  const remote=await cloud.read();if(uid()!==user||!canSync(user))throw new Error('Аккаунт или локальный профиль изменился');
-  if(!remote.exists)throw new Error('Облачная копия отсутствует');
-  const current=local();if(current.fingerprint===stable(remote.payload))return {status:'same',revision:remote.revision};
-  captureConflict(current,remote);return {status:'conflict',revision:remote.revision};
- }
  async function syncOnce(){
   if(busy||!enabled())return {status:'idle'};busy=true;let syncUid=null;
   try{
@@ -153,23 +128,6 @@ function create({auth,cloud,storage,validate,now=()=>Date.now(),reload=()=>{},ca
    throw error
   }finally{busy=false}
  }
- async function resolve(choice){
-  const user=uid();if(!user)throw new Error('Сначала войдите в аккаунт');if(!canSync(user))throw new Error('Локальный профиль не принадлежит текущему аккаунту');
-  const conflict=await getConflict();if(!conflict||conflict.uid!==user)throw new Error('Для этого аккаунта нет сохранённого конфликта');
-  const latest=await cloud.read();if(uid()!==user||!canSync(user))throw new Error('Аккаунт изменился');if(!latest.exists)throw new Error('Облачная копия отсутствует');
-  const current=local();if(conflict.cloud.revision!==latest.revision||stable(conflict.cloud.progress)!==stable(latest.payload)||stable(conflict.local.progress)!==current.fingerprint)throw new Error('Копии изменились после скачивания. Скачайте актуальный набор обеих версий ещё раз.');
-  const exported=JSON.parse(storage.getItem(exportKey(user))||'null');if(exported?.uid!==user||exported.revision!==latest.revision||exported.localFingerprint!==current.fingerprint)throw new Error('Сначала скачайте актуальный файл с обеими версиями конфликта.');
-  const selected=choice==='local'?current.value:choice==='cloud'?latest.payload:null;if(!selected||!validate(selected))throw new Error('Неизвестный вариант прогресса');
-  archiveConflict(user,conflict);
-  if(choice==='local'){
-   const result=await cloud.write(selected,latest.revision);if(uid()!==user||!canSync(user))throw new Error('Аккаунт изменился; проверьте облачную копию');
-   const confirmed=await cloud.read();if(uid()!==user||!canSync(user)||!confirmed.exists||confirmed.revision!==result.revision||stable(confirmed.payload)!==current.fingerprint)throw new Error('Не удалось подтвердить облачную копию; обе версии сохранены');
-   const afterWrite=local();if(afterWrite.fingerprint!==current.fingerprint){await exportConflict();throw new Error('Локальный прогресс изменился во время записи. Скачайте обе версии ещё раз.')}
-   saveSettings({uid:user,revision:result.revision,baseline:current.fingerprint});clearConflict(user);return {status:'kept-local',revision:result.revision};
-  }
-  device.restore(device.preview(JSON.stringify({format:'wordscene-backup',version:1,progress:selected})));
-  clearConflict(user);reload();return {status:'kept-cloud',revision:latest.revision};
- }
  async function prepareRestore(){
   const user=uid();if(!user||!canSync(user))throw Error('Сначала войдите в нужный аккаунт');
   const remote=await cloud.read();if(uid()!==user||!canSync(user))throw Error('Аккаунт изменился');
@@ -201,7 +159,7 @@ function create({auth,cloud,storage,validate,now=()=>Date.now(),reload=()=>{},ca
   saveSettings({uid:prepared.uid,revision:result.revision,baseline:current.fingerprint});clearConflict(prepared.uid);
   return {status:local().raw===current.raw?'pushed':'local-changed',revision:result.revision};
  }
- return {prepareRestore,restorePrepared,keepPrepared,enable,disable,enabled,syncOnce,bootstrapBackup,getConflict,getConflictHistory,exportConflict,markConflictExported,isConflictExported,prepareConflict,resolve,stable,conflictKey:scopedKey};
+ return {prepareRestore,restorePrepared,keepPrepared,enabled,syncOnce,bootstrapBackup,getConflictHistory,exportConflict,stable,conflictKey:scopedKey};
 }
 const api={create,KEY,CONFLICT_KEY,stable,conflictKey:scopedKey};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.WordSceneCloudSync=api;
