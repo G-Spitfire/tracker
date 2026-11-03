@@ -34,6 +34,7 @@ for(const b of allButtons)b.disabled=true;login.disabled=false;
 const uiStyle=document.createElement('style');uiStyle.textContent='section[aria-label="Облачная копия WordScene"] button:disabled{opacity:.5!important;cursor:wait!important}section[aria-label="Облачная копия WordScene"] button[hidden]{display:none!important}body.profile-switch-blocked>header,body.profile-switch-blocked>#app,body.profile-switch-blocked>.bottom-nav{visibility:hidden!important}';document.head.append(uiStyle);
 function message(value){info.textContent=value}
 let lastSyncSuccess=null;
+const lastSyncKey=uid=>'wordscene-last-success-v1-'+encodeURIComponent(uid);
 function syncState(state){
  const uid=auth.currentUser?.uid||null;
  window.WordSceneSyncStatus={uid,state,lastSuccess:lastSyncSuccess};
@@ -85,7 +86,7 @@ function runSync(){
    else if(result.status==='pushed'||result.status==='same')message('Прогресс сохранён на устройстве и в облаке.');
    else if(result.status==='restored')message('Прогресс автоматически восстановлен из облака.');
    else if(result.status==='local-changed'){backupRequested=true;message('Копия отправлена. Новые ответы сохраняются следом.');}
-   if(['pushed','same','restored'].includes(result.status)){lastSyncSuccess=Date.now();syncState('ok')}
+   if(['pushed','same','restored'].includes(result.status)){lastSyncSuccess=Date.now();try{localStorage.setItem(lastSyncKey(auth.currentUser.uid),String(lastSyncSuccess))}catch(e){console.warn('[WordScene sync timestamp]',e)}syncState('ok')}
    else if(['conflict','conflict-race','remote-newer','restore-available'].includes(result.status))syncState('conflict');
    else syncState('pending');
    refreshButtons();return result;
@@ -111,6 +112,7 @@ importGuest.onclick=()=>void withBusy(async()=>{const uid=auth.currentUser?.uid;
 function scheduleBackup({immediate=false}={}){
  if(!AUTO_BACKUP_ENABLED||!authReady||!auth.currentUser)return;
  backupRequested=true;
+ syncState('pending');
  if(backupTask)return;
  if(immediate)queueBackup(0);else if(!backupTimer)queueBackup(BACKUP_DELAY);
 }
@@ -127,7 +129,8 @@ onAuthStateChanged(auth,user=>{
    &&confirm('На этом устройстве есть изученные слова без аккаунта. Привязать этот прогресс к аккаунту '+(user.email||'ребёнка')+'?\n\nВыбирайте «ОК» только если это прогресс владельца аккаунта. Исходная гостевая копия сохранится.');
   const result=profiles.switchTo(user?.uid||null,{recoverDamagedTarget:true,importGuestOnFirstLogin:claimGuest});
   if(result.changed){authReady=false;document.body.dataset.wordsceneProfileState='switching';document.body.classList.add('profile-switch-blocked');status.textContent='Сохраняем данные предыдущего профиля и открываем отдельный профиль…';location.reload();return}
-  lastSyncSuccess=null;
+  const priorSuccess=user?Number(localStorage.getItem(lastSyncKey(user.uid))):NaN;
+  lastSyncSuccess=Number.isFinite(priorSuccess)&&priorSuccess>0&&priorSuccess<=Date.now()?priorSuccess:null;
   window.WordSceneAccount=user?{uid:user.uid,displayName:(user.displayName||'').trim(),email:user.email||''}:null;
   syncState(user?'pending':'idle');
   window.dispatchEvent(new Event('wordscene-account-change'));
