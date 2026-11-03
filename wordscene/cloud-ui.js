@@ -43,7 +43,7 @@ const password=document.createElement('input');password.type='password';password
 const button=(label,type='button')=>{const b=document.createElement('button');b.type=type;b.textContent=label;return b};
 const saveCloud=button('Сохранить прогресс'),login=button('Войти','submit'),logout=button('Выйти'),restore=button('Восстановить прогресс'),download=button('Скачать облачную копию'),exportConflict=button('Скачать обе версии'),keepLocal=button('Сохранить эту версию в облако'),keepCloud=button('Восстановить облачную копию'),importGuest=button('Перенести гостевой прогресс');
 const info=document.createElement('p');info.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere';
-const extra=document.createElement('details'),extraTitle=document.createElement('summary');extraTitle.textContent='Другие действия';extra.append(extraTitle,logout,download,importGuest,exportConflict);panel.append(status,form,saveCloud,restore,keepLocal,keepCloud,info,extra);form.append(email,password,login);
+const extra=document.createElement('details'),extraTitle=document.createElement('summary');extraTitle.textContent='Для взрослых · дополнительные действия';extra.append(extraTitle,saveCloud,restore,keepLocal,keepCloud,logout,download,importGuest,exportConflict);panel.append(status,form,info,extra);form.append(email,password,login);
 const allButtons=[saveCloud,login,logout,restore,download,importGuest,exportConflict,keepLocal,keepCloud];
 for(const b of allButtons)b.style.cssText='display:block;width:100%;min-height:42px;margin:7px 0;padding:9px 12px;background:#6554b8;color:#fff;border:1px solid #6554b8;border-radius:10px;font:600 14px system-ui;opacity:1;cursor:pointer';
 for(const b of [logout,download,exportConflict]){b.style.background='#f1eafa';b.style.color='#342b49'}
@@ -91,8 +91,8 @@ function runSync(){
  backupTask=(async()=>{
   try{
    const result=syncEngine.enabled()?await syncEngine.syncOnce():await syncEngine.bootstrapBackup();
-   if(result.status==='conflict'||result.status==='conflict-race')message('Есть несколько версий прогресса. Обе сохранены. Откройте восстановление, чтобы сравнить их.');
-   else if(result.status==='remote-newer'||result.status==='restore-available')message('В облаке есть другая копия. Она не заменена. Выберите «Восстановить прогресс», чтобы сравнить прогресс.');
+   if(result.status==='conflict'||result.status==='conflict-race')message('Обнаружены разные версии прогресса. Обе сохранены. Попросите взрослого открыть дополнительные действия и проверить их.');
+   else if(result.status==='remote-newer'||result.status==='restore-available')message('В облаке есть другая копия. Текущий прогресс сохранён. Взрослый может проверить версии в дополнительных действиях.');
    else if(result.status==='pushed'||result.status==='same')message('Прогресс сохранён на устройстве и в облаке.');
    else if(result.status==='local-changed'){backupRequested=true;message('Копия отправлена. Новые ответы сохраняются следом.');}
    refreshButtons();return result;
