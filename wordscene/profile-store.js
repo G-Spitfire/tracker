@@ -23,7 +23,7 @@ function create({storage,validate,now=()=>Date.now()}){
   const raw=uid?storage.getItem(syncProfileKey(uid)):null,setting=parse(raw);
   if(uid&&setting?.uid===uid)storage.setItem(SYNC,raw);else storage.removeItem(SYNC);
  }
- function switchTo(uid,{recoverDamagedTarget=false}={}){
+ function switchTo(uid,{recoverDamagedTarget=false,importGuestOnFirstLogin=false}={}){
   recover();
   const target=identity(uid),previousMarker=storage.getItem(ACTIVE),from=previousMarker||'guest',previousRaw=storage.getItem(KEY);
   if(from===target){
@@ -38,10 +38,10 @@ function create({storage,validate,now=()=>Date.now()}){
   // Preserve the active profile before selecting another one.
   storage.setItem(profileKey(from),sourceRaw);
   const savedTarget=storage.getItem(profileKey(target));
-  // On the first sign-in, carry the existing guest progress into the new account.
-  // Keep the original guest save untouched, and never replace an existing account profile.
-  const firstAccountLogin=!!uid&&previousMarker===null&&from==='guest'&&savedTarget===null&&!!validate(parse(sourceRaw));
-  const targetRaw=firstAccountLogin?sourceRaw:(savedTarget===null?JSON.stringify(EMPTY):(recoverDamagedTarget?savedTarget:(assertState(savedTarget),savedTarget)));
+  // An adult must approve claiming guest progress for a brand-new account.
+  // Never overwrite an existing account profile or discard the guest copy.
+  const firstAccountImport=!!uid&&importGuestOnFirstLogin&&from==='guest'&&savedTarget===null&&!!validate(parse(sourceRaw));
+  const targetRaw=firstAccountImport?sourceRaw:(savedTarget===null?JSON.stringify(EMPTY):(recoverDamagedTarget?savedTarget:(assertState(savedTarget),savedTarget)));
   const previousSync=parse(storage.getItem(SYNC));
   // Only carry an active sync preference when it belongs to the profile being saved.
   if(previousMarker&&from.startsWith('user:')&&previousSync?.uid===from.slice(5))storage.setItem(syncProfileKey(from.slice(5)),JSON.stringify(previousSync));
@@ -55,10 +55,15 @@ function create({storage,validate,now=()=>Date.now()}){
   }
   return {changed:true,profile:target};
  }
- function hasGuestProgress(){
-  const raw=storage.getItem(profileKey('guest')),value=parse(raw);if(!value||!validate(value))return false;
+ function hasProgress(raw){
+  const value=parse(raw);if(!value||!validate(value))return false;
   if(value.session||value.reviewCycle?.length||Object.keys(value.habit?.days||{}).length)return true;
   return Object.values(value.words||{}).some(p=>p.started||p.trained||p.attempts>0||p.errors>0||p.sessions>0||p.hesitations>0||p.needsWork||p.writingNeedsWork||p.schedule?.checks?.length||p.writingResults?.length);
+ }
+ function hasGuestProgress(){return hasProgress(storage.getItem(profileKey('guest')))}
+ function canOfferGuestImport(uid){
+  if(!uid||activeId()!=='guest'||storage.getItem(profileKey(identity(uid)))!==null)return false;
+  return hasProgress(storage.getItem(KEY));
  }
  function importGuest(uid){
   if(!uid||!matches(uid))throw new Error('Сначала откройте профиль нужного аккаунта');
@@ -68,7 +73,7 @@ function create({storage,validate,now=()=>Date.now()}){
   device.restore(device.preview(JSON.stringify({format:'wordscene-backup',version:1,progress:parse(guestRaw)})));
   return {backupKey:device.rollbackKey()};
  }
- return {switchTo,matches,activeId,hasGuestProgress,importGuest,profileKey,syncProfileKey,ACTIVE,PENDING,KEY};
+ return {switchTo,matches,activeId,hasGuestProgress,canOfferGuestImport,importGuest,profileKey,syncProfileKey,ACTIVE,PENDING,KEY};
 }
 const api={create,EMPTY};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.WordSceneProfiles=api;
