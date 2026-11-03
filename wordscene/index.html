@@ -1062,21 +1062,45 @@ function startSelected(intent='auto',exclude=[]){
  if(s&&!['result','between'].includes(s.phase)){render();return}
  const fresh=freshIds(),due=requiredIds(),reviews=(due.length||intent==='review'||!fresh.length)?reviewIds(exclude):[];
  if(!reviews.length&&!fresh.length){s=null;home();return}
- s={id:Date.now()+'-'+Math.random().toString(36).slice(2,8),schedulerVersion:1,mode:reviews.length?'review':'new',part:reviews.length?'review':'new',ids:reviews.length?reviews:fresh,newIds:reviews.length?[]:fresh,learnIndex:0,completed:[],errors:[],partErrors:[],reviewProgress:{},queueKind:due.length?'required':'optional',reviewBatchSeen:exclude};
+ s={id:Date.now()+'-'+Math.random().toString(36).slice(2,8),schedulerVersion:1,mode:reviews.length?'review':'new',part:reviews.length?'review':'new',ids:reviews.length?reviews:fresh,newIds:reviews.length?[]:fresh,learnIndex:0,completed:[],errors:[],partErrors:[],reviewProgress:{},queueKind:due.length?'required':'optional',reviewBatchSeen:exclude,sortExtraStacks:0};
  if(s.part==='new')beginNew();else beginReview()
 }
 
 function beginNew(){if(requiredIds().length){s=null;startSelected();return}s.part='new';s.ids=s.newIds;s.phase='learn';s.learnIndex=0;s.partErrors=[];s.sorting=true;s.sortIndex=0;s.sortKnown=[];s.sortUnknown=[];save();sortStack()}
 
 function beginReview(){s.part='review';s.phase='test';s.partErrors=[];s.queue=[...shuffled(s.ids).map(i=>({i,dir:1})),...shuffled(s.ids).map(i=>({i,dir:0}))];s.pos=0;s.revealed=false;s.feedback=false;s.ignoreTiming=false;save();test()}
-function render(){if(!s){home();return}if(s.phase==='learn')(s.sorting?sortStack():learn());else if(s.phase==='round')roundResult();else if(s.phase==='writing')writing();else if(s.phase==='between')between();else if(s.phase==='result')result();else test()}
+function render(){if(!s){home();return}if(s.phase==='sort-next')sortNextStack();else if(s.phase==='learn')(s.sorting?sortStack():learn());else if(s.phase==='round')roundResult();else if(s.phase==='writing')writing();else if(s.phase==='between')between();else if(s.phase==='result')result();else test()}
 function markStarted(i){record(i).started=true;if(s?.part==='new')H.record(data.habit,{kind:'newActivity'});save()}
 function speakWord(word){if(!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window)){toast('Озвучивание недоступно в этом браузере');return}try{const synth=window.speechSynthesis;synth.cancel();const utterance=new SpeechSynthesisUtterance(word);utterance.lang='en-GB';utterance.rate=.85;const voices=synth.getVoices();utterance.voice=voices.find(v=>v.lang.toLowerCase()==='en-gb')||voices.find(v=>v.lang.toLowerCase().startsWith('en-gb'))||null;synth.speak(utterance)}catch(e){toast('Не удалось воспроизвести слово')}}
 function sortStack(){if(!s?.sorting)return;screen='learn';const w=words[s.newIds[s.sortIndex]];frame('Разбор стопки',s.sortIndex/s.newIds.length*100,`<div class="stack-screen"><div id="stack-card" class="stack-card" role="button" tabindex="0" onclick="revealStack()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();revealStack()}" aria-label="Показать перевод"><div class="stack-word">${w.en}</div><div id="stack-translation" class="stack-translation" hidden>${w.ru}</div><p class="note">Нажми, чтобы увидеть перевод</p></div><div class="bottom-actions stack-actions">${btn('← Не знаю','animateSort(false)','secondary')}${btn('Знаю →','animateSort(true)','success-button')}</div></div>`);const card=$('stack-card');let start=null,moving=false;card.addEventListener('pointerdown',e=>{if(card.dataset.leaving)return;start={x:e.clientX,y:e.clientY,id:e.pointerId};moving=false;card.setPointerCapture?.(e.pointerId)});card.addEventListener('pointermove',e=>{if(!start||start.id!==e.pointerId||card.dataset.leaving)return;const dx=e.clientX-start.x,dy=e.clientY-start.y;if(!moving&&Math.abs(dx)<9)return;if(!moving&&Math.abs(dy)>Math.abs(dx)){start=null;return}moving=true;card.style.transition='none';card.style.transform=`translateX(${dx}px) rotate(${Math.max(-12,Math.min(12,dx/14))}deg)`;card.style.opacity=String(Math.max(.65,1-Math.abs(dx)/550))});card.addEventListener('pointerup',e=>{if(!start||start.id!==e.pointerId)return;const dx=e.clientX-start.x,dy=e.clientY-start.y;start=null;if(Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.2){card.dataset.swiped='1';animateSort(dx>0)}else{card.style.transition='transform .2s ease,opacity .2s ease';card.style.transform='';card.style.opacity=''}});card.addEventListener('pointercancel',()=>{start=null;card.style.transition='transform .2s ease,opacity .2s ease';card.style.transform='';card.style.opacity=''});card.addEventListener('click',e=>{if(card.dataset.swiped){card.dataset.swiped='';e.stopImmediatePropagation()}},true)}
 function animateSort(known){const card=$('stack-card');if(!s?.sorting||!card||card.dataset.leaving)return;card.dataset.leaving='1';document.querySelectorAll('.stack-actions button').forEach(b=>b.disabled=true);card.style.transition='transform .26s ease-in, opacity .26s ease-in';card.style.transform=`translateX(${known?'120':'-120'}vw) rotate(${known?'18':'-18'}deg)`;card.style.opacity='0';setTimeout(()=>{if(s?.sorting)sortAnswer(known)},270)}
 
 function revealStack(){const el=$('stack-translation');if(el)el.hidden=false}
-function sortAnswer(known){if(!s?.sorting)return;const i=s.newIds[s.sortIndex];(known?s.sortKnown:s.sortUnknown).push(i);s.sortIndex++;if(s.sortIndex<s.newIds.length){save();sortStack();return}const knownIds=[...s.sortKnown],unknownIds=[...s.sortUnknown];for(const id of knownIds){const p=record(id);R.introduce(p);p.learningOrigin??="known";p.started=true;p.sessions++;p.lastAt=Date.now()}s.sorting=false;s.sortIndex=0;s.ids=unknownIds.length?unknownIds:knownIds;s.newIds=unknownIds;s.learnIndex=0;save();if(unknownIds.length)learn();else{beginReview()}}
+const MAX_EXTRA_KNOWN_STACKS=5;
+function sortNextStack(){
+ if(s?.phase!=='sort-next')return;
+ const canContinue=(s.sortExtraStacks||0)<MAX_EXTRA_KNOWN_STACKS&&freshIds().length>0;
+ frame('Разбор стопки',100,`<div class="interlude center result-body"><h2>Ты знаешь все ${s.ids.length} слов!</h2><p>Отлично! Можно посмотреть следующую пятёрку.</p><div class="bottom-actions">${canContinue?btn('Следующие 5 слов','nextKnownStack()'):''}${btn('Повторить знакомые','beginReview()','secondary')}</div>${canContinue?`<p class="note">Дополнительных стопок: ${s.sortExtraStacks||0} из ${MAX_EXTRA_KNOWN_STACKS}</p>`:'<p class="note">Больше новых стопок в этом подходе нет.</p>'}</div>`);
+}
+function nextKnownStack(){
+ if(s?.phase!=='sort-next'||(s.sortExtraStacks||0)>=MAX_EXTRA_KNOWN_STACKS)return;
+ const next=freshIds();
+ if(!next.length){sortNextStack();return}
+ s.sortExtraStacks=(s.sortExtraStacks||0)+1;
+ s.newIds=next;s.ids=next;s.sortIndex=0;s.sortKnown=[];s.sortUnknown=[];s.sorting=true;s.phase='learn';
+ save();sortStack();
+}
+function sortAnswer(known){
+ if(!s?.sorting||!s.newIds?.length||s.sortIndex>=s.newIds.length)return;
+ const i=s.newIds[s.sortIndex];(known?s.sortKnown:s.sortUnknown).push(i);s.sortIndex++;
+ if(s.sortIndex<s.newIds.length){save();sortStack();return}
+ const knownIds=[...s.sortKnown],unknownIds=[...s.sortUnknown];
+ for(const id of knownIds){const p=record(id);R.introduce(p);p.learningOrigin??="known";p.started=true;p.sessions++;p.lastAt=Date.now()}
+ s.sorting=false;s.sortIndex=0;s.ids=unknownIds.length?unknownIds:knownIds;s.newIds=unknownIds;s.learnIndex=0;
+ if(unknownIds.length){save();learn();return}
+ if((s.sortExtraStacks||0)<MAX_EXTRA_KNOWN_STACKS&&freshIds().length){s.phase='sort-next';save();sortNextStack();return}
+ save();beginReview();
+}
 
 function learn(){screen='learn';sceneHidden=false;const i=s.ids[s.learnIndex],w=words[i];markStarted(i);frame(`Новое слово · ${s.learnIndex+1} из ${s.ids.length}`,s.learnIndex/s.ids.length*100,`<div class="learning"><div class="word-heading"><div><div class="word">${w.en}</div><div class="translation">${w.ru}</div><div class="phonetic pronunciation-row">${w.ipa}<button class="speak-button" type="button" onclick="speakWord(${JSON.stringify(w.en)})" aria-label="Произнести слово ${w.en}" title="Прослушать произношение"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15 9a5 5 0 0 1 0 6M18 6a9 9 0 0 1 0 12"/></svg></button></div></div></div><div class="scene-box"><div id="scene-content">${illustration(w.en)}<p>${w.scene}</p><span class="cue">Созвучие: <b>${w.cue}</b></span></div><div id="scene-empty" hidden><div class="mental-symbol">◌</div><h2>Теперь представь сцену</h2><p>Удерживай сцену в воображении.</p></div></div><div class="bottom-actions">${btn('Представить без картинки','imagine()')}</div></div>`)}
 function imagine(){sceneHidden=true;$('scene-content').hidden=true;$('scene-empty').hidden=false;document.querySelector('.bottom-actions').innerHTML=btn(s.learnIndex===s.ids.length-1?'Вспомнить слова →':'Готово · дальше →','nextLearn()')+btn('Ещё раз посмотреть','lookAgain()','quiet')}
