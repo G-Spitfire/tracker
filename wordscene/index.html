@@ -528,6 +528,7 @@ body.is-writing #writing-answer{scroll-margin-block:12px}
 .achievement-note{font-size:12px;color:var(--muted);line-height:1.5}
 .week-switcher{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px;color:var(--muted);font-size:12px;font-weight:800}.week-switcher button{display:flex;align-items:center;justify-content:center;width:30px;height:30px;flex-shrink:0;border-radius:50%;background:rgba(101,84,184,.1);color:var(--primary);font-size:24px;line-height:1}.week-switcher button:disabled{opacity:.25}.week-switcher span{text-align:center;white-space:nowrap}
 .home-screen .week-switcher{margin-bottom:5px;font-size:11px}.home-screen .week-switcher button{width:25px;height:25px;font-size:20px}
+.achievement-empty{padding:24px 12px;text-align:center;color:var(--muted);font-size:13px;line-height:1.5}
 /* Compact home layout only: leave learning, settings and achievements untouched. */
 .home-screen .home-content>h1{font-size:clamp(23px,5vw,29px);margin:4px 0 9px;text-align:left}
 .home-screen .habit-card{padding:11px 13px;margin:0 0 9px;border-radius:16px}
@@ -847,16 +848,18 @@ function achievementPreview(){
 }
 function achievementLine(a){
  const learned=a.dated.filter(x=>x.origin==='learned').sort((x,y)=>x.date.localeCompare(y.date));
- const start=learned.length?learned[0].date:a.today;
+ if(!learned.length)return `<div class="achievement-empty">${a.origins.learned||a.origins.unknown?'История первых занятий не сохранилась. Новые выученные слова появятся на графике.':'Пока нет выученных здесь слов. Начни учить — и график появится!'}</div>`;
+ const start=learned[0].date;
  const dateAt=d=>new Date(d+'T12:00:00');
  const elapsed=Math.max(0,Math.round((dateAt(a.today)-dateAt(start))/86400000));
  const mode=elapsed<=45?'day':elapsed<=365?'week':'month';
  const dates=[start],counts=[0];let total=0;
  for(const item of learned){total++;if(item.date===dates.at(-1))counts[counts.length-1]=total;else{dates.push(item.date);counts.push(total)}}
  if(dates.at(-1)!==a.today){dates.push(a.today);counts.push(total)}
+ if(dates.length===1){dates.unshift(H.shift(start,-1));counts.unshift(0)}
  const w=320,h=150,left=16,right=27,top=21,bottom=38,max=Math.max(1,total);
- const span=Math.max(1,dateAt(a.today)-dateAt(start));
- const points=dates.map((d,i)=>[left+(dateAt(d)-dateAt(start))/span*(w-left-right),top+(max-counts[i])*(h-top-bottom)/max]);
+ const span=Math.max(1,dateAt(a.today)-dateAt(dates[0]));
+ const points=dates.map((d,i)=>[left+(dateAt(d)-dateAt(dates[0]))/span*(w-left-right),top+(max-counts[i])*(h-top-bottom)/max]);
  const line=points.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
  const fmt=d=>{const [y,m,day]=d.split('-').map(Number);return mode==='month'?['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'][m-1]+' '+String(y).slice(2):day+'.'+String(m).padStart(2,'0')};
  const ticks=Array.from({length:Math.min(5,elapsed+1)},(_,i)=>i/(Math.min(5,elapsed+1)-1||1));
