@@ -242,7 +242,7 @@ main{padding-top:8px;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
 .result-screen>.topline{display:none}
 .result-screen>.line{display:none}
 .result-screen .training-body{padding-top:8px}
-:root{--paper:#fffaf2;--ink:#352044;--primary:#6554b8;--primary-hover:#5948a5;--primary-pressed:#4f3e96;--primary-soft:#eee7f7;--primary-mid:#9c82c8;--border:#e7ddee;--muted:#786588;--success:#3d9b8d;--success-hover:#348a7e;--success-pressed:#287c70;--gold:#eab64a;--sage:var(--primary-soft)}
+:root{--paper:#fffaf2;--ink:#352044;--primary:#6554b8;--primary-hover:#5948a5;--primary-pressed:#4f3e96;--primary-soft:#eee7f7;--primary-mid:#9c82c8;--border:#e7ddee;--muted:#786588;--success:#3d9b8d;--success-hover:#348a7e;--success-pressed:#287c70;--gold:#eab64a;--sage:var(--primary-soft);--habit-new:#7851B8;--habit-review:#DF82B8;--habit-idle:#ddd3e7}
 body{background:var(--paper)}
 header{background:var(--paper);box-shadow:none}
 main{background:var(--paper)}
@@ -421,7 +421,7 @@ body.home-page-scroll .home-content{overflow:visible}
 .home-title{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.language-flag{display:inline-flex;align-items:center;justify-content:center;font-size:.66em;line-height:1;vertical-align:middle;flex-shrink:0}
 .pronunciation-row{display:flex;align-items:center;gap:9px}.speak-button{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;border:0;border-radius:12px;background:var(--primary-soft);color:var(--primary);cursor:pointer}.stack-screen{display:flex;flex-direction:column;flex:1;min-height:0}.stack-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:250px;flex:1;max-height:410px;border:2px solid #e5d9ef;border-radius:24px;background:#fffdf8;touch-action:pan-y;user-select:none;cursor:pointer;padding:25px}.stack-word{font-size:clamp(40px,10vw,66px);font-weight:800}.stack-translation{font-size:23px;color:var(--primary)}.stack-translation[hidden]{display:none}.stack-card{will-change:transform,opacity}@media(prefers-reduced-motion:reduce){.stack-card{transition:none!important}}.stack-actions{display:flex;flex-direction:row;gap:10px}.stack-actions button{flex:1;min-width:0}
 .ios-settings-group{overflow:hidden;border:1px solid var(--border);border-radius:16px;background:var(--card,#fff);margin-top:18px}.ios-settings-row{appearance:none;width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:60px;padding:12px 16px;background:transparent;color:var(--ink);border:0;border-radius:0;text-align:left;font:inherit;cursor:pointer}.ios-settings-row+.ios-settings-row{border-top:1px solid var(--border)}.ios-settings-label{display:flex;flex-direction:column;gap:3px}.ios-settings-label small,.ios-settings-value{color:var(--muted);font-size:13px}.ios-settings-value{display:flex;align-items:center;gap:10px}.ios-chevron{font-size:26px;line-height:1;color:var(--muted)}.ios-toggle-row{position:relative;cursor:pointer}.ios-toggle-row input{position:absolute;right:16px;width:49px;height:30px;opacity:0;cursor:pointer}.ios-switch{position:relative;flex:none;width:49px;height:30px;border-radius:20px;background:#b8bac4;transition:background .15s}.ios-switch:after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:white;box-shadow:0 1px 3px #0003;transition:transform .15s}.ios-toggle-row input:checked+.ios-switch{background:#35a86a}.ios-toggle-row input:checked+.ios-switch:after{transform:translateX(19px)}.ios-toggle-row input:focus-visible+.ios-switch{outline:3px solid var(--primary);outline-offset:3px}.ios-name-form{display:flex;flex-direction:column;gap:12px;margin-top:20px}.ios-name-form input{width:100%;min-height:48px;border:1px solid var(--border);border-radius:12px;padding:12px 14px;font:inherit;background:#fff;color:var(--ink)}.ios-name-form button{align-self:stretch}
-.habit-rings{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.habit-ring-day{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0}.habit-ring-day svg{width:100%;max-width:50px;height:auto;overflow:visible}.habit-ring-day small{font-size:11px;color:var(--muted)}.habit-ring-day.today small{font-weight:700;color:var(--ink)}.habit-ring-day.future{opacity:.55}.habit-ring-legend{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px 9px;margin:0;font-size:11px;color:var(--muted)}.habit-ring-legend span{display:inline-flex;align-items:center;gap:5px}.habit-ring-legend i{display:inline-block;width:10px;height:10px;border-radius:50%}.habit-ring-legend .new{background:#7851B8}.habit-ring-legend .review{background:#DF82B8}
+.habit-rings{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.habit-ring-day{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0}.habit-ring-day svg{width:100%;max-width:50px;height:auto;overflow:visible}.habit-ring-day small{font-size:11px;color:var(--muted)}.habit-ring-day.today small{font-weight:700;color:var(--ink)}.habit-ring-day.future{opacity:.55}.habit-ring-legend{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px 9px;margin:0;font-size:11px;color:var(--muted)}.habit-ring-legend span{display:inline-flex;align-items:center;gap:5px}.habit-ring-legend i{display:inline-block;width:10px;height:10px;border-radius:50%}.habit-ring-legend .new{background:var(--habit-new)}.habit-ring-legend .review{background:var(--habit-review)}
 
 
 /* Current-week summary: period on the left, legend on the right. */
@@ -637,7 +637,7 @@ body.is-writing.writing-keyboard #writing-answer{min-height:44px;font-size:20px}
 .statistics-unknown{font-size:12px;color:var(--muted);margin:10px 0 0}
 .statistics-section{margin-bottom:12px}
 .statistics-recent{margin-bottom:0}
-.statistics-recent .achievement-metric{background:#fffdfd;border:1px solid var(--border)}
+.statistics-recent .achievement-metric{background:#fffdfd;border:1px solid var(--border);color:var(--ink)}
 .statistics-recent .achievement-metric b{display:block;font-size:25px}
 .statistics-recent .achievement-metric span{display:block;font-size:11px;color:var(--ink);font-weight:700}
 .statistics-recent .achievement-metric>small{display:block;font-size:10px;color:var(--muted);line-height:1.35}
@@ -646,7 +646,7 @@ body.is-writing.writing-keyboard #writing-answer{min-height:44px;font-size:20px}
 .habit-calendar .habit-ring-legend{justify-content:center;gap:9px;margin-top:13px;font-size:11px}
 .habit-calendar .habit-ring-legend i{width:10px;height:10px}
 .calendar-hint{margin:13px 0 0;color:var(--muted);font-size:12px;text-align:center}
-.month-day{background:transparent;border:0;padding:0;cursor:pointer;border-radius:9px}
+.month-day{background:transparent;color:var(--ink);border:0;padding:0;cursor:pointer;border-radius:9px}
 .month-day:focus-visible{outline:2px solid var(--primary);outline-offset:1px}
 .month-day.selected{background:rgba(120,81,184,.15)}
 .month-day.future{cursor:default}
@@ -933,8 +933,8 @@ function habitDayState(date){
 }
 function habitDayRings(date){
  const state=habitDayState(date);
- const ring=(radius,color,on,width)=>'<circle cx="22" cy="22" r="'+radius+'" fill="none" stroke="'+(on?color:'currentColor')+'" stroke-opacity="'+(on?'1':'.12')+'" stroke-width="'+width+'"/>';
- return '<svg viewBox="0 0 44 44" aria-hidden="true">'+ring(17.5,'#7851B8',state.learned,5)+ring(11.5,'#DF82B8',state.reviewed,4)+(state.done?'<path d="M17 22l3.5 3.5 7-8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>':'')+'</svg>';
+ const ring=(radius,color,on,width)=>'<circle cx="22" cy="22" r="'+radius+'" fill="none" stroke="'+(on?color:'var(--habit-idle)')+'" stroke-width="'+width+'"/>';
+ return '<svg viewBox="0 0 44 44" aria-hidden="true">'+ring(17.5,'var(--habit-new)',state.learned,5)+ring(11.5,'var(--habit-review)',state.reviewed,4)+(state.done?'<path d="M17 22l3.5 3.5 7-8" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>':'')+'</svg>';
 }
 function habitDayDescription(date){
  const state=habitDayState(date);
@@ -1017,7 +1017,7 @@ function achievementLine(a){
  const ticks=Array.from({length:Math.min(5,elapsed+1)},(_,i)=>i/(Math.min(5,elapsed+1)-1||1));
  const labels=ticks.map(f=>{const d=H.shift(start,Math.round(elapsed*f));return `<text x="${(left+f*(w-left-right)).toFixed(1)}" y="141" text-anchor="${f===0?'start':f===1?'end':'middle'}" font-size="10" fill="#786588">${fmt(d)}</text>`}).join('');
  const last=points.at(-1);
- return `<svg class="achievement-chart" viewBox="0 0 320 150" role="img" aria-label="Рост словаря с первого выученного слова"><path d="M16 112H293" stroke="#e7ddee"/><text x="5" y="16" font-size="10" fill="#786588">Слов</text><path d="${line}" fill="none" stroke="#6554b8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>${labels}<circle cx="${last[0]}" cy="${last[1]}" r="4" fill="#6554b8"/><text x="${last[0]-7}" y="${Math.max(14,last[1]-9)}" text-anchor="end" font-size="13" font-weight="700" fill="#352044">${total}</text></svg>${undated?`<p class="achievement-note">${undated} ${undated===1?'слово учтено':'слов учтено'} в начальном результате без точной даты изучения.</p>`:''}`;
+ return `<svg class="achievement-chart" viewBox="0 0 320 150" role="img" aria-label="Рост словаря с первого выученного слова"><path d="M16 112H293" stroke="#e7ddee"/><text x="5" y="16" font-size="10" fill="#786588">Слов</text><path d="${line}" fill="none" stroke="var(--habit-new)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>${labels}<circle cx="${last[0]}" cy="${last[1]}" r="4" fill="var(--habit-new)"/><text x="${last[0]-7}" y="${Math.max(14,last[1]-9)}" text-anchor="end" font-size="13" font-weight="700" fill="#352044">${total}</text></svg>${undated?`<p class="achievement-note">${undated} ${undated===1?'слово учтено':'слов учтено'} в начальном результате без точной даты изучения.</p>`:''}`;
 }
 function achievements(){
  screen='statistics';const a=achievementData();
