@@ -425,7 +425,30 @@ body.home-page-scroll .home-content{overflow:visible}
 .home-title{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.language-flag{display:inline-flex;align-items:center;justify-content:center;font-size:.66em;line-height:1;vertical-align:middle;flex-shrink:0}
 .pronunciation-row{display:flex;align-items:center;gap:9px}.speak-button{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;border:0;border-radius:12px;background:var(--primary-soft);color:var(--primary);cursor:pointer}.stack-screen{display:flex;flex-direction:column;flex:1;min-height:0}.stack-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:250px;flex:1;max-height:410px;border:2px solid #e5d9ef;border-radius:24px;background:#fffdf8;touch-action:pan-y;user-select:none;cursor:pointer;padding:25px}.stack-word{font-size:clamp(40px,10vw,66px);font-weight:800}.stack-translation{font-size:23px;color:var(--primary)}.stack-translation[hidden]{display:none}.stack-card{will-change:transform,opacity}@media(prefers-reduced-motion:reduce){.stack-card{transition:none!important}}.stack-actions{display:flex;flex-direction:row;gap:10px}.stack-actions button{flex:1;min-width:0}
 .ios-settings-group{overflow:hidden;border:1px solid var(--border);border-radius:16px;background:var(--card,#fff);margin-top:18px}.ios-settings-row{appearance:none;width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:60px;padding:12px 16px;background:transparent;color:var(--ink);border:0;border-radius:0;text-align:left;font:inherit;cursor:pointer}.ios-settings-row+.ios-settings-row{border-top:1px solid var(--border)}.ios-settings-label{display:flex;flex-direction:column;gap:3px}.ios-settings-label small,.ios-settings-value{color:var(--muted);font-size:13px}.ios-settings-value{display:flex;align-items:center;gap:10px}.ios-chevron{font-size:26px;line-height:1;color:var(--muted)}.ios-toggle-row{position:relative;cursor:pointer}.ios-toggle-row input{position:absolute;right:16px;width:49px;height:30px;opacity:0;cursor:pointer}.ios-switch{position:relative;flex:none;width:49px;height:30px;border-radius:20px;background:#b8bac4;transition:background .15s}.ios-switch:after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:white;box-shadow:0 1px 3px #0003;transition:transform .15s}.ios-toggle-row input:checked+.ios-switch{background:#35a86a}.ios-toggle-row input:checked+.ios-switch:after{transform:translateX(19px)}.ios-toggle-row input:focus-visible+.ios-switch{outline:3px solid var(--primary);outline-offset:3px}.ios-name-form{display:flex;flex-direction:column;gap:12px;margin-top:20px}.ios-name-form input{width:100%;min-height:48px;border:1px solid var(--border);border-radius:12px;padding:12px 14px;font:inherit;background:#fff;color:var(--ink)}.ios-name-form button{align-self:stretch}
-.habit-rings{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.habit-ring-day{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0}.habit-ring-day svg{width:100%;max-width:44px;height:auto;overflow:visible}.habit-ring-day small{font-size:11px;color:var(--muted)}.habit-ring-day.today small{font-weight:700;color:var(--ink)}.habit-ring-day.future{opacity:.55}.habit-ring-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 16px;margin-top:10px;font-size:12px;color:var(--muted)}.habit-ring-legend span{display:inline-flex;align-items:center;gap:5px}.habit-ring-legend i{display:inline-block;width:10px;height:10px;border-radius:50%}.habit-ring-legend .new{background:#7851B8}.habit-ring-legend .review{background:#DF82B8}
+.habit-rings{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.habit-ring-day{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0}.habit-ring-day svg{width:100%;max-width:50px;height:auto;overflow:visible}.habit-ring-day small{font-size:11px;color:var(--muted)}.habit-ring-day.today small{font-weight:700;color:var(--ink)}.habit-ring-day.future{opacity:.55}.habit-ring-legend{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px 9px;margin:0;font-size:11px;color:var(--muted)}.habit-ring-legend span{display:inline-flex;align-items:center;gap:5px}.habit-ring-legend i{display:inline-block;width:10px;height:10px;border-radius:50%}.habit-ring-legend .new{background:#7851B8}.habit-ring-legend .review{background:#DF82B8}
+
+
+/* Weekly swipe card: period on the left, compact legend on the right. */
+.habit-week-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 12px;min-width:0}
+.habit-week-period{font-size:12px;font-weight:800;color:var(--muted);white-space:nowrap;flex:none}
+.habit-week-header .habit-ring-legend{min-width:0}
+.habit-week-swipe{touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.habit-week-swipe:focus-visible{outline:2px solid var(--primary);outline-offset:3px;border-radius:12px}
+.habit-week-swipe.week-swipe-enter{animation:week-swipe-enter .2s ease-out}
+@keyframes week-swipe-enter{from{opacity:.55;transform:translateX(var(--week-slide,8px))}to{opacity:1;transform:translateX(0)}}
+.habit-card h2{margin-bottom:8px}
+.habit-rings{gap:2px}
+.habit-ring-day svg{max-width:50px}
+@media(max-width:390px){.habit-card{padding:16px 12px}.habit-week-header{gap:5px}.habit-week-period{font-size:11px}.habit-week-header .habit-ring-legend{gap:3px 6px;font-size:10px}.habit-ring-legend i{width:8px;height:8px}.habit-rings{gap:1px}}
+@media(prefers-reduced-motion:reduce){.habit-week-swipe.week-swipe-enter{animation:none}}
+/* The achievements preview shares the weekly progress card language. */
+.achievement-preview{background:var(--primary-soft);border:0;border-radius:23px;padding:18px 19px;margin:14px 0 4px}
+.achievement-mini{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:9px}
+.achievement-metric{min-width:0;padding:9px 4px;text-align:center;border:0;border-radius:13px;background:rgba(255,255,255,.74)}
+.achievement-metric b{font-size:20px;line-height:1.25;color:var(--ink);font-variant-numeric:tabular-nums}
+.achievement-metric span{font-size:11px;white-space:normal}
+.achievement-metric .achievement-delta{font-size:10px}
+@media(max-width:390px){.achievement-preview{padding:16px 12px}}
 
 /* Responsive layout hardening across all screens; no visual asset or font changes. */
 html,body{max-width:100%;overflow-x:hidden}
@@ -817,16 +840,31 @@ function weekMonday(offset=0){const today=H.day(),dow=(new Date().getDay()+6)%7;
 function weekHeading(offset){const start=weekMonday(offset),end=H.shift(start,6);const fmt=d=>{const [y,m,day]=d.split('-').map(Number);return day+' '+['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'][m-1]};return fmt(start)+' — '+fmt(end)}
 function weekSwitcher(offset,callback){return `<div class="week-switcher"><button type="button" onclick="${callback}(-1)" aria-label="Предыдущая неделя">‹</button><span>${weekHeading(offset)}</span><button type="button" onclick="${callback}(1)" aria-label="Следующая неделя" ${offset>=0?'disabled':''}>›</button></div>`}
 function changeHomeWeek(delta){homeWeekOffset=Math.min(0,homeWeekOffset+delta);home()}
+let weekSwipeStart=null;
+function weekSwipeBegin(event){if(event.touches.length!==1)return;const t=event.touches[0];weekSwipeStart={x:t.clientX,y:t.clientY,time:Date.now()}}
+function weekSwipeEnd(event){
+ if(!weekSwipeStart||!event.changedTouches.length)return;
+ const start=weekSwipeStart;weekSwipeStart=null;
+ const t=event.changedTouches[0],dx=t.clientX-start.x,dy=t.clientY-start.y;
+ if(Math.abs(dx)<45||Math.abs(dx)<Math.abs(dy)*1.35||Date.now()-start.time>1200)return;
+ const delta=dx<0?1:-1,next=Math.min(0,homeWeekOffset+delta);
+ if(next===homeWeekOffset)return;
+ homeWeekOffset=next;home();
+ const node=document.querySelector('.habit-card .habit-week-swipe');
+ if(node){node.style.setProperty('--week-slide',dx<0?'12px':'-12px');node.classList.add('week-swipe-enter')}
+}
+function weekSwipeCancel(){weekSwipeStart=null}
 function changeAchievementsWeek(delta){achievementsWeekOffset=Math.min(0,achievementsWeekOffset+delta);achievements()}
 function habitWeek(){const st=H.stats(data.habit),monday=weekMonday(homeWeekOffset);
  const ring=(radius,color,on,width)=>`<circle cx="22" cy="22" r="${radius}" fill="none" stroke="${on?color:'currentColor'}" stroke-opacity="${on?'1':'.12'}" stroke-width="${width}"/>`;
  return `<div class="habit-week habit-rings" aria-label="Прогресс за неделю">${['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map((name,i)=>{const day=H.shift(monday,i),d=data.habit.days[day]||{},today=day===st.today,future=day>st.today,learned=!!d.newDone||!!d.newActivity,reviewed=(d.reviews?.length||0)>0||!!d.reviewActivity,done=!!d.qualified;const status=future?'впереди':[learned?'новые слова':'',reviewed?'повторение':'',done?'новые слова и повторение выполнены':''].filter(Boolean).join(', ')||'нет активности';
- return `<div class="habit-ring-day ${today?'today':''} ${future?'future':''}" aria-label="${name}: ${status}"><svg viewBox="0 0 44 44" aria-hidden="true">${ring(17.5,'#7851B8',learned,5)}${ring(11.5,'#DF82B8',reviewed,4)}${done?'<path d="M17 22l3.5 3.5 7-8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>':''}</svg><small>${name}</small></div>`}).join('')}</div><div class="habit-ring-legend"><span><i class="new"></i>Новые слова</span><span><i class="review"></i>Повторение</span></div>`;
+ return `<div class="habit-ring-day ${today?'today':''} ${future?'future':''}" aria-label="${name}: ${status}"><svg viewBox="0 0 44 44" aria-hidden="true">${ring(17.5,'#7851B8',learned,5)}${ring(11.5,'#DF82B8',reviewed,4)}${done?'<path d="M17 22l3.5 3.5 7-8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>':''}</svg><small>${name}</small></div>`}).join('')}</div>`;
 }
+function habitWeekHeader(){return `<div class="habit-week-header"><span class="habit-week-period">${weekHeading(homeWeekOffset)}</span><div class="habit-ring-legend"><span><i class="new"></i>Новые</span><span><i class="review"></i>Повторение</span></div></div>`}
 function habitCard(){const st=H.stats(data.habit),available=trainedIds().length,goal=Math.max(1,Math.min(5,available));
- return `<div class="habit-card"><h2>Прогресс за неделю</h2>${weekSwitcher(homeWeekOffset,"changeHomeWeek")}${habitWeek()}<p>${st.done?'Сегодня занятие засчитано.':'Сегодня занятие ещё не засчитано.'}</p>${!st.done?`<p class="note">Закончи новую подборку${available?` или повтори ${goal} ${goal===1?'знакомое слово':goal<5?'знакомых слова':'знакомых слов'} в обе стороны`:''}, чтобы отметить сегодняшний день.</p>`:''}</div>`;
+ return `<div class="habit-card"><h2>Прогресс за неделю</h2><div class="habit-week-swipe" tabindex="0" role="group" aria-label="Недели: проведите пальцем влево или вправо" ontouchstart="weekSwipeBegin(event)" ontouchend="weekSwipeEnd(event)" ontouchcancel="weekSwipeCancel()" onkeydown="if(event.key==='ArrowLeft'){changeHomeWeek(-1)}else if(event.key==='ArrowRight'){changeHomeWeek(1)}">${habitWeekHeader()}${habitWeek()}</div><p>${st.done?'Сегодня занятие засчитано.':'Сегодня занятие ещё не засчитано.'}</p>${!st.done?`<p class="note">Закончи новую подборку${available?` или повтори ${goal} ${goal===1?'знакомое слово':goal<5?'знакомых слова':'знакомых слов'} в обе стороны`:''}, чтобы отметить сегодняшний день.</p>`:''}</div>`;
 }
-function habitPraise(p){return `<div class="habit-praise ${p.milestone?'milestone':''}" role="status">${berryArt(p.milestone?'bunch':'sprout')}<h2>${p.title}</h2><p>${p.text}</p><p class="note">Прогресс за неделю</p>${weekSwitcher(homeWeekOffset,"changeHomeWeek")}${habitWeek()}<span class="day-earned">Сегодня засчитано</span></div>`}
+function habitPraise(p){return `<div class="habit-praise ${p.milestone?'milestone':''}" role="status">${berryArt(p.milestone?'bunch':'sprout')}<h2>${p.title}</h2><p>${p.text}</p><p class="note">Прогресс за неделю</p><div class="habit-week-swipe" tabindex="0" role="group" aria-label="Недели: проведите пальцем влево или вправо" ontouchstart="weekSwipeBegin(event)" ontouchend="weekSwipeEnd(event)" ontouchcancel="weekSwipeCancel()" onkeydown="if(event.key==='ArrowLeft'){changeHomeWeek(-1)}else if(event.key==='ArrowRight'){changeHomeWeek(1)}">${habitWeekHeader()}${habitWeek()}</div><span class="day-earned">Сегодня засчитано</span></div>`}
 
 /* Counts use saved word records. Old migrated words without a first date are not placed on a timeline. */
 function achievementData(){
