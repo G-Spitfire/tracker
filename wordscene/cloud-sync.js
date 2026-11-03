@@ -83,8 +83,22 @@ function create({auth,cloud,storage,validate,now=()=>Date.now(),reload=()=>{},ca
   const current=local();
   if(remote.exists){
    if(stable(remote.payload)===current.fingerprint){saveSettings({uid:user,revision:remote.revision,baseline:current.fingerprint});return {status:'same',revision:remote.revision}}
-   const hasLocalProgress=!!current.value.session||Object.values(current.value.words||{}).some(p=>p.started||p.trained||p.attempts>0||p.sessions>0||p.errors>0||p.schedule?.checks?.length)||Object.keys(current.value.habit?.days||{}).length>0;
-   if(!hasLocalProgress)return {status:'restore-available',revision:remote.revision};
+   // Only a genuinely untouched profile may be recovered without asking.
+   // Existing answers, sessions, activity or unknown word data must never be replaced.
+   const pristine=!current.value.session
+    &&(!Array.isArray(current.value.reviewCycle)||current.value.reviewCycle.length===0)
+    &&Object.keys(current.value.words||{}).length===0
+    &&Object.keys(current.value.habit?.days||{}).length===0
+    &&!current.value.habit?.sessions?.length
+    &&!current.value.history?.length;
+   if(pristine){
+    // The restore path checks that neither the active profile nor the local
+    // snapshot changed while the cloud was being read. It also saves rollback.
+    const ticket=await prepareRestore();
+    if(uid()!==user||!canSync(user))return {status:'account-changed'};
+    await restorePrepared(ticket);
+    return {status:'restored',revision:remote.revision};
+   }
    captureConflict(current,remote);return {status:'conflict',revision:remote.revision};
   }
   const result=await cloud.write(current.value,0);
