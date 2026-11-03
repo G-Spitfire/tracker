@@ -584,6 +584,16 @@ body.is-writing #writing-answer{scroll-margin-block:12px}
 .home-screen .habit-totals b{font-size:24px}
 @media(max-height:740px){.home-screen .home-content>h1{margin:1px 0 6px}.home-screen .habit-card{padding:8px 11px}.home-screen .achievement-preview{padding:8px 10px;margin:6px 0 3px}.home-screen .today-card{padding:8px 11px}}
 .home-screen .achievement-delta{display:inline-block;margin-left:3px;font-size:10px;font-weight:800;color:var(--muted)}.home-screen .achievement-metric:last-child span{white-space:normal}.home-screen .achievement-metric:last-child b{color:var(--primary)}
+
+/* Final home-card overrides: keep the two blocks visually consistent. */
+.home-screen .habit-ring-day svg{width:100%;max-width:50px;height:auto;aspect-ratio:1}
+.home-screen .habit-rings{gap:2px}
+.home-screen .achievement-preview{background:var(--primary-soft);border:0;border-radius:16px}
+.home-screen .achievement-mini{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.home-screen .achievement-metric,.home-screen .achievement-metric+.achievement-metric{background:rgba(255,255,255,.74);border:0;border-radius:11px;padding:7px 3px;min-width:0}
+.home-screen .achievement-metric b{font-size:20px;line-height:1.2;font-variant-numeric:tabular-nums}
+.home-screen .achievement-metric span{white-space:normal}
+
 /* While typing on iPhone, give the answer field priority over large action buttons. The keyboard's Done key submits the form. */
 body.is-writing.writing-keyboard .action-dock{display:block;padding:4px 1px 2px;border-top:0}
 body.is-writing.writing-keyboard .action-dock .bottom-actions{gap:0}
