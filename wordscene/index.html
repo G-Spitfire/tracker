@@ -836,19 +836,21 @@ function achievementData(){
   if(Number.isFinite(p.schedule?.masteredAt)&&p.schedule.masteredAt>0)mastered++;
   const origin=p.learningOrigin==='known'||p.learningOrigin==='learned'?p.learningOrigin:'unknown';origins[origin]++;
   const at=p.schedule?.firstLearnedAt;
-  if(Number.isFinite(at)&&at>0){const date=H.day(at);if(date<=today)dated.push({date,origin})}
+  if(Number.isFinite(at)&&at>0){const date=H.day(at);if(date<=today)dated.push({date,origin,word:w.en})}
   else unknown.push(w.en);
  }
- const count=(from,to)=>dated.filter(x=>x.origin==='learned'&&x.date>=from&&x.date<=to).length;
+ const count=(from,to)=>{const saved=new Set();for(const [day,entry] of Object.entries(data.habit.days||{}))if(day>=from&&day<=to)for(const word of entry.learnedWords||[])saved.add(word);for(const x of dated)if(x.origin==='learned'&&x.date>=from&&x.date<=to&&!saved.has(x.word))saved.add(x.word||'dated:'+x.date+':'+saved.size);return saved.size};
  const days=Array.from({length:7},(_,i)=>H.shift(monday,i));
- return {total:origins.known+origins.learned+origins.unknown,mastered,origins,dated,unknown:unknown.length,today,yesterday,monday,lastMonday,lastSunday,todayCount:count(today,today),week:count(monday,today),yesterdayCount:count(yesterday,yesterday),lastWeek:count(lastMonday,lastSunday),days,counts:days.map(d=>count(d,d))};
+ return {total:origins.known+origins.learned+origins.unknown,mastered,origins,dated,unknown:unknown.length,today,yesterday,monday,lastMonday,lastSunday,todayCount:count(today,today),week:count(monday,today),yesterdayCount:count(yesterday,yesterday),lastWeek:count(lastMonday,lastSunday),days,counts:days.map(d=>count(d,d)),count};
 }
 function achievementPreview(){
  const a=achievementData();
  return `<section class="achievement-preview" aria-label="Мои достижения"><button class="achievement-heading" onclick="achievements()">Мои достижения <span aria-hidden="true">›</span></button><div class="achievement-mini"><div class="achievement-metric"><b>+${a.week}</b><span>Неделя</span></div><div class="achievement-metric"><b>${a.yesterdayCount}</b><span>Вчера</span></div><div class="achievement-metric"><b>${a.todayCount}</b><span>Сегодня <small class="achievement-delta">${a.todayCount>a.yesterdayCount?`▲ +${a.todayCount-a.yesterdayCount}`:a.todayCount<a.yesterdayCount?`▼ −${a.yesterdayCount-a.todayCount}`:"= 0"}</small></span></div></div></section>`;
 }
 function achievementLine(a){
- const learned=a.dated.filter(x=>x.origin==='learned').sort((x,y)=>x.date.localeCompare(y.date));
+ const events=Object.entries(data.habit.days||{}).flatMap(([date,d])=>(d.learnedWords||[]).map(word=>({date,origin:'learned',word}))).filter(x=>x.date<=a.today);
+ const eventWords=new Set(events.map(x=>x.word));
+ const learned=[...a.dated.filter(x=>x.origin==='learned'&&!eventWords.has(x.word)),...events].sort((x,y)=>x.date.localeCompare(y.date));
  const undated=Math.max(0,a.origins.learned+a.origins.unknown-learned.length-a.dated.filter(x=>x.origin==='unknown').length);
  const uncertain=a.origins.unknown;
  const history=Object.keys(data.habit.days||{}).filter(d=>d<=a.today&&(data.habit.days[d].newDone||data.habit.days[d].newActivity)).sort();
@@ -872,7 +874,7 @@ function achievementLine(a){
  return `<svg class="achievement-chart" viewBox="0 0 320 150" role="img" aria-label="Рост словаря с первого выученного слова"><path d="M16 112H293" stroke="#e7ddee"/><text x="5" y="16" font-size="10" fill="#786588">Слов</text><path d="${line}" fill="none" stroke="#6554b8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>${labels}<circle cx="${last[0]}" cy="${last[1]}" r="4" fill="#6554b8"/><text x="${last[0]-7}" y="${Math.max(14,last[1]-9)}" text-anchor="end" font-size="13" font-weight="700" fill="#352044">${total}</text></svg>${undated?`<p class="achievement-note">${undated} ${undated===1?'слово учтено':'слов учтено'} в начальном результате без точной даты изучения.</p>`:''}`;
 }
 function achievements(){
- screen='parents';const a=achievementData(),labels=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],monday=weekMonday(achievementsWeekOffset),days=Array.from({length:7},(_,i)=>H.shift(monday,i)),counts=days.map(d=>a.dated.filter(x=>x.origin==='learned'&&x.date===d).length),max=Math.max(1,...counts);
+ screen='parents';const a=achievementData(),labels=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],monday=weekMonday(achievementsWeekOffset),days=Array.from({length:7},(_,i)=>H.shift(monday,i)),counts=days.map(d=>a.count(d,d)),max=Math.max(1,...counts);
  const missingDates=a.origins.unknown+Math.max(0,a.origins.learned-a.dated.filter(x=>x.origin==='learned').length);
  const activity=days.map(d=>!!(data.habit.days?.[d]?.newDone||data.habit.days?.[d]?.newActivity));
  const bars=counts.map((n,i)=>{const future=days[i]>a.today,unknown=!future&&n===0&&activity[i]&&missingDates>0;
@@ -1023,10 +1025,10 @@ function startWritingPractice(ids){
 }
 function openWritingErrors(){if(s&&!['result','between'].includes(s.phase)){toast('Сначала заверши текущее занятие.');return}s=null;save();wordTopic='all';wordIssue='writing';wordFilter='all';wordQuery='';myWords()}
 
-function completePart(){if(s.part==='writing'){sound('finish');s.phase='result';save();result();return}if(s.part==='new'&&!s.writingDone){beginWriting();return}sound('finish');for(const i of s.ids){
+function completePart(){if(s.part==='writing'){sound('finish');s.phase='result';save();result();return}if(s.part==='new'&&!s.writingDone){beginWriting();return}sound('finish');const newlyLearned=[];for(const i of s.ids){
  if(s.part==='review'){finishReviewedWord(i,!s.schedulerVersion);continue}
- const token='new:'+i;if(s.completed.includes(token))continue;const p=record(i);R.introduce(p);p.learningOrigin??="learned";p.sessions++;p.started=true;p.needsWork=s.partErrors.includes(i);p.lastAt=Date.now();s.completed.push(token);
- }if(s.part==='new')H.record(data.habit,{kind:'new'});s.phase='result';save();result()}
+ const token='new:'+i;if(s.completed.includes(token))continue;const p=record(i);R.introduce(p);p.learningOrigin??="learned";p.sessions++;p.started=true;p.needsWork=s.partErrors.includes(i);p.lastAt=Date.now();s.completed.push(token);if(s.part==='new'&&p.learningOrigin==='learned')newlyLearned.push(words[i].en);
+ }if(s.part==='new'){const date=H.day(),day=data.habit.days[date]??={reviews:[],newDone:false,qualified:false,praised:false};day.learnedWords??=[];for(const word of newlyLearned)if(!day.learnedWords.includes(word))day.learnedWords.push(word);day.learningSessions??=[];if(!day.learningSessions.some(x=>x.id===s.id))day.learningSessions.push({id:s.id,at:Date.now(),words:[...newlyLearned],count:newlyLearned.length});H.record(data.habit,{kind:'new'})}s.phase='result';save();result()}
 
 function between(){s.phase='result';save();result()}
 
