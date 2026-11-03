@@ -96,6 +96,9 @@ function create({auth,cloud,storage,validate,now=()=>Date.now(),reload=()=>{},ca
     // snapshot changed while the cloud was being read. It also saves rollback.
     const ticket=await prepareRestore();
     if(uid()!==user||!canSync(user))return {status:'account-changed'};
+    // The child may have started an activity during the cloud read.
+    // Never overwrite an active save that changed after the pristine check.
+    if(local().raw!==current.raw)return {status:'local-changed'};
     await restorePrepared(ticket);
     return {status:'restored',revision:remote.revision};
    }
