@@ -43,7 +43,7 @@ const password=document.createElement('input');password.type='password';password
 const button=(label,type='button')=>{const b=document.createElement('button');b.type=type;b.textContent=label;return b};
 const saveCloud=button('Сохранить прогресс'),login=button('Войти','submit'),logout=button('Выйти'),restore=button('Восстановить прогресс'),download=button('Скачать облачную копию'),exportConflict=button('Скачать обе версии'),keepLocal=button('Сохранить эту версию в облако'),keepCloud=button('Восстановить облачную копию'),importGuest=button('Перенести гостевой прогресс');
 const info=document.createElement('p');info.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere';
-const extra=document.createElement('details'),extraTitle=document.createElement('summary');extraTitle.textContent='Для взрослых · дополнительные действия';extra.append(extraTitle,saveCloud,restore,keepLocal,keepCloud,logout,download,importGuest,exportConflict);panel.append(status,form,info,extra);form.append(email,password,login);
+window.WordSceneBackupUI.advancedCloud.append(saveCloud,restore,keepLocal,keepCloud,logout,download,importGuest,exportConflict);panel.append(status,form,info);form.append(email,password,login);
 const allButtons=[saveCloud,login,logout,restore,download,importGuest,exportConflict,keepLocal,keepCloud];
 for(const b of allButtons)b.style.cssText='display:block;width:100%;min-height:42px;margin:7px 0;padding:9px 12px;background:#6554b8;color:#fff;border:1px solid #6554b8;border-radius:10px;font:600 14px system-ui;opacity:1;cursor:pointer';
 for(const b of [logout,download,exportConflict]){b.style.background='#f1eafa';b.style.color='#342b49'}
@@ -135,6 +135,8 @@ onAuthStateChanged(auth,user=>{
    &&confirm('На этом устройстве есть изученные слова без аккаунта. Привязать этот прогресс к аккаунту '+(user.email||'ребёнка')+'?\n\nВыбирайте «ОК» только если это прогресс владельца аккаунта. Исходная гостевая копия сохранится.');
   const result=profiles.switchTo(user?.uid||null,{recoverDamagedTarget:true,importGuestOnFirstLogin:claimGuest});
   if(result.changed){authReady=false;document.body.dataset.wordsceneProfileState='switching';document.body.classList.add('profile-switch-blocked');status.textContent='Сохраняем данные предыдущего профиля и открываем отдельный профиль…';location.reload();return}
+  window.WordSceneAccount=user?{uid:user.uid,displayName:(user.displayName||'').trim(),email:user.email||''}:null;
+  window.dispatchEvent(new Event('wordscene-account-change'));
   authReady=true;document.body.dataset.wordsceneProfileState='ready';document.body.classList.remove('profile-switch-blocked');status.textContent=user?'Аккаунт: '+(user.email||'выполнен вход'):'Гостевой режим: прогресс только на этом устройстве';refreshButtons();if(user)void runSync();else offerCloudLogin()
  }catch(e){authReady=profiles.matches(user?.uid||null);document.body.dataset.wordsceneProfileState='damaged';document.body.classList.remove('profile-switch-blocked');status.textContent='Сохранение повреждено. Восстановите облачную копию или файл. Исходные данные не перезаписаны.';message(e.message||'Хранилище недоступно');refreshButtons();window.WordSceneBackupUI.open()}
 });
