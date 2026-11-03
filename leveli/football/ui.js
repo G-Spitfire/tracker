@@ -7,8 +7,7 @@ const status = $('#football-status');
 const leagueSelect = $('#football-league');
 const seasonSelect = $('#football-season');
 const params = new URLSearchParams(location.search);
-const DEMO = params.get('football-demo') === '1';
-const LOCAL = !DEMO && params.get('football-local') === '1';
+const LOCAL = params.get('football-local') === '1';
 const cacheKey = 'leveli-football-snapshots-v1';
 const leagues = FOOTBALL_LEAGUES;
 const leagueNames = {PL:'Английская Премьер-лига',PD:'Ла Лига',SA:'Серия А',BL1:'Бундеслига',FL1:'Лига 1',CL:'Лига чемпионов УЕФА',RPL:'Российская Премьер-Лига'};
@@ -33,7 +32,7 @@ const safeRead = key => { try { return JSON.parse(localStorage.getItem(key) || '
 const safeWrite = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} };
 function setStatus(message, kind = '') {
   status.replaceChildren();
-  if (kind) { const pill = document.createElement('span'); pill.className = `pill ${kind}`; pill.textContent = kind === 'demo' ? 'Демо · тестовые данные' : kind === 'stale' ? 'Данные устарели' : 'Подтверждённые данные'; status.append(pill); }
+  if (kind) { const pill = document.createElement('span'); pill.className = `pill ${kind}`; pill.textContent = kind === 'stale' ? 'Данные устарели' : 'Подтверждённые данные'; status.append(pill); }
   const text = document.createElement('span'); text.textContent = message; status.append(text);
 }
 function currentData(endpoint) { return snapshots[docId(leagueSelect.value, Number(seasonSelect.value), endpoint)] || null; }
@@ -45,7 +44,6 @@ function sourceLine(data) {
   return `football-data.org · снимок ${Number.isNaN(date.getTime()) ? 'с неизвестной датой' : date.toLocaleString('ru-RU')}${age > 36 * 3600_000 ? ' · данные старше 36 часов' : ''}`;
 }
 function dataAgeKind(data) {
-  if (DEMO) return 'demo';
   return !data || !isFresh(data) ? 'stale' : '';
 }
 function loadLocalCache() {
@@ -251,13 +249,6 @@ function renderFavoriteTeamPicker(selectedSeason) {
 }
 function renderMyFootball() {
   view.replaceChildren();
-  const lab=card('Битва прогнозов · прототип','Попробуй угадать победителя, изменить условия матча и сравнить вероятности. Пока используются условные данные.');
-  const labLink=document.createElement('a');
-  labLink.href='./football/prediction-lab.html';
-  labLink.className='football-source-link';
-  labLink.textContent='Открыть футбольную лабораторию →';
-  lab.append(labLink);
-  view.append(lab);
   const selectedSeason=Number(seasonSelect.value)||null;
   if(favorites.teams.length) view.append(card('Мои команды',`${favorites.teams.length} из 3`));
   if(!favorites.teams.length)view.append(make('p','Пока нет любимых команд. Найди команду ниже и добавь её.','football-notice'));
@@ -519,8 +510,7 @@ function render() {
   if(detailPage){renderDetail();return;}
   const data=currentData('standings')||currentData('matches')||currentData('scorers');
   const latest=[currentData('standings'),currentData('matches'),currentData('scorers')].filter(Boolean).sort((a,b)=>String(b.fetchedAt).localeCompare(String(a.fetchedAt)))[0]||data;
-  if(DEMO)setStatus(`Искусственные данные для проверки интерфейса · ${sourceLine(latest)}`,'demo');
-  else if(LOCAL && latest)setStatus(sourceLine(latest)+(localLoadMessage?' · '+localLoadMessage:''),dataAgeKind(latest));
+  if(LOCAL && latest)setStatus(sourceLine(latest)+(localLoadMessage?' · '+localLoadMessage:''),dataAgeKind(latest));
   else if(LOCAL)setStatus(Object.keys(snapshots).length?'Для выбранного турнира и сезона локальных снимков нет. '+localLoadMessage:(localLoadMessage||'Локальные данные не найдены. Сначала загрузите JSON-файлы в кеш футбольного модуля.'));
   else if(latest)setStatus(sourceLine(latest),dataAgeKind(latest));
   else setStatus(navigator.onLine?'Нет подключённых данных. Показывается пустое состояние.':'Офлайн: локального снимка пока нет.');
@@ -535,16 +525,6 @@ function refreshSeasonOptions() {
   const selected=Number(seasonSelect.value)||seasons[0]||new Date().getUTCFullYear();
   seasonSelect.replaceChildren(...(seasons.length?seasons:[selected]).map(year=>new Option(String(year),String(year))));
   seasonSelect.value=String(seasons.includes(selected)?selected:seasons[0]||selected);
-}
-async function loadDemo() {
-  try {
-    const response=await fetch('./football/demo-snapshots.json',{cache:'no-store'});
-    if(!response.ok)throw new Error('fixture unavailable');
-    const data=await response.json();
-    if(data.schemaVersion!==1||data.source!=='football-data.org')throw new Error('invalid fixture');
-    for(const endpoint of ['standings','matches','scorers'])snapshots[docId(data.league,data.season,endpoint)]=data[endpoint];
-    leagueSelect.value=data.league;refreshSeasonOptions();
-  } catch { setStatus('Демо-данные не загрузились. Откройте страницу через локальный веб-сервер.'); }
 }
 async function loadPlayerCatalog() {
   try {
@@ -606,7 +586,7 @@ async function loadFirebaseSnapshots() {
 }
 async function readFirebaseSnapshots() {
   const sdk=window.leveliFirebase;
-  if(DEMO||LOCAL||!sdk?.db||!currentUser)return;
+  if(LOCAL||!sdk?.db||!currentUser)return;
   const uid=currentUser.uid;
   let loaded=false;
   if(sdk.collection&&sdk.getDocs&&sdk.query&&sdk.limit){
@@ -661,8 +641,7 @@ leagueSelect.addEventListener('change',()=>{refreshSeasonOptions();render();});
 seasonSelect.addEventListener('change',render);
 document.addEventListener('click',event=>{const target=event.target.closest('[data-go="football"]');if(target){detailPage=null;activeTab='my-football';render();}});
 window.addEventListener('online',()=>{render();void readFirebaseSnapshots();});window.addEventListener('offline',render);
-if(!LOCAL&&!DEMO)loadLocalCache();loadFavorites();
+if(!LOCAL)loadLocalCache();loadFavorites();
 void loadPlayerCatalog();
 if(LOCAL){ refreshSeasonOptions(); render(); void loadLocalFiles(); }
-else if(DEMO)loadDemo().then(render);
 else { refreshSeasonOptions(); render(); if(window.leveliFirebase)loadFirebaseSnapshots(); else window.addEventListener('leveliFirebaseReady',loadFirebaseSnapshots,{once:true}); }
