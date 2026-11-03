@@ -147,7 +147,6 @@ h1{font-size:36px}
 @media(max-width:700px){.scene-box p{font-size:14px;line-height:1.5}}
 @media(max-width:700px){.practice-reminder{font-size:13px;padding:10px 12px}}
 @media(max-width:700px){.learning .bottom-actions{padding-top:13px}}
-.header-tools{display:flex;align-items:center;gap:3px}.header-help{display:flex;align-items:center;justify-content:center;width:38px;height:44px;background:transparent;color:#806d92;font-size:23px;font-weight:600;border:0;border-radius:12px}.header-help:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .sound-toggle{font-weight:650;min-height:44px;border-radius:14px;white-space:nowrap}
 header{padding-top:calc(8px + env(safe-area-inset-top));padding-bottom:8px;flex-shrink:0}
 main{padding-top:8px;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
@@ -250,9 +249,6 @@ main{background:var(--paper)}
 header{position:relative;max-width:520px;padding-left:24px;padding-right:24px;gap:4px;height:calc(76px + env(safe-area-inset-top));border-radius:0;margin-top:0}
 .brand{font-family:'Nunito',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:31px!important;font-weight:700;letter-spacing:-1.3px;color:var(--primary)}
 .brand:before{display:none}
-#brand-berry{margin-right:auto;width:43px;height:48px;display:flex;align-items:center}
-#brand-berry svg{width:48px;height:48px}
-.header-tools{gap:0}
 .sound-toggle{border:0;background:none;color:#806d92;font-size:10px;padding:8px 2px;min-width:52px}
 h1{font-family:'Nunito',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#3d214f;font-weight:700;letter-spacing:-.7px}
 h2{font-family:'Nunito',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#3d214f;font-weight:700;letter-spacing:-.7px}
@@ -421,20 +417,19 @@ body.home-page-scroll .home-content{overflow:visible}
 .learning-info-button{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;border:0;background:transparent;color:inherit;min-width:32px;min-height:32px;font-size:20px;cursor:pointer}
 .learning-help{font-size:13px;line-height:1.5;color:var(--muted);margin:7px 0}
 .learning-help[hidden]{display:none}
-.settings-toggle{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;border-radius:12px;background:transparent;color:inherit;padding:8px;cursor:pointer}.settings-sound{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:16px 0;padding:12px;border:1px solid var(--border);border-radius:14px}.settings-sound span{font-size:14px}.settings-sound button{min-height:44px;font-size:13px}
+.settings-sound{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:16px 0;padding:12px;border:1px solid var(--border);border-radius:14px}.settings-sound span{font-size:14px}.settings-sound button{min-height:44px;font-size:13px}
 .home-title{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.language-flag{display:inline-flex;align-items:center;justify-content:center;font-size:.66em;line-height:1;vertical-align:middle;flex-shrink:0}
 .pronunciation-row{display:flex;align-items:center;gap:9px}.speak-button{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;border:0;border-radius:12px;background:var(--primary-soft);color:var(--primary);cursor:pointer}.stack-screen{display:flex;flex-direction:column;flex:1;min-height:0}.stack-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:250px;flex:1;max-height:410px;border:2px solid #e5d9ef;border-radius:24px;background:#fffdf8;touch-action:pan-y;user-select:none;cursor:pointer;padding:25px}.stack-word{font-size:clamp(40px,10vw,66px);font-weight:800}.stack-translation{font-size:23px;color:var(--primary)}.stack-translation[hidden]{display:none}.stack-card{will-change:transform,opacity}@media(prefers-reduced-motion:reduce){.stack-card{transition:none!important}}.stack-actions{display:flex;flex-direction:row;gap:10px}.stack-actions button{flex:1;min-width:0}
 .ios-settings-group{overflow:hidden;border:1px solid var(--border);border-radius:16px;background:var(--card,#fff);margin-top:18px}.ios-settings-row{appearance:none;width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:60px;padding:12px 16px;background:transparent;color:var(--ink);border:0;border-radius:0;text-align:left;font:inherit;cursor:pointer}.ios-settings-row+.ios-settings-row{border-top:1px solid var(--border)}.ios-settings-label{display:flex;flex-direction:column;gap:3px}.ios-settings-label small,.ios-settings-value{color:var(--muted);font-size:13px}.ios-settings-value{display:flex;align-items:center;gap:10px}.ios-chevron{font-size:26px;line-height:1;color:var(--muted)}.ios-toggle-row{position:relative;cursor:pointer}.ios-toggle-row input{position:absolute;right:16px;width:49px;height:30px;opacity:0;cursor:pointer}.ios-switch{position:relative;flex:none;width:49px;height:30px;border-radius:20px;background:#b8bac4;transition:background .15s}.ios-switch:after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:white;box-shadow:0 1px 3px #0003;transition:transform .15s}.ios-toggle-row input:checked+.ios-switch{background:#35a86a}.ios-toggle-row input:checked+.ios-switch:after{transform:translateX(19px)}.ios-toggle-row input:focus-visible+.ios-switch{outline:3px solid var(--primary);outline-offset:3px}.ios-name-form{display:flex;flex-direction:column;gap:12px;margin-top:20px}.ios-name-form input{width:100%;min-height:48px;border:1px solid var(--border);border-radius:12px;padding:12px 14px;font:inherit;background:#fff;color:var(--ink)}.ios-name-form button{align-self:stretch}
 .habit-rings{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.habit-ring-day{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0}.habit-ring-day svg{width:100%;max-width:50px;height:auto;overflow:visible}.habit-ring-day small{font-size:11px;color:var(--muted)}.habit-ring-day.today small{font-weight:700;color:var(--ink)}.habit-ring-day.future{opacity:.55}.habit-ring-legend{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px 9px;margin:0;font-size:11px;color:var(--muted)}.habit-ring-legend span{display:inline-flex;align-items:center;gap:5px}.habit-ring-legend i{display:inline-block;width:10px;height:10px;border-radius:50%}.habit-ring-legend .new{background:#7851B8}.habit-ring-legend .review{background:#DF82B8}
 
 
-/* Weekly swipe card: period on the left, compact legend on the right. */
+/* Current-week summary: period on the left, legend on the right. */
 .habit-week-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 12px;min-width:0}
 .habit-week-period{font-size:12px;font-weight:800;color:var(--muted);white-space:nowrap;flex:none}
 .habit-week-header .habit-ring-legend{min-width:0}
 .habit-card h2{margin-bottom:8px}
 .habit-rings{gap:2px}
-.habit-ring-day svg{max-width:50px}
 @media(max-width:390px){.habit-card{padding:16px 12px}.habit-week-header{gap:5px}.habit-week-period{font-size:11px}.habit-week-header .habit-ring-legend{gap:3px 6px;font-size:10px}.habit-ring-legend i{width:8px;height:8px}.habit-rings{gap:1px}}
 /* The achievements preview shares the weekly progress card language. */
 .achievement-preview{background:var(--primary-soft);border:0;border-radius:23px;padding:18px 19px;margin:14px 0 4px}
@@ -481,8 +476,6 @@ html,body{max-width:100%;overflow-x:hidden}
  header{gap:5px;padding-left:12px;padding-right:12px}
  .brand{font-size:clamp(20px,6vw,24px)!important;white-space:nowrap}
  .brand:before{margin-right:3px}
- .header-help{width:40px;min-width:40px}
- .settings-toggle{min-width:40px;padding:6px}
  main{padding-left:12px;padding-right:12px}
  .home-content>h1{font-size:clamp(23px,7vw,28px)}
  .habit-card{padding:14px 12px}
@@ -506,7 +499,7 @@ html,body{max-width:100%;overflow-x:hidden}
 }
 /* Unified typography: Nunito for all application UI; preserve existing illustration styling. */
 body{font-weight:400}button,.primary,.secondary{font-weight:700}h1,h2,.word,.stack-word{font-weight:800}input,select,textarea{font-family:'Nunito',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-.header-help svg,.settings-toggle svg{display:block;flex:none}.nav-item svg{stroke-width:1.9}
+.nav-item svg{stroke-width:1.9}
 
 /* Consistent UI roles: neutral secondary actions, lavender selections, distinct success states. */
 .secondary{background:transparent;border:1px solid var(--primary);color:var(--primary)}
@@ -546,20 +539,20 @@ body.is-writing #writing-answer{scroll-margin-block:12px}
 .home-screen .habit-card h2{font-size:16px;margin:0 0 7px}
 .home-screen .habit-card p{font-size:11px;margin:6px 0 0;line-height:1.3}
 .home-screen .habit-card p.note{display:none}
-.home-screen .habit-ring-day svg{width:33px;height:33px}
+.home-screen .habit-ring-day svg{width:100%;max-width:50px;height:auto;aspect-ratio:1}
 .home-screen .habit-ring-day small{font-size:10px}
 .home-screen .habit-ring-legend{font-size:10px;margin-top:4px}
 .home-screen .today-card{padding:10px 13px;min-height:0;border-radius:15px}
 .home-screen .today-card h2{font-size:16px;margin:0 0 3px}
 .home-screen .today-card p{font-size:12px;line-height:1.35}
-.home-screen .achievement-preview{margin:9px 0 4px;padding:10px 12px;border-radius:16px}
+.home-screen .achievement-preview{margin:9px 0 4px;padding:10px 12px;border-radius:16px;background:var(--primary-soft);border:0}
 .home-screen .achievement-heading{display:flex;justify-content:space-between;align-items:center;width:100%;padding:0;background:none;color:var(--ink);font-size:16px;font-weight:800;text-align:left}
 .home-screen .achievement-heading span{color:var(--primary);font-size:22px;line-height:1}
-.home-screen .achievement-mini{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin-top:7px}
-.home-screen .achievement-metric{padding:4px 2px;text-align:center;border:0;background:transparent}
-.home-screen .achievement-metric+.achievement-metric{border-left:1px solid var(--border);border-radius:0}
-.home-screen .achievement-metric b{font-size:23px;line-height:1.2;color:var(--primary)}
-.home-screen .achievement-metric span{font-size:10px;white-space:nowrap}
+.home-screen .achievement-mini{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:7px}
+.home-screen .achievement-metric{padding:7px 3px;text-align:center;border:0;border-radius:11px;background:rgba(255,255,255,.74);min-width:0}
+.home-screen .achievement-metric+.achievement-metric{border-left:0;border-radius:11px}
+.home-screen .achievement-metric b{font-size:20px;line-height:1.2;color:var(--primary);font-variant-numeric:tabular-nums}
+.home-screen .achievement-metric span{font-size:10px;white-space:normal}
 .home-screen .home-actions{padding-top:4px}
 .home-screen .home-actions>.primary{min-height:46px}
 .home-screen .habit-praise>.berry-art{height:54px;width:90px}
@@ -571,15 +564,6 @@ body.is-writing #writing-answer{scroll-margin-block:12px}
 .home-screen .habit-totals b{font-size:24px}
 @media(max-height:740px){.home-screen .home-content>h1{margin:1px 0 6px}.home-screen .habit-card{padding:8px 11px}.home-screen .achievement-preview{padding:8px 10px;margin:6px 0 3px}.home-screen .today-card{padding:8px 11px}}
 .home-screen .achievement-delta{display:inline-block;margin-left:3px;font-size:10px;font-weight:800;color:var(--muted)}.home-screen .achievement-metric:last-child span{white-space:normal}.home-screen .achievement-metric:last-child b{color:var(--primary)}
-
-/* Final home-card overrides: keep the two blocks visually consistent. */
-.home-screen .habit-ring-day svg{width:100%;max-width:50px;height:auto;aspect-ratio:1}
-.home-screen .habit-rings{gap:2px}
-.home-screen .achievement-preview{background:var(--primary-soft);border:0;border-radius:16px}
-.home-screen .achievement-mini{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
-.home-screen .achievement-metric,.home-screen .achievement-metric+.achievement-metric{background:rgba(255,255,255,.74);border:0;border-radius:11px;padding:7px 3px;min-width:0}
-.home-screen .achievement-metric b{font-size:20px;line-height:1.2;font-variant-numeric:tabular-nums}
-.home-screen .achievement-metric span{white-space:normal}
 
 /* While typing on iPhone, give the answer field priority over large action buttons. The keyboard's Done key submits the form. */
 body.is-writing.writing-keyboard .action-dock{display:block;padding:4px 1px 2px;border-top:0}
@@ -594,7 +578,6 @@ body.is-writing.writing-keyboard #writing-answer{min-height:44px;font-size:20px}
 /* Unified lilac progress indicators with a restrained static glow. */
 .training-screen .line{background:#e9e1f3;overflow:visible;border-radius:999px}
 .training-screen .line i{background:linear-gradient(90deg,#b7a5dc,#6554b8);border-radius:999px;box-shadow:0 0 7px 1px rgba(101,84,184,.32),0 0 13px rgba(156,130,200,.18)}
-.achievement-bar-fill{background:linear-gradient(0deg,#6554b8,#b7a5dc);box-shadow:0 0 7px rgba(101,84,184,.24)}
 .topic-grid progress{accent-color:var(--primary)}
 @media(prefers-reduced-motion:reduce){.training-screen .line i{transition:none}}
 
