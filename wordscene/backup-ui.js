@@ -12,11 +12,11 @@ panel.append(title,close,explanation,slot,info);document.body.append(panel);
 function open(){if(!panel.open)panel.showModal()}
 window.addEventListener('wordscene-open-settings',open);window.addEventListener('wordscene-screen-change',()=>{if(panel.open)panel.close()});
 const device=B.create({storage:localStorage,validate,disable:()=>{localStorage.removeItem('wordscene-sync-v1');const id=localStorage.getItem('wordscene-active-profile-v1');if(id?.startsWith('user:'))localStorage.removeItem('wordscene-sync-v1-profile-'+encodeURIComponent(id.slice(5)))}});
-const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Для взрослых · аварийное восстановление';details.append(summary);panel.append(details);
+const details=document.createElement('details'),summary=document.createElement('summary'),advancedCloud=document.createElement('div');summary.textContent='Для взрослых · дополнительные действия';details.append(summary,advancedCloud);panel.append(details);
 const button=label=>{const b=document.createElement('button');b.textContent=label;b.className='secondary wide';b.style.margin='8px 0';return b};
 const deviceExport=button('Скачать копию устройства'),fileInput=document.createElement('input'),undo=button('Отменить последнее восстановление');fileInput.type='file';fileInput.accept='.json,application/json';fileInput.setAttribute('aria-label','Восстановить из файла JSON');
 const choices=document.createElement('select');choices.setAttribute('aria-label','Версия из файла');choices.hidden=true;const importButton=button('Восстановить выбранную версию');importButton.hidden=true;
-details.append(deviceExport,fileInput,choices,importButton,undo);let selected=[];
+const recoveryLabel=document.createElement('h3');recoveryLabel.textContent='Файлы и аварийное восстановление';details.append(recoveryLabel,deviceExport,fileInput,choices,importButton,undo);let selected=[];
 async function applyFile(ticket){
  if(document.body.dataset.wordsceneProfileState==='switching')throw Error('Дождитесь переключения профиля');
  await window.WordSceneCloudBackup?.pause?.();
@@ -34,5 +34,5 @@ fileInput.onchange=async()=>{
 };
 importButton.onclick=async()=>{try{const item=selected[Number(choices.value)||0];if(!item)throw Error('Сначала выберите файл');await applyFile(device.preview(JSON.stringify(item.backup)))}catch(e){info.textContent=e.message}};
 undo.onclick=async()=>{try{await applyFile(device.rollback())}catch(e){info.textContent=e.message}};
-window.WordSceneBackupUI={open,device};
+window.WordSceneBackupUI={open,device,advancedCloud};
 })();
