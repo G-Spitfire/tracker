@@ -1060,7 +1060,11 @@ function endApproach(){if(s&&!['result','between'].includes(s.phase)){pause();re
 function startSelected(intent='auto',exclude=[]){
  if(storageBlock){home();return}
  if(s&&!['result','between'].includes(s.phase)){render();return}
- const fresh=freshIds(),due=requiredIds(),reviews=(due.length||intent==='review'||!fresh.length)?reviewIds(exclude):[];
+ const fresh=freshIds(),due=requiredIds();
+ // Explicit review actions never fall through to learning new words.
+ // Once every trained word has been covered, start a fresh review batch.
+ const reviews=intent==='review'?(reviewIds(exclude).length?reviewIds(exclude):reviewIds()):(due.length||!fresh.length?reviewIds(exclude):[]);
+ if(intent==='review'&&!reviews.length){s=null;toast('Пока нет знакомых слов для повторения.');home();return}
  if(!reviews.length&&!fresh.length){s=null;home();return}
  s={id:Date.now()+'-'+Math.random().toString(36).slice(2,8),schedulerVersion:1,mode:reviews.length?'review':'new',part:reviews.length?'review':'new',ids:reviews.length?reviews:fresh,newIds:reviews.length?[]:fresh,learnIndex:0,completed:[],errors:[],partErrors:[],reviewProgress:{},queueKind:due.length?'required':'optional',reviewBatchSeen:exclude,sortExtraStacks:0,sortPendingUnknown:[]};
  if(s.part==='new')beginNew();else beginReview()
@@ -1079,8 +1083,8 @@ function revealStack(){const el=$('stack-translation');if(el)el.hidden=false}
 const MAX_EXTRA_KNOWN_STACKS=5;
 function sortNextStack(){
  if(s?.phase!=='sort-next')return;
- const canContinue=(s.sortExtraStacks||0)<MAX_EXTRA_KNOWN_STACKS&&freshIds().length>0;
- frame('Разбор стопки',100,`<div class="interlude center result-body"><h2>Ты знаешь все ${s.ids.length} слов!</h2><p>Отлично! Можно посмотреть следующую пятёрку.</p><div class="bottom-actions">${canContinue?btn('Следующие 5 слов','nextKnownStack()'):''}${btn('Повторить знакомые','beginReview()','secondary')}</div>${canContinue?`<p class="note">Дополнительных стопок: ${s.sortExtraStacks||0} из ${MAX_EXTRA_KNOWN_STACKS}</p>`:'<p class="note">Больше новых стопок в этом подходе нет.</p>'}</div>`);
+ const nextCount=freshIds().length,canContinue=(s.sortExtraStacks||0)<MAX_EXTRA_KNOWN_STACKS&&nextCount>0;
+ frame('Разбор стопки',100,`<div class="interlude center result-body"><h2>Ты знаешь все ${s.ids.length} слов!</h2><p>${canContinue?'Отлично! Можно посмотреть следующую стопку.':'Отлично! Разбор стопок завершён.'}</p><div class="bottom-actions">${canContinue?btn('Следующие '+nextCount+' '+(nextCount===1?'слово':nextCount<5?'слова':'слов'),'nextKnownStack()'):''}${btn('Повторить знакомые','beginReview()','secondary')}</div>${canContinue?`<p class="note">Дополнительных стопок: ${s.sortExtraStacks||0} из ${MAX_EXTRA_KNOWN_STACKS}</p>`:'<p class="note">Больше новых стопок в этом подходе нет.</p>'}</div>`);
 }
 function startSortedLearning(ids){
  s.sorting=false;s.sortIndex=0;s.ids=[...ids];s.newIds=[...ids];s.learnIndex=0;
