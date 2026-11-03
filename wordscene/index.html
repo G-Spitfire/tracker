@@ -848,9 +848,10 @@ function achievementPreview(){
 }
 function achievementLine(a){
  const learned=a.dated.filter(x=>x.origin==='learned').sort((x,y)=>x.date.localeCompare(y.date));
- const undated=Math.max(0,a.origins.learned-learned.length);
+ const undated=Math.max(0,a.origins.learned+a.origins.unknown-learned.length-a.dated.filter(x=>x.origin==='unknown').length);
+ const uncertain=a.origins.unknown;
  const history=Object.keys(data.habit.days||{}).filter(d=>d<=a.today&&(data.habit.days[d].newDone||data.habit.days[d].newActivity)).sort();
- if(!learned.length&&!undated)return `<div class="achievement-empty">Пока нет слов с сохранённой датой обучения. Новые слова появятся здесь после занятий.</div>`;
+ if(!learned.length&&!undated)return `<div class="achievement-empty">Пока нет слов с подтверждённой датой обучения. Новые слова появятся здесь после занятий.</div>`;
  const start=[learned[0]?.date,history[0],a.today].filter(Boolean).sort()[0];
  const dateAt=d=>new Date(d+'T12:00:00');
  const elapsed=Math.max(0,Math.round((dateAt(a.today)-dateAt(start))/86400000));
@@ -871,8 +872,10 @@ function achievementLine(a){
 }
 function achievements(){
  screen='parents';const a=achievementData(),labels=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],monday=weekMonday(achievementsWeekOffset),days=Array.from({length:7},(_,i)=>H.shift(monday,i)),counts=days.map(d=>a.dated.filter(x=>x.origin==='learned'&&x.date===d).length),max=Math.max(1,...counts);
+ const hasDatedWords=a.dated.some(x=>x.origin==='learned'&&x.date>=days[0]&&x.date<=days[6]);
+ const legacyCount=a.origins.unknown;
  const bars=counts.map((n,i)=>`<div class="achievement-bar-col"><b>${days[i]>a.today?'—':n}</b><div class="achievement-bar-track"><div class="achievement-bar-fill" style="height:${days[i]>a.today?0:n/max*100}%"></div></div><span>${labels[i]}</span></div>`).join('');
- shell(`<section class="app-screen ios-settings"><div class="topline">${btn('← Настройки','settings()','quiet')}</div><h1>Мои достижения</h1><div class="achievement-grid"><div class="achievement-tile"><b>${a.origins.known}</b><span>Знал раньше</span></div><div class="achievement-tile"><b>${a.origins.learned}</b><span>Выучил здесь</span></div><div class="achievement-tile"><b>${a.total}</b><span>Всего знаю</span></div></div><div class="achievement-panel"><h2>Как растёт мой словарь</h2>${achievementLine(a)}<p class="achievement-note">Вся доступная история · только выученные здесь слова</p></div><div class="achievement-panel"><h2>Сколько слов я учил каждый день</h2>${weekSwitcher(achievementsWeekOffset,"changeAchievementsWeek")}<div class="achievement-bars">${bars}</div></div></section>`);
+ shell(`<section class="app-screen ios-settings"><div class="topline">${btn('← Настройки','settings()','quiet')}</div><h1>Мои достижения</h1><div class="achievement-grid"><div class="achievement-tile"><b>${a.origins.known}</b><span>Знал раньше</span></div><div class="achievement-tile"><b>${a.origins.learned}</b><span>Выучил здесь</span></div><div class="achievement-tile"><b>${a.total}</b><span>Всего знаю</span></div></div><div class="achievement-panel"><h2>Как растёт мой словарь</h2>${achievementLine(a)}<p class="achievement-note">Вся доступная история · только выученные здесь слова</p></div><div class="achievement-panel"><h2>Сколько слов я учил каждый день</h2>${weekSwitcher(achievementsWeekOffset,"changeAchievementsWeek")}<div class="achievement-bars">${bars}</div>${!hasDatedWords&&legacyCount?`<p class="achievement-note">Для старых слов даты обучения не сохранились. Отметки занятий доступны на главной, но количество слов по дням восстановить точно нельзя.</p>`:""}</div></section>`);
 }
 
 function home(){screen='home';const fresh=freshIds(),trained=trainedIds(),due=requiredIds(),active=s&&!['result','between'].includes(s.phase),st=H.stats(data.habit),praise=H.takePraise(data.habit);if(praise)save();
