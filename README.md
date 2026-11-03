@@ -9,14 +9,11 @@
 | Левели | Школа, обучение и футбол | [Открыть](https://g-spitfire.github.io/tracker/leveli/) | [README](leveli/README.md) |
 | Форма | Трекер тренировок | [Открыть](https://g-spitfire.github.io/tracker/forma/) | [README](forma/README.md) |
 | WordScene | Английские слова · Полина | [Открыть](https://g-spitfire.github.io/tracker/wordscene/) | [README](wordscene/README.md) |
-| Мои слова | Карточки английских слов · MVP | [Открыть](https://g-spitfire.github.io/tracker/moi-slova/) | [README](moi-slova/README.md) |
 | Покер с нуля | Интерактивная инструкция | [Открыть](https://g-spitfire.github.io/tracker/poker/) | [README](poker/README.md) |
 
 ## Данные и разработка
 
 - Приложения независимы; их данные и возможности описаны в README внутри соответствующих папок.
-- Архитектура хранения и резервных копий: [docs/data-and-sync.md](docs/data-and-sync.md).
-- Краткая история заметных обновлений: [docs/CHANGELOG.md](docs/CHANGELOG.md). Полная история доступна в Git.
 - Правила разработки и публикации: [AGENTS.md](AGENTS.md).
 
 Сборка не требуется: GitHub Pages отдаёт статические HTML, CSS, JavaScript и ресурсы.
