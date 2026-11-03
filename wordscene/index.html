@@ -611,6 +611,16 @@ body.is-writing.writing-keyboard #writing-answer{min-height:44px;font-size:20px}
 .month-day.today svg{border-radius:50%;outline:1px solid var(--primary);outline-offset:1px}
 .month-day.future{opacity:.45}
 @media(max-width:360px){.habit-calendar{padding:12px 9px}.calendar-days{column-gap:0}.calendar-header h2{font-size:16px}}
+
+/* Statistics: the existing achievement totals and timeline remain visible above/below the monthly calendar. */
+.statistics-screen{padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+.statistics-section-heading{font-size:18px;margin:3px 0 8px}
+.statistics-screen .achievement-grid{margin:0 0 8px}
+.statistics-recent{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 16px}
+.statistics-recent .achievement-metric{min-width:0;background:var(--primary-soft);border:0;border-radius:13px;text-align:center;padding:10px 3px}
+.statistics-recent .achievement-metric b{font-size:20px;color:var(--primary);font-variant-numeric:tabular-nums}
+.statistics-recent .achievement-metric span{white-space:normal;line-height:1.3}
+.statistics-recent .achievement-delta{display:inline-block;font-size:10px;color:var(--muted)}
 </style></head><body><header><button class="brand" onclick="pause()" aria-label="На главную">WordScene</button></header><main id="app"></main><nav id="bottom-nav" class="bottom-nav" aria-label="Основная навигация"></nav><div id="toast" role="status"></div><script src="./review-engine.js"></script><script src="./habit-engine.js"></script><script src="./state-guard.js"></script><script src="./writing-engine.js"></script><script src="./topics.js"></script><script src="./content.js"></script><script>
 const words=[
 {en:'mug',ru:'кружка',ipa:'/mʌɡ/',cue:'маг',scene:'Маг взмахивает палочкой — и из огромной кружки вылетает искристый фонтан. Кружка размером с самого мага!',hint:'Представь ручку кружки, мага рядом и вспышку из кружки.'},
@@ -953,7 +963,12 @@ function achievementLine(a){
 }
 function achievements(){
  screen='statistics';const a=achievementData();
- shell(`<section class="app-screen ios-settings"><h1>Статистика</h1>${statisticsCalendar()}<div class="achievement-grid"><div class="achievement-tile"><b>${a.origins.known}</b><span>Знал раньше</span></div><div class="achievement-tile"><b>${a.origins.learned}</b><span>Выучил здесь</span></div><div class="achievement-tile"><b>${a.total}</b><span>Всего знаю</span></div></div><div class="achievement-panel"><h2>Как растёт мой словарь</h2>${achievementLine(a)}<p class="achievement-note">Вся доступная история · только выученные здесь слова</p></div></section>`);
+ const delta=a.todayCount-a.yesterdayCount,trend=delta>0?'▲ +'+delta:delta<0?'▼ −'+Math.abs(delta):'= 0';
+ shell(`<section class="app-screen ios-settings statistics-screen"><h1>Статистика</h1>
+ <section aria-label="Мои достижения"><h2 class="statistics-section-heading">Мои достижения</h2><div class="achievement-grid"><div class="achievement-tile"><b>${a.origins.known}</b><span>Знал раньше</span></div><div class="achievement-tile"><b>${a.origins.learned}</b><span>Выучил здесь</span></div><div class="achievement-tile"><b>${a.total}</b><span>Всего знаю</span></div></div>
+ <div class="achievement-mini statistics-recent"><div class="achievement-metric"><b>+${a.week}</b><span>Неделя</span></div><div class="achievement-metric"><b>${a.yesterdayCount}</b><span>Вчера</span></div><div class="achievement-metric"><b>${a.todayCount}</b><span>Сегодня <small class="achievement-delta">${trend}</small></span></div></div></section>
+ ${statisticsCalendar()}
+ <div class="achievement-panel"><h2>Как растёт мой словарь</h2>${achievementLine(a)}<p class="achievement-note">Вся доступная история · только выученные здесь слова</p></div></section>`);
 }
 function home(){screen='home';const fresh=freshIds(),trained=trainedIds(),due=requiredIds(),active=s&&!['result','between'].includes(s.phase),st=H.stats(data.habit),praise=H.takePraise(data.habit);if(praise)save();
  const returning=st.returning&&!praise;
