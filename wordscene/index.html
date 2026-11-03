@@ -526,6 +526,8 @@ body.is-writing #writing-answer{scroll-margin-block:12px}
 .achievement-bar-fill{width:100%;background:var(--success);border-radius:7px 7px 0 0}
 .achievement-bar-col b{color:var(--ink);font-size:12px}
 .achievement-note{font-size:12px;color:var(--muted);line-height:1.5}
+.week-switcher{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px;color:var(--muted);font-size:12px;font-weight:800}.week-switcher button{display:flex;align-items:center;justify-content:center;width:30px;height:30px;flex-shrink:0;border-radius:50%;background:rgba(101,84,184,.1);color:var(--primary);font-size:24px;line-height:1}.week-switcher button:disabled{opacity:.25}.week-switcher span{text-align:center;white-space:nowrap}
+.home-screen .week-switcher{margin-bottom:5px;font-size:11px}.home-screen .week-switcher button{width:25px;height:25px;font-size:20px}
 /* Compact home layout only: leave learning, settings and achievements untouched. */
 .home-screen .home-content>h1{font-size:clamp(23px,5vw,29px);margin:4px 0 9px;text-align:left}
 .home-screen .habit-card{padding:11px 13px;margin:0 0 9px;border-radius:16px}
@@ -808,15 +810,21 @@ function navigation(){
  const list='<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7c-2.3-1.7-5-2-9-1v14c4-1 6.7-.7 9 1 2.3-1.7 5-2 9-1V6c-4-1-6.7-.7-9 1Z"/><path d="M12 7v14M6 10h3M15 10h3M6 13h3M15 13h3"/></svg>';
  nav.innerHTML=`<button onclick="pause()" class="nav-item ${!inWords?'active':''}" ${!inWords?'aria-current="page"':''}>${house}<span>Учиться</span></button><button onclick="myWords()" class="nav-item ${inWords?'active':''}" ${inWords?'aria-current="page"':''}>${list}<span>Словарь</span></button>`;
 }
-function habitWeek(){const st=H.stats(data.habit),date=new Date(),offset=(date.getDay()+6)%7,monday=H.shift(st.today,-offset);
+let homeWeekOffset=0,achievementsWeekOffset=0;
+function weekMonday(offset=0){const today=H.day(),dow=(new Date().getDay()+6)%7;return H.shift(today,-dow+offset*7)}
+function weekHeading(offset){const start=weekMonday(offset),end=H.shift(start,6);const fmt=d=>{const [y,m,day]=d.split('-').map(Number);return day+' '+['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'][m-1]};return fmt(start)+' — '+fmt(end)}
+function weekSwitcher(offset,callback){return `<div class="week-switcher"><button type="button" onclick="${callback}(-1)" aria-label="Предыдущая неделя">‹</button><span>${weekHeading(offset)}</span><button type="button" onclick="${callback}(1)" aria-label="Следующая неделя" ${offset>=0?'disabled':''}>›</button></div>`}
+function changeHomeWeek(delta){homeWeekOffset=Math.min(0,homeWeekOffset+delta);home()}
+function changeAchievementsWeek(delta){achievementsWeekOffset=Math.min(0,achievementsWeekOffset+delta);achievements()}
+function habitWeek(){const st=H.stats(data.habit),monday=weekMonday(homeWeekOffset);
  const ring=(radius,color,on,width)=>`<circle cx="22" cy="22" r="${radius}" fill="none" stroke="${on?color:'currentColor'}" stroke-opacity="${on?'1':'.12'}" stroke-width="${width}"/>`;
  return `<div class="habit-week habit-rings" aria-label="Прогресс за неделю">${['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map((name,i)=>{const day=H.shift(monday,i),d=data.habit.days[day]||{},today=day===st.today,future=day>st.today,learned=!!d.newDone||!!d.newActivity,reviewed=(d.reviews?.length||0)>0||!!d.reviewActivity,done=learned&&reviewed;const status=future?'впереди':[learned?'новые слова':'',reviewed?'повторение':'',done?'новые слова и повторение выполнены':''].filter(Boolean).join(', ')||'нет активности';
  return `<div class="habit-ring-day ${today?'today':''} ${future?'future':''}" aria-label="${name}: ${status}"><svg viewBox="0 0 44 44" aria-hidden="true">${ring(17.5,'#e3ab48',learned,5)}${ring(11.5,'#5a9c83',reviewed,4)}${done?'<path d="M17 22l3.5 3.5 7-8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>':''}</svg><small>${name}</small></div>`}).join('')}</div><div class="habit-ring-legend"><span><i class="new"></i>Новые слова</span><span><i class="review"></i>Повторение</span></div>`;
 }
 function habitCard(){const st=H.stats(data.habit),available=trainedIds().length,goal=Math.max(1,Math.min(5,available));
- return `<div class="habit-card"><h2>Прогресс за неделю</h2>${habitWeek()}<p>${st.done?'Сегодня занятие засчитано.':'Сегодня занятие ещё не засчитано.'}</p>${!st.done?`<p class="note">Закончи новую подборку${available?` или повтори ${goal} ${goal===1?'знакомое слово':goal<5?'знакомых слова':'знакомых слов'} в обе стороны`:''}, чтобы отметить сегодняшний день.</p>`:''}</div>`;
+ return `<div class="habit-card"><h2>Прогресс за неделю</h2>${weekSwitcher(homeWeekOffset,"changeHomeWeek")}${habitWeek()}<p>${st.done?'Сегодня занятие засчитано.':'Сегодня занятие ещё не засчитано.'}</p>${!st.done?`<p class="note">Закончи новую подборку${available?` или повтори ${goal} ${goal===1?'знакомое слово':goal<5?'знакомых слова':'знакомых слов'} в обе стороны`:''}, чтобы отметить сегодняшний день.</p>`:''}</div>`;
 }
-function habitPraise(p){return `<div class="habit-praise ${p.milestone?'milestone':''}" role="status">${berryArt(p.milestone?'bunch':'sprout')}<h2>${p.title}</h2><p>${p.text}</p><p class="note">Прогресс за неделю</p>${habitWeek()}<span class="day-earned">Сегодня засчитано</span></div>`}
+function habitPraise(p){return `<div class="habit-praise ${p.milestone?'milestone':''}" role="status">${berryArt(p.milestone?'bunch':'sprout')}<h2>${p.title}</h2><p>${p.text}</p><p class="note">Прогресс за неделю</p>${weekSwitcher(homeWeekOffset,"changeHomeWeek")}${habitWeek()}<span class="day-earned">Сегодня засчитано</span></div>`}
 
 /* Counts use saved word records. Old migrated words without a first date are not placed on a timeline. */
 function achievementData(){
@@ -846,9 +854,9 @@ function achievementLine(a){
  return `<svg class="achievement-chart" viewBox="0 0 320 150" role="img" aria-label="Выученные слова за последние 28 дней"><path d="M15 112H294" stroke="#e7ddee"/><text x="5" y="18" font-size="10" fill="#786588">Слов</text><path d="${line}" fill="none" stroke="#6554b8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>${labels}<circle cx="${points[27][0]}" cy="${points[27][1]}" r="4" fill="#6554b8"/><text x="${points[27][0]-7}" y="${Math.max(14,points[27][1]-9)}" text-anchor="end" font-size="13" font-weight="700" fill="#352044">${values[27]}</text></svg>`;
 }
 function achievements(){
- screen='parents';const a=achievementData(),labels=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],max=Math.max(1,...a.counts);
- const bars=a.counts.map((n,i)=>`<div class="achievement-bar-col"><b>${a.days[i]>a.today?'—':n}</b><div class="achievement-bar-track"><div class="achievement-bar-fill" style="height:${a.days[i]>a.today?0:n/max*100}%"></div></div><span>${labels[i]}</span></div>`).join('');
- shell(`<section class="app-screen ios-settings"><div class="topline">${btn('← Настройки','settings()','quiet')}</div><h1>Мои достижения</h1><div class="achievement-grid"><div class="achievement-tile"><b>${a.origins.known}</b><span>Знал раньше</span></div><div class="achievement-tile"><b>${a.origins.learned}</b><span>Выучил здесь</span></div><div class="achievement-tile"><b>${a.total}</b><span>Всего знаю</span></div></div><div class="achievement-panel"><h2>Как растёт мой словарь</h2>${achievementLine(a)}<p class="achievement-note">За последние 28 дней · только выученные здесь слова</p></div><div class="achievement-panel"><h2>Сколько слов я учил каждый день</h2><div class="achievement-bars">${bars}</div></div></section>`);
+ screen='parents';const a=achievementData(),labels=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],monday=weekMonday(achievementsWeekOffset),days=Array.from({length:7},(_,i)=>H.shift(monday,i)),counts=days.map(d=>a.dated.filter(x=>x.origin==='learned'&&x.date===d).length),max=Math.max(1,...counts);
+ const bars=counts.map((n,i)=>`<div class="achievement-bar-col"><b>${days[i]>a.today?'—':n}</b><div class="achievement-bar-track"><div class="achievement-bar-fill" style="height:${days[i]>a.today?0:n/max*100}%"></div></div><span>${labels[i]}</span></div>`).join('');
+ shell(`<section class="app-screen ios-settings"><div class="topline">${btn('← Настройки','settings()','quiet')}</div><h1>Мои достижения</h1><div class="achievement-grid"><div class="achievement-tile"><b>${a.origins.known}</b><span>Знал раньше</span></div><div class="achievement-tile"><b>${a.origins.learned}</b><span>Выучил здесь</span></div><div class="achievement-tile"><b>${a.total}</b><span>Всего знаю</span></div></div><div class="achievement-panel"><h2>Как растёт мой словарь</h2>${achievementLine(a)}<p class="achievement-note">За последние 28 дней · только выученные здесь слова</p></div><div class="achievement-panel"><h2>Сколько слов я учил каждый день</h2>${weekSwitcher(achievementsWeekOffset,"changeAchievementsWeek")}<div class="achievement-bars">${bars}</div></div></section>`);
 }
 
 function home(){screen='home';const fresh=freshIds(),trained=trainedIds(),due=requiredIds(),active=s&&!['result','between'].includes(s.phase),st=H.stats(data.habit),praise=H.takePraise(data.habit);if(praise)save();
