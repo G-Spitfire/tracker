@@ -51,6 +51,12 @@ for(const b of [exportConflict,keepLocal,keepCloud,importGuest])b.hidden=true;
 for(const b of allButtons)b.disabled=true;login.disabled=false;
 const uiStyle=document.createElement('style');uiStyle.textContent='section[aria-label="Облачная копия WordScene"] button:disabled{opacity:.5!important;cursor:wait!important}section[aria-label="Облачная копия WordScene"] button[hidden]{display:none!important}body.profile-switch-blocked>header,body.profile-switch-blocked>#app,body.profile-switch-blocked>.bottom-nav{visibility:hidden!important}';document.head.append(uiStyle);
 function message(value){info.textContent=value}
+let lastSyncSuccess=null;
+function syncState(state){
+ const uid=auth.currentUser?.uid||null;
+ window.WordSceneSyncStatus={uid,state,lastSuccess:lastSyncSuccess};
+ window.dispatchEvent(new Event('wordscene-sync-status'));
+}
 
 function assertProfile(uid){if(!uid||auth.currentUser?.uid!==uid||!profiles.matches(uid))throw new Error('Аккаунт или локальный профиль изменился; действие остановлено')}
 let prepared=null,uiBusy=false;
@@ -89,6 +95,7 @@ function runSync(){
  if(backupTask){backupRequested=true;return backupTask}
  clearTimeout(backupTimer);backupTimer=0;backupRequested=false;
  backupTask=(async()=>{
+  syncState('pending');
   try{
    const result=syncEngine.enabled()?await syncEngine.syncOnce():await syncEngine.bootstrapBackup();
    if(result.status==='conflict'||result.status==='conflict-race'){message('Обнаружены разные версии прогресса. Обе сохранены. Нужно проверить их перед продолжением облачного сохранения.');window.WordSceneBackupUI.showRecovery()}
@@ -96,12 +103,15 @@ function runSync(){
    else if(result.status==='pushed'||result.status==='same')message('Прогресс сохранён на устройстве и в облаке.');
    else if(result.status==='restored')message('Прогресс автоматически восстановлен из облака.');
    else if(result.status==='local-changed'){backupRequested=true;message('Копия отправлена. Новые ответы сохраняются следом.');}
+   if(['pushed','same','restored'].includes(result.status)){lastSyncSuccess=Date.now();syncState('ok')}
+   else if(['conflict','conflict-race','remote-newer','restore-available'].includes(result.status))syncState('conflict');
+   else syncState('pending');
    refreshButtons();return result;
   }catch(e){
    console.error('[WordScene backup]',e);
    const offline=e.code==='unavailable'||e.code==='auth/network-request-failed'||e.message==='Failed to fetch'||e.message==='offline';
    message(offline?'Не удалось отправить копию. Повторим при возвращении связи.':'Не удалось обновить облачную копию: '+(e.message||e.code||'неизвестная ошибка')+'. Локальный прогресс не заменён.');
-   return {status:'error'};
+   syncState('error');return {status:'error'};
   }finally{backupTask=null;if(backupRequested)queueBackup(1000)}
  })();
  return backupTask;
@@ -135,8 +145,10 @@ onAuthStateChanged(auth,user=>{
    &&confirm('На этом устройстве есть изученные слова без аккаунта. Привязать этот прогресс к аккаунту '+(user.email||'ребёнка')+'?\n\nВыбирайте «ОК» только если это прогресс владельца аккаунта. Исходная гостевая копия сохранится.');
   const result=profiles.switchTo(user?.uid||null,{recoverDamagedTarget:true,importGuestOnFirstLogin:claimGuest});
   if(result.changed){authReady=false;document.body.dataset.wordsceneProfileState='switching';document.body.classList.add('profile-switch-blocked');status.textContent='Сохраняем данные предыдущего профиля и открываем отдельный профиль…';location.reload();return}
+  lastSyncSuccess=null;
   window.WordSceneAccount=user?{uid:user.uid,displayName:(user.displayName||'').trim(),email:user.email||''}:null;
+  syncState(user?'pending':'idle');
   window.dispatchEvent(new Event('wordscene-account-change'));
-  authReady=true;document.body.dataset.wordsceneProfileState='ready';document.body.classList.remove('profile-switch-blocked');status.textContent=user?'Аккаунт: '+(user.email||'выполнен вход'):'Гостевой режим: прогресс только на этом устройстве';refreshButtons();if(user)void runSync();else offerCloudLogin()
+  authReady=true;document.body.dataset.wordsceneProfileState='ready';document.body.classList.remove('profile-switch-blocked');status.textContent=user?'Аккаунт: '+(user.email||'выполнен вход'):'Гостевой режим: прогресс только на этом устройстве';refreshButtons();if(user)void runSync()
  }catch(e){authReady=profiles.matches(user?.uid||null);document.body.dataset.wordsceneProfileState='damaged';document.body.classList.remove('profile-switch-blocked');status.textContent='Сохранение повреждено. Восстановите облачную копию или файл. Исходные данные не перезаписаны.';message(e.message||'Хранилище недоступно');refreshButtons();window.WordSceneBackupUI.showRecovery()}
 });
