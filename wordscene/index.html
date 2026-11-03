@@ -829,7 +829,7 @@ function achievementData(){
   if(Number.isFinite(at)&&at>0){const date=H.day(at);if(date<=today)dated.push({date,origin})}
   else unknown.push(w.en);
  }
- const count=(from,to)=>dated.filter(x=>x.origin!=='known'&&x.date>=from&&x.date<=to).length;
+ const count=(from,to)=>dated.filter(x=>x.origin==='learned'&&x.date>=from&&x.date<=to).length;
  const days=Array.from({length:7},(_,i)=>H.shift(monday,i));
  return {total:origins.known+origins.learned+origins.unknown,mastered,origins,dated,unknown:unknown.length,today,yesterday,monday,lastMonday,lastSunday,todayCount:count(today,today),week:count(monday,today),yesterdayCount:count(yesterday,yesterday),lastWeek:count(lastMonday,lastSunday),days,counts:days.map(d=>count(d,d))};
 }
@@ -838,18 +838,17 @@ function achievementPreview(){
  return `<section class="achievement-preview" aria-label="Мои достижения"><button class="achievement-heading" onclick="achievements()">Мои достижения <span aria-hidden="true">›</span></button><div class="achievement-mini"><div class="achievement-metric"><b>+${a.week}</b><span>Неделя</span></div><div class="achievement-metric"><b>${a.yesterdayCount}</b><span>Вчера</span></div><div class="achievement-metric"><b>${a.todayCount}</b><span>Сегодня <small class="achievement-delta">${a.todayCount>a.yesterdayCount?`▲ +${a.todayCount-a.yesterdayCount}`:a.todayCount<a.yesterdayCount?`▼ −${a.yesterdayCount-a.todayCount}`:"= 0"}</small></span></div></div></section>`;
 }
 function achievementLine(a){
- const days=Array.from({length:28},(_,i)=>H.shift(a.today,i-27)),values=days.map(d=>a.dated.filter(x=>x.origin!=='known'&&x.date<=d).length);
- const max=Math.max(1,...values),w=320,h=130,left=12,right=12,top=12,bottom=24;
+ const days=Array.from({length:28},(_,i)=>H.shift(a.today,i-27)),values=days.map(d=>a.dated.filter(x=>x.origin==='learned'&&x.date<=d).length);
+ const max=Math.max(1,...values),w=320,h=150,left=15,right=26,top=20,bottom=38;
  const points=values.map((v,i)=>[left+i*(w-left-right)/27,top+(max-v)*(h-top-bottom)/max]);
  const line=points.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
- const labels=[0,7,14,21,27].map(i=>`<text x="${points[i][0]}" y="124" text-anchor="middle" font-size="10" fill="#786588">${days[i].slice(5).replace('-','.')}</text>`).join('');
- return `<svg class="achievement-chart" viewBox="0 0 320 135" role="img" aria-label="Накопительный график слов с известной датой за 28 дней"><path d="M12 106H308" stroke="#e7ddee"/><path d="${line}" fill="none" stroke="#6554b8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>${labels}</svg>`;
+ const labels=[0,7,14,21,27].map(i=>`<text x="${points[i][0]}" y="141" text-anchor="middle" font-size="10" fill="#786588">${days[i].slice(5).replace('-','.')}</text>`).join('');
+ return `<svg class="achievement-chart" viewBox="0 0 320 150" role="img" aria-label="Выученные слова за последние 28 дней"><path d="M15 112H294" stroke="#e7ddee"/><text x="5" y="18" font-size="10" fill="#786588">Слов</text><path d="${line}" fill="none" stroke="#6554b8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>${labels}<circle cx="${points[27][0]}" cy="${points[27][1]}" r="4" fill="#6554b8"/><text x="${points[27][0]-7}" y="${Math.max(14,points[27][1]-9)}" text-anchor="end" font-size="13" font-weight="700" fill="#352044">${values[27]}</text></svg>`;
 }
 function achievements(){
  screen='parents';const a=achievementData(),labels=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],max=Math.max(1,...a.counts);
  const bars=a.counts.map((n,i)=>`<div class="achievement-bar-col"><b>${a.days[i]>a.today?'—':n}</b><div class="achievement-bar-track"><div class="achievement-bar-fill" style="height:${a.days[i]>a.today?0:n/max*100}%"></div></div><span>${labels[i]}</span></div>`).join('');
- const legacyNote=a.unknown?`<p class="achievement-note">${a.unknown} слов без сохранённой даты первого изучения не включены в графики и подсчёты по дням. Они учтены в общем количестве.</p>`:'';
- shell(`<section class="app-screen ios-settings"><div class="topline">${btn('← Настройки','settings()','quiet')}</div><h1>Мои достижения</h1><div class="achievement-grid"><div class="achievement-tile"><b>${a.origins.known}</b><span>Знал раньше</span></div><div class="achievement-tile"><b>${a.origins.learned}</b><span>Выучил здесь</span></div><div class="achievement-tile"><b>${a.total}</b><span>Всего знаю</span></div></div>${a.origins.unknown? `<p class="achievement-note">Для ${a.origins.unknown} ранее изученных слов не сохранено, знал ли ты их до WordScene. Они включены в общий результат.</p>`:''}<div class="achievement-panel"><h2>Сколько слов я выучил</h2>${achievementLine(a)}<p class="achievement-note">Показаны слова, выученные в WordScene, с подтверждённой датой. Старые записи с датой, но без категории учитываются как изученные; среди них могут быть ранее знакомые слова.</p></div><div class="achievement-panel"><h2>Эта неделя</h2><div class="achievement-bars">${bars}</div></div><div class="achievement-panel"><h2>По дням и неделям</h2><div class="achievement-mini"><div class="achievement-metric"><span>Вчера</span><b>${a.yesterdayCount}</b></div><div class="achievement-metric"><span>Эта неделя</span><b>${a.week}</b></div><div class="achievement-metric"><span>Прошлая неделя</span><b>${a.lastWeek}</b></div><div class="achievement-metric"><span>Всего</span><b>${a.total}</b></div></div></div>${legacyNote}</section>`);
+ shell(`<section class="app-screen ios-settings"><div class="topline">${btn('← Настройки','settings()','quiet')}</div><h1>Мои достижения</h1><div class="achievement-grid"><div class="achievement-tile"><b>${a.origins.known}</b><span>Знал раньше</span></div><div class="achievement-tile"><b>${a.origins.learned}</b><span>Выучил здесь</span></div><div class="achievement-tile"><b>${a.total}</b><span>Всего знаю</span></div></div><div class="achievement-panel"><h2>Как растёт мой словарь</h2>${achievementLine(a)}<p class="achievement-note">За последние 28 дней · только выученные здесь слова</p></div><div class="achievement-panel"><h2>Сколько слов я учил каждый день</h2><div class="achievement-bars">${bars}</div></div></section>`);
 }
 
 function home(){screen='home';const fresh=freshIds(),trained=trainedIds(),due=requiredIds(),active=s&&!['result','between'].includes(s.phase),st=H.stats(data.habit),praise=H.takePraise(data.habit);if(praise)save();
