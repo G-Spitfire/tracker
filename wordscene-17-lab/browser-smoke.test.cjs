@@ -70,7 +70,7 @@ test('pause displays a countdown without extending the saved deadline',()=>{
 
 test('Paper shows real totals with new words first and the reason inside the locked button',()=>{
  const b=boot();
- assert.match(b.root.html,/Учить новые слова[\s\S]*Повторить слова[\s\S]*На сегодня всё повторено<\/small>/);
+ assert.match(b.root.html,/Учить новые слова[\s\S]*Выбери способ подбора[\s\S]*Повторение[\s\S]*Пока нет слов для повторения<\/small>/);
  assert.match(b.root.html,/class="paper-rings"/);
  assert.doesNotMatch(b.root.html,/Добавить 10|Тренировка написания/);
 });
@@ -96,6 +96,7 @@ test('mandatory review unlocks voluntary practice for final errors without chang
  initial.map.set(key,JSON.stringify(profile));
  const b=boot({map:initial.map,now:initial.now()});
  assert.match(b.root.html,/Сначала повтори слова/);
+ assert.doesNotMatch(b.root.html,/Выбери способ подбора/);
  b.click('review');
  for(let i=0;i<4;i++){b.click('no');b.click('advance');b.click('yes')}
  const saved=b.map.get(key);

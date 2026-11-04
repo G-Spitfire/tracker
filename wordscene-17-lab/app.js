@@ -42,9 +42,25 @@ function pauseTime(){
  return 'Осталось '+Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0');
 }
 const levelLabels={novice:'Новичок',experienced:'Опытный',pro:'Профи'};
-const lockIcon='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>';
-function paperAction(label,action,reason=''){
- return btn((reason?lockIcon:'')+'<span>'+label+(reason?'<small>'+reason+'</small>':'')+'</span>',action,'paper-action paper-'+action,!!reason);
+const paperIcons={
+ book:'<path fill="#fff2cf" stroke="#ffa600" d="M12 5C9 2 5 2 2 3v15c4-1 7-1 10 2 3-3 6-3 10-2V3c-3-1-7-1-10 2v15"/><path stroke="#0877ff" d="M22 3v15c-4-1-7-1-10 2" class="paper-book-edge"/><path stroke="#efc16d" stroke-width=".65" d="M4 7q3-.6 6 1M4 10q3-.6 6 1M4 13q3-.6 6 1m4-6q3-1.6 6-1m-6 4q3-1.6 6-1m-6 4q3-1.6 6-1"/>',
+ settings:'<path d="M10 2h4l.6 3 2.1.9 2.6-1.6 2.8 2.8-1.6 2.6.9 2.1 3 .6v4l-3 .6-.9 2.1 1.6 2.6-2.8 2.8-2.6-1.6-2.1.9-.6 3h-4l-.6-3-2.1-.9-2.6 1.6-2.8-2.8 1.6-2.6-.9-2.1-3-.6v-4l3-.6.9-2.1-1.6-2.6 2.8-2.8 2.6 1.6 2.1-.9Z" transform="translate(2 0) scale(.82)"/><circle cx="12" cy="11.5" r="2.8"/>',
+ cap:'<path fill="#005cae" stroke="none" d="M5 11h14v7q-7 5-14 0z"/><path fill="#007bd8" stroke="none" d="m0 10 12-6 12 6-12 6z"/><path stroke="#ffa600" d="m12 10-8 4v6"/>',
+ info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/>',
+ plus:'<path d="M12 3v18M3 12h18"/>',
+ lock:'<path d="M7 10V7a5 5 0 0 1 10 0v3"/><rect x="3" y="9" width="18" height="14" rx="2" fill="currentColor" stroke="none"/><path stroke="#f4ede5" d="M12 15v4"/>',
+ repeat:'<path d="M20 8a8 8 0 1 0 0 8m0-12v5h-5"/>',
+ progress:'<path stroke="#0877ff" stroke-width="4.5" d="M5 20v-4m7 4v-9m7 9V4"/>',
+ next:'<path d="m9 5 7 7-7 7"/>'
+};
+function paperIcon(name){
+ return '<svg class="paper-icon paper-icon-'+name+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+paperIcons[name]+'</svg>';
+}
+function paperAction(label,action,reason='',subtitle=''){
+ const icon=reason?'lock':action==='sources'?'plus':'repeat';
+ return btn('<span class="paper-action-icon">'+paperIcon(icon)+'</span><span>'+label+
+  (reason||subtitle?'<small>'+(reason||subtitle)+'</small>':'')+'</span>'+(!reason?paperIcon('next'):''),
+  action,'paper-action paper-'+action,!!reason);
 }
 function wordCount(n){
  const tail=n%100,last=n%10;
@@ -54,11 +70,15 @@ function paperLevel(){
  const p=E.levelProgress(profile);
  const count=p.window||0;
  const detail=p.target?
-  '<p><strong>Следующий уровень — '+p.target+'</strong></p><p>Выучи не меньше '+p.min+' новых слов за занятие. На повторении в другой день вспомни в обе стороны хотя бы '+Math.round(p.threshold*100)+'% слов из трёх занятий.</p>'+
-  '<div class="paper-steps" aria-hidden="true">'+[1,2,3].map(i=>'<i class="'+(i<=count?'filled':'')+'"></i>').join('')+'</div><small>Подтверждено занятий: <strong>'+count+' из 3</strong></small>'+
+  '<p class="paper-target">Следующий уровень — '+p.target+'</p><p>Три занятия, от '+p.min+' новых слов в каждом. На повторении вспомни от '+Math.round(p.threshold*100)+'% в обе стороны.</p>'+
+  '<div class="paper-confirmed"><small>Подтверждено занятий: <strong>'+count+' из 3</strong></small>'+
+  '<div class="paper-steps" aria-hidden="true">'+[1,2,3].map(i=>i<=count?'<i class="filled">✓</i>':'<i></i>').join('')+'</div></div>'+
   (count===3?'<small>Вспомнил в обе стороны: <strong>'+Math.floor(p.successRate*100)+'%</strong></small>':''):
   '<p>Ты на самом высоком уровне.</p>';
- return '<section class="paper-card paper-level"><h2>Твой уровень</h2><div class="paper-rank">'+levelLabels[profile.level]+'</div>'+detail+'</section>';
+ return '<section class="paper-card paper-level" aria-labelledby="paper-level">'+
+  '<div class="paper-level-heading">'+paperIcon('cap')+'<div><h2 id="paper-level">Твой уровень</h2><div class="paper-rank">'+levelLabels[profile.level]+'</div></div>'+
+  '<details class="paper-info"><summary aria-label="Как повышается уровень">'+paperIcon('info')+'</summary>'+
+  '<p>Занятие подтверждается, когда все его слова проверены в обе стороны не раньше следующего дня.</p></details></div>'+detail+'</section>';
 }
 function paperProgress(){
  const total=dictionary.length;
@@ -69,23 +89,25 @@ function paperProgress(){
  const circle=(r,value,kind)=>'<circle class="ring-track '+kind+'" cx="58" cy="58" r="'+r+'"/>'+
   (value?'<circle class="ring-fill '+kind+'" cx="58" cy="58" r="'+r+'" pathLength="100" stroke-dasharray="'+value+' 100" transform="rotate(-90 58 58)"/>':'');
  const label=percent(learned).toLocaleString('ru-RU',{maximumFractionDigits:1})+'%';
- const rings='<svg class="paper-rings" viewBox="0 0 116 116" role="img" aria-label="Изучено '+label+' словаря">'+circle(50,percent(learned),'learned')+circle(37,percent(mastered),'mastered')+
-  '<text x="58" y="59" text-anchor="middle" dominant-baseline="middle">'+label+'</text></svg>';
- return '<section class="paper-card"><h2>Мой словарь</h2><div class="paper-progress">'+rings+'<dl><dt class="learned">Изучено</dt><dd>'+learned+' из '+total+'</dd><dt class="mastered">Закреплено</dt><dd>'+mastered+' из '+total+'</dd></dl></div></section>';
+ const rings='<svg class="paper-rings" viewBox="0 0 116 116" role="img" aria-label="Изучено '+label+' словаря">'+circle(52,percent(learned),'learned')+circle(39,percent(mastered),'mastered')+
+  '<text x="58" y="58" text-anchor="middle" dominant-baseline="central">'+label+'</text></svg>';
+ return '<section class="paper-card paper-progress" aria-label="Прогресс по словарю">'+rings+'<dl>'+
+  '<div><dt class="learned">Изучено:</dt><dd>'+learned+' из '+total+'</dd></div>'+
+  '<div><dt class="mastered">Закреплено:</dt><dd>'+mastered+' из '+total+'</dd></div></dl></section>';
 }
 function home(){
  view='home';
  const pending=E.due(profile),errors=E.residualErrors(profile).filter(id=>byId[id]);
  const blocked=storageFailure?'Сохранение заблокировано':session?'Сначала закончи занятие':'';
- const fresh=paperAction('Учить новые слова','sources',blocked||(pending.length?'Сначала повтори слова на сегодня':''));
- const repeat=pending.length?paperAction('Повторить сегодня — '+wordCount(pending.length),'review',blocked):
+ const fresh=paperAction('Учить новые слова','sources',blocked||(pending.length?'Сначала повтори слова на сегодня. После этого сможешь учить новые.':''),'Выбери способ подбора');
+ const repeat=pending.length?paperAction('Повторить сегодня: '+wordCount(pending.length),'review',blocked):
   errors.length?paperAction('Повторить ошибки — '+wordCount(errors.length),'practice',blocked):
-  paperAction('Повторить слова','review',blocked||'На сегодня всё повторено');
- shell('', '', '<main class="paper"><div class="paper-heading"><span>WordScene <b>17.0</b></span>'+
- btn('Профиль','accounts','paper-profile',!!session)+'</div>'+
- '<section class="paper-hero"><h1>Мой английский</h1><img src="./paper-lighthouse.svg" alt="" width="720" height="220"></section>'+
+  paperAction('Повторение','review',blocked||'Пока нет слов для повторения');
+ shell('', '', '<main class="paper"><div class="paper-heading"><h1>'+paperIcon('book')+'WordScene</h1>'+
+ '<button type="button" data-action="accounts" class="paper-profile" aria-label="Настройки профиля" '+(session?'disabled':'')+'>'+paperIcon('settings')+'</button></div>'+
+ '<div class="paper-hero"><img src="./paper-lighthouse.svg" alt="" width="729" height="160"></div>'+
  paperLevel()+paperProgress()+'<div class="paper-actions">'+fresh+repeat+'</div>'+
- '<nav class="paper-nav" aria-label="Разделы">'+btn('Мой прогресс','progress')+btn('Словарь','dictionary')+'</nav></main>');
+ '<nav class="paper-nav" aria-label="Разделы">'+btn(paperIcon('progress')+'Мой прогресс','progress')+btn(paperIcon('book')+'Словарь','dictionary')+'</nav></main>');
 }
 function sources(){
  if(warnLocked())return;view='sources';shell('Как будем учить?','<section class="panel">'+btn('Автоматически','auto','primary')+btn('По темам','themes','secondary')+btn('Выбрать самому','manual','secondary')+'</section>'+btn('На главную','home','quiet'));
