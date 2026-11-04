@@ -1,0 +1,340 @@
+/* WordScene 17.0 - isolated UI; no reads/writes to 16.17 data. */
+(()=>{
+'use strict';
+const E=window.WS17Engine,T=window.WordSceneTopics||{topics:[],forWord:()=>[]},C=window.WordSceneContent;
+const dictionary=[...window.WS17_SEED,...(C?.cards||[])].filter((w,i,a)=>a.findIndex(x=>x.en===w.en)===i);
+const byId=Object.fromEntries(dictionary.map(w=>[w.en,w]));
+const ACCOUNT_KEY='wordscene-17-lab-current-account-v1';
+const currentAccount=(()=>{try{const id=localStorage.getItem(ACCOUNT_KEY);return ['child-1','child-2'].includes(id)?id:'local'}catch{return 'local'}})();
+const cloudEnabled=['localhost','127.0.0.1'].includes(window.location?.hostname);
+const BINDINGS='wordscene-17-lab-cloud-bindings-v1';
+let cloud,cloudBusy=false,cloudConflict;
+const accountSuffix=currentAccount==='local'?'':'-account-'+currentAccount;
+const KEY='wordscene-17-lab-v1'+accountSuffix,ACTIVE='wordscene-17-lab-active-v1'+accountSuffix;
+const root=document.getElementById('app');
+let profile,session=null,selection=null,view='home',batch=[],showAnswer=false,showHelp=false,manual=new Set(),themeIds=new Set(),manualThemes=new Set(),query='',clockStarted=null,confirmed=false,storageFailure=false,savedProfileRaw=null,savedActiveRaw=null,writingIds=[],writingIndex=0,writingValue='',writingFeedback=null;
+const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+const dateText=at=>new Date(at).toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
+const accounts=window.WS17Accounts.create({storage:localStorage,empty:E.empty,valid:p=>p?.version===17&&p.words&&typeof p.words==='object'&&Array.isArray(p.sessions),keyFor:id=>({main:'wordscene-17-lab-v1'+(id==='local'?'':'-account-'+id),active:'wordscene-17-lab-active-v1'+(id==='local'?'':'-account-'+id),backup:'wordscene-17-lab-last-good-v1'+(id==='local'?'':'-account-'+id)})});
+function store(){
+ if(storageFailure)return false;
+ try{accounts.save(currentAccount,profile,session,savedProfileRaw,savedActiveRaw);savedProfileRaw=localStorage.getItem(KEY);savedActiveRaw=localStorage.getItem(ACTIVE);return true}
+ catch(err){storageFailure=true;notice('Не удалось сохранить: '+err.message+'. Данные защищены от перезаписи.');return false}
+}
+function load(){
+ try{
+ const state=accounts.load(currentAccount);
+ if(!['new','ok'].includes(state.status))throw Error('Сохранение требует восстановления: '+state.status);
+ profile=state.profile;session=state.session;savedProfileRaw=localStorage.getItem(KEY);savedActiveRaw=localStorage.getItem(ACTIVE);
+ }catch(err){storageFailure=true;profile=E.empty();session=null;notice('Сохранение повреждено. Исходные данные не перезаписываются.')}
+ if(session&&E.timedOut(session,Date.now())){session=null;store();notice('Прошло 30 минут. Незавершённое занятие отменено.')}
+}
+function notice(s){let el=document.getElementById('notice');if(!el){el=document.createElement('div');el.id='notice';el.setAttribute('role','status');document.body.append(el)}el.textContent=s;el.hidden=false;clearTimeout(notice.id);notice.id=setTimeout(()=>el.hidden=true,5500)}
+function speak(id){if(!('speechSynthesis' in window))return notice('Озвучивание недоступно на этом устройстве');const u=new SpeechSynthesisUtterance(id);u.lang='en-US';u.rate=.83;speechSynthesis.cancel();speechSynthesis.speak(u)}
+function btn(label,event,cls='',disabled=false){return '<button type="button" data-action="'+event+'" class="'+cls+'" '+(disabled?'disabled':'')+'>'+label+'</button>'}
+function head(name){return '<header><span class="brand">WordScene <b>17</b></span><span class="lab">Лаборатория · отдельный прогресс</span></header><main><h1>'+name+'</h1>'}
+function end(){return '</main>'}
+function shell(title,html){root.innerHTML=head(title)+html+end();root.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click',()=>{if(root.contains?.(el)===false)return;return dispatch(el.dataset.action,el)}));root.querySelectorAll('[data-input]').forEach(el=>el.addEventListener('input',()=>{const caret=el.selectionStart;query=el.value;render();const next=root.querySelector('[data-input]');if(next){next.focus();next.setSelectionRange(caret,caret)}}));root.querySelectorAll('[data-writing]').forEach(el=>el.addEventListener('input',()=>{writingValue=el.value}));}
+function warnLocked(){if(storageFailure){notice('Сохранение недоступно, изменения заблокированы');return true}if(session){notice('Сначала закончи или отмени текущее занятие');return true}return false}
+function levelInfo(){const p=E.levelProgress(profile);return !p.target?'<p class="reason">Уровень Профи достигнут.</p>':'<p class="reason">До уровня «'+p.target+'»: подтверждено '+Math.min(3,p.window||0)+' из 3 подходящих занятий · минимум '+p.min+' новых слов в занятии · '+Math.round(p.threshold*100)+'% успешных первых проверок.</p>'}
+function pauseTime(){
+ const seconds=Math.ceil(E.remainingTime(session,Date.now())/1000);
+ return 'Осталось '+Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0');
+}
+function home(){
+ view='home';const pending=E.due(profile),learned=Object.values(profile.words).filter(w=>w.origin==='learned').length,mastered=Object.values(profile.words).filter(w=>E.status(w)==='mastered').length;
+ const labels={novice:'Новичок',experienced:'Опытный',pro:'Профи'};
+ const block=pending.length>0;
+ shell('Мой английский'+(storageFailure?' · сохранение заблокировано':''),'<section class="summary"><div><small>Уровень</small><strong>'+labels[profile.level]+'</strong></div><div><small>Изучено</small><strong>'+learned+'</strong></div><div><small>Закреплено</small><strong>'+mastered+'</strong></div></section>'+
+ levelInfo()+(session?'<section class="panel"><b>Незавершённое занятие</b><p>Лимит паузы — 30 минут.</p><p id="pause-time">'+pauseTime()+'</p>'+btn('Продолжить','resume','primary')+btn('Отменить занятие','cancel','quiet')+'</section>':'')+
+ '<section class="panel"><h2>Повторить сегодня: '+pending.length+' слов</h2>'+btn('Начать повторение','review','primary',storageFailure||!pending.length||!!session)+'</section>'+
+ '<section class="panel">'+btn('Учить новые слова','sources','secondary',storageFailure||block||!!session)+(block?'<p class="reason">Сначала повтори слова на сегодня. После этого сможешь учить новые.</p>':'')+'</section>'+
+ '<section class="footer-actions">'+btn('Мой прогресс','progress')+btn('Словарь','dictionary')+'</section>'+'<section class="panel"><p class="reason">Профиль: '+h(currentAccount==='local'?'Локальный':currentAccount)+'</p>'+btn('Сменить профиль','accounts','secondary',!!session)+'</section>'+'<section class="panel">'+btn('Тренировка написания · отдельно','writingStart','secondary',storageFailure||!!session||!Object.keys(profile.words).length)+'</section>');
+}
+function sources(){
+ if(warnLocked())return;view='sources';shell('Как будем учить?','<section class="panel">'+btn('Автоматически','auto','primary')+btn('По темам','themes','secondary')+btn('Выбрать самому','manual','secondary')+'</section>'+btn('На главную','home','quiet'));
+}
+function topics(){
+ view='themes';shell('Выбери темы','<section class="panel"><div class="chips">'+T.topics.map(t=>'<button type="button" class="chip '+(themeIds.has(t.id)?'chosen':'')+'" data-action="topic:'+h(t.id)+'">'+h(t.name)+'</button>').join('')+'</div>'+btn('Подобрать слова','themed','primary',!themeIds.size)+'</section>'+btn('Назад','sources','quiet'));
+}
+function nextBatch(){
+ batch=E.selectCandidates(dictionary,profile,{seen:selection.seen,skipped:selection.skipped||[],unknown:selection.unknown,themes:selection.themes,topic:T.forWord});
+ selection.cursor=0;
+ if(!batch.length){finishSelection();return}
+ selection.current=batch.map(w=>w.en);renderSelection();
+}
+function makeSelection(kind){if(warnLocked())return;selection=E.beginSelection(kind,kind==='theme'?[...themeIds]:[]);selection.skipped=[];nextBatch()}
+function selectionScreen(){
+ const id=selection.current?.[selection.cursor],w=byId[id];if(!w){nextBatch();return}
+ view='select';const title=selection.unknown.length+' / 10 неизвестных · просмотрено '+selection.seen.length+' / 50';
+ shell('Подбор новых слов','<div class="counter">'+title+'</div><section class="flash"><h2>'+h(w.en)+'</h2><div class="ipa">'+h(w.ipa||'')+'</div>'+btn('▶ Произнести','say:'+h(id),'quiet')+
+ (showAnswer?'<div class="translation">'+h(w.ru)+'</div><div class="actions">'+btn('Знаю','known','secondary')+btn('Не знаю','unknown','primary')+'</div>':btn('Показать перевод','reveal','primary'))+'</section>'+
+ btn('Завершить подбор','stopSelection','quiet'));
+}
+function renderSelection(){showAnswer=false;selectionScreen()}
+function selectionGrade(knows){
+ const id=selection.current[selection.cursor];const stop=E.selectionAnswer(selection,id,knows);
+ if(stop){finishSelection();return}
+ if(selection.cursor<selection.current.length-1){selection.cursor++;while(selection.cursor<selection.current.length){const w=byId[selection.current[selection.cursor]],conflict=selection.unknown.some(id=>{const x=byId[id];return (w.cue&&x.cue&&w.cue.trim().toLowerCase()===x.cue.trim().toLowerCase())||(w.associationId&&w.associationId===x.associationId)});if(!conflict)break;selection.skipped.push(w.en);selection.cursor++}if(selection.cursor<selection.current.length){renderSelection();return}}
+ nextBatch();
+}
+function finishSelection(){
+ const n=selection.unknown.length;
+ if(n>=3){startLearning(selection.unknown,selection.known);return}
+ if(n===0){
+  const ids=selection.known;
+  selection=null;
+  if(!saveFamiliar(ids))return home();
+  view='selectionDone';
+  shell('Неизвестных слов не найдено','<section class="panel">'+btn('Повторить знакомые','review','primary',!E.due(profile).length)+btn('На главную','home','quiet')+'</section>');
+  return;
+ }
+ manual=new Set(selection.unknown);view='fill';manualView(true);
+}
+function saveFamiliar(ids){
+ const previous=profile;
+ profile=E.clone(profile);
+ for(const id of ids)if(!profile.words[id]){
+  profile.words[id]={origin:'known',schedule:{...E.newSchedule(Date.now()),nextDay:E.day(Date.now())},history:[]};
+ }
+ if(ids.length)profile.revision++;
+ if(store())return true;
+ profile=previous;
+ return false;
+}
+function stopSelection(){selection=null;home()}
+function manualView(fill=false){
+ view=fill?'fill':'manual';const selected=[...manual],limit=E.levelLimit(profile);
+ const available=dictionary.filter(w=>!profile.words[w.en]?.origin&&(view!=='fill'||!selection?.themes?.length||T.forWord(w.en).some(t=>selection.themes.includes(t))));
+ const filtered=available.filter(w=>(!manualThemes.size||T.forWord(w.en).some(t=>manualThemes.has(t)))&&(w.en+' '+w.ru).toLowerCase().includes(query.toLowerCase()));
+ shell(fill?'Добавь слова до трёх':'Выбери слова','<section class="panel"><div class="counter">Выбрано '+selected.length+' · минимум 3 · максимум '+(Number.isFinite(limit)?limit:'весь словарь')+'</div><input data-input="search" placeholder="Поиск слова или перевода" value="'+h(query)+'" /><div class="chips">'+T.topics.map(t=>'<button type="button" class="chip '+(manualThemes.has(t.id)?'chosen':'')+'" data-action="manualTopic:'+h(t.id)+'">'+h(t.name)+'</button>').join('')+'</div><div class="word-picker">'+filtered.map(w=>'<button class="word-option '+(manual.has(w.en)?'picked':'')+'" data-action="pick:'+h(w.en)+'"><span>'+h(w.en)+' <small>'+h(w.ru)+'</small></span><b>'+(manual.has(w.en)?'✓':'+')+'</b></button>').join('')+'</div>'+btn('Начать изучение','startManual','primary',!E.eligible(profile,selected))+'</section>'+btn(fill?'Выйти из добора':'Назад',fill?'leaveFill':'sources','quiet'));
+}
+function startLearning(ids,known=[]){
+ try{session=E.start(profile,'new',ids,known);selection=null;manual.clear();if(!store())return home();showAnswer=false;showHelp=false;confirmed=false;learn()}catch(e){notice(e.message);home()}
+}
+function review(){if(warnLocked())return;const ids=E.due(profile);if(!ids.length)return home();try{session=E.start(profile,'review',ids);showAnswer=false;showHelp=false;confirmed=false;if(!store())return home();clockStarted=Date.now();recall()}catch(e){notice(e.message)}}
+function visual(w){if(window.WS17_illustration){try{return window.WS17_illustration(w.en)}catch(e){}}if(w.props&&C?.render){try{return C.render(w)}catch(e){}}return '<div class="simple-art">'+h(w.cue||w.en)+'</div>'}
+function learn(){
+ if(!session)return home();view='learn';const w=byId[session.ids[session.learnIndex]];
+ shell('Запоминание · '+(session.learnIndex+1)+' / '+session.ids.length,'<section class="flash learn"><h2>'+h(w.en)+'</h2><div class="ipa">'+h(w.ipa||'')+'</div>'+btn('▶ Произнести','say:'+h(w.en),'quiet')+'<div class="translation">'+h(w.ru)+'</div>'+
+ (!showHelp?'<div class="art">'+visual(w)+'</div><p class="scene">'+h(w.scene||'')+'</p>':'')+
+ btn(showHelp?'Показать ассоциацию':'Представить без картинки','toggleArt','quiet')+
+ btn(session.learnIndex===session.ids.length-1?'Начать проверку':'Дальше','learnNext','primary')+'</section>'+btn('Пауза','pause','quiet')+btn('Отменить занятие','cancel','quiet'));
+}
+function recall(){
+ if(!session)return home();view='recall';const item=session.items[session.index];if(!item)return completed();
+ const w=byId[item.id],front=item.dir===1?w.ru:w.en,back=item.dir===1?w.en:w.ru;
+ let text='';
+ if(!showAnswer){text='<div class="direction">'+(item.dir===1?'Русский → Английский':'Английский → Русский')+'</div><h2>'+h(front)+'</h2><div class="actions">'+btn('Вспомнил','yes','primary')+btn('Не вспомнил','no','secondary')+'</div>'+btn('Проверить ответ','check','quiet')}
+ else{text='<div class="direction">'+h(front)+'</div><h2>'+h(back)+'</h2>'+btn('▶ Произнести','say:'+h(w.en),'quiet')+(showHelp?'<div class="art">'+visual(w)+'</div><p>'+h(w.scene||'')+'</p>':'')+btn('Показать ассоциацию','help','quiet')+
+ (confirmed?btn('Следующая карточка','advance','primary'):'<div class="actions">'+btn('Вспомнил','checkedYes','primary')+btn('Не вспомнил','checkedNo','secondary')+'</div>') }
+ shell((session.mode==='new'?'Изучение':'Повторение')+' · проход '+session.round,'<div class="counter">Карточка '+(session.index+1)+' / '+session.items.length+'</div><section class="flash recall">'+text+'</section>'+btn('Пауза','pause','quiet')+btn('Отменить занятие','cancel','quiet'));
+}
+function sendAnswer(ok,checked=false){
+ try{
+  const ms=session.feedback?session.feedback.ms:elapsed();
+  delete session.feedback;
+  const r=E.answer(session,ok,Date.now(),ms,checked);
+  if(!store())return home();
+  if(r.done)return completed();
+  showAnswer=false;showHelp=false;confirmed=false;clockStarted=Date.now();recall();
+ }catch(e){expire(e)}
+}
+function elapsed(){return clockStarted===null?null:Date.now()-clockStarted}
+function showFeedback(failed){
+ E.action(session);
+ session.feedback={failed,ms:elapsed(),help:false};
+ showAnswer=true;confirmed=failed;showHelp=false;
+ if(!store())return home();
+ recall();
+}
+function resume(){
+ if(session.stage==='complete')return completed();
+ E.action(session);
+ const feedback=session.feedback;
+ view=session.stage==='learn'?'learn':'recall';
+ showAnswer=!!feedback;confirmed=!!feedback?.failed;showHelp=!!(feedback?.help||session.artHidden);clockStarted=null;
+ if(!store())return home();
+ render();
+}
+function suspend(){
+ if(!session||storageFailure||session.pausedAt!==null||E.timedOut(session,Date.now()))return;
+ clockStarted=null;
+ if(session.feedback)session.feedback.ms=null;
+ E.pause(session);store();
+}
+function completed(){
+ try{const previousLevel=profile.level,previousProfile=profile,previousSession=session;const result=E.completed(profile,session,Date.now());profile=result;session=null;if(!store()){profile=previousProfile;session=previousSession;return home()}view='result';
+ const entry=profile.sessions.at(-1);shell('Занятие завершено','<section class="panel"><div class="result-metrics"><div><strong>'+entry.ids.length+'</strong><small>'+(entry.mode==='new'?'Изучено':'Повторено')+'</small></div><div><strong>'+entry.successful+'</strong><small>В обе стороны · '+(entry.mode==='new'?'3-й прогон':'1-й прогон')+'</small></div><div><strong>'+(entry.extraWords||0)+'</strong><small>Нужны дополнительные прогоны</small></div></div><p class="reason">Остались трудными: '+entry.hard+' слов.</p>'+(previousLevel!==profile.level?'<p><strong>Новый уровень: '+({novice:'Новичок',experienced:'Опытный',pro:'Профи'}[profile.level])+'</strong></p>':'')+levelInfo()+btn('Готово','home','primary')+'</section>');
+ }catch(err){expire(err)}
+}
+function expire(err){session=null;if(!storageFailure)store();notice('Занятие аннулировано: '+(err?.message||'истекло время'));home()}
+function progress(){
+ view='progress';const a=Object.entries(profile.words),learned=a.filter(([_,w])=>w.origin==='learned'),mastered=a.filter(([_,w])=>E.status(w)==='mastered');
+ const now=Date.now(), recent=profile.sessions.filter(s=>s.at>=now-28*86400000);
+ const recalls=recent.filter(s=>s.mode==='review');
+ const attempted=recalls.reduce((n,s)=>n+s.ids.length,0);
+ const hits=recalls.reduce((n,s)=>n+s.successful,0);
+ const weeks=Array.from({length:4},(_,i)=>{
+  const end=now-(3-i)*7*86400000;
+  const count=learned.filter(([,w])=>w.firstLearnedAt<=end).length;
+  return '<div class="history-row">'+dateText(end)+' · '+count+'<div class="progress-track"><i style="width:'+100*count/Math.max(1,learned.length)+'%"></i></div></div>';
+ }).join('');
+ const known=a.filter(([_,w])=>w.origin==='known'&&E.status(w)!=='mastered').length;const studying=a.filter(([_,w])=>w.origin==='learned'&&E.status(w)!=='mastered').length;const total=dictionary.length;
+ shell('Мой прогресс','<section class="summary"><div><small>Изучено</small><strong>'+learned.length+'</strong></div><div><small>Закреплено</small><strong>'+mastered.length+'</strong></div><div><small>Знакомо</small><strong>'+known+'</strong></div></section><section class="panel"><h2>Освоение словаря</h2><div class="progress-track"><i style="width:'+100*(mastered.length/total)+'%"></i></div><p>'+mastered.length+' закреплено · '+studying.length+' изучено · '+known+' знакомо · '+Math.max(0,total-a.length)+' не изучено</p><h2>Изучено за последние четыре недели</h2>'+weeks+'<h2>Качество вспоминания</h2><p>'+ (attempted?Math.round(100*hits/attempted)+'% ('+hits+' из '+attempted+')':'Пока нет завершённых повторений')+' · первый прогон повторения за 28 дней</p><h2>Занятия</h2>'+profile.sessions.slice(-12).reverse().map(s=>'<div class="history-row">'+dateText(s.at)+' · '+(s.mode==='new'?'Новые':'Повторение')+' · '+s.ids.length+' слов · '+s.successful+(s.mode==='new'?' в третьем прогоне':' в первом прогоне')+'</div>').join('')+'</section>'+btn('На главную','home','quiet'));
+}
+function dictionaryView(){
+ view='dictionary';const list=dictionary.filter(w=>(w.en+' '+w.ru).toLowerCase().includes(query.toLowerCase()));
+ shell('Словарь','<section class="panel"><input data-input="search" value="'+h(query)+'" placeholder="Поиск слова" /><div class="word-picker">'+list.map(w=>'<button class="word-option" data-action="word:'+h(w.en)+'"><span><b>'+h(w.en)+'</b> · '+h(w.ru)+'</span><small>'+({new:'Не изучено',known:'Предварительно знакомо',learning:'Закрепляется',mastered:'Закреплено'}[E.status(profile.words[w.en])]||'')+'</small></button>').join('')+'</div></section>'+btn('На главную','home','quiet'));
+}
+function wordDetail(id){
+ const w=byId[id],p=profile.words[id],hist=p?.history||[];
+
+ shell(h(w.en),'<section class="flash learn"><div class="ipa">'+h(w.ipa||'')+'</div><div class="translation">'+h(w.ru)+'</div>'+btn('▶ Произнести','say:'+h(w.en),'quiet')+'<div class="art">'+visual(w)+'</div><p>'+h(w.scene||'')+'</p><p class="reason">Статус: '+({new:'Не изучено',known:'Предварительно знакомо',learning:'Закрепляется',mastered:'Закреплено'}[E.status(p)]||'')+'</p></section><section class="panel"><h2>История вспоминания</h2>'+(hist.length?hist.slice(-12).reverse().map(x=>'<div class="history-row">'+dateText(x.at)+' · '+(x.ok?'Вспомнил в обе стороны':'Была ошибка')+'</div>').join(''):'<p>Проверок пока нет</p>')+'</section>'+btn('Словарь','dictionary','quiet'));
+}
+
+function accountsScreen(){
+ if(session)return notice('Заверши или отмени занятие перед сменой профиля');
+ view='accounts';
+ const ids=['local','child-1','child-2'];
+ shell('Профили WordScene 17','<section class="panel"><p class="reason">У каждого профиля собственные сохранения. Переключение не переносит данные между детьми. Не используй один профиль одновременно на разных устройствах без синхронизации.</p>'+ids.map(id=>btn((id===currentAccount?'✓ ':'')+(id==='local'?'Локальный':id==='child-1'?'Ребёнок 1':'Ребёнок 2'),'account:'+id,id===currentAccount?'primary':'secondary',id===currentAccount)).join('')+'</section>'+(cloudEnabled?btn('Облако · локальный эмулятор','cloud','secondary'):'')+btn('Назад','home','quiet'));
+}
+function switchAccount(id){
+ if(session)return notice('Нельзя менять профиль во время занятия');
+ if(!['local','child-1','child-2'].includes(id))return notice('Неизвестный профиль');
+ try{localStorage.setItem(ACCOUNT_KEY,id);window.location.reload()}catch(err){notice('Не удалось сменить профиль')}
+}
+function cloudScreen(){
+ if(!cloudEnabled||warnLocked())return;
+ view='cloud';
+ const details=cloudConflict?'<p>Локальная и облачная копии различаются. Обе версии сохранены на этом устройстве.</p>'+
+  btn('Оставить локальную копию','cloudLocal','secondary')+
+  (cloudConflict.cloud?btn('Восстановить облачную копию','cloudRestore','secondary'):''):'';
+ shell('Облако WordScene 17','<section class="panel"><p>Тестовый профиль: '+h(currentAccount)+'. Используй только тестовую учётную запись эмулятора.</p>'+
+  (cloud?btn('Синхронизировать','cloudSync','primary')+details+btn('Выйти из облака','cloudLogout','quiet'):
+   '<input id="cloudEmail" type="email" placeholder="Тестовый email" aria-label="Тестовый email"><input id="cloudPassword" type="password" placeholder="Тестовый пароль" aria-label="Тестовый пароль">'+btn('Войти','cloudLogin','primary'))+
+  '</section>'+btn('К профилям','accounts','quiet'));
+}
+async function cloudAction(action){
+ if(!cloudEnabled||view!=='cloud'||warnLocked()||cloudBusy)return;
+ if(!navigator.locks)return notice('Для облака нужен браузер с поддержкой блокировок вкладок');
+ const email=document.getElementById('cloudEmail')?.value;
+ const password=document.getElementById('cloudPassword')?.value;
+ const choice=action==='cloudLocal'?'local':action==='cloudRestore'?'cloud':undefined;
+ if(choice&&!window.confirm(choice==='local'?'Заменить облачную копию локальной?':'Восстановить облачную копию на этом устройстве?'))return;
+ cloudBusy=true;
+ try{
+  await navigator.locks.request(BINDINGS,async()=>{
+   if(action==='cloudLogout'){await cloud.close();cloud=null;cloudConflict=null;return}
+   if(action==='cloudLogin'){
+    const client=await (await import('./cloud-ui.mjs')).open(email,password);
+    try{
+     const bindings=JSON.parse(localStorage.getItem(BINDINGS)||'{}');
+     if((bindings[currentAccount]&&bindings[currentAccount]!==client.signedInUid)||
+        Object.entries(bindings).some(([id,uid])=>id!==currentAccount&&uid===client.signedInUid)){
+      notice('Учётная запись уже связана с другим профилем');
+      await client.close();return;
+     }
+     localStorage.setItem(BINDINGS,JSON.stringify({...bindings,[currentAccount]:client.signedInUid}));
+     cloud=client;
+    }catch(err){await client.close();throw err}
+    return;
+   }
+   if(!cloud||cloud.uid()!==cloud.signedInUid)return;
+   const stale=()=>storageFailure||!!session||localStorage.getItem(KEY)!==savedProfileRaw||
+    localStorage.getItem(ACTIVE)!==null;
+   const sync=window.WS17Sync.create({
+    storage:localStorage,uid:cloud.uid,local:()=>profile,transport:cloud.transport,active:stale,
+    restore:next=>{
+     if(stale()||cloud.uid()!==cloud.signedInUid)throw Error('Profile changed');
+     const before=profile;
+     profile=next;
+     if(!store()){profile=before;throw Error('Restore failed')}
+    }
+   });
+   const {status}=await sync.sync(choice,cloudConflict);
+   cloudConflict=status==='conflict'?sync.getConflict():null;
+   notice(({uploaded:'Копия отправлена и проверена',same:'Копии совпадают',restored:'Копия восстановлена',
+    conflict:'Нужно выбрать копию', 'session-active':'Профиль занят или изменён в другой вкладке',
+    'local-changed':'Копии изменились. Запусти синхронизацию снова'})[status]);
+  });
+ }catch(err){notice('Облако недоступно или операция не завершена. Проверь подключение и повтори синхронизацию.')}
+ finally{cloudBusy=false;if(storageFailure)home();else cloudScreen()}
+}
+function recoverScreen(){
+ view='recover';let backup;
+ try{backup=accounts.inspect(currentAccount).backup}catch{}
+ shell('Восстановление прогресса','<section class="panel"><p>Основное сохранение повреждено или недоступно.</p><p class="reason">'+(backup?'Найдена резервная копия: '+Object.keys(backup.words).length+' слов, '+backup.sessions.length+' занятий.':'Корректная резервная копия не найдена. Исходные данные остаются нетронутыми.')+'</p>'+(backup?btn('Восстановить резервную копию','restoreBackup','primary'):'')+btn('Вернуться','home','quiet')+'</section>');
+}
+function restoreBackup(){
+ if(!storageFailure||session)return notice('Восстановление недоступно');
+ try{accounts.recover(currentAccount);window.location.reload()}
+ catch(err){notice('Не удалось восстановить копию. Исходные данные не изменены.')}
+}
+function writingStart(){
+ if(warnLocked())return;
+ writingIds=Object.entries(profile.words).filter(([id,w])=>w.origin&&byId[id]).sort((a,b)=>(a[1].writingHistory?.at(-1)?.at||0)-(b[1].writingHistory?.at(-1)?.at||0)).map(([id])=>id).slice(0,15);
+ if(!writingIds.length)return notice('Нет доступных слов');
+ writingIndex=0;writingValue='';writingFeedback=null;writingScreen();
+}
+function writingScreen(){
+ view='writing';const id=writingIds[writingIndex],w=byId[id];
+ if(!w){notice('Тренировка написания закончена');writingIds=[];return home()}
+ const feedback=writingFeedback?'<div class="translation">'+h(w.en)+'</div><p class="reason">'+(writingFeedback.ok?'Написано правильно.':'Верный ответ показан. Ошибка сохранена только в истории написания.')+'</p>'+btn('Следующее слово','writingNext','primary'):'<input data-writing="answer" type="text" spellcheck="false" autocapitalize="none" autocomplete="off" value="'+h(writingValue)+'" placeholder="Напиши по-английски" aria-label="Английское слово" /><div class="actions">'+btn('Проверить','writingCheck','primary')+btn('Не помню','writingForgot','secondary')+'</div>';
+ shell('Написание · '+(writingIndex+1)+' / '+writingIds.length,'<section class="flash"><p>Напиши английское слово</p><h2>'+h(w.ru)+'</h2>'+feedback+'</section>'+btn('Закончить тренировку','writingEnd','quiet'));
+}
+function writingGrade(forgot=false){
+ if(writingFeedback)return;
+ const id=writingIds[writingIndex],w=byId[id];if(!w)return writingEnd();
+ const norm=x=>String(x||'').trim().normalize('NFKC').toLowerCase();
+ const ok=!forgot&&norm(writingValue)===norm(w.en);
+ const before=JSON.stringify(profile.words[id]);const rec=profile.words[id];rec.writingHistory??=[];rec.writingHistory.push({at:Date.now(),ok,attempt:forgot?null:writingValue.trim()});if(rec.writingHistory.length>40)rec.writingHistory.shift();
+ if(!store()){profile.words[id]=JSON.parse(before);return home()}writingFeedback={ok};writingScreen();
+}
+function writingNext(){writingIndex++;writingValue='';writingFeedback=null;writingScreen()}
+function writingEnd(){writingIds=[];writingValue='';writingFeedback=null;home()}
+function confirmCancel(){const yes=window.confirm('Отменить занятие? Все незавершённые результаты будут потеряны.');if(yes){session=null;selection=null;store();home()}else if(session){E.action(session);store();render()}}
+function render(){if(session){if(E.timedOut(session,Date.now()))return expire(new Error('30 минут бездействия'));if(session.stage==='complete'&&view!=='home')return completed();if(view==='learn')return learn();if(view==='recall')return recall()}if(view==='select')return selectionScreen();if(view==='manual'||view==='fill')return manualView(view==='fill');if(view==='themes')return topics();if(view==='sources')return sources();if(view==='progress')return progress();if(view==='dictionary')return dictionaryView();return home()}
+function dispatch(act,el){
+ if(cloudBusy)return;
+ if(['cloudLogin','cloudLogout','cloudSync','cloudLocal','cloudRestore'].includes(act))return cloudAction(act);
+ if(act==='cloud')return cloudScreen();
+ if(storageFailure&&!['home','dictionary','progress','recover','restoreBackup'].includes(act)&&!act.startsWith('word:')&&!act.startsWith('say:'))return notice('Сохранение заблокировано. Никакие данные не перезаписываются.');
+ if(act.startsWith('say:'))return speak(act.slice(4));
+ if(act.startsWith('account:'))return switchAccount(act.slice(8));
+ if(act.startsWith('topic:')){let v=act.slice(6);themeIds.has(v)?themeIds.delete(v):themeIds.add(v);return topics()}
+ if(act.startsWith('manualTopic:')){const v=act.slice(12);manualThemes.has(v)?manualThemes.delete(v):manualThemes.add(v);return manualView(view==='fill')}
+ if(act.startsWith('pick:')){const v=act.slice(5);manual.has(v)?manual.delete(v):manual.size<E.levelLimit(profile)&&manual.add(v);return manualView(view==='fill')}
+ if(act.startsWith('word:'))return wordDetail(act.slice(5));
+ if(session&&E.timedOut(session,Date.now()))return expire();
+ switch(act){
+ case 'home':return home();case 'accounts':return accountsScreen();case 'restoreBackup':return restoreBackup();case 'recover':return recoverScreen();case 'sources':return sources();case 'themes':return topics();case 'manual':manual.clear();manualThemes.clear();query='';return manualView();
+ case 'auto':return makeSelection('auto');case 'themed':return makeSelection('theme');
+ case 'review':return review();case 'progress':return progress();case 'dictionary':query='';return dictionaryView();
+ case 'known':return selectionGrade(true);case 'unknown':return selectionGrade(false);case 'stopSelection':return stopSelection();
+ case 'reveal':showAnswer=true;return selectionScreen();
+ case 'startManual':return startLearning([...manual],selection?.known||[]);
+ case 'leaveFill':saveFamiliar(selection.known);selection=null;manual.clear();return home();
+ case 'learnNext':try{E.learnNext(session);session.artHidden=false;if(!store())return home();showHelp=false;clockStarted=Date.now();return session.stage==='learn'?learn():recall()}catch(err){return expire(err)}
+ case 'toggleArt':E.action(session);showHelp=!showHelp;session.artHidden=showHelp;store();return learn();
+ case 'yes':return sendAnswer(true);case 'no':return showFeedback(true);
+ case 'check':return showFeedback(false);
+ case 'checkedYes':return sendAnswer(true,true);case 'checkedNo':return sendAnswer(false,true);
+ case 'advance':return sendAnswer(false);
+ case 'help':E.action(session);showHelp=true;session.feedback.help=true;store();return recall();
+ case 'pause':suspend();return home();case 'resume':return resume();
+ case 'writingStart':return writingStart();case 'writingCheck':return writingGrade();case 'writingForgot':return writingGrade(true);case 'writingNext':return writingNext();case 'writingEnd':return writingEnd();
+ case 'cancel':return confirmCancel();
+ }
+}
+document.addEventListener?.('visibilitychange',()=>{if(document.hidden)suspend()});
+window.addEventListener?.('pagehide',suspend);
+load();if(storageFailure)recoverScreen();else home();
+setInterval(()=>{
+ if(!session)return;
+ if(E.timedOut(session,Date.now()))return expire(new Error('30 минут бездействия'));
+ const timer=root.querySelector('#pause-time');
+ if(timer)timer.textContent=pauseTime();
+},1000);
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+})();
