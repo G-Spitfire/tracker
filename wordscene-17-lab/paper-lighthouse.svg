@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 220">
+<defs>
+ <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#e4ece3"/><stop offset="1" stop-color="#faf0d3"/></linearGradient>
+ <linearGradient id="sea" x2="0" y2="1"><stop stop-color="#a6c2c1"/><stop offset="1" stop-color="#789d9e"/></linearGradient>
+</defs>
+<path fill="url(#sky)" d="M0 0h720v220H0z"/>
+<circle cx="461" cy="54" r="32" fill="#fff2c9"/>
+<path fill="#f5f1dc" d="M37 93q28-17 67-10 24-17 66-8 28-13 72 6 18-3 30 6-106 9-235 6m528-65q21-10 47-8 22-13 57-1 24-4 43 9z"/>
+<path fill="#b2c3ae" d="m0 140 67-19 68 8 45-14 82 10 47-7 63 11 83-5 48 19v17H0z"/>
+<path fill="url(#sea)" d="M0 141h720v79H0z"/>
+<path fill="none" stroke="#e4e9d4" stroke-width="2" stroke-linecap="round" opacity=".68" d="M26 154h84m29 0h23m38-6h105m29 13h57m-360 20h40m19-10h155m-32 24h129m-276 9h105m233-58h46m-67 32h75"/>
+<path fill="#74896e" d="m720 117-39 1-32-10-27 9-51-4-30 9-18 18-34 4-19 18-32 7-13 13-43 9-23 29h361z"/>
+<path fill="#a8a581" d="m720 143-68 3-35-7-33 9-29 16-53 4-17 18-59 13-34 21h328z"/>
+<path fill="#606c60" d="m720 166-62 10-51-6-29 16-44 4-50 30h236z"/>
+<path fill="#839171" d="m720 193-50-4-40 8-52 5-24 18h166z"/>
+<path fill="#e4d2a6" d="m626 127 31 8-26 10-14 14-52 17 8 3 51-17 14-14 35-11-5-4-35-9z"/>
+<path fill="#f7edd4" stroke="#52655e" stroke-width="2" stroke-linejoin="round" d="m586 120 9-61h20l10 61z"/>
+<path fill="#b26c54" d="M591 88h29l2 12h-33z"/>
+<path fill="#d4c8ad" d="m610 61 3 58h10l-9-58z"/>
+<path fill="#354d47" d="M595 56V44h20v12z"/>
+<path fill="#f6d590" d="M600 45h10v11h-10z"/>
+<path fill="#965744" stroke="#52655e" stroke-width="2" stroke-linejoin="round" d="m591 44 14-11 14 11z"/>
+<path stroke="#52655e" stroke-width="2" stroke-linecap="round" d="M605 34v-6m-15 31h31"/>
+<path fill="#38514b" d="M602 111q3-6 7 0v9h-7zm2-41h5v8h-5z"/>
+<path fill="#e4d4b6" stroke="#52655e" stroke-width="2" stroke-linejoin="round" d="M631 121V99h25v22z"/>
+<path fill="#ad6853" d="m627 101 15-13 18 13z"/>
+<path fill="#4c6157" d="M639 106h6v6h-6z"/>
+<path fill="none" stroke="#596d60" stroke-width="1.5" stroke-linecap="round" d="M522 52q6-5 12 1 5-6 12-3m-46-14q4-3 8 1 4-5 9-2"/>
+</svg>

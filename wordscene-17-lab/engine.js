@@ -30,11 +30,16 @@ function selectionAnswer(sel,id,knows){
 }
 function eligible(p,ids){return unique(ids).length===ids.length&&ids.length>=3&&ids.length<=levelLimit(p)&&ids.every(id=>!p.words[id]?.origin)}
 function queue(ids){return ids.map(id=>({id,dir:1})).concat(ids.map(id=>({id,dir:0})))}
+function residualErrors(p){
+ const last=p.sessions.findLast(s=>s.mode==='review');
+ return last?.hardIds||[];
+}
 function start(p,mode,ids,known=[],at=Date.now()){
- if(!['new','review'].includes(mode)||!ids.length)throw Error('Invalid session');
+ if(!['new','review','practice'].includes(mode)||!ids.length)throw Error('Invalid session');
  if(mode==='new'&&!eligible(p,ids))throw Error('Invalid new-word selection');
  if(mode==='new'&&due(p,at).length)throw Error('Complete due reviews first');
  if(mode==='review'&&ids.some(id=>!due(p,at).includes(id)))throw Error('Only due words');
+ if(mode==='practice'&&(due(p,at).length||ids.some(id=>!residualErrors(p).includes(id))))throw Error('Only residual errors');
  const all=unique(ids);
  return {id:'ws17-'+at+'-'+Math.random().toString(36).slice(2,10),mode,ids:all,known:unique(known),stage:mode==='new'?'learn':'recall',learnIndex:0,round:1,extra:0,items:queue(all),index:0,answers:[],hard:[],roundHard:[],startedAt:at,lastActionAt:at,pausedAt:null,openedAt:at,locked:false};
 }
@@ -46,13 +51,13 @@ function learnNext(s,at=Date.now()){action(s,at);if(s.stage!=='learn')throw Erro
 function answer(s,ok,at=Date.now(),ms=null,checked=false){
  action(s,at);if(s.stage!=='recall'||s.index>=s.items.length)throw Error('No active recall');
  const {id,dir}=s.items[s.index];
- s.answers.push({id,dir,round:s.round,extra:s.extra,ok:!!ok,at,ms:Number.isFinite(ms)&&ms>=0?ms:null,checked});
+ if(s.mode!=='practice')s.answers.push({id,dir,round:s.round,extra:s.extra,ok:!!ok,at,ms:Number.isFinite(ms)&&ms>=0?ms:null,checked});
  if(!ok&&!s.roundHard.includes(id))s.roundHard.push(id);
  s.index++;
  if(s.index<s.items.length)return {done:false};
  if(s.mode==='new'&&s.extra===0&&s.round<3){s.round++;s.index=0;s.items=queue(s.ids);s.roundHard=[];return {nextRound:true}}
  const difficult=s.roundHard;
- if(difficult.length&&s.extra<3){s.extra++;s.round++;s.hard=unique([...s.hard,...difficult]);s.items=queue(difficult);s.index=0;s.roundHard=[];return {extra:true}}
+ if(difficult.length&&(s.mode==='practice'||s.extra<3)){s.extra++;s.round++;s.hard=unique([...s.hard,...difficult]);s.items=queue(difficult);s.index=0;s.roundHard=[];return {extra:true}}
  s.stage='complete';return {done:true};
 }
 function firstPair(s,id){
@@ -82,6 +87,7 @@ function scheduler(old,ok,at){
 function newSchedule(at){return {stage:'daily',days:[],checks:[],interval:0,nextDay:addDays(day(at),1),firstLearnedAt:at,masteredAt:null}}
 function completed(p,s,at=Date.now()){
  if(s.stage!=='complete'||timedOut(s,at))throw Error('Incomplete or expired');
+ if(s.mode==='practice')return p;
  if(p.sessions.some(x=>x.id===s.id))return clone(p);
  const next=clone(p);
  if(s.mode==='new'){
@@ -96,7 +102,7 @@ function completed(p,s,at=Date.now()){
    if(s.roundHard.includes(id))w.schedule.nextDay=addDays(day(at),1);
   }
  }
- next.sessions.push({id:s.id,mode:s.mode,ids:s.ids,at,successful:s.ids.filter(id=>firstPair(s,id)).length,extraWords:unique(s.answers.filter(a=>a.extra>0).map(a=>a.id)).length,hard:s.roundHard.length});
+ next.sessions.push({id:s.id,mode:s.mode,ids:s.ids,at,successful:s.ids.filter(id=>firstPair(s,id)).length,extraWords:unique(s.answers.filter(a=>a.extra>0).map(a=>a.id)).length,hard:s.roundHard.length,...(s.mode==='review'?{hardIds:s.roundHard}: {})});
  next.revision++;recalcLevel(next);return next;
 }
 function recalcLevel(p){
@@ -121,6 +127,6 @@ function levelProgress(p){
  return {level:p.level,target:cfg.label,eligible:eligible.length,confirmed:confirmed.length,window:three.length,successRate,threshold:cfg.threshold,min:cfg.min};
 }
 function status(w){if(!w)return 'new';if(w.schedule?.masteredAt&&w.schedule.stage==='spaced')return 'mastered';if(w.origin==='known')return 'known';return 'learning'}
-const api={day,addDays,empty,clone,due,levelLimit,selectCandidates,beginSelection,selectionAnswer,eligible,queue,start,remainingTime,timedOut,action,pause,learnNext,answer,firstPair,scheduler,newSchedule,completed,recalcLevel,levelProgress,status};
+const api={day,addDays,empty,clone,due,levelLimit,selectCandidates,beginSelection,selectionAnswer,eligible,queue,start,residualErrors,remainingTime,timedOut,action,pause,learnNext,answer,firstPair,scheduler,newSchedule,completed,recalcLevel,levelProgress,status};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.WS17Engine=api;
 })(typeof globalThis!=='undefined'?globalThis:this);
