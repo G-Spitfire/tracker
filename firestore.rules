@@ -16,14 +16,6 @@ service cloud.firestore {
       allow list, write: if false;
     }
 
-    // Public sports facts behind existing sign-in; only trusted ingestion writes them.
-    match /footballSnapshots/{snapshotId} {
-      allow get: if signedIn();
-      allow list: if signedIn() && request.query.limit != null
-                  && request.query.limit <= 120;
-      allow write: if false;
-    }
-
     match /users/{uid}/wordscene/{documentId} {
       function validPayload(p) {
         // Keep legacy fields in the payload; do not silently discard saved progress.

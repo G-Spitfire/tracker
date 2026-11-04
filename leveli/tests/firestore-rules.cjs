@@ -32,14 +32,8 @@ test('school and profiles remain read-only and private for both children',async(
   await assertFails(getDocs(collection(db(uid),kind)));await assertFails(setDoc(doc(db(uid),kind,uid),{changed:true}));await assertFails(deleteDoc(doc(db(uid),kind,uid)));
  }
 });
-test('football snapshot reads allow sign-in and bounded listing; browsers cannot write',async()=>{
- const id='PL_2026_matches';await env.withSecurityRulesDisabled(context=>setDoc(doc(context.firestore(),'footballSnapshots',id),{schemaVersion:1,items:[]}));
- await assertSucceeds(getDoc(doc(db('A'),'footballSnapshots',id)));await assertSucceeds(getDocs(query(collection(db('A'),'footballSnapshots'),limit(120))));
- await assertFails(getDoc(doc(db(null),'footballSnapshots',id)));await assertFails(getDocs(collection(db('A'),'footballSnapshots')));await assertFails(getDocs(query(collection(db('A'),'footballSnapshots'),limit(121))));
- await assertFails(setDoc(doc(db('A'),'footballSnapshots',id),{items:[]}));await assertFails(deleteDoc(doc(db('A'),'footballSnapshots',id)));
-});
 test('unlisted collections and preference writers stay closed',async()=>{
- for(const p of ['unlisted/x','users/A/privatePreferences/football','schoolGrades/A/private/x']){await assertFails(getDoc(doc(db('A'),p)));await assertFails(setDoc(doc(db('A'),p),{anything:true}))}
+ for(const p of ['unlisted/x','schoolGrades/A/private/x']){await assertFails(getDoc(doc(db('A'),p)));await assertFails(setDoc(doc(db('A'),p),{anything:true}))}
 });
 test('real backup transport round-trips encoded nested arrays under candidate rules',async()=>{
  const {create}=require('../../wordscene/cloud-firestore.js'),guard=require('../../wordscene/state-guard.js');

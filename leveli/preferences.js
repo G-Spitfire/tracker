@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 let uid=null;
-const names={news:'Что нового',school:'Школа',learning:'WordScene',awards:'Достижения',football:'Футбол'};
+const names={news:'Что нового',school:'Школа',learning:'WordScene',awards:'Достижения'};
 const key=()=> 'leveli-preferences-v1:'+encodeURIComponent(uid||'guest');
 let settings={theme:'lilac',hidden:[]};
 function read(){try{const value=JSON.parse(localStorage.getItem(key())||'null');settings={theme:['lilac','blue','mint'].includes(value?.theme)?value.theme:'lilac',hidden:Array.isArray(value?.hidden)?value.hidden.filter(x=>x in names):[]}}catch{settings={theme:'lilac',hidden:[]}}}

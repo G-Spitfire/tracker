@@ -1,5 +1,5 @@
 const CACHE='leveli-v2-no-demo';
-const FILES=['./','./index.html','./school-model.js','./preferences.js','./learning.js','./football/ui.js','./football/snapshot_data.mjs','./football/favorites_sync.mjs','./football/player_data.mjs','./football/players-catalog.json','../wordscene/state-guard.js','../wordscene/cloud-firestore.js'];
+const FILES=['./','./index.html','./school-model.js','./preferences.js','./learning.js','../wordscene/state-guard.js','../wordscene/cloud-firestore.js'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('leveli-v')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{
