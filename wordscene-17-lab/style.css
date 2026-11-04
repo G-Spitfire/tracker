@@ -5,10 +5,17 @@ body:has(.paper){background:#fdf7ed}
 .paper{
  --ink:#0c1731;--muted:#495463;--blue:#0775ff;--green:#40bf24;--card:#fdf8f0;
  --card-edge:#fffaf3;--card-shadow:0 2px 4px #98643124;
- max-width:460px;color:var(--ink);
- padding: max(15px,env(safe-area-inset-top)) max(15px,env(safe-area-inset-right))
-  calc(clamp(58px,17vw,77px) + env(safe-area-inset-bottom)) max(15px,env(safe-area-inset-left));
- background:url('./paper-shore.svg') bottom center / 100% auto no-repeat;
+ --paper-left:max(15px,env(safe-area-inset-left));
+ --paper-right:max(15px,env(safe-area-inset-right));
+ display:flex;flex-direction:column;max-width:460px;min-height:100svh;color:var(--ink);
+ padding:max(15px,env(safe-area-inset-top)) var(--paper-right)
+  max(8px,env(safe-area-inset-bottom)) var(--paper-left);
+}
+.paper::after{
+ content:'';flex:none;aspect-ratio:729 / 128;margin-top:auto;
+ margin-inline:calc(-1 * var(--paper-left)) calc(-1 * var(--paper-right));
+ background:url('./paper-shore.svg') center / contain no-repeat;
+ pointer-events:none;
 }
 .paper-heading{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 3px 0 10px}
 .paper-heading h1{display:flex;align-items:center;gap:10px;margin:0;font:800 clamp(24px,7.3vw,33px)/1 Georgia,serif;letter-spacing:-.035em}
