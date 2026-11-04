@@ -1,2 +1,2 @@
-WordScene 17.0 Paper home
-Source commit: cc715132201b0171e6fbc1b31681b6de887314d9
+WordScene 17.0 responsive shore decoration
+Source commit: c57a9aecbcfd2f34e9ff3600b198e5a2a2f92b49
