@@ -31,7 +31,7 @@ const cases=[
  ['restored page refreshes',()=>{const a=boot();a.tomorrow();a.event('pageshow',{persisted:true});assert.equal(a.button('sources').disabled,true)}],
  ['window focus refreshes',()=>{const a=boot();a.tomorrow();a.event('focus');assert.equal(a.button('sources').disabled,true)}],
  ['same day does not replace the home DOM',()=>{const a=boot(),n=a.renders;a.tick();a.event('focus');assert.equal(a.renders,n)}],
- ['new day does not leave profile form',()=>{const a=boot();a.click('childProfile');const before=a.html;a.tomorrow();a.tick();a.event('focus');a.event('visibilitychange');assert.equal(a.html,before)}],
+ ['new day does not leave progress screen',()=>{const a=boot();a.click('progress');const before=a.html;a.tomorrow();a.tick();a.event('focus');a.event('visibilitychange');assert.equal(a.html,before)}],
  ['new day preserves an active learning session',()=>{const a=boot({active:true}),before=a.html,n=a.writes.length;a.tomorrow();a.tick();a.event('focus');assert.equal(a.html,before);assert.equal(a.writes.length,n)}]
 ];
 const test=require('node:test');
