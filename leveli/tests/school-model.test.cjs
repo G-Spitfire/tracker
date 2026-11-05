@@ -66,3 +66,13 @@ test('explicit academic year and quarter overrides approximate calendar; unknown
  assert.equal(S.period({quarter:2}),null);
  assert.equal(S.period({date:'2026-11-02',quarter:2}),'2026-2');
 });
+
+test('observed first-quarter dates map consistently and quarter final stays separate',()=>{
+ const regular={date:'2026-09-02',type:'Устный ответ',value:'5'};
+ const lastRegular={date:'2026-10-23',type:'Самостоятельная работа',value:'4'};
+ const final={date:'2026-10-25',type:'Четвертная',value:'5'};
+ for(const row of [regular,lastRegular,final])assert.equal(S.period(row),'2026-1');
+ assert.equal(S.officialKind(final),'За четверть');
+ assert.equal(S.officialKind(lastRegular),'');
+ assert.equal(S.period({date:'2026-11-01'}),'2026-2');
+});
