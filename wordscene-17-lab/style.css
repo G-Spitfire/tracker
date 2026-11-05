@@ -255,3 +255,30 @@ html:has(.ws-manual),body:has(.ws-manual){background:#fdf7ed}
  .ws-manual-topics.is-expanded{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
  .ws-manual-topic{font-size:12px}
 }
+
+/* UX audit P2/P3: contextual hints, selected-word drawer, long topic labels */
+.ws-manual-scroll-note[hidden],.ws-manual-topics-note[hidden],.paper-scroll-cue[hidden]{display:none!important}
+.ws-manual-topics-note{align-self:flex-end;flex:none;font-size:11px;font-weight:650;color:#3c5d82;line-height:1;padding:0 5px 1px}
+.ws-manual-topic span:last-child{word-break:normal;overflow-wrap:normal;hyphens:none}
+.ws-manual-summary-toggle{margin-left:8px;padding:6px 8px;border-radius:10px;background:#e4edff;color:#154a86;font-size:12px;white-space:nowrap;line-height:1.25}
+.ws-manual-summary-toggle:disabled{opacity:.5}
+.ws-manual-summary{max-height:min(175px,25dvh);overflow-y:auto;overscroll-behavior:contain;border:1px solid #dce9fa;background:#fffdf9;border-radius:15px;margin:-3px 0 9px;padding:3px 10px;scrollbar-width:thin;scrollbar-color:#7da5d8 #edf3f9}
+.ws-manual-summary>div{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:37px;border-bottom:1px solid #e7edf3}
+.ws-manual-summary>div:last-child{border:0}
+.ws-manual-summary>div>span{min-width:0;font-size:14px;font-weight:700;overflow-wrap:anywhere}
+.ws-manual-summary small{color:#506781;font-size:12px;font-weight:450}
+.ws-manual-remove{background:#e8f2ff;color:#184e92;padding:6px 9px;font-size:12px;flex:none;border-radius:10px}
+.paper-scroll-cue{position:fixed;z-index:10;bottom:max(11px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:#183d70;color:#fff;padding:7px 16px;border-radius:99px;font-size:12px;font-weight:650;box-shadow:0 3px 10px #20344a33;pointer-events:none;white-space:nowrap}
+@media(max-height:650px){
+ .ws-manual-topic{flex-basis:168px;min-width:168px}
+ .ws-manual-topics.is-expanded .ws-manual-topic{min-width:0;flex-basis:auto}
+ .ws-manual-summary{max-height:105px;margin-bottom:5px}
+ .ws-manual-summary>div{min-height:34px}
+ .ws-manual-total>div{font-size:14px}
+ .ws-manual-summary-toggle{font-size:11px;padding:5px 7px}
+ .ws-manual-topics-note{font-size:11px}
+}
+@media(max-width:350px){
+ .ws-manual-topic span:last-child{font-size:12px}
+ .ws-manual-topics.is-expanded .ws-manual-topic{min-width:0}
+}
