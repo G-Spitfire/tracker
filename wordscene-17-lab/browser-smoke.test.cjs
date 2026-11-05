@@ -132,17 +132,12 @@ test('My Progress retains aggregates and periods without detailed lesson history
  assert.match(b.root.html,/class="progress-line"/);
 });
 
-test('one child can save name and age without creating an account',()=>{
- const b=boot({inputs:{childName:'Полина',childAge:'9'}});
- b.click('childProfile');
- assert.match(b.root.html,/Как тебя зовут/);
- assert.match(b.root.html,/Сколько тебе лет/);
- b.click('saveChild');
- const profile=JSON.parse(b.map.get('wordscene-17-lab-v1'));
- assert.equal(profile.child.name,'Полина');
- assert.equal(profile.child.age,9);
- assert.equal(profile.revision,1);
- assert.doesNotMatch(b.root.html,/Ребёнок 1|Ребёнок 2|Облако/);
+test('profile controls stay hidden without altering stored data',()=>{
+ const b=boot();
+ assert.doesNotMatch(b.root.html,/data-action="childProfile"/);
+ assert.equal(b.map.has('wordscene-17-lab-v1'),false);
+ b.click('progress');
+ assert.match(b.root.html,/Мой словарь/);
 });
 test('legacy selected child data is reused without creating an empty local save',()=>{
  const m=new Map(),E=boot().window.WS17Engine,p=E.empty();
