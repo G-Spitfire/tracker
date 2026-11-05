@@ -155,3 +155,23 @@ test('legacy selected child data is reused without creating an empty local save'
  assert.equal(m.has('wordscene-17-lab-v1'),false);
  assert.doesNotMatch(b.root.html,/Ребёнок 1|Ребёнок 2|Переключить профиль/);
 });
+
+test('Paper word picker allows immediate decisions and optional translation reveal',()=>{
+ const b=boot();b.click('sources');b.click('auto');
+ assert.match(b.root.html,/Неизвестных:[\\s\\S]*0 из 10/);
+ assert.match(b.root.html,/Просмотрено:[\\s\\S]*0 из 50/);
+ assert.match(b.root.html,/Нажми, чтобы увидеть перевод/);
+ assert.match(b.root.html,/data-action="known"/);
+ assert.match(b.root.html,/data-action="unknown"/);
+ assert.doesNotMatch(b.root.html,/progress-track|paper-shore|paper-sand/);
+ b.click('known');
+ assert.match(b.root.html,/Просмотрено:[\\s\\S]*1 из 50/);
+ b.click('reveal');
+ assert.doesNotMatch(b.root.html,/Нажми, чтобы увидеть перевод/);
+ assert.match(b.root.html,/ws-picker-translation/);
+ b.click('unknown');
+ assert.match(b.root.html,/Неизвестных:[\\s\\S]*1 из 10/);
+ b.click('stopSelection');
+ assert.match(b.root.html,/Учить новые слова/);
+ assert.equal(b.map.has('wordscene-17-lab-active-v1'),false);
+});
