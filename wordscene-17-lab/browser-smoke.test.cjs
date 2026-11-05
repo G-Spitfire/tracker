@@ -112,7 +112,7 @@ test('mandatory review unlocks voluntary practice for final errors without chang
  assert.doesNotMatch(b.root.html,/Повторить ещё раз/);
 });
 
-test('My Progress periods and history reveal five lessons at a time',()=>{
+test('My Progress retains aggregates and periods without detailed lesson history',()=>{
  const fresh=boot(),E=fresh.window.WS17Engine,p=E.empty();
  const base=Date.now()-11*86400000;
  for(let i=0;i<12;i++){
@@ -126,13 +126,7 @@ test('My Progress periods and history reveal five lessons at a time',()=>{
  assert.match(b.root.html,/Сколько слов я выучил/);
  assert.match(b.root.html,/Как хорошо я помню слова/);
  assert.match(b.root.html,/Пока нет проверок за этот период/);
- assert.equal((b.root.html.match(/class="progress-session"/g)||[]).length,5);
- b.click('progressMore');
- assert.equal((b.root.html.match(/class="progress-session"/g)||[]).length,10);
- b.click('progressMore');
- assert.equal((b.root.html.match(/class="progress-session"/g)||[]).length,12);
- b.click('history:demo-11');
- assert.match(b.root.html,/Итог третьего обязательного прогона/);
+ assert.doesNotMatch(b.root.html,/Мои занятия|progress-session|Показать ещё/);
  b.click('progressRange:all');
  b.click('qualityRange:all');
  assert.match(b.root.html,/class="progress-line"/);
