@@ -65,6 +65,44 @@ async function run(name, browserType, contextOptions) {
   await page.waitForFunction(()=>document.querySelector('.ws-manual-scroll-note').hidden);
   assert.equal(await page.locator('[data-action="pick:pineapple"]').count(),1);
   await snap('short-search');
+  // Search keeps one focused input during typing, without a second focus outline.
+  const searchInput=page.locator('#manual-search');
+  await searchInput.fill('apple');
+  await page.waitForFunction(()=>document.querySelector('.ws-manual-list-head small')?.textContent?.includes('Найдено:'));
+  assert.equal(await searchInput.evaluate(el=>document.activeElement===el),true,'search focus lost after typing');
+  const frame=await page.locator('.ws-manual-search-wrap').evaluate(el=>({
+   inputBorder:getComputedStyle(el.querySelector('input')).borderTopWidth,
+   inputOutline:getComputedStyle(el.querySelector('input')).outlineStyle,
+   containerBorder:getComputedStyle(el).borderTopWidth
+  }));
+  assert.equal(frame.inputBorder,'0px','input has a duplicate border');
+  assert.equal(frame.inputOutline,'none','input has a second focus outline');
+  assert.equal(frame.containerBorder,'1px','search container is missing its single frame');
+  await snap('focused-search');
+  // Keyboard geometry simulation: not a real iOS keyboard.
+  const simulated=await page.evaluate(()=>{
+   const viewport=window.visualViewport;
+   if(!viewport)return {supported:false};
+   try{
+    Object.defineProperty(viewport,'height',{configurable:true,value:window.innerHeight-290});
+    window.dispatchEvent(new Event('resize'));
+    const panel=document.querySelector('.ws-manual');
+    const bottom=document.querySelector('.ws-manual-start').getBoundingClientRect();
+    const results=document.querySelector('.ws-manual-word-scroll').getBoundingClientRect();
+    const active=panel.classList.contains('is-keyboard');
+    delete viewport.height;
+    window.dispatchEvent(new Event('resize'));
+    return {supported:true,active,bottom:bottom.bottom,visible:window.innerHeight-290,resultsHeight:results.height,restored:!panel.classList.contains('is-keyboard')};
+   }catch(error){try{delete viewport.height}catch{}return {supported:false,error:String(error)}}
+  });
+  if(simulated.supported){
+   assert.equal(simulated.active,true,'keyboard class not activated by reduced visualViewport');
+   assert.ok(simulated.bottom<=simulated.visible+5,'bottom action covered in simulated keyboard viewport '+JSON.stringify(simulated));
+   assert.ok(simulated.resultsHeight>=0,'results layout invalid');
+   assert.equal(simulated.restored,true,'normal layout not restored on keyboard close');
+  }
+  await searchInput.blur();
+
   await page.locator('[data-action="manualTab:topics"]').click();
   await page.locator('[data-action="manualTopic:food"]').click();
   await page.locator('[data-action="pick:apple"]').click();
