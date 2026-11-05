@@ -1,2 +1,0 @@
-WordScene 17.0 responsive shore decoration
-Source commit: c57a9aecbcfd2f34e9ff3600b198e5a2a2f92b49
