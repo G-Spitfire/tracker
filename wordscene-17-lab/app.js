@@ -115,7 +115,6 @@ function home(openPicker=false){
  btn('<span class="paper-sheet-symbol" aria-hidden="true">☷</span><span><strong>Выбрать самому</strong><small>Найди слова или выбери тему</small></span>'+paperIcon('next'),'manual','paper-sheet-choice')+'</section></div>':'') );
  if(openPicker){const sheet=root.querySelector('.paper-sheet');const close=root.querySelector('.paper-sheet-close');close?.setAttribute('aria-label','Закрыть');close?.focus();let touchY=null;sheet?.addEventListener('click',event=>event.stopPropagation());sheet?.addEventListener('touchstart',event=>{touchY=event.touches[0]?.clientY??null},{passive:true});sheet?.addEventListener('touchend',event=>{if(touchY!==null&&event.changedTouches[0].clientY-touchY>75)home();touchY=null},{passive:true});}
 }
-}
 function sources(){if(warnLocked())return;home(true)}
 function nextBatch(){
  batch=E.selectCandidates(dictionary,profile,{seen:selection.seen,skipped:selection.skipped||[],unknown:selection.unknown,themes:selection.themes,topic:T.forWord});
