@@ -1,4 +1,4 @@
-const CACHE='leveli-v5-approved-home';
+const CACHE='leveli-v6-subject-details';
 const FILES=['./','./index.html','./school-model.js'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('leveli-v')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
