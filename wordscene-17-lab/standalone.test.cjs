@@ -23,7 +23,8 @@ test('WordScene 17 HTML and PWA have no runtime dependency on WordScene 16',()=>
 });
 
 test('vendored dictionary and topics initialize independently of WordScene 16 directory',()=>{
- const context={window:{},console};
+ const context={console};
+ context.window=context; // Browser globalThis and window refer to the same object.
  vm.createContext(context);
  vm.runInContext(read('content.js'),context,{filename:'content.js'});
  vm.runInContext(read('topics.js'),context,{filename:'topics.js'});
