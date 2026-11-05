@@ -7,7 +7,7 @@ const clone=x=>JSON.parse(JSON.stringify(x));
    Historical optional fields are preserved unchanged. */
 function validProfile(p){
  const obj=x=>!!x&&typeof x==='object'&&!Array.isArray(x);
- const date=x=>typeof x==='string'&&/^\\d{4}-\\d{2}-\\d{2}$/.test(x)&&!Number.isNaN(Date.parse(x+'T00:00:00Z'));
+ const date=x=>typeof x==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x)&&!Number.isNaN(Date.parse(x+'T00:00:00Z'));
  if(!obj(p)||p.version!==17||!Number.isSafeInteger(p.revision)||p.revision<0||
     !['novice','experienced','pro'].includes(p.level)||!obj(p.words)||
     !Array.isArray(p.sessions)||!Array.isArray(p.levels))return false;
