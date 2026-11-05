@@ -150,6 +150,7 @@ test('legacy selected child data is reused without creating an empty local save'
  m.set('wordscene-17-lab-current-account-v1','child-2');
  m.set('wordscene-17-lab-v1-account-child-2',JSON.stringify(p));
  const b=boot({map:m});
+ b.click('progress');
  assert.match(b.root.html,/1 из/);
  assert.equal(m.has('wordscene-17-lab-v1'),false);
  assert.doesNotMatch(b.root.html,/Ребёнок 1|Ребёнок 2|Переключить профиль/);
