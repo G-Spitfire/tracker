@@ -12,7 +12,7 @@ const legacyStorageSuffix=(()=>{
 const KEY='wordscene-17-lab-v1'+legacyStorageSuffix,ACTIVE='wordscene-17-lab-active-v1'+legacyStorageSuffix,PRACTICE='wordscene-17-lab-practice-cleared-v1'+legacyStorageSuffix;
 const root=document.getElementById('app');
 let profile,session=null,selection=null,view='home',batch=[],showAnswer=false,showHelp=false,manual=new Set(),manualThemes=new Set(),query='',confirmed=false,storageFailure=false,savedProfileRaw=null,savedActiveRaw=null;
-let progressRange='30',qualityRange='28',homeDay=null;
+let progressRange='30',qualityRange='28',homeDay=null,manualMode='topics',manualShowAll=false;
 const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const accounts=window.WS17Accounts.create({storage:localStorage,empty:E.empty,valid:window.WS17Accounts.validProfile,keyFor:()=>({main:KEY,active:ACTIVE,backup:'wordscene-17-lab-last-good-v1'+legacyStorageSuffix})});
 function store(){
@@ -168,10 +168,41 @@ function saveFamiliar(ids){
 }
 function stopSelection(){selection=null;home()}
 function manualView(fill=false){
- view=fill?'fill':'manual';const selected=[...manual],limit=E.levelLimit(profile);
- const available=dictionary.filter(w=>!profile.words[w.en]?.origin);
- const filtered=available.filter(w=>(!manualThemes.size||T.forWord(w.en).some(t=>manualThemes.has(t)))&&(w.en+' '+w.ru).toLowerCase().includes(query.toLowerCase()));
- shell(fill?'Добавь слова до трёх':'Выбери слова','<section class="panel"><div class="counter">Выбрано '+selected.length+' · минимум 3 · максимум '+(Number.isFinite(limit)?limit:'весь словарь')+'</div><input data-input="search" placeholder="Поиск слова или перевода" value="'+h(query)+'" /><div class="chips">'+T.topics.map(t=>'<button type="button" class="chip '+(manualThemes.has(t.id)?'chosen':'')+'" data-action="manualTopic:'+h(t.id)+'">'+h(t.name)+'</button>').join('')+'</div><div class="word-picker">'+filtered.map(w=>'<button class="word-option '+(manual.has(w.en)?'picked':'')+'" data-action="pick:'+h(w.en)+'"><span>'+h(w.en)+' <small>'+h(w.ru)+'</small></span><b>'+(manual.has(w.en)?'✓':'+')+'</b></button>').join('')+'</div>'+btn('Начать изучение','startManual','primary',!E.eligible(profile,selected))+'</section>'+btn(fill?'Выйти из добора':'Назад',fill?'leaveFill':'sources','quiet'));
+ view=fill?'fill':'manual';
+ const selected=[...manual],limit=E.levelLimit(profile),topicId=[...manualThemes][0]||'food';
+ const topic=T.topics.find(t=>t.id===topicId);
+ const q=query.trim().toLocaleLowerCase('ru');
+ const themed=manualMode==='topics';
+ const filtered=themed?dictionary.filter(w=>T.forWord(w.en).includes(topicId)):q?dictionary.filter(w=>(w.en+' '+w.ru).toLocaleLowerCase('ru').includes(q)):[];
+ const chosenInTopic=filtered.filter(w=>manual.has(w.en)).length;
+ const mainTopics=['food','home','school','animals','sports','travel'];
+ const shownTopics=manualShowAll?T.topics:mainTopics.map(id=>T.topics.find(t=>t.id===id)).filter(Boolean);
+ const topicIcons={food:'🍎',home:'🏠',school:'🎒',animals:'🐾',sports:'⚽',travel:'✈️',family:'👨‍👩‍👧',clothes:'👕',nature:'🌿',weather:'☀️',colours:'🎨',body:'🖐️'};
+ const listing=filtered.map(w=>{
+   const picked=manual.has(w.en),used=!!profile.words[w.en]?.origin,blocked=used||(!picked&&manual.size>=limit);
+   return '<div class="ws-manual-word'+(used?' is-learned':'')+'">'+
+     '<button type="button" class="ws-manual-pick" data-action="pick:'+h(w.en)+'" aria-pressed="'+picked+'" '+(blocked?'disabled':'')+'>'+
+     '<span class="ws-manual-check" aria-hidden="true">'+(picked?'✓':'')+'</span>'+
+     '<span class="ws-manual-word-copy"><strong>'+h(w.en)+'</strong><small>'+h(w.ipa||'')+' · '+h(w.ru)+'</small></span>'+
+     (used?'<span class="ws-manual-learned">Уже изучено</span>':'')+'</button>'+
+     btn('◖))','say:'+h(w.en),'ws-manual-audio')+'</div>';
+ }).join('');
+ const main='<main class="ws-manual"><div class="ws-picker-header">'+btn('‹',fill?'leaveFill':'sources','ws-picker-back')+'<h1>'+(fill?'Добавь слова':'Выбор слов')+'</h1></div>'+
+ '<div class="ws-manual-tabs" role="group" aria-label="Способ выбора слов">'+
+ btn('▦　По темам','manualTab:topics','ws-manual-tab'+(themed?' is-active':''))+
+ btn('⌕　Поиск слов','manualTab:search','ws-manual-tab'+(!themed?' is-active':''))+'</div>'+
+ '<div class="ws-manual-body">'+
+ (themed?'<div class="ws-manual-topic-head"><h2>Выбери тему</h2>'+btn(manualShowAll?'Свернуть':'Все темы ›','manualAllTopics','ws-manual-all')+'</div>'+
+ '<div class="ws-manual-topics">'+shownTopics.map(t=>btn('<span aria-hidden="true">'+(topicIcons[t.id]||'📚')+'</span><span>'+h(t.name)+'</span>','manualTopic:'+h(t.id),'ws-manual-topic'+(topicId===t.id?' is-active':''))).join('')+'</div>':
+ '<label class="ws-manual-search-label" for="manual-search">Поиск по всему словарю</label><div class="ws-manual-search-wrap"><span aria-hidden="true">⌕</span><input id="manual-search" data-input="search" type="search" placeholder="Английское слово или перевод" autocomplete="off" value="'+h(query)+'"></div>')+
+ '<section class="ws-manual-list"><div class="ws-manual-list-head"><h2>'+(themed?h(topic?.name||'Слова'):'Результаты поиска')+'</h2><small>'+(themed?'В этой теме выбрано: '+chosenInTopic:q?'Найдено: '+filtered.length:'Введите слово для поиска')+'</small></div>'+
+ '<div class="ws-manual-word-scroll">'+(listing||'<p class="ws-manual-empty">'+(themed?'В этой теме пока нет слов. Выбери другую тему.':q?'Ничего не найдено. Попробуй другой запрос.':'Начни вводить слово на русском или английском.')+'</p>')+'</div></section></div>'+
+ '<div class="ws-manual-bottom"><div class="ws-manual-total"><div><span aria-hidden="true">▱</span> Выбрано слов: <strong>'+selected.length+' / 10</strong></div><small>Рекомендуется 10 слов. Начать изучение можно с 3 слов.'+(Number.isFinite(limit)&&limit!==10?' Максимум уровня: '+limit+'.':'')+'</small></div>'+
+ btn('Начать изучение ('+selected.length+' '+(selected.length%100>=11&&selected.length%100<=14?'слов':selected.length%10===1?'слово':selected.length%10>=2&&selected.length%10<=4?'слова':'слов')+')','startManual','ws-manual-start',!E.eligible(profile,selected))+
+ '</div></main>';
+ const scroll=root.querySelector?.('.ws-manual-word-scroll')?.scrollTop??0;
+ shell('','',main);
+ const next=root.querySelector?.('.ws-manual-word-scroll');if(next)next.scrollTop=scroll;
 }
 function startLearning(ids,known=[]){
  try{session=E.start(profile,'new',ids,known);selection=null;manual.clear();if(!store())return home();showAnswer=false;showHelp=false;confirmed=false;learn()}catch(e){notice(e.message);home()}
@@ -334,15 +365,17 @@ function render(){if(session){if(E.timedOut(session,Date.now()))return expire(ne
 function dispatch(act,el){
  if(storageFailure&&!['home','dictionary','progress','recover','restoreBackup'].includes(act)&&!act.startsWith('word:')&&!act.startsWith('say:'))return notice('Сохранение заблокировано. Никакие данные не перезаписываются.');
  if(act.startsWith('say:'))return speak(act.slice(4));
- if(act.startsWith('manualTopic:')){const v=act.slice(12);manualThemes.has(v)?manualThemes.delete(v):manualThemes.add(v);return manualView(view==='fill')}
- if(act.startsWith('pick:')){const v=act.slice(5);manual.has(v)?manual.delete(v):manual.size<E.levelLimit(profile)&&manual.add(v);return manualView(view==='fill')}
+ if(act.startsWith('manualTopic:')){const v=act.slice(12);manualThemes.clear();manualThemes.add(v);return manualView(view==='fill')}
+ if(act.startsWith('manualTab:')){manualMode=act.slice(10);return manualView(view==='fill')}
+ if(act==='manualAllTopics'){manualShowAll=!manualShowAll;return manualView(view==='fill')}
+ if(act.startsWith('pick:')){const v=act.slice(5);if(profile.words[v]?.origin||!byId[v])return;manual.has(v)?manual.delete(v):manual.size<E.levelLimit(profile)&&manual.add(v);return manualView(view==='fill')}
  if(act.startsWith('progressRange:')){progressRange=act.slice(14);return progress()}
  if(act.startsWith('qualityRange:')){qualityRange=act.slice(13);return progress()}
  if(act.startsWith('word:'))return wordDetail(act.slice(5));
  if(session&&E.timedOut(session,Date.now()))return expire();
  if(session&&session.pausedAt!==null&&!['continue','cancel','stopPractice'].includes(act))return notice('Сначала продолжи занятие');
  switch(act){
- case 'home':return home();case 'closeSources':return home();case 'childProfile':return childProfile();case 'saveChild':return saveChild();case 'restoreBackup':return restoreBackup();case 'recover':return recoverScreen();case 'sources':return sources();case 'manual':manual.clear();manualThemes.clear();query='';return manualView();
+ case 'home':return home();case 'closeSources':return home();case 'childProfile':return childProfile();case 'saveChild':return saveChild();case 'restoreBackup':return restoreBackup();case 'recover':return recoverScreen();case 'sources':return sources();case 'manual':manual.clear();manualThemes.clear();manualThemes.add('food');manualMode='topics';manualShowAll=false;query='';return manualView();
  case 'auto':return makeSelection('auto');
  case 'review':return review();case 'practice':return review('practice');case 'stopPractice':session=null;store();return home();case 'progress':return progress();case 'dictionary':query='';return dictionaryView();
  case 'known':return selectionGrade(true);case 'unknown':return selectionGrade(false);case 'stopSelection':return stopSelection();
