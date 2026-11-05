@@ -34,6 +34,7 @@ function btn(label,event,cls='',disabled=false){return '<button type="button" da
 function head(name){return '<header><span class="brand">WordScene <b>17</b></span></header><main><h1>'+name+'</h1>'}
 function end(){return '</main>'}
 function shell(title,html,layout){root.innerHTML=layout||head(title)+html+end();root.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click',()=>{if(root.contains?.(el)===false)return;return dispatch(el.dataset.action,el)}));root.querySelectorAll('[data-input]').forEach(el=>el.addEventListener('input',()=>{query=el.value;if(view==='manual'&&manualMode==='search'){refreshManualSearch();return}const caret=el.selectionStart;render();const next=root.querySelector('[data-input]');if(next){next.focus();try{if(caret!==null)next.setSelectionRange(caret,caret)}catch{}}}));}
+let manualSearchBaseHeight=0;
 function syncManualViewport(){
  const panel=root.querySelector?.('.ws-manual.is-search');
  if(!panel)return;
@@ -41,10 +42,13 @@ function syncManualViewport(){
  const field=root.querySelector?.('#manual-search');
  const focused=!!field&&document.activeElement===field;
  const available=vv?.height||window.innerHeight;
- const keyboard=focused&&window.innerHeight-available>110;
+ // iOS can resize innerHeight along with visualViewport; retain the unobstructed baseline.
+ if(!focused&&available>0)manualSearchBaseHeight=Math.max(manualSearchBaseHeight,available);
+ if(!manualSearchBaseHeight)manualSearchBaseHeight=window.innerHeight;
+ const keyboard=focused&&Math.max(window.innerHeight,manualSearchBaseHeight)-available>110;
  panel.classList.toggle('is-keyboard',keyboard);
  if(keyboard){
-  panel.style.setProperty('--ws-search-vh',Math.max(200,available)+'px');
+  panel.style.setProperty('--ws-search-vh',Math.max(0,available)+'px');
   panel.style.setProperty('--ws-search-top',(vv?.offsetTop||0)+'px');
  }else{
   panel.style.removeProperty('--ws-search-vh');
@@ -436,7 +440,7 @@ function dispatch(act,el){
  if(act.startsWith('removeManual:')){manual.delete(act.slice(13));if(!manual.size)manualSummaryOpen=false;return manualView(view==='fill')}
  if(act==='manualSummary'){manualSummaryOpen=!manualSummaryOpen;return manualView(view==='fill')}
  if(act.startsWith('manualTopic:')){const v=act.slice(12);manualThemes.clear();manualThemes.add(v);return manualView(view==='fill')}
- if(act.startsWith('manualTab:')){manualMode=act.slice(10);return manualView(view==='fill')}
+ if(act.startsWith('manualTab:')){manualMode=act.slice(10);if(manualMode==='search')manualSearchBaseHeight=window.visualViewport?.height||window.innerHeight;return manualView(view==='fill')}
  if(act==='manualAllTopics'){manualShowAll=!manualShowAll;return manualView(view==='fill')}
  if(act.startsWith('pick:')){const v=act.slice(5);if(profile.words[v]?.origin||!byId[v])return;manual.has(v)?manual.delete(v):manual.size<E.levelLimit(profile)&&manual.add(v);return manualView(view==='fill')}
  if(act.startsWith('progressRange:')){progressRange=act.slice(14);return progress()}
@@ -445,7 +449,7 @@ function dispatch(act,el){
  if(session&&E.timedOut(session,Date.now()))return expire();
  if(session&&session.pausedAt!==null&&!['continue','cancel','stopPractice'].includes(act))return notice('Сначала продолжи занятие');
  switch(act){
- case 'home':return home();case 'closeSources':return home();case 'childProfile':return childProfile();case 'saveChild':return saveChild();case 'restoreBackup':return restoreBackup();case 'recover':return recoverScreen();case 'sources':return sources();case 'manual':manual.clear();manualThemes.clear();manualThemes.add('food');manualMode='topics';manualShowAll=false;manualSummaryOpen=false;query='';return manualView();
+ case 'home':return home();case 'closeSources':return home();case 'childProfile':return childProfile();case 'saveChild':return saveChild();case 'restoreBackup':return restoreBackup();case 'recover':return recoverScreen();case 'sources':return sources();case 'manual':manual.clear();manualThemes.clear();manualThemes.add('food');manualMode='topics';manualShowAll=false;manualSummaryOpen=false;query='';manualSearchBaseHeight=0;return manualView();
  case 'auto':return makeSelection('auto');
  case 'review':return review();case 'practice':return review('practice');case 'stopPractice':session=null;store();return home();case 'progress':return progress();case 'dictionary':query='';return dictionaryView();
  case 'known':return selectionGrade(true);case 'unknown':return selectionGrade(false);case 'stopSelection':return stopSelection();
