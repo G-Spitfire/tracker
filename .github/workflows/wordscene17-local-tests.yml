@@ -1,10 +1,11 @@
-name: WordScene 17 local-only checks
+name: Family applications checks
 on:
   pull_request:
     paths:
       - 'wordscene-17-lab/**'
-      - 'wordscene/**'
       - 'leveli/**'
+      - 'index.html'
+      - 'README.md'
       - '.github/workflows/wordscene17-local-tests.yml'
   workflow_dispatch:
 jobs:
@@ -15,13 +16,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Syntax checks
+      - name: JavaScript syntax checks
         run: |
           node --check wordscene-17-lab/app.js
           node --check wordscene-17-lab/engine.js
           node --check wordscene-17-lab/accounts.js
           node --check wordscene-17-lab/sw.js
-      - name: Native test suite
+          node --check leveli/school-model.js
+          node --check leveli/sw.js
+      - name: WordScene and Leveli unit tests
         run: node --test wordscene-17-lab/*.test.cjs leveli/tests/*.test.cjs
 
   browser-acceptance:
@@ -36,7 +39,7 @@ jobs:
         run: |
           npm install --no-save playwright
           npx playwright install --with-deps chromium webkit
-      - name: Test desktop/mobile browsers and offline PWA
+      - name: Test WordScene and Leveli desktop/mobile browser flows
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/wordscene-http.log 2>&1 &
           for i in $(seq 1 40); do
