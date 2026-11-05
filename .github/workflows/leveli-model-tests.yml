@@ -18,4 +18,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: node --check leveli/school-model.js
       - run: node --test leveli/tests/school-model.test.cjs leveli/tests/retirement.test.cjs
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright
+      - run: npx playwright install --with-deps chromium
+      - name: Run Leveli browser acceptance with synthetic data
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/leveli-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8765/leveli/index.html >/dev/null; then break; fi
+            sleep 1
+          done
+          node leveli/tests/browser.cjs
