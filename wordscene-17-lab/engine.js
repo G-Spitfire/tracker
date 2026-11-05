@@ -38,7 +38,7 @@ function start(p,mode,ids,known=[],at=Date.now()){
  if(!['new','review','practice'].includes(mode)||!ids.length)throw Error('Invalid session');
  if(mode==='new'&&!eligible(p,ids))throw Error('Invalid new-word selection');
  if(mode==='new'&&due(p,at).length)throw Error('Complete due reviews first');
- if(mode==='review'&&ids.some(id=>!due(p,at).includes(id)))throw Error('Only due words');
+ if(mode==='review'){const required=due(p,at);if(ids.length!==required.length||new Set(ids).size!==ids.length||ids.some(id=>!required.includes(id)))throw Error('Review must include every due word exactly once');}
  if(mode==='practice'&&(due(p,at).length||ids.some(id=>!residualErrors(p).includes(id))))throw Error('Only residual errors');
  const all=unique(ids);
  return {id:'ws17-'+at+'-'+Math.random().toString(36).slice(2,10),mode,ids:all,known:unique(known),stage:mode==='new'?'learn':'recall',learnIndex:0,round:1,extra:0,items:queue(all),index:0,answers:[],hard:[],roundHard:[],startedAt:at,lastActionAt:at,pausedAt:null,openedAt:at,locked:false};
