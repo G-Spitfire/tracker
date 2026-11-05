@@ -3,6 +3,29 @@
 'use strict';
 const PREFIX='wordscene-17-lab-account-v1:',ACTIVE='wordscene-17-lab-account-active-v1:';
 const clone=x=>JSON.parse(JSON.stringify(x));
+/* Validate persisted learning invariants before allowing a damaged profile to be edited.
+   Historical optional fields are preserved unchanged. */
+function validProfile(p){
+ const obj=x=>!!x&&typeof x==='object'&&!Array.isArray(x);
+ const date=x=>typeof x==='string'&&/^\\d{4}-\\d{2}-\\d{2}$/.test(x)&&!Number.isNaN(Date.parse(x+'T00:00:00Z'));
+ if(!obj(p)||p.version!==17||!Number.isSafeInteger(p.revision)||p.revision<0||
+    !['novice','experienced','pro'].includes(p.level)||!obj(p.words)||
+    !Array.isArray(p.sessions)||!Array.isArray(p.levels))return false;
+ if(!Object.values(p.words).every(w=>{
+   if(!obj(w)||!['learned','known'].includes(w.origin))return false;
+   if(w.history!==undefined&&!Array.isArray(w.history))return false;
+   if(w.schedule!==undefined){
+     const s=w.schedule;
+     if(!obj(s)||!['daily','repair','spaced'].includes(s.stage)||!date(s.nextDay)||
+        !Array.isArray(s.days)||!Array.isArray(s.checks))return false;
+   }
+   return true;
+ }))return false;
+ return p.sessions.every(s=>obj(s)&&typeof s.id==='string'&&s.id.length>0&&
+   ['new','review'].includes(s.mode)&&Number.isFinite(s.at)&&
+   Array.isArray(s.ids)&&s.ids.every(id=>typeof id==='string')&&
+   Number.isSafeInteger(s.successful)&&s.successful>=0);
+}
 function create({storage,empty,valid,keyFor}){
  if(!storage||typeof empty!=='function'||typeof valid!=='function')throw Error('Missing dependencies');
  const id=u=>{if(typeof u!=='string'||!/^[a-zA-Z0-9_-]{1,128}$/.test(u))throw Error('Invalid account identifier');return u};
@@ -49,6 +72,6 @@ function create({storage,empty,valid,keyFor}){
  function exportData(uid){const k=keys(uid);return JSON.stringify({format:'wordscene17-local-backup',uid,exportedAt:new Date().toISOString(),main:storage.getItem(k.main),backup:storage.getItem(k.backup),active:storage.getItem(k.active)},null,2)}
  return {keys,inspect,load,save,recover,exportData};
 }
-const api={create};
+const api={create,validProfile};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.WS17Accounts=api;
 })(typeof globalThis!=='undefined'?globalThis:this);
