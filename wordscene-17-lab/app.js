@@ -12,7 +12,7 @@ const legacyStorageSuffix=(()=>{
 const KEY='wordscene-17-lab-v1'+legacyStorageSuffix,ACTIVE='wordscene-17-lab-active-v1'+legacyStorageSuffix,PRACTICE='wordscene-17-lab-practice-cleared-v1'+legacyStorageSuffix;
 const root=document.getElementById('app');
 let profile,session=null,selection=null,view='home',batch=[],showAnswer=false,showHelp=false,manual=new Set(),manualThemes=new Set(),query='',confirmed=false,storageFailure=false,savedProfileRaw=null,savedActiveRaw=null;
-let progressRange='30',qualityRange='28';
+let progressRange='30',qualityRange='28',homeDay=null;
 const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const accounts=window.WS17Accounts.create({storage:localStorage,empty:E.empty,valid:window.WS17Accounts.validProfile,keyFor:()=>({main:KEY,active:ACTIVE,backup:'wordscene-17-lab-last-good-v1'+legacyStorageSuffix})});
 function store(){
@@ -96,6 +96,7 @@ function paperProgress(){
 }
 function home(){
  view='home';
+ homeDay=E.day();
  const pending=E.due(profile),lastReview=profile.sessions.findLast(s=>s.mode==='review');
  const cleared=lastReview&&localStorage.getItem(PRACTICE)===lastReview.id;
  const errors=cleared?[]:E.residualErrors(profile).filter(id=>byId[id]);
@@ -353,12 +354,17 @@ function dispatch(act,el){
  case 'cancel':return confirmCancel();
  }
 }
-function returnToCard(){if(session&&!storageFailure)resume()}
+function refreshHomeDay(){
+ if(!storageFailure&&!session&&view==='home'&&homeDay!==E.day())home();
+}
+function returnToCard(){if(session&&!storageFailure)resume();else refreshHomeDay()}
 document.addEventListener?.('visibilitychange',()=>{if(document.hidden)suspend();else returnToCard()});
 window.addEventListener?.('pagehide',suspend);
 window.addEventListener?.('pageshow',event=>{if(event.persisted)returnToCard()});
+window.addEventListener?.('focus',refreshHomeDay);
 load();if(storageFailure)recoverScreen();else if(session)resume();else home();
 setInterval(()=>{
+ refreshHomeDay();
  if(!session||storageFailure)return;
  if(E.timedOut(session,Date.now()))return expire(new Error('30 минут бездействия'));
  const timer=root.querySelector('#pause-time');
