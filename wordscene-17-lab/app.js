@@ -43,7 +43,7 @@ function syncManualViewport(){
  const focused=!!field&&document.activeElement===field;
  const available=vv?.height||window.innerHeight;
  // iOS can resize innerHeight along with visualViewport; retain the unobstructed baseline.
- if(!focused&&available>0)manualSearchBaseHeight=Math.max(manualSearchBaseHeight,available);
+ if(!focused&&available>0&&(!panel.classList.contains('is-keyboard')||available>=manualSearchBaseHeight-40))manualSearchBaseHeight=available;
  if(!manualSearchBaseHeight)manualSearchBaseHeight=window.innerHeight;
  const keyboard=focused&&Math.max(window.innerHeight,manualSearchBaseHeight)-available>110;
  panel.classList.toggle('is-keyboard',keyboard);
