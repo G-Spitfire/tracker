@@ -13,7 +13,7 @@ function boot(options={}){
  };
  let now=options.now??Date.now(),tick;
  class TestDate extends Date{static now(){return now}}
- const window={WordSceneTopics:{topics:[],forWord:()=>[]},WordSceneContent:{cards:[],render:()=>'<svg></svg>'},confirm:()=>true};
+ const window={WordSceneTopics:options.topics||{topics:[],forWord:()=>[]},WordSceneContent:{cards:[],render:()=>'<svg></svg>'},confirm:()=>true};
  const doc={getElementById:id=>id==='childName'||id==='childAge'?{value:options.inputs?.[id]??''}:root,createElement:()=>({setAttribute(){},hidden:true}),body:{append(){}}};
  const context={window,document:doc,localStorage:storage,navigator:{},setInterval:cb=>{tick=cb},setTimeout:()=>0,clearTimeout:()=>{},Date:TestDate,Math,console};
  vm.createContext(context);
@@ -184,7 +184,8 @@ test('Paper word picker allows immediate decisions and optional translation reve
 });
 
 test('manual selection keeps cross-topic picks and search is independent of topic',()=>{
- const b=boot();
+ const topics={topics:[{id:'food',name:'Еда и напитки'},{id:'animals',name:'Животные'}],forWord:id=>id==='apple'?['food']:['animals']};
+ const b=boot({topics});
  b.click('sources');b.click('manual');
  assert.match(b.root.html,/Выбор слов/);
  assert.match(b.root.html,/Начать изучение \(0 слов\)/);
