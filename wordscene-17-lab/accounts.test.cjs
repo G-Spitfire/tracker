@@ -39,3 +39,18 @@ test('stale tab cannot replace a checkpoint when permanent progress is unchanged
  assert.throws(()=>a.save('child-1',p,{id:'second'},raw,null),/Session changed/);
  assert.equal(JSON.parse(storage.getItem(active)).id,'first');
 });
+
+test('strict persisted profile validation rejects malformed nested schedules without losing data',()=>{
+ const storage=memory(),a=A.create({storage,empty:E.empty,valid:A.validProfile});
+ const p=E.empty();p.words.apple={origin:'learned',schedule:{stage:'other',nextDay:'2026-11-05'},history:[]};
+ const k=a.keys('child-1');storage.setItem(k.main,JSON.stringify(p));
+ assert.equal(a.load('child-1').status,'corrupt');
+ assert.throws(()=>a.save('child-1',E.empty()),/recovery/);
+ assert.ok(storage.getItem(k.main).includes('other'));
+});
+test('valid current WordScene 17 profiles remain readable',()=>{
+ const storage=memory(),a=A.create({storage,empty:E.empty,valid:A.validProfile}),p=E.empty();
+ p.words.apple={origin:'known',schedule:E.newSchedule(Date.now()),history:[]};
+ a.save('child-1',p);
+ assert.equal(a.load('child-1').status,'ok');
+});
