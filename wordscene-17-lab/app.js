@@ -125,10 +125,17 @@ function nextBatch(){
 function makeSelection(kind){if(warnLocked())return;selection=E.beginSelection('auto');selection.skipped=[];nextBatch()}
 function selectionScreen(){
  const id=selection.current?.[selection.cursor],w=byId[id];if(!w){nextBatch();return}
- view='select';const title=selection.unknown.length+' / 10 неизвестных · просмотрено '+selection.seen.length+' / 50';
- shell('Подбор новых слов','<div class="counter">'+title+'</div><section class="flash"><h2>'+h(w.en)+'</h2><div class="ipa">'+h(w.ipa||'')+'</div>'+btn('▶ Произнести','say:'+h(id),'quiet')+
- (showAnswer?'<div class="translation">'+h(w.ru)+'</div><div class="actions">'+btn('Знаю','known','secondary')+btn('Не знаю','unknown','primary')+'</div>':btn('Показать перевод','reveal','primary'))+'</section>'+
- btn('Завершить подбор','stopSelection','quiet'));
+ view='select';
+ const unseen=selection.unknown.length,seen=selection.seen.length;
+ const content='<main class="ws-picker"><div class="ws-picker-header">'+btn('‹','stopSelection','ws-picker-back')+'<h1>Подбор слов</h1></div>'+
+ '<div class="ws-picker-stats" aria-label="Ход подбора"><div><span class="ws-picker-stat-icon" aria-hidden="true">◎</span><span>Неизвестных:<strong>'+unseen+' из 10</strong></span></div><div><span class="ws-picker-stat-icon" aria-hidden="true">▱</span><span>Просмотрено:<strong>'+seen+' из 50</strong></span></div></div>'+
+ '<p class="ws-picker-instruction">Посмотри на слово и реши, знаешь ли ты его.</p>'+
+ '<section class="ws-picker-card"><button class="ws-picker-reveal" data-action="reveal" type="button" aria-label="'+(showAnswer?'Перевод: '+h(w.ru):'Показать перевод слова '+h(w.en))+'"><span class="ws-picker-word">'+h(w.en)+'</span><span class="ws-picker-ipa">'+h(w.ipa||'')+'</span>'+
+ (showAnswer?'<span class="ws-picker-translation">'+h(w.ru)+'</span>':'<span class="ws-picker-hint">Нажми, чтобы увидеть перевод</span>')+'</button>'+
+ btn('▶','say:'+h(id),'ws-picker-speak')+'</section>'+
+ '<div class="ws-picker-choices">'+btn('Не знаю','unknown','ws-picker-unknown')+btn('Знаю','known','ws-picker-known')+'</div>'+
+ btn('Завершить подбор','stopSelection','ws-picker-exit')+'</main>';
+ shell('','',content);
 }
 function renderSelection(){showAnswer=false;selectionScreen()}
 function selectionGrade(knows){
