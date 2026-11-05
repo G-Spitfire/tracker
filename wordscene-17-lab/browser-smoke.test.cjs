@@ -207,3 +207,16 @@ test('manual selection keeps cross-topic picks and search is independent of topi
  b.click('startManual');
  assert.match(b.root.html,/Запоминание/);
 });
+
+test('mobile Paper selection layout keeps visible scrolling cues and shared controls',()=>{
+ const css=file('style.css');
+ assert.match(css,/\\.ws-manual-scroll-note/);
+ assert.match(css,/\\.ws-manual-word-scroll\\{[^}]*overflow-y:auto/);
+ assert.match(css,/@media\\(max-height:650px\\)/);
+ assert.match(css,/\\.ws-manual-topics\\{display:flex/);
+ assert.match(css,/\\.ws-picker-hint\\{color:#304f71\\}/);
+ assert.match(css,/\\.ws-picker-exit\\{color:#3c5574\\}/);
+ const b=boot();b.click('sources');b.click('manual');
+ assert.match(b.root.html,/Прокрути список/);
+ assert.match(b.root.html,/role="region" aria-label="Список слов"/);
+});
