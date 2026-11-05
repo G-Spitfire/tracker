@@ -182,3 +182,27 @@ test('Paper word picker allows immediate decisions and optional translation reve
  assert.match(b.root.html,/Учить новые слова/);
  assert.equal(b.map.has('wordscene-17-lab-active-v1'),false);
 });
+
+test('manual selection keeps cross-topic picks and search is independent of topic',()=>{
+ const b=boot();
+ b.click('sources');b.click('manual');
+ assert.match(b.root.html,/Выбор слов/);
+ assert.match(b.root.html,/Начать изучение \(0 слов\)/);
+ assert.match(b.root.html,/data-action="manualTab:search"/);
+ b.click('pick:apple');
+ assert.match(b.root.html,/Выбрано слов:[\\s\\S]*1 \/ 10/);
+ b.click('manualTab:search');
+ assert.match(b.root.html,/Поиск по всему словарю/);
+ assert.match(b.root.html,/Выбрано слов:[\\s\\S]*1 \/ 10/);
+ b.click('manualTab:topics');
+ b.click('manualTopic:animals');
+ assert.match(b.root.html,/Животные/);
+ assert.match(b.root.html,/Выбрано слов:[\\s\\S]*1 \/ 10/);
+ b.click('pick:cat');b.click('pick:dog');
+ assert.match(b.root.html,/Выбрано слов:[\\s\\S]*3 \/ 10/);
+ assert.match(b.root.html,/data-action="startManual"[^>]*>/);
+ b.click('manualTopic:food');
+ assert.match(b.root.html,/aria-pressed="true"/);
+ b.click('startManual');
+ assert.match(b.root.html,/Запоминание/);
+});
