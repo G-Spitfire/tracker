@@ -39,7 +39,7 @@ function period(g){
  if(!d)return null;
  if(year===2026){
   const key=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
-  if(key>=20260901&&key<=20261025)return '2026-1'; // first term provisional; last known final Oct 25
+  if(key>=20260901&&key<=20261025)return '2026-1'; // first term confirmed through Oct 25
   if(key>=20261105&&key<=20261230)return '2026-2';
   if(key>=20270111&&key<=20270326)return '2026-3';
   if(key>=20270405&&key<=20270526)return '2026-4';
