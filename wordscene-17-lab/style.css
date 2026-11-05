@@ -282,3 +282,36 @@ html:has(.ws-manual),body:has(.ws-manual){background:#fdf7ed}
  .ws-manual-topic span:last-child{font-size:12px}
  .ws-manual-topics.is-expanded .ws-manual-topic{min-width:0}
 }
+
+/* iPhone search only: one outer focus ring, visualViewport keyboard resize */
+.ws-manual.is-search .ws-manual-search-wrap{border:1px solid #a8c7e8;outline:0;transition:border-color .12s,box-shadow .12s}
+.ws-manual.is-search .ws-manual-search-wrap:focus-within{border-color:#0753bb;box-shadow:0 0 0 3px #087bfa44}
+.ws-manual.is-search .ws-manual-search-wrap input,
+.ws-manual.is-search .ws-manual-search-wrap input:focus,
+.ws-manual.is-search .ws-manual-search-wrap input:focus-visible{
+ border:0!important;outline:0!important;box-shadow:none!important;border-radius:0;min-width:0;
+}
+.ws-manual.is-search.is-keyboard{
+ position:fixed;inset:var(--ws-search-top,0px) 0 auto 0;z-index:50;
+ width:100%;height:var(--ws-search-vh,100dvh);min-height:0;max-height:var(--ws-search-vh,100dvh);
+ padding-top:4px;padding-bottom:5px;overflow:hidden;
+}
+.ws-manual.is-search.is-keyboard .ws-picker-header,
+.ws-manual.is-search.is-keyboard .ws-manual-search-label,
+.ws-manual.is-search.is-keyboard .ws-manual-total small{display:none}
+.ws-manual.is-search.is-keyboard .ws-manual-tabs{margin-bottom:4px;padding:2px}
+.ws-manual.is-search.is-keyboard .ws-manual-tab{padding:7px 4px;font-size:14px}
+.ws-manual.is-search.is-keyboard .ws-manual-body{gap:4px}
+.ws-manual.is-search.is-keyboard .ws-manual-search-wrap input{padding:9px 0;font-size:16px}
+.ws-manual.is-search.is-keyboard .ws-manual-search-wrap{min-height:41px}
+.ws-manual.is-search.is-keyboard .ws-manual-list{padding:5px 9px 3px;border-radius:16px}
+.ws-manual.is-search.is-keyboard .ws-manual-list-head{padding:2px 0 4px}
+.ws-manual.is-search.is-keyboard .ws-manual-list-head h2{font-size:15px}
+.ws-manual.is-search.is-keyboard .ws-manual-scroll-note{padding:1px 3px;font-size:10px}
+.ws-manual.is-search.is-keyboard .ws-manual-bottom{padding-top:4px}
+.ws-manual.is-search.is-keyboard .ws-manual-total{padding:5px 9px;margin-bottom:5px;border-radius:13px}
+.ws-manual.is-search.is-keyboard .ws-manual-total>div{font-size:14px}
+.ws-manual.is-search.is-keyboard .ws-manual-total strong{font-size:18px}
+.ws-manual.is-search.is-keyboard .ws-manual-summary{max-height:min(65px,18dvh);margin-bottom:4px}
+.ws-manual.is-search.is-keyboard .ws-manual-start{min-height:49px;font-size:16px;border-radius:16px}
+.ws-manual.is-search.is-keyboard .ws-manual-word-scroll{-webkit-overflow-scrolling:touch;touch-action:pan-y}
