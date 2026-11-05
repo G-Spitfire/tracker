@@ -33,7 +33,9 @@ test('child profile settings replace multi-account and cloud UI',()=>{
 });
 test('two ways of choosing words remain',()=>{
  const app=file('app.js');
- assert.doesNotMatch(app,/btn\('По темам','themes'/);
- assert.match(app,/btn\('Автоматически','auto'/);
- assert.match(app,/btn\('Выбрать самому','manual'/);
+ assert.doesNotMatch(app,/case 'themes'/);
+ assert.match(app,/Подберём слова для тебя/);
+ assert.match(app,/Найди слова или выбери тему/);
+ assert.match(app,/case 'manual'/);
+ assert.match(app,/case 'auto'/);
 });
