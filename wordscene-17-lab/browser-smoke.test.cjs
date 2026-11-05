@@ -14,7 +14,7 @@ function boot(options={}){
  let now=options.now??Date.now(),tick;
  class TestDate extends Date{static now(){return now}}
  const window={WordSceneTopics:{topics:[],forWord:()=>[]},WordSceneContent:{cards:[],render:()=>'<svg></svg>'},confirm:()=>true};
- const doc={getElementById:()=>root,createElement:()=>({setAttribute(){},hidden:true}),body:{append(){}}};
+ const doc={getElementById:id=>id==='childName'||id==='childAge'?{value:options.inputs?.[id]??''}:root,createElement:()=>({setAttribute(){},hidden:true}),body:{append(){}}};
  const context={window,document:doc,localStorage:storage,navigator:{},setInterval:cb=>{tick=cb},setTimeout:()=>0,clearTimeout:()=>{},Date:TestDate,Math,console};
  vm.createContext(context);
  const mod={exports:{}};vm.runInNewContext(file('engine.js'),Object.assign(context,{module:mod,exports:mod.exports}));window.WS17Engine=mod.exports;
@@ -112,7 +112,7 @@ test('mandatory review unlocks voluntary practice for final errors without chang
  assert.doesNotMatch(b.root.html,/Повторить ещё раз/);
 });
 
-test('My Progress periods and history reveal five lessons at a time',()=>{
+test('My Progress retains aggregates and periods without detailed lesson history',()=>{
  const fresh=boot(),E=fresh.window.WS17Engine,p=E.empty();
  const base=Date.now()-11*86400000;
  for(let i=0;i<12;i++){
@@ -126,14 +126,32 @@ test('My Progress periods and history reveal five lessons at a time',()=>{
  assert.match(b.root.html,/Сколько слов я выучил/);
  assert.match(b.root.html,/Как хорошо я помню слова/);
  assert.match(b.root.html,/Пока нет проверок за этот период/);
- assert.equal((b.root.html.match(/class="progress-session"/g)||[]).length,5);
- b.click('progressMore');
- assert.equal((b.root.html.match(/class="progress-session"/g)||[]).length,10);
- b.click('progressMore');
- assert.equal((b.root.html.match(/class="progress-session"/g)||[]).length,12);
- b.click('history:demo-11');
- assert.match(b.root.html,/Итог третьего обязательного прогона/);
+ assert.doesNotMatch(b.root.html,/Мои занятия|progress-session|Показать ещё/);
  b.click('progressRange:all');
  b.click('qualityRange:all');
  assert.match(b.root.html,/class="progress-line"/);
+});
+
+test('one child can save name and age without creating an account',()=>{
+ const b=boot({inputs:{childName:'Полина',childAge:'9'}});
+ b.click('childProfile');
+ assert.match(b.root.html,/Как тебя зовут/);
+ assert.match(b.root.html,/Сколько тебе лет/);
+ b.click('saveChild');
+ const profile=JSON.parse(b.map.get('wordscene-17-lab-v1'));
+ assert.equal(profile.child.name,'Полина');
+ assert.equal(profile.child.age,9);
+ assert.equal(profile.revision,1);
+ assert.doesNotMatch(b.root.html,/Ребёнок 1|Ребёнок 2|Облако/);
+});
+test('legacy selected child data is reused without creating an empty local save',()=>{
+ const m=new Map(),E=boot().window.WS17Engine,p=E.empty();
+ p.words.apple={origin:'known',schedule:E.newSchedule(Date.now()),history:[]};
+ m.set('wordscene-17-lab-current-account-v1','child-2');
+ m.set('wordscene-17-lab-v1-account-child-2',JSON.stringify(p));
+ const b=boot({map:m});
+ b.click('progress');
+ assert.match(b.root.html,/1 из/);
+ assert.equal(m.has('wordscene-17-lab-v1'),false);
+ assert.doesNotMatch(b.root.html,/Ребёнок 1|Ребёнок 2|Переключить профиль/);
 });

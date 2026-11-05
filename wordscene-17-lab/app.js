@@ -4,27 +4,25 @@
 const E=window.WS17Engine,T=window.WordSceneTopics||{topics:[],forWord:()=>[]},C=window.WordSceneContent;
 const dictionary=[...window.WS17_SEED,...(C?.cards||[])].filter((w,i,a)=>a.findIndex(x=>x.en===w.en)===i);
 const byId=Object.fromEntries(dictionary.map(w=>[w.en,w]));
-const ACCOUNT_KEY='wordscene-17-lab-current-account-v1';
-const currentAccount=(()=>{try{const id=localStorage.getItem(ACCOUNT_KEY);return ['child-1','child-2'].includes(id)?id:'local'}catch{return 'local'}})();
-const cloudEnabled=['localhost','127.0.0.1'].includes(window.location?.hostname);
-const BINDINGS='wordscene-17-lab-cloud-bindings-v1';
-let cloud,cloudBusy=false,cloudConflict;
-const accountSuffix=currentAccount==='local'?'':'-account-'+currentAccount;
-const KEY='wordscene-17-lab-v1'+accountSuffix,ACTIVE='wordscene-17-lab-active-v1'+accountSuffix,PRACTICE='wordscene-17-lab-practice-cleared-v1'+accountSuffix;
+// Keep the active pre-refactor storage namespace without offering account switching.
+const legacyStorageSuffix=(()=>{
+ try{const old=localStorage.getItem('wordscene-17-lab-current-account-v1');
+ return old==='child-1'||old==='child-2'?'-account-'+old:''}catch{return ''}
+})();
+const KEY='wordscene-17-lab-v1'+legacyStorageSuffix,ACTIVE='wordscene-17-lab-active-v1'+legacyStorageSuffix,PRACTICE='wordscene-17-lab-practice-cleared-v1'+legacyStorageSuffix;
 const root=document.getElementById('app');
-let profile,session=null,selection=null,view='home',batch=[],showAnswer=false,showHelp=false,manual=new Set(),themeIds=new Set(),manualThemes=new Set(),query='',clockStarted=null,confirmed=false,storageFailure=false,savedProfileRaw=null,savedActiveRaw=null;
-let progressRange='30',qualityRange='28',progressVisible=5;const openHistory=new Set();
+let profile,session=null,selection=null,view='home',batch=[],showAnswer=false,showHelp=false,manual=new Set(),manualThemes=new Set(),query='',confirmed=false,storageFailure=false,savedProfileRaw=null,savedActiveRaw=null;
+let progressRange='30',qualityRange='28';
 const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
-const dateText=at=>new Date(at).toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
-const accounts=window.WS17Accounts.create({storage:localStorage,empty:E.empty,valid:p=>p?.version===17&&p.words&&typeof p.words==='object'&&Array.isArray(p.sessions),keyFor:id=>({main:'wordscene-17-lab-v1'+(id==='local'?'':'-account-'+id),active:'wordscene-17-lab-active-v1'+(id==='local'?'':'-account-'+id),backup:'wordscene-17-lab-last-good-v1'+(id==='local'?'':'-account-'+id)})});
+const accounts=window.WS17Accounts.create({storage:localStorage,empty:E.empty,valid:window.WS17Accounts.validProfile,keyFor:()=>({main:KEY,active:ACTIVE,backup:'wordscene-17-lab-last-good-v1'+legacyStorageSuffix})});
 function store(){
  if(storageFailure)return false;
- try{accounts.save(currentAccount,profile,session,savedProfileRaw,savedActiveRaw);savedProfileRaw=localStorage.getItem(KEY);savedActiveRaw=localStorage.getItem(ACTIVE);return true}
+ try{accounts.save('local',profile,session,savedProfileRaw,savedActiveRaw);savedProfileRaw=localStorage.getItem(KEY);savedActiveRaw=localStorage.getItem(ACTIVE);return true}
  catch(err){storageFailure=true;notice('Не удалось сохранить: '+err.message+'. Данные защищены от перезаписи.');return false}
 }
 function load(){
  try{
- const state=accounts.load(currentAccount);
+ const state=accounts.load('local');
  if(!['new','ok'].includes(state.status))throw Error('Сохранение требует восстановления: '+state.status);
  profile=state.profile;session=state.session;savedProfileRaw=localStorage.getItem(KEY);savedActiveRaw=localStorage.getItem(ACTIVE);
  }catch(err){storageFailure=true;profile=E.empty();session=null;notice('Сохранение повреждено. Исходные данные не перезаписываются.')}
@@ -33,7 +31,7 @@ function load(){
 function notice(s){let el=document.getElementById('notice');if(!el){el=document.createElement('div');el.id='notice';el.setAttribute('role','status');document.body.append(el)}el.textContent=s;el.hidden=false;clearTimeout(notice.id);notice.id=setTimeout(()=>el.hidden=true,5500)}
 function speak(id){if(!('speechSynthesis' in window))return notice('Озвучивание недоступно на этом устройстве');const u=new SpeechSynthesisUtterance(id);u.lang='en-US';u.rate=.83;speechSynthesis.cancel();speechSynthesis.speak(u)}
 function btn(label,event,cls='',disabled=false){return '<button type="button" data-action="'+event+'" class="'+cls+'" '+(disabled?'disabled':'')+'>'+label+'</button>'}
-function head(name){return '<header><span class="brand">WordScene <b>17</b></span><span class="lab">Лаборатория · отдельный прогресс</span></header><main><h1>'+name+'</h1>'}
+function head(name){return '<header><span class="brand">WordScene <b>17</b></span></header><main><h1>'+name+'</h1>'}
 function end(){return '</main>'}
 function shell(title,html,layout){root.innerHTML=layout||head(title)+html+end();root.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click',()=>{if(root.contains?.(el)===false)return;return dispatch(el.dataset.action,el)}));root.querySelectorAll('[data-input]').forEach(el=>el.addEventListener('input',()=>{const caret=el.selectionStart;query=el.value;render();const next=root.querySelector('[data-input]');if(next){next.focus();next.setSelectionRange(caret,caret)}}));}
 function warnLocked(){if(storageFailure){notice('Сохранение недоступно, изменения заблокированы');return true}if(session){notice('Сначала закончи или отмени текущее занятие');return true}return false}
@@ -107,16 +105,13 @@ function home(){
   errors.length?paperAction('Повторить ещё раз','practice',blocked,'Если хочешь, потренируй ещё '+errors.length+' '+(errors.length%100>=11&&errors.length%100<=14?'трудных слов':errors.length%10===1?'трудное слово':errors.length%10>=2&&errors.length%10<=4?'трудных слова':'трудных слов')):
   paperAction('На сегодня всё повторено','review',blocked||'Повторений на сегодня нет');
  shell('', '', '<main class="paper"><div class="paper-heading"><h1>'+paperIcon('book')+'WordScene</h1>'+
- '<button type="button" data-action="accounts" class="paper-profile" aria-label="Настройки профиля" '+(session?'disabled':'')+'>'+paperIcon('settings')+'</button></div>'+
+ '<button type="button" data-action="childProfile" class="paper-profile" aria-label="Настройки профиля" '+(session?'disabled':'')+'>'+paperIcon('settings')+'</button></div>'+
  '<div class="paper-hero"><img src="./paper-lighthouse.svg" alt="" width="729" height="160"></div>'+
  paperLevel()+paperProgress()+'<div class="paper-actions">'+fresh+repeat+'</div>'+
  '<nav class="paper-nav" aria-label="Разделы">'+btn(paperIcon('progress')+'Мой прогресс','progress')+btn(paperIcon('book')+'Словарь','dictionary')+'</nav></main>');
 }
 function sources(){
- if(warnLocked())return;view='sources';shell('Как будем учить?','<section class="panel">'+btn('Автоматически','auto','primary')+btn('По темам','themes','secondary')+btn('Выбрать самому','manual','secondary')+'</section>'+btn('На главную','home','quiet'));
-}
-function topics(){
- view='themes';shell('Выбери темы','<section class="panel"><div class="chips">'+T.topics.map(t=>'<button type="button" class="chip '+(themeIds.has(t.id)?'chosen':'')+'" data-action="topic:'+h(t.id)+'">'+h(t.name)+'</button>').join('')+'</div>'+btn('Подобрать слова','themed','primary',!themeIds.size)+'</section>'+btn('Назад','sources','quiet'));
+ if(warnLocked())return;view='sources';shell('Как будем учить?','<section class="panel">'+btn('Автоматически','auto','primary')+btn('Выбрать самому','manual','secondary')+'</section>'+btn('На главную','home','quiet'));
 }
 function nextBatch(){
  batch=E.selectCandidates(dictionary,profile,{seen:selection.seen,skipped:selection.skipped||[],unknown:selection.unknown,themes:selection.themes,topic:T.forWord});
@@ -124,7 +119,7 @@ function nextBatch(){
  if(!batch.length){finishSelection();return}
  selection.current=batch.map(w=>w.en);renderSelection();
 }
-function makeSelection(kind){if(warnLocked())return;selection=E.beginSelection(kind,kind==='theme'?[...themeIds]:[]);selection.skipped=[];nextBatch()}
+function makeSelection(kind){if(warnLocked())return;selection=E.beginSelection('auto');selection.skipped=[];nextBatch()}
 function selectionScreen(){
  const id=selection.current?.[selection.cursor],w=byId[id];if(!w){nextBatch();return}
  view='select';const title=selection.unknown.length+' / 10 неизвестных · просмотрено '+selection.seen.length+' / 50';
@@ -181,12 +176,12 @@ function review(mode='review'){
   session=E.start(profile,mode,ids);
   showAnswer=false;showHelp=false;confirmed=false;
   if(!store())return home();
-  clockStarted=Date.now();recall();
+  recall();
  }catch(e){notice(e.message)}
 }
 function cardActions(){
  return (session.pausedAt!==null?'<p class="reason" id="pause-time">'+pauseTime()+'</p>':'')+
-  btn('Пауза','pause','quiet',session.pausedAt!==null)+
+  (session.pausedAt!==null?btn('Продолжить','continue','primary'):btn('Пауза','pause','quiet'))+
   (session.mode==='practice'?btn('Закончить тренировку','stopPractice','quiet'):btn('Отменить занятие','cancel','quiet'));
 }
 function visual(w){if(window.WS17_illustration){try{return window.WS17_illustration(w.en)}catch(e){}}if(w.props&&C?.render){try{return C.render(w)}catch(e){}}return '<div class="simple-art">'+h(w.cue||w.en)+'</div>'}
@@ -208,18 +203,16 @@ function recall(){
 }
 function sendAnswer(ok,checked=false){
  try{
-  const ms=session.feedback?session.feedback.ms:elapsed();
   delete session.feedback;
-  const r=E.answer(session,ok,Date.now(),ms,checked);
+   const r=E.answer(session,ok,Date.now(),null,checked);
   if(!store())return home();
   if(r.done)return completed();
-  showAnswer=false;showHelp=false;confirmed=false;clockStarted=Date.now();recall();
+  showAnswer=false;showHelp=false;confirmed=false;recall();
  }catch(e){expire(e)}
 }
-function elapsed(){return clockStarted===null?null:Date.now()-clockStarted}
 function showFeedback(failed){
  E.action(session);
- session.feedback={failed,ms:elapsed(),help:false};
+ session.feedback={failed,help:false};
  showAnswer=true;confirmed=failed;showHelp=false;
  if(!store())return home();
  recall();
@@ -229,14 +222,13 @@ function resume(){
  if(session.stage==='complete')return completed();
  const feedback=session.feedback;
  view=session.stage==='learn'?'learn':'recall';
- showAnswer=!!feedback;confirmed=!!feedback?.failed;showHelp=!!(feedback?.help||session.artHidden);clockStarted=null;
+ showAnswer=!!feedback;confirmed=!!feedback?.failed;showHelp=!!(feedback?.help||session.artHidden);
  render();
 }
 function suspend(){
  if(!session||storageFailure||session.pausedAt!==null||E.timedOut(session,Date.now()))return;
- clockStarted=null;
- if(session.feedback)session.feedback.ms=null;
- E.pause(session);store();
+ 
+  E.pause(session);store();
 }
 function finishPractice(){
  const finished=session.stage==='complete',lastReview=profile.sessions.findLast(s=>s.mode==='review');
@@ -288,12 +280,6 @@ function progress(){
  const attempts=reviews.reduce((a,x)=>a+new Set(x.ids).size,0);
  const hits=reviews.reduce((a,x)=>a+x.successful,0);
  const quality=attempts?'<strong class="quality-value">'+Math.round(100*hits/attempts)+'%</strong><p>'+hits+' из '+attempts+' слов успешно вспомнены в обе стороны на первом прогоне</p>':'<p>Пока нет проверок за этот период</p>';
- const history=profile.sessions.slice().reverse();
- const entries=history.slice(0,progressVisible).map(x=>{
-  const count=new Set(x.ids).size,expanded=openHistory.has(x.id),type=x.mode==='new'?'Новые слова':'Повторение';
-  return '<div class="progress-session">'+btn('<strong>'+dateText(x.at)+' · '+type+'</strong><small>'+count+' слов · '+x.successful+' в обе стороны · '+(expanded?'Скрыть':'Подробнее')+'</small>','history:'+encodeURIComponent(x.id),'progress-session-toggle')+
-  (expanded?'<div class="progress-session-detail">Успешно: '+(count?Math.round(100*x.successful/count):0)+'% · Дополнительные прогоны потребовались для '+(x.extraWords||0)+' слов. '+(x.mode==='new'?'Итог третьего обязательного прогона.':'Итог первого обязательного прогона.')+'</div>':'')+'</div>';
- }).join('');
  const metrics='<section class="panel"><h2>Мой словарь</h2><div class="progress-total"><small>Знакомых слов</small><strong>'+(learned+known)+' из '+total+'</strong></div>'+
   '<div class="progress-breakdown"><span>Выучил в WordScene <strong>'+learned+'</strong></span><span>Уже знал <strong>'+known+'</strong></span><span>Из них закреплено <strong>'+mastered+'</strong></span></div></section>';
  const rangeButtons=btn('30 дней','progressRange:30',progressRange==='30'?'primary':'secondary')+btn('Всё время','progressRange:all',progressRange==='all'?'primary':'secondary');
@@ -301,124 +287,61 @@ function progress(){
  shell('Мой прогресс',metrics+
   '<section class="panel"><h2>Сколько слов я выучил</h2><div class="progress-switch">'+rangeButtons+'</div>'+chart+'</section>'+
   '<section class="panel"><h2>Как хорошо я помню слова</h2><div class="progress-switch">'+qualityButtons+'</div>'+quality+'</section>'+
-  '<section class="panel"><h2>Мои занятия</h2>'+(entries||'<p class="reason">Завершённых занятий пока нет.</p>')+
-  (history.length>progressVisible?btn('Показать ещё','progressMore','secondary'):'')+'</section>'+btn('На главную','home','quiet'));
+  btn('На главную','home','quiet'));
 }
 function dictionaryView(){
  view='dictionary';const list=dictionary.filter(w=>(w.en+' '+w.ru).toLowerCase().includes(query.toLowerCase()));
  shell('Словарь','<section class="panel"><input data-input="search" value="'+h(query)+'" placeholder="Поиск слова" /><div class="word-picker">'+list.map(w=>'<button class="word-option" data-action="word:'+h(w.en)+'"><span><b>'+h(w.en)+'</b> · '+h(w.ru)+'</span><small>'+({new:'Не изучено',known:'Предварительно знакомо',learning:'Закрепляется',mastered:'Закреплено'}[E.status(profile.words[w.en])]||'')+'</small></button>').join('')+'</div></section>'+btn('На главную','home','quiet'));
 }
 function wordDetail(id){
- const w=byId[id],p=profile.words[id],hist=p?.history||[];
-
- shell(h(w.en),'<section class="flash learn"><div class="ipa">'+h(w.ipa||'')+'</div><div class="translation">'+h(w.ru)+'</div>'+btn('▶ Произнести','say:'+h(w.en),'quiet')+'<div class="art">'+visual(w)+'</div><p>'+h(w.scene||'')+'</p><p class="reason">Статус: '+({new:'Не изучено',known:'Предварительно знакомо',learning:'Закрепляется',mastered:'Закреплено'}[E.status(p)]||'')+'</p></section><section class="panel"><h2>История вспоминания</h2>'+(hist.length?hist.slice(-12).reverse().map(x=>'<div class="history-row">'+dateText(x.at)+' · '+(x.ok?'Вспомнил в обе стороны':'Была ошибка')+'</div>').join(''):'<p>Проверок пока нет</p>')+'</section>'+btn('Словарь','dictionary','quiet'));
+ const w=byId[id],p=profile.words[id];
+ shell(h(w.en),'<section class="flash learn"><div class="ipa">'+h(w.ipa||'')+'</div><div class="translation">'+h(w.ru)+'</div>'+btn('▶ Произнести','say:'+h(w.en),'quiet')+'<div class="art">'+visual(w)+'</div><p>'+h(w.scene||'')+'</p><p class="reason">Статус: '+({new:'Не изучено',known:'Предварительно знакомо',learning:'Закрепляется',mastered:'Закреплено'}[E.status(p)]||'')+'</p></section>'+btn('Словарь','dictionary','quiet'));
 }
-
-function accountsScreen(){
- if(session)return notice('Заверши или отмени занятие перед сменой профиля');
- view='accounts';
- const ids=['local','child-1','child-2'];
- shell('Профили WordScene 17','<section class="panel"><p class="reason">У каждого профиля собственные сохранения. Переключение не переносит данные между детьми. Не используй один профиль одновременно на разных устройствах без синхронизации.</p>'+ids.map(id=>btn((id===currentAccount?'✓ ':'')+(id==='local'?'Локальный':id==='child-1'?'Ребёнок 1':'Ребёнок 2'),'account:'+id,id===currentAccount?'primary':'secondary',id===currentAccount)).join('')+'</section>'+(cloudEnabled?btn('Облако · локальный эмулятор','cloud','secondary'):'')+btn('Назад','home','quiet'));
+function childProfile(){
+ if(session)return notice('Сначала заверши или отмени занятие');
+ view='childProfile';const child=profile.child||{};
+ shell('Профиль','<section class="panel"><label for="childName">Как тебя зовут?</label><input id="childName" maxlength="60" value="'+h(child.name||'')+'" placeholder="Имя" /><label for="childAge">Сколько тебе лет?</label><input id="childAge" type="number" min="1" max="120" value="'+h(child.age??'')+'" placeholder="Возраст" />'+btn('Сохранить','saveChild','primary')+'</section>'+btn('На главную','home','quiet'));
 }
-function switchAccount(id){
- if(session)return notice('Нельзя менять профиль во время занятия');
- if(!['local','child-1','child-2'].includes(id))return notice('Неизвестный профиль');
- try{localStorage.setItem(ACCOUNT_KEY,id);window.location.reload()}catch(err){notice('Не удалось сменить профиль')}
-}
-function cloudScreen(){
- if(!cloudEnabled||warnLocked())return;
- view='cloud';
- const details=cloudConflict?'<p>Локальная и облачная копии различаются. Обе версии сохранены на этом устройстве.</p>'+
-  btn('Оставить локальную копию','cloudLocal','secondary')+
-  (cloudConflict.cloud?btn('Восстановить облачную копию','cloudRestore','secondary'):''):'';
- shell('Облако WordScene 17','<section class="panel"><p>Тестовый профиль: '+h(currentAccount)+'. Используй только тестовую учётную запись эмулятора.</p>'+
-  (cloud?btn('Синхронизировать','cloudSync','primary')+details+btn('Выйти из облака','cloudLogout','quiet'):
-   '<input id="cloudEmail" type="email" placeholder="Тестовый email" aria-label="Тестовый email"><input id="cloudPassword" type="password" placeholder="Тестовый пароль" aria-label="Тестовый пароль">'+btn('Войти','cloudLogin','primary'))+
-  '</section>'+btn('К профилям','accounts','quiet'));
-}
-async function cloudAction(action){
- if(!cloudEnabled||view!=='cloud'||warnLocked()||cloudBusy)return;
- if(!navigator.locks)return notice('Для облака нужен браузер с поддержкой блокировок вкладок');
- const email=document.getElementById('cloudEmail')?.value;
- const password=document.getElementById('cloudPassword')?.value;
- const choice=action==='cloudLocal'?'local':action==='cloudRestore'?'cloud':undefined;
- if(choice&&!window.confirm(choice==='local'?'Заменить облачную копию локальной?':'Восстановить облачную копию на этом устройстве?'))return;
- cloudBusy=true;
- try{
-  await navigator.locks.request(BINDINGS,async()=>{
-   if(action==='cloudLogout'){await cloud.close();cloud=null;cloudConflict=null;return}
-   if(action==='cloudLogin'){
-    const client=await (await import('./cloud-ui.mjs')).open(email,password);
-    try{
-     const bindings=JSON.parse(localStorage.getItem(BINDINGS)||'{}');
-     if((bindings[currentAccount]&&bindings[currentAccount]!==client.signedInUid)||
-        Object.entries(bindings).some(([id,uid])=>id!==currentAccount&&uid===client.signedInUid)){
-      notice('Учётная запись уже связана с другим профилем');
-      await client.close();return;
-     }
-     localStorage.setItem(BINDINGS,JSON.stringify({...bindings,[currentAccount]:client.signedInUid}));
-     cloud=client;
-    }catch(err){await client.close();throw err}
-    return;
-   }
-   if(!cloud||cloud.uid()!==cloud.signedInUid)return;
-   const stale=()=>storageFailure||!!session||localStorage.getItem(KEY)!==savedProfileRaw||
-    localStorage.getItem(ACTIVE)!==null;
-   const sync=window.WS17Sync.create({
-    storage:localStorage,uid:cloud.uid,local:()=>profile,transport:cloud.transport,active:stale,
-    restore:next=>{
-     if(stale()||cloud.uid()!==cloud.signedInUid)throw Error('Profile changed');
-     const before=profile;
-     profile=next;
-     if(!store()){profile=before;throw Error('Restore failed')}
-    }
-   });
-   const {status}=await sync.sync(choice,cloudConflict);
-   cloudConflict=status==='conflict'?sync.getConflict():null;
-   notice(({uploaded:'Копия отправлена и проверена',same:'Копии совпадают',restored:'Копия восстановлена',
-    conflict:'Нужно выбрать копию', 'session-active':'Профиль занят или изменён в другой вкладке',
-    'local-changed':'Копии изменились. Запусти синхронизацию снова'})[status]);
-  });
- }catch(err){notice('Облако недоступно или операция не завершена. Проверь подключение и повтори синхронизацию.')}
- finally{cloudBusy=false;if(storageFailure)home();else cloudScreen()}
+function saveChild(){
+ if(warnLocked())return;
+ const name=(document.getElementById('childName')?.value||'').trim(),raw=document.getElementById('childAge')?.value??'';
+ const age=raw===''?null:Number(raw);
+ if(name.length>60||(age!==null&&(!Number.isInteger(age)||age<1||age>120)))return notice('Проверь имя и возраст');
+ const old=profile;profile=E.clone(profile);profile.child={name,age};profile.revision++;
+ if(!store()){profile=old;return home()}
+ notice('Сохранено');home();
 }
 function recoverScreen(){
  view='recover';let backup;
- try{backup=accounts.inspect(currentAccount).backup}catch{}
+ try{backup=accounts.inspect('local').backup}catch{}
  shell('Восстановление прогресса','<section class="panel"><p>Основное сохранение повреждено или недоступно.</p><p class="reason">'+(backup?'Найдена резервная копия: '+Object.keys(backup.words).length+' слов, '+backup.sessions.length+' занятий.':'Корректная резервная копия не найдена. Исходные данные остаются нетронутыми.')+'</p>'+(backup?btn('Восстановить резервную копию','restoreBackup','primary'):'')+btn('Вернуться','home','quiet')+'</section>');
 }
 function restoreBackup(){
  if(!storageFailure||session)return notice('Восстановление недоступно');
- try{accounts.recover(currentAccount);window.location.reload()}
+ try{accounts.recover('local');window.location.reload()}
  catch(err){notice('Не удалось восстановить копию. Исходные данные не изменены.')}
 }
-function confirmCancel(){const yes=window.confirm('Отменить занятие? Все незавершённые результаты будут потеряны.');if(yes){session=null;selection=null;store();home()}else if(session){E.action(session);store();render()}}
-function render(){if(session){if(E.timedOut(session,Date.now()))return expire(new Error('30 минут бездействия'));if(session.stage==='complete'&&view!=='home')return completed();if(view==='learn')return learn();if(view==='recall')return recall()}if(view==='select')return selectionScreen();if(view==='manual'||view==='fill')return manualView(view==='fill');if(view==='themes')return topics();if(view==='sources')return sources();if(view==='progress')return progress();if(view==='dictionary')return dictionaryView();return home()}
+function confirmCancel(){const yes=window.confirm('Отменить занятие? Все незавершённые результаты будут потеряны.');if(yes){session=null;selection=null;store();home()}else if(session){render()}}
+function render(){if(session){if(E.timedOut(session,Date.now()))return expire(new Error('30 минут бездействия'));if(session.stage==='complete'&&view!=='home')return completed();if(view==='learn')return learn();if(view==='recall')return recall()}if(view==='select')return selectionScreen();if(view==='manual'||view==='fill')return manualView(view==='fill');if(view==='childProfile')return childProfile();if(view==='sources')return sources();if(view==='progress')return progress();if(view==='dictionary')return dictionaryView();return home()}
 function dispatch(act,el){
- if(cloudBusy)return;
- if(['cloudLogin','cloudLogout','cloudSync','cloudLocal','cloudRestore'].includes(act))return cloudAction(act);
- if(act==='cloud')return cloudScreen();
  if(storageFailure&&!['home','dictionary','progress','recover','restoreBackup'].includes(act)&&!act.startsWith('word:')&&!act.startsWith('say:'))return notice('Сохранение заблокировано. Никакие данные не перезаписываются.');
  if(act.startsWith('say:'))return speak(act.slice(4));
- if(act.startsWith('account:'))return switchAccount(act.slice(8));
- if(act.startsWith('topic:')){let v=act.slice(6);themeIds.has(v)?themeIds.delete(v):themeIds.add(v);return topics()}
  if(act.startsWith('manualTopic:')){const v=act.slice(12);manualThemes.has(v)?manualThemes.delete(v):manualThemes.add(v);return manualView(view==='fill')}
  if(act.startsWith('pick:')){const v=act.slice(5);manual.has(v)?manual.delete(v):manual.size<E.levelLimit(profile)&&manual.add(v);return manualView(view==='fill')}
  if(act.startsWith('progressRange:')){progressRange=act.slice(14);return progress()}
  if(act.startsWith('qualityRange:')){qualityRange=act.slice(13);return progress()}
- if(act.startsWith('history:')){const id=decodeURIComponent(act.slice(8));openHistory.has(id)?openHistory.delete(id):openHistory.add(id);return progress()}
- if(act==='progressMore'){progressVisible+=5;return progress()}
  if(act.startsWith('word:'))return wordDetail(act.slice(5));
  if(session&&E.timedOut(session,Date.now()))return expire();
+ if(session&&session.pausedAt!==null&&!['continue','cancel','stopPractice'].includes(act))return notice('Сначала продолжи занятие');
  switch(act){
- case 'home':return home();case 'accounts':return accountsScreen();case 'restoreBackup':return restoreBackup();case 'recover':return recoverScreen();case 'sources':return sources();case 'themes':return topics();case 'manual':manual.clear();manualThemes.clear();query='';return manualView();
- case 'auto':return makeSelection('auto');case 'themed':return makeSelection('theme');
+ case 'home':return home();case 'childProfile':return childProfile();case 'saveChild':return saveChild();case 'restoreBackup':return restoreBackup();case 'recover':return recoverScreen();case 'sources':return sources();case 'manual':manual.clear();manualThemes.clear();query='';return manualView();
+ case 'auto':return makeSelection('auto');
  case 'review':return review();case 'practice':return review('practice');case 'stopPractice':session=null;store();return home();case 'progress':return progress();case 'dictionary':query='';return dictionaryView();
  case 'known':return selectionGrade(true);case 'unknown':return selectionGrade(false);case 'stopSelection':return stopSelection();
  case 'reveal':showAnswer=true;return selectionScreen();
  case 'startManual':return startLearning([...manual],selection?.known||[]);
  case 'leaveFill':saveFamiliar(selection.known);selection=null;manual.clear();return home();
- case 'learnNext':try{E.learnNext(session);session.artHidden=false;if(!store())return home();showHelp=false;clockStarted=Date.now();return session.stage==='learn'?learn():recall()}catch(err){return expire(err)}
+ case 'learnNext':try{E.learnNext(session);session.artHidden=false;if(!store())return home();showHelp=false;return session.stage==='learn'?learn():recall()}catch(err){return expire(err)}
  case 'toggleArt':E.action(session);showHelp=!showHelp;session.artHidden=showHelp;store();return learn();
  case 'yes':return sendAnswer(true);case 'no':return showFeedback(true);
  case 'check':return showFeedback(false);
@@ -426,6 +349,7 @@ function dispatch(act,el){
  case 'advance':return sendAnswer(false);
  case 'help':E.action(session);showHelp=true;session.feedback.help=true;store();return recall();
  case 'pause':suspend();return storageFailure?home():render();
+  case 'continue':session.pausedAt=null;if(!store())return home();return render();
  case 'cancel':return confirmCancel();
  }
 }

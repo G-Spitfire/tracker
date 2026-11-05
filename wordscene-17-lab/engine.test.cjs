@@ -75,7 +75,7 @@ test('mastery is current: a mistake removes it until a new 30-day interval succe
  assert.equal(E.status({origin:'learned',schedule:r}),'mastered');
  assert.equal(r.masteredAt,firstMasteredAt);
 });
-test('inactivity and away deadlines are independent and earliest wins',()=>{
+test('single inactivity deadline: a pause never starts a second deadline',()=>{
  const base=t('2026-11-04');
  let s=E.start(E.empty(),'new',['a','b','c'],[],base);
  E.pause(s,base+20*60000);
@@ -86,4 +86,13 @@ test('inactivity and away deadlines are independent and earliest wins',()=>{
  E.pause(s,base+20*60000);
  assert.equal(E.timedOut(s,base+49*60000-1),false);
  assert.equal(E.timedOut(s,base+49*60000),true);
+});
+
+test('mandatory review rejects a partial queue and duplicate IDs',()=>{
+ const p=E.empty(),at=t('2026-11-05');
+ for(const id of ['apple','cat'])p.words[id]={origin:'known',schedule:E.newSchedule(t('2026-11-03')),history:[]};
+ assert.deepEqual(E.due(p,at),['apple','cat']);
+ assert.throws(()=>E.start(p,'review',['apple'],[],at),/every due word/);
+ assert.throws(()=>E.start(p,'review',['apple','apple'],[],at),/every due word/);
+ assert.equal(E.start(p,'review',['cat','apple'],[],at).ids.length,2);
 });

@@ -39,3 +39,48 @@ test('stale tab cannot replace a checkpoint when permanent progress is unchanged
  assert.throws(()=>a.save('child-1',p,{id:'second'},raw,null),/Session changed/);
  assert.equal(JSON.parse(storage.getItem(active)).id,'first');
 });
+
+test('strict persisted profile validation rejects malformed nested schedules without losing data',()=>{
+ const storage=memory(),a=A.create({storage,empty:E.empty,valid:A.validProfile});
+ const p=E.empty();p.words.apple={origin:'learned',schedule:{stage:'other',nextDay:'2026-11-05'},history:[]};
+ const k=a.keys('child-1');storage.setItem(k.main,JSON.stringify(p));
+ assert.equal(a.load('child-1').status,'corrupt');
+ assert.throws(()=>a.save('child-1',E.empty()),/recovery/);
+ assert.ok(storage.getItem(k.main).includes('other'));
+});
+test('valid current WordScene 17 profiles remain readable',()=>{
+ const storage=memory(),a=A.create({storage,empty:E.empty,valid:A.validProfile}),p=E.empty();
+ p.words.apple={origin:'known',schedule:E.newSchedule(Date.now()),history:[]};
+ a.save('child-1',p);
+ assert.equal(a.load('child-1').status,'ok');
+});
+
+test('missing primary with valid backup requires explicit recovery instead of new profile',()=>{
+ const storage=memory(),a=A.create({storage,empty:E.empty,valid:A.validProfile}),p=E.empty();
+ a.save('child-1',p);p.revision++;a.save('child-1',p);
+ const k=a.keys('child-1');storage.removeItem(k.main);
+ assert.equal(a.load('child-1').status,'recoverable');
+ assert.throws(()=>a.save('child-1',E.empty()),/recovery/);
+ a.recover('child-1');
+ assert.equal(a.load('child-1').status,'ok');
+});
+
+test('stale tab cannot overwrite a newer committed profile',()=>{
+ const storage=memory(),a=A.create({storage,empty:E.empty,valid:A.validProfile}),first=E.empty();
+ a.save('child-1',first);
+ const k=a.keys('child-1'),stale=storage.getItem(k.main);
+ const second=E.clone(first);second.revision=1;
+ a.save('child-1',second,null,stale,null);
+ assert.throws(()=>a.save('child-1',first,null,stale,null),/Profile changed/);
+ assert.equal(JSON.parse(storage.getItem(k.main)).revision,1);
+});
+test('failed main write preserves prior committed data and does not replace backup',()=>{
+ const base=memory(),p=E.empty(),a=A.create({storage:base,empty:E.empty,valid:A.validProfile});
+ a.save('child-1',p);
+ const keys=a.keys('child-1'),old=base.getItem(keys.main);
+ const failing={getItem:k=>base.getItem(k),setItem:(k,v)=>{if(k===keys.main)throw Error('Quota exceeded');base.setItem(k,v)},removeItem:k=>base.removeItem(k)};
+ const b=A.create({storage:failing,empty:E.empty,valid:A.validProfile}),next=E.clone(p);next.revision=1;
+ assert.throws(()=>b.save('child-1',next),/Quota exceeded/);
+ assert.equal(base.getItem(keys.main),old);
+ assert.equal(b.load('child-1').profile.revision,0);
+});

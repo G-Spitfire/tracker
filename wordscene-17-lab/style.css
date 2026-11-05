@@ -109,8 +109,3 @@ body:has(.paper){background:#fdf7ed;min-height:100dvh}
 .progress-line{display:block;width:100%;height:auto;max-height:220px;overflow:visible}
 .progress-line text{fill:#6d7180;font:12px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
 .quality-value{display:block;font-size:36px;color:#1673bd;margin:6px 0}
-.progress-session{border-top:1px solid #e9e6ee}
-.progress-session-toggle{display:block;width:100%;padding:13px 5px;border-radius:0;background:transparent;color:#2a2640;text-align:left}
-.progress-session-toggle strong,.progress-session-toggle small{display:block;font-size:14px;line-height:1.45}
-.progress-session-toggle small{font-size:12px;color:#686477;font-weight:400;margin-top:3px}
-.progress-session-detail{padding:0 5px 13px;color:#5f586d;font-size:13px;line-height:1.5}

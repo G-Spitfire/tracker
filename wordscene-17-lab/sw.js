@@ -1,5 +1,5 @@
-const CACHE='wordscene-17-lab-cache-v18';
-const ASSETS=['./','./index.html','./style.css','./style.css?v=shore-20261105','./paper-lighthouse.svg','./paper-leaves.svg','./paper-sand.svg','./paper-shore-base.svg','./app.js?v=18','./engine.js?v=18','./accounts.js','./sync.js','./cloud-firestore.js','./cloud-ui.mjs','./seed.js','./legacy-art.js','./manifest.webmanifest','../wordscene/content.js','../wordscene/topics.js','../wordscene/assets/mug-scene.png'];
+const CACHE='wordscene-17-lab-cache-v21';
+const ASSETS=['./','./index.html','./style.css','./style.css?v=shore-20261105','./paper-lighthouse.svg','./paper-leaves.svg','./paper-sand.svg','./paper-shore-base.svg','./app.js?v=21','./engine.js?v=21','./accounts.js?v=21','./seed.js','./legacy-art.js','./manifest.webmanifest','./content.js?v=21','./topics.js?v=21','./assets/mug-scene.png','./assets/icon-192.png','./assets/icon-512.png','./assets/icon-180.png'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('wordscene-17-lab-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
