@@ -29,8 +29,8 @@ body:has(.paper){background:#fdf7ed;min-height:100dvh}
 .paper-nav .paper-book-edge{stroke:#ffa600}
 .paper-profile,.paper-info summary{display:grid;place-items:center;width:44px;height:44px;padding:0;background:transparent;color:inherit}
 .paper-profile .paper-icon{width:32px;height:32px}
-.paper-hero{margin:-15px calc(-1 * max(15px,env(safe-area-inset-right))) -17px calc(-1 * max(15px,env(safe-area-inset-left)))}
-.paper-hero img{display:block;width:100%;height:auto;aspect-ratio:4.25;mask-image:linear-gradient(#000 70%,#000d 80%,#0006 92%,transparent)}
+.paper-hero{position:relative;z-index:0;margin:-15px calc(-1 * max(15px,env(safe-area-inset-right))) -9px calc(-1 * max(15px,env(safe-area-inset-left)))}
+.paper-hero img{display:block;width:100%;height:auto;aspect-ratio:729/160;object-fit:cover}
 .paper-card,.paper-nav button{background:linear-gradient(#fef9f1,var(--card));border:1px solid var(--card-edge);border-radius:21px;box-shadow:var(--card-shadow)}
 .paper-card{margin-bottom:10px}
 .paper-level{position:relative;margin-top:-1px;padding:9px 17px 12px}
