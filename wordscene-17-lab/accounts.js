@@ -33,7 +33,7 @@ function create({storage,empty,valid,keyFor}){
  const parse=raw=>{if(raw===null)return null;try{const v=JSON.parse(raw);return valid(v)?v:null}catch{return null}};
  function inspect(uid){
   const k=keys(uid),raw=storage.getItem(k.main),backupRaw=storage.getItem(k.backup),profile=parse(raw),backup=parse(backupRaw);
-  return {status:raw===null?'new':profile?'ok':backup?'recoverable':'corrupt',profile,backup,keys:k};
+  return {status:raw===null?(backupRaw===null?'new':backup?'recoverable':'corrupt'):profile?'ok':backup?'recoverable':'corrupt',profile,backup,keys:k};
  }
  function load(uid){
   const info=inspect(uid);
