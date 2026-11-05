@@ -76,8 +76,7 @@ function paperLevel(){
   '<p>Ты на самом высоком уровне.</p>';
  return '<section class="paper-card paper-level" aria-labelledby="paper-level">'+
   '<div class="paper-level-heading">'+paperIcon('cap')+'<div><h2 id="paper-level">Твой уровень</h2><div class="paper-rank">'+levelLabels[profile.level]+'</div></div>'+
-  '<details class="paper-info"><summary aria-label="Как повышается уровень">'+paperIcon('info')+'</summary>'+
-  '<p>Занятие подтверждается, когда все его слова проверены в обе стороны не раньше следующего дня.</p></details></div>'+detail+'</section>';
+  '</div>'+detail+'</section>';
 }
 function paperProgress(){
  const total=dictionary.length;
@@ -105,8 +104,7 @@ function home(openPicker=false){
  const repeat=pending.length?paperAction('Повторить сегодня: '+wordCount(pending.length),'review',blocked):
   errors.length?paperAction('Повторить ещё раз','practice',blocked,'Если хочешь, потренируй ещё '+errors.length+' '+(errors.length%100>=11&&errors.length%100<=14?'трудных слов':errors.length%10===1?'трудное слово':errors.length%10>=2&&errors.length%10<=4?'трудных слова':'трудных слов')):
   paperAction('На сегодня всё повторено','review',blocked||'Повторений на сегодня нет');
- shell('', '', '<main class="paper"><div class="paper-heading"><h1>'+paperIcon('book')+'WordScene</h1>'+
- '<button type="button" data-action="childProfile" class="paper-profile" aria-label="Настройки профиля" '+(session?'disabled':'')+'>'+paperIcon('settings')+'</button></div>'+
+ shell('', '', '<main class="paper"><div class="paper-heading"><h1>'+paperIcon('book')+'WordScene</h1></div>'+
  '<div class="paper-hero"><img src="./paper-lighthouse.svg" alt="" width="729" height="160"></div>'+
  paperLevel()+paperProgress()+'<div class="paper-actions">'+fresh+repeat+'</div>'+
  '<nav class="paper-nav" aria-label="Разделы">'+btn(paperIcon('progress')+'Мой прогресс','progress')+btn(paperIcon('book')+'Словарь','dictionary')+'</nav></main>'+
