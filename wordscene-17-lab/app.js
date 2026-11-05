@@ -94,8 +94,8 @@ function paperProgress(){
   '<div><dt class="learned">Изучено:</dt><dd>'+learned+' из '+total+'</dd></div>'+
   '<div><dt class="mastered">Закреплено:</dt><dd>'+mastered+' из '+total+'</dd></div></dl></section>';
 }
-function home(){
- view='home';
+function home(openPicker=false){
+ view=openPicker?'sources':'home';
  homeDay=E.day();
  const pending=E.due(profile),lastReview=profile.sessions.findLast(s=>s.mode==='review');
  const cleared=lastReview&&localStorage.getItem(PRACTICE)===lastReview.id;
@@ -109,11 +109,14 @@ function home(){
  '<button type="button" data-action="childProfile" class="paper-profile" aria-label="Настройки профиля" '+(session?'disabled':'')+'>'+paperIcon('settings')+'</button></div>'+
  '<div class="paper-hero"><img src="./paper-lighthouse.svg" alt="" width="729" height="160"></div>'+
  paperLevel()+paperProgress()+'<div class="paper-actions">'+fresh+repeat+'</div>'+
- '<nav class="paper-nav" aria-label="Разделы">'+btn(paperIcon('progress')+'Мой прогресс','progress')+btn(paperIcon('book')+'Словарь','dictionary')+'</nav></main>');
+ '<nav class="paper-nav" aria-label="Разделы">'+btn(paperIcon('progress')+'Мой прогресс','progress')+btn(paperIcon('book')+'Словарь','dictionary')+'</nav></main>'+
+ (openPicker?'<div class="paper-sheet-backdrop" data-action="closeSources"><section class="paper-sheet" role="dialog" aria-modal="true" aria-labelledby="picker-title"><div class="paper-sheet-handle" aria-hidden="true"></div><div class="paper-sheet-head"><h2 id="picker-title">Как будем учить?</h2>'+btn('×','closeSources','paper-sheet-close')+'</div>'+
+ btn('<span class="paper-sheet-symbol" aria-hidden="true">✦</span><span><strong>Автоматически</strong><small>Подберём слова для тебя</small></span>'+paperIcon('next'),'auto','paper-sheet-choice')+
+ btn('<span class="paper-sheet-symbol" aria-hidden="true">☷</span><span><strong>Выбрать самому</strong><small>Найди слова или выбери тему</small></span>'+paperIcon('next'),'manual','paper-sheet-choice')+'</section></div>':'') );
+ if(openPicker){const sheet=root.querySelector('.paper-sheet');const close=root.querySelector('.paper-sheet-close');close?.setAttribute('aria-label','Закрыть');close?.focus();let touchY=null;sheet?.addEventListener('click',event=>event.stopPropagation());sheet?.addEventListener('touchstart',event=>{touchY=event.touches[0]?.clientY??null},{passive:true});sheet?.addEventListener('touchend',event=>{if(touchY!==null&&event.changedTouches[0].clientY-touchY>75)home();touchY=null},{passive:true});}
 }
-function sources(){
- if(warnLocked())return;view='sources';shell('Как будем учить?','<section class="panel">'+btn('Автоматически','auto','primary')+btn('Выбрать самому','manual','secondary')+'</section>'+btn('На главную','home','quiet'));
 }
+function sources(){if(warnLocked())return;home(true)}
 function nextBatch(){
  batch=E.selectCandidates(dictionary,profile,{seen:selection.seen,skipped:selection.skipped||[],unknown:selection.unknown,themes:selection.themes,topic:T.forWord});
  selection.cursor=0;
@@ -323,7 +326,7 @@ function restoreBackup(){
  catch(err){notice('Не удалось восстановить копию. Исходные данные не изменены.')}
 }
 function confirmCancel(){const yes=window.confirm('Отменить занятие? Все незавершённые результаты будут потеряны.');if(yes){session=null;selection=null;store();home()}else if(session){render()}}
-function render(){if(session){if(E.timedOut(session,Date.now()))return expire(new Error('30 минут бездействия'));if(session.stage==='complete'&&view!=='home')return completed();if(view==='learn')return learn();if(view==='recall')return recall()}if(view==='select')return selectionScreen();if(view==='manual'||view==='fill')return manualView(view==='fill');if(view==='childProfile')return childProfile();if(view==='sources')return sources();if(view==='progress')return progress();if(view==='dictionary')return dictionaryView();return home()}
+function render(){if(session){if(E.timedOut(session,Date.now()))return expire(new Error('30 минут бездействия'));if(session.stage==='complete'&&view!=='home')return completed();if(view==='learn')return learn();if(view==='recall')return recall()}if(view==='select')return selectionScreen();if(view==='manual'||view==='fill')return manualView(view==='fill');if(view==='childProfile')return childProfile();if(view==='sources')return home(true);if(view==='progress')return progress();if(view==='dictionary')return dictionaryView();return home()}
 function dispatch(act,el){
  if(storageFailure&&!['home','dictionary','progress','recover','restoreBackup'].includes(act)&&!act.startsWith('word:')&&!act.startsWith('say:'))return notice('Сохранение заблокировано. Никакие данные не перезаписываются.');
  if(act.startsWith('say:'))return speak(act.slice(4));
@@ -335,7 +338,7 @@ function dispatch(act,el){
  if(session&&E.timedOut(session,Date.now()))return expire();
  if(session&&session.pausedAt!==null&&!['continue','cancel','stopPractice'].includes(act))return notice('Сначала продолжи занятие');
  switch(act){
- case 'home':return home();case 'childProfile':return childProfile();case 'saveChild':return saveChild();case 'restoreBackup':return restoreBackup();case 'recover':return recoverScreen();case 'sources':return sources();case 'manual':manual.clear();manualThemes.clear();query='';return manualView();
+ case 'home':return home();case 'closeSources':return home();case 'childProfile':return childProfile();case 'saveChild':return saveChild();case 'restoreBackup':return restoreBackup();case 'recover':return recoverScreen();case 'sources':return sources();case 'manual':manual.clear();manualThemes.clear();query='';return manualView();
  case 'auto':return makeSelection('auto');
  case 'review':return review();case 'practice':return review('practice');case 'stopPractice':session=null;store();return home();case 'progress':return progress();case 'dictionary':query='';return dictionaryView();
  case 'known':return selectionGrade(true);case 'unknown':return selectionGrade(false);case 'stopSelection':return stopSelection();
@@ -358,6 +361,7 @@ function refreshHomeDay(){
  if(!storageFailure&&!session&&view==='home'&&homeDay!==E.day())home();
 }
 function returnToCard(){if(session&&!storageFailure)resume();else refreshHomeDay()}
+document.addEventListener?.('keydown',event=>{if(view==='sources'&&event.key==='Escape')home()});
 document.addEventListener?.('visibilitychange',()=>{if(document.hidden)suspend();else returnToCard()});
 window.addEventListener?.('pagehide',suspend);
 window.addEventListener?.('pageshow',event=>{if(event.persisted)returnToCard()});
