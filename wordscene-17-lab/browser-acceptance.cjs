@@ -25,23 +25,16 @@ async function run(name, browserType, contextOptions) {
   assert.ok(resources.topics > 1,'topics not loaded: '+JSON.stringify(resources));
   assert.ok(resources.scriptSrcs.every(x=>!x.includes('/wordscene/')),'legacy scripts remain');
 
-  // The single child's settings survive reload.
-  await page.locator('[data-action="childProfile"]').click();
-  await page.locator('#childName').fill('Тестовый ребёнок');
-  await page.locator('#childAge').fill('9');
-  await page.locator('[data-action="saveChild"]').click();
-  await page.reload({waitUntil:'load'});
-  await page.locator('[data-action="childProfile"]').click();
-  assert.equal(await page.locator('#childName').inputValue(),'Тестовый ребёнок');
-  assert.equal(await page.locator('#childAge').inputValue(),'9');
-  await page.locator('[data-action="home"]').click();
+  // Profile settings are intentionally hidden on the home screen.
+  assert.equal(await page.locator('[data-action="childProfile"]').count(),0);
 
   // Manual learning is accessible with topic chips, without a separate topic flow.
   await page.locator('[data-action="sources"]').click();
   assert.equal(await page.locator('[data-action="themes"]').count(),0);
   await page.locator('[data-action="manual"]').click();
   assert.ok(await page.locator('[data-action^="manualTopic:"]').count()>1,'manual topic filters missing');
-  const picks=page.locator('[data-action^="pick:"]');
+  assert.ok(await page.locator('[data-action="manualTab:search"]').count()===1,'search tab missing');
+  const picks=page.locator('[data-action^="pick:"]:not([disabled])');
   assert.ok(await picks.count()>=3,'not enough selectable words');
   for(let i=0;i<3;i++)await picks.nth(i).click();
   await page.locator('[data-action="startManual"]').click();
@@ -54,7 +47,7 @@ async function run(name, browserType, contextOptions) {
    return JSON.parse(localStorage.getItem('wordscene-17-lab-v1'+suffix));
   });
   assert.equal(stored.sessions.length,1,'lesson not committed');
-  assert.equal(stored.child.name,'Тестовый ребёнок');
+  assert.equal(stored.child.name||'', '', 'hidden settings should not change the profile');
   assert.equal(Object.keys(stored.words).length,3);
   assert.ok(stored.words[Object.keys(stored.words)[0]].initialAnswers.every(a=>!Object.hasOwn(a,'ms')),'response latency persisted');
 
