@@ -54,3 +54,13 @@ test('valid current WordScene 17 profiles remain readable',()=>{
  a.save('child-1',p);
  assert.equal(a.load('child-1').status,'ok');
 });
+
+test('missing primary with valid backup requires explicit recovery instead of new profile',()=>{
+ const storage=memory(),a=A.create({storage,empty:E.empty,valid:A.validProfile}),p=E.empty();
+ a.save('child-1',p);p.revision++;a.save('child-1',p);
+ const k=a.keys('child-1');storage.removeItem(k.main);
+ assert.equal(a.load('child-1').status,'recoverable');
+ assert.throws(()=>a.save('child-1',E.empty()),/recovery/);
+ a.recover('child-1');
+ assert.equal(a.load('child-1').status,'ok');
+});
