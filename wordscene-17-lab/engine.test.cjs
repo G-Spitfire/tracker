@@ -57,3 +57,33 @@ test('error in spaced stage triggers repair and returns to 3 day cycle',()=>{
  r=E.scheduler(r,true,t('2026-11-12'));r=E.scheduler(r,true,t('2026-11-13'));
  assert.equal(r.stage,'spaced');assert.equal(r.nextDay,'2026-11-16');
 });
+test('mastery is current: a mistake removes it until a new 30-day interval succeeds',()=>{
+ let r=E.newSchedule(t('2026-11-01'));
+ for(let d=2;d<=8;d++)r=E.scheduler(r,true,t('2026-11-'+String(d).padStart(2,'0')));
+ for(const date of ['2026-11-11','2026-11-18','2026-12-02','2027-01-01'])r=E.scheduler(r,true,t(date));
+ const firstMasteredAt=r.masteredAt;
+ assert.equal(E.status({origin:'learned',schedule:r}),'mastered');
+ r=E.scheduler(r,false,t('2027-01-31'));
+ assert.equal(E.status({origin:'learned',schedule:r}),'learning');
+ r=E.scheduler(r,true,t('2027-02-01'));
+ r=E.scheduler(r,true,t('2027-02-02'));
+ assert.equal(r.stage,'spaced');
+ assert.equal(E.status({origin:'learned',schedule:r}),'learning');
+ for(const date of ['2027-02-05','2027-02-12','2027-02-26'])r=E.scheduler(r,true,t(date));
+ assert.equal(E.status({origin:'learned',schedule:r}),'learning');
+ r=E.scheduler(r,true,t('2027-03-28'));
+ assert.equal(E.status({origin:'learned',schedule:r}),'mastered');
+ assert.equal(r.masteredAt,firstMasteredAt);
+});
+test('inactivity and away deadlines are independent and earliest wins',()=>{
+ const base=t('2026-11-04');
+ let s=E.start(E.empty(),'new',['a','b','c'],[],base);
+ E.pause(s,base+20*60000);
+ assert.equal(E.timedOut(s,base+30*60000-1),false);
+ assert.equal(E.timedOut(s,base+30*60000),true);
+ s=E.start(E.empty(),'new',['a','b','c'],[],base);
+ E.action(s,base+19*60000);
+ E.pause(s,base+20*60000);
+ assert.equal(E.timedOut(s,base+49*60000-1),false);
+ assert.equal(E.timedOut(s,base+49*60000),true);
+});
