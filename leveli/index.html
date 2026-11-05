@@ -149,7 +149,7 @@ const trend=document.getElementById('school-trend');trend.replaceChildren();
 const bounds=quarterBounds(periodSelect.value);
 if(!bounds){trend.textContent='Период не выбран.';return}
 const [start,end]=bounds;
-const grades=rows.filter(g=>isMark(g.value??g.grade)&&!isFinal(g)&&periodOf(g)===periodSelect.value).map(g=>({subject:String(g.subject||g.subjectName||'').trim(),value:Number(g.value??g.grade),weight:S.weight(g),date:gradeDate(g)})).filter(g=>g.subject&&g.date).sort((a,b)=>a.date-b.date);
+const grades=rows.filter(g=>isMark(g.value)&&!isFinal(g)&&periodOf(g)===periodSelect.value).map(g=>({subject:String(g.subject||g.subjectName||'').trim(),value:Number(g.value??g.grade),weight:S.weight(g),date:gradeDate(g)})).filter(g=>g.subject&&g.date).sort((a,b)=>a.date-b.date);
 const days=new Map();for(const g of grades){const key=[g.date.getFullYear(),String(g.date.getMonth()+1).padStart(2,'0'),String(g.date.getDate()).padStart(2,'0')].join('-');if(!days.has(key))days.set(key,[]);days.get(key).push(g)}
 const points=[],bySubject=new Map();
 for(const [key,items] of days){for(const g of items){if(!bySubject.has(g.subject))bySubject.set(g.subject,[]);bySubject.get(g.subject).push(g)}
@@ -194,7 +194,7 @@ function renderOrientations(all,strong,attention){
 function renderGrades(){const detail=document.getElementById('school-subject-detail');detail.hidden=true;document.getElementById('school-overview').hidden=false;subjects.replaceChildren();const chosen=periodSelect.value;
 const rows=cachedGrades.filter(g=>periodOf(g)===chosen);
 const groups=new Map();
-for(const g of rows){const name=String(g.subject||g.subjectName||'').trim();if(!name)continue;if(!groups.has(name))groups.set(name,{regular:[],final:[]});const value=String(g.value??g.grade??'').trim();if(!isMark(value))continue;groups.get(name)[isFinal(g)?'final':'regular'].push({value:Number(value),weight:S.weight(g),officialWeight:g.weight??g.gradeWeight??g.coefficient??null,date:gradeDate(g),type:String(g.workType||g.type||g.description||'').trim(),category:workCategory(g),officialKind:S.officialKind(g)})}
+for(const g of rows){const name=String(g.subject||g.subjectName||'').trim();if(!name)continue;if(!groups.has(name))groups.set(name,{regular:[],final:[]});const value=String(g.value??'').trim();if(!isMark(value))continue;groups.get(name)[isFinal(g)?'final':'regular'].push({value:Number(value),weight:S.weight(g),officialWeight:g.weight??g.gradeWeight??g.coefficient??null,date:gradeDate(g),type:String(g.workType||g.type||g.description||'').trim(),category:workCategory(g),officialKind:S.officialKind(g)})}
 const all=[...groups].map(([name,g])=>({name,grades:g,avg:mean(g.regular),count:g.regular.length,stats:S.summary(g.regular,g.final.filter(v=>v.officialKind==='За четверть'))}));
 const eligible=all.filter(x=>x.avg!==null),baseline=eligible.length?eligible.reduce((n,x)=>n+x.avg,0)/eligible.length:null;
 const strong=all.filter(x=>x.count>=3&&x.avg>=baseline+0.3);
