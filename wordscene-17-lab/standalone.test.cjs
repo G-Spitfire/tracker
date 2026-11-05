@@ -17,7 +17,7 @@ test('WordScene 17 HTML and PWA have no runtime dependency on WordScene 16',()=>
  }
  assert.match(html,/\.\/content\.js\?v=21/);
  assert.match(html,/\.\/topics\.js\?v=21/);
- assert.match(sw,/wordscene-17-lab-cache-v\\d+/);
+ assert.match(sw,/wordscene-17-lab-cache-v\d+/);
  assert.match(manifest,/\.\/assets\/icon-192\.png/);
  assert.doesNotMatch(html,/Лаборатория/);
 });
