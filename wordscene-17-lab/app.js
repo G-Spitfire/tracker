@@ -296,12 +296,22 @@ function cardActions(){
   (session.mode==='practice'?btn('Закончить тренировку','stopPractice','quiet'):btn('Отменить занятие','cancel','quiet'));
 }
 function visual(w){if(window.WS17_illustration){try{return window.WS17_illustration(w.en)}catch(e){}}if(w.props&&C?.render){try{return C.render(w)}catch(e){}}return '<div class="simple-art">'+h(w.cue||w.en)+'</div>'}
-function learn(){
+function learn(focusWord=false){
  if(!session)return home();view='learn';const w=byId[session.ids[session.learnIndex]];
- shell('Запоминание · '+(session.learnIndex+1)+' / '+session.ids.length,'<section class="flash learn"><h2>'+h(w.en)+'</h2><div class="ipa">'+h(w.ipa||'')+'</div>'+btn('▶ Произнести','say:'+h(w.en),'quiet')+'<div class="translation">'+h(w.ru)+'</div>'+
- (!showHelp?'<div class="art">'+visual(w)+'</div><p class="scene">'+h(w.scene||'')+'</p>':'')+
+ const title='Запоминание · '+(session.learnIndex+1)+' / '+session.ids.length;
+ shell('', '', '<main class="ws-learn"><div class="ws-picker-header"><h1>'+title+'</h1></div>'+
+ '<section class="flash learn" tabindex="0" aria-label="Материалы слова"><h2 id="learn-word" tabindex="-1">'+h(w.en)+'</h2><div class="ipa">'+h(w.ipa||'')+'</div>'+btn('▶ Произнести','say:'+h(w.en),'quiet')+'<div class="translation">'+h(w.ru)+'</div>'+
+ (!showHelp?'<div class="art">'+visual(w)+'</div><p class="scene">'+h(w.scene||'')+'</p>':'')+'</section>'+
+ '<div class="ws-learn-actions"><p class="ws-learn-scroll-note" hidden aria-hidden="true">Прокрути карточку ↓</p>'+
  btn(showHelp?'Показать ассоциацию':'Представить без картинки','toggleArt','quiet')+
- btn(session.learnIndex===session.ids.length-1?'Начать проверку':'Дальше','learnNext','primary')+'</section>'+cardActions());
+ btn(session.learnIndex===session.ids.length-1?'Начать проверку':'Дальше','learnNext','primary')+
+ '<div class="ws-learn-session-actions">'+cardActions()+'</div></div></main>');
+ const card=root.querySelector?.('.learn'),cue=root.querySelector?.('.ws-learn-scroll-note');
+ if(card&&cue){
+  const updateCue=()=>{cue.hidden=card.scrollHeight-card.clientHeight-card.scrollTop<=3};
+  updateCue();card.addEventListener('scroll',updateCue,{passive:true});
+ }
+ if(focusWord){window.scrollTo?.(0,0);if(card)card.scrollTop=0;root.querySelector?.('#learn-word')?.focus?.({preventScroll:true})}
 }
 function recall(){
  if(!session)return home();view='recall';const item=session.items[session.index];if(!item)return completed();
@@ -456,7 +466,7 @@ function dispatch(act,el){
  case 'reveal':showAnswer=true;return selectionScreen();
  case 'startManual':return startLearning([...manual],selection?.known||[]);
  case 'leaveFill':saveFamiliar(selection.known);selection=null;manual.clear();return home();
- case 'learnNext':try{E.learnNext(session);session.artHidden=false;if(!store())return home();showHelp=false;return session.stage==='learn'?learn():recall()}catch(err){return expire(err)}
+ case 'learnNext':try{E.learnNext(session);session.artHidden=false;if(!store())return home();showHelp=false;return session.stage==='learn'?learn(true):recall()}catch(err){return expire(err)}
  case 'toggleArt':E.action(session);showHelp=!showHelp;session.artHidden=showHelp;store();return learn();
  case 'yes':return sendAnswer(true);case 'no':return showFeedback(true);
  case 'check':return showFeedback(false);

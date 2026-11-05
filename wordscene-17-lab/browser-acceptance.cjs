@@ -5,6 +5,7 @@ const path = require('node:path');
 const shots = path.join(__dirname,'audit-screenshots');
 fs.mkdirSync(shots,{recursive:true});
 const { chromium, webkit, devices } = require('playwright');
+const { checkMemorization } = require('./browser-memorization.cjs');
 
 const origin = process.env.WS17_TEST_ORIGIN || 'http://127.0.0.1:8765';
 const url = origin + '/wordscene-17-lab/';
@@ -124,7 +125,7 @@ async function run(name, browserType, contextOptions) {
   assert.ok((await page.locator('.ws-manual-total').innerText()).includes('3 / 10'));
   assert.equal(await page.locator('[data-action="startManual"]').isEnabled(),true);
   await page.locator('[data-action="startManual"]').click();
-  for(let i=0;i<3;i++)await page.locator('[data-action="learnNext"]').click();
+  await checkMemorization(page,snap);
   for(let i=0;i<18;i++)await page.locator('[data-action="yes"]').click();
   await page.getByText('Занятие завершено').waitFor();
   const stored=await page.evaluate(()=> {

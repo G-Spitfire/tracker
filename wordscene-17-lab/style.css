@@ -117,6 +117,28 @@ body:has(.paper){background:#fdf7ed;min-height:100dvh}
 .paper-sheet-choice>.paper-icon{width:20px;height:20px;color:#8093a4}
 @media(max-width:355px){.paper-sheet-choice{gap:9px;padding:12px 10px}.paper-sheet-symbol{width:38px;height:38px}.paper-sheet-choice strong{font-size:16px}}
 
+/* Memorization uses the existing Paper surfaces and actions. Only materials scroll. */
+html:has(.ws-learn),body:has(.ws-learn){background:#fdf7ed}
+.ws-learn{max-width:460px;height:100dvh;min-height:0;margin:0 auto;padding:max(12px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));display:flex;flex-direction:column;gap:10px;color:#0c1731}
+.ws-learn .ws-picker-header{flex:none;min-height:40px;margin:0}
+.ws-learn .learn{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:#8c7f70 #fdf8f0;margin:0;padding:16px;background:linear-gradient(#fef9f1,#fdf8f0);border:1px solid #fffaf3;border-radius:21px;box-shadow:0 2px 4px #98643124}
+.ws-learn .learn h2{margin:8px 0;font-size:clamp(30px,7vw,36px);color:#0c1731}
+.ws-learn .learn .ipa{color:#495463}
+.ws-learn .learn .translation{margin:4px 0;padding:8px 0;border-color:#e7dccd;color:#0c1731}
+.ws-learn .learn .art{min-height:130px;margin:8px auto}
+.ws-learn .learn .art svg,.ws-learn .learn .art img{max-height:220px}
+.ws-learn .learn .scene{margin:10px 0 4px;color:#495463;font-size:14px;line-height:1.55}
+.ws-learn button.quiet{min-height:44px;margin:0;padding:10px 12px;color:#103c85;background:transparent}
+.ws-learn .learn button.quiet{margin:4px auto}
+.ws-learn-actions{flex:none;display:grid;gap:6px}
+.ws-learn-actions>.primary{width:100%;min-height:var(--ws-action-min-height);border-radius:var(--ws-action-radius);background:var(--ws-action-blue);color:white;font-size:clamp(17px,5vw,22px)}
+.ws-learn-session-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:0 6px}
+.ws-learn-session-actions .reason{flex-basis:100%;margin:0;text-align:center;color:#495463}
+.ws-learn-session-actions>.primary{background:var(--ws-action-blue);color:white;min-height:44px}
+.ws-learn-scroll-note{margin:0;text-align:center;color:#495463;font-size:12px;line-height:18px}
+.ws-learn :focus-visible{outline-color:#103c85}
+@media(max-height:650px){.ws-learn{gap:6px;padding-top:max(8px,env(safe-area-inset-top));padding-bottom:max(8px,env(safe-area-inset-bottom))}.ws-learn .ws-picker-header{min-height:34px}.ws-learn .ws-picker-header h1{font-size:23px}.ws-learn .learn{padding:12px}.ws-learn .learn .art svg,.ws-learn .learn .art img{max-height:170px}.ws-learn-actions>.primary{min-height:52px}}
+
 /* Word selection · approved Paper layout, no decorative footer */
 html:has(.ws-picker),body:has(.ws-picker){background:#fdf7ed}
 .ws-picker{--ws-ink:#102d63;max-width:460px;min-height:100dvh;margin:0 auto;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) calc(28px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));color:var(--ws-ink);display:flex;flex-direction:column;align-items:stretch;gap:0}
