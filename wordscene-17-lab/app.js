@@ -9,7 +9,6 @@ const root=document.getElementById('app');
 let profile,session=null,selection=null,view='home',batch=[],showAnswer=false,showHelp=false,manual=new Set(),manualThemes=new Set(),query='',confirmed=false,storageFailure=false,savedProfileRaw=null,savedActiveRaw=null;
 let progressRange='30',qualityRange='28';
 const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
-const dateText=at=>new Date(at).toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
 const accounts=window.WS17Accounts.create({storage:localStorage,empty:E.empty,valid:window.WS17Accounts.validProfile,keyFor:()=>({main:KEY,active:ACTIVE,backup:'wordscene-17-lab-last-good-v1'})});
 function store(){
  if(storageFailure)return false;
@@ -277,12 +276,6 @@ function progress(){
  const attempts=reviews.reduce((a,x)=>a+new Set(x.ids).size,0);
  const hits=reviews.reduce((a,x)=>a+x.successful,0);
  const quality=attempts?'<strong class="quality-value">'+Math.round(100*hits/attempts)+'%</strong><p>'+hits+' из '+attempts+' слов успешно вспомнены в обе стороны на первом прогоне</p>':'<p>Пока нет проверок за этот период</p>';
- const history=profile.sessions.slice().reverse();
- const entries=history.slice(0,progressVisible).map(x=>{
-  const count=new Set(x.ids).size,expanded=openHistory.has(x.id),type=x.mode==='new'?'Новые слова':'Повторение';
-  return '<div class="progress-session">'+btn('<strong>'+dateText(x.at)+' · '+type+'</strong><small>'+count+' слов · '+x.successful+' в обе стороны · '+(expanded?'Скрыть':'Подробнее')+'</small>','history:'+encodeURIComponent(x.id),'progress-session-toggle')+
-  (expanded?'<div class="progress-session-detail">Успешно: '+(count?Math.round(100*x.successful/count):0)+'% · Дополнительные прогоны потребовались для '+(x.extraWords||0)+' слов. '+(x.mode==='new'?'Итог третьего обязательного прогона.':'Итог первого обязательного прогона.')+'</div>':'')+'</div>';
- }).join('');
  const metrics='<section class="panel"><h2>Мой словарь</h2><div class="progress-total"><small>Знакомых слов</small><strong>'+(learned+known)+' из '+total+'</strong></div>'+
   '<div class="progress-breakdown"><span>Выучил в WordScene <strong>'+learned+'</strong></span><span>Уже знал <strong>'+known+'</strong></span><span>Из них закреплено <strong>'+mastered+'</strong></span></div></section>';
  const rangeButtons=btn('30 дней','progressRange:30',progressRange==='30'?'primary':'secondary')+btn('Всё время','progressRange:all',progressRange==='all'?'primary':'secondary');
@@ -290,19 +283,16 @@ function progress(){
  shell('Мой прогресс',metrics+
   '<section class="panel"><h2>Сколько слов я выучил</h2><div class="progress-switch">'+rangeButtons+'</div>'+chart+'</section>'+
   '<section class="panel"><h2>Как хорошо я помню слова</h2><div class="progress-switch">'+qualityButtons+'</div>'+quality+'</section>'+
-  '<section class="panel"><h2>Мои занятия</h2>'+(entries||'<p class="reason">Завершённых занятий пока нет.</p>')+
-  (history.length>progressVisible?btn('Показать ещё','progressMore','secondary'):'')+'</section>'+btn('На главную','home','quiet'));
+  btn('На главную','home','quiet'));
 }
 function dictionaryView(){
  view='dictionary';const list=dictionary.filter(w=>(w.en+' '+w.ru).toLowerCase().includes(query.toLowerCase()));
  shell('Словарь','<section class="panel"><input data-input="search" value="'+h(query)+'" placeholder="Поиск слова" /><div class="word-picker">'+list.map(w=>'<button class="word-option" data-action="word:'+h(w.en)+'"><span><b>'+h(w.en)+'</b> · '+h(w.ru)+'</span><small>'+({new:'Не изучено',known:'Предварительно знакомо',learning:'Закрепляется',mastered:'Закреплено'}[E.status(profile.words[w.en])]||'')+'</small></button>').join('')+'</div></section>'+btn('На главную','home','quiet'));
 }
 function wordDetail(id){
- const w=byId[id],p=profile.words[id],hist=p?.history||[];
-
- shell(h(w.en),'<section class="flash learn"><div class="ipa">'+h(w.ipa||'')+'</div><div class="translation">'+h(w.ru)+'</div>'+btn('▶ Произнести','say:'+h(w.en),'quiet')+'<div class="art">'+visual(w)+'</div><p>'+h(w.scene||'')+'</p><p class="reason">Статус: '+({new:'Не изучено',known:'Предварительно знакомо',learning:'Закрепляется',mastered:'Закреплено'}[E.status(p)]||'')+'</p></section><section class="panel"><h2>История вспоминания</h2>'+(hist.length?hist.slice(-12).reverse().map(x=>'<div class="history-row">'+dateText(x.at)+' · '+(x.ok?'Вспомнил в обе стороны':'Была ошибка')+'</div>').join(''):'<p>Проверок пока нет</p>')+'</section>'+btn('Словарь','dictionary','quiet'));
+ const w=byId[id],p=profile.words[id];
+ shell(h(w.en),'<section class="flash learn"><div class="ipa">'+h(w.ipa||'')+'</div><div class="translation">'+h(w.ru)+'</div>'+btn('▶ Произнести','say:'+h(w.en),'quiet')+'<div class="art">'+visual(w)+'</div><p>'+h(w.scene||'')+'</p><p class="reason">Статус: '+({new:'Не изучено',known:'Предварительно знакомо',learning:'Закрепляется',mastered:'Закреплено'}[E.status(p)]||'')+'</p></section>'+btn('Словарь','dictionary','quiet'));
 }
-
 function childProfile(){
  if(session)return notice('Сначала заверши или отмени занятие');
  view='childProfile';const child=profile.child||{};
