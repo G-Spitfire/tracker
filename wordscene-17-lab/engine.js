@@ -43,15 +43,15 @@ function start(p,mode,ids,known=[],at=Date.now()){
  const all=unique(ids);
  return {id:'ws17-'+at+'-'+Math.random().toString(36).slice(2,10),mode,ids:all,known:unique(known),stage:mode==='new'?'learn':'recall',learnIndex:0,round:1,extra:0,items:queue(all),index:0,answers:[],hard:[],roundHard:[],startedAt:at,lastActionAt:at,pausedAt:null,openedAt:at,locked:false};
 }
-function remainingTime(s,now){const inactive=30*MS-(now-s.lastActionAt);const away=s.pausedAt===null?Infinity:30*MS-(now-s.pausedAt);return Math.max(0,Math.min(inactive,away))}
+function remainingTime(s,now){return Math.max(0,30*MS-(now-s.lastActionAt))}
 function timedOut(s,now){return remainingTime(s,now)===0}
 function action(s,at=Date.now()){if(timedOut(s,at))throw Error('Session expired');s.lastActionAt=at;s.pausedAt=null}
 function pause(s,at=Date.now()){if(timedOut(s,at))throw Error('Session expired');if(s.pausedAt===null)s.pausedAt=at}
 function learnNext(s,at=Date.now()){action(s,at);if(s.stage!=='learn')throw Error('Not learning');if(s.learnIndex<s.ids.length-1)s.learnIndex++;else{s.stage='recall';s.items=queue(s.ids);s.index=0}}
-function answer(s,ok,at=Date.now(),ms=null,checked=false){
+function answer(s,ok,at=Date.now(),_unusedMs=null,checked=false){
  action(s,at);if(s.stage!=='recall'||s.index>=s.items.length)throw Error('No active recall');
  const {id,dir}=s.items[s.index];
- if(s.mode!=='practice')s.answers.push({id,dir,round:s.round,extra:s.extra,ok:!!ok,at,ms:Number.isFinite(ms)&&ms>=0?ms:null,checked});
+ if(s.mode!=='practice')s.answers.push({id,dir,round:s.round,extra:s.extra,ok:!!ok,at,checked});
  if(!ok&&!s.roundHard.includes(id))s.roundHard.push(id);
  s.index++;
  if(s.index<s.items.length)return {done:false};
