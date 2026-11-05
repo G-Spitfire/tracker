@@ -16,7 +16,7 @@ let profile,session=null,selection=null,view='home',batch=[],showAnswer=false,sh
 let progressRange='30',qualityRange='28',progressVisible=5;const openHistory=new Set();
 const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const dateText=at=>new Date(at).toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
-const accounts=window.WS17Accounts.create({storage:localStorage,empty:E.empty,valid:p=>p?.version===17&&p.words&&typeof p.words==='object'&&Array.isArray(p.sessions),keyFor:id=>({main:'wordscene-17-lab-v1'+(id==='local'?'':'-account-'+id),active:'wordscene-17-lab-active-v1'+(id==='local'?'':'-account-'+id),backup:'wordscene-17-lab-last-good-v1'+(id==='local'?'':'-account-'+id)})});
+const accounts=window.WS17Accounts.create({storage:localStorage,empty:E.empty,valid:window.WS17Accounts.validProfile,keyFor:id=>({main:'wordscene-17-lab-v1'+(id==='local'?'':'-account-'+id),active:'wordscene-17-lab-active-v1'+(id==='local'?'':'-account-'+id),backup:'wordscene-17-lab-last-good-v1'+(id==='local'?'':'-account-'+id)})});
 function store(){
  if(storageFailure)return false;
  try{accounts.save(currentAccount,profile,session,savedProfileRaw,savedActiveRaw);savedProfileRaw=localStorage.getItem(KEY);savedActiveRaw=localStorage.getItem(ACTIVE);return true}
