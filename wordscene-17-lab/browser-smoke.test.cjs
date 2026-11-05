@@ -132,7 +132,7 @@ test('My Progress retains aggregates and periods without detailed lesson history
  assert.match(b.root.html,/class="progress-line"/);
 });
 
-test('profile controls stay hidden without altering stored data',()=>{
+test('profile controls are absent without altering stored data',()=>{
  const b=boot();
  assert.doesNotMatch(b.root.html,/data-action="childProfile"/);
  assert.equal(b.map.has('wordscene-17-lab-v1'),false);
@@ -151,7 +151,7 @@ test('legacy selected child data is reused without creating an empty local save'
  assert.doesNotMatch(b.root.html,/Ребёнок 1|Ребёнок 2|Переключить профиль/);
 });
 
-test('Paper home hides level info and profile gear while retaining navigation',()=>{
+test('Paper home has no profile gear and retains navigation',()=>{
  const b=boot();
  assert.doesNotMatch(b.root.html,/data-action="childProfile"|class="paper-info"/);
  assert.match(b.root.html,/Твой уровень/);

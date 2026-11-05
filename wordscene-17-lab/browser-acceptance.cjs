@@ -30,7 +30,7 @@ async function run(name, browserType, contextOptions) {
   assert.ok(resources.topics > 1,'topics not loaded: '+JSON.stringify(resources));
   assert.ok(resources.scriptSrcs.every(x=>!x.includes('/wordscene/')),'legacy scripts remain');
 
-  // Profile settings are intentionally hidden on the home screen.
+  // The retired profile editor is absent; historical stored fields remain intact.
   assert.equal(await page.locator('[data-action="childProfile"]').count(),0);
 
   // Manual picker: real layout, conditional scroll affordances and cross-topic selections.
@@ -134,7 +134,7 @@ async function run(name, browserType, contextOptions) {
    return JSON.parse(localStorage.getItem('wordscene-17-lab-v1'+suffix));
   });
   assert.equal(stored.sessions.length,1,'lesson not committed');
-  assert.equal(stored.child?.name||'', '', 'hidden settings should not change the profile');
+  assert.equal(stored.child?.name||'', '', 'removing the editor must not change historical profile data');
   assert.equal(Object.keys(stored.words).length,3);
   assert.ok(stored.words[Object.keys(stored.words)[0]].initialAnswers.every(a=>!Object.hasOwn(a,'ms')),'response latency persisted');
 
