@@ -9,7 +9,7 @@ const clone=x=>JSON.parse(JSON.stringify(x));
 const empty=()=>({version:17,revision:0,level:'novice',words:{},sessions:[],levels:[],createdAt:Date.now()});
 function word(p,id){return p.words[id]||null}
 function schedule(p,id){return word(p,id)?.schedule||null}
-function due(p,now=Date.now()){const today=day(now),yesterday=addDays(today,-1);return Object.keys(p.words).filter(id=>schedule(p,id)?.nextDay<=today).sort((a,b)=>{const rank=id=>{const w=p.words[id],r=w.schedule;if(w.firstLearnedAt&&day(w.firstLearnedAt)===yesterday&&!(w.history||[]).length)return 0;if(w.needsWork||r.stage==='repair')return 1;if(r.stage==='daily')return 2;return 3};return rank(a)-rank(b)||schedule(p,a).nextDay.localeCompare(schedule(p,b).nextDay)||a.localeCompare(b)})}
+function due(p,now=Date.now()){const today=day(now);return Object.keys(p.words).filter(id=>schedule(p,id)?.nextDay<=today).sort((a,b)=>{const rank=id=>{const w=p.words[id],r=w.schedule;if(w.firstLearnedAt&&!(w.history||[]).length)return 0;if(w.needsWork||r.stage==='repair')return 1;if(r.stage==='daily')return 2;return 3};return rank(a)-rank(b)||schedule(p,a).nextDay.localeCompare(schedule(p,b).nextDay)||a.localeCompare(b)})}
 function levelLimit(p){return LIMIT[p.level]??15}
 function selectCandidates(words,p,opts={}){
  const excluded=new Set([...(opts.seen||[]),...(opts.skipped||[])]),selected=new Set(opts.unknown||[]);
