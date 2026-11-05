@@ -115,7 +115,6 @@ function pauseTime(){
 const levelLabels={novice:'Новичок',experienced:'Опытный',pro:'Профи'};
 const paperIcons={
  book:'<path fill="#fff2cf" stroke="#ffa600" d="M12 5C9 2 5 2 2 3v15c4-1 7-1 10 2 3-3 6-3 10-2V3c-3-1-7-1-10 2v15"/><path stroke="#0877ff" d="M22 3v15c-4-1-7-1-10 2" class="paper-book-edge"/><path stroke="#efc16d" stroke-width=".65" d="M4 7q3-.6 6 1M4 10q3-.6 6 1M4 13q3-.6 6 1m4-6q3-1.6 6-1m-6 4q3-1.6 6-1m-6 4q3-1.6 6-1"/>',
- settings:'<path d="M10 2h4l.6 3 2.1.9 2.6-1.6 2.8 2.8-1.6 2.6.9 2.1 3 .6v4l-3 .6-.9 2.1 1.6 2.6-2.8 2.8-2.6-1.6-2.1.9-.6 3h-4l-.6-3-2.1-.9-2.6 1.6-2.8-2.8 1.6-2.6-.9-2.1-3-.6v-4l3-.6.9-2.1-1.6-2.6 2.8-2.8 2.6 1.6 2.1-.9Z" transform="translate(2 0) scale(.82)"/><circle cx="12" cy="11.5" r="2.8"/>',
  cap:'<path fill="#005cae" stroke="none" d="M5 11h14v7q-7 5-14 0z"/><path fill="#007bd8" stroke="none" d="m0 10 12-6 12 6-12 6z"/><path stroke="#ffa600" d="m12 10-8 4v6"/>',
  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/>',
  plus:'<path d="M12 3v18M3 12h18"/>',
@@ -418,20 +417,6 @@ function wordDetail(id){
  const w=byId[id],p=profile.words[id];
  shell(h(w.en),'<section class="flash learn"><div class="ipa">'+h(w.ipa||'')+'</div><div class="translation">'+h(w.ru)+'</div>'+btn('▶ Произнести','say:'+h(w.en),'quiet')+'<div class="art">'+visual(w)+'</div><p>'+h(w.scene||'')+'</p><p class="reason">Статус: '+({new:'Не изучено',known:'Предварительно знакомо',learning:'Закрепляется',mastered:'Закреплено'}[E.status(p)]||'')+'</p></section>'+btn('Словарь','dictionary','quiet'));
 }
-function childProfile(){
- if(session)return notice('Сначала заверши или отмени занятие');
- view='childProfile';const child=profile.child||{};
- shell('Профиль','<section class="panel"><label for="childName">Как тебя зовут?</label><input id="childName" maxlength="60" value="'+h(child.name||'')+'" placeholder="Имя" /><label for="childAge">Сколько тебе лет?</label><input id="childAge" type="number" min="1" max="120" value="'+h(child.age??'')+'" placeholder="Возраст" />'+btn('Сохранить','saveChild','primary')+'</section>'+btn('На главную','home','quiet'));
-}
-function saveChild(){
- if(warnLocked())return;
- const name=(document.getElementById('childName')?.value||'').trim(),raw=document.getElementById('childAge')?.value??'';
- const age=raw===''?null:Number(raw);
- if(name.length>60||(age!==null&&(!Number.isInteger(age)||age<1||age>120)))return notice('Проверь имя и возраст');
- const old=profile;profile=E.clone(profile);profile.child={name,age};profile.revision++;
- if(!store()){profile=old;return home()}
- notice('Сохранено');home();
-}
 function recoverScreen(){
  view='recover';let backup;
  try{backup=accounts.inspect('local').backup}catch{}
@@ -443,7 +428,7 @@ function restoreBackup(){
  catch(err){notice('Не удалось восстановить копию. Исходные данные не изменены.')}
 }
 function confirmCancel(){const yes=window.confirm('Отменить занятие? Все незавершённые результаты будут потеряны.');if(yes){session=null;selection=null;store();home()}else if(session){render()}}
-function render(){if(session){if(E.timedOut(session,Date.now()))return expire(new Error('30 минут бездействия'));if(session.stage==='complete'&&view!=='home')return completed();if(view==='learn')return learn();if(view==='recall')return recall()}if(view==='select')return selectionScreen();if(view==='manual'||view==='fill')return manualView(view==='fill');if(view==='childProfile')return childProfile();if(view==='sources')return home(true);if(view==='progress')return progress();if(view==='dictionary')return dictionaryView();return home()}
+function render(){if(session){if(E.timedOut(session,Date.now()))return expire(new Error('30 минут бездействия'));if(session.stage==='complete'&&view!=='home')return completed();if(view==='learn')return learn();if(view==='recall')return recall()}if(view==='select')return selectionScreen();if(view==='manual'||view==='fill')return manualView(view==='fill');if(view==='sources')return home(true);if(view==='progress')return progress();if(view==='dictionary')return dictionaryView();return home()}
 function dispatch(act,el){
  if(storageFailure&&!['home','dictionary','progress','recover','restoreBackup'].includes(act)&&!act.startsWith('word:')&&!act.startsWith('say:'))return notice('Сохранение заблокировано. Никакие данные не перезаписываются.');
  if(act.startsWith('say:'))return speak(act.slice(4));
@@ -459,7 +444,7 @@ function dispatch(act,el){
  if(session&&E.timedOut(session,Date.now()))return expire();
  if(session&&session.pausedAt!==null&&!['continue','cancel','stopPractice'].includes(act))return notice('Сначала продолжи занятие');
  switch(act){
- case 'home':return home();case 'closeSources':return home();case 'childProfile':return childProfile();case 'saveChild':return saveChild();case 'restoreBackup':return restoreBackup();case 'recover':return recoverScreen();case 'sources':return sources();case 'manual':manual.clear();manualThemes.clear();manualThemes.add('food');manualMode='topics';manualShowAll=false;manualSummaryOpen=false;query='';manualSearchBaseHeight=0;return manualView();
+ case 'home':return home();case 'closeSources':return home();case 'restoreBackup':return restoreBackup();case 'recover':return recoverScreen();case 'sources':return sources();case 'manual':manual.clear();manualThemes.clear();manualThemes.add('food');manualMode='topics';manualShowAll=false;manualSummaryOpen=false;query='';manualSearchBaseHeight=0;return manualView();
  case 'auto':return makeSelection('auto');
  case 'review':return review();case 'practice':return review('practice');case 'stopPractice':session=null;store();return home();case 'progress':return progress();case 'dictionary':query='';return dictionaryView();
  case 'known':return selectionGrade(true);case 'unknown':return selectionGrade(false);case 'stopSelection':return stopSelection();
