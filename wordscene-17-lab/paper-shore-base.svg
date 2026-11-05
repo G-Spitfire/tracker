@@ -1,9 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 100" preserveAspectRatio="none">
- <defs>
-  <linearGradient id="sand" x2="0" y2="1"><stop stop-color="#ffdfa0"/><stop offset="1" stop-color="#ffedbc"/></linearGradient>
-  <linearGradient id="leaves" x2="1" y2="1"><stop stop-color="#8fbb59"/><stop offset="1" stop-color="#abc96d"/></linearGradient>
- </defs>
- <path fill="url(#sand)" d="M0 37Q37 49 73 68T166 88Q240 96 300 86T392 46Q431 19 460 9V100H0Z"/>
- <path fill="url(#leaves)" d="M0 31Q15 48 28 69T83 100H0Z"/>
- <path fill="#f6d18f" d="M460 31Q430 47 415 69T365 100H460Z"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 100" preserveAspectRatio="none"><defs><linearGradient id="sand" x2="0" y2="1"><stop offset=".22" stop-color="#ffedbc" stop-opacity="0"/><stop offset="1" stop-color="#ffedbc"/></linearGradient></defs><path fill="url(#sand)" d="M0 0H460V100H0Z"/></svg>
