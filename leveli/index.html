@@ -51,6 +51,11 @@ section[hidden],[hidden]{display:none!important}
 .subject-row__hint{font-size:12px;color:#837790}
 .choice-buttons button{min-height:38px;cursor:pointer}
 #school-status{line-height:1.5}
+#school-sync-freshness{font-size:11px;color:#706680;margin:0 0 12px;display:flex;align-items:center;gap:6px;line-height:1.4}
+#school-sync-freshness::before{content:'';display:inline-block;flex:none;width:7px;height:7px;border-radius:50%;background:#9990aa}
+#school-sync-freshness[data-state="ok"]::before{background:#4f9a6d}
+#school-sync-freshness[data-state="failed"]{color:#a03143}
+#school-sync-freshness[data-state="failed"]::before{background:#c94a54}
 @media(prefers-reduced-motion:reduce){.subject-row{transition:none}}
 
 :root{color:#3c276b;background:#f3efff}
@@ -101,7 +106,7 @@ section[hidden],[hidden]{display:none!important}
 </style></head><body><div class="app"><main class="content" id="main">
 <section data-page="home"><header class="school-header"><div><div class="eyebrow">ЛЕВЕЛИ</div><h1 id="home-greeting">Привет!</h1><p>Мои оценки и успеваемость</p></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
 <article class="card" id="school-login"><h2>Войди, чтобы увидеть оценки</h2><p>Оценки загружаются из электронного дневника.</p><form id="school-form"><label>Почта<input id="school-email" type="email" autocomplete="username" required></label><label>Пароль<input id="school-password" type="password" autocomplete="current-password" required></label><button class="btn" type="submit">Войти</button></form></article>
-<div id="school-results" hidden><div id="school-subject-detail" class="card" hidden></div><div id="school-overview">
+<div id="school-results" hidden><p id="school-sync-freshness" data-state="unknown" aria-live="polite">Когда проверялся дневник — неизвестно</p><div id="school-subject-detail" class="card" hidden></div><div id="school-overview">
 <article class="card forecast-card"><div class="card-heading"><h2>Как у меня дела?</h2><span class="quarter-label" id="school-quarter-label">Текущая четверть</span></div>
 <div class="forecast-layout"><div class="forecast-chart"><svg id="school-donut" viewBox="0 0 200 200" role="img" aria-label="Распределение прогнозов по предметам"></svg><div class="forecast-center"><strong id="school-overall">—</strong><span>Средний балл</span></div></div>
 <div id="school-forecast-legend" class="forecast-legend"></div></div><div id="school-analytics" class="muted"></div><p id="school-status" class="muted">Загрузка…</p></article>
@@ -131,7 +136,18 @@ const S=window.LeveliSchool;
 const isMark=v=>S.score(v)!==null;
 const isFinal=g=>!!S.officialKind(g);
 let cachedGrades=[],loadGeneration=0;
-let forecastFilter=null;function clearSchool(){cachedGrades=[];subjects.replaceChildren();for(const id of ['school-analytics','school-trend','school-subject-detail','school-period-buttons','school-filter-buttons','school-forecast-legend','school-good-list','school-attention-list'])document.getElementById(id).replaceChildren();document.getElementById('school-donut').replaceChildren();document.getElementById('school-subject-detail').hidden=true;document.getElementById('school-overview').hidden=false;periodSelect.replaceChildren();subjectFilter.value='all';forecastFilter=null;status.textContent='';document.getElementById('school-overall').textContent='—';document.getElementById('school-trend-change').textContent='';}
+const freshness=document.getElementById('school-sync-freshness');
+function renderFreshness(data){
+ const sync=data?.sync;
+ const raw=sync?.lastDiarySuccessAt;
+ const value=typeof raw==='string'?new Date(raw):null;
+ const valid=value&&!Number.isNaN(value.getTime())&&value.getTime()<=Date.now()+5*60*1000;
+ const failedRetry=Number(sync?.failedRetryCount);
+ const isFailed=Number.isInteger(failedRetry)&&failedRetry>=1;
+ freshness.dataset.state=isFailed?'failed':valid?'ok':'unknown';
+ freshness.textContent=(valid?'Дневник проверен: '+value.toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'Когда проверялся дневник — неизвестно')+(isFailed?' · повторная попытка обновления не удалась':'');
+}
+let forecastFilter=null;function clearSchool(){cachedGrades=[];subjects.replaceChildren();for(const id of ['school-analytics','school-trend','school-subject-detail','school-period-buttons','school-filter-buttons','school-forecast-legend','school-good-list','school-attention-list'])document.getElementById(id).replaceChildren();document.getElementById('school-donut').replaceChildren();document.getElementById('school-subject-detail').hidden=true;document.getElementById('school-overview').hidden=false;periodSelect.replaceChildren();subjectFilter.value='all';forecastFilter=null;renderFreshness(null);status.textContent='';document.getElementById('school-overall').textContent='—';document.getElementById('school-trend-change').textContent='';}
 const periodSelect=document.getElementById('school-period');
 const subjectFilter=document.getElementById('school-filter'),analytics=document.getElementById('school-analytics');
 const gradeDate=S.date,periodOf=S.period;
@@ -232,12 +248,12 @@ if(key<=20270404)return '2026-3';
 return '2026-4'}
 const m=now.getMonth()+1;const q=m>=9&&m<=10?1:m>=11?2:m<=3?3:4;return year+'-'+q}
 function applySchoolData(data){if(data.schemaVersion!==1||data.source!=='petersburgedu'||!Array.isArray(data.grades))throw Error('Неизвестный формат школьных данных.');
-cachedGrades=data.grades.filter(g=>g&&typeof g==='object').map(g=>({...g,value:S.mark(g)}));updateIdentity(auth.currentUser,cachedGrades);
+cachedGrades=data.grades.filter(g=>g&&typeof g==='object').map(g=>({...g,value:S.mark(g)}));renderFreshness(data);updateIdentity(auth.currentUser,cachedGrades);
 const selected=periodSelect.value;const nowPeriod=currentSchoolPeriod();const schoolYear=Number(nowPeriod.slice(0,4));const years=[...new Set([schoolYear,...cachedGrades.map(periodOf).filter(Boolean).map(p=>Number(p.slice(0,4)))])].sort((a,b)=>b-a);
 periodSelect.replaceChildren(...years.flatMap(year=>[1,2,3,4].map(q=>new Option(q+' четверть'+(year===schoolYear?'':' · '+year+'/'+(year+1)),year+'-'+q))));
 periodSelect.value=[...periodSelect.options].some(o=>o.value===selected)?selected:nowPeriod;refreshChoiceButtons();renderGrades()}
 
-async function load(){const user=auth.currentUser;if(!user)return;const uid=user.uid,generation=++loadGeneration;const active=()=>auth.currentUser?.uid===uid&&generation===loadGeneration;error.textContent='';let cached=null;try{cached=await readGradeCache(uid);if(!active())return;if(cached?.data){applySchoolData(cached.data);status.textContent+=' · сохранено '+new Date(cached.savedAt).toLocaleString('ru-RU')+' · проверяем обновления…'}else{status.textContent='Загрузка оценок…';subjects.replaceChildren()}}catch(e){cached=null;console.warn('Локальный кэш недоступен',e)}try{const snap=await getDocFromServer(doc(db,'schoolGrades',uid));if(!active())return;if(!snap.exists()){if(!cached){clearSchool();status.textContent='Оценки пока не загружены.'}return}const data=snap.data();if(data.schemaVersion!==1||data.source!=='petersburgedu'||!Array.isArray(data.grades))throw Error('Неизвестный формат школьных данных.');if(!cached||JSON.stringify(cached.data)!==JSON.stringify(data))applySchoolData(data);try{await writeGradeCache(uid,{data,savedAt:Date.now()})}catch(e){console.warn('Не удалось сохранить оценки локально',e)}if(active())status.textContent='Предметов: '+subjects.children.length+' · данные обновлены'}catch(e){if(!active())return;if(cached){error.textContent='Нет связи с сервером. Показаны сохранённые оценки от '+new Date(cached.savedAt).toLocaleString('ru-RU')+'.'}else{status.textContent='Не удалось загрузить оценки.';showError(e)}}}
+async function load(){const user=auth.currentUser;if(!user)return;const uid=user.uid,generation=++loadGeneration;const active=()=>auth.currentUser?.uid===uid&&generation===loadGeneration;error.textContent='';let cached=null;try{cached=await readGradeCache(uid);if(!active())return;if(cached?.data){applySchoolData(cached.data);status.textContent+=' · проверяем оценки…'}else{status.textContent='Загрузка оценок…';subjects.replaceChildren()}}catch(e){cached=null;console.warn('Локальный кэш недоступен',e)}try{const snap=await getDocFromServer(doc(db,'schoolGrades',uid));if(!active())return;if(!snap.exists()){if(!cached){clearSchool();status.textContent='Оценки пока не загружены.'}return}const data=snap.data();if(data.schemaVersion!==1||data.source!=='petersburgedu'||!Array.isArray(data.grades))throw Error('Неизвестный формат школьных данных.');if(!cached||JSON.stringify(cached.data)!==JSON.stringify(data))applySchoolData(data);else renderFreshness(data);try{await writeGradeCache(uid,{data,savedAt:Date.now()})}catch(e){console.warn('Не удалось сохранить оценки локально',e)}if(active())status.textContent='Предметов: '+subjects.children.length}catch(e){if(!active())return;if(cached){error.textContent='Показаны сохранённые оценки.'}else{status.textContent='Не удалось загрузить оценки.';showError(e)}}}
 document.getElementById('school-form').addEventListener('submit',async e=>{e.preventDefault();error.textContent='';try{await setPersistence(auth,browserLocalPersistence);await signInWithEmailAndPassword(auth,document.getElementById('school-email').value.trim(),document.getElementById('school-password').value);document.getElementById('school-password').value=''}catch(err){showError(err)}});
 document.getElementById('school-refresh').addEventListener('click',load);window.addEventListener('online',load);
 document.getElementById('school-logout').addEventListener('click',()=>signOut(auth).catch(showError));
