@@ -101,3 +101,18 @@ body:has(.paper){background:#fdf7ed;min-height:100dvh}
 .progress-line text{fill:#6d7180;font:12px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
 .quality-value{display:block;font-size:36px;color:#1673bd;margin:6px 0}
 
+
+/* Learning source picker: mobile Paper bottom sheet */
+.paper-sheet-backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:flex-end;justify-content:center;background:rgba(22,34,49,.46)}
+.paper-sheet{width:min(100%,560px);max-height:calc(100dvh - 32px);overflow-y:auto;background:#fdf7ed;color:#263448;border-radius:25px 25px 0 0;padding:10px max(18px,env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));box-shadow:0 -12px 36px #1d27333b;touch-action:pan-y}
+.paper-sheet-handle{width:38px;height:5px;margin:0 auto 13px;border-radius:99px;background:#c6bfba}
+.paper-sheet-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:17px}
+.paper-sheet-head h2{margin:0;font-size:clamp(20px,5.7vw,25px);font-weight:800;letter-spacing:-.025em}
+.paper-sheet-close{width:40px;height:40px;padding:0;display:grid;place-items:center;border-radius:50%;background:#eee8e0;color:#4b5967;font-size:28px;font-weight:400;line-height:1}
+.paper-sheet-choice{display:flex;align-items:center;gap:14px;width:100%;margin-top:10px;padding:15px 14px;min-height:79px;border:1px solid #e9d9c8;border-radius:17px;text-align:left;background:linear-gradient(#fffdf9,#fff8ed);color:#203347;box-shadow:0 3px 10px #473c2b0d}
+.paper-sheet-choice>span:nth-child(2){flex:1;min-width:0}
+.paper-sheet-choice strong{display:block;font-size:17px;line-height:1.2}
+.paper-sheet-choice small{display:block;margin-top:5px;font-size:13px;font-weight:400;line-height:1.25;color:#64717b}
+.paper-sheet-symbol{display:grid;place-items:center;width:43px;height:43px;flex:none;border-radius:13px;background:#e7f1ff;color:#1764bd;font-size:27px}
+.paper-sheet-choice>.paper-icon{width:20px;height:20px;color:#8093a4}
+@media(max-width:355px){.paper-sheet-choice{gap:9px;padding:12px 10px}.paper-sheet-symbol{width:38px;height:38px}.paper-sheet-choice strong{font-size:16px}}
