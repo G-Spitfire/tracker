@@ -91,7 +91,7 @@ async function run(name, browserType, contextOptions) {
    return JSON.parse(localStorage.getItem('wordscene-17-lab-v1'+suffix));
   });
   assert.equal(stored.sessions.length,1,'lesson not committed');
-  assert.equal(stored.child.name||'', '', 'hidden settings should not change the profile');
+  assert.equal(stored.child?.name||'', '', 'hidden settings should not change the profile');
   assert.equal(Object.keys(stored.words).length,3);
   assert.ok(stored.words[Object.keys(stored.words)[0]].initialAnswers.every(a=>!Object.hasOwn(a,'ms')),'response latency persisted');
 
