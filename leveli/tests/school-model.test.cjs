@@ -74,5 +74,20 @@ test('observed first-quarter dates map consistently and quarter final stays sepa
  for(const row of [regular,lastRegular,final])assert.equal(S.period(row),'2026-1');
  assert.equal(S.officialKind(final),'За четверть');
  assert.equal(S.officialKind(lastRegular),'');
- assert.equal(S.period({date:'2026-11-01'}),'2026-2');
+ assert.equal(S.period({date:'2026-11-01'}),null); assert.equal(S.period({date:'2026-11-05'}),'2026-2');
+});
+
+test('2026/27 school calendar uses supplied term dates and excludes holiday records',()=>{
+ const inPeriod=(d)=>S.period({date:d});
+ for(const [date,expected] of [
+  ['2026-09-02','2026-1'],['2026-10-25','2026-1'],
+  ['2026-10-26',null],['2026-11-03',null],['2026-11-04',null],
+  ['2026-11-05','2026-2'],['2026-12-30','2026-2'],
+  ['2026-12-31',null],['2027-01-10',null],
+  ['2027-01-11','2026-3'],['2027-03-26','2026-3'],
+  ['2027-03-27',null],['2027-04-04',null],
+  ['2027-04-05','2026-4'],['2027-05-26','2026-4'],
+  ['2027-05-27',null]
+ ])assert.equal(inPeriod(date),expected,date);
+ assert.equal(S.period({date:'2026-11-04',quarter:1}),'2026-1');
 });

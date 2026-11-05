@@ -37,6 +37,14 @@ function period(g){
  if(year===null)return null;
  if(Number.isInteger(q)&&q>=1&&q<=4)return year+'-'+q;
  if(!d)return null;
+ if(year===2026){
+  const key=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
+  if(key>=20260901&&key<=20261025)return '2026-1'; // first term confirmed through Oct 25
+  if(key>=20261105&&key<=20261230)return '2026-2';
+  if(key>=20270111&&key<=20270326)return '2026-3';
+  if(key>=20270405&&key<=20270526)return '2026-4';
+  return null; // do not assign holiday dates to the next term
+ }
  const m=d.getMonth()+1;
  return year+'-'+(m>=9&&m<=10?1:m>=11?2:m<=3?3:4);
 }
