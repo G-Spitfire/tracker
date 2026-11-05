@@ -61,6 +61,9 @@ async function run(name, browserType, contextOptions) {
    return b.left>=a.left-2&&b.right<=a.right+2;
   });
   await page.locator('[data-action="manualTab:search"]').click();
+  await page.locator('#manual-search').focus();
+  assert.equal(await page.locator('.ws-manual-word-scroll .ws-manual-word').count(),0,'empty search should not show results');
+  await snap('empty-focused-search');
   await page.locator('#manual-search').fill('pineapple');
   await page.waitForFunction(()=>document.querySelector('.ws-manual-scroll-note').hidden);
   assert.equal(await page.locator('[data-action="pick:pineapple"]').count(),1);
@@ -100,6 +103,7 @@ async function run(name, browserType, contextOptions) {
    assert.ok(simulated.bottom<=simulated.visible+5,'bottom action covered in simulated keyboard viewport '+JSON.stringify(simulated));
    assert.ok(simulated.resultsHeight>=0,'results layout invalid');
    assert.equal(simulated.restored,true,'normal layout not restored on keyboard close');
+   assert.equal(await page.locator('.ws-manual').evaluate(el=>el.style.getPropertyValue('--ws-search-vh')),'','keyboard inline height must reset');
   }
   await searchInput.evaluate(el=>el.blur());
 
