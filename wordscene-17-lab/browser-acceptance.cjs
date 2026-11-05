@@ -1,5 +1,9 @@
 'use strict';
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const shots = path.join(__dirname,'audit-screenshots');
+fs.mkdirSync(shots,{recursive:true});
 const { chromium, webkit, devices } = require('playwright');
 
 const origin = process.env.WS17_TEST_ORIGIN || 'http://127.0.0.1:8765';
@@ -28,15 +32,55 @@ async function run(name, browserType, contextOptions) {
   // Profile settings are intentionally hidden on the home screen.
   assert.equal(await page.locator('[data-action="childProfile"]').count(),0);
 
-  // Manual learning is accessible with topic chips, without a separate topic flow.
+  // Manual picker: real layout, conditional scroll affordances and cross-topic selections.
   await page.locator('[data-action="sources"]').click();
-  assert.equal(await page.locator('[data-action="themes"]').count(),0);
   await page.locator('[data-action="manual"]').click();
-  assert.ok(await page.locator('[data-action^="manualTopic:"]').count()>1,'manual topic filters missing');
-  assert.ok(await page.locator('[data-action="manualTab:search"]').count()===1,'search tab missing');
-  const picks=page.locator('[data-action^="pick:"]:not([disabled])');
-  assert.ok(await picks.count()>=3,'not enough selectable words');
-  for(let i=0;i<3;i++)await picks.nth(i).click();
+  const label=name.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+  const snap=async suffix=>page.screenshot({path:path.join(shots,label+'-'+suffix+'.png')});
+  await snap('topics');
+  const wordList=page.locator('.ws-manual-word-scroll');
+  const note=page.locator('.ws-manual-scroll-note');
+  await page.waitForFunction(()=>{const el=document.querySelector('.ws-manual-word-scroll'),n=document.querySelector('.ws-manual-scroll-note');return n.hidden===(el.scrollHeight-el.clientHeight-el.scrollTop<=3)});
+  if(await wordList.evaluate(el=>el.scrollHeight>el.clientHeight+3)){
+   assert.equal(await note.isVisible(),true,'long list should advertise scrolling');
+   await wordList.evaluate(el=>el.scrollTop=el.scrollHeight);
+   await page.waitForFunction(()=>document.querySelector('.ws-manual-scroll-note').hidden);
+   await snap('end-of-list');
+   await wordList.evaluate(el=>el.scrollTop=0);
+  }
+  await page.locator('[data-action="manualAllTopics"]').click();
+  await snap('all-topics');
+  const travel=page.locator('[data-action="manualTopic:travel"]');
+  await travel.click();
+  await page.locator('[data-action="manualAllTopics"]').click();
+  await page.waitForFunction(()=>{
+   const parent=document.querySelector('.ws-manual-topics'),selected=parent?.querySelector('.is-active');
+   if(!selected)return false;
+   if(parent.scrollWidth<=parent.clientWidth+3)return true;
+   const a=parent.getBoundingClientRect(),b=selected.getBoundingClientRect();
+   return b.left>=a.left-2&&b.right<=a.right+2;
+  });
+  await page.locator('[data-action="manualTab:search"]').click();
+  await page.locator('#manual-search').fill('pineapple');
+  await page.waitForFunction(()=>document.querySelector('.ws-manual-scroll-note').hidden);
+  assert.equal(await page.locator('[data-action="pick:pineapple"]').count(),1);
+  await snap('short-search');
+  await page.locator('[data-action="manualTab:topics"]').click();
+  await page.locator('[data-action="manualTopic:food"]').click();
+  await page.locator('[data-action="pick:apple"]').click();
+  await page.locator('[data-action="manualTopic:animals"]').click();
+  await page.locator('[data-action="pick:cat"]').click();
+  await page.locator('[data-action="pick:dog"]').click();
+  await page.locator('[data-action="manualSummary"]').click();
+  await snap('three-selected');
+  assert.ok(await page.getByText('Выбрано слов:').count()>0);
+  await page.locator('[data-action="removeManual:apple"]').click();
+  assert.ok((await page.locator('.ws-manual-total').innerText()).includes('2 / 10'));
+  assert.equal(await page.locator('[data-action="startManual"]').isDisabled(),true);
+  await page.locator('[data-action="manualTopic:food"]').click();
+  await page.locator('[data-action="pick:apple"]').click();
+  assert.ok((await page.locator('.ws-manual-total').innerText()).includes('3 / 10'));
+  assert.equal(await page.locator('[data-action="startManual"]').isEnabled(),true);
   await page.locator('[data-action="startManual"]').click();
   for(let i=0;i<3;i++)await page.locator('[data-action="learnNext"]').click();
   for(let i=0;i<18;i++)await page.locator('[data-action="yes"]').click();
@@ -94,8 +138,10 @@ async function legacy(name,browserType,contextOptions) {
 (async()=>{
  const targets=[
   ['Chromium desktop',chromium,{viewport:{width:1200,height:900}}],
-  ['Chromium mobile',chromium,{...devices['iPhone 13'],isMobile:true}],
-  ['WebKit mobile emulation',webkit,{...devices['iPhone 13']}]
+  ['Chromium 390x844',chromium,{viewport:{width:390,height:844},isMobile:true,hasTouch:true}],
+  ['Chromium 320x568',chromium,{viewport:{width:320,height:568},isMobile:true,hasTouch:true}],
+  ['WebKit 390x844',webkit,{viewport:{width:390,height:844},isMobile:true,hasTouch:true}],
+  ['WebKit 320x568',webkit,{viewport:{width:320,height:568},isMobile:true,hasTouch:true}]
  ];
  for(const [name,type,opts] of targets) {
   await run(name,type,opts);
