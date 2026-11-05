@@ -116,3 +116,30 @@ body:has(.paper){background:#fdf7ed;min-height:100dvh}
 .paper-sheet-symbol{display:grid;place-items:center;width:43px;height:43px;flex:none;border-radius:13px;background:#e7f1ff;color:#1764bd;font-size:27px}
 .paper-sheet-choice>.paper-icon{width:20px;height:20px;color:#8093a4}
 @media(max-width:355px){.paper-sheet-choice{gap:9px;padding:12px 10px}.paper-sheet-symbol{width:38px;height:38px}.paper-sheet-choice strong{font-size:16px}}
+
+/* Word selection · approved Paper layout, no decorative footer */
+html:has(.ws-picker),body:has(.ws-picker){background:#fdf7ed}
+.ws-picker{--ws-ink:#102d63;max-width:460px;min-height:100dvh;margin:0 auto;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) calc(28px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));color:var(--ws-ink);display:flex;flex-direction:column;align-items:stretch;gap:0}
+.ws-picker-header{display:flex;align-items:center;justify-content:center;position:relative;min-height:60px;margin-bottom:12px}
+.ws-picker-header h1{margin:0;text-align:center;font-size:clamp(23px,6.5vw,29px);letter-spacing:-.035em;font-weight:800;color:var(--ws-ink)}
+.ws-picker-back{position:absolute;left:0;top:4px;width:46px;height:46px;padding:0;border-radius:50%;background:#fff;color:#103c85;box-shadow:0 3px 10px #91795727;font-size:37px;line-height:1;font-weight:400}
+.ws-picker-stats{display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:24px;background:#fffcf8;box-shadow:0 3px 10px #98643118;border:1px solid #fffbf7;padding:12px 8px}
+.ws-picker-stats>div{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;font-size:clamp(11px,3.2vw,14px);line-height:1.2}
+.ws-picker-stats>div+div{border-left:1px solid #e5dfd7}
+.ws-picker-stats strong{display:block;font-size:clamp(16px,4.7vw,20px);margin-top:2px}
+.ws-picker-stat-icon{font-size:clamp(20px,7vw,27px);color:#516bfe;flex:none}
+.ws-picker-instruction{margin:20px 0 16px;text-align:center;font-size:clamp(14px,3.8vw,17px);line-height:1.4}
+.ws-picker-card{padding:14px;background:#fffdfa;border-radius:30px;box-shadow:0 6px 17px #9e744233;border:1px solid #fff;display:flex;flex-direction:column;align-items:center;min-height:clamp(265px,39dvh,380px);background-clip:padding-box}
+.ws-picker-reveal{background:linear-gradient(145deg,#edf6ff,#e2f0ff);color:var(--ws-ink);border-radius:24px;width:100%;flex:1;min-height:190px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;padding:14px 8px 6px;box-shadow:none}
+.ws-picker-word{font-size:clamp(43px,12vw,64px);font-weight:850;line-height:1.08;letter-spacing:-.035em;overflow-wrap:anywhere}
+.ws-picker-ipa{font-size:clamp(19px,5.6vw,26px);color:#3a5a83;font-weight:400}
+.ws-picker-hint{margin-top:auto;color:#4a6e9d;font-size:clamp(12px,3.6vw,15px);font-weight:500;text-align:center;background:#d8eafa;border-radius:30px;padding:10px 9px;width:100%}
+.ws-picker-translation{margin-top:15px;font-size:clamp(23px,7vw,30px);font-weight:750}
+.ws-picker-speak{display:grid;place-items:center;align-self:center;width:58px;height:58px;padding:0;margin:8px auto 0;background:#e6f3ff;color:#0078ff;border-radius:50%;font-size:26px;box-shadow:0 3px 8px #8297aa44}
+.ws-picker-choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px}
+.ws-picker-choices button{min-width:0;min-height:65px;padding:12px 5px;border-radius:999px;font-size:clamp(18px,5.6vw,24px);font-weight:780}
+.ws-picker-unknown{background:linear-gradient(#edf8ff,#e0f1ff);border:2px solid #b9e3ff;color:#0753bb;box-shadow:0 3px 8px #8eb5cf35}
+.ws-picker-known{background:linear-gradient(#1199ff,#0064e6);color:white;box-shadow:0 3px 8px #488bda3d}
+.ws-picker-exit{align-self:center;margin:auto 0 0;padding:24px 15px 4px;color:#667f9e;background:transparent;text-decoration:underline;text-underline-offset:4px;font-size:clamp(14px,4vw,17px);font-weight:450}
+@media(max-height:700px){.ws-picker-card{min-height:230px}.ws-picker-instruction{margin:10px 0}.ws-picker-choices{margin-top:14px}.ws-picker-exit{padding-top:12px}}
+@media(max-width:355px){.ws-picker{padding-inline:12px}.ws-picker-stats{padding:10px 4px}.ws-picker-stats>div{gap:4px}.ws-picker-card{padding:10px}.ws-picker-choices{gap:8px}}
