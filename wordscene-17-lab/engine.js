@@ -43,10 +43,10 @@ function start(p,mode,ids,known=[],at=Date.now()){
  const all=unique(ids);
  return {id:'ws17-'+at+'-'+Math.random().toString(36).slice(2,10),mode,ids:all,known:unique(known),stage:mode==='new'?'learn':'recall',learnIndex:0,round:1,extra:0,items:queue(all),index:0,answers:[],hard:[],roundHard:[],startedAt:at,lastActionAt:at,pausedAt:null,openedAt:at,locked:false};
 }
-function remainingTime(s,now){return Math.max(0,30*MS-(now-(s.pausedAt??s.lastActionAt)))}
+function remainingTime(s,now){const inactive=30*MS-(now-s.lastActionAt);const away=s.pausedAt===null?Infinity:30*MS-(now-s.pausedAt);return Math.max(0,Math.min(inactive,away))}
 function timedOut(s,now){return remainingTime(s,now)===0}
 function action(s,at=Date.now()){if(timedOut(s,at))throw Error('Session expired');s.lastActionAt=at;s.pausedAt=null}
-function pause(s,at=Date.now()){action(s,at);s.pausedAt=at}
+function pause(s,at=Date.now()){if(timedOut(s,at))throw Error('Session expired');if(s.pausedAt===null)s.pausedAt=at}
 function learnNext(s,at=Date.now()){action(s,at);if(s.stage!=='learn')throw Error('Not learning');if(s.learnIndex<s.ids.length-1)s.learnIndex++;else{s.stage='recall';s.items=queue(s.ids);s.index=0}}
 function answer(s,ok,at=Date.now(),ms=null,checked=false){
  action(s,at);if(s.stage!=='recall'||s.index>=s.items.length)throw Error('No active recall');
@@ -69,7 +69,7 @@ function scheduler(old,ok,at){
  const originalDue=r.nextDay,hadToday=r.days.some(x=>x.day===today);
  r.checks.push({at,day:today,ok});
  if(!hadToday)r.days.push({day:today,ok});else{const d=r.days.find(x=>x.day===today);d.ok=d.ok&&ok}
- if(!ok){if(r.stage==='spaced')r.stage='repair';r.interval=0;r.repairSince=today;r.nextDay=addDays(today,1);return r}
+ if(!ok){if(r.stage==='spaced')r.stage='repair';r.currentMastered=false;r.interval=0;r.repairSince=today;r.nextDay=addDays(today,1);return r}
  if(hadToday||today<originalDue)return r;
  if(r.stage==='daily'){
   const last=r.days.slice(-2);r.nextDay=addDays(today,1);
@@ -79,7 +79,7 @@ function scheduler(old,ok,at){
   r.nextDay=addDays(today,1);
   if(recent.length===2&&recent.every(x=>x.ok)){r.stage='spaced';r.interval=0;r.nextDay=addDays(today,3)}
  }else{
-  if(r.interval===3&&!r.masteredAt)r.masteredAt=at;
+  if(r.interval===3){if(!r.masteredAt)r.masteredAt=at;r.currentMastered=true}
   r.interval=Math.min(3,r.interval+1);r.nextDay=addDays(today,INTERVALS[r.interval])
  }
  return r;
@@ -126,7 +126,7 @@ function levelProgress(p){
  if(ids.length){const hits=ids.filter(id=>{const origin=three.find(x=>x.ids.includes(id));return p.words[id].history.find(h=>day(h.at)>day(origin.at))?.ok}).length;successRate=hits/ids.length}
  return {level:p.level,target:cfg.label,eligible:eligible.length,confirmed:confirmed.length,window:three.length,successRate,threshold:cfg.threshold,min:cfg.min};
 }
-function status(w){if(!w)return 'new';if(w.schedule?.masteredAt&&w.schedule.stage==='spaced')return 'mastered';if(w.origin==='known')return 'known';return 'learning'}
+function status(w){if(!w)return 'new';if(w.schedule?.masteredAt&&w.schedule.stage==='spaced'&&w.schedule.interval===3&&w.schedule.currentMastered!==false)return 'mastered';if(w.origin==='known')return 'known';return 'learning'}
 const api={day,addDays,empty,clone,due,levelLimit,selectCandidates,beginSelection,selectionAnswer,eligible,queue,start,residualErrors,remainingTime,timedOut,action,pause,learnNext,answer,firstPair,scheduler,newSchedule,completed,recalcLevel,levelProgress,status};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.WS17Engine=api;
 })(typeof globalThis!=='undefined'?globalThis:this);
