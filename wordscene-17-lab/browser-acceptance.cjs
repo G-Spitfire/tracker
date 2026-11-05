@@ -101,7 +101,7 @@ async function run(name, browserType, contextOptions) {
    assert.ok(simulated.resultsHeight>=0,'results layout invalid');
    assert.equal(simulated.restored,true,'normal layout not restored on keyboard close');
   }
-  await searchInput.blur();
+  await searchInput.evaluate(el=>el.blur());
 
   await page.locator('[data-action="manualTab:topics"]').click();
   await page.locator('[data-action="manualTopic:food"]').click();
