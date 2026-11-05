@@ -25,11 +25,11 @@ test('published page has no cloud dependencies and still includes Paper assets',
  assert.doesNotMatch(html,/sync\.js|cloud-firestore\.js|cloud-ui\.mjs/);
  assert.match(html,/paper|style\.css/);
 });
-test('child profile settings replace multi-account and cloud UI',()=>{
+test('profile UI and handlers are removed without touching stored historical fields',()=>{
  const app=file('app.js');
+ assert.doesNotMatch(app,/childProfile|saveChild|childName|childAge|Как тебя зовут|Сколько тебе лет/);
  assert.doesNotMatch(app,/cloudAction|switchAccount|currentAccount|accountsScreen/);
- assert.match(app,/Как тебя зовут/);
- assert.match(app,/Сколько тебе лет/);
+ assert.match(app,/wordscene-17-lab-v1/);
 });
 test('two ways of choosing words remain',()=>{
  const app=file('app.js');
