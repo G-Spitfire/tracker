@@ -176,7 +176,7 @@ function review(mode='review'){
 }
 function cardActions(){
  return (session.pausedAt!==null?'<p class="reason" id="pause-time">'+pauseTime()+'</p>':'')+
-  btn('Пауза','pause','quiet',session.pausedAt!==null)+
+  (session.pausedAt!==null?btn('Продолжить','continue','primary'):btn('Пауза','pause','quiet'))+
   (session.mode==='practice'?btn('Закончить тренировку','stopPractice','quiet'):btn('Отменить занятие','cancel','quiet'));
 }
 function visual(w){if(window.WS17_illustration){try{return window.WS17_illustration(w.en)}catch(e){}}if(w.props&&C?.render){try{return C.render(w)}catch(e){}}return '<div class="simple-art">'+h(w.cue||w.en)+'</div>'}
@@ -223,8 +223,7 @@ function resume(){
 function suspend(){
  if(!session||storageFailure||session.pausedAt!==null||E.timedOut(session,Date.now()))return;
  
- if(session.feedback)session.feedback.ms=null;
- E.pause(session);store();
+  E.pause(session);store();
 }
 function finishPractice(){
  const finished=session.stage==='complete',lastReview=profile.sessions.findLast(s=>s.mode==='review');
@@ -317,7 +316,7 @@ function restoreBackup(){
  try{accounts.recover('local');window.location.reload()}
  catch(err){notice('Не удалось восстановить копию. Исходные данные не изменены.')}
 }
-function confirmCancel(){const yes=window.confirm('Отменить занятие? Все незавершённые результаты будут потеряны.');if(yes){session=null;selection=null;store();home()}else if(session){E.action(session);store();render()}}
+function confirmCancel(){const yes=window.confirm('Отменить занятие? Все незавершённые результаты будут потеряны.');if(yes){session=null;selection=null;store();home()}else if(session){render()}}
 function render(){if(session){if(E.timedOut(session,Date.now()))return expire(new Error('30 минут бездействия'));if(session.stage==='complete'&&view!=='home')return completed();if(view==='learn')return learn();if(view==='recall')return recall()}if(view==='select')return selectionScreen();if(view==='manual'||view==='fill')return manualView(view==='fill');if(view==='childProfile')return childProfile();if(view==='sources')return sources();if(view==='progress')return progress();if(view==='dictionary')return dictionaryView();return home()}
 function dispatch(act,el){
  if(storageFailure&&!['home','dictionary','progress','recover','restoreBackup'].includes(act)&&!act.startsWith('word:')&&!act.startsWith('say:'))return notice('Сохранение заблокировано. Никакие данные не перезаписываются.');
@@ -328,6 +327,7 @@ function dispatch(act,el){
  if(act.startsWith('qualityRange:')){qualityRange=act.slice(13);return progress()}
  if(act.startsWith('word:'))return wordDetail(act.slice(5));
  if(session&&E.timedOut(session,Date.now()))return expire();
+ if(session&&session.pausedAt!==null&&!['continue','cancel','stopPractice'].includes(act))return notice('Сначала продолжи занятие');
  switch(act){
  case 'home':return home();case 'childProfile':return childProfile();case 'saveChild':return saveChild();case 'restoreBackup':return restoreBackup();case 'recover':return recoverScreen();case 'sources':return sources();case 'manual':manual.clear();manualThemes.clear();query='';return manualView();
  case 'auto':return makeSelection('auto');
@@ -344,6 +344,7 @@ function dispatch(act,el){
  case 'advance':return sendAnswer(false);
  case 'help':E.action(session);showHelp=true;session.feedback.help=true;store();return recall();
  case 'pause':suspend();return storageFailure?home():render();
+  case 'continue':session.pausedAt=null;if(!store())return home();return render();
  case 'cancel':return confirmCancel();
  }
 }
