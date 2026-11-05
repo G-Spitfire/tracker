@@ -156,6 +156,13 @@ test('legacy selected child data is reused without creating an empty local save'
  assert.doesNotMatch(b.root.html,/Ребёнок 1|Ребёнок 2|Переключить профиль/);
 });
 
+test('Paper home hides level info and profile gear while retaining navigation',()=>{
+ const b=boot();
+ assert.doesNotMatch(b.root.html,/data-action="childProfile"|class="paper-info"/);
+ assert.match(b.root.html,/Твой уровень/);
+ assert.match(b.root.html,/data-action="progress"/);
+ assert.match(b.root.html,/data-action="dictionary"/);
+});
 test('Paper word picker allows immediate decisions and optional translation reveal',()=>{
  const b=boot();b.click('sources');b.click('auto');
  assert.match(b.root.html,/Неизвестных:[\\s\\S]*0 из 10/);
