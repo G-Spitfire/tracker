@@ -6,8 +6,8 @@ const dictionary=[...window.WS17_SEED,...(C?.cards||[])].filter((w,i,a)=>a.findI
 const byId=Object.fromEntries(dictionary.map(w=>[w.en,w]));
 const KEY='wordscene-17-lab-v1',ACTIVE='wordscene-17-lab-active-v1',PRACTICE='wordscene-17-lab-practice-cleared-v1';
 const root=document.getElementById('app');
-let profile,session=null,selection=null,view='home',batch=[],showAnswer=false,showHelp=false,manual=new Set(),themeIds=new Set(),manualThemes=new Set(),query='',clockStarted=null,confirmed=false,storageFailure=false,savedProfileRaw=null,savedActiveRaw=null;
-let progressRange='30',qualityRange='28',progressVisible=5;const openHistory=new Set();
+let profile,session=null,selection=null,view='home',batch=[],showAnswer=false,showHelp=false,manual=new Set(),manualThemes=new Set(),query='',confirmed=false,storageFailure=false,savedProfileRaw=null,savedActiveRaw=null;
+let progressRange='30',qualityRange='28';
 const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const dateText=at=>new Date(at).toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
 const accounts=window.WS17Accounts.create({storage:localStorage,empty:E.empty,valid:window.WS17Accounts.validProfile,keyFor:()=>({main:KEY,active:ACTIVE,backup:'wordscene-17-lab-last-good-v1'})});
@@ -107,10 +107,7 @@ function home(){
  '<nav class="paper-nav" aria-label="Разделы">'+btn(paperIcon('progress')+'Мой прогресс','progress')+btn(paperIcon('book')+'Словарь','dictionary')+'</nav></main>');
 }
 function sources(){
- if(warnLocked())return;view='sources';shell('Как будем учить?','<section class="panel">'+btn('Автоматически','auto','primary')+btn('По темам','themes','secondary')+btn('Выбрать самому','manual','secondary')+'</section>'+btn('На главную','home','quiet'));
-}
-function topics(){
- view='themes';shell('Выбери темы','<section class="panel"><div class="chips">'+T.topics.map(t=>'<button type="button" class="chip '+(themeIds.has(t.id)?'chosen':'')+'" data-action="topic:'+h(t.id)+'">'+h(t.name)+'</button>').join('')+'</div>'+btn('Подобрать слова','themed','primary',!themeIds.size)+'</section>'+btn('Назад','sources','quiet'));
+ if(warnLocked())return;view='sources';shell('Как будем учить?','<section class="panel">'+btn('Автоматически','auto','primary')+btn('Выбрать самому','manual','secondary')+'</section>'+btn('На главную','home','quiet'));
 }
 function nextBatch(){
  batch=E.selectCandidates(dictionary,profile,{seen:selection.seen,skipped:selection.skipped||[],unknown:selection.unknown,themes:selection.themes,topic:T.forWord});
@@ -118,7 +115,7 @@ function nextBatch(){
  if(!batch.length){finishSelection();return}
  selection.current=batch.map(w=>w.en);renderSelection();
 }
-function makeSelection(kind){if(warnLocked())return;selection=E.beginSelection(kind,kind==='theme'?[...themeIds]:[]);selection.skipped=[];nextBatch()}
+function makeSelection(kind){if(warnLocked())return;selection=E.beginSelection('auto');selection.skipped=[];nextBatch()}
 function selectionScreen(){
  const id=selection.current?.[selection.cursor],w=byId[id];if(!w){nextBatch();return}
  view='select';const title=selection.unknown.length+' / 10 неизвестных · просмотрено '+selection.seen.length+' / 50';
@@ -175,7 +172,7 @@ function review(mode='review'){
   session=E.start(profile,mode,ids);
   showAnswer=false;showHelp=false;confirmed=false;
   if(!store())return home();
-  clockStarted=Date.now();recall();
+  recall();
  }catch(e){notice(e.message)}
 }
 function cardActions(){
@@ -202,18 +199,16 @@ function recall(){
 }
 function sendAnswer(ok,checked=false){
  try{
-  const ms=session.feedback?session.feedback.ms:elapsed();
   delete session.feedback;
-  const r=E.answer(session,ok,Date.now(),ms,checked);
+   const r=E.answer(session,ok,Date.now(),null,checked);
   if(!store())return home();
   if(r.done)return completed();
-  showAnswer=false;showHelp=false;confirmed=false;clockStarted=Date.now();recall();
+  showAnswer=false;showHelp=false;confirmed=false;recall();
  }catch(e){expire(e)}
 }
-function elapsed(){return clockStarted===null?null:Date.now()-clockStarted}
 function showFeedback(failed){
  E.action(session);
- session.feedback={failed,ms:elapsed(),help:false};
+ session.feedback={failed,help:false};
  showAnswer=true;confirmed=failed;showHelp=false;
  if(!store())return home();
  recall();
@@ -223,12 +218,12 @@ function resume(){
  if(session.stage==='complete')return completed();
  const feedback=session.feedback;
  view=session.stage==='learn'?'learn':'recall';
- showAnswer=!!feedback;confirmed=!!feedback?.failed;showHelp=!!(feedback?.help||session.artHidden);clockStarted=null;
+ showAnswer=!!feedback;confirmed=!!feedback?.failed;showHelp=!!(feedback?.help||session.artHidden);
  render();
 }
 function suspend(){
  if(!session||storageFailure||session.pausedAt!==null||E.timedOut(session,Date.now()))return;
- clockStarted=null;
+ 
  if(session.feedback)session.feedback.ms=null;
  E.pause(session);store();
 }
@@ -333,28 +328,25 @@ function restoreBackup(){
  catch(err){notice('Не удалось восстановить копию. Исходные данные не изменены.')}
 }
 function confirmCancel(){const yes=window.confirm('Отменить занятие? Все незавершённые результаты будут потеряны.');if(yes){session=null;selection=null;store();home()}else if(session){E.action(session);store();render()}}
-function render(){if(session){if(E.timedOut(session,Date.now()))return expire(new Error('30 минут бездействия'));if(session.stage==='complete'&&view!=='home')return completed();if(view==='learn')return learn();if(view==='recall')return recall()}if(view==='select')return selectionScreen();if(view==='manual'||view==='fill')return manualView(view==='fill');if(view==='themes')return topics();if(view==='sources')return sources();if(view==='progress')return progress();if(view==='dictionary')return dictionaryView();return home()}
+function render(){if(session){if(E.timedOut(session,Date.now()))return expire(new Error('30 минут бездействия'));if(session.stage==='complete'&&view!=='home')return completed();if(view==='learn')return learn();if(view==='recall')return recall()}if(view==='select')return selectionScreen();if(view==='manual'||view==='fill')return manualView(view==='fill');if(view==='childProfile')return childProfile();if(view==='sources')return sources();if(view==='progress')return progress();if(view==='dictionary')return dictionaryView();return home()}
 function dispatch(act,el){
  if(storageFailure&&!['home','dictionary','progress','recover','restoreBackup'].includes(act)&&!act.startsWith('word:')&&!act.startsWith('say:'))return notice('Сохранение заблокировано. Никакие данные не перезаписываются.');
  if(act.startsWith('say:'))return speak(act.slice(4));
- if(act.startsWith('topic:')){let v=act.slice(6);themeIds.has(v)?themeIds.delete(v):themeIds.add(v);return topics()}
  if(act.startsWith('manualTopic:')){const v=act.slice(12);manualThemes.has(v)?manualThemes.delete(v):manualThemes.add(v);return manualView(view==='fill')}
  if(act.startsWith('pick:')){const v=act.slice(5);manual.has(v)?manual.delete(v):manual.size<E.levelLimit(profile)&&manual.add(v);return manualView(view==='fill')}
  if(act.startsWith('progressRange:')){progressRange=act.slice(14);return progress()}
  if(act.startsWith('qualityRange:')){qualityRange=act.slice(13);return progress()}
- if(act.startsWith('history:')){const id=decodeURIComponent(act.slice(8));openHistory.has(id)?openHistory.delete(id):openHistory.add(id);return progress()}
- if(act==='progressMore'){progressVisible+=5;return progress()}
  if(act.startsWith('word:'))return wordDetail(act.slice(5));
  if(session&&E.timedOut(session,Date.now()))return expire();
  switch(act){
- case 'home':return home();case 'childProfile':return childProfile();case 'saveChild':return saveChild();case 'restoreBackup':return restoreBackup();case 'recover':return recoverScreen();case 'sources':return sources();case 'themes':return topics();case 'manual':manual.clear();manualThemes.clear();query='';return manualView();
- case 'auto':return makeSelection('auto');case 'themed':return makeSelection('theme');
+ case 'home':return home();case 'childProfile':return childProfile();case 'saveChild':return saveChild();case 'restoreBackup':return restoreBackup();case 'recover':return recoverScreen();case 'sources':return sources();case 'manual':manual.clear();manualThemes.clear();query='';return manualView();
+ case 'auto':return makeSelection('auto');
  case 'review':return review();case 'practice':return review('practice');case 'stopPractice':session=null;store();return home();case 'progress':return progress();case 'dictionary':query='';return dictionaryView();
  case 'known':return selectionGrade(true);case 'unknown':return selectionGrade(false);case 'stopSelection':return stopSelection();
  case 'reveal':showAnswer=true;return selectionScreen();
  case 'startManual':return startLearning([...manual],selection?.known||[]);
  case 'leaveFill':saveFamiliar(selection.known);selection=null;manual.clear();return home();
- case 'learnNext':try{E.learnNext(session);session.artHidden=false;if(!store())return home();showHelp=false;clockStarted=Date.now();return session.stage==='learn'?learn():recall()}catch(err){return expire(err)}
+ case 'learnNext':try{E.learnNext(session);session.artHidden=false;if(!store())return home();showHelp=false;return session.stage==='learn'?learn():recall()}catch(err){return expire(err)}
  case 'toggleArt':E.action(session);showHelp=!showHelp;session.artHidden=showHelp;store();return learn();
  case 'yes':return sendAnswer(true);case 'no':return showFeedback(true);
  case 'check':return showFeedback(false);
