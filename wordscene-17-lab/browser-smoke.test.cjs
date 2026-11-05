@@ -70,7 +70,7 @@ test('pause displays a countdown without extending the saved deadline',()=>{
 
 test('Paper shows real totals with new words first and the reason inside the locked button',()=>{
  const b=boot();
- assert.match(b.root.html,/Учить новые слова[\s\S]*Выбери способ подбора[\s\S]*Повторение[\s\S]*Пока нет слов для повторения<\/small>/);
+ assert.match(b.root.html,/Учить новые слова[\s\S]*Выбери способ подбора[\s\S]*На сегодня всё повторено/);
  assert.match(b.root.html,/class="paper-rings"/);
  assert.doesNotMatch(b.root.html,/Добавить 10|Тренировка написания/);
 });
@@ -101,10 +101,39 @@ test('mandatory review unlocks voluntary practice for final errors without chang
  for(let i=0;i<4;i++){b.click('no');b.click('advance');b.click('yes')}
  const saved=b.map.get(key);
  b.click('home');
- assert.match(b.root.html,/Повторить ошибки — 1 слово/);
+ assert.match(b.root.html,/Повторить ещё раз[\s\S]*Если хочешь, потренируй ещё 1 трудное слово/);
  b.click('practice');
  for(let i=0;i<4;i++){b.click('no');b.click('advance');b.click('yes')}
  b.click('yes');b.click('yes');
  assert.equal(b.map.get(key),saved);
  assert.equal(b.map.has('wordscene-17-lab-active-v1'),false);
+ b.click('home');
+ assert.match(b.root.html,/На сегодня всё повторено/);
+ assert.doesNotMatch(b.root.html,/Повторить ещё раз/);
+});
+
+test('My Progress periods and history reveal five lessons at a time',()=>{
+ const fresh=boot(),E=fresh.window.WS17Engine,p=E.empty();
+ const base=Date.now()-11*86400000;
+ for(let i=0;i<12;i++){
+  p.sessions.push({id:'demo-'+i,mode:'new',ids:['word'+i],at:base+i*86400000,successful:1,extraWords:0,hard:0});
+  p.words['word'+i]={origin:'learned',firstLearnedAt:base+i*86400000,schedule:E.newSchedule(base+i*86400000),history:[]};
+ }
+ fresh.map.set('wordscene-17-lab-v1',JSON.stringify(p));
+ const b=boot({map:fresh.map});
+ b.click('progress');
+ assert.match(b.root.html,/Знакомых слов/);
+ assert.match(b.root.html,/Сколько слов я выучил/);
+ assert.match(b.root.html,/Как хорошо я помню слова/);
+ assert.match(b.root.html,/Пока нет проверок за этот период/);
+ assert.equal((b.root.html.match(/class="progress-session"/g)||[]).length,5);
+ b.click('progressMore');
+ assert.equal((b.root.html.match(/class="progress-session"/g)||[]).length,10);
+ b.click('progressMore');
+ assert.equal((b.root.html.match(/class="progress-session"/g)||[]).length,12);
+ b.click('history:demo-11');
+ assert.match(b.root.html,/Итог третьего обязательного прогона/);
+ b.click('progressRange:all');
+ b.click('qualityRange:all');
+ assert.match(b.root.html,/class="progress-line"/);
 });
