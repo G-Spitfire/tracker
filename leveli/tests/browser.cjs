@@ -24,20 +24,14 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.evaluate(()=>{window.__offline=true});await page.evaluate(()=>document.getElementById('school-refresh').click());await page.waitForFunction(()=>document.querySelector('#school-error').textContent.includes('Нет связи'));assert.match(await page.locator('#school-subjects').innerText(),/История · 3,00/);
  await page.evaluate(()=>window.__switchUser(null));assert.equal(await page.locator('#school-results').isVisible(),false);assert.equal(await page.locator('#school-subjects').innerText(),'');
  await page.locator('[data-tab="home"]').click();await page.screenshot({path:'outputs/leveli-home.png',fullPage:true});
- await page.goto((process.env.TEST_BASE_URL||'http://127.0.0.1:8765')+'/wordscene/');await page.waitForFunction(()=>window.WordSceneCloudBackup);assert.equal(await page.evaluate(()=>window.WordSceneCloudBackup.enabled),true);assert.equal(await page.locator('#app').isVisible(),true);
-
- await page.getByRole('button',{name:'Продолжить без аккаунта',exact:true}).click();
- await page.evaluate(()=>window.__switchUser('A'));
- await page.waitForFunction(()=>JSON.parse(sessionStorage.getItem('cloud:users/A/wordscene/state')||'null')?.revision===1);
- await page.evaluate(()=>{const s=JSON.parse(localStorage.getItem('word-scenes-v5'));s.words.cup={started:true,trained:true,attempts:3};localStorage.setItem('word-scenes-v5',JSON.stringify(s));window.WordSceneCloudBackup.schedule()});
- await page.waitForFunction(()=>JSON.parse(sessionStorage.getItem('cloud:users/A/wordscene/state')||'null')?.revision===2);
+ // The retained archive reader works without the retired application directory.
+ await page.evaluate(()=>{window.__offline=false;window.__switchUser('A');localStorage.setItem('wordscene-active-profile-v1','user:A');localStorage.setItem('word-scenes-v5',JSON.stringify({version:5,words:{cup:{started:true,trained:true}},habit:{days:{}}}));window.dispatchEvent(new Event('storage'))});
+ await page.locator('[data-tab="learning"]').click();
+ await page.waitForFunction(()=>document.querySelector('#learning-status').textContent.includes('Начато слов: 1'));
  await page.evaluate(()=>window.__switchUser('B'));
- await page.waitForFunction(()=>JSON.parse(sessionStorage.getItem('cloud:users/B/wordscene/state')||'null')?.revision===1);
- assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('word-scenes-v5')).words.cup.started),false);
- assert.equal(await page.evaluate(()=>JSON.parse(sessionStorage.getItem('cloud:users/A/wordscene/state')).payload.words.cup.attempts),3);
- await page.evaluate(()=>window.__switchUser('A'));
- await page.waitForFunction(()=>localStorage.getItem('wordscene-active-profile-v1')==='user:A'&&window.WordSceneCloudBackup);
- assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('word-scenes-v5')).words.cup.attempts),3);
- assert.deepEqual(errors,[]);fs.writeFileSync('work/browser-result.json',JSON.stringify({passed:true,checks:['three tabs','settings persistence','exact school forecast','official final','decline warning','A/B isolation','offline cached grades','logout clear','WordScene automatic first backup, scheduled update, account isolation and return'],errors},null,2));
+ await page.waitForFunction(()=>!document.querySelector('#learning-status').textContent.includes('Начато слов: 1'));
+ await page.locator('#wordscene').click();await page.waitForURL('**/wordscene-17-lab/');
+ await page.locator('[data-action="sources"]').waitFor();
+ assert.deepEqual(errors,[]);fs.writeFileSync('work/browser-result.json',JSON.stringify({passed:true,checks:['three tabs','settings persistence','exact school forecast','official final','decline warning','A/B isolation','offline cached grades','logout clear','legacy archive reader isolation and navigation to WordScene 17'],errors},null,2));
  await browser.close();console.log('Browser integration: PASS');
 })().catch(e=>{console.error(e);process.exit(1)});
