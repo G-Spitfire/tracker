@@ -157,7 +157,7 @@ test('unconfirmed lessons and an aggregate below threshold do not upgrade',()=>{
  for(let j=0;j<3;j++){
   const ids=Array.from({length:10},(_,i)=>'set'+j+'-'+i);
   p.sessions.push({id:'set'+j,mode:'new',ids,at:at+j*86400000,successful:10});
-  for(let i=0;i<ids.length;i++)p.words[ids[i]]={origin:'learned',schedule:E.newSchedule(at),history:j===2?[]:[{at:at+(j+1)*86400000,ok:i<7}]};
+  for(let i=0;i<ids.length;i++)p.words[ids[i]]={origin:'learned',schedule:E.newSchedule(at),history:j===2?[]:[{at:at+(j+1)*86400000,ok:i<6}]};
  }
  E.recalcLevel(p);
  assert.equal(p.level,'novice');
