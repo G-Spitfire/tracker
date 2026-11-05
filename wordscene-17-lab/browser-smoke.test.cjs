@@ -220,3 +220,25 @@ test('mobile Paper selection layout keeps visible scrolling cues and shared cont
  assert.match(b.root.html,/Прокрути список/);
  assert.match(b.root.html,/role="region" aria-label="Список слов"/);
 });
+
+test('selection summary removes cross-topic words and updates total and lesson button',()=>{
+ const topics={topics:[{id:'food',name:'Еда и напитки'},{id:'animals',name:'Животные'}],forWord:id=>id==='apple'?['food']:['animals']};
+ const b=boot({topics});b.click('sources');b.click('manual');
+ b.click('pick:apple');b.click('manualTopic:animals');b.click('pick:cat');b.click('pick:dog');
+ assert.match(b.root.html,/Выбрано слов:[\\s\\S]*3 \/ 10/);
+ assert.match(b.root.html,/Начать изучение \\(3 слова\\)/);
+ b.click('manualSummary');
+ assert.match(b.root.html,/aria-label="Выбранные слова"/);
+ assert.match(b.root.html,/data-action="removeManual:apple"/);
+ assert.match(b.root.html,/data-action="removeManual:cat"/);
+ b.click('removeManual:apple');
+ assert.match(b.root.html,/Выбрано слов:[\\s\\S]*2 \/ 10/);
+ assert.match(b.root.html,/Начать изучение \\(2 слова\\)/);
+ assert.doesNotMatch(b.root.html,/data-action="removeManual:apple"/);
+ assert.match(b.root.html,/data-action="removeManual:dog"/);
+});
+test('scroll hints are initially hidden until actual overflow is measured',()=>{
+ const b=boot();b.click('sources');b.click('manual');
+ assert.match(b.root.html,/class="ws-manual-scroll-note" aria-hidden="true" hidden/);
+ assert.match(b.root.html,/class="ws-manual-topics-note" aria-hidden="true" hidden/);
+});
