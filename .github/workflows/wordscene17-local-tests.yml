@@ -1,5 +1,10 @@
 name: Family applications checks
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'wordscene-17-lab/**'
+      - '.github/workflows/wordscene17-local-tests.yml'
   pull_request:
     paths:
       - 'wordscene-17-lab/**'
@@ -48,8 +53,16 @@ jobs:
           done
           node wordscene-17-lab/browser-acceptance.cjs
           node leveli/tests/browser.cjs
+      - name: Save mobile browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wordscene-mobile-ux-screenshots
+          path: wordscene-17-lab/audit-screenshots/*.png
+          if-no-files-found: warn
 
   live-site-acceptance:
+    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
