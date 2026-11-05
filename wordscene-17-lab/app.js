@@ -33,7 +33,47 @@ function speak(id){if(!('speechSynthesis' in window))return notice('Озвучи
 function btn(label,event,cls='',disabled=false){return '<button type="button" data-action="'+event+'" class="'+cls+'" '+(disabled?'disabled':'')+'>'+label+'</button>'}
 function head(name){return '<header><span class="brand">WordScene <b>17</b></span></header><main><h1>'+name+'</h1>'}
 function end(){return '</main>'}
-function shell(title,html,layout){root.innerHTML=layout||head(title)+html+end();root.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click',()=>{if(root.contains?.(el)===false)return;return dispatch(el.dataset.action,el)}));root.querySelectorAll('[data-input]').forEach(el=>el.addEventListener('input',()=>{const caret=el.selectionStart;query=el.value;render();const next=root.querySelector('[data-input]');if(next){next.focus();next.setSelectionRange(caret,caret)}}));}
+function shell(title,html,layout){root.innerHTML=layout||head(title)+html+end();root.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click',()=>{if(root.contains?.(el)===false)return;return dispatch(el.dataset.action,el)}));root.querySelectorAll('[data-input]').forEach(el=>el.addEventListener('input',()=>{query=el.value;if(view==='manual'&&manualMode==='search'){refreshManualSearch();return}const caret=el.selectionStart;render();const next=root.querySelector('[data-input]');if(next){next.focus();try{if(caret!==null)next.setSelectionRange(caret,caret)}catch{}}}));}
+function syncManualViewport(){
+ const panel=root.querySelector?.('.ws-manual.is-search');
+ if(!panel)return;
+ const vv=window.visualViewport;
+ const field=root.querySelector?.('#manual-search');
+ const focused=!!field&&document.activeElement===field;
+ const available=vv?.height||window.innerHeight;
+ const keyboard=focused&&window.innerHeight-available>110;
+ panel.classList.toggle('is-keyboard',keyboard);
+ if(keyboard){
+  panel.style.setProperty('--ws-search-vh',Math.max(200,available)+'px');
+  panel.style.setProperty('--ws-search-top',(vv?.offsetTop||0)+'px');
+ }else{
+  panel.style.removeProperty('--ws-search-vh');
+  panel.style.removeProperty('--ws-search-top');
+ }
+ refreshManualScroll();
+}
+function manualWordRow(w){
+ const picked=manual.has(w.en),used=!!profile.words[w.en]?.origin,blocked=used||(!picked&&manual.size>=E.levelLimit(profile));
+ return '<div class="ws-manual-word'+(used?' is-learned':'')+'">'+
+  '<button type="button" class="ws-manual-pick" data-action="pick:'+h(w.en)+'" aria-pressed="'+picked+'" '+(blocked?'disabled':'')+'>'+
+  '<span class="ws-manual-check" aria-hidden="true">'+(picked?'✓':'')+'</span>'+
+  '<span class="ws-manual-word-copy"><strong>'+h(w.en)+'</strong><small>'+h(w.ipa||'')+' · '+h(w.ru)+'</small></span>'+
+  (used?'<span class="ws-manual-learned">Уже изучено</span>':'')+'</button>'+
+  btn('◖))','say:'+h(w.en),'ws-manual-audio')+'</div>';
+}
+function refreshManualSearch(){
+ const q=query.trim().toLocaleLowerCase('ru');
+ const filtered=q?dictionary.filter(w=>(w.en+' '+w.ru).toLocaleLowerCase('ru').includes(q)):[];
+ const list=root.querySelector?.('.ws-manual-word-scroll');
+ if(!list)return;
+ list.innerHTML=filtered.length?filtered.map(manualWordRow).join(''):'<p class="ws-manual-empty">'+(q?'Ничего не найдено. Попробуй другой запрос.':'Начни вводить слово на русском или английском.')+'</p>';
+ list.scrollTop=0;
+ const counter=root.querySelector?.('.ws-manual-list-head small');
+ if(counter)counter.textContent=q?'Найдено: '+filtered.length:'Введите слово для поиска';
+ list.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click',()=>dispatch(el.dataset.action,el)));
+ refreshManualScroll();
+ syncManualViewport();
+}
 function refreshManualScroll(){
  const list=root.querySelector?.('.ws-manual-word-scroll');
  const note=root.querySelector?.('.ws-manual-scroll-note');
@@ -212,16 +252,8 @@ function manualView(fill=false){
  const mainTopics=['food','home','school','animals','sports','travel'];
  const shownTopics=manualShowAll?T.topics:mainTopics.map(id=>T.topics.find(t=>t.id===id)).filter(Boolean);
  const topicIcons={food:'🍎',home:'🏠',school:'🎒',animals:'🐾',sports:'⚽',travel:'✈️',family:'👨‍👩‍👧',clothes:'👕',nature:'🌿',weather:'☀️',colours:'🎨',body:'🖐️'};
- const listing=filtered.map(w=>{
-   const picked=manual.has(w.en),used=!!profile.words[w.en]?.origin,blocked=used||(!picked&&manual.size>=limit);
-   return '<div class="ws-manual-word'+(used?' is-learned':'')+'">'+
-     '<button type="button" class="ws-manual-pick" data-action="pick:'+h(w.en)+'" aria-pressed="'+picked+'" '+(blocked?'disabled':'')+'>'+
-     '<span class="ws-manual-check" aria-hidden="true">'+(picked?'✓':'')+'</span>'+
-     '<span class="ws-manual-word-copy"><strong>'+h(w.en)+'</strong><small>'+h(w.ipa||'')+' · '+h(w.ru)+'</small></span>'+
-     (used?'<span class="ws-manual-learned">Уже изучено</span>':'')+'</button>'+
-     btn('◖))','say:'+h(w.en),'ws-manual-audio')+'</div>';
- }).join('');
- const main='<main class="ws-manual"><div class="ws-picker-header">'+btn('‹',fill?'leaveFill':'sources','ws-picker-back')+'<h1>'+(fill?'Добавь слова':'Выбор слов')+'</h1></div>'+
+ const listing=filtered.map(manualWordRow).join('');
+ const main='<main class="ws-manual'+(themed?'':' is-search')+'"><div class="ws-picker-header">'+btn('‹',fill?'leaveFill':'sources','ws-picker-back')+'<h1>'+(fill?'Добавь слова':'Выбор слов')+'</h1></div>'+
  '<div class="ws-manual-tabs" role="group" aria-label="Способ выбора слов">'+
  btn('▦　По темам','manualTab:topics','ws-manual-tab'+(themed?' is-active':''))+
  btn('⌕　Поиск слов','manualTab:search','ws-manual-tab'+(!themed?' is-active':''))+'</div>'+
@@ -238,6 +270,7 @@ function manualView(fill=false){
  shell('','',main);
  const next=root.querySelector?.('.ws-manual-word-scroll');if(next)next.scrollTop=scroll;
  wireManualScroll();
+ syncManualViewport();
 }
 function startLearning(ids,known=[]){
  try{session=E.start(profile,'new',ids,known);selection=null;manual.clear();if(!store())return home();showAnswer=false;showHelp=false;confirmed=false;learn()}catch(e){notice(e.message);home()}
@@ -440,6 +473,11 @@ document.addEventListener?.('visibilitychange',()=>{if(document.hidden)suspend()
 window.addEventListener?.('pagehide',suspend);
 window.addEventListener?.('pageshow',event=>{if(event.persisted)returnToCard()});
 window.addEventListener?.('focus',refreshHomeDay);
+window.visualViewport?.addEventListener?.('resize',syncManualViewport,{passive:true});
+window.visualViewport?.addEventListener?.('scroll',syncManualViewport,{passive:true});
+window.addEventListener?.('resize',syncManualViewport,{passive:true});
+document.addEventListener?.('focusin',event=>{if(event.target?.id==='manual-search')syncManualViewport()});
+document.addEventListener?.('focusout',event=>{if(event.target?.id==='manual-search'&&typeof window.requestAnimationFrame==='function')window.requestAnimationFrame(syncManualViewport)});
 load();if(storageFailure)recoverScreen();else if(session)resume();else home();
 setInterval(()=>{
  refreshHomeDay();
