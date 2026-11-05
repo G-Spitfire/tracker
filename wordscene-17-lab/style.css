@@ -143,3 +143,51 @@ html:has(.ws-picker),body:has(.ws-picker){background:#fdf7ed}
 .ws-picker-exit{align-self:center;margin:auto 0 0;padding:24px 15px 4px;color:#667f9e;background:transparent;text-decoration:underline;text-underline-offset:4px;font-size:clamp(14px,4vw,17px);font-weight:450}
 @media(max-height:700px){.ws-picker-card{min-height:230px}.ws-picker-instruction{margin:10px 0}.ws-picker-choices{margin-top:14px}.ws-picker-exit{padding-top:12px}}
 @media(max-width:355px){.ws-picker{padding-inline:12px}.ws-picker-stats{padding:10px 4px}.ws-picker-stats>div{gap:4px}.ws-picker-card{padding:10px}.ws-picker-choices{gap:8px}}
+
+/* Paper manual selection: shared action geometry, independent scrollable vocabulary */
+html:has(.ws-manual),body:has(.ws-manual){background:#fdf7ed}
+.ws-manual{--ws-ink:#102d63;max-width:460px;min-height:100dvh;height:100dvh;margin:0 auto;padding:max(12px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));color:var(--ws-ink);display:flex;flex-direction:column;overflow:hidden}
+.ws-manual .ws-picker-header{flex:none;margin-bottom:11px}
+.ws-manual-tabs{display:grid;grid-template-columns:1fr 1fr;gap:3px;background:#fffcf8;border-radius:24px;padding:4px;box-shadow:0 3px 12px #9e744228;flex:none;margin-bottom:13px}
+.ws-manual-tab{min-width:0;border-radius:20px;background:transparent;color:#102d63;padding:12px 3px;font-size:clamp(13px,3.6vw,17px);font-weight:600;white-space:nowrap}
+.ws-manual-tab.is-active{background:linear-gradient(#d4eaff,#b8d9ff);box-shadow:0 2px 5px #377ac01c}
+.ws-manual-body{display:flex;flex-direction:column;gap:11px;flex:1;min-height:0;overflow:hidden}
+.ws-manual-topic-head{display:flex;justify-content:space-between;align-items:center;flex:none;gap:8px}
+.ws-manual-topic-head h2,.ws-manual-list-head h2{margin:0;font-size:clamp(17px,4.5vw,20px);line-height:1.2;color:var(--ws-ink)}
+.ws-manual-all{background:transparent;color:#087bfa;font-size:14px;padding:6px;font-weight:500}
+.ws-manual-topics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;overflow-y:auto;max-height:clamp(102px,21dvh,175px);padding:2px 1px 5px;flex:none}
+.ws-manual-topic{min-width:0;min-height:58px;background:#fffcf9;border:1px solid #fff;border-radius:17px;box-shadow:0 3px 8px #9e74421b;color:#133262;font-size:clamp(10px,2.75vw,13px);padding:7px 4px;display:flex;gap:4px;align-items:center;justify-content:center;line-height:1.17;text-align:left}
+.ws-manual-topic span:first-child{font-size:clamp(19px,5.5vw,25px);flex:none}
+.ws-manual-topic span:last-child{overflow-wrap:anywhere}
+.ws-manual-topic.is-active{background:#ebf6ff;border:2px solid #087bfa;padding:6px 3px}
+.ws-manual-search-label{font-size:13px;color:#51627a}
+.ws-manual-search-wrap{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #c7d8ee;border-radius:17px;padding:0 13px;box-shadow:0 2px 8px #846b4718;flex:none}
+.ws-manual-search-wrap>span{font-size:27px;color:#0753bb}
+.ws-manual-search-wrap input{border:0;box-shadow:none;background:transparent;min-width:0;padding:13px 0;color:#112e61;outline-offset:0}
+.ws-manual-list{display:flex;flex-direction:column;min-height:0;flex:1;background:#fffdfa;border:1px solid #fff;border-radius:23px;padding:12px 12px 5px;box-shadow:0 3px 12px #9e744222}
+.ws-manual-list-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex:none;padding:2px 2px 10px;border-bottom:1px solid #e9edf3}
+.ws-manual-list-head small{font-size:12px;color:#446180;text-align:right}
+.ws-manual-word-scroll{overflow-y:auto;overscroll-behavior:contain;min-height:0;flex:1}
+.ws-manual-word{display:flex;align-items:center;border-bottom:1px solid #e9edf3;min-height:55px;gap:4px}
+.ws-manual-word:last-child{border-bottom:0}
+.ws-manual-pick{display:flex;align-items:center;gap:9px;flex:1;min-width:0;padding:8px 2px;text-align:left;background:transparent;color:#142f62;font-weight:500}
+.ws-manual-pick:disabled{opacity:1;cursor:default}
+.ws-manual-check{display:grid;place-items:center;width:25px;height:25px;flex:none;border:2px solid #abb9ca;border-radius:6px;color:white;font-size:20px;line-height:1}
+.ws-manual-pick[aria-pressed="true"] .ws-manual-check{border-color:#087bfa;background:#087bfa}
+.ws-manual-word-copy{display:flex;flex-direction:column;min-width:0;gap:2px}
+.ws-manual-word-copy strong{font-size:clamp(15px,4.2vw,19px);overflow-wrap:anywhere}
+.ws-manual-word-copy small{font-size:clamp(11px,3vw,13px);font-weight:400;color:#4d6786;overflow-wrap:anywhere}
+.ws-manual-audio{flex:none;display:grid;place-items:center;background:transparent;color:#087bfa;padding:8px 4px;font-size:19px;letter-spacing:-3px}
+.ws-manual-learned{font-size:10px;max-width:68px;text-align:center;background:#e6eaf0;border-radius:12px;padding:5px;color:#677587;flex:none}
+.ws-manual-word.is-learned .ws-manual-word-copy{color:#728097}
+.ws-manual-empty{padding:25px 10px;color:#66788b;text-align:center;font-size:14px}
+.ws-manual-bottom{flex:none;background:#fdf7ed;padding-top:10px}
+.ws-manual-total{border-radius:20px;background:#f3f6ff;border:1px solid #fff;box-shadow:0 3px 10px #9e744221;padding:11px 13px;margin-bottom:10px}
+.ws-manual-total>div{display:flex;align-items:center;gap:7px;font-size:clamp(15px,4.2vw,19px);font-weight:700}
+.ws-manual-total>div>span{color:#087bfa;font-size:21px}
+.ws-manual-total strong{margin-left:auto;white-space:nowrap;color:#087bfa;font-size:clamp(18px,5vw,24px)}
+.ws-manual-total small{display:block;margin-top:5px;color:#47617c;font-size:clamp(11px,3vw,13px);line-height:1.3}
+.ws-manual-start{display:block;width:100%;min-height:var(--ws-action-min-height);border-radius:var(--ws-action-radius);background:var(--ws-action-blue);color:white;font-size:var(--ws-action-font);font-weight:650}
+.ws-manual-start:disabled{background:#e4e9ef;color:#75869b;opacity:1}
+@media(max-height:690px){.ws-manual{padding-top:max(5px,env(safe-area-inset-top))}.ws-manual .ws-picker-header{min-height:48px;margin-bottom:5px}.ws-manual-tabs{margin-bottom:7px}.ws-manual-topics{max-height:112px}.ws-manual-topic{min-height:49px}.ws-manual-body{gap:6px}.ws-manual-total{padding:7px 10px;margin-bottom:7px}}
+@media(max-width:350px){.ws-manual-topics{grid-template-columns:repeat(2,minmax(0,1fr))}.ws-manual-word{min-height:50px}.ws-manual-word-copy small{font-size:11px}}
