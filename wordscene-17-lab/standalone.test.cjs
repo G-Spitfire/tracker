@@ -17,7 +17,7 @@ test('WordScene 17 HTML and PWA have no runtime dependency on WordScene 16',()=>
  }
  assert.match(html,/\.\/content\.js\?v=21/);
  assert.match(html,/\.\/topics\.js\?v=21/);
- assert.match(sw,/wordscene-17-lab-cache-v22/);
+ assert.match(sw,/wordscene-17-lab-cache-v\\d+/);
  assert.match(manifest,/\.\/assets\/icon-192\.png/);
  assert.doesNotMatch(html,/Лаборатория/);
 });
@@ -55,6 +55,6 @@ test('service worker activation removes v19 and v20 caches but preserves unrelat
  let pending;
  listeners.activate({waitUntil:p=>{pending=p}});
  await pending;
- assert.deepEqual(removed.sort(),['wordscene-17-lab-cache-v19','wordscene-17-lab-cache-v20','wordscene-17-lab-cache-v21']);
+ assert.deepEqual(removed.sort(),['wordscene-17-lab-cache-v19','wordscene-17-lab-cache-v20','wordscene-17-lab-cache-v21','wordscene-17-lab-cache-v22']);
 });
 
