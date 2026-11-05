@@ -10,9 +10,10 @@ const cloudEnabled=['localhost','127.0.0.1'].includes(window.location?.hostname)
 const BINDINGS='wordscene-17-lab-cloud-bindings-v1';
 let cloud,cloudBusy=false,cloudConflict;
 const accountSuffix=currentAccount==='local'?'':'-account-'+currentAccount;
-const KEY='wordscene-17-lab-v1'+accountSuffix,ACTIVE='wordscene-17-lab-active-v1'+accountSuffix;
+const KEY='wordscene-17-lab-v1'+accountSuffix,ACTIVE='wordscene-17-lab-active-v1'+accountSuffix,PRACTICE='wordscene-17-lab-practice-cleared-v1'+accountSuffix;
 const root=document.getElementById('app');
 let profile,session=null,selection=null,view='home',batch=[],showAnswer=false,showHelp=false,manual=new Set(),themeIds=new Set(),manualThemes=new Set(),query='',clockStarted=null,confirmed=false,storageFailure=false,savedProfileRaw=null,savedActiveRaw=null;
+let progressRange='30',qualityRange='28',progressVisible=5;const openHistory=new Set();
 const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const dateText=at=>new Date(at).toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
 const accounts=window.WS17Accounts.create({storage:localStorage,empty:E.empty,valid:p=>p?.version===17&&p.words&&typeof p.words==='object'&&Array.isArray(p.sessions),keyFor:id=>({main:'wordscene-17-lab-v1'+(id==='local'?'':'-account-'+id),active:'wordscene-17-lab-active-v1'+(id==='local'?'':'-account-'+id),backup:'wordscene-17-lab-last-good-v1'+(id==='local'?'':'-account-'+id)})});
@@ -97,12 +98,14 @@ function paperProgress(){
 }
 function home(){
  view='home';
- const pending=E.due(profile),errors=E.residualErrors(profile).filter(id=>byId[id]);
+ const pending=E.due(profile),lastReview=profile.sessions.findLast(s=>s.mode==='review');
+ const cleared=lastReview&&localStorage.getItem(PRACTICE)===lastReview.id;
+ const errors=cleared?[]:E.residualErrors(profile).filter(id=>byId[id]);
  const blocked=storageFailure?'Сохранение заблокировано':session?'Сначала закончи занятие':'';
  const fresh=paperAction('Учить новые слова','sources',blocked||(pending.length?'Сначала повтори слова на сегодня. После этого сможешь учить новые.':''),'Выбери способ подбора');
  const repeat=pending.length?paperAction('Повторить сегодня: '+wordCount(pending.length),'review',blocked):
-  errors.length?paperAction('Повторить ошибки — '+wordCount(errors.length),'practice',blocked):
-  paperAction('Повторение','review',blocked||'Пока нет слов для повторения');
+  errors.length?paperAction('Повторить ещё раз','practice',blocked,'Если хочешь, потренируй ещё '+errors.length+' '+(errors.length%100>=11&&errors.length%100<=14?'трудных слов':errors.length%10===1?'трудное слово':errors.length%10>=2&&errors.length%10<=4?'трудных слова':'трудных слов')):
+  paperAction('На сегодня всё повторено','review',blocked||'Повторений на сегодня нет');
  shell('', '', '<main class="paper"><div class="paper-heading"><h1>'+paperIcon('book')+'WordScene</h1>'+
  '<button type="button" data-action="accounts" class="paper-profile" aria-label="Настройки профиля" '+(session?'disabled':'')+'>'+paperIcon('settings')+'</button></div>'+
  '<div class="paper-hero"><img src="./paper-lighthouse.svg" alt="" width="729" height="160"></div>'+
@@ -147,7 +150,7 @@ function finishSelection(){
   shell('Неизвестных слов не найдено','<section class="panel">'+btn('Повторить знакомые','review','primary',!E.due(profile).length)+btn('На главную','home','quiet')+'</section>');
   return;
  }
- manual=new Set(selection.unknown);view='fill';manualView(true);
+ manual=new Set(selection.unknown);manualThemes=new Set(selection.themes||[]);query='';view='fill';manualView(true);
 }
 function saveFamiliar(ids){
  const previous=profile;
@@ -163,7 +166,7 @@ function saveFamiliar(ids){
 function stopSelection(){selection=null;home()}
 function manualView(fill=false){
  view=fill?'fill':'manual';const selected=[...manual],limit=E.levelLimit(profile);
- const available=dictionary.filter(w=>!profile.words[w.en]?.origin&&(view!=='fill'||!selection?.themes?.length||T.forWord(w.en).some(t=>selection.themes.includes(t))));
+ const available=dictionary.filter(w=>!profile.words[w.en]?.origin);
  const filtered=available.filter(w=>(!manualThemes.size||T.forWord(w.en).some(t=>manualThemes.has(t)))&&(w.en+' '+w.ru).toLowerCase().includes(query.toLowerCase()));
  shell(fill?'Добавь слова до трёх':'Выбери слова','<section class="panel"><div class="counter">Выбрано '+selected.length+' · минимум 3 · максимум '+(Number.isFinite(limit)?limit:'весь словарь')+'</div><input data-input="search" placeholder="Поиск слова или перевода" value="'+h(query)+'" /><div class="chips">'+T.topics.map(t=>'<button type="button" class="chip '+(manualThemes.has(t.id)?'chosen':'')+'" data-action="manualTopic:'+h(t.id)+'">'+h(t.name)+'</button>').join('')+'</div><div class="word-picker">'+filtered.map(w=>'<button class="word-option '+(manual.has(w.en)?'picked':'')+'" data-action="pick:'+h(w.en)+'"><span>'+h(w.en)+' <small>'+h(w.ru)+'</small></span><b>'+(manual.has(w.en)?'✓':'+')+'</b></button>').join('')+'</div>'+btn('Начать изучение','startManual','primary',!E.eligible(profile,selected))+'</section>'+btn(fill?'Выйти из добора':'Назад',fill?'leaveFill':'sources','quiet'));
 }
@@ -236,8 +239,10 @@ function suspend(){
  E.pause(session);store();
 }
 function finishPractice(){
+ const finished=session.stage==='complete',lastReview=profile.sessions.findLast(s=>s.mode==='review');
  session=null;
  if(!store())return home();
+ if(finished&&lastReview){try{localStorage.setItem(PRACTICE,lastReview.id)}catch(err){notice('Не удалось сохранить отметку добровольной тренировки')}}
  view='result';
  shell('Тренировка завершена','<section class="panel">'+btn('Готово','home','primary')+'</section>');
 }
@@ -249,18 +254,55 @@ function completed(){
 }
 function expire(err){session=null;if(!storageFailure)store();notice('Занятие аннулировано: '+(err?.message||'истекло время'));home()}
 function progress(){
- view='progress';const a=Object.entries(profile.words),learned=a.filter(([_,w])=>w.origin==='learned'),mastered=a.filter(([_,w])=>E.status(w)==='mastered');
- const now=Date.now(), recent=profile.sessions.filter(s=>s.at>=now-28*86400000);
- const recalls=recent.filter(s=>s.mode==='review');
- const attempted=recalls.reduce((n,s)=>n+s.ids.length,0);
- const hits=recalls.reduce((n,s)=>n+s.successful,0);
- const weeks=Array.from({length:4},(_,i)=>{
-  const end=now-(3-i)*7*86400000;
-  const count=learned.filter(([,w])=>w.firstLearnedAt<=end).length;
-  return '<div class="history-row">'+dateText(end)+' · '+count+'<div class="progress-track"><i style="width:'+100*count/Math.max(1,learned.length)+'%"></i></div></div>';
+ view='progress';
+ const all=Object.entries(profile.words).filter(([id])=>byId[id]),total=dictionary.length;
+ const learned=all.filter(([_,w])=>w.origin==='learned').length;
+ const known=all.filter(([_,w])=>w.origin==='known').length;
+ const mastered=all.filter(([_,w])=>E.status(w)==='mastered').length;
+ const lessonDate=at=>E.day(at);
+ const lessons=profile.sessions.filter(x=>x.mode==='new').sort((a,b)=>a.at-b.at);
+ const today=E.day(),now=Date.now();
+ const monday=day=>{const d=new Date(day+'T12:00:00');return E.addDays(day,-((d.getDay()+6)%7))};
+ const days=progressRange==='30'?Array.from({length:30},(_,i)=>E.addDays(today,i-29)):(()=>{
+  const first=monday(lessons.length?lessonDate(lessons[0].at):today);
+  const last=monday(today),out=[];for(let day=first;day<=last;day=E.addDays(day,7))out.push(day);
+  return out;
+ })();
+ const points=days.map(day=>{
+  const end=progressRange==='30'?day:E.addDays(day,6);
+  return {day,value:lessons.reduce((sum,x)=>sum+(lessonDate(x.at)<=end?new Set(x.ids).size:0),0)};
+ });
+ const top=Math.max(1,...points.map(p=>p.value));
+ const coords=(points.length===1?[points[0],points[0]]:points).map((p,i,arr)=>{
+  const x=26+i*286/(arr.length-1),y=124-p.value*100/top;
+  return x.toFixed(1)+','+y.toFixed(1);
+ }).join(' ');
+ const timeLabel=day=>new Date(day+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
+ const chart='<svg class="progress-line" viewBox="0 0 340 164" role="img" aria-label="Накопленное количество изученных слов">'+
+  '<path d="M26 24V124H312" fill="none" stroke="#c5ced9" stroke-width="1.5"/>'+
+  '<text x="22" y="26" text-anchor="end">'+top+'</text><text x="22" y="127" text-anchor="end">0</text>'+
+  '<polyline points="'+coords+'" fill="none" stroke="#0877dd" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>'+
+  '<text x="26" y="145" text-anchor="start">'+timeLabel(days[0])+'</text>'+
+  '<text x="312" y="145" text-anchor="end">'+timeLabel(days[days.length-1])+'</text></svg>';
+ const reviews=profile.sessions.filter(x=>x.mode==='review'&&(qualityRange==='all'||x.at>=now-28*86400000));
+ const attempts=reviews.reduce((a,x)=>a+new Set(x.ids).size,0);
+ const hits=reviews.reduce((a,x)=>a+x.successful,0);
+ const quality=attempts?'<strong class="quality-value">'+Math.round(100*hits/attempts)+'%</strong><p>'+hits+' из '+attempts+' слов успешно вспомнены в обе стороны на первом прогоне</p>':'<p>Пока нет проверок за этот период</p>';
+ const history=profile.sessions.slice().reverse();
+ const entries=history.slice(0,progressVisible).map(x=>{
+  const count=new Set(x.ids).size,expanded=openHistory.has(x.id),type=x.mode==='new'?'Новые слова':'Повторение';
+  return '<div class="progress-session">'+btn('<strong>'+dateText(x.at)+' · '+type+'</strong><small>'+count+' слов · '+x.successful+' в обе стороны · '+(expanded?'Скрыть':'Подробнее')+'</small>','history:'+encodeURIComponent(x.id),'progress-session-toggle')+
+  (expanded?'<div class="progress-session-detail">Успешно: '+(count?Math.round(100*x.successful/count):0)+'% · Дополнительные прогоны потребовались для '+(x.extraWords||0)+' слов. '+(x.mode==='new'?'Итог третьего обязательного прогона.':'Итог первого обязательного прогона.')+'</div>':'')+'</div>';
  }).join('');
- const known=a.filter(([_,w])=>w.origin==='known'&&E.status(w)!=='mastered').length;const studying=a.filter(([_,w])=>w.origin==='learned'&&E.status(w)!=='mastered').length;const total=dictionary.length;
- shell('Мой прогресс','<section class="summary"><div><small>Изучено</small><strong>'+learned.length+'</strong></div><div><small>Закреплено</small><strong>'+mastered.length+'</strong></div><div><small>Знакомо</small><strong>'+known+'</strong></div></section><section class="panel"><h2>Освоение словаря</h2><div class="progress-track"><i style="width:'+100*(mastered.length/total)+'%"></i></div><p>'+mastered.length+' закреплено · '+studying.length+' изучено · '+known+' знакомо · '+Math.max(0,total-a.length)+' не изучено</p><h2>Изучено за последние четыре недели</h2>'+weeks+'<h2>Качество вспоминания</h2><p>'+ (attempted?Math.round(100*hits/attempted)+'% ('+hits+' из '+attempted+')':'Пока нет завершённых повторений')+' · первый прогон повторения за 28 дней</p><h2>Занятия</h2>'+profile.sessions.slice(-12).reverse().map(s=>'<div class="history-row">'+dateText(s.at)+' · '+(s.mode==='new'?'Новые':'Повторение')+' · '+s.ids.length+' слов · '+s.successful+(s.mode==='new'?' в третьем прогоне':' в первом прогоне')+'</div>').join('')+'</section>'+btn('На главную','home','quiet'));
+ const metrics='<section class="panel"><h2>Мой словарь</h2><div class="progress-total"><small>Знакомых слов</small><strong>'+(learned+known)+' из '+total+'</strong></div>'+
+  '<div class="progress-breakdown"><span>Выучил в WordScene <strong>'+learned+'</strong></span><span>Уже знал <strong>'+known+'</strong></span><span>Из них закреплено <strong>'+mastered+'</strong></span></div></section>';
+ const rangeButtons=btn('30 дней','progressRange:30',progressRange==='30'?'primary':'secondary')+btn('Всё время','progressRange:all',progressRange==='all'?'primary':'secondary');
+ const qualityButtons=btn('28 дней','qualityRange:28',qualityRange==='28'?'primary':'secondary')+btn('Всё время','qualityRange:all',qualityRange==='all'?'primary':'secondary');
+ shell('Мой прогресс',metrics+
+  '<section class="panel"><h2>Сколько слов я выучил</h2><div class="progress-switch">'+rangeButtons+'</div>'+chart+'</section>'+
+  '<section class="panel"><h2>Как хорошо я помню слова</h2><div class="progress-switch">'+qualityButtons+'</div>'+quality+'</section>'+
+  '<section class="panel"><h2>Мои занятия</h2>'+(entries||'<p class="reason">Завершённых занятий пока нет.</p>')+
+  (history.length>progressVisible?btn('Показать ещё','progressMore','secondary'):'')+'</section>'+btn('На главную','home','quiet'));
 }
 function dictionaryView(){
  view='dictionary';const list=dictionary.filter(w=>(w.en+' '+w.ru).toLowerCase().includes(query.toLowerCase()));
@@ -362,6 +404,10 @@ function dispatch(act,el){
  if(act.startsWith('topic:')){let v=act.slice(6);themeIds.has(v)?themeIds.delete(v):themeIds.add(v);return topics()}
  if(act.startsWith('manualTopic:')){const v=act.slice(12);manualThemes.has(v)?manualThemes.delete(v):manualThemes.add(v);return manualView(view==='fill')}
  if(act.startsWith('pick:')){const v=act.slice(5);manual.has(v)?manual.delete(v):manual.size<E.levelLimit(profile)&&manual.add(v);return manualView(view==='fill')}
+ if(act.startsWith('progressRange:')){progressRange=act.slice(14);return progress()}
+ if(act.startsWith('qualityRange:')){qualityRange=act.slice(13);return progress()}
+ if(act.startsWith('history:')){const id=decodeURIComponent(act.slice(8));openHistory.has(id)?openHistory.delete(id):openHistory.add(id);return progress()}
+ if(act==='progressMore'){progressVisible+=5;return progress()}
  if(act.startsWith('word:'))return wordDetail(act.slice(5));
  if(session&&E.timedOut(session,Date.now()))return expire();
  switch(act){
