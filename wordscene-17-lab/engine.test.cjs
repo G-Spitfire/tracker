@@ -75,7 +75,7 @@ test('mastery is current: a mistake removes it until a new 30-day interval succe
  assert.equal(E.status({origin:'learned',schedule:r}),'mastered');
  assert.equal(r.masteredAt,firstMasteredAt);
 });
-test('inactivity and away deadlines are independent and earliest wins',()=>{
+test('single inactivity deadline: a pause never starts a second deadline',()=>{
  const base=t('2026-11-04');
  let s=E.start(E.empty(),'new',['a','b','c'],[],base);
  E.pause(s,base+20*60000);
