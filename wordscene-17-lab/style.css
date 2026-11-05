@@ -6,7 +6,7 @@ body:has(.paper){background:#fdf7ed;min-height:100dvh}
 .paper{
  --ink:#0c1731;--muted:#495463;--blue:#0775ff;--green:#40bf24;--card:#fdf8f0;
  --card-edge:#fffaf3;--card-shadow:0 2px 4px #98643124;
- --shore-height:clamp(34px,7svh,65px);
+ --shore-height:clamp(72px,10svh,98px);
  --paper-bottom:max(8px,env(safe-area-inset-bottom));
  --paper-left:max(15px,env(safe-area-inset-left));
  --paper-right:max(15px,env(safe-area-inset-right));
