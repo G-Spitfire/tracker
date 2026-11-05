@@ -64,3 +64,23 @@ test('missing primary with valid backup requires explicit recovery instead of ne
  a.recover('child-1');
  assert.equal(a.load('child-1').status,'ok');
 });
+
+test('stale tab cannot overwrite a newer committed profile',()=>{
+ const storage=memory(),a=A.create({storage,empty:E.empty,valid:A.validProfile}),first=E.empty();
+ a.save('child-1',first);
+ const k=a.keys('child-1'),stale=storage.getItem(k.main);
+ const second=E.clone(first);second.revision=1;
+ a.save('child-1',second,null,stale,null);
+ assert.throws(()=>a.save('child-1',first,null,stale,null),/Profile changed/);
+ assert.equal(JSON.parse(storage.getItem(k.main)).revision,1);
+});
+test('failed main write preserves prior committed data and does not replace backup',()=>{
+ const base=memory(),p=E.empty(),a=A.create({storage:base,empty:E.empty,valid:A.validProfile});
+ a.save('child-1',p);
+ const keys=a.keys('child-1'),old=base.getItem(keys.main);
+ const failing={getItem:k=>base.getItem(k),setItem:(k,v)=>{if(k===keys.main)throw Error('Quota exceeded');base.setItem(k,v)},removeItem:k=>base.removeItem(k)};
+ const b=A.create({storage:failing,empty:E.empty,valid:A.validProfile}),next=E.clone(p);next.revision=1;
+ assert.throws(()=>b.save('child-1',next),/Quota exceeded/);
+ assert.equal(base.getItem(keys.main),old);
+ assert.equal(b.load('child-1').profile.revision,0);
+});
