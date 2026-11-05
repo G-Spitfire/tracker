@@ -57,7 +57,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await page.locator('#school-subject-detail').isVisible(),false);
  await page.evaluate(()=>{window.__offline=true});
  await page.evaluate(()=>document.getElementById('school-refresh').click());
- await page.waitForFunction(()=>document.querySelector('#school-error').textContent.includes('Нет связи'));
+ await page.waitForFunction(()=>document.querySelector('#school-error').textContent.includes('Показаны сохранённые оценки'));
  assert.match(await page.locator('#school-subjects').innerText(),/История[\s\S]*3,00/);
  await page.evaluate(()=>window.__switchUser(null));assert.equal(await page.locator('#school-results').isVisible(),false);assert.equal(await page.locator('#school-subjects').innerText(),'');
  await page.screenshot({path:'outputs/leveli-home.png',fullPage:true});
