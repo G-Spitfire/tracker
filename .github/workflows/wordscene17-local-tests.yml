@@ -42,3 +42,20 @@ jobs:
             sleep 1
           done
           node wordscene-17-lab/browser-acceptance.cjs
+
+  live-site-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install Playwright and browsers
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium webkit
+      - name: Test deployed GitHub Pages in desktop/mobile browsers and offline
+        env:
+          WS17_TEST_ORIGIN: https://g-spitfire.github.io/tracker
+        run: node wordscene-17-lab/browser-acceptance.cjs
