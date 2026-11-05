@@ -31,7 +31,7 @@ function load(){
 function notice(s){let el=document.getElementById('notice');if(!el){el=document.createElement('div');el.id='notice';el.setAttribute('role','status');document.body.append(el)}el.textContent=s;el.hidden=false;clearTimeout(notice.id);notice.id=setTimeout(()=>el.hidden=true,5500)}
 function speak(id){if(!('speechSynthesis' in window))return notice('Озвучивание недоступно на этом устройстве');const u=new SpeechSynthesisUtterance(id);u.lang='en-US';u.rate=.83;speechSynthesis.cancel();speechSynthesis.speak(u)}
 function btn(label,event,cls='',disabled=false){return '<button type="button" data-action="'+event+'" class="'+cls+'" '+(disabled?'disabled':'')+'>'+label+'</button>'}
-function head(name){return '<header><span class="brand">WordScene <b>17</b></span><span class="lab">Лаборатория · отдельный прогресс</span></header><main><h1>'+name+'</h1>'}
+function head(name){return '<header><span class="brand">WordScene <b>17</b></span></header><main><h1>'+name+'</h1>'}
 function end(){return '</main>'}
 function shell(title,html,layout){root.innerHTML=layout||head(title)+html+end();root.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click',()=>{if(root.contains?.(el)===false)return;return dispatch(el.dataset.action,el)}));root.querySelectorAll('[data-input]').forEach(el=>el.addEventListener('input',()=>{const caret=el.selectionStart;query=el.value;render();const next=root.querySelector('[data-input]');if(next){next.focus();next.setSelectionRange(caret,caret)}}));}
 function warnLocked(){if(storageFailure){notice('Сохранение недоступно, изменения заблокированы');return true}if(session){notice('Сначала закончи или отмени текущее занятие');return true}return false}
