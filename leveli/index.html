@@ -25,7 +25,7 @@ const pages=[...document.querySelectorAll('[data-page]')],tabs=[...document.quer
 function navigate(page){if(!pages.some(x=>x.dataset.page===page))page='home';for(const p of pages)p.hidden=p.dataset.page!==page;for(const t of tabs){if(t.dataset.tab===page)t.setAttribute('aria-current','page');else t.removeAttribute('aria-current')}window.scrollTo(0,0);history.replaceState(null,'','#'+page)}
 document.addEventListener('click',e=>{const target=e.target.closest('[data-tab],[data-go]');if(target)navigate(target.dataset.tab||target.dataset.go)});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
-document.getElementById('wordscene').addEventListener('click',()=>{location.href='../wordscene/'});
+document.getElementById('wordscene').addEventListener('click',()=>{location.href='../wordscene-17-lab/'});
 addEventListener('hashchange',()=>navigate(location.hash.slice(1)));navigate(location.hash.slice(1)||'home');
 </script><script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js';
@@ -84,4 +84,4 @@ document.getElementById('school-form').addEventListener('submit',async e=>{e.pre
 document.getElementById('school-refresh').addEventListener('click',load);window.addEventListener('online',load);
 document.getElementById('school-logout').addEventListener('click',()=>signOut(auth).catch(showError));
 onAuthStateChanged(auth,user=>{++loadGeneration;firestoreProfileName='';clearSchool();login.hidden=!!user;results.hidden=!user;error.textContent='';updateIdentity(user);if(user){loadProfile(user);load()}else {clearSchool()}},showError);
-</script><script src="../wordscene/state-guard.js"></script><script src="../wordscene/cloud-firestore.js"></script><script type="module" src="./learning.js"></script></body></html>
+</script><script src="./state-guard.js"></script><script src="./cloud-firestore.js"></script><script type="module" src="./learning.js"></script></body></html>

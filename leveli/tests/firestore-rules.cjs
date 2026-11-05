@@ -36,12 +36,10 @@ test('unlisted collections and preference writers stay closed',async()=>{
  for(const p of ['unlisted/x','schoolGrades/A/private/x']){await assertFails(getDoc(doc(db('A'),p)));await assertFails(setDoc(doc(db('A'),p),{anything:true}))}
 });
 test('real backup transport round-trips encoded nested arrays under candidate rules',async()=>{
- const {create}=require('../../wordscene/cloud-firestore.js'),guard=require('../../wordscene/state-guard.js');
+ const {create}=require('../cloud-firestore.js'),guard=require('../state-guard.js');
  const firestore=db('roundtrip'),auth={currentUser:{uid:'roundtrip'}};
  const cloud=create({auth,db:firestore,sdk:{doc,getDoc,runTransaction,serverTimestamp},validate:x=>guard.valid(x,500)});
  const progress={...payload,words:{cup:{started:true,times:[[1,2],[3]],attempts:3}},reviewCycle:[]};
- const values=new Map([['word-scenes-v5',JSON.stringify(progress)]]),storage={getItem:key=>values.get(key)||null,setItem:(key,value)=>values.set(key,value),removeItem:key=>values.delete(key)};
- const engine=require('../../wordscene/cloud-sync.js').create({auth,cloud,storage,validate:x=>guard.valid(x,500),canSync:uid=>uid==='roundtrip'});
- assert.equal((await engine.bootstrapBackup()).status,'pushed');const remote=await cloud.read();assert.deepEqual(remote.payload,progress);assert.equal(remote.revision,1);
+ await cloud.write(progress,0);const remote=await cloud.read();assert.deepEqual(remote.payload,progress);assert.equal(remote.revision,1);
  await assert.rejects(()=>cloud.write(progress,0),/conflict/);await cloud.write(progress,1);assert.equal((await cloud.read()).revision,2);
 });
