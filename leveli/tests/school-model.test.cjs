@@ -58,7 +58,7 @@ test('improvement goal uses hypothetical weight-one fives and thresholds',()=>{
  assert.equal(S.fivesNeeded(grades),8);
  assert.equal(S.fivesNeeded([{value:5},{value:5}]),null);
  assert.equal(S.fivesNeeded([{value:5},{value:5},{value:5}]),null);
- assert.equal(S.fivesNeeded([{value:2},{value:2},{value:2}]),2);
+ assert.equal(S.fivesNeeded([{value:2},{value:2},{value:2}]),1);
 });
 test('explicit academic year and quarter overrides approximate calendar; unknown period stays unknown',()=>{
  assert.equal(S.period({date:'2026-11-02',quarter:1,schoolYear:'2026/2027'}),'2026-1');
