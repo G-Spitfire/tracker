@@ -787,3 +787,5 @@ html:has(#app > header),body:has(#app > header){
 }
 @media(max-height:580px){.ws-recall-header small{display:none}.ws-recall-v2 .ws-recall-card{padding:8px}.ws-recall-prompt{margin-bottom:3px}.ws-recall-separator{margin:5px 0}.ws-recall-placeholder{min-height:45px}}
 @media(prefers-reduced-motion:reduce){.ws-recall-progress span{transition:none}}
+
+.ws-recall-association{display:block;min-height:44px;flex:none;margin:8px auto 0;padding:9px 12px;border:1px solid #d2dfed;background:#fffbf5;border-radius:13px;color:#0753bb;font-size:14px;font-weight:650}
