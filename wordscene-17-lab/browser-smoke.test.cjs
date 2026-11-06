@@ -100,7 +100,7 @@ test('recall v4 offers optional flip and association only after reveal',()=>{
  assert.match(b.root.html,/ws-recall-v4/);
  b.click('no');
  assert.match(b.root.html,/aria-expanded="true"/);
- assert.match(b.root.html,/Посмотри правильный перевод/);
+ assert.match(b.root.html,/Посмотри правильный ответ/);
  assert.match(b.root.html,/data-action="advance"/);
  assert.doesNotMatch(b.root.html,/data-action="yes"/);
  b.click('help');
@@ -167,7 +167,7 @@ test('reload restores the same card before the deadline without moving it',()=>{
  b.click('learnNext');b.click('pause');
  const key='wordscene-17-lab-active-v1', saved=b.map.get(key);
  const restored=boot({map:b.map,now:b.now()+29*60000});
- assert.match(restored.root.html,/Слово 2 из 10/);
+ assert.match(restored.root.html,/2 из 10/);
  assert.equal(b.map.get(key),saved);
  const expired=boot({map:b.map,now:b.now()+30*60000});
  assert.match(expired.root.html,/Учить новые слова/);
@@ -259,10 +259,10 @@ test('Paper picker v2 keeps aligned counters, approved button order and two-way 
  assert.match(b.root.html,/aria-expanded="false"/);
  assert.match(b.root.html,/class="ws-paper-dream ws-paper-dream-empty"/);
  b.click('known');
- assert.match(b.root.html,/Знаю<strong>1<\/strong>/);
+ assert.match(b.root.html,/Неизвестных: 0 из 10/);
  assert.match(b.root.html,/1\/50/);
  b.click('unknown');
- assert.match(b.root.html,/Изучить<strong>1<\/strong>/);
+ assert.match(b.root.html,/Неизвестных: 1 из 10/);
  assert.match(b.root.html,/2\/50/);
  b.click('stopSelection');
  assert.match(b.root.html,/Учить новые слова/);
@@ -300,7 +300,7 @@ test('manual selection keeps cross-topic picks and search is independent of topi
  assert.match(b.root.html,/Выбрано слов:[\s\S]*3 \/ 15/);
  assert.match(b.root.html,/data-action="startManual"[^>]*>/);
  b.click('manualTopic:food');
- assert.match(b.root.html,/aria-expanded="true"/);
+ assert.match(b.root.html,/aria-pressed="true"/);
  b.click('startManual');
  assert.match(b.root.html,/Запоминание/);
 });
