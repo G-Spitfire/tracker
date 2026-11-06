@@ -32,6 +32,27 @@ test('automatic 10 word selection -> memorization -> 3 two-way passes -> atomic 
  assert.equal(data.sessions.length,1);assert.equal(Object.keys(data.words).length,10);
  assert.match(b.root.html,/Занятие завершено/);
 });
+test('approved memorization UI keeps illustration visible, progress and unchanged recall help',()=>{
+ const b=boot();b.click('sources');b.click('manual');
+ b.click('pick:apple');b.click('pick:cake');b.click('pick:cheese');b.click('startManual');
+ assert.match(b.root.html,/class="ws-learn ws-learn-v2"/);
+ assert.match(b.root.html,/Прогресс запоминания/);
+ assert.match(b.root.html,/aria-valuenow="1"/);
+ assert.match(b.root.html,/class="art"/);
+ assert.match(b.root.html,/class="scene"/);
+ assert.match(b.root.html,/data-action="say:apple"/);
+ assert.doesNotMatch(b.root.html,/data-action="toggleArt"|Представить без картинки|Показать ассоциацию/);
+ b.click('pause');assert.match(b.root.html,/data-action="continue"/);
+ b.click('continue');assert.match(b.root.html,/class="art"/);
+ b.click('learnNext');assert.match(b.root.html,/aria-valuenow="2"/);
+ b.click('learnNext');assert.match(b.root.html,/aria-valuenow="3"/);
+ assert.match(b.root.html,/Начать проверку/);
+ b.click('learnNext');
+ assert.match(b.root.html,/data-action="check"/);
+ b.click('check');
+ assert.match(b.root.html,/data-action="help"/);
+});
+
 test('confirmed cancellation keeps persistent profile clean',()=>{
  const b=boot();b.click('sources');b.click('auto');
  for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
