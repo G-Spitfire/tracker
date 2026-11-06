@@ -901,3 +901,111 @@ html:has(#app > header),body:has(#app > header){
  .ws-recall-flip-inner{transition:none}
   .ws-recall-flip.turn-to-back .ws-recall-flip-inner,.ws-recall-flip.turn-to-front .ws-recall-flip-inner{animation:none}
 }
+
+/* WordScene Learning Card System 2.0 — one visual language for selection, memorization and recall. */
+:root{
+ --ws-study-paper:#fffbf5;
+ --ws-study-inner:#eaf3ff;
+ --ws-study-line:#e8decf;
+ --ws-study-radius:25px;
+ --ws-study-inner-radius:19px;
+ --ws-study-shadow:0 5px 18px rgba(57,45,27,.075),0 1px 2px rgba(57,45,27,.04);
+ --ws-study-ink:#0c1731;
+ --ws-study-muted:#527399;
+}
+.ws-picker-v2 .ws-picker-card,
+.ws-learn-v2 .learn,
+.ws-recall-v4 .ws-recall-card{
+ background:var(--ws-study-paper);
+ border:1px solid var(--ws-study-line);
+ border-radius:var(--ws-study-radius);
+ box-shadow:var(--ws-study-shadow);
+}
+.ws-picker-v2 .ws-picker-reveal,
+.ws-learn-v2 .ws-learn-primary,
+.ws-recall-v4 .ws-recall-face{
+ background:var(--ws-study-inner);
+ border-radius:var(--ws-study-inner-radius);
+}
+.ws-picker-v2 .ws-picker-card{padding:12px;min-height:clamp(245px,36dvh,330px)}
+.ws-picker-v2 .ws-picker-reveal{background:var(--ws-study-inner);padding:15px 10px 8px;box-shadow:none}
+.ws-picker-v2 .ws-picker-word,
+.ws-learn-v2 .learn h2,
+.ws-recall-v4 .ws-recall-word{
+ font-size:clamp(32px,9vw,42px);
+ font-weight:850;
+ line-height:1.1;
+ letter-spacing:-.025em;
+ color:var(--ws-study-ink);
+}
+.ws-learn-v2 .learn{padding:12px;display:flex;flex-direction:column;gap:9px}
+.ws-learn-v2 .ws-learn-primary{padding:12px 10px 11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;flex:none}
+.ws-learn-v2 .learn h2{margin:2px 0 3px}
+.ws-learn-pronunciation{display:flex;gap:2px;min-height:44px;justify-content:center;align-items:center}
+.ws-learn-v2 .ws-learn-pronunciation .ipa{font-size:17px;color:var(--ws-study-muted)}
+.ws-learn-v2 .ws-learn-speak,
+.ws-recall-v4 .ws-recall-speak{
+ background:transparent;
+ width:44px;height:44px;min-width:44px;min-height:44px;
+ margin:0;padding:10px;display:grid;place-items:center;
+ color:#087bfa;border-radius:50%;
+ position:relative;
+}
+.ws-learn-v2 .ws-learn-speak::before,
+.ws-recall-v4 .ws-recall-speak::before{
+ content:"";position:absolute;inset:7px;background:#dcecff;border-radius:50%;
+}
+.ws-learn-v2 .ws-learn-speak svg,
+.ws-recall-v4 .ws-recall-speak svg{width:20px;height:20px;position:relative;z-index:1}
+.ws-learn-v2 .learn .translation{border:0;margin:2px 0 0;padding:1px 0 0;font-size:clamp(23px,6.5vw,29px);font-weight:800}
+.ws-learn-v2 .ws-learn-association{background:#f3ecf8;border-radius:17px;padding:9px;min-height:0}
+.ws-learn-v2 .learn .art{background:transparent;padding:0;margin:0 auto;min-height:0}
+.ws-learn-v2 .learn .art svg,.ws-learn-v2 .learn .art img{max-height:205px}
+.ws-learn-v2 .learn .scene{margin:6px 2px 2px;text-align:center}
+.ws-recall-v4 .ws-recall-card{
+ margin:clamp(10px,4dvh,32px) 0 0;
+ padding:11px;
+ flex:0 1 auto;
+ height:clamp(235px,36dvh,320px);
+ max-height:none;
+ min-height:0;
+ overflow:hidden;
+}
+.ws-recall-v4 .ws-recall-flip{height:100%;min-height:0}
+.ws-recall-v4 .ws-recall-face{border:0;inset:0;padding:13px;overflow-y:auto}
+.ws-recall-v4 .ws-recall-actions{margin-top:0;gap:6px}
+.ws-recall-v4 .ws-recall-face-front{gap:8px}
+.ws-recall-v4 .ws-recall-face-back{gap:6px}
+.ws-recall-v4 .ws-recall-card.is-expanded{
+ flex:1 1 auto;
+ height:auto;
+ max-height:none;
+ min-height:0;
+ margin:8px 0 0;
+}
+.ws-recall-v4 .ws-recall-card.is-expanded .ws-recall-face-back{
+ justify-content:flex-start;
+ overflow-y:auto;
+ overscroll-behavior:contain;
+}
+.ws-recall-v4 .ws-recall-card.is-expanded .ws-recall-face-back::before,
+.ws-recall-v4 .ws-recall-card.is-expanded .ws-recall-face-back::after{display:none}
+.ws-recall-v4 .ws-recall-clue{background:#f3ecf8;border-radius:16px;text-align:left;flex:none;padding:11px}
+.ws-recall-v4 .ws-recall-clue-art{max-height:none;overflow:visible;display:grid;place-items:center}
+.ws-recall-v4 .ws-recall-clue-art img,
+.ws-recall-v4 .ws-recall-clue-art svg{max-height:220px;max-width:100%;height:auto;width:auto;object-fit:contain}
+@media(max-height:700px){
+ .ws-picker-v2 .ws-picker-card{min-height:0}
+ .ws-learn-v2 .learn{padding:9px;gap:6px}
+ .ws-learn-v2 .ws-learn-primary{padding:8px}
+ .ws-learn-v2 .learn .art svg,.ws-learn-v2 .learn .art img{max-height:145px}
+ .ws-recall-v4 .ws-recall-card{height:clamp(165px,34dvh,235px);margin-top:10px}
+ .ws-recall-v4 .ws-recall-card.is-expanded{height:auto;min-height:0;flex:1 1 auto}
+ .ws-recall-v4 .ws-recall-face{padding:9px}
+ .ws-recall-v4 .ws-recall-clue-art img,.ws-recall-v4 .ws-recall-clue-art svg{max-height:160px}
+}
+@media(max-height:580px){
+ .ws-learn-v2 .learn .art svg,.ws-learn-v2 .learn .art img{max-height:105px}
+ .ws-recall-v4 .ws-recall-card{height:clamp(155px,32dvh,185px);margin-top:6px}
+ .ws-recall-v4 .ws-recall-card.is-expanded{height:auto}
+}
