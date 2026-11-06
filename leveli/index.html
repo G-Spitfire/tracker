@@ -448,6 +448,64 @@ body{background:#0e0c21;color:#f6f0ff}
 :root[data-leveli-theme="light"] .trend-sparse strong{color:#624295}
 :root[data-leveli-theme="light"] .trend-sparse span{color:#665678}
 @media(max-width:360px){:root .help-btn{width:44px;height:44px}:root .forecast-legend button{min-height:44px}}
+
+/* Leveli B3: game-inspired settings. Old form controls and IDs stay intact inside the dialog. */
+[data-page="profile"]{position:relative}
+[data-page="profile"]>.profile-header,[data-page="profile"]>.profile-card{display:none!important}
+[data-page="profile"] .b3-settings{display:block}
+.b3-header{display:flex;align-items:center;gap:12px;margin:4px 0 0}
+.b3-header h1{font-size:24px;line-height:1.2;letter-spacing:-.025em;margin:0;color:#fff;font-weight:800}
+.b3-header p{font-size:12px;color:#baa9d2;margin:4px 0 0}
+.b3-home-btn{width:44px;height:44px;display:grid;place-items:center;flex:none;border-radius:12px;border:1px solid #544069;background:#2b2444;color:#f4eaff;font-size:23px;cursor:pointer}
+.b3-hero-space{padding-top:94px}
+.b3-hero{border-radius:24px;border:1px solid var(--leveli-accent-border);padding:87px 16px 18px;background:linear-gradient(148deg,var(--leveli-accent-dim),#241c3d 81%);position:relative;text-align:center;box-shadow:0 16px 36px -27px var(--leveli-accent-glow)}
+.b3-glow{position:absolute;width:210px;height:95px;left:50%;top:-80px;transform:translateX(-50%);background:var(--leveli-accent-glow);filter:blur(27px);opacity:.18;pointer-events:none}
+.b3-avatar-stand{position:absolute;top:-95px;left:50%;transform:translateX(-50%);width:174px;height:174px;border-radius:47% 47% 34% 34%;padding:8px;background:radial-gradient(circle at 45% 25%,var(--leveli-accent-dim),#21192f);border:3px solid var(--leveli-accent-border);box-shadow:0 0 0 6px #0e0c21,0 12px 25px #0006}
+.b3-avatar-stand .profile-avatar{height:100%;width:100%;display:block;border:0;overflow:hidden;border-radius:46% 46% 32% 32%;background:#44355f}
+.b3-avatar-stand .avatar-illustration{width:100%;max-width:none;height:100%;aspect-ratio:auto;border-radius:46% 46% 32% 32%}
+.b3-avatar-stand .profile-avatar-custom{height:100%;border-radius:46% 46% 32% 32%}
+.b3-identity-slot .profile-identity{display:block}
+.b3-identity-slot #profile-name{font-size:28px!important;margin:0;color:#fff}
+.b3-identity-slot #profile-account{font-size:12px;color:#c8b9da;margin:6px 0}
+.b3-change-avatar{min-height:44px;margin:14px auto 0;border-radius:12px;background:#ffffff13;border:1px solid var(--leveli-accent-border);color:#fff;padding:10px 15px;font-size:12px;font-weight:800;cursor:pointer}
+.b3-hero-footer{border-top:1px solid #ffffff28;padding-top:14px;margin-top:16px;font-size:11px;color:#cbbdda}
+.b3-hero-footer span{margin:0 8px}
+.b3-section-label{margin:24px 3px 10px;color:#b9aaca;letter-spacing:.11em;font-size:11px;font-weight:800;text-transform:uppercase}
+.b3-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.b3-tile{min-height:132px;min-width:0;text-align:left;padding:14px;border-radius:18px;display:flex;flex-direction:column;align-items:flex-start;gap:7px;background:#1c1735;border:1px solid #453360;color:#fff;cursor:pointer}
+.b3-tile-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:13px;background:var(--leveli-accent-dim);color:#fff;font-size:23px}
+.b3-tile strong{font-size:13px;font-weight:800;line-height:1.35;margin-top:auto}
+.b3-tile small{font-size:11px;color:#b8a9ca}
+.b3-extra{background:#1c1735;border:1px solid #453360;border-radius:18px;padding:0 13px}
+.b3-extra button{background:transparent;color:#fff;border:0;border-bottom:1px solid #453360;min-height:54px;width:100%;display:flex;align-items:center;justify-content:space-between;text-align:left;font-weight:700;font-size:13px;cursor:pointer}
+.b3-extra button:last-child{border-bottom:0}
+.b3-extra button span{font-size:21px;color:#b5a6ce}
+.b3-overlay{position:fixed;z-index:30;inset:0;display:flex;justify-content:center;align-items:center;padding:20px 12px;background:#090617d9;overflow:auto}
+.b3-overlay[hidden]{display:none!important}
+.b3-dialog{width:min(100%,480px);max-height:min(84dvh,740px);overflow-y:auto;background:#1c1735;border:1px solid var(--leveli-accent-border);border-radius:22px;padding:16px;color:#fff;box-shadow:0 18px 50px #0007}
+.b3-dialog-header{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.b3-dialog-header h2{font-size:18px;margin:0}
+#b3-panel-close{border:0;background:#302747;border-radius:11px;width:44px;height:44px;color:#fff;font-size:23px;cursor:pointer}
+.b3-dialog .profile-card{display:block!important;margin-top:10px}
+.b3-dialog .profile-card[hidden]{display:none!important}
+.b3-dialog .profile-card h2{display:none}
+.b3-dialog .personal-group{display:none}
+.b3-dialog[data-section="avatar"] .personal-group:has(#personal-avatar-options),.b3-dialog[data-section="theme"] .personal-group:has(#personal-theme-options),.b3-dialog[data-section="accent"] .personal-group:has(#personal-accent-options),.b3-dialog[data-section="icons"] .personal-group:has(#personal-pack-options){display:block}
+.b3-dialog .personal-option{min-height:48px}
+.b3-dialog #profile-personalization{margin-top:0}
+.b3-settings button:focus-visible,.b3-dialog button:focus-visible{outline:3px solid var(--leveli-accent);outline-offset:2px}
+:root[data-leveli-theme="light"] .b3-header h1,:root[data-leveli-theme="light"] .b3-identity-slot #profile-name{color:#302448}
+:root[data-leveli-theme="light"] .b3-header p,:root[data-leveli-theme="light"] .b3-section-label,:root[data-leveli-theme="light"] .b3-identity-slot #profile-account{color:#746489}
+:root[data-leveli-theme="light"] .b3-hero{background:linear-gradient(145deg,#ece0f9,#fff)}
+:root[data-leveli-theme="light"] .b3-avatar-stand{box-shadow:0 0 0 6px #f7f4fc,0 12px 25px #31204735;background:#eee2f8}
+:root[data-leveli-theme="light"] .b3-hero-footer{color:#73617f;border-top-color:#dfd1ee}
+:root[data-leveli-theme="light"] .b3-change-avatar{color:#302448;background:#ffffffaa}
+:root[data-leveli-theme="light"] .b3-tile,:root[data-leveli-theme="light"] .b3-extra{background:#fff;border-color:#e4dbef;color:#302448}
+:root[data-leveli-theme="light"] .b3-tile small,:root[data-leveli-theme="light"] .b3-extra button span{color:#746489}
+:root[data-leveli-theme="light"] .b3-extra button{color:#302448;border-bottom-color:#e4dbef}
+:root[data-leveli-theme="light"] .b3-dialog{background:#fff;color:#302448}
+:root[data-leveli-theme="light"] .b3-dialog-header h2{color:#302448}
+@media(max-width:360px){.b3-tile{padding:12px;min-height:124px}.b3-avatar-stand{width:156px;height:156px;top:-84px}.b3-hero{padding-top:80px}.b3-hero-space{padding-top:84px}}
 </style></head><body><div class="app"><main class="content" id="main">
 <section data-page="home"><header class="school-header"><div><div class="eyebrow brand-lockup"><img src="./brand/mark.svg" alt="" width="30" height="30" aria-hidden="true"><span>Левели</span></div><h1 id="home-greeting">Привет!</h1><p id="home-birthday-greeting" class="home-birthday-greeting" hidden></p><p>Мои оценки и успеваемость</p><div class="header-period" id="school-header-period">II четверть · 2026/27 учебный год</div></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
 <article class="card" id="school-login"><h2>Войди, чтобы увидеть оценки</h2><p>Оценки загружаются из электронного дневника.</p><form id="school-form"><label>Почта<input id="school-email" type="email" autocomplete="username" required></label><label>Пароль<input id="school-password" type="password" autocomplete="current-password" required></label><button class="btn" type="submit">Войти</button></form></article>
@@ -469,6 +527,23 @@ body{background:#0e0c21;color:#f6f0ff}
 <article class="card subjects-card"><div class="card-heading"><h2>Все предметы</h2><span id="school-subject-count" class="muted"></span></div>
 <div id="school-filter-buttons" hidden></div><select id="school-filter" hidden><option value="all">Все предметы</option><option value="strong">Сильные</option><option value="attention">Требуют внимания</option></select><div id="school-subjects"></div></article><p id="school-status" class="muted">Загрузка…</p><p id="school-freshness" aria-live="polite"></p></div></div><p id="school-error" role="alert" class="muted"></p></section>
 <section data-page="profile" hidden>
+ <div class="b3-settings" id="b3-settings">
+  <header class="b3-header"><button type="button" class="b3-home-btn" data-go="home" aria-label="На главную">←</button><div><h1>Мой Левели</h1><p>Персональное пространство</p></div></header>
+  <div class="b3-hero-space"><div class="b3-hero"><div class="b3-glow" aria-hidden="true"></div><div class="b3-avatar-stand" id="b3-avatar-stand"></div><div class="b3-identity-slot" id="b3-identity-slot"></div><button class="b3-change-avatar" type="button" data-b3-panel="avatar">Изменить аватар</button><div class="b3-hero-footer">✦ Мой профиль <span>·</span> Мой стиль</div></div></div>
+  <h2 class="b3-section-label">Быстрые настройки</h2>
+  <div class="b3-tiles">
+    <button type="button" class="b3-tile" data-b3-panel="quarter"><span class="b3-tile-icon">▦</span><strong>Выбрать четверть</strong><small id="b3-quarter-status">II четверть</small></button>
+    <button type="button" class="b3-tile" data-b3-panel="theme"><span class="b3-tile-icon">◐</span><strong>Тема</strong><small id="b3-theme-status">Тёмная</small></button>
+    <button type="button" class="b3-tile" data-b3-panel="accent"><span class="b3-tile-icon">◉</span><strong>Акцентные цвета</strong><small id="b3-accent-status">Фиолетовый</small></button>
+    <button type="button" class="b3-tile" data-b3-panel="icons"><span class="b3-tile-icon">✧</span><strong>Вариант иконок</strong><small id="b3-icons-status">Вариант 1</small></button>
+  </div>
+  <h2 class="b3-section-label">Дополнительно</h2>
+  <div class="b3-extra">
+    <button type="button" data-b3-panel="birthday">День рождения <span aria-hidden="true">›</span></button>
+    <button type="button" data-b3-panel="account">Аккаунт и данные <span aria-hidden="true">›</span></button>
+  </div>
+ </div>
+ <div id="b3-panel-overlay" class="b3-overlay" role="presentation" hidden><div class="b3-dialog" role="dialog" aria-modal="true" aria-labelledby="b3-panel-title"><div class="b3-dialog-header"><h2 id="b3-panel-title">Настройка</h2><button type="button" id="b3-panel-close" aria-label="Закрыть настройки">×</button></div><div id="b3-panel-host"></div></div></div>
  <header class="profile-header"><button class="btn secondary profile-back" data-go="home">← На главную</button><h1 class="section-title">Настройки и профиль</h1><p>Твой профиль и учебные результаты</p></header>
  <article class="card profile-card"><div class="profile-identity"><div class="profile-avatar" id="profile-avatar-display" aria-hidden="true">★</div><div><h2 id="profile-name">Гость</h2><p id="profile-account">Войди на главной, чтобы подключить профиль.</p></div></div><p id="profile-school" class="muted" hidden></p></article>
  <article class="card profile-card" id="profile-personalization" hidden>
@@ -485,7 +560,48 @@ body{background:#0e0c21;color:#f6f0ff}
  <article class="card profile-card"><h2>Учебный период</h2><p>Выбери четверть для просмотра оценок, графиков и прогнозов.</p><div class="profile-period"><div id="school-period-buttons" class="choice-buttons"></div><p id="school-period-notice" class="period-notice" role="status" aria-live="polite" hidden></p><select id="school-period" hidden><option value="all">Все оценки</option></select><button type="button" id="school-current-period" class="btn secondary">Вернуться к текущей четверти</button></div></article>
  <article class="card profile-card profile-account-actions" id="profile-actions" hidden><h2>Аккаунт и данные</h2><p>Оценки обновляются автоматически.</p><div class="profile-actions"><button class="btn secondary" id="school-refresh">Проверить обновления</button><button class="btn secondary profile-logout" id="school-logout">Выйти из аккаунта</button></div></article>
 </section>
-</main></div><script src="./school-model.js"></script><script>
+</main></div>
+<script>
+/* B3 UI shell: pre-existing preference controls, period selector and account logic are reused verbatim. */
+(()=>{
+ const profile=document.querySelector('[data-page="profile"]');
+ const hero=document.getElementById('b3-avatar-stand');
+ const identity=document.querySelector('.profile-identity');
+ const info=identity.querySelector('div:last-child');
+ const identitySlot=document.getElementById('b3-identity-slot');
+ hero.append(document.getElementById('profile-avatar-display'));
+ identitySlot.append(info);
+ const overlay=document.getElementById('b3-panel-overlay'),host=document.getElementById('b3-panel-host'),dialog=overlay.querySelector('.b3-dialog'),heading=document.getElementById('b3-panel-title');
+ const cards={
+  avatar:document.getElementById('profile-personalization'),theme:document.getElementById('profile-personalization'),
+  accent:document.getElementById('profile-personalization'),icons:document.getElementById('profile-personalization'),
+  quarter:document.querySelector('.profile-period').closest('.profile-card'),
+  birthday:document.getElementById('profile-birthday-card'),account:document.getElementById('profile-actions')
+ };
+ const titles={avatar:'Выбрать аватар',theme:'Тема',accent:'Акцентные цвета',icons:'Вариант иконок',quarter:'Выбрать четверть',birthday:'День рождения',account:'Аккаунт и данные'};
+ let previous=null,active=null,lastTrigger=null;
+ const updateQuarter=()=>{const value=document.getElementById('school-period').value;const q=Number(value.split('-')[1]);document.getElementById('b3-quarter-status').textContent=(['','I','II','III','IV'][q]||'—')+' четверть'};
+ const observer=new MutationObserver(updateQuarter);observer.observe(document.getElementById('school-period'),{attributes:true,childList:true,subtree:true});document.getElementById('school-period').addEventListener('change',updateQuarter);
+ const open=(key,trigger)=>{
+  if(!cards[key]||cards[key].hidden)return;
+  lastTrigger=trigger;previous=cards[key].parentElement;active=cards[key];heading.textContent=titles[key];dialog.dataset.section=key;
+  host.replaceChildren(active);overlay.hidden=false;document.getElementById('b3-panel-close').focus();
+ };
+ const close=()=>{
+  if(active&&previous)previous.append(active);
+  active=null;previous=null;overlay.hidden=true;
+  lastTrigger?.focus();lastTrigger=null;updateQuarter();
+ };
+ profile.querySelectorAll('[data-b3-panel]').forEach(btn=>btn.addEventListener('click',()=>open(btn.dataset.b3Panel,btn)));
+ document.getElementById('b3-panel-close').addEventListener('click',close);
+ overlay.addEventListener('click',e=>{if(e.target===overlay)close()});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!overlay.hidden){e.preventDefault();close()}});
+ document.addEventListener('click',e=>{if(e.target.closest('[data-go="home"]')&&!overlay.hidden)close()});
+ updateQuarter();
+ window.LeveliB3={open:key=>open(key,profile.querySelector('[data-b3-panel="'+key+'"]')),close};
+})();
+</script>
+<script src="./school-model.js"></script><script>
 'use strict';
 const pages=[...document.querySelectorAll('[data-page]')];function navigate(page){if(page!=='profile')page='home';for(const p of pages)p.hidden=p.dataset.page!==page;window.scrollTo(0,0);history.replaceState(null,'','#'+page)}document.addEventListener('click',e=>{const target=e.target.closest('[data-go]');if(target)navigate(target.dataset.go)});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
@@ -542,6 +658,9 @@ window.LeveliAppearance=(()=>{
   }
   const ageLabel=document.querySelector('#profile-age'),n=age();ageLabel.textContent=n===null?'Дата рождения необязательна.':('Возраст: '+n);
   const date=document.querySelector('#profile-birthday');if(date.value!==profile.birthday)date.value=profile.birthday;
+  document.getElementById('b3-theme-status').textContent={dark:'Тёмная',light:'Светлая',system:'Системная'}[profile.theme];
+  document.getElementById('b3-accent-status').textContent={violet:'Фиолетовый',pink:'Розовый',blue:'Синий',yellow:'Жёлтый',mint:'Мятный'}[profile.accent];
+  document.getElementById('b3-icons-status').textContent={'classic':'Вариант 1','cats':'Вариант 2','sports':'Вариант 3'}[profile.pack];
   if(uid)drawControls();
  }
  function button(label,selected,action,extra,style){
