@@ -59,6 +59,12 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.ok((await page.locator('#school-subject-detail .detail-chart-scroll rect[filter="url(#leveli-subject-bar-glow)"]').count())<=6);
  await page.getByRole('button',{name:'Средний балл',exact:true}).click();
  assert.equal(await page.locator('#school-subject-detail .detail-chart-scroll polyline[filter="url(#leveli-subject-line-glow)"]').count(),1);
+ const fit=await page.locator('#school-subject-detail .detail-chart-scroll').evaluate(el=>{
+   const svg=el.querySelector('svg');
+   return {chart:svg.getBoundingClientRect().width,container:el.clientWidth,scroll:el.scrollWidth};
+ });
+ assert.ok(fit.chart<=fit.container+1,'average line must fit the visible chart');
+ assert.ok(fit.scroll<=fit.container+1,'average line must not scroll horizontally');
  assert.equal(await page.locator('#school-subject-detail .detail-header .detail-period').innerText(),'I четверть');
  assert.ok((await page.locator('#school-subject-detail').evaluate(el=>el.scrollWidth<=el.clientWidth+1)),'subject detail must not overflow phone viewport');
  await page.getByRole('button',{name:'Контрольные'}).click();
