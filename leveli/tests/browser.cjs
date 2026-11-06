@@ -253,7 +253,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  // Visual baseline checks: text/background contrast in both themes (WCAG 4.5:1 normal text).
  const themeAudit=await page.evaluate(()=>{
   const root=document.documentElement,old=root.dataset.leveliTheme;
-  const channels=color=>{const m=color.match(/rgba?\\(([^)]+)\\)/);return m?m[1].split(',').slice(0,3).map(x=>Number(x.trim())/255):null};
+  const channels=color=>{const m=color.match(/rgba?\(([^)]+)\)/);return m?m[1].split(',').slice(0,3).map(x=>Number(x.trim())/255):null};
   const lum=color=>{const vals=channels(color);if(!vals)return NaN;return vals.map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((a,v,i)=>a+v*[.2126,.7152,.0722][i],0)};
   const contrast=(a,b)=>{const x=lum(a),y=lum(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
   const out=[];
