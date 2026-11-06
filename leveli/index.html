@@ -614,6 +614,12 @@ body{background:#0e0c21;color:#f6f0ff}
 :root .b3-extra button svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;color:var(--ds-text-secondary)}
 :root[data-leveli-theme="light"] .b3-extra button svg{color:#746489}
 
+/* Design-kit typography: shared screen and card title sizes across dashboard and subject. */
+:root .school-header h1{font-size:var(--ds-font-screen);line-height:var(--ds-line-heading)}
+:root .forecast-card .card-heading h2,:root .trend-card .card-heading h2,:root .subjects-card h2,:root .orient-heading h2{font-size:var(--ds-font-card);line-height:var(--ds-line-heading)}
+:root .card p{line-height:var(--ds-line-normal)}
+@media(max-width:360px){:root .school-header h1{font-size:clamp(23px,7vw,var(--ds-font-screen))}}
+
 /* Leveli single-avatar trial: compact horizontal profile, no false window frame. */
 .b3-hero-space{padding-top:29px!important}
 .b3-hero{display:grid!important;grid-template-columns:minmax(0,44%) minmax(0,56%);align-items:center;min-height:170px;padding:14px 15px 14px 0!important;text-align:left!important;overflow:visible;background:linear-gradient(125deg,var(--leveli-accent-dim),#241c3d 85%)}
