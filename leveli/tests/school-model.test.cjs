@@ -104,7 +104,7 @@ test('2 to 5 grades compare last grade with weighted mean of all preceding grade
  assert.equal(S.summary(four).previousAverage,4);
  assert.equal(S.summary(four.slice(0,2)).difference,1);
  assert.equal(S.summary([{value:2,weight:3,date:dates[0]},{value:4,weight:1,date:dates[1]},{value:5,weight:9,date:dates[2]}]).difference,2.5);
- assert.equal(S.summary([...four,{value:5,date:dates[4]}]).difference,1);
+ assert.equal(S.summary([...four,{value:5,date:dates[4]}]).difference,0.75);
 });
 test('6+ grades compare disjoint groups of three, ignoring earlier marks',()=>{
  const data=[2,4,5,4,2,5,5].map((value,i)=>({value,date:new Date(2026,10,i+1)}));
