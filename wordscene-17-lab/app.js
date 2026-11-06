@@ -243,11 +243,11 @@ function pickerIcon(name){
 }
 function paperWordSide(w,english,back=false,hidden=false){
  return '<div class="ws-paper-face'+(back?' ws-paper-face-back':'')+'" aria-hidden="'+hidden+'" '+(hidden?'inert':'')+'>'+
-  '<div class="ws-paper-grain" aria-hidden="true"></div><div class="ws-paper-metadata"><span>WORDSCENE</span><span>'+(back?'02 / BACK':'01 / FRONT')+'</span></div>'+
+  '<div class="ws-paper-grain" aria-hidden="true"></div>'+
   '<div class="ws-paper-wordbox"><strong class="ws-paper-word">'+h(english?w.en:w.ru)+'</strong>'+
   '<span class="ws-paper-ipa">'+(english?h(w.ipa||''):'')+'</span>'+
   '<span class="ws-paper-sound-slot">'+(english?btn(pickerIcon('volume'),'say:'+h(w.en),'ws-paper-sound'):'')+'</span></div>'+
-  '<div class="ws-paper-foot"><span>LEARN BY IMAGINATION</span><span>↻ ПЕРЕВЕРНИ</span></div></div>';
+  '<div class="ws-paper-foot"><span>↻ ПЕРЕВЕРНИ</span></div></div>';
 }
 function paperSheet(w,frontEnglish,flipped=false,locked=false,motion=''){
  return '<div class="ws-paper-stage"><div class="ws-paper-underlay" aria-hidden="true"></div>'+
