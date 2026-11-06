@@ -6,6 +6,7 @@ on:
       - '.github/workflows/leveli-model-tests.yml'
   push:
     branches:
+      - main
       - 'feature/leveli-grade-model-audit-1'
     paths:
       - 'leveli/**'
