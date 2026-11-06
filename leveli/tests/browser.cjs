@@ -250,6 +250,29 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   width:getComputedStyle(el).width,height:getComputedStyle(el).height,stroke:getComputedStyle(el).strokeWidth
  }));
  assert.equal(iconStyle.width,'24px');assert.equal(iconStyle.height,'24px');assert.equal(iconStyle.stroke,'2px');
+ // Visual baseline checks: text/background contrast in both themes (WCAG 4.5:1 normal text).
+ const themeAudit=await page.evaluate(()=>{
+  const root=document.documentElement,old=root.dataset.leveliTheme;
+  const channels=color=>{const m=color.match(/rgba?\(([^)]+)\)/);return m?m[1].split(',').slice(0,3).map(x=>Number(x.trim())/255):null};
+  const lum=color=>{const vals=channels(color);if(!vals)return NaN;return vals.map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((a,v,i)=>a+v*[.2126,.7152,.0722][i],0)};
+  const contrast=(a,b)=>{const x=lum(a),y=lum(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
+  const out=[];
+  for(const theme of ['dark','light']){
+   root.dataset.leveliTheme=theme;
+   const tile=document.querySelector('.b3-tile');
+   const text=tile.querySelector('strong'),sub=tile.querySelector('small'),section=document.querySelector('.b3-section-label');
+   const bg=getComputedStyle(tile).backgroundColor;
+   const pageBg=getComputedStyle(document.body).backgroundColor;
+   out.push({theme,headline:contrast(getComputedStyle(text).color,bg),subtitle:contrast(getComputedStyle(sub).color,bg),section:contrast(getComputedStyle(section).color,pageBg)});
+  }
+  root.dataset.leveliTheme=old;
+  return out
+ });
+ for(const metrics of themeAudit)for(const key of ['headline','subtitle','section']){
+  assert.ok(metrics[key]>=4.5,'contrast '+key+' '+metrics.theme+' must be at least 4.5:1; got '+metrics[key]);
+ }
+ const hits=await page.locator('.b3-home-btn,.b3-change-avatar,.b3-tile,.b3-extra button').evaluateAll(items=>items.map(el=>({name:el.textContent.trim(),w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height})));
+ for(const hit of hits)assert.ok(hit.w>=44&&hit.h>=44,'accessible control '+hit.name+' is smaller than 44px');
  for(const width of [320,360,390,430]){
   await page.setViewportSize({width,height:844});
   const state=await page.evaluate(()=>({
