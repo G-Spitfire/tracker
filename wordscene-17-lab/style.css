@@ -499,3 +499,49 @@ html:has(#app > header),body:has(#app > header){
  #app:has(>header) .flash.recall h2{font-size:clamp(27px,8vw,34px)}
  #app:has(>header) .word-option{padding:11px 8px;font-size:13px}
 }
+
+
+/* UI Kit 1.0 — automatic picker v2, scoped to keep manual selection unchanged. */
+.ws-picker-v2{--ws-ink:#0c1731;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+.ws-picker-v2 .ws-picker-header{min-height:52px;margin-bottom:11px}
+.ws-picker-v2 .ws-picker-heading{display:flex;flex-direction:column;align-items:center;gap:2px}
+.ws-picker-v2 .ws-picker-heading h1{font-size:clamp(22px,5.8vw,27px);color:#0c1731}
+.ws-picker-v2 .ws-picker-heading small{font-size:12px;color:#596676;font-weight:500}
+.ws-picker-v2 .ws-picker-back{width:44px;height:44px;top:4px;display:grid;place-items:center;color:#087bfa}
+.ws-picker-svg{width:24px;height:24px;flex:none}
+.ws-picker-v2 .ws-picker-back .ws-picker-svg{width:27px;height:27px}
+.ws-picker-v2 .ws-picker-position{position:absolute;right:0;top:5px;display:grid;place-items:center;height:44px;font-size:13px;color:#596676;font-variant-numeric:tabular-nums}
+.ws-picker-v2 .ws-picker-stats{border-radius:21px;background:#fffbf5;border:1px solid #e8decf;box-shadow:0 3px 10px #98643115;padding:11px 9px}
+.ws-picker-v2 .ws-picker-stats>div{color:#596676;font-size:12px;font-weight:500;gap:9px}
+.ws-picker-v2 .ws-picker-stats>div:first-child .ws-picker-svg{color:#268137}
+.ws-picker-v2 .ws-picker-stats>div:last-child .ws-picker-svg{color:#087bfa}
+.ws-picker-v2 .ws-picker-stats strong{font-size:23px;font-weight:750;color:#0c1731;margin-top:2px}
+.ws-picker-v2 .ws-picker-instruction{color:#495463;font-size:14px;margin:14px 0 12px}
+.ws-picker-v2 .ws-picker-card{border-radius:21px;padding:11px;min-height:clamp(265px,40dvh,360px);background:#fffbf5;border:1px solid #e8decf;box-shadow:0 6px 17px #9e744226}
+.ws-picker-v2 .ws-picker-reveal{border-radius:17px;min-height:170px;background:linear-gradient(145deg,#edf6ff,#e2f0ff);gap:11px;padding:15px 12px 9px;touch-action:manipulation}
+.ws-picker-v2 .ws-picker-word{font-size:clamp(34px,10vw,48px);line-height:1.06;color:#0c1731;max-width:100%;overflow-wrap:anywhere}
+.ws-picker-v2 .ws-picker-ipa{font-size:clamp(17px,4.8vw,21px);color:#476386}
+.ws-picker-v2 .ws-picker-translation{font-size:clamp(22px,6vw,27px);margin-top:4px;color:#0c1731}
+.ws-picker-v2 .ws-picker-hint{background:transparent;color:#476a96;font-size:clamp(12px,3.4vw,14px);line-height:1.3;padding:5px 3px;border-radius:0}
+.ws-picker-v2 .ws-picker-speak{min-width:48px;min-height:48px;width:48px;height:48px;font-size:unset;margin:7px auto 0;background:#dceafe;color:#087bfa}
+.ws-picker-v2 .ws-picker-choices{gap:11px;margin-top:13px}
+.ws-picker-v2 .ws-picker-choices button{min-height:63px;border-radius:21px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:clamp(16px,4.7vw,20px)}
+.ws-picker-v2 .ws-picker-known{background:linear-gradient(#087bfa,#0046aa);color:white}
+.ws-picker-v2 .ws-picker-unknown{background:#e1efff;border:1px solid #b8d8ff;color:#0753bb}
+.ws-picker-v2 .ws-picker-reveal:focus-visible,.ws-picker-v2 button:focus-visible{outline:3px solid #087bfa;outline-offset:2px}
+@media(max-height:700px){
+ .ws-picker-v2{padding-top:max(7px,env(safe-area-inset-top));padding-bottom:max(7px,env(safe-area-inset-bottom));min-height:100dvh;height:100dvh;overflow:hidden}
+ .ws-picker-v2 .ws-picker-header{min-height:45px;margin-bottom:6px}
+ .ws-picker-v2 .ws-picker-back{width:44px;height:44px;top:0}
+ .ws-picker-v2 .ws-picker-position{top:0}
+ .ws-picker-v2 .ws-picker-stats{padding:7px 6px}
+ .ws-picker-v2 .ws-picker-instruction{margin:8px 0;font-size:13px}
+ .ws-picker-v2 .ws-picker-card{min-height:0;flex:1;padding:8px}
+ .ws-picker-v2 .ws-picker-reveal{min-height:0;gap:5px;padding:8px 7px 4px}
+ .ws-picker-v2 .ws-picker-word{font-size:clamp(32px,9.5vw,42px)}
+ .ws-picker-v2 .ws-picker-ipa{font-size:17px}
+ .ws-picker-v2 .ws-picker-hint{font-size:12px;padding:4px 2px}
+ .ws-picker-v2 .ws-picker-speak{width:44px;height:44px;min-width:44px;min-height:44px;margin-top:4px}
+ .ws-picker-v2 .ws-picker-choices{margin-top:8px;gap:9px}
+}
+@media(max-width:355px){.ws-picker-v2 .ws-picker-choices button{gap:4px;padding:8px}.ws-picker-v2 .ws-picker-stats>div{gap:5px}}
