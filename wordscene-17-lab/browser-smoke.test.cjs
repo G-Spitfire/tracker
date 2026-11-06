@@ -203,16 +203,16 @@ test('manual selection keeps cross-topic picks and search is independent of topi
  assert.match(b.root.html,/Начать изучение \(0 слов\)/);
  assert.match(b.root.html,/data-action="manualTab:search"/);
  b.click('pick:apple');
- assert.match(b.root.html,/Выбрано слов:[\s\S]*1 \/ 10/);
+ assert.match(b.root.html,/Выбрано слов:[\s\S]*1 \/ 15/);
  b.click('manualTab:search');
  assert.match(b.root.html,/Поиск по всему словарю/);
- assert.match(b.root.html,/Выбрано слов:[\s\S]*1 \/ 10/);
+ assert.match(b.root.html,/Выбрано слов:[\s\S]*1 \/ 15/);
  b.click('manualTab:topics');
  b.click('manualTopic:animals');
  assert.match(b.root.html,/Животные/);
- assert.match(b.root.html,/Выбрано слов:[\s\S]*1 \/ 10/);
+ assert.match(b.root.html,/Выбрано слов:[\s\S]*1 \/ 15/);
  b.click('pick:cat');b.click('pick:dog');
- assert.match(b.root.html,/Выбрано слов:[\s\S]*3 \/ 10/);
+ assert.match(b.root.html,/Выбрано слов:[\s\S]*3 \/ 15/);
  assert.match(b.root.html,/data-action="startManual"[^>]*>/);
  b.click('manualTopic:food');
  assert.match(b.root.html,/aria-pressed="true"/);
@@ -221,7 +221,8 @@ test('manual selection keeps cross-topic picks and search is independent of topi
 });
 
 test('manual UI Kit v2 keeps the approved hierarchy, scoped controls and progress meter',()=>{
- const b=boot();b.click('sources');b.click('manual');
+ const topics={topics:[{id:'food',name:'Еда и напитки'},{id:'animals',name:'Животные'}],forWord:id=>id==='apple'?['food']:['animals']};
+ const b=boot({topics});b.click('sources');b.click('manual');
  assert.match(b.root.html,/class="ws-manual ws-manual-v2"/);
  assert.match(b.root.html,/Ручной подбор/);
  assert.match(b.root.html,/По темам/);
@@ -232,7 +233,7 @@ test('manual UI Kit v2 keeps the approved hierarchy, scoped controls and progres
  assert.match(b.root.html,/Начать изучение \(0 слов\)/);
  b.click('pick:apple');
  assert.match(b.root.html,/aria-valuenow="1"/);
- assert.match(b.root.html,/Выбрано слов:[\s\S]*1 \/ 10/);
+ assert.match(b.root.html,/Выбрано слов:[\s\S]*1 \/ 15/);
  b.click('manualSummary');
  assert.match(b.root.html,/data-action="removeManual:apple"/);
  b.click('manualTab:search');
@@ -262,14 +263,14 @@ test('selection summary removes cross-topic words and updates total and lesson b
  const topics={topics:[{id:'food',name:'Еда и напитки'},{id:'animals',name:'Животные'}],forWord:id=>id==='apple'?['food']:['animals']};
  const b=boot({topics});b.click('sources');b.click('manual');
  b.click('pick:apple');b.click('manualTopic:animals');b.click('pick:cat');b.click('pick:dog');
- assert.match(b.root.html,/Выбрано слов:[\s\S]*3 \/ 10/);
+ assert.match(b.root.html,/Выбрано слов:[\s\S]*3 \/ 15/);
  assert.match(b.root.html,/Начать изучение \(3 слова\)/);
  b.click('manualSummary');
  assert.match(b.root.html,/aria-label="Выбранные слова"/);
  assert.match(b.root.html,/data-action="removeManual:apple"/);
  assert.match(b.root.html,/data-action="removeManual:cat"/);
  b.click('removeManual:apple');
- assert.match(b.root.html,/Выбрано слов:[\s\S]*2 \/ 10/);
+ assert.match(b.root.html,/Выбрано слов:[\s\S]*2 \/ 15/);
  assert.match(b.root.html,/Начать изучение \(2 слова\)/);
  assert.doesNotMatch(b.root.html,/data-action="removeManual:apple"/);
  assert.match(b.root.html,/data-action="removeManual:dog"/);
