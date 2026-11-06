@@ -84,8 +84,8 @@ test('recall UI v2 follows question, hint, reveal, evaluation and next card with
  assert.doesNotMatch(b.root.html,/class="ws-recall-answer"/);
  assert.match(b.root.html,/data-action="check"/);
  const css=file('style.css');
- assert.match(css,/\\.ws-recall-v2\\{display:flex;flex-direction:column/);
- assert.match(css,/\\.ws-recall-decisions\\{display:grid;grid-template-columns:repeat\\(2/);
+ assert.ok(css.includes('.ws-recall-v2{display:flex;flex-direction:column'));
+ assert.ok(css.includes('.ws-recall-decisions{display:grid;grid-template-columns:repeat(2'));
 });
 
 test('confirmed cancellation keeps persistent profile clean',()=>{
