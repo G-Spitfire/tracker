@@ -1415,3 +1415,9 @@ html:has(.ws-result-page),body:has(.ws-result-page){background:#fdf7ed}
 @media(prefers-reduced-motion:reduce){
  .ws-result-chevron{transition:none}
 }
+
+/* Audit decisions 23–26: all interactive touch targets are at least 44 CSS px. */
+.ws-paper-dream-toggle,
+.ws-manual-v3 .ws-manual-all,
+.ws-manual-v3 .ws-manual-summary-toggle,
+.ws-progress-page .progress-switch button{min-height:44px;min-width:44px}
