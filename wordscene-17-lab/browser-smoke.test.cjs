@@ -9,7 +9,7 @@ function boot(options={}){
    if(q!=='[data-action]')return [];
    const hits=[...this.html.matchAll(/data-action="([^"]+)"/g)];
    return hits.map(hit=>{const el={dataset:{action:hit[1]},addEventListener:(event,cb)=>{el.click=cb}};this.listeners[hit[1]]=el;return el});
-  },pauseTime:{},querySelector(q){return q==='#pause-time'&&this.html.includes('id="pause-time"')?this.pauseTime:null}
+  },pauseTime:{},querySelector(q){if(q==='[data-flip-card]'&&this.html.includes('data-flip-card="true"'))return {addEventListener:(name,fn)=>{if(name==='click')this.flip=()=>fn({target:{closest:()=>null}})}};return q==='#pause-time'&&this.html.includes('id="pause-time"')?this.pauseTime:null}
  };
  let now=options.now??Date.now(),tick;
  class TestDate extends Date{static now(){return now}}
@@ -20,14 +20,14 @@ function boot(options={}){
  const mod={exports:{}};vm.runInNewContext(file('engine.js'),Object.assign(context,{module:mod,exports:mod.exports}));window.WS17Engine=mod.exports;
  vm.runInContext(file('seed.js'),context);vm.runInContext(file('legacy-art.js'),Object.assign(context,{WordSceneContent:window.WordSceneContent}));
  delete context.module;delete context.exports;vm.runInContext(file('accounts.js'),context);window.WS17Accounts=context.WS17Accounts;vm.runInContext(file('app.js'),context);
- function click(action){const el=root.listeners[action];assert.ok(el,'Missing action '+action+'; available '+Object.keys(root.listeners).join(','));el.click()}
+ function click(action){if(action==='flip'){assert.ok(root.flip,'Flip handler missing');return root.flip()}const el=root.listeners[action];assert.ok(el,'Missing action '+action+'; available '+Object.keys(root.listeners).join(','));el.click()}
  return {click,root,map,window,now:()=>now,advanceTime:ms=>{now+=ms;tick()},setFailProfileWrite:v=>{failProfileWrite=v}};
 }
 test('automatic 10 word selection -> memorization -> 3 two-way passes -> atomic result',()=>{
  const b=boot();b.click('sources');b.click('auto');
  for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
  for(let i=0;i<10;i++)b.click('learnNext');
- for(let i=0;i<60;i++){b.click('check');b.click('checkedYes')}
+ for(let i=0;i<60;i++)b.click('yes')
  const data=JSON.parse(b.map.get('wordscene-17-lab-v1'));
  assert.equal(data.sessions.length,1);assert.equal(Object.keys(data.words).length,10);
  assert.match(b.root.html,/Занятие завершено/);
@@ -48,40 +48,37 @@ test('approved memorization UI keeps illustration visible, progress and unchange
  for(let i=0;i<7;i++)b.click('learnNext');
  assert.match(b.root.html,/Начать проверку/);
  b.click('learnNext');
- assert.match(b.root.html,/data-action="check"/);
- b.click('check');
+ assert.match(b.root.html,/data-flip-card="true"/);
+ b.click('flip');
  assert.match(b.root.html,/data-action="help"/);
 });
 
-test('recall v3 keeps action positions stable and makes translation optional',()=>{
+test('recall v4 offers optional flip and association only after reveal',()=>{
  const b=boot();b.click('sources');b.click('auto');
  for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
  for(let i=0;i<10;i++)b.click('learnNext');
- assert.match(b.root.html,/class="ws-recall-v2 ws-recall-v3"/);
+ assert.match(b.root.html,/ws-recall-v4/);
  assert.match(b.root.html,/data-action="yes"/);
  assert.match(b.root.html,/data-action="no"/);
- assert.match(b.root.html,/data-action="check"/);
- assert.doesNotMatch(b.root.html,/class="ws-recall-answer"/);
- assert.match(b.root.html,/Показать перевод/);
- b.click('recallHint');
- assert.match(b.root.html,/Ассоциация/);
- b.click('recallHint');
- b.click('check');
- assert.match(b.root.html,/class="ws-recall-answer"/);
- assert.match(b.root.html,/Скрыть перевод/);
+ assert.match(b.root.html,/data-flip-card="true"/);
+ assert.match(b.root.html,/aria-expanded="false"/);
+ assert.doesNotMatch(b.root.html,/data-action="recallHint"|data-action="check"/);
+ b.click('flip');
+ assert.match(b.root.html,/aria-expanded="true"/);
+ assert.match(b.root.html,/data-action="help"/);
  assert.match(b.root.html,/data-action="checkedYes"/);
- assert.match(b.root.html,/data-action="checkedNo"/);
- b.click('hideTranslation');
- assert.match(b.root.html,/data-action="check"/);
- assert.match(b.root.html,/data-action="yes"/);
+ b.click('help');
+ assert.match(b.root.html,/ws-recall-clue-art/);
+ b.click('help');
+ b.click('flip');
+ assert.match(b.root.html,/aria-expanded="false"/);
  b.click('yes');
- assert.match(b.root.html,/class="ws-recall-v2 ws-recall-v3"/);
- assert.doesNotMatch(b.root.html,/class="ws-recall-answer"/);
+ assert.match(b.root.html,/ws-recall-v4/);
  b.click('no');
- assert.match(b.root.html,/class="ws-recall-answer"/);
+ assert.match(b.root.html,/aria-expanded="true"/);
  assert.match(b.root.html,/Посмотри правильный перевод/);
  assert.match(b.root.html,/data-action="advance"/);
- assert.match(b.root.html,/data-action="checkedYes"[^>]*disabled/);
+ assert.doesNotMatch(b.root.html,/data-action="yes"/);
  b.click('help');
  assert.match(b.root.html,/ws-recall-clue-art/);
  b.click('pause');
@@ -89,11 +86,11 @@ test('recall v3 keeps action positions stable and makes translation optional',()
  b.click('continue');
  assert.match(b.root.html,/ws-recall-clue-art/);
  b.click('advance');
- assert.match(b.root.html,/data-action="check"/);
+ assert.match(b.root.html,/data-action="yes"/);
  const css=file('style.css');
- assert.ok(css.includes('.ws-recall-v3 .ws-recall-card{flex:1 1 auto;min-height:0'));
- assert.ok(css.includes('.ws-recall-v3 .ws-recall-actions{flex:none'));
- assert.ok(css.includes('.ws-recall-v3 .ws-recall-translation{display:block;min-height:54px'));
+ assert.ok(css.includes('.ws-recall-v4 .ws-recall-card'));
+ assert.ok(css.includes('.ws-recall-v4 .ws-recall-speak'));
+ assert.ok(css.includes('.ws-recall-v4 .ws-recall-next'));
 });
 
 test('confirmed cancellation keeps persistent profile clean',()=>{
@@ -109,8 +106,8 @@ test('failed final profile write does not falsely display completion',()=>{
  const b=boot();b.click('sources');b.click('auto');
  for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
  for(let i=0;i<10;i++)b.click('learnNext');
- for(let i=0;i<59;i++){b.click('check');b.click('checkedYes')}
- b.click('check');b.setFailProfileWrite(true);b.click('checkedYes');
+ for(let i=0;i<59;i++)b.click('yes')
+ b.setFailProfileWrite(true);b.click('yes');
  const data=JSON.parse(b.map.get('wordscene-17-lab-v1'));
  assert.equal(data.sessions.length,0);
  assert.doesNotMatch(b.root.html,/Занятие завершено/);
@@ -168,7 +165,7 @@ test('mandatory review unlocks voluntary practice for final errors without chang
  assert.match(b.root.html,/Повторить ещё раз[\s\S]*Если хочешь, потренируй ещё 1 трудное слово/);
  b.click('practice');
  for(let i=0;i<4;i++){b.click('no');b.click('advance');b.click('yes')}
- b.click('check');b.click('checkedYes');b.click('check');b.click('checkedYes');
+ b.click('yes');b.click('yes');
  assert.equal(b.map.get(key),saved);
  assert.equal(b.map.has('wordscene-17-lab-active-v1'),false);
  b.click('home');
