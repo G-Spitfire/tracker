@@ -86,13 +86,14 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
    track:document.querySelector('#school-donut circle[data-accent-track="true"]')?.getAttribute('stroke'),
    line:document.querySelector('#school-trend polyline[filter="url(#leveli-line-glow)"]')?.getAttribute('stroke'),
    grade:document.querySelector('#school-donut circle[stroke="#6ee6ae"]')?.getAttribute('stroke'),
-   pressed:getComputedStyle(document.querySelector('#school-period-buttons button[aria-pressed="true"]')).borderTopColor
+   pressed:getComputedStyle(document.querySelector('#school-period-buttons button[aria-pressed="true"]')).borderTopColor,
+   borderToken:getComputedStyle(document.documentElement).getPropertyValue('--leveli-accent-border').trim()
   }));
   assert.equal(state.accent,accent);
   assert.equal(state.track,track);
   assert.equal(state.line,glow);
   assert.equal(state.grade,'#6ee6ae','semantic fifth-grade segment must not change');
-  assert.equal(state.pressed,'rgb('+[parseInt(accent.slice(1,3),16),parseInt(accent.slice(3,5),16),parseInt(accent.slice(5,7),16)].join(', ')+')');
+  assert.equal(state.pressed,'rgb('+[parseInt(state.borderToken.slice(1,3),16),parseInt(state.borderToken.slice(3,5),16),parseInt(state.borderToken.slice(5,7),16)].join(', ')+')');
  }
  await page.getByRole('button',{name:'Розовый',exact:true}).click();
  await page.getByRole('button',{name:'← На главную'}).click();
