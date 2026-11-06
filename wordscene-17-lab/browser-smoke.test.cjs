@@ -70,7 +70,7 @@ test('pause displays a countdown without extending the saved deadline',()=>{
 
 test('Paper shows real totals with new words first and the reason inside the locked button',()=>{
  const b=boot();
- assert.match(b.root.html,/Учить новые слова[\s\S]*Выбери способ подбора[\s\S]*На сегодня всё повторено/);
+ assert.match(b.root.html,/Учить новые слова[\s\S]*Выбери способ подбора[\s\S]*Отлично! Всё повторено/);
  assert.match(b.root.html,/class="paper-rings"/);
  assert.doesNotMatch(b.root.html,/Добавить 10|Тренировка написания/);
 });
@@ -108,7 +108,7 @@ test('mandatory review unlocks voluntary practice for final errors without chang
  assert.equal(b.map.get(key),saved);
  assert.equal(b.map.has('wordscene-17-lab-active-v1'),false);
  b.click('home');
- assert.match(b.root.html,/На сегодня всё повторено/);
+ assert.match(b.root.html,/Отлично! Всё повторено/);
  assert.doesNotMatch(b.root.html,/Повторить ещё раз/);
 });
 
@@ -236,4 +236,50 @@ test('scroll hints are initially hidden until actual overflow is measured',()=>{
  const b=boot();b.click('sources');b.click('manual');
  assert.match(b.root.html,/class="ws-manual-scroll-note" aria-hidden="true" hidden/);
  assert.match(b.root.html,/class="ws-manual-topics-note" aria-hidden="true" hidden/);
+});
+
+
+test('Paper weekly goal counts only completed new-word lessons for Monday-Sunday and does not cap the display',()=>{
+ const at=new Date(2026,10,6,12).getTime(),earlier=new Date(2026,9,30,12).getTime(),monday=new Date(2026,10,2,12).getTime();
+ const p=boot({now:at}).window.WS17Engine.empty();
+ function session(i,date,ids){
+  p.sessions.push({id:'weekly-test-'+i,mode:'new',at:date,ids,successful:ids.length});
+  for(const id of ids)p.words[id]={origin:'learned',schedule:{...boot({now:at}).window.WS17Engine.newSchedule(date),nextDay:'2099-01-01'},history:[]};
+ }
+ session(1,monday,Array.from({length:20},(_,i)=>'mon-'+i));
+ session(2,at,Array.from({length:13},(_,i)=>'fri-'+i));
+ session(3,earlier,['previous-week']);
+ const known='known-earlier';p.words[known]={origin:'known',schedule:boot({now:at}).window.WS17Engine.newSchedule(at),history:[]};
+ const map=new Map([['wordscene-17-lab-v1',JSON.stringify(p)]]);
+ const b=boot({map,now:at});
+ assert.match(b.root.html,/За неделю:<\/dt><dd>33 из 30/);
+ assert.match(b.root.html,/class="ring-fill weekly"/);
+ assert.match(b.root.html,/--ring-value:100/);
+ const nextWeek=boot({map,now:new Date(2026,10,9,12).getTime()});
+ assert.match(nextWeek.root.html,/За неделю:<\/dt><dd>0 из 30/);
+ assert.equal(nextWeek.map.get('wordscene-17-lab-v1'),map.get('wordscene-17-lab-v1'));
+});
+
+test('Paper uses an informational success card, simplified level, and no plus for enabled learning',()=>{
+ const b=boot();
+ assert.match(b.root.html,/class="paper-done" role="status"/);
+ assert.doesNotMatch(b.root.html,/data-action="review"/);
+ assert.match(b.root.html,/class="paper-level-help"/);
+ assert.match(b.root.html,/Как перейти на следующий уровень/);
+ assert.doesNotMatch(b.root.html,/paper-icon-plus/);
+ assert.match(b.root.html,/class="paper-action paper-sources"/);
+ const css=file('style.css');
+ assert.match(css,/prefers-reduced-motion:reduce/);
+ assert.match(css,/\\.paper-done-mark/);
+ assert.match(css,/\\.paper-rings \\.ring-fill/);
+});
+
+test('mandatory due review keeps new-word button locked and never shows the all-done card',()=>{
+ const at=new Date(2026,10,6,12).getTime(),E=boot({now:at}).window.WS17Engine,p=E.empty();
+ p.words.apple={origin:'learned',schedule:E.newSchedule(at-2*86400000),history:[]};
+ const b=boot({now:at,map:new Map([['wordscene-17-lab-v1',JSON.stringify(p)]])});
+ assert.match(b.root.html,/paper-action paper-sources" disabled/);
+ assert.match(b.root.html,/paper-icon-lock/);
+ assert.match(b.root.html,/Повторить сегодня: 1 слово/);
+ assert.doesNotMatch(b.root.html,/class="paper-done"/);
 });
