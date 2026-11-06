@@ -7,7 +7,7 @@
 
 ## Файлы для публикации
 
-Архив `leveli_new_avatars_v3.zip` подготовлен отдельно от GitHub и содержит:
+Архив `leveli_new_avatars_v3.zip` сохранён в пользовательской Библиотеке ChatGPT по пути `/Leveli/leveli_new_avatars_v3.zip` и содержит:
 - `webp/avatar-01.webp` … `webp/avatar-10.webp`;
 - `png/avatar-01.png` … `png/avatar-10.png`;
 - `preview.png` с проверкой на светлом и тёмном фоне.
