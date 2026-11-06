@@ -307,8 +307,67 @@ body{background:#0e0c21;color:#f6f0ff}
 .school-header .brand-lockup{display:inline-flex;align-items:center;gap:7px;letter-spacing:0;font-size:17px;font-weight:800;line-height:1.25;color:#f5eaff}
 .school-header .brand-lockup img{width:30px;height:30px;display:block;object-fit:contain;flex:none}
 @media(max-width:360px){.school-header .brand-lockup img{width:27px;height:27px}}
+
+/* Personalization tokens: separate visual accents from semantic grade colors. */
+:root{--leveli-accent:#a882ff;--leveli-accent-soft:#e2cdff;--leveli-accent-dim:#514071;--leveli-accent-border:#b48cf3}
+:root:not([data-leveli-theme="light"]){color-scheme:dark}
+:root[data-leveli-theme="light"]{color-scheme:light;background:#f7f4fc;color:#302448}
+:root[data-leveli-theme="light"] body{background:#f7f4fc;color:#302448}
+:root[data-leveli-theme="light"] .school-header h1,:root[data-leveli-theme="light"] .card h2,:root[data-leveli-theme="light"] .orient-heading h2,:root[data-leveli-theme="light"] .profile-header .section-title,:root[data-leveli-theme="light"] .subject-row__name{color:#27193d}
+:root[data-leveli-theme="light"] .card,:root[data-leveli-theme="light"] .profile-card{background:#fff;border-color:#e4dbef;color:#302448}
+:root[data-leveli-theme="light"] .school-header p,:root[data-leveli-theme="light"] .profile-header p,:root[data-leveli-theme="light"] .card p,:root[data-leveli-theme="light"] .muted{color:#746588}
+:root[data-leveli-theme="light"] .school-header .brand-lockup{color:#33214e}
+:root[data-leveli-theme="light"] .donut-panel,:root[data-leveli-theme="light"] .subject-row,:root[data-leveli-theme="light"] .detail-kpi>div,:root[data-leveli-theme="light"] .detail-chart-scroll{background:#f3eefb;border-color:#e5d8f1;color:#302448}
+:root[data-leveli-theme="light"] .subject-row__name,:root[data-leveli-theme="light"] .donut-title,:root[data-leveli-theme="light"] .forecast-center strong,:root[data-leveli-theme="light"] .forecast-legend .legend-count{color:#342450}
+:root[data-leveli-theme="light"] .subject-row__meta,:root[data-leveli-theme="light"] .subject-row small,:root[data-leveli-theme="light"] .forecast-center span,:root[data-leveli-theme="light"] .donut-unit{color:#746489}
+:root[data-leveli-theme="light"] .subject-row:hover{background:#eee6fb}
+:root[data-leveli-theme="light"] .forecast-legend .legend-item{color:#413158}
+:root[data-leveli-theme="light"] .trend-card{background:#fff}
+:root[data-leveli-theme="light"] .orient-good{background:#e9f8ef;border-color:#b9e9ce}
+:root[data-leveli-theme="light"] .orient-attention{background:#fff3e5;border-color:#f0d1a8}
+:root[data-leveli-theme="light"] .orient-good .orient-title{color:#245c42}
+:root[data-leveli-theme="light"] .orient-attention .orient-title{color:#855626}
+:root[data-leveli-theme="light"] .orient-link{color:#362847;border-color:#d1c5de}
+:root[data-leveli-theme="light"] .orient-link__metrics strong{color:#302448}
+:root[data-leveli-theme="light"] .grade-entry span{color:#574568}
+:root[data-leveli-theme="light"] #school-subject-detail{background:#f7f4fc}
+:root[data-leveli-theme="light"] #school-subject-detail .detail-hero{background:linear-gradient(145deg,#efe3ff,#f9f4ff);border-color:#d9c5f3}
+:root[data-leveli-theme="light"] #school-subject-detail .detail-hero-label,:root[data-leveli-theme="light"] #school-subject-detail .detail-hero-hint,:root[data-leveli-theme="light"] #school-subject-detail .detail-hero-score{color:#302448}
+:root[data-leveli-theme="light"] #school-subject-detail h3,:root[data-leveli-theme="light"] #school-subject-detail .detail-kpi strong{color:#302448}
+:root[data-leveli-theme="light"] #school-subject-detail .detail-kpi span{color:#746489}
+:root[data-leveli-theme="light"] .profile-actions .profile-logout{color:#5c426e}
+:root[data-leveli-theme="light"] .btn.secondary,:root[data-leveli-theme="light"] .profile-back,:root[data-leveli-theme="light"] .detail-toggle button,:root[data-leveli-theme="light"] #school-period-buttons button{background:#eee7f7;color:#38274b;border-color:#d3c4e5}
+:root .school-header .settings-button,:root .help-btn{color:var(--leveli-accent-soft)}
+:root .btn:not(.secondary),:root #school-period-buttons button[aria-pressed="true"],:root .detail-toggle button[aria-pressed="true"]{background:var(--leveli-accent-dim)!important;border-color:var(--leveli-accent-border)!important}
+:root .subject-row__average,:root .detail-kpi strong{color:var(--leveli-accent-soft)}
+:root .profile-header .profile-back{margin-bottom:12px}
+.profile-identity{display:flex;gap:13px;align-items:center}
+.profile-identity #profile-name{margin:0 0 4px;font-size:21px}
+.profile-avatar{width:56px;height:56px;border:2px solid var(--leveli-accent-border);background:var(--leveli-accent-dim);border-radius:17px;display:grid;place-items:center;font-size:29px;flex:none}
+.profile-identity #profile-account{font-size:11px;overflow-wrap:anywhere}
+.profile-account-actions{opacity:.86}
+.profile-account-actions h2{font-size:15px}
+.personal-group{margin-top:18px}
+.personal-group h3{font-size:13px;margin:0 0 9px;font-weight:800}
+.personal-choice-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.personal-theme-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.personal-color-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.personal-option{min-width:0;min-height:48px;border:1px solid #665184;background:#29223f;border-radius:12px;color:#f0e5ff;font:700 11px Manrope,system-ui;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;padding:7px 4px;overflow-wrap:anywhere}
+.personal-option[aria-pressed="true"]{border:2px solid var(--leveli-accent-border);box-shadow:0 0 0 2px var(--leveli-accent-dim);background:var(--leveli-accent-dim)}
+.personal-option:focus-visible{outline:3px solid var(--leveli-accent);outline-offset:2px}
+.personal-avatar-option{font-size:28px;min-height:59px}
+.personal-color-swatch{width:27px;height:27px;border-radius:10px;border:1px solid #ffffff50}
+:root[data-leveli-theme="light"] .personal-option{background:#f0e8fa;color:#342348;border-color:#d4c3e9}
+:root[data-leveli-theme="light"] .personal-option[aria-pressed="true"]{background:#e8dff4}
+.birthday-label{display:block;font-size:12px;font-weight:700;margin:12px 0 7px}
+#profile-birthday{font:600 14px Manrope,system-ui;width:100%;min-height:44px;border:1px solid var(--leveli-accent-border);border-radius:12px;padding:9px 12px;color:inherit;background:#29223f}
+:root[data-leveli-theme="light"] #profile-birthday{background:#f1eaf9}
+.birthday-note,#profile-save-status{font-size:12px;margin:9px 0 0;color:var(--leveli-accent-soft)}
+:root[data-leveli-theme="light"] .birthday-note,:root[data-leveli-theme="light"] #profile-save-status{color:#5b3c79}
+.home-birthday-greeting{padding:8px 12px;border:1px solid var(--leveli-accent-border);background:var(--leveli-accent-dim);border-radius:12px;font-size:13px!important;margin:9px 0!important;color:#fff!important}
+@media(max-width:360px){.personal-choice-grid,.personal-color-grid{gap:5px}.personal-option{font-size:10px;padding:6px 2px}.personal-theme-grid{gap:5px}}
 </style></head><body><div class="app"><main class="content" id="main">
-<section data-page="home"><header class="school-header"><div><div class="eyebrow brand-lockup"><img src="./brand/mark.svg" alt="" width="30" height="30" aria-hidden="true"><span>Левели</span></div><h1 id="home-greeting">Привет!</h1><p>Мои оценки и успеваемость</p><div class="header-period" id="school-header-period">II четверть · 2026/27 учебный год</div></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
+<section data-page="home"><header class="school-header"><div><div class="eyebrow brand-lockup"><img src="./brand/mark.svg" alt="" width="30" height="30" aria-hidden="true"><span>Левели</span></div><h1 id="home-greeting">Привет!</h1><p id="home-birthday-greeting" class="home-birthday-greeting" hidden></p><p>Мои оценки и успеваемость</p><div class="header-period" id="school-header-period">II четверть · 2026/27 учебный год</div></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
 <article class="card" id="school-login"><h2>Войди, чтобы увидеть оценки</h2><p>Оценки загружаются из электронного дневника.</p><form id="school-form"><label>Почта<input id="school-email" type="email" autocomplete="username" required></label><label>Пароль<input id="school-password" type="password" autocomplete="current-password" required></label><button class="btn" type="submit">Войти</button></form></article>
 <div id="school-results" hidden><div id="school-subject-detail" class="card" hidden></div><div id="school-overview">
 <article class="card forecast-card">
@@ -328,10 +387,21 @@ body{background:#0e0c21;color:#f6f0ff}
 <article class="card subjects-card"><div class="card-heading"><h2>Все предметы</h2><span id="school-subject-count" class="muted"></span></div>
 <div id="school-filter-buttons" hidden></div><select id="school-filter" hidden><option value="all">Все предметы</option><option value="strong">Сильные</option><option value="attention">Требуют внимания</option></select><div id="school-subjects"></div></article><p id="school-status" class="muted">Загрузка…</p><p id="school-freshness" aria-live="polite"></p></div></div><p id="school-error" role="alert" class="muted"></p></section>
 <section data-page="profile" hidden>
- <header class="profile-header"><button class="btn secondary profile-back" data-go="home">← К оценкам</button><div class="eyebrow">Левели</div><h1 class="section-title">Настройки и профиль</h1><p>Аккаунт и параметры отображения оценок</p></header>
- <article class="card profile-card"><div class="profile-label">УЧЕНИК</div><h2 id="profile-name">Гость</h2><p id="profile-account">Войди на главной, чтобы подключить профиль.</p><p id="profile-school" class="muted"></p></article>
+ <header class="profile-header"><button class="btn secondary profile-back" data-go="home">← На главную</button><h1 class="section-title">Настройки и профиль</h1><p>Твой профиль и учебные результаты</p></header>
+ <article class="card profile-card"><div class="profile-identity"><div class="profile-avatar" id="profile-avatar-display" aria-hidden="true">★</div><div><h2 id="profile-name">Гость</h2><p id="profile-account">Войди на главной, чтобы подключить профиль.</p></div></div><p id="profile-school" class="muted" hidden></p></article>
+ <article class="card profile-card" id="profile-personalization" hidden>
+  <h2>Моё оформление</h2><p>Выбирай, как выглядит твой Левели.</p>
+  <div class="personal-group"><h3>Аватар</h3><div class="personal-choice-grid" id="personal-avatar-options" role="group" aria-label="Выбрать аватар"></div></div>
+  <div class="personal-group"><h3>Тема</h3><div class="personal-theme-grid" id="personal-theme-options" role="group" aria-label="Тема оформления"></div></div>
+  <div class="personal-group"><h3>Акцентный цвет</h3><div class="personal-color-grid" id="personal-accent-options" role="group" aria-label="Акцентный цвет"></div></div>
+  <div class="personal-group"><h3>Значки</h3><div class="personal-theme-grid" id="personal-pack-options" role="group" aria-label="Тематические значки"></div></div>
+ </article>
+ <article class="card profile-card" id="profile-birthday-card" hidden>
+  <h2>День рождения</h2><p>Укажи дату рождения, если хочешь получать поздравление. Её можно удалить в любой момент.</p>
+  <label class="birthday-label" for="profile-birthday">Дата рождения</label><input type="date" id="profile-birthday" min="2000-01-01" max="2030-12-31"><p class="birthday-note" id="profile-age"></p><p id="profile-save-status" role="status" aria-live="polite"></p>
+ </article>
  <article class="card profile-card"><h2>Учебный период</h2><p>Выбери четверть для просмотра оценок, графиков и прогнозов.</p><div class="profile-period"><div id="school-period-buttons" class="choice-buttons"></div><p id="school-period-notice" class="period-notice" role="status" aria-live="polite" hidden></p><select id="school-period" hidden><option value="all">Все оценки</option></select><button type="button" id="school-current-period" class="btn secondary">Вернуться к текущей четверти</button></div></article>
- <article class="card profile-card" id="profile-actions" hidden><h2>Аккаунт и данные</h2><p>Обновление проверяет данные в Firebase. Сбор оценок из дневника выполняется автоматически на Mac.</p><div class="profile-actions"><button class="btn secondary" id="school-refresh">Проверить обновления</button><button class="btn secondary profile-logout" id="school-logout">Выйти из аккаунта</button></div></article>
+ <article class="card profile-card profile-account-actions" id="profile-actions" hidden><h2>Аккаунт и данные</h2><p>Оценки обновляются автоматически.</p><div class="profile-actions"><button class="btn secondary" id="school-refresh">Проверить обновления</button><button class="btn secondary profile-logout" id="school-logout">Выйти из аккаунта</button></div></article>
 </section>
 </main></div><script src="./school-model.js"></script><script>
 'use strict';
@@ -340,7 +410,63 @@ if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catc
 
 document.addEventListener('click',e=>{const btn=e.target.closest('[data-help]');if(!btn)return;const target=document.getElementById(btn.dataset.help);if(!target)return;target.hidden=!target.hidden;btn.setAttribute('aria-expanded',String(!target.hidden))});
 addEventListener('hashchange',()=>navigate(location.hash.slice(1)));navigate(location.hash.slice(1)||'home');
-</script><script type="module">
+</script>
+<script>
+/* Local-first, UID-scoped preferences. No personal data sent to analytics or public URLs. */
+window.LeveliAppearance=(()=>{
+ const accents={
+  violet:{main:'#a882ff',soft:'#e2cdff',dim:'#514071',border:'#b48cf3',line:'#d1adff',glow:'#ab7aff'},
+  pink:{main:'#f18bc9',soft:'#ffd3ed',dim:'#804567',border:'#f18bc9',line:'#ffd0eb',glow:'#f18bc9'},
+  blue:{main:'#68adff',soft:'#c8e4ff',dim:'#32537d',border:'#68adff',line:'#bedbff',glow:'#68adff'},
+  yellow:{main:'#f4c75f',soft:'#ffe6a3',dim:'#76602c',border:'#f4c75f',line:'#ffe7a1',glow:'#f4c75f'},
+  mint:{main:'#69d9bd',soft:'#bdf9e7',dim:'#286b5c',border:'#69d9bd',line:'#bcf9e9',glow:'#69d9bd'}
+ };
+ const avatars=[['Кошка','🐱'],['Танцы','🩰'],['Лапки','🐾'],['Музыка','🎵'],['Звезда','🌟'],['Футбол','⚽'],['Гейминг','🎮'],['Гонки','🏎️'],['Мяч','🏆'],['Наушники','🎧']];
+ const packs=[['classic','Классика','✦'],['cats','Кошки и танцы','🐱'],['sports','Футбол и игры','⚽']];
+ const defaults={theme:'dark',accent:'violet',avatar:0,pack:'classic',birthday:''};
+ let uid=null,profile={...defaults},render=null;
+ const safe=x=>typeof x==='string'&&/^[-\w]{1,150}$/.test(x)?x:null;
+ function read(id){try{const p=JSON.parse(localStorage.getItem('leveli-personal-v1-'+id)||'{}');return {...defaults,...p}}catch{return {...defaults}}}
+ function valid(p){return {theme:['dark','light','system'].includes(p.theme)?p.theme:'dark',accent:accents[p.accent]?p.accent:'violet',avatar:Number.isInteger(p.avatar)&&p.avatar>=0&&p.avatar<avatars.length?p.avatar:0,pack:packs.some(a=>a[0]===p.pack)?p.pack:'classic',birthday:/^\d{4}-\d{2}-\d{2}$/.test(p.birthday||'')?p.birthday:''}}
+ function age(){if(!profile.birthday)return null;const b=new Date(profile.birthday+'T12:00:00');const now=new Date();if(!Number.isFinite(b.getTime())||b>now)return null;let n=now.getFullYear()-b.getFullYear();if(now.getMonth()<b.getMonth()||(now.getMonth()===b.getMonth()&&now.getDate()<b.getDate()))n--;return n>=0&&n<=120?n:null}
+ function paint(){
+  const theme=profile.theme==='system'?(window.matchMedia?.('(prefers-color-scheme: light)').matches?'light':'dark'):profile.theme;
+  document.documentElement.dataset.leveliTheme=theme;
+  document.documentElement.dataset.leveliPack=profile.pack;
+  const c=accents[profile.accent],s=document.documentElement.style;
+  for(const [key,val] of Object.entries({accent:c.main,'accent-soft':c.soft,'accent-dim':c.dim,'accent-border':c.border}))s.setProperty('--leveli-'+key,val);
+  document.querySelector('#profile-avatar-display').textContent=avatars[profile.avatar][1];
+  document.querySelector('#home-birthday-greeting').hidden=true;
+  const b=profile.birthday?new Date(profile.birthday+'T12:00:00'):null,now=new Date();
+  if(uid&&b&&Number.isFinite(b.getTime())&&b.getMonth()===now.getMonth()&&b.getDate()===now.getDate()){
+   const note=document.querySelector('#home-birthday-greeting');note.textContent='С днём рождения! Желаем тебе отличного года!';note.hidden=false;
+  }
+  const ageLabel=document.querySelector('#profile-age'),n=age();ageLabel.textContent=n===null?'Дата рождения необязательна.':('Возраст: '+n);
+  const date=document.querySelector('#profile-birthday');if(date.value!==profile.birthday)date.value=profile.birthday;
+  if(uid)drawControls();
+ }
+ function button(label,selected,action,extra,style){
+  const b=document.createElement('button');b.type='button';b.className='personal-option'+(extra?' '+extra:'');b.textContent=label;b.setAttribute('aria-pressed',String(selected));if(style)b.style.cssText=style;b.onclick=action;return b
+ }
+ function drawControls(){
+  const av=document.querySelector('#personal-avatar-options');av.replaceChildren();avatars.forEach(([label,emoji],i)=>{const b=button(emoji,profile.avatar===i,()=>set({avatar:i}),'personal-avatar-option');b.title=label;b.setAttribute('aria-label',label);av.append(b)});
+  const themeBox=document.querySelector('#personal-theme-options');themeBox.replaceChildren();for(const [k,t] of [['light','☀ Светлая'],['dark','☾ Тёмная'],['system','◐ Системная']])themeBox.append(button(t,profile.theme===k,()=>set({theme:k})));
+  const colorBox=document.querySelector('#personal-accent-options');colorBox.replaceChildren();for(const [k,title] of [['violet','Фиолетовый'],['pink','Розовый'],['blue','Синий'],['yellow','Жёлтый'],['mint','Мятный']]){const b=button(title,profile.accent===k,()=>set({accent:k}));const swatch=document.createElement('span');swatch.className='personal-color-swatch';swatch.style.background=accents[k].main;b.prepend(swatch);colorBox.append(b)}
+  const packBox=document.querySelector('#personal-pack-options');packBox.replaceChildren();for(const [k,title,emoji] of packs)packBox.append(button(emoji+' '+title,profile.pack===k,()=>set({pack:k})));
+ }
+ function set(v){
+  if(!uid)return;profile=valid({...profile,...v});try{localStorage.setItem('leveli-personal-v1-'+uid,JSON.stringify(profile))}catch(e){document.querySelector('#profile-save-status').textContent='Не удалось сохранить настройки на этом устройстве.';return}
+  document.querySelector('#profile-save-status').textContent='Сохранено на этом устройстве';
+  paint();document.dispatchEvent(new CustomEvent('leveliAppearanceChanged',{detail:{profile:{...profile}}}));
+ }
+ function activate(id){uid=safe(id);profile=uid?valid(read(uid)):{...defaults};document.querySelector('#profile-personalization').hidden=!uid;document.querySelector('#profile-birthday-card').hidden=!uid;document.querySelector('#profile-save-status').textContent='';paint()}
+ document.querySelector('#profile-birthday').addEventListener('change',e=>{const value=e.target.value;if(value&&new Date(value+'T12:00:00')>new Date()){document.querySelector('#profile-save-status').textContent='Дата рождения не может быть в будущем';return}set({birthday:value})});
+ window.matchMedia?.('(prefers-color-scheme: light)').addEventListener?.('change',()=>{if(profile.theme==='system')paint()});
+ paint();
+ return {activate,get:()=>({...profile}),colors:()=>accents[profile.accent],avatars};
+})();
+</script>
+<script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js';
 import {getAuth, setPersistence, browserLocalPersistence, onAuthStateChanged, signInWithEmailAndPassword, signOut} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js';
 import {getFirestore, doc, getDocFromServer} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js';
@@ -348,9 +474,11 @@ const firebaseConfig={apiKey:"AIzaSyCs3gfUXcrlTJLZqxXQ0cgXpfuqNBkNIsU",authDomai
 const app=initializeApp(firebaseConfig,'leveli-school');
 const auth=getAuth(app), db=getFirestore(app);window.leveliFirebase={auth,db,onAuthStateChanged,doc,getDocFromServer};window.dispatchEvent(new Event('leveliFirebaseReady'));
 const login=document.getElementById('school-login'), results=document.getElementById('school-results'), error=document.getElementById('school-error'), status=document.getElementById('school-status'), subjects=document.getElementById('school-subjects');
-let firestoreProfileName='';function updateIdentity(user,grades){const email=user?.email||'';const known=firestoreProfileName;document.getElementById('home-greeting').textContent=known?'Привет, '+known+'!':'Привет!';document.getElementById('profile-name').textContent=user?(known||'Ученик'):'Гость';document.getElementById('profile-account').textContent=user?'Аккаунт: '+email:'Войди на главной, чтобы подключить профиль.';document.getElementById('profile-actions').hidden=!user;document.getElementById('profile-school').textContent=user?'Школьных записей: '+(grades?.length??'загружаются…'):'';window.dispatchEvent(new CustomEvent('leveliIdentity',{detail:{uid:user?.uid||null}}));document.title='Левели · '+(known||'Мои оценки')}
+let firestoreProfileName='';function updateIdentity(user,grades){const email=user?.email||'';const known=firestoreProfileName;document.getElementById('home-greeting').textContent=known?'Привет, '+known+'!':'Привет!';document.getElementById('profile-name').textContent=user?(known||'Ученик'):'Гость';document.getElementById('profile-account').textContent=user?'Аккаунт: '+email:'Войди на главной, чтобы подключить профиль.';document.getElementById('profile-actions').hidden=!user;document.getElementById('profile-school').textContent='';window.dispatchEvent(new CustomEvent('leveliIdentity',{detail:{uid:user?.uid||null}}));document.title='Левели · '+(known||'Мои оценки')}
 function showError(e){error.textContent=e?.code==='auth/invalid-credential'?'Неверная почта или пароль.':e?.code==='permission-denied'?'Нет доступа к оценкам этой учётной записи.':e?.message||'Не удалось загрузить оценки.'}
 const S=window.LeveliSchool;
+const accentColor=()=>window.LeveliAppearance.colors();
+document.addEventListener('leveliAppearanceChanged',()=>{if(auth.currentUser&&cachedGrades.length&&document.getElementById('school-subject-detail').hidden)renderGrades()});
 const isMark=v=>S.score(v)!==null;
 const isFinal=g=>!!S.officialKind(g);
 let cachedGrades=[],loadGeneration=0;let schoolDataMeta=null;let retryHandle=null;
@@ -394,19 +522,19 @@ function renderInsights(groups,rows,baseline){
  const svg=svgEl('svg',{viewBox:'0 0 '+width+' '+height,role:'img','aria-label':'Накопительный средний балл за четверть'});
  svg.style.width='100%';svg.style.display='block';
  const defs=svgEl('defs');const glow=svgEl('filter',{id:'leveli-line-glow',x:'-40%',y:'-100%',width:'180%',height:'300%'});glow.append(svgEl('feGaussianBlur',{stdDeviation:5}));defs.append(glow);
- const grad=svgEl('linearGradient',{id:'leveli-trend-area',x1:0,x2:0,y1:0,y2:1});grad.append(svgEl('stop',{offset:'0%','stop-color':'#a171ff','stop-opacity':'.32'}),svgEl('stop',{offset:'100%','stop-color':'#a171ff','stop-opacity':'0'}));defs.append(grad);svg.append(defs);
+ const grad=svgEl('linearGradient',{id:'leveli-trend-area',x1:0,x2:0,y1:0,y2:1});grad.append(svgEl('stop',{offset:'0%','stop-color':accentColor().glow,'stop-opacity':'.32'}),svgEl('stop',{offset:'100%','stop-color':accentColor().glow,'stop-opacity':'0'}));defs.append(grad);svg.append(defs);
  for(const v of [2,3,4,5]){const y=top+(5-v)/3*(height-top-bottom);svg.append(svgEl('line',{x1:left,x2:width-right,y1:y,y2:y,stroke:'#47365e','stroke-dasharray':'3 5'}));const t=svgEl('text',{x:5,y:y+4,'font-size':10,fill:'#ada0c7'});t.textContent=v+',0';svg.append(t)}
  if(points.length){
   const total=end-start||1,coords=points.map(p=>[left+Math.max(0,Math.min(1,(p.date-start)/total))*(width-left-right),top+(5-p.value)/3*(height-top-bottom)]);
   if(coords.length>1){
    const path='M '+coords.map(p=>p.join(' ')).join(' L ');
    svg.append(svgEl('path',{d:path+' L '+coords.at(-1)[0]+' '+(height-bottom)+' L '+coords[0][0]+' '+(height-bottom)+' Z',fill:'url(#leveli-trend-area)'}));
-   svg.append(svgEl('polyline',{points:coords.map(p=>p.join(',')).join(' '),fill:'none',stroke:'#ab7aff','stroke-width':13,opacity:'.55',filter:'url(#leveli-line-glow)','stroke-linecap':'round','stroke-linejoin':'round'}));
-   svg.append(svgEl('polyline',{points:coords.map(p=>p.join(',')).join(' '),fill:'none',stroke:'#d1adff','stroke-width':3,'stroke-linecap':'round','stroke-linejoin':'round'}));
+   svg.append(svgEl('polyline',{points:coords.map(p=>p.join(',')).join(' '),fill:'none',stroke:accentColor().glow,'stroke-width':13,opacity:'.55',filter:'url(#leveli-line-glow)','stroke-linecap':'round','stroke-linejoin':'round'}));
+   svg.append(svgEl('polyline',{points:coords.map(p=>p.join(',')).join(' '),fill:'none',stroke:accentColor().line,'stroke-width':3,'stroke-linecap':'round','stroke-linejoin':'round'}));
   }
-  for(const [i,[x,y]] of coords.entries())svg.append(svgEl('circle',{cx:x,cy:y,r:i===coords.length-1?4.5:2.5,fill:'#f2e6ff'}));
+  for(const [i,[x,y]] of coords.entries())svg.append(svgEl('circle',{cx:x,cy:y,r:i===coords.length-1?4.5:2.5,fill:accentColor().soft}));
   const [x,y]=coords.at(-1),tagX=Math.max(33,Math.min(x-37,width-85)),tagY=Math.max(1,y-36);
-  svg.append(svgEl('rect',{x:tagX,y:tagY,width:72,height:25,rx:9,fill:'#4b3276',stroke:'#b88aff'}));
+  svg.append(svgEl('rect',{x:tagX,y:tagY,width:72,height:25,rx:9,fill:accentColor().dim,stroke:accentColor().main}));
   const score=svgEl('text',{x:tagX+36,y:tagY+17,'text-anchor':'middle','font-size':14,'font-weight':800,fill:'#fff'});score.textContent=formatMean(baseline);svg.append(score);
  }else{const t=svgEl('text',{x:width/2,y:height/2,'text-anchor':'middle',fill:'#b6a7cf','font-size':12});t.textContent='Пока нет оценок с датами';svg.append(t)}
  trend.append(svg);
@@ -616,7 +744,7 @@ function openSubject(name,grades){
   const barGlow=svgEl('filter',{id:'leveli-subject-bar-glow',x:'-90%',y:'-40%',width:'280%',height:'190%'});
   barGlow.append(svgEl('feGaussianBlur',{stdDeviation:5}));defs.append(barGlow);
   const area=svgEl('linearGradient',{id:'leveli-subject-area',x1:0,y1:0,x2:0,y2:1});
-  area.append(svgEl('stop',{offset:'0%','stop-color':'#a171ff','stop-opacity':'.29'}),svgEl('stop',{offset:'100%','stop-color':'#a171ff','stop-opacity':'0'}));defs.append(area);
+  area.append(svgEl('stop',{offset:'0%','stop-color':accentColor().glow,'stop-opacity':'.29'}),svgEl('stop',{offset:'100%','stop-color':accentColor().glow,'stop-opacity':'0'}));defs.append(area);
   const colors={5:['#8af0b7','#26634e'],4:['#c8a3ff','#513389'],3:['#ffa5b8','#73384d'],2:['#ffa5b8','#73384d']};
   for(const [value,stops] of Object.entries(colors)){
    const gradient=svgEl('linearGradient',{id:'leveli-subject-grade-'+value,x1:0,x2:0,y1:0,y2:1});
@@ -635,10 +763,10 @@ function openSubject(name,grades){
     const points=coords.map(p=>p.join(',')).join(' ');
     const areaPath='M '+coords.map(p=>p.join(' ')).join(' L ')+' L '+coords.at(-1)[0]+' '+baseY+' L '+coords[0][0]+' '+baseY+' Z';
     svg.append(svgEl('path',{d:areaPath,fill:'url(#leveli-subject-area)'}));
-    svg.append(svgEl('polyline',{points,fill:'none',stroke:'#ab7aff','stroke-width':12,opacity:'.55',filter:'url(#leveli-subject-line-glow)','stroke-linecap':'round','stroke-linejoin':'round'}));
-    svg.append(svgEl('polyline',{points,fill:'none',stroke:'#d1adff','stroke-width':3,'stroke-linecap':'round','stroke-linejoin':'round'}));
+    svg.append(svgEl('polyline',{points,fill:'none',stroke:accentColor().glow,'stroke-width':12,opacity:'.55',filter:'url(#leveli-subject-line-glow)','stroke-linecap':'round','stroke-linejoin':'round'}));
+    svg.append(svgEl('polyline',{points,fill:'none',stroke:accentColor().line,'stroke-width':3,'stroke-linecap':'round','stroke-linejoin':'round'}));
    }
-   coords.forEach(([x,cy],i)=>svg.append(svgEl('circle',{cx:x,cy,r:i===coords.length-1?4.5:2.5,fill:'#f2e6ff'})));
+   coords.forEach(([x,cy],i)=>svg.append(svgEl('circle',{cx:x,cy,r:i===coords.length-1?4.5:2.5,fill:accentColor().soft})));
   }else plotted.forEach((g,i)=>{
    const step=(width-65)/Math.max(1,plotted.length-1);
    const x=25+i*step,top=y(g.value),barHeight=baseY-top,glowColor=colors[g.value]?.[0]||'#c8a3ff';
@@ -803,5 +931,5 @@ document.getElementById('school-refresh').addEventListener('click',load);documen
 // Sync status updates may arrive independently of grade uploads.
 setInterval(()=>{if(!document.hidden&&auth.currentUser)load()},60000);
 document.getElementById('school-logout').addEventListener('click',()=>signOut(auth).catch(showError));
-onAuthStateChanged(auth,user=>{if(retryHandle){clearTimeout(retryHandle);retryHandle=null}++loadGeneration;firestoreProfileName='';clearSchool();login.hidden=!!user;results.hidden=!user;error.textContent='';updateIdentity(user);if(user){loadProfile(user);load()}else {clearSchool()}},showError);
+onAuthStateChanged(auth,user=>{window.LeveliAppearance.activate(user?.uid||null);if(retryHandle){clearTimeout(retryHandle);retryHandle=null}++loadGeneration;firestoreProfileName='';clearSchool();login.hidden=!!user;results.hidden=!user;error.textContent='';updateIdentity(user);if(user){loadProfile(user);load()}else {clearSchool()}},showError);
 </script></body></html>
