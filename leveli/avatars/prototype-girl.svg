@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Девочка в фиолетовом худи и наушниках">
+<defs>
+ <linearGradient id="hair" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d58c4b"/><stop offset=".44" stop-color="#8e4b30"/><stop offset="1" stop-color="#3e2733"/></linearGradient>
+ <radialGradient id="skin" cx=".32" cy=".2" r=".9"><stop stop-color="#ffe3bd"/><stop offset=".55" stop-color="#e8a986"/><stop offset="1" stop-color="#b56e65"/></radialGradient>
+ <linearGradient id="hoodie" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a78ce9"/><stop offset=".48" stop-color="#7660b8"/><stop offset="1" stop-color="#403776"/></linearGradient>
+ <linearGradient id="headphone" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#a8a0bc"/></linearGradient>
+ <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%"><feGaussianBlur in="SourceAlpha" stdDeviation="12"/><feOffset dx="8" dy="14"/><feComponentTransfer><feFuncA type="linear" slope=".22"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<g filter="url(#shadow)">
+ <path d="M107 1024c0-213 107-326 262-343l275-8c165 27 254 140 279 351Z" fill="url(#hoodie)" stroke="#4b3977" stroke-width="9"/>
+ <path d="M163 830q-37 51-37 194h129q-8-148 35-223M763 792q86 82 97 232H748" fill="#46396c" opacity=".6"/>
+ <path d="M378 677q67 92 131 131 79-52 123-135l72 49q-67 162-192 212-140-70-214-213Z" fill="#d5c7ef" opacity=".91"/>
+ <path d="M422 593v121q81 82 169 0V582Z" fill="#d58e75"/>
+ <path d="M249 378q-48-120 40-209 26-100 130-105 101-77 179 14 111-8 133 97 110 68 47 203l-43 129-459-7Z" fill="url(#hair)"/>
+ <path d="M312 365q-6-170 178-188 190-10 209 182l-7 128q-13 130-128 180-105 34-198-71-54-80-54-231Z" fill="url(#skin)"/>
+ <path d="M330 334q-42 13-52 69-38-86-6-161 30-86 129-98 90-71 177-7 130-16 158 134-94-16-140-96-55 87-266 159Z" fill="url(#hair)"/>
+ <path d="M351 416q51-35 111-10M547 408q54-26 105 6" stroke="#6c3b36" stroke-width="19" stroke-linecap="round" fill="none"/>
+ <path d="M369 453q42-43 87 0-44 47-87 0ZM550 448q48-45 92-2-46 49-92 2Z" fill="#fff9eb"/>
+ <ellipse cx="417" cy="454" rx="17" ry="25" fill="#453b39"/><ellipse cx="596" cy="449" rx="17" ry="25" fill="#453b39"/>
+ <circle cx="423" cy="444" r="7" fill="#fff"/><circle cx="602" cy="439" r="7" fill="#fff"/>
+ <path d="M501 461q-22 70 14 79" stroke="#ac7168" stroke-width="11" stroke-linecap="round" fill="none"/>
+ <path d="M433 578q74 58 142-7" stroke="#985a5e" stroke-width="13" stroke-linecap="round" fill="none"/>
+ <g fill="#b76c67" opacity=".43"><circle cx="361" cy="524" r="6"/><circle cx="389" cy="534" r="5"/><circle cx="407" cy="519" r="5"/><circle cx="614" cy="519" r="6"/><circle cx="645" cy="515" r="5"/></g>
+ <path d="M277 368q-70 85-23 251 16 65 78 104-38-125-18-254Z" fill="url(#hair)"/>
+ <path d="M689 360q75 108 27 267-11 39-61 81 32-145 20-257Z" fill="url(#hair)"/>
+ <path d="M324 737q57-58 104-43l85 98-93 80q-65-10-96-135ZM622 692q78 3 111 51-38 121-116 127l-104-78Z" fill="#9e86d4"/>
+ <path d="M302 755q81-76 137-7M607 751q73-56 130 10" fill="none" stroke="#eadcfa" stroke-width="24" stroke-linecap="round"/>
+ <path d="M368 813q-5 124-15 211M657 813q5 124 19 211" stroke="#cdbdec" stroke-width="11" stroke-linecap="round"/>
+ <path d="M326 719q-26 63-8 149" stroke="#403a61" stroke-width="30" fill="none"/>
+ <path d="M701 713q36 62 26 160" stroke="#403a61" stroke-width="30" fill="none"/>
+ <path d="M321 726q168 134 374 0" stroke="#f8f5ff" stroke-width="35" fill="none" stroke-linecap="round"/>
+ <rect x="285" y="700" width="86" height="111" rx="38" fill="url(#headphone)" stroke="#8b83a5" stroke-width="10" transform="rotate(-13 328 756)"/>
+ <rect x="655" y="694" width="86" height="111" rx="38" fill="url(#headphone)" stroke="#8b83a5" stroke-width="10" transform="rotate(11 698 750)"/>
+</g>
+</svg>
