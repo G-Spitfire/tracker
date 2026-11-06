@@ -24,8 +24,12 @@ function selectCandidates(words,p,opts={}){
 }
 function beginSelection(kind='auto',themes=[]){return {kind,stage:'select',themes,seen:[],unknown:[],known:[],cursor:0,startedAt:Date.now()}}
 function selectionAnswer(sel,id,knows){
- if(sel.stage!=='select'||sel.seen.includes(id)||sel.seen.length>=50)throw Error('Selection closed or duplicate');
- sel.seen.push(id);(knows?sel.known:sel.unknown).push(id);
+ if(sel.stage!=='select'||sel.known.includes(id)||sel.unknown.includes(id)||sel.seen.length>50)throw Error('Selection closed or duplicate');
+ if(!sel.seen.includes(id)){
+  if(sel.seen.length>=50)throw Error('Selection limit reached');
+  sel.seen.push(id);
+ }
+ (knows?sel.known:sel.unknown).push(id);
  return sel.unknown.length>=10||sel.seen.length>=50;
 }
 function eligible(p,ids){return unique(ids).length===ids.length&&ids.length>=3&&ids.length<=levelLimit(p)&&ids.every(id=>!p.words[id]?.origin)}
