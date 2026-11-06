@@ -348,6 +348,10 @@ body{background:#0e0c21;color:#f6f0ff}
 .profile-identity #profile-name{margin:0 0 4px;font-size:21px}
 .profile-avatar{width:56px;height:56px;border:2px solid var(--leveli-accent-border);background:var(--leveli-accent-dim);border-radius:17px;display:grid;place-items:center;font-size:29px;flex:none}
 .profile-identity #profile-account{font-size:11px;overflow-wrap:anywhere}
+.profile-avatar-custom{display:block;width:100%;height:100%;object-fit:cover;border-radius:15px}
+.personal-avatar-custom{display:block;width:44px;height:44px;object-fit:cover;border-radius:10px}
+.avatar-upload-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+.avatar-upload-row .btn{font-size:11px;margin:0;padding:9px 10px;min-height:42px}
 .profile-account-actions{opacity:.86}
 .profile-account-actions h2{font-size:15px}
 .personal-group{margin-top:18px}
@@ -394,7 +398,7 @@ body{background:#0e0c21;color:#f6f0ff}
  <article class="card profile-card"><div class="profile-identity"><div class="profile-avatar" id="profile-avatar-display" aria-hidden="true">★</div><div><h2 id="profile-name">Гость</h2><p id="profile-account">Войди на главной, чтобы подключить профиль.</p></div></div><p id="profile-school" class="muted" hidden></p></article>
  <article class="card profile-card" id="profile-personalization" hidden>
   <h2>Моё оформление</h2><p>Выбирай, как выглядит твой Левели.</p>
-  <div class="personal-group"><h3>Аватар</h3><div class="personal-choice-grid" id="personal-avatar-options" role="group" aria-label="Выбрать аватар"></div></div>
+  <div class="personal-group"><h3>Аватар</h3><div class="personal-choice-grid" id="personal-avatar-options" role="group" aria-label="Выбрать аватар"></div><div class="avatar-upload-row"><button type="button" class="btn secondary" id="profile-upload-avatar">Выбрать свою картинку</button><button type="button" class="btn secondary" id="profile-remove-avatar" hidden>Убрать картинку</button></div><input id="profile-avatar-file" type="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif" hidden></div>
   <div class="personal-group"><h3>Тема</h3><div class="personal-theme-grid" id="personal-theme-options" role="group" aria-label="Тема оформления"></div></div>
   <div class="personal-group"><h3>Акцентный цвет</h3><div class="personal-color-grid" id="personal-accent-options" role="group" aria-label="Акцентный цвет"></div></div>
   <div class="personal-group"><h3>Значки</h3><div class="personal-theme-grid" id="personal-pack-options" role="group" aria-label="Тематические значки"></div></div>
@@ -426,11 +430,11 @@ window.LeveliAppearance=(()=>{
  };
  const avatars=[['Кошка','🐱'],['Танцы','🩰'],['Лапки','🐾'],['Музыка','🎵'],['Звезда','🌟'],['Футбол','⚽'],['Гейминг','🎮'],['Гонки','🏎️'],['Мяч','🏆'],['Наушники','🎧']];
  const packs=[['classic','Классика','✦'],['cats','Кошки и танцы','🐱'],['sports','Футбол и игры','⚽']];
- const defaults={theme:'dark',accent:'violet',avatar:0,pack:'classic',birthday:''};
+ const defaults={theme:'dark',accent:'violet',avatar:0,customAvatar:'',pack:'classic',birthday:''};
  let uid=null,profile={...defaults},render=null;
  const safe=x=>typeof x==='string'&&/^[-\w]{1,150}$/.test(x)?x:null;
  function read(id){try{const p=JSON.parse(localStorage.getItem('leveli-personal-v1-'+id)||'{}');return {...defaults,...p}}catch{return {...defaults}}}
- function valid(p){return {theme:['dark','light','system'].includes(p.theme)?p.theme:'dark',accent:accents[p.accent]?p.accent:'violet',avatar:Number.isInteger(p.avatar)&&p.avatar>=0&&p.avatar<avatars.length?p.avatar:0,pack:packs.some(a=>a[0]===p.pack)?p.pack:'classic',birthday:/^\d{4}-\d{2}-\d{2}$/.test(p.birthday||'')?p.birthday:''}}
+ function valid(p){return {theme:['dark','light','system'].includes(p.theme)?p.theme:'dark',accent:accents[p.accent]?p.accent:'violet',avatar:p.avatar==='custom'||(Number.isInteger(p.avatar)&&p.avatar>=0&&p.avatar<avatars.length)?p.avatar:0,customAvatar:typeof p.customAvatar==='string'&&p.customAvatar.length<120000&&/^data:image\/(webp|png|jpeg);base64,/.test(p.customAvatar)?p.customAvatar:'',pack:packs.some(a=>a[0]===p.pack)?p.pack:'classic',birthday:/^\d{4}-\d{2}-\d{2}$/.test(p.birthday||'')?p.birthday:''}}
  function age(){if(!profile.birthday)return null;const b=new Date(profile.birthday+'T12:00:00');const now=new Date();if(!Number.isFinite(b.getTime())||b>now)return null;let n=now.getFullYear()-b.getFullYear();if(now.getMonth()<b.getMonth()||(now.getMonth()===b.getMonth()&&now.getDate()<b.getDate()))n--;return n>=0&&n<=120?n:null}
  function paint(){
   const theme=profile.theme==='system'?(window.matchMedia?.('(prefers-color-scheme: light)').matches?'light':'dark'):profile.theme;
@@ -438,7 +442,7 @@ window.LeveliAppearance=(()=>{
   document.documentElement.dataset.leveliPack=profile.pack;
   const c=accents[profile.accent],s=document.documentElement.style;
   for(const [key,val] of Object.entries({accent:c.main,'accent-soft':c.soft,'accent-dim':c.dim,'accent-border':c.border}))s.setProperty('--leveli-'+key,val);
-  document.querySelector('#profile-avatar-display').textContent=avatars[profile.avatar][1];
+  const avatarDisplay=document.querySelector('#profile-avatar-display');avatarDisplay.replaceChildren();if(profile.avatar==='custom'&&profile.customAvatar){const img=document.createElement('img');img.src=profile.customAvatar;img.alt='';img.className='profile-avatar-custom';avatarDisplay.append(img)}else avatarDisplay.textContent=avatars[profile.avatar] ? avatars[profile.avatar][1] : '★';document.querySelector('#profile-remove-avatar').hidden=!profile.customAvatar;
   // A themed icon pack changes navigation and card headings, not the immutable Leveli brand mark.
   const settingsButton=document.querySelector('.settings-button');
   let settingsImage=settingsButton.querySelector('.leveli-pack-settings');
@@ -467,7 +471,7 @@ window.LeveliAppearance=(()=>{
   const b=document.createElement('button');b.type='button';b.className='personal-option'+(extra?' '+extra:'');b.textContent=label;b.setAttribute('aria-pressed',String(selected));if(style)b.style.cssText=style;b.onclick=action;return b
  }
  function drawControls(){
-  const av=document.querySelector('#personal-avatar-options');av.replaceChildren();avatars.forEach(([label,emoji],i)=>{const b=button(emoji,profile.avatar===i,()=>set({avatar:i}),'personal-avatar-option');b.title=label;b.setAttribute('aria-label',label);av.append(b)});
+  const av=document.querySelector('#personal-avatar-options');av.replaceChildren();avatars.forEach(([label,emoji],i)=>{const b=button(emoji,profile.avatar===i,()=>set({avatar:i}),'personal-avatar-option');b.title=label;b.setAttribute('aria-label',label);av.append(b)});if(profile.customAvatar){const b=button('',profile.avatar==='custom',()=>set({avatar:'custom'}),'personal-avatar-option');b.setAttribute('aria-label','Моя картинка');const img=document.createElement('img');img.src=profile.customAvatar;img.alt='';img.className='personal-avatar-custom';b.append(img);av.append(b)}
   const themeBox=document.querySelector('#personal-theme-options');themeBox.replaceChildren();for(const [k,t] of [['light','☀ Светлая'],['dark','☾ Тёмная'],['system','◐ Системная']])themeBox.append(button(t,profile.theme===k,()=>set({theme:k})));
   const colorBox=document.querySelector('#personal-accent-options');colorBox.replaceChildren();for(const [k,title] of [['violet','Фиолетовый'],['pink','Розовый'],['blue','Синий'],['yellow','Жёлтый'],['mint','Мятный']]){const b=button(title,profile.accent===k,()=>set({accent:k}));const swatch=document.createElement('span');swatch.className='personal-color-swatch';swatch.style.background=accents[k].main;b.prepend(swatch);colorBox.append(b)}
   const packBox=document.querySelector('#personal-pack-options');packBox.replaceChildren();for(const [k,title,emoji] of packs)packBox.append(button(emoji+' '+title,profile.pack===k,()=>set({pack:k})));
@@ -478,6 +482,23 @@ window.LeveliAppearance=(()=>{
   paint();document.dispatchEvent(new CustomEvent('leveliAppearanceChanged',{detail:{profile:{...profile}}}));
  }
  function activate(id){uid=safe(id);profile=uid?valid(read(uid)):{...defaults};document.querySelector('#profile-personalization').hidden=!uid;document.querySelector('#profile-birthday-card').hidden=!uid;document.querySelector('#profile-save-status').textContent='';paint()}
+ document.querySelector('#profile-upload-avatar').addEventListener('click',()=>{if(uid)document.querySelector('#profile-avatar-file').click()});
+ document.querySelector('#profile-remove-avatar').addEventListener('click',()=>set({customAvatar:'',avatar:0}));
+ document.querySelector('#profile-avatar-file').addEventListener('change',async e=>{
+  const file=e.target.files?.[0];e.target.value='';if(!uid||!file)return;const owner=uid;
+  const status=document.querySelector('#profile-save-status');
+  if(file.size>5000000||!/^image\/(png|jpeg|webp|heic|heif)$/.test(file.type)){status.textContent='Выбери картинку PNG, JPG или WebP размером до 5 МБ.';return}
+  let url='';
+  try{
+   url=URL.createObjectURL(file);const img=new Image();img.src=url;await img.decode();if(uid!==owner)return;
+   const side=Math.min(img.naturalWidth,img.naturalHeight);if(!side)throw Error('empty');
+   const canvas=document.createElement('canvas');canvas.width=128;canvas.height=128;
+   const ctx=canvas.getContext('2d');if(!ctx)throw Error('canvas');
+   ctx.drawImage(img,(img.naturalWidth-side)/2,(img.naturalHeight-side)/2,side,side,0,0,128,128);
+   const data=canvas.toDataURL('image/webp',.72);if(data.length>110000){status.textContent='Картинка слишком большая. Попробуй другую.';return}
+   set({customAvatar:data,avatar:'custom'});
+  }catch(e){status.textContent='Не удалось открыть картинку. Попробуй PNG или JPG.'}finally{if(url)URL.revokeObjectURL(url)}
+ });
  document.querySelector('#profile-birthday').addEventListener('change',e=>{const value=e.target.value;if(value&&new Date(value+'T12:00:00')>new Date()){document.querySelector('#profile-save-status').textContent='Дата рождения не может быть в будущем';return}set({birthday:value})});
  window.matchMedia?.('(prefers-color-scheme: light)').addEventListener?.('change',()=>{if(profile.theme==='system')paint()});
  paint();
