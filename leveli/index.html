@@ -271,6 +271,30 @@ body{background:#0e0c21;color:#f6f0ff}
 #school-subject-detail .grade-entry{min-height:0;padding:7px 2px;gap:8px}
 #school-subject-detail .grade-entry span{font-size:11px;line-height:1.45}
 #school-subject-detail .grade-entry__value{font-size:19px}
+/* Subject overview: approved child-focused hierarchy. */
+#school-subject-detail{background:#0e0c21;border:0;box-shadow:none;padding:10px 0 24px;margin-top:0}
+#school-subject-detail .detail-header{padding:0 2px}
+#school-subject-detail .detail-hero{margin-top:17px;border-radius:20px;padding:21px 15px 19px;text-align:center;background:linear-gradient(145deg,#36264e,#242040 72%,#1e1b38);border:1px solid #634982;display:flex;align-items:center;flex-direction:column;gap:3px}
+#school-subject-detail .detail-hero-label{font-size:12px;font-weight:750;color:#d4c2f1}
+#school-subject-detail .detail-hero-score{font-size:72px;line-height:1.17;color:#f6eaff;font-weight:800;font-variant-numeric:tabular-nums}
+#school-subject-detail .detail-hero-hint{font-size:12px;color:#c4b5da}
+#school-subject-detail .detail-trend-pill{display:inline-block;background:#3a3155;color:#ddccef;border-radius:30px;font-size:11px;font-weight:750;padding:9px 13px;margin-top:11px;line-height:1.35}
+#school-subject-detail .detail-trend-pill.up{background:#203e35;color:#9be9bd}
+#school-subject-detail .detail-trend-pill.down{background:#50303e;color:#ffb1bd}
+#school-subject-detail .detail-kpi{margin:11px 0 12px}
+#school-subject-detail .detail-kpi>div{background:#29223f;border:1px solid #403250}
+#school-subject-detail .detail-kpi strong{font-size:26px;color:#f3eaff;margin-top:5px}
+#school-subject-detail .detail-kpi span{font-size:11px;color:#bfb1d4}
+#school-subject-detail .detail-goal{margin:12px 0 0;background:#18382e;border:1px solid #396c50;border-radius:17px;padding:16px 15px}
+#school-subject-detail .detail-goal.complete{background:#292341;border-color:#5f4984}
+#school-subject-detail .detail-goal-label{font-size:11px;font-weight:800;color:#a3e7be;letter-spacing:.03em}
+#school-subject-detail .detail-goal.complete .detail-goal-label{color:#d4bcff}
+#school-subject-detail .detail-goal-main{font-size:18px;font-weight:800;color:#e1ffed;line-height:1.4;margin:6px 0}
+#school-subject-detail .detail-goal.complete .detail-goal-main{color:#f0e3ff}
+#school-subject-detail .detail-goal-note{font-size:11px;color:#a8d5bb;line-height:1.55}
+#school-subject-detail .detail-chart-scroll{background:#1c1735}
+#school-subject-detail .detail-toggle button{border-radius:10px}
+@media(max-width:360px){#school-subject-detail .detail-hero-score{font-size:62px}#school-subject-detail .detail-goal-main{font-size:16px}}
 </style></head><body><div class="app"><main class="content" id="main">
 <section data-page="home"><header class="school-header"><div><div class="eyebrow">Левели</div><h1 id="home-greeting">Привет!</h1><p>Мои оценки и успеваемость</p><div class="header-period" id="school-header-period">II четверть · 2026/27 учебный год</div></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
 <article class="card" id="school-login"><h2>Войди, чтобы увидеть оценки</h2><p>Оценки загружаются из электронного дневника.</p><form id="school-form"><label>Почта<input id="school-email" type="email" autocomplete="username" required></label><label>Пароль<input id="school-password" type="password" autocomplete="current-password" required></label><button class="btn" type="submit">Войти</button></form></article>
@@ -514,26 +538,48 @@ function openSubject(name,grades){
  quarter.textContent=({1:'I',2:'II',3:'III',4:'IV'}[Number(periodSelect.value.split('-')[1])]||'')+' четверть';
  head.append(back,title,quarter);detail.append(head);
  const stats=S.summary(grades.regular,grades.final);
+ const hero=document.createElement('section');hero.className='detail-hero';
+ const heroLabel=document.createElement('span');heroLabel.className='detail-hero-label';
+ heroLabel.textContent=stats.official!==null?'Официальная оценка за четверть':'Прогноз за четверть';
+ const heroScore=document.createElement('strong');heroScore.className='detail-hero-score';
+ heroScore.textContent=stats.official??stats.forecast??'—';
+ const heroHint=document.createElement('span');heroHint.className='detail-hero-hint';
+ heroHint.textContent=stats.official!==null?'Итог выставлен школой':stats.forecast!==null?'Ожидаемый результат':'Пока недостаточно оценок';
+ const trend=document.createElement('span');trend.className='detail-trend-pill';
+ if(stats.difference===null){trend.textContent='Динамика пока неизвестна'}
+ else if(stats.difference>=.5){trend.textContent='↗ Результаты стали лучше';trend.classList.add('up')}
+ else if(stats.difference<=-.5){trend.textContent='↘ Последние оценки стали ниже';trend.classList.add('down')}
+ else trend.textContent='● Результаты стабильные';
+ if(stats.difference!==null)trend.title='Последние 3: '+formatMean(stats.recentAverage)+' · вся четверть: '+formatMean(stats.previousAverage)+' · изменение '+formatMean(stats.difference);
+ hero.append(heroLabel,heroScore,heroHint,trend);detail.append(hero);
  const kpis=document.createElement('div');kpis.className='detail-kpi';
- const official=stats.official!==null?'Итог: '+stats.official:stats.forecast!==null?'Прогноз: '+stats.forecast:'Мало оценок';
- for(const [label,value] of [['Средний балл',formatMean(stats.average)],['Четверть',official]]){
-  const cell=document.createElement('div'),num=document.createElement('strong'),text=document.createElement('span');num.textContent=value;text.textContent=label;cell.append(num,text);kpis.append(cell)
+ for(const [label,value] of [['Средний балл',formatMean(stats.average)],['Получено оценок',String(grades.regular.length)]]){
+  const cell=document.createElement('div'),num=document.createElement('strong'),text=document.createElement('span');
+  num.textContent=value;text.textContent=label;cell.append(text,num);kpis.append(cell);
  }
  detail.append(kpis);
  if(!grades.regular.length){
   const empty=document.createElement('p');empty.className='school-empty';
   empty.textContent='Пока нет оценок за эту четверть';detail.append(empty);
  }
- if(stats.difference!==null){
-  const d=document.createElement('p');d.className='grade-delta '+(stats.difference>=0.5?'up':stats.difference<=-0.5?'down':'flat');
-  d.textContent='Последние три, средний: '+formatMean(stats.recentAverage)+' · за четверть: '+formatMean(stats.previousAverage)+' · изменение '+(stats.difference>0?'+':'')+formatMean(stats.difference);detail.append(d);
- }
  const goal=document.createElement('div');goal.className='detail-goal';
- if(stats.official!==null)goal.textContent='Четвертная оценка выставлена — '+stats.official;
- else if(grades.regular.length<3){const left=3-grades.regular.length;goal.textContent=grades.regular.length===0?'Для прогноза нужны 3 оценки':'Для прогноза '+(left===1?'нужна ещё 1 оценка':'нужно ещё '+left+' оценки')}
- else if(stats.forecast===5)goal.textContent='Отличный результат! Сейчас прогноз — 5. Продолжай в том же духе';
- else{const n=S.fivesNeeded(grades.regular);goal.textContent=n===null?'Недостаточно данных для расчёта цели':n>10?'Для следующей оценки потребуется значительное улучшение результатов':'До следующего прогноза: примерно '+n+' '+(n===1?'пятёрка':n<5?'пятёрки':'пятёрок')+' подряд. Если следующие оценки будут пятёрками с обычным весом (1). Это сценарий, а не гарантированный итог.'}
- detail.append(goal);
+ const goalLabel=document.createElement('div');goalLabel.className='detail-goal-label';
+ goalLabel.textContent=stats.official!==null?'ИТОГ ЧЕТВЕРТИ':'ТВОЯ ЦЕЛЬ';
+ const goalMain=document.createElement('div');goalMain.className='detail-goal-main';
+ const goalNote=document.createElement('div');goalNote.className='detail-goal-note';
+ if(stats.official!==null){
+  goal.classList.add('complete');goalMain.textContent='Четвертная оценка выставлена — '+stats.official;
+ }else if(grades.regular.length<3){
+  const left=3-grades.regular.length;
+  goalMain.textContent=left===3?'Для прогноза нужны 3 оценки':'Для прогноза '+(left===1?'нужна ещё 1 оценка':'нужно ещё '+left+' оценки');
+ }else if(stats.forecast===5){
+  goalMain.textContent='Отличный результат!';goalNote.textContent='Сейчас прогноз — 5. Продолжай в том же духе.';
+ }else{
+  const n=S.fivesNeeded(grades.regular);
+  goalMain.textContent=n===null?'Недостаточно данных для расчёта цели':n>10?'Для следующей оценки потребуется значительное улучшение результатов':'Ещё '+n+' '+(n===1?'пятёрка':n<5?'пятёрки':'пятёрок')+' до прогноза '+(stats.forecast+1);
+  if(n!==null&&n<=10)goalNote.textContent='Если следующие оценки будут пятёрками с обычным весом (1). Это расчётный сценарий, не гарантия.';
+ }
+ goal.append(goalLabel,goalMain,goalNote);detail.append(goal);
  const chartTitle=document.createElement('h3');chartTitle.textContent='Динамика';detail.append(chartTitle);
  const chartControls=document.createElement('div');chartControls.className='detail-toggle';detail.append(chartControls);
  const chartHost=document.createElement('div');chartHost.className='detail-chart-scroll';detail.append(chartHost);
