@@ -265,7 +265,7 @@ test('Paper uses an informational success card, simplified level, and no plus fo
  assert.match(b.root.html,/class="paper-done" role="status"/);
  assert.doesNotMatch(b.root.html,/data-action="review"/);
  assert.match(b.root.html,/class="paper-level-help"/);
- assert.match(b.root.html,/Как перейти на следующий уровень/);
+ assert.match(b.root.html,/Как перейти на уровень «Опытный»/);
  assert.doesNotMatch(b.root.html,/paper-icon-plus/);
  assert.match(b.root.html,/class="paper-action paper-sources"/);
  const css=file('style.css');
@@ -303,7 +303,7 @@ test('Paper level metrics use only confirmed relevant lessons, not all reviews',
  for(let k=0;k<2;k++){
   const lessonAt=at-(k+5)*86400000,reviewAt=at-(k+3)*86400000;
   const ids=Array.from({length:10},(_,i)=>'level-'+k+'-'+i);
-  p.sessions.push({id:'learn-'+k,mode:'new',at:lessonAt,ids});
+  p.sessions.push({id:'learn-'+k,mode:'new',at:lessonAt,ids,successful:8});
   ids.forEach((id,i)=>p.words[id]={origin:'learned',schedule:{...E.newSchedule(lessonAt),nextDay:'2099-01-01'},history:[{at:reviewAt,ok:i<8}]});
  }
  const map=new Map([['wordscene-17-lab-v1',JSON.stringify(p)]]);
