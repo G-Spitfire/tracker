@@ -266,6 +266,14 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   const expected=selector==='.b3-home-btn svg'?'20px':'24px';assert.equal(style.w,expected);assert.equal(style.h,expected);assert.equal(style.stroke,'2px');
  }
 
+ // Design-kit typography on the main dashboard must use shared tokens.
+ const typeAudit=await page.evaluate(()=>{
+  const root=getComputedStyle(document.documentElement),font=sel=>getComputedStyle(document.querySelector(sel)).fontSize;
+  return {screenToken:root.getPropertyValue('--ds-font-screen').trim(),cardToken:root.getPropertyValue('--ds-font-card').trim(),screen:font('.school-header h1'),cards:['.forecast-card .card-heading h2','.trend-card .card-heading h2','.subjects-card h2','.orient-heading h2'].map(font)};
+ });
+ assert.equal(typeAudit.screen,typeAudit.screenToken,'dashboard screen heading follows design-kit');
+ for(const size of typeAudit.cards)assert.equal(size,typeAudit.cardToken,'dashboard card headings follow design-kit');
+
  // Consolidated CSS must preserve key card, navigation, and theme contracts.
  const cascadeAudit=await page.evaluate(()=>{
   const root=document.documentElement,old=root.dataset.leveliTheme,out=[];
