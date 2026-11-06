@@ -127,11 +127,11 @@ async function run(name, browserType, contextOptions) {
   await snap('three-selected');
   assert.ok(await page.getByText('Выбрано слов:').count()>0);
   await page.locator('[data-action="removeManual:apple"]').click();
-  assert.ok((await page.locator('.ws-manual-total').innerText()).includes('2 / 10'));
+  assert.ok((await page.locator('.ws-manual-total').innerText()).includes('2 / 15'));
   assert.equal(await page.locator('[data-action="startManual"]').isDisabled(),true);
   await page.locator('[data-action="manualTopic:food"]').click();
   await page.locator('[data-action="pick:apple"]').click();
-  assert.ok((await page.locator('.ws-manual-total').innerText()).includes('3 / 10'));
+  assert.ok((await page.locator('.ws-manual-total').innerText()).includes('3 / 15'));
   assert.equal(await page.locator('[data-action="startManual"]').isEnabled(),true);
   await page.locator('[data-action="startManual"]').click();
   await checkMemorization(page,snap);
