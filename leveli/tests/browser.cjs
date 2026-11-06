@@ -78,6 +78,16 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   assert.ok(box.characterTop<box.heroTop,'character must rise above hero');
   assert.ok(box.characterBottom<=box.nameTop-5,'character must not cover the profile name');
   assert.ok(box.width<210,'transparent avatar must stay compact');
+  const framing=await page.locator('.b3-avatar-stand').evaluate(el=>{
+   const line=getComputedStyle(el,'::after'),portrait=getComputedStyle(el.querySelector('.cutout-ready'));
+   return {bottom:line.borderBottomWidth,left:line.borderLeftWidth,right:line.borderRightWidth,top:line.borderTopWidth,content:line.content,bottomRadius:line.borderBottomLeftRadius,mask:portrait.maskImage||portrait.webkitMaskImage,frameWidth:el.getBoundingClientRect().width};
+  });
+  assert.equal(framing.content,'""');
+  assert.equal(framing.top,'0px','frame remains open at the top');
+  assert.equal(framing.left,'2px');assert.equal(framing.right,'2px');assert.equal(framing.bottom,'2px');
+  assert.match(framing.mask,/linear-gradient/,'portrait bottom has a mask, rather than a hard crop');
+  assert.ok(framing.frameWidth<=160,'character window stays compact');
+
  }
  await page.locator('#b3-panel-close').click();
  await page.locator('[data-b3-panel="icons"]').click();
