@@ -362,7 +362,14 @@ body{background:#0e0c21;color:#f6f0ff}
 .personal-option{min-width:0;min-height:48px;border:1px solid #665184;background:#29223f;border-radius:12px;color:#f0e5ff;font:700 11px Manrope,system-ui;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;padding:7px 4px;overflow-wrap:anywhere}
 .personal-option[aria-pressed="true"]{border:2px solid var(--leveli-accent-border);box-shadow:0 0 0 2px var(--leveli-accent-dim);background:var(--leveli-accent-dim)}
 .personal-option:focus-visible{outline:3px solid var(--leveli-accent);outline-offset:2px}
-.personal-avatar-option{font-size:28px;min-height:59px}
+.personal-avatar-option{font-size:28px;min-height:59px;padding:4px}
+.avatar-gallery-label{grid-column:1/-1;font-size:11px;font-weight:800;color:var(--leveli-accent-soft);margin:6px 0 1px;letter-spacing:.01em}
+.avatar-gallery-label:not(:first-child){margin-top:13px}
+.avatar-illustration{display:block;width:100%;max-width:58px;aspect-ratio:1;background-image:url('./avatars/portraits-atlas.webp');background-repeat:no-repeat;background-size:500% 200%;border-radius:11px;background-color:#34254c}
+.profile-avatar .avatar-illustration{width:100%;max-width:none;border-radius:15px}
+.personal-avatar-option[aria-pressed="true"] .avatar-illustration{outline:2px solid var(--leveli-accent-soft);outline-offset:1px}
+:root[data-leveli-theme="light"] .avatar-gallery-label{color:#69519a}
+@media(max-width:360px){.personal-avatar-option{min-height:52px;padding:3px}.avatar-illustration{border-radius:8px}}
 .personal-color-swatch{width:27px;height:27px;border-radius:10px;border:1px solid #ffffff50}
 :root[data-leveli-theme="light"] .personal-option{background:#f0e8fa;color:#342348;border-color:#d4c3e9}
 :root[data-leveli-theme="light"] .personal-option[aria-pressed="true"]{background:#e8dff4}
@@ -428,7 +435,9 @@ window.LeveliAppearance=(()=>{
   yellow:{main:'#f4c75f',soft:'#ffe6a3',dim:'#76602c',border:'#f4c75f',line:'#ffe7a1',glow:'#f4c75f'},
   mint:{main:'#69d9bd',soft:'#bdf9e7',dim:'#286b5c',border:'#69d9bd',line:'#bcf9e9',glow:'#69d9bd'}
  };
- const avatars=[['Кошка','🐱'],['Танцы','🩰'],['Лапки','🐾'],['Музыка','🎵'],['Звезда','🌟'],['Футбол','⚽'],['Гейминг','🎮'],['Гонки','🏎️'],['Мяч','🏆'],['Наушники','🎧']];
+ // Each portrait corresponds to one 64×64 cell of a 5×2 sprite. The index is stable for saved profiles.
+ const avatars=[['Кошка',0],['Танцы',2],['Лапки',3],['Музыка',4],['Звезда',1],['Футбол',6],['Гейминг',8],['Гонки',7],['Мяч',5],['Наушники',9]];
+ function avatarImage(tile,cls){const node=document.createElement('span');node.className='avatar-illustration'+(cls?' '+cls:'');node.setAttribute('aria-hidden','true');node.style.backgroundPosition=(tile%5*25)+'% '+(tile>=5?'100%':'0%');return node}
  const packs=[['classic','Классика','✦'],['cats','Кошки и танцы','🐱'],['sports','Футбол и игры','⚽']];
  const defaults={theme:'dark',accent:'violet',avatar:0,customAvatar:'',pack:'classic',birthday:''};
  let uid=null,profile={...defaults},render=null;
@@ -442,7 +451,7 @@ window.LeveliAppearance=(()=>{
   document.documentElement.dataset.leveliPack=profile.pack;
   const c=accents[profile.accent],s=document.documentElement.style;
   for(const [key,val] of Object.entries({accent:c.main,'accent-soft':c.soft,'accent-dim':c.dim,'accent-border':c.border}))s.setProperty('--leveli-'+key,val);
-  const avatarDisplay=document.querySelector('#profile-avatar-display');avatarDisplay.replaceChildren();if(profile.avatar==='custom'&&profile.customAvatar){const img=document.createElement('img');img.src=profile.customAvatar;img.alt='';img.className='profile-avatar-custom';avatarDisplay.append(img)}else avatarDisplay.textContent=avatars[profile.avatar] ? avatars[profile.avatar][1] : '★';document.querySelector('#profile-remove-avatar').hidden=!profile.customAvatar;
+  const avatarDisplay=document.querySelector('#profile-avatar-display');avatarDisplay.replaceChildren();if(profile.avatar==='custom'&&profile.customAvatar){const img=document.createElement('img');img.src=profile.customAvatar;img.alt='';img.className='profile-avatar-custom';avatarDisplay.append(img)}else if(avatars[profile.avatar])avatarDisplay.append(avatarImage(avatars[profile.avatar][1]));else avatarDisplay.textContent='★';avatarDisplay.dataset.avatarIndex=String(profile.avatar);document.querySelector('#profile-remove-avatar').hidden=!profile.customAvatar;
   // A themed icon pack changes navigation and card headings, not the immutable Leveli brand mark.
   const settingsButton=document.querySelector('.settings-button');
   let settingsImage=settingsButton.querySelector('.leveli-pack-settings');
@@ -471,7 +480,7 @@ window.LeveliAppearance=(()=>{
   const b=document.createElement('button');b.type='button';b.className='personal-option'+(extra?' '+extra:'');b.textContent=label;b.setAttribute('aria-pressed',String(selected));if(style)b.style.cssText=style;b.onclick=action;return b
  }
  function drawControls(){
-  const av=document.querySelector('#personal-avatar-options');av.replaceChildren();avatars.forEach(([label,emoji],i)=>{const b=button(emoji,profile.avatar===i,()=>set({avatar:i}),'personal-avatar-option');b.title=label;b.setAttribute('aria-label',label);av.append(b)});if(profile.customAvatar){const b=button('',profile.avatar==='custom',()=>set({avatar:'custom'}),'personal-avatar-option');b.setAttribute('aria-label','Моя картинка');const img=document.createElement('img');img.src=profile.customAvatar;img.alt='';img.className='personal-avatar-custom';b.append(img);av.append(b)}
+  const av=document.querySelector('#personal-avatar-options');av.replaceChildren();avatars.forEach(([label,tile],i)=>{if(i===0||i===5){const heading=document.createElement('div');heading.className='avatar-gallery-label';heading.textContent=i===0?'Кошки и танцы':'Футбол и игры';av.append(heading)}const b=button('',profile.avatar===i,()=>set({avatar:i}),'personal-avatar-option');b.title=label;b.setAttribute('aria-label',label);b.dataset.avatarIndex=String(i);b.append(avatarImage(tile));av.append(b)});if(profile.customAvatar){const b=button('',profile.avatar==='custom',()=>set({avatar:'custom'}),'personal-avatar-option');b.setAttribute('aria-label','Моя картинка');const img=document.createElement('img');img.src=profile.customAvatar;img.alt='';img.className='personal-avatar-custom';b.append(img);av.append(b)}
   const themeBox=document.querySelector('#personal-theme-options');themeBox.replaceChildren();for(const [k,t] of [['light','☀ Светлая'],['dark','☾ Тёмная'],['system','◐ Системная']])themeBox.append(button(t,profile.theme===k,()=>set({theme:k})));
   const colorBox=document.querySelector('#personal-accent-options');colorBox.replaceChildren();for(const [k,title] of [['violet','Фиолетовый'],['pink','Розовый'],['blue','Синий'],['yellow','Жёлтый'],['mint','Мятный']]){const b=button(title,profile.accent===k,()=>set({accent:k}));const swatch=document.createElement('span');swatch.className='personal-color-swatch';swatch.style.background=accents[k].main;b.prepend(swatch);colorBox.append(b)}
   const packBox=document.querySelector('#personal-pack-options');packBox.replaceChildren();for(const [k,title,emoji] of packs)packBox.append(button(emoji+' '+title,profile.pack===k,()=>set({pack:k})));
@@ -481,6 +490,7 @@ window.LeveliAppearance=(()=>{
   document.querySelector('#profile-save-status').textContent='Сохранено на этом устройстве';
   paint();document.dispatchEvent(new CustomEvent('leveliAppearanceChanged',{detail:{profile:{...profile}}}));
  }
+ function suggestAvatar(name){if(!uid||!name)return;try{if(localStorage.getItem('leveli-personal-v1-'+uid))return}catch{return}profile.avatar=/матвей/i.test(name)?5:0;paint()}
  function activate(id){uid=safe(id);profile=uid?valid(read(uid)):{...defaults};document.querySelector('#profile-personalization').hidden=!uid;document.querySelector('#profile-birthday-card').hidden=!uid;document.querySelector('#profile-save-status').textContent='';paint()}
  document.querySelector('#profile-upload-avatar').addEventListener('click',()=>{if(uid)document.querySelector('#profile-avatar-file').click()});
  document.querySelector('#profile-remove-avatar').addEventListener('click',()=>set({customAvatar:'',avatar:0}));
@@ -502,7 +512,7 @@ window.LeveliAppearance=(()=>{
  document.querySelector('#profile-birthday').addEventListener('change',e=>{const value=e.target.value;if(value&&new Date(value+'T12:00:00')>new Date()){document.querySelector('#profile-save-status').textContent='Дата рождения не может быть в будущем';return}set({birthday:value})});
  window.matchMedia?.('(prefers-color-scheme: light)').addEventListener?.('change',()=>{if(profile.theme==='system')paint()});
  paint();
- return {activate,get:()=>({...profile}),colors:()=>accents[profile.accent],avatars};
+ return {activate,suggestAvatar,get:()=>({...profile}),colors:()=>accents[profile.accent],avatars};
 })();
 </script>
 <script type="module">
@@ -513,7 +523,7 @@ const firebaseConfig={apiKey:"AIzaSyCs3gfUXcrlTJLZqxXQ0cgXpfuqNBkNIsU",authDomai
 const app=initializeApp(firebaseConfig,'leveli-school');
 const auth=getAuth(app), db=getFirestore(app);window.leveliFirebase={auth,db,onAuthStateChanged,doc,getDocFromServer};window.dispatchEvent(new Event('leveliFirebaseReady'));
 const login=document.getElementById('school-login'), results=document.getElementById('school-results'), error=document.getElementById('school-error'), status=document.getElementById('school-status'), subjects=document.getElementById('school-subjects');
-let firestoreProfileName='';function updateIdentity(user,grades){const email=user?.email||'';const known=firestoreProfileName;document.getElementById('home-greeting').textContent=known?'Привет, '+known+'!':'Привет!';document.getElementById('profile-name').textContent=user?(known||'Ученик'):'Гость';document.getElementById('profile-account').textContent=user?'Аккаунт подключён':'Войди на главной, чтобы подключить профиль.';document.getElementById('profile-actions').hidden=!user;document.getElementById('profile-school').textContent='';window.dispatchEvent(new CustomEvent('leveliIdentity',{detail:{uid:user?.uid||null}}));document.title='Левели · '+(known||'Мои оценки')}
+let firestoreProfileName='';function updateIdentity(user,grades){const email=user?.email||'';const known=firestoreProfileName;document.getElementById('home-greeting').textContent=known?'Привет, '+known+'!':'Привет!';document.getElementById('profile-name').textContent=user?(known||'Ученик'):'Гость';if(user&&known)window.LeveliAppearance.suggestAvatar(known);document.getElementById('profile-account').textContent=user?'Аккаунт подключён':'Войди на главной, чтобы подключить профиль.';document.getElementById('profile-actions').hidden=!user;document.getElementById('profile-school').textContent='';window.dispatchEvent(new CustomEvent('leveliIdentity',{detail:{uid:user?.uid||null}}));document.title='Левели · '+(known||'Мои оценки')}
 function showError(e){error.textContent=e?.code==='auth/invalid-credential'?'Неверная почта или пароль.':e?.code==='permission-denied'?'Нет доступа к оценкам этой учётной записи.':e?.message||'Не удалось загрузить оценки.'}
 const S=window.LeveliSchool;
 const accentColor=()=>window.LeveliAppearance.colors();
