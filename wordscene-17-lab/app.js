@@ -555,7 +555,7 @@ function dictionaryView(){
   '<div><h1>Словарь</h1><p>Все слова WordScene</p></div></div>'+
   '<div class="ws-dict-search"><label for="ws-dict-input">Поиск по слову или переводу</label><input id="ws-dict-input" type="search" autocomplete="off" spellcheck="false" value="'+h(query)+'" placeholder="Например, apple или яблоко"></div>'+
   '<div class="ws-dict-filters" role="group" aria-label="Фильтр по статусу">'+chips+'</div>'+
-  '<section class="ws-dict-list-card" aria-label="Список слов"><div class="ws-dict-list-head"><h2>Слова</h2><span id="ws-dict-count"></span></div><div id="ws-dict-results" class="ws-dict-results"></div></section>'+
+  '<section class="ws-dict-list-card" aria-label="Список слов"><div class="ws-dict-list-head"><h2>Слова</h2><span id="ws-dict-count">'+dictionary.filter(dictionaryMatches).length+' из '+dictionary.length+' слов</span></div><div id="ws-dict-results" class="ws-dict-results">'+(dictionary.filter(dictionaryMatches).length?dictionary.filter(dictionaryMatches).map(dictionaryRow).join(''):'<div class="ws-dict-empty"><strong>Ничего не найдено</strong><p>Попробуй другой запрос или выбери фильтр «Все».</p></div>')+'</div></section>'+
   '<p class="ws-dict-footnote">Просмотр слов не изменяет прогресс обучения.</p></main>');
  const input=root.querySelector?.('#ws-dict-input');
  input?.addEventListener('input',()=>{query=input.value;refreshDictionaryResults()});
