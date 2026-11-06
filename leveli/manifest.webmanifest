@@ -1,0 +1,25 @@
+{
+  "name": "Левели",
+  "short_name": "Левели",
+  "description": "Мои оценки и успеваемость",
+  "lang": "ru",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0e0c21",
+  "theme_color": "#0e0c21",
+  "icons": [
+    {
+      "src": "./brand/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./brand/app-icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
