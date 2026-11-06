@@ -194,7 +194,56 @@ async function run(name, browserType, contextOptions) {
   assert.equal(await page.locator('[data-action="startManual"]').isEnabled(),true);
   await page.locator('[data-action="startManual"]').click();
   await checkMemorization(page,snap);
-  if(await page.locator('.ws-recall-v4').count()){
+  if(await page.locator('.ws-paper-recall').count()){
+   const measure=()=>page.evaluate(()=>{
+    const box=s=>{const r=document.querySelector(s)?.getBoundingClientRect();return r?{x:r.x,y:r.y,width:r.width,height:r.height}:null};
+    return {sheet:box('.ws-paper-stage'),dream:box('.ws-paper-dream'),grades:box('.ws-paper-decisions'),minors:box('.ws-paper-minors'),main:box('.ws-paper-page'),viewport:innerHeight};
+   });
+   const compare=(a,b,label)=>{
+    for(const type of ['sheet','grades','minors'])for(const k of ['x','y','width','height'])
+     assert.ok(Math.abs(a[type][k]-b[type][k])<=2,label+' moved '+type+'.'+k+': '+JSON.stringify([a[type],b[type]]));
+   };
+   const original=await measure();
+   assert.ok(original.sheet.height>=150,'paper too short');
+   assert.ok(original.sheet.y+original.sheet.height<=original.dream.y+3,'dream belongs outside paper');
+   assert.ok(original.dream.y+original.dream.height<=original.grades.y+2,'buttons belong below dream');
+   assert.ok(Math.abs(original.main.y+original.main.height-original.viewport)<12,'study fills viewport');
+   const grades=await page.locator('.ws-paper-decisions button').evaluateAll(items=>items.map(e=>({h:e.getBoundingClientRect().height,r:parseFloat(getComputedStyle(e).borderTopLeftRadius)})));
+   assert.equal(grades.length,2);
+   grades.forEach(g=>{assert.ok(g.h>=63);assert.ok(Math.abs(g.r-21)<=1)});
+   assert.equal(await page.locator('.ws-paper-face-back[aria-hidden="true"]').count(),1);
+   assert.equal(await page.locator('.ws-paper-dream .ws-paper-art').count(),0);
+   assert.equal(await page.locator('[data-action="help"]').count(),0);
+   await page.locator('[data-flip-card]').click({position:{x:20,y:20}});
+   assert.equal(await page.locator('.ws-paper-face-back[aria-hidden="false"]').count(),1);
+   compare(original,await measure(),'flip');
+   await snap('paper-recall-translation');
+   assert.ok(await page.locator('.ws-paper-face-back .ws-paper-sound').evaluate(e=>e.getBoundingClientRect().height)>=44,'English sound target');
+   await page.locator('[data-action="help"]').click();
+   assert.equal(await page.locator('.ws-paper-dream .ws-paper-art').count(),1);
+   assert.equal(await page.locator('.ws-paper-sheet .ws-paper-art').count(),0);
+   compare(original,await measure(),'open imagination');
+   await snap('paper-recall-imagination');
+   await page.locator('[data-action="help"]').click();
+   await page.locator('[data-flip-card]').click({position:{x:20,y:20}});
+   assert.equal(await page.locator('.ws-paper-face:not(.ws-paper-face-back)[aria-hidden="false"]').count(),1);
+   compare(original,await measure(),'return to front');
+   await page.locator('[data-action="pause"]').click();
+   await page.locator('[data-action="continue"]').click();
+   compare(original,await measure(),'resume');
+   await page.locator('[data-action="no"]').click();
+   assert.equal(await page.locator('.ws-paper-face-back[aria-hidden="false"]').count(),1);
+   assert.equal(await page.locator('[data-action="yes"]').count(),0);
+   assert.equal(await page.locator('[data-action="advance"]').count(),1);
+   compare(original,await measure(),'correction');
+   await snap('paper-recall-correction');
+   await page.locator('[data-action="advance"]').click();
+   let guard=0;
+   while(await page.locator('.ws-paper-recall').count()){
+    if(++guard>80)throw new Error('paper recall did not finish');
+    await page.locator('[data-action="yes"]').click();
+   }
+  }else if(await page.locator('.ws-recall-v4').count()){
    const measure=()=>page.evaluate(()=>{
     const selectors=['.ws-recall-decisions','.ws-recall-session-actions'];
     const bounds=selectors.map(selector=>{
