@@ -280,7 +280,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   for(const theme of ['dark','light']){
    root.dataset.leveliTheme=theme;
    const read=selector=>{const element=document.querySelector(selector),style=getComputedStyle(element);return {radius:style.borderTopLeftRadius,background:style.backgroundColor,minHeight:style.minHeight,color:style.color}};
-   out.push({theme,card:read('.card'),tile:read('.b3-tile'),back:read('.leveli-back-btn'),extra:read('.b3-extra')});
+   out.push({theme,card:read('.card'),tile:read('.b3-tile'),back:read('.leveli-back-btn'),extra:read('.b3-extra'),dashboard:['.forecast-card','.trend-card','.subjects-card'].map(selector=>({background:read(selector).background,padding:getComputedStyle(document.querySelector(selector)).paddingTop})),donut:read('.donut-panel')});
   }
   root.dataset.leveliTheme=old;
   return out;
@@ -291,6 +291,12 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   assert.equal(state.back.radius,'12px','back navigation retains DS 12px radius');
   assert.equal(state.back.minHeight,'44px','navigation hit targets remain 44px');
   assert.notEqual(state.tile.background,'rgba(0, 0, 0, 0)','tiles remain visible in '+state.theme);
+  for(const panel of state.dashboard){
+   assert.equal(panel.background,state.card.background,'dashboard surfaces match shared card surface in '+state.theme);
+   assert.equal(panel.padding,'16px','dashboard card spacing follows 16px token at 390px in '+state.theme);
+  }
+  assert.equal(state.donut.radius,'15px','inner chart surfaces use 15px radius in '+state.theme);
+  assert.equal(state.donut.background,state.theme==='light'?'rgb(243, 238, 251)':'rgb(37, 32, 61)','inner chart surface follows theme in '+state.theme);
  }
  assert.notEqual(cascadeAudit[0].card.background,cascadeAudit[1].card.background,'light/dark card surfaces must remain distinct');
  // Visual baseline checks: text/background contrast in both themes (WCAG 4.5:1 normal text).
