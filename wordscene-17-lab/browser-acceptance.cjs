@@ -193,17 +193,61 @@ async function run(name, browserType, contextOptions) {
   assert.equal(await page.locator('[data-action="startManual"]').isEnabled(),true);
   await page.locator('[data-action="startManual"]').click();
   await checkMemorization(page,snap);
-  if(await page.locator('.ws-recall-v2').count()){
+  if(await page.locator('.ws-recall-v3').count()){
+   const measure=()=>page.evaluate(()=>{
+    const controls=['.ws-recall-decisions','.ws-recall-translation','.ws-recall-session-actions'];
+    const bounds=controls.map(selector=>{
+     const r=document.querySelector(selector)?.getBoundingClientRect();
+     return r?{x:r.x,y:r.y,width:r.width,height:r.height}:null;
+    });
+    const card=document.querySelector('.ws-recall-card').getBoundingClientRect();
+    const root=document.querySelector('.ws-recall-v3').getBoundingClientRect();
+    return {bounds,card:{top:card.top,bottom:card.bottom,height:card.height},root:{height:root.height,bottom:root.bottom},viewport:innerHeight};
+   });
+   const checkPositions=(before,after,label)=>{
+    for(let i=0;i<before.bounds.length;i++)for(const k of ['x','y','width','height']){
+     assert.ok(Math.abs(before.bounds[i][k]-after.bounds[i][k])<=2,label+' changed '+k+' for control '+i+': '+JSON.stringify([before.bounds[i],after.bounds[i]]));
+    }
+   };
+   const before=await measure();
+   assert.ok(before.card.height>100,'recall card must use available height');
+   assert.ok(Math.abs(before.root.bottom-before.viewport)<3,'recall screen should fill viewport');
+   assert.ok(await page.locator('[data-action="yes"]').isVisible(),'direct success is visible');
+   assert.ok(await page.locator('[data-action="no"]').isVisible(),'direct failure is visible');
+   assert.ok(await page.locator('[data-action="check"]').isVisible(),'optional translation is visible');
+   assert.equal(await page.locator('.ws-recall-answer').count(),0,'translation initially hidden');
+   await page.locator('[data-action="recallHint"]').click();
+   assert.ok(await page.locator('.ws-recall-clue').count()>0,'hint available');
+   await page.locator('[data-action="recallHint"]').click();
+   await page.locator('[data-action="check"]').click();
+   assert.equal(await page.locator('.ws-recall-answer').count(),1);
+   checkPositions(before,await measure(),'show translation');
+   await snap('recall-optional-translation');
+   await page.locator('[data-action="hideTranslation"]').click();
+   assert.equal(await page.locator('.ws-recall-answer').count(),0);
+   checkPositions(before,await measure(),'hide translation');
+   await page.locator('[data-action="no"]').click();
+   assert.equal(await page.locator('.ws-recall-answer').count(),1);
+   assert.ok(await page.locator('[data-action="yes"]').count()===0,'after failure grading is blocked');
+   assert.equal(await page.locator('[data-action="advance"]').count(),1,'failed word needs corrective continuation');
+   checkPositions(before,await measure(),'failed answer');
+   await snap('recall-corrective-answer');
+   await page.locator('[data-action="advance"]').click();
+   // One mistake creates an extra remediation round; finish it without changing the scoring engine.
+   let guard=0;
+   while(await page.locator('.ws-recall-v3').count()){
+    if(++guard>80)throw new Error('recall loop did not complete after direct scoring');
+    await page.locator('[data-action="yes"]').click();
+   }
+  }else if(await page.locator('.ws-recall-v2').count()){
    assert.equal(await page.locator('[data-action="yes"]').count(),0,'no self-scoring before reveal');
    assert.equal(await page.locator('[data-action="check"]').count(),1);
    await page.locator('[data-action="recallHint"]').click();
-   assert.ok(await page.locator('.ws-recall-clue').count()>0,'hint is available before answer');
+   assert.ok(await page.locator('.ws-recall-clue').count()>0,'hint available');
    await page.locator('[data-action="recallHint"]').click();
    await snap('recall-question');
    await page.locator('[data-action="check"]').click();
    assert.equal(await page.locator('.ws-recall-answer').count(),1);
-   assert.ok(await page.locator('[data-action="checkedYes"]').count()>0);
-   assert.ok(await page.locator('[data-action="checkedNo"]').count()>0);
    await snap('recall-answer');
    await page.locator('[data-action="help"]').click();
    assert.ok(await page.locator('.ws-recall-clue-art').count()>0);
@@ -273,6 +317,7 @@ async function legacy(name,browserType,contextOptions) {
   ['Chromium 390x844',chromium,{viewport:{width:390,height:844},isMobile:true,hasTouch:true}],
   ['Chromium 320x568',chromium,{viewport:{width:320,height:568},isMobile:true,hasTouch:true}],
   ['WebKit 390x844',webkit,{viewport:{width:390,height:844},isMobile:true,hasTouch:true}],
+  ['WebKit 375x667',webkit,{viewport:{width:375,height:667},isMobile:true,hasTouch:true}],
   ['WebKit 320x568',webkit,{viewport:{width:320,height:568},isMobile:true,hasTouch:true}]
  ];
  for(const [name,type,opts] of targets) {

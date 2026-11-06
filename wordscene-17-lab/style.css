@@ -789,3 +789,41 @@ html:has(#app > header),body:has(#app > header){
 @media(prefers-reduced-motion:reduce){.ws-recall-progress span{transition:none}}
 
 .ws-recall-association{display:block;min-height:44px;flex:none;margin:8px auto 0;padding:9px 12px;border:1px solid #d2dfed;background:#fffbf5;border-radius:13px;color:#0753bb;font-size:14px;font-weight:650}
+
+
+/* Recall v3: fixed-position evaluation controls and flexible card for all viewport heights. */
+.ws-recall-v3{display:flex;flex-direction:column;height:100dvh;min-height:0;max-height:100dvh;overflow:hidden}
+.ws-recall-v3 .ws-recall-card{flex:1 1 auto;min-height:0;max-height:none;display:flex;flex-direction:column;overflow-y:auto;align-items:stretch;justify-content:initial;text-align:center;overscroll-behavior:contain}
+.ws-recall-v3 .ws-recall-core{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;width:100%;max-width:100%;margin:auto 0;flex:none;padding:6px 0}
+.ws-recall-v3 .ws-recall-word{margin:7px 0 9px}
+.ws-recall-v3 .ws-recall-direction{margin:0 0 6px}
+.ws-recall-v3 .ws-recall-separator{margin:13px 0 14px;width:100%}
+.ws-recall-meaning-question{color:#596676;font-size:14px;line-height:1.4;margin:4px 0 6px}
+.ws-recall-correction{color:#596676;font-size:12px;line-height:1.4;margin:9px 0 0}
+.ws-recall-v3 .ws-recall-card-tools{width:100%;display:flex;flex-direction:column;align-items:stretch;gap:8px;flex:none;padding:6px 0 0;margin-top:12px}
+.ws-recall-v3 .ws-recall-association{margin:0 auto;min-height:44px}
+.ws-recall-v3 .ws-recall-actions{flex:none;display:flex;flex-direction:column;gap:8px}
+.ws-recall-v3 .ws-recall-decisions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.ws-recall-v3 .ws-recall-decisions button{min-height:63px;max-height:none;margin:0}
+.ws-recall-v3 .ws-recall-decisions button:disabled{opacity:.55;filter:saturate(.55);cursor:default}
+.ws-recall-v3 .ws-recall-translation{display:block;min-height:54px;width:100%;padding:9px 12px;border:1px solid #c9ddf3;border-radius:18px;background:#fffbf5;color:#0753bb;font-size:17px;font-weight:700}
+.ws-recall-v3 .ws-recall-session-actions{min-height:44px;gap:8px}
+.ws-recall-v3 .ws-recall-session-actions>.quiet{min-height:44px}
+.ws-recall-v3 .ws-recall-answer{min-height:83px}
+.ws-recall-v3 .ws-recall-clue{margin:0}
+.ws-recall-v3 button:not(:disabled):active{transform:scale(.975)}
+@media(max-height:700px){
+.ws-recall-v3 .ws-recall-card{padding:11px}
+.ws-recall-v3 .ws-recall-core{padding:3px 0}
+.ws-recall-v3 .ws-recall-separator{margin:9px 0}
+.ws-recall-v3 .ws-recall-actions{gap:6px}
+.ws-recall-v3 .ws-recall-decisions button{min-height:60px}
+.ws-recall-v3 .ws-recall-translation{min-height:50px}
+.ws-recall-v3 .ws-recall-card-tools{margin-top:6px}
+}
+@media(max-height:590px){
+.ws-recall-v3 .ws-recall-word{font-size:clamp(27px,8vw,34px)}
+.ws-recall-v3 .ws-recall-answer{min-height:67px;padding:10px}
+.ws-recall-v3 .ws-recall-card-tools{margin-top:3px}
+}
+@media(prefers-reduced-motion:reduce){.ws-recall-v3 button{transition:none}}

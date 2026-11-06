@@ -53,39 +53,47 @@ test('approved memorization UI keeps illustration visible, progress and unchange
  assert.match(b.root.html,/data-action="help"/);
 });
 
-test('recall UI v2 follows question, hint, reveal, evaluation and next card with saved state',()=>{
+test('recall v3 keeps action positions stable and makes translation optional',()=>{
  const b=boot();b.click('sources');b.click('auto');
  for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
  for(let i=0;i<10;i++)b.click('learnNext');
- assert.match(b.root.html,/class="ws-recall-v2"/);
- assert.match(b.root.html,/Проверка знаний/);
- assert.match(b.root.html,/data-action="recallHint"/);
+ assert.match(b.root.html,/class="ws-recall-v2 ws-recall-v3"/);
+ assert.match(b.root.html,/data-action="yes"/);
+ assert.match(b.root.html,/data-action="no"/);
  assert.match(b.root.html,/data-action="check"/);
- assert.doesNotMatch(b.root.html,/data-action="checkedYes"/);
  assert.doesNotMatch(b.root.html,/class="ws-recall-answer"/);
+ assert.match(b.root.html,/Показать перевод/);
  b.click('recallHint');
  assert.match(b.root.html,/Ассоциация/);
- assert.match(b.root.html,/Скрыть подсказку/);
  b.click('recallHint');
- assert.match(b.root.html,/Нужна подсказка/);
  b.click('check');
  assert.match(b.root.html,/class="ws-recall-answer"/);
+ assert.match(b.root.html,/Скрыть перевод/);
  assert.match(b.root.html,/data-action="checkedYes"/);
  assert.match(b.root.html,/data-action="checkedNo"/);
- assert.match(b.root.html,/data-action="help"/);
+ b.click('hideTranslation');
+ assert.match(b.root.html,/data-action="check"/);
+ assert.match(b.root.html,/data-action="yes"/);
+ b.click('yes');
+ assert.match(b.root.html,/class="ws-recall-v2 ws-recall-v3"/);
+ assert.doesNotMatch(b.root.html,/class="ws-recall-answer"/);
+ b.click('no');
+ assert.match(b.root.html,/class="ws-recall-answer"/);
+ assert.match(b.root.html,/Посмотри правильный перевод/);
+ assert.match(b.root.html,/data-action="advance"/);
+ assert.match(b.root.html,/data-action="checkedYes"[^>]*disabled/);
  b.click('help');
  assert.match(b.root.html,/ws-recall-clue-art/);
  b.click('pause');
  assert.match(b.root.html,/data-action="continue"/);
  b.click('continue');
  assert.match(b.root.html,/ws-recall-clue-art/);
- b.click('checkedYes');
- assert.match(b.root.html,/class="ws-recall-v2"/);
- assert.doesNotMatch(b.root.html,/class="ws-recall-answer"/);
+ b.click('advance');
  assert.match(b.root.html,/data-action="check"/);
  const css=file('style.css');
- assert.ok(css.includes('.ws-recall-v2{display:flex;flex-direction:column'));
- assert.ok(css.includes('.ws-recall-decisions{display:grid;grid-template-columns:repeat(2'));
+ assert.ok(css.includes('.ws-recall-v3 .ws-recall-card{flex:1 1 auto;min-height:0'));
+ assert.ok(css.includes('.ws-recall-v3 .ws-recall-actions{flex:none'));
+ assert.ok(css.includes('.ws-recall-v3 .ws-recall-translation{display:block;min-height:54px'));
 });
 
 test('confirmed cancellation keeps persistent profile clean',()=>{
@@ -154,12 +162,12 @@ test('mandatory review unlocks voluntary practice for final errors without chang
  assert.match(b.root.html,/Сначала повтори слова/);
  assert.doesNotMatch(b.root.html,/Выбери способ подбора/);
  b.click('review');
- for(let i=0;i<4;i++){b.click('check');b.click('checkedNo');b.click('check');b.click('checkedYes')}
+ for(let i=0;i<4;i++){b.click('no');b.click('advance');b.click('yes')}
  const saved=b.map.get(key);
  b.click('home');
  assert.match(b.root.html,/Повторить ещё раз[\s\S]*Если хочешь, потренируй ещё 1 трудное слово/);
  b.click('practice');
- for(let i=0;i<4;i++){b.click('check');b.click('checkedNo');b.click('check');b.click('checkedYes')}
+ for(let i=0;i<4;i++){b.click('no');b.click('advance');b.click('yes')}
  b.click('check');b.click('checkedYes');b.click('check');b.click('checkedYes');
  assert.equal(b.map.get(key),saved);
  assert.equal(b.map.has('wordscene-17-lab-active-v1'),false);
@@ -501,7 +509,7 @@ test('installed PWA uses consistent WordScene lighthouse icon assets and Paper c
  assert.equal(mask.readUInt32BE(16),512);
  assert.equal(mask.readUInt32BE(20),512);
  const sw=file('sw.js');
- assert.match(sw,/wordscene-17-lab-cache-v42/);
+ assert.match(sw,/wordscene-17-lab-cache-v43/);
  assert.match(sw,/icon-maskable-512\.png/);
  assert.match(sw,/wordscene-lighthouse-icon\.svg/);
 });
