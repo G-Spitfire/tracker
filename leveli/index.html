@@ -564,6 +564,50 @@ body{background:#0e0c21;color:#f6f0ff}
 .b3-dialog .personal-choice-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
 .b3-dialog .personal-avatar-option{min-width:0}
 @media(max-width:360px){.b3-avatar-stand:has(.avatar-illustration.cutout-ready){top:-81px;width:148px;height:148px}}
+
+/* Shared component contract: typography, geometric tokens and touch targets.
+   Semantic grade colors remain intentionally independent from decorative accents. */
+:root{
+ --ds-font-body:14px;--ds-font-support:12px;--ds-font-card:18px;--ds-font-screen:26px;
+ --ds-line-normal:1.5;--ds-line-heading:1.3;
+ --ds-radius-card:20px;--ds-radius-inner:15px;--ds-radius-control:12px;
+ --ds-hit:44px;--ds-button-height:48px;
+ --ds-text-primary:#f6f0ff;--ds-text-secondary:#baadcf;
+ --ds-card-surface:#1c1735;--ds-border:#453360;
+}
+:root[data-leveli-theme="light"]{
+ --ds-text-primary:#302448;--ds-text-secondary:#665677;
+ --ds-card-surface:#fff;--ds-border:#e4dbef;
+}
+:root .card:not(.detail-goal){border-radius:var(--ds-radius-card)}
+:root .subject-row,:root .b3-settings .b3-tile,:root .b3-extra{border-radius:var(--ds-radius-inner)}
+:root .btn,:root .detail-toggle button,:root #school-period-buttons button,
+:root .personal-option,:root .b3-change-avatar,:root .b3-home-btn{min-height:var(--ds-hit)}
+:root #school-form button[type="submit"],:root .b3-change-avatar{min-height:var(--ds-button-height)}
+:root .orient-more,:root .detail-back,:root .profile-back{min-height:var(--ds-hit)}
+:root .card-heading h2,:root .subjects-card h2,:root .orient-heading h2{line-height:var(--ds-line-heading)}
+:root .b3-extra button,.b3-dialog button{touch-action:manipulation}
+:root .b3-section-label{color:var(--ds-text-secondary)}
+:root .b3-tile small{color:var(--ds-text-secondary)}
+:root .b3-tile:focus-visible,:root .b3-extra button:focus-visible,:root .b3-change-avatar:focus-visible,
+:root .b3-home-btn:focus-visible,:root .orient-more:focus-visible,:root .detail-back:focus-visible{
+ outline:3px solid var(--leveli-accent-border);outline-offset:3px
+}
+/* White icon artwork stays decorative inside a 44px or larger target. */
+:root .b3-tile-icon{width:var(--ds-hit);height:var(--ds-hit);flex:none}
+:root .b3-tile-icon svg{width:var(--ds-icon-lg);height:var(--ds-icon-lg)}
+/* Keep grade history readable without inadvertently enlarging score glyphs. */
+:root #school-subject-detail .grade-entry span:not(.grade-entry__weight):not(.grade-entry__value){line-height:1.55}
+:root .subject-row__name{line-height:1.45}
+@media(max-width:360px){
+ :root .b3-tiles{gap:8px}
+ :root .b3-tile{min-width:0}
+ :root .b3-tile strong{overflow-wrap:anywhere}
+ :root .b3-dialog{max-width:calc(100vw - 24px)}
+}
+@media(prefers-reduced-motion:reduce){
+ :root .b3-tile,:root .b3-change-avatar,:root .orient-more{transition:none!important}
+}
 </style></head><body><div class="app"><main class="content" id="main">
 <section data-page="home"><header class="school-header"><div><div class="eyebrow brand-lockup"><img src="./brand/mark.svg" alt="" width="30" height="30" aria-hidden="true"><span>Левели</span></div><h1 id="home-greeting">Привет!</h1><p id="home-birthday-greeting" class="home-birthday-greeting" hidden></p><p>Мои оценки и успеваемость</p><div class="header-period" id="school-header-period">II четверть · 2026/27 учебный год</div></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
 <article class="card" id="school-login"><h2>Войди, чтобы увидеть оценки</h2><p>Оценки загружаются из электронного дневника.</p><form id="school-form"><label>Почта<input id="school-email" type="email" autocomplete="username" required></label><label>Пароль<input id="school-password" type="password" autocomplete="current-password" required></label><button class="btn" type="submit">Войти</button></form></article>
