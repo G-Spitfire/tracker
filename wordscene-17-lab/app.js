@@ -241,27 +241,44 @@ function pickerIcon(name){
  };
  return '<svg class="ws-picker-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+shapes[name]+'</svg>';
 }
+function paperWordSide(w,english,back=false){
+ return '<div class="ws-paper-face'+(back?' ws-paper-face-back':'')+'" aria-hidden="'+(back?'true':'false')+'">'+
+  '<div class="ws-paper-grain" aria-hidden="true"></div><div class="ws-paper-metadata"><span>WORDSCENE</span><span>'+(back?'02 / BACK':'01 / FRONT')+'</span></div>'+
+  '<div class="ws-paper-wordbox"><strong class="ws-paper-word">'+h(english?w.en:w.ru)+'</strong>'+
+  '<span class="ws-paper-ipa">'+(english?h(w.ipa||''):'')+'</span>'+
+  '<span class="ws-paper-sound-slot">'+(english?btn(pickerIcon('volume'),'say:'+h(w.en),'ws-paper-sound'):'')+'</span></div>'+
+  '<div class="ws-paper-foot"><span>LEARN BY IMAGINATION</span><span>↻ ПЕРЕВЕРНИ</span></div></div>';
+}
+function paperSheet(w,frontEnglish,flipped=false,locked=false){
+ return '<div class="ws-paper-stage"><div class="ws-paper-underlay" aria-hidden="true"></div>'+
+  '<div class="ws-paper-sheet'+(flipped?' is-flipped':'')+'" data-flip-card="true" role="button" tabindex="0" aria-label="'+(locked?'Ответ открыт':flipped?'Вернуть исходное слово':'Перевернуть лист')+'" aria-expanded="'+flipped+'">'+
+  '<div class="ws-paper-inner">'+paperWordSide(w,frontEnglish)+paperWordSide(w,!frontEnglish,true)+'</div></div></div>';
+}
+function paperDream(w,mode,shown,canToggle){
+ if(mode==='select')return '<div class="ws-paper-dream ws-paper-dream-empty" aria-hidden="true"></div>';
+ return '<section class="ws-paper-dream" aria-label="Пространство фантазии"><div class="ws-paper-dream-head"><strong>✦ ПРОСТРАНСТВО ФАНТАЗИИ</strong>'+
+  (canToggle?btn(shown?'Скрыть образ':'Показать образ','help','ws-paper-dream-toggle'):'')+'</div>'+
+  '<div class="ws-paper-dream-scroll">'+(shown?'<div class="ws-paper-art">'+visual(w)+'</div><p class="ws-paper-scene">'+h(w.scene||'')+'</p>':
+  '<p class="ws-paper-dream-hint">Сначала попробуй вспомнить слово. Образ можно открыть отдельно.</p>')+'</div></section>';
+}
+function wirePaperFlip(onTurn){
+ const el=root.querySelector?.('[data-flip-card]');
+ if(!el)return;
+ const turn=event=>{if(event?.target?.closest?.('button'))return;onTurn()};
+ el.addEventListener('click',turn);
+ el.addEventListener('keydown',event=>{if(event.target!==el)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();onTurn()}});
+}
 function selectionScreen(){
  const id=selection.current?.[selection.cursor],w=byId[id];if(!w){nextBatch();return}
  view='select';
  const known=selection.known.length,unknown=selection.unknown.length,seen=selection.seen.length;
- const content='<main class="ws-picker ws-picker-v2"><div class="ws-picker-header">'+
- btn(pickerIcon('back'),'stopSelection','ws-picker-back')+
- '<div class="ws-picker-heading"><h1>Подбор слов</h1><small>Автоматический подбор</small></div>'+
- '<span class="ws-picker-position" aria-label="Просмотрено '+seen+' из 50 слов">'+seen+'/50</span></div>'+
- '<div class="ws-picker-stats" aria-label="Результаты подбора"><div>'+pickerIcon('known')+'<span>Знаю<strong>'+known+'</strong></span></div><div>'+pickerIcon('learn')+'<span>Изучить<strong>'+unknown+'</strong></span></div></div>'+
- '<p class="ws-picker-instruction">Знаешь значение этого слова?</p>'+
- '<section class="ws-picker-card"><div class="ws-picker-study-inner">'+
- '<button class="ws-picker-reveal" data-action="reveal" type="button" aria-label="'+(showAnswer?'Скрыть перевод слова '+h(w.en):'Показать перевод слова '+h(w.en))+'" aria-pressed="'+showAnswer+'"></button>'+
- '<span class="ws-picker-word">'+h(w.en)+'</span>'+
- '<div class="ws-picker-pronunciation"><span class="ws-picker-ipa">'+h(w.ipa||'')+'</span>'+
- btn(pickerIcon('volume'),'say:'+h(id),'ws-picker-speak')+'</div>'+
- (showAnswer?'<span class="ws-picker-translation">'+h(w.ru)+'</span>':'')+
- '<span class="ws-picker-hint">'+(showAnswer?'Нажми, чтобы скрыть перевод':'Нажми на карточку, чтобы увидеть перевод')+'</span></div></section>'+
- '<div class="ws-picker-choices">'+
- btn(pickerIcon('known')+'<span>Знаю</span>','known','ws-picker-known')+
- btn(pickerIcon('learn')+'<span>Не знаю</span>','unknown','ws-picker-unknown')+'</div></main>';
- shell('','',content);
+ const actions='<div class="ws-paper-decisions">'+btn('Не знаю','unknown','ws-paper-negative')+btn('Знаю','known','ws-paper-positive')+'</div>';
+ shell('','', '<main class="ws-paper-page ws-paper-select"><div class="ws-paper-header"><div><h1>Подбор слов</h1><small>Неизвестных: '+unknown+' из 10 · Просмотрено: '+seen+' из 50</small></div><span class="ws-paper-count">'+seen+'/50</span></div>'+
+  '<div class="ws-paper-track" role="progressbar" aria-label="Просмотр кандидатов" aria-valuemin="0" aria-valuemax="50" aria-valuenow="'+seen+'"><span style="width:'+Math.min(100,seen*2)+'%"></span></div>'+
+  '<div class="ws-paper-main">'+paperSheet(w,true,showAnswer)+paperDream(w,'select',false,false)+'</div>'+
+  '<div class="ws-paper-bottom"><p class="ws-paper-instruction">Знаешь значение этого слова? Переверни лист, если нужно.</p>'+actions+
+  '<div class="ws-paper-minors">'+btn('Завершить подбор','stopSelection','ws-paper-minor')+'</div></div></main>');
+ wirePaperFlip(()=>{showAnswer=!showAnswer;selectionScreen()});
 }
 function renderSelection(){showAnswer=false;selectionScreen()}
 function selectionGrade(knows){
@@ -355,73 +372,35 @@ function cardActions(){
 function visual(w){if(window.WS17_illustration){try{return window.WS17_illustration(w.en)}catch(e){}}if(w.props&&C?.render){try{return C.render(w)}catch(e){}}return '<div class="simple-art">'+h(w.cue||w.en)+'</div>'}
 function learn(focusWord=false){
  if(!session)return home();view='learn';const w=byId[session.ids[session.learnIndex]];
- const position=session.learnIndex+1,total=session.ids.length;
- const progress=Math.round(100*position/total);
- shell('', '', '<main class="ws-learn ws-learn-v2">'+
- '<div class="ws-learn-header"><div><h1>Запоминание</h1><small>Изучаем новые слова</small></div><span class="ws-learn-count" aria-label="Слово '+position+' из '+total+'">'+position+' из '+total+'</span></div>'+
- '<div class="ws-learn-progress" role="progressbar" aria-label="Прогресс запоминания" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+position+'"><span style="width:'+progress+'%"></span></div>'+
- '<section class="flash learn" tabindex="0" aria-label="Материалы слова"><div class="ws-learn-primary"><h2 id="learn-word" tabindex="-1">'+h(w.en)+'</h2>'+
- '<div class="ws-learn-pronunciation"><span class="ipa">'+h(w.ipa||'')+'</span>'+
- btn(pickerIcon('volume'),'say:'+h(w.en),'ws-learn-speak')+'</div>'+
- '<div class="translation">'+h(w.ru)+'</div></div>'+
- '<div class="ws-learn-association"><div class="art">'+visual(w)+'</div><p class="scene">'+h(w.scene||'')+'</p></div></section>'+
- '<div class="ws-learn-actions"><p class="ws-learn-scroll-note" hidden aria-hidden="true">Прокрути карточку ↓</p>'+
- btn((session.learnIndex===total-1?'Начать проверку':'Дальше')+' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>','learnNext','primary')+
- '<div class="ws-learn-session-actions">'+cardActions()+'</div></div></main>');
- const card=root.querySelector?.('.learn'),cue=root.querySelector?.('.ws-learn-scroll-note');
- if(card&&cue){
-  const updateCue=()=>{cue.hidden=card.scrollHeight-card.clientHeight-card.scrollTop<=3};
-  updateCue();card.addEventListener('scroll',updateCue,{passive:true});
- }
- if(focusWord){window.scrollTo?.(0,0);if(card)card.scrollTop=0;root.querySelector?.('#learn-word')?.focus?.({preventScroll:true})}
+ const position=session.learnIndex+1,total=session.ids.length,progress=Math.round(100*position/total);
+ const back=!!session.paperLearnFace;
+ shell('','', '<main class="ws-paper-page ws-paper-learn"><div class="ws-paper-header"><div><h1>Запоминание</h1><small>Изучаем новые слова</small></div><span class="ws-paper-count">'+position+' из '+total+'</span></div>'+
+  '<div class="ws-paper-track" role="progressbar" aria-label="Прогресс запоминания" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+position+'"><span style="width:'+progress+'%"></span></div>'+
+  '<div class="ws-paper-main">'+paperSheet(w,true,back)+paperDream(w,'learn',true,false)+'</div>'+
+  '<div class="ws-paper-bottom"><p class="ws-paper-instruction">Изучи обе стороны и представь образ</p>'+
+  '<div class="ws-paper-decisions">'+btn(position===total?'Начать проверку':'Дальше','learnNext','ws-paper-positive ws-paper-full')+'</div>'+
+  '<div class="ws-paper-minors">'+cardActions()+'</div></div></main>');
+ wirePaperFlip(()=>{if(session.pausedAt!==null)return;session.paperLearnFace=!session.paperLearnFace;if(store())learn()});
+ if(focusWord){window.scrollTo?.(0,0);root.querySelector?.('[data-flip-card]')?.focus?.({preventScroll:true})}
 }
 function recall(){
  if(!session)return home();view='recall';const item=session.items[session.index];if(!item)return completed();
- const w=byId[item.id],front=item.dir===1?w.ru:w.en,back=item.dir===1?w.en:w.ru;
- const total=session.items.length,position=session.index+1,progress=Math.round((position-1)/Math.max(1,total)*100);
+ const w=byId[item.id],total=session.items.length,position=session.index+1,progress=Math.round((position-1)/Math.max(1,total)*100);
  const direction=item.dir===1?'Русский → Английский':'Английский → Русский';
  const title=session.mode==='practice'?'Повторяем ошибки':session.mode==='review'?'Повторение':'Проверка знаний';
  const failed=!!session.feedback?.failed,answerVisible=showAnswer;
  const recallKey=[session.mode,session.round,session.index,item.id,item.dir].join(':');
  if(recallKey!==lastRecallKey){lastRecallFace=false;lastRecallKey=recallKey}
- const flipMotion=answerVisible!==lastRecallFace?(answerVisible?' turn-to-back':' turn-to-front'):'';
  lastRecallFace=answerVisible;
- const sound=()=>btn(pickerIcon('volume'),'say:'+h(w.en),'ws-recall-speak','');
- const pronunciation='<div class="ws-recall-pronunciation"><span class="ws-recall-ipa">'+h(w.ipa||'')+'</span>'+sound()+'</div>';
- const frontFace='<div class="ws-recall-face ws-recall-face-front" aria-hidden="'+(answerVisible?'true':'false')+'" '+(answerVisible?'inert':'')+'>'+
-  '<div class="ws-recall-direction">'+direction+'</div>'+
-  '<h2 class="ws-recall-word" id="recall-word">'+h(front)+'</h2>'+
-  (item.dir!==1?pronunciation:'')+
-  '<div class="ws-recall-tap-note">'+pickerIcon('flip')+' Нажми на карточку, чтобы увидеть перевод</div></div>';
- const association=showHelp?'<div class="ws-recall-clue"><div class="ws-recall-clue-title">'+pickerIcon('learn')+' Ассоциация</div><p>'+h(w.scene||'')+'</p><div class="ws-recall-clue-art">'+visual(w)+'</div></div>':'';
- const backFace='<div class="ws-recall-face ws-recall-face-back" aria-hidden="'+(!answerVisible?'true':'false')+'" '+(!answerVisible?'inert':'')+'>'+
-  '<div class="ws-recall-direction">Перевод</div><div class="ws-recall-answer"><strong>'+h(back)+'</strong></div>'+
-  '<div class="ws-recall-original">'+h(front)+'</div>'+
-  (item.dir===1?pronunciation:'')+
-  (failed?'<p class="ws-recall-correction">Посмотри правильный перевод перед продолжением.</p>':'')+
-  btn(showHelp?'Скрыть ассоциацию':'Ассоциация и картинка','help','ws-recall-association')+
-  association+
-  (!failed?'<div class="ws-recall-tap-note">Нажми на карточку, чтобы вернуть слово</div>':'')+
-  '</div>';
- const card='<section class="flash recall ws-recall-card'+(showHelp?' is-expanded':'')+'" aria-label="Карточка проверки">'+
-  '<div class="ws-recall-flip '+(answerVisible?'is-flipped':'')+flipMotion+'" data-flip-card="true" role="button" tabindex="0" aria-label="'+(failed?'Правильный перевод':answerVisible?'Вернуть исходное слово':'Показать перевод')+'" aria-expanded="'+answerVisible+'">'+
-  '<div class="ws-recall-flip-inner">'+frontFace+backFace+'</div></div></section>';
- const grade='<div class="ws-recall-decisions">'+(failed?
-  btn('Дальше','advance','ws-recall-next'):
-  btn('Не вспомнил',answerVisible?'checkedNo':'no','ws-recall-negative')+
-  btn('Вспомнил',answerVisible?'checkedYes':'yes','ws-recall-positive'))+'</div>';
- shell('', '', '<main class="ws-recall-v2 ws-recall-v3 ws-recall-v4"><div class="ws-recall-header"><div><h1>'+title+
-  '</h1><small>'+(session.mode==='new'?'Вспомни изученное слово':'Проход '+session.round+' · '+direction)+
-  '</small></div><span class="ws-recall-count" aria-label="Карточка '+position+' из '+total+'">'+position+' из '+total+'</span></div>'+
-  '<div class="ws-recall-progress" role="progressbar" aria-label="Прогресс проверки" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+(position-1)+'"><span style="width:'+progress+'%"></span></div>'+
-  '<div class="ws-recall-stage">'+card+'</div><div class="ws-recall-actions">'+grade+
-  '<div class="ws-recall-session-actions">'+cardActions()+'</div></div></main>');
- const flip=root.querySelector?.('[data-flip-card]');
- if(flip){
-  const turn=()=>{if(session.pausedAt!==null||failed)return;dispatch(answerVisible?'hideTranslation':'check')};
-  flip.addEventListener('click',event=>{if(event.target.closest('button'))return;turn()});
-  flip.addEventListener('keydown',event=>{if(event.target!==flip)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();turn()}});
- }
+ const grade='<div class="ws-paper-decisions">'+(failed?btn('Дальше','advance','ws-paper-positive ws-paper-full'):
+  btn('Не вспомнил',answerVisible?'checkedNo':'no','ws-paper-negative')+
+  btn('Вспомнил',answerVisible?'checkedYes':'yes','ws-paper-positive'))+'</div>';
+ shell('','', '<main class="ws-paper-page ws-paper-recall ws-recall-v4"><div class="ws-paper-header"><div><h1>'+title+'</h1><small>Проход '+session.round+' · '+direction+'</small></div><span class="ws-paper-count">'+position+' из '+total+'</span></div>'+
+  '<div class="ws-paper-track" role="progressbar" aria-label="Прогресс проверки" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+(position-1)+'"><span style="width:'+progress+'%"></span></div>'+
+  '<div class="ws-paper-main">'+paperSheet(w,item.dir!==1,answerVisible,failed)+paperDream(w,'recall',showHelp,answerVisible)+'</div>'+
+  '<div class="ws-paper-bottom"><p class="ws-paper-instruction">'+(failed?'Посмотри правильный ответ и переходи дальше':'Вспомни слово и оцени себя')+'</p>'+
+  grade+'<div class="ws-paper-minors">'+cardActions()+'</div></div></main>');
+ wirePaperFlip(()=>{if(session.pausedAt!==null||failed)return;dispatch(answerVisible?'hideTranslation':'check')});
 }
 function sendAnswer(ok,checked=false){
  try{
@@ -612,7 +591,7 @@ function dispatch(act,el){
  case 'reveal':showAnswer=!showAnswer;return selectionScreen();
  case 'startManual':return startLearning([...manual],selection?.known||[]);
  case 'leaveFill':saveFamiliar(selection.known);selection=null;manual.clear();return home();
- case 'learnNext':try{E.learnNext(session);session.artHidden=false;if(!store())return home();showHelp=false;return session.stage==='learn'?learn(true):recall()}catch(err){return expire(err)}
+ case 'learnNext':try{E.learnNext(session);session.artHidden=false;session.paperLearnFace=false;if(!store())return home();showHelp=false;return session.stage==='learn'?learn(true):recall()}catch(err){return expire(err)}
  
  case 'yes':return sendAnswer(true);case 'no':return showFeedback(true);
  case 'check':return showFeedback(false);
