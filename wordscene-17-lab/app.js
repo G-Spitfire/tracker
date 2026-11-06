@@ -368,15 +368,35 @@ function learn(focusWord=false){
 function recall(){
  if(!session)return home();view='recall';const item=session.items[session.index];if(!item)return completed();
  const w=byId[item.id],front=item.dir===1?w.ru:w.en,back=item.dir===1?w.en:w.ru;
- let text='';
- if(!showAnswer){text='<div class="direction">'+(item.dir===1?'Русский → Английский':'Английский → Русский')+'</div><h2>'+h(front)+'</h2><div class="actions">'+btn('Вспомнил','yes','primary')+btn('Не вспомнил','no','secondary')+'</div>'+btn('Проверить ответ','check','quiet')}
- else{text='<div class="direction">'+h(front)+'</div><h2>'+h(back)+'</h2>'+btn('▶ Произнести','say:'+h(w.en),'quiet')+(showHelp?'<div class="art">'+visual(w)+'</div><p>'+h(w.scene||'')+'</p>':'')+btn('Показать ассоциацию','help','quiet')+
- (confirmed?btn('Следующая карточка','advance','primary'):'<div class="actions">'+btn('Вспомнил','checkedYes','primary')+btn('Не вспомнил','checkedNo','secondary')+'</div>') }
- shell((session.mode==='new'?'Изучение':session.mode==='practice'?'Повторяем ошибки':'Повторение')+' · проход '+session.round,'<div class="counter">Карточка '+(session.index+1)+' / '+session.items.length+'</div><section class="flash recall">'+text+'</section>'+cardActions());
+ const total=session.items.length,position=session.index+1,progress=Math.round((position-1)/Math.max(1,total)*100);
+ const direction=item.dir===1?'Русский → Английский':'Английский → Русский';
+ const title=session.mode==='practice'?'Повторяем ошибки':session.mode==='review'?'Повторение':'Проверка знаний';
+ const prompt=showAnswer?'Правильный ответ':'Вспомни перевод';
+ const sound=btn(pickerIcon('volume'),'say:'+h(w.en),'ws-recall-speak');
+ const wordHead='<h2 class="ws-recall-word" id="recall-word" tabindex="-1">'+h(front)+'</h2>'+
+  (item.dir!==1?'<div class="ws-recall-ipa">'+h(w.ipa||'')+'</div>'+sound:'');
+ const clue=showHelp?'<div class="ws-recall-clue"><div class="ws-recall-clue-title">'+pickerIcon('learn')+' Ассоциация</div><p>'+h(w.scene||'Попробуй представить значение слова.')+'</p></div>':
+  '<div class="ws-recall-placeholder">'+pickerIcon('learn')+'<span>Как переводится это слово?</span></div>';
+ const revealed=showAnswer?'<div class="ws-recall-answer"><span>Перевод</span><strong>'+h(back)+'</strong></div>'+
+  (item.dir===1?'<div class="ws-recall-after-sound">'+sound+'<span>'+h(w.ipa||'')+'</span></div>':'')+
+  (showHelp?'<div class="ws-recall-clue"><div class="ws-recall-clue-title">'+pickerIcon('learn')+' Ассоциация</div><p>'+h(w.scene||'')+'</p><div class="ws-recall-clue-art">'+visual(w)+'</div></div>':''):'';
+ const actions=showAnswer?
+  (confirmed?btn('Следующая карточка','advance','ws-recall-primary'):
+   '<p class="ws-recall-question">Удалось вспомнить перевод?</p><div class="ws-recall-decisions">'+
+   btn('Не вспомнил','checkedNo','ws-recall-negative')+
+   btn('Вспомнил','checkedYes','ws-recall-positive')+'</div><p class="ws-recall-guidance">Оценивай себя по памяти, а не по знакомству со словом.</p>'):
+  btn('Показать ответ '+pickerIcon('back'),'check','ws-recall-primary')+
+  btn((showHelp?'Скрыть подсказку':'Нужна подсказка'),'recallHint','ws-recall-hint');
+ shell('', '', '<main class="ws-recall-v2"><div class="ws-recall-header"><div><h1>'+title+'</h1><small>'+(session.mode==='new'?'Вспомни изученное слово':'Проход '+session.round+' · '+direction)+'</small></div><span class="ws-recall-count" aria-label="Карточка '+position+' из '+total+'">'+position+' из '+total+'</span></div>'+
+ '<div class="ws-recall-progress" role="progressbar" aria-label="Прогресс проверки" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+(position-1)+'"><span style="width:'+progress+'%"></span></div>'+
+ '<section class="flash recall ws-recall-card" tabindex="0" aria-label="Карточка проверки"><div class="ws-recall-prompt">'+prompt+'</div><div class="ws-recall-direction">'+direction+'</div>'+
+ wordHead+'<div class="ws-recall-separator"></div>'+(showAnswer?revealed:clue)+'</section>'+
+ '<div class="ws-recall-actions">'+actions+'<div class="ws-recall-session-actions">'+cardActions()+'</div></div></main>');
 }
 function sendAnswer(ok,checked=false){
  try{
   delete session.feedback;
+  delete session.recallHint;
    const r=E.answer(session,ok,Date.now(),null,checked);
   if(!store())return home();
   if(r.done)return completed();
@@ -386,6 +406,7 @@ function sendAnswer(ok,checked=false){
 function showFeedback(failed){
  E.action(session);
  session.feedback={failed,help:false};
+ delete session.recallHint;
  showAnswer=true;confirmed=failed;showHelp=false;
  if(!store())return home();
  recall();
@@ -395,7 +416,7 @@ function resume(){
  if(session.stage==='complete')return completed();
  const feedback=session.feedback;
  view=session.stage==='learn'?'learn':'recall';
- showAnswer=!!feedback;confirmed=!!feedback?.failed;showHelp=!!(feedback?.help||session.artHidden);
+ showAnswer=!!feedback;confirmed=!!feedback?.failed;showHelp=!!(feedback?.help||session.recallHint);
  render();
 }
 function suspend(){
@@ -509,9 +530,10 @@ function dispatch(act,el){
  
  case 'yes':return sendAnswer(true);case 'no':return showFeedback(true);
  case 'check':return showFeedback(false);
+ case 'recallHint':E.action(session);session.recallHint=!session.recallHint;showHelp=!!session.recallHint;if(!store())return home();return recall();
  case 'checkedYes':return sendAnswer(true,true);case 'checkedNo':return sendAnswer(false,true);
  case 'advance':return sendAnswer(false);
- case 'help':E.action(session);showHelp=true;session.feedback.help=true;store();return recall();
+ case 'help':E.action(session);showHelp=true;if(session.feedback)session.feedback.help=true;else session.recallHint=true;store();return recall();
  case 'pause':suspend();return storageFailure?home():render();
   case 'continue':session.pausedAt=null;if(!store())return home();return render();
  case 'cancel':return confirmCancel();
