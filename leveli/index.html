@@ -509,6 +509,41 @@ body{background:#0e0c21;color:#f6f0ff}
 :root[data-leveli-theme="light"] .b3-dialog{background:#fff;color:#302448}
 :root[data-leveli-theme="light"] .b3-dialog-header h2{color:#302448}
 @media(max-width:360px){.b3-tile{padding:12px;min-height:124px}.b3-avatar-stand{width:156px;height:156px;top:-84px}.b3-hero{padding-top:80px}.b3-hero-space{padding-top:84px}}
+
+/* DS v2: icon role and hit area are separate. Unified interactive geometry. */
+:root{
+ --ds-icon:20px;--ds-icon-lg:24px;--ds-hit:44px;
+ --ds-button-height:48px;--ds-control-height:44px;
+ --ds-radius-card:20px;--ds-radius-control:12px;
+ --ds-space-1:4px;--ds-space-2:8px;--ds-space-3:12px;--ds-space-4:16px;--ds-space-5:24px;--ds-space-6:32px;
+}
+:root .b3-tile-icon svg{width:var(--ds-icon-lg);height:var(--ds-icon-lg);fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+:root .b3-home-btn{font-size:var(--ds-icon-lg)}
+:root .b3-settings .b3-tile{border-radius:var(--ds-radius-card)}
+:root #school-current-period,:root #profile-remove-avatar,:root #profile-upload-avatar,:root .profile-actions .btn{min-height:var(--ds-hit)}
+:root .detail-toggle button,:root #school-period-buttons button{min-height:var(--ds-hit)}
+:root .forecast-legend button.legend-item{min-height:var(--ds-hit)}
+:root .b3-dialog .personal-option{min-height:var(--ds-control-height)}
+:root .b3-dialog .personal-avatar-option{min-height:64px}
+:root .b3-dialog .avatar-upload-row button{min-height:var(--ds-hit)}
+:root .b3-dialog .personal-option:focus-visible,:root .b3-dialog input:focus-visible,:root .b3-extra button:focus-visible{
+ outline:3px solid var(--leveli-accent);outline-offset:3px
+}
+:root .b3-dialog .personal-option[aria-pressed="true"]{border-width:2px;box-shadow:inset 0 0 0 1px var(--leveli-accent-border)}
+:root .b3-dialog .avatar-gallery-label{font-size:12px}
+:root .b3-dialog .personal-option{font-size:12px}
+:root .b3-dialog .personal-color-swatch{width:30px;height:30px}
+:root .b3-dialog-open{overflow:hidden}
+:root .b3-overlay{padding:max(18px,env(safe-area-inset-top)) 12px max(18px,env(safe-area-inset-bottom))}
+:root .b3-dialog{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+:root .b3-change-avatar[hidden],:root .b3-extra button[hidden]{display:none!important}
+@media(max-width:360px){
+ :root .b3-tile{padding:12px;min-height:124px}
+ :root .b3-tiles{gap:8px}
+ :root .b3-settings .b3-tile strong{font-size:12px}
+ :root .b3-dialog .personal-choice-grid,:root .b3-dialog .personal-color-grid{gap:5px}
+}
+@media(prefers-reduced-motion:reduce){:root .b3-tile,:root .b3-dialog .personal-option{transition:none!important}}
 </style></head><body><div class="app"><main class="content" id="main">
 <section data-page="home"><header class="school-header"><div><div class="eyebrow brand-lockup"><img src="./brand/mark.svg" alt="" width="30" height="30" aria-hidden="true"><span>Левели</span></div><h1 id="home-greeting">Привет!</h1><p id="home-birthday-greeting" class="home-birthday-greeting" hidden></p><p>Мои оценки и успеваемость</p><div class="header-period" id="school-header-period">II четверть · 2026/27 учебный год</div></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
 <article class="card" id="school-login"><h2>Войди, чтобы увидеть оценки</h2><p>Оценки загружаются из электронного дневника.</p><form id="school-form"><label>Почта<input id="school-email" type="email" autocomplete="username" required></label><label>Пароль<input id="school-password" type="password" autocomplete="current-password" required></label><button class="btn" type="submit">Войти</button></form></article>
@@ -536,10 +571,10 @@ body{background:#0e0c21;color:#f6f0ff}
   <div class="b3-hero-space"><div class="b3-hero"><div class="b3-glow" aria-hidden="true"></div><div class="b3-avatar-stand" id="b3-avatar-stand"></div><div class="b3-identity-slot" id="b3-identity-slot"></div><button class="b3-change-avatar" type="button" data-b3-panel="avatar">Изменить аватар</button><div class="b3-hero-footer">✦ Мой профиль <span>·</span> Мой стиль</div></div></div>
   <h2 class="b3-section-label">Быстрые настройки</h2>
   <div class="b3-tiles">
-    <button type="button" class="b3-tile" data-b3-panel="quarter"><span class="b3-tile-icon">▦</span><strong>Выбрать четверть</strong><small id="b3-quarter-status">II четверть</small></button>
-    <button type="button" class="b3-tile" data-b3-panel="theme"><span class="b3-tile-icon">◐</span><strong>Тема</strong><small id="b3-theme-status">Тёмная</small></button>
-    <button type="button" class="b3-tile" data-b3-panel="accent"><span class="b3-tile-icon">◉</span><strong>Акцентные цвета</strong><small id="b3-accent-status">Фиолетовый</small></button>
-    <button type="button" class="b3-tile" data-b3-panel="icons"><span class="b3-tile-icon">✧</span><strong>Вариант иконок</strong><small id="b3-icons-status">Вариант 1</small></button>
+    <button type="button" class="b3-tile" data-b3-panel="quarter"><span class="b3-tile-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><strong>Выбрать четверть</strong><small id="b3-quarter-status">II четверть</small></button>
+    <button type="button" class="b3-tile" data-b3-panel="theme"><span class="b3-tile-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/></svg></span><strong>Тема</strong><small id="b3-theme-status">Тёмная</small></button>
+    <button type="button" class="b3-tile" data-b3-panel="accent"><span class="b3-tile-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="9" r="1"/><circle cx="15" cy="8" r="1"/><circle cx="16" cy="14" r="1"/><path d="M8 17h2"/></svg></span><strong>Акцентные цвета</strong><small id="b3-accent-status">Фиолетовый</small></button>
+    <button type="button" class="b3-tile" data-b3-panel="icons"><span class="b3-tile-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></span><strong>Вариант иконок</strong><small id="b3-icons-status">Вариант 1</small></button>
   </div>
   <h2 class="b3-section-label">Дополнительно</h2>
   <div class="b3-extra">
@@ -589,17 +624,26 @@ body{background:#0e0c21;color:#f6f0ff}
  const open=(key,trigger)=>{
   if(!cards[key]||cards[key].hidden)return;
   lastTrigger=trigger;previous=cards[key].parentElement;active=cards[key];heading.textContent=titles[key];dialog.dataset.section=key;
-  host.replaceChildren(active);overlay.hidden=false;document.getElementById('b3-panel-close').focus();
+  host.replaceChildren(active);overlay.hidden=false;document.body.classList.add('b3-dialog-open');document.getElementById('b3-panel-close').focus();
  };
  const close=()=>{
   if(active&&previous)previous.append(active);
-  active=null;previous=null;overlay.hidden=true;
+  active=null;previous=null;overlay.hidden=true;document.body.classList.remove('b3-dialog-open');
   lastTrigger?.focus();lastTrigger=null;updateQuarter();
  };
  profile.querySelectorAll('[data-b3-panel]').forEach(btn=>btn.addEventListener('click',()=>open(btn.dataset.b3Panel,btn)));
  document.getElementById('b3-panel-close').addEventListener('click',close);
  overlay.addEventListener('click',e=>{if(e.target===overlay)close()});
- document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!overlay.hidden){e.preventDefault();close()}});
+ document.addEventListener('keydown',e=>{
+  if(overlay.hidden)return;
+  if(e.key==='Escape'){e.preventDefault();close();return}
+  if(e.key!=='Tab')return;
+  const items=[...overlay.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(el=>el.getClientRects().length>0);
+  if(!items.length)return;
+  const first=items[0],last=items.at(-1);
+  if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}
+  else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
+ });
  document.addEventListener('click',e=>{if(e.target.closest('[data-go="home"]')&&!overlay.hidden)close()});
  updateQuarter();
  window.LeveliB3={open:key=>open(key,profile.querySelector('[data-b3-panel="'+key+'"]')),close};
