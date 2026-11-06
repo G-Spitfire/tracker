@@ -235,6 +235,33 @@ body{background:#0e0c21;color:#f6f0ff}
  .detail-kpi strong{font-size:20px}
  .detail-chart-scroll{padding:8px 3px}
 }
+/* Profile: same dark card system as the dashboard, mobile first. */
+.profile-header{margin:2px 2px 17px}
+.profile-header .profile-back{margin:0 0 22px;min-height:40px;font-size:12px;padding:10px 13px}
+.profile-header .eyebrow{font-size:13px;letter-spacing:.08em}
+.profile-header .section-title{font-size:clamp(23px,7vw,29px);color:#fff;line-height:1.22;margin:8px 0}
+.profile-header p{margin:0;color:#b5a8ce;font-size:12px;line-height:1.55}
+.profile-card{padding:19px 16px;margin-top:13px}
+.profile-card .profile-label{font-size:10px;letter-spacing:.13em;font-weight:800;color:#b69bf4;margin-bottom:9px}
+.profile-card h2{font-size:19px;line-height:1.35;margin-bottom:9px}
+.profile-card p{font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+#profile-name{font-size:24px;color:#fff;overflow-wrap:anywhere}
+#profile-account{color:#d3c4ec}
+#profile-school{margin-top:10px;color:#ac9bc8}
+.profile-card .profile-period{border-top:1px solid #45365d;margin-top:13px;padding-top:13px}
+#school-period-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0}
+#school-period-buttons button{min-height:44px;width:100%;font-size:12px;padding:10px 7px;text-align:center;line-height:1.35;white-space:normal;border-radius:11px}
+#school-period-buttons button[aria-pressed=true]{background:#514071!important;border-color:#b48cf3!important;color:#fff!important}
+#school-current-period{margin-top:13px;width:100%;min-height:43px;white-space:normal}
+#profile-actions{display:block}
+.profile-actions{display:grid;grid-template-columns:minmax(0,1fr);gap:0;margin-top:8px}
+.profile-actions .btn{width:100%;min-height:43px;margin-top:11px}
+.profile-actions .profile-logout{background:transparent;border-color:#665174;color:#e5c9ef}
+@media(max-width:360px){
+ .profile-card{padding:15px 12px}
+ #school-period-buttons{gap:7px}
+ #school-period-buttons button{font-size:11px}
+}
 </style></head><body><div class="app"><main class="content" id="main">
 <section data-page="home"><header class="school-header"><div><div class="eyebrow">Левели</div><h1 id="home-greeting">Привет!</h1><p>Мои оценки и успеваемость</p><div class="header-period" id="school-header-period">II четверть · 2026/27 учебный год</div></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
 <article class="card" id="school-login"><h2>Войди, чтобы увидеть оценки</h2><p>Оценки загружаются из электронного дневника.</p><form id="school-form"><label>Почта<input id="school-email" type="email" autocomplete="username" required></label><label>Пароль<input id="school-password" type="password" autocomplete="current-password" required></label><button class="btn" type="submit">Войти</button></form></article>
@@ -255,7 +282,12 @@ body{background:#0e0c21;color:#f6f0ff}
 <div class="orient-grid"><article class="orient-panel orient-good"><div class="orient-title">★ Молодец</div><div id="school-good-list"></div></article><article class="orient-panel orient-attention"><div class="orient-title">◎ Подтянуть</div><div id="school-attention-list"></div></article></div>
 <article class="card subjects-card"><div class="card-heading"><h2>Все предметы</h2><span id="school-subject-count" class="muted"></span></div>
 <div id="school-filter-buttons" hidden></div><select id="school-filter" hidden><option value="all">Все предметы</option><option value="strong">Сильные</option><option value="attention">Требуют внимания</option></select><div id="school-subjects"></div></article><p id="school-status" class="muted">Загрузка…</p><p id="school-freshness" aria-live="polite"></p></div></div><p id="school-error" role="alert" class="muted"></p></section>
-<section data-page="profile" hidden><h1 class="section-title">Настройки и профиль</h1><button class="btn secondary" data-go="home">← К оценкам</button><article class="card"><h2 id="profile-name">Гость</h2><p id="profile-account">Войди на главной, чтобы подключить профиль.</p><p id="profile-school" class="muted"></p><div class="profile-period"><h2>Просмотр четверти</h2><p class="muted">На главной обычно показывается текущая четверть.</p><div id="school-period-buttons" class="choice-buttons"></div><select id="school-period" hidden><option value="all">Все оценки</option></select><button type="button" id="school-current-period" class="btn secondary">Вернуться к текущей четверти</button></div><div id="profile-actions" hidden><button class="btn secondary" id="school-refresh">Обновить оценки</button><button class="btn secondary" id="school-logout">Выйти</button></div></article></section>
+<section data-page="profile" hidden>
+ <header class="profile-header"><button class="btn secondary profile-back" data-go="home">← К оценкам</button><div class="eyebrow">Левели</div><h1 class="section-title">Настройки и профиль</h1><p>Аккаунт и параметры отображения оценок</p></header>
+ <article class="card profile-card"><div class="profile-label">УЧЕНИК</div><h2 id="profile-name">Гость</h2><p id="profile-account">Войди на главной, чтобы подключить профиль.</p><p id="profile-school" class="muted"></p></article>
+ <article class="card profile-card"><h2>Учебный период</h2><p>Выбери четверть для просмотра оценок, графиков и прогнозов.</p><div class="profile-period"><div id="school-period-buttons" class="choice-buttons"></div><select id="school-period" hidden><option value="all">Все оценки</option></select><button type="button" id="school-current-period" class="btn secondary">Вернуться к текущей четверти</button></div></article>
+ <article class="card profile-card" id="profile-actions" hidden><h2>Аккаунт и данные</h2><p>Обновление проверяет данные в Firebase. Сбор оценок из дневника выполняется автоматически на Mac.</p><div class="profile-actions"><button class="btn secondary" id="school-refresh">Проверить обновления</button><button class="btn secondary profile-logout" id="school-logout">Выйти из аккаунта</button></div></article>
+</section>
 </main></div><script src="./school-model.js"></script><script>
 'use strict';
 const pages=[...document.querySelectorAll('[data-page]')];function navigate(page){if(page!=='profile')page='home';for(const p of pages)p.hidden=p.dataset.page!==page;window.scrollTo(0,0);history.replaceState(null,'','#'+page)}document.addEventListener('click',e=>{const target=e.target.closest('[data-go]');if(target)navigate(target.dataset.go)});
