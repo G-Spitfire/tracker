@@ -285,6 +285,15 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  }));
  assert.equal(iconStyle.width,'24px');assert.equal(iconStyle.height,'24px');assert.equal(iconStyle.stroke,'2px');
  assert.equal(await page.locator('.b3-home-btn svg').count(),1,'Back navigation uses consistent SVG icon');
+ assert.equal(await page.locator('.help-btn svg').count(),3,'all help actions use SVG icons');
+ assert.equal(await page.locator('.b3-extra button svg').count(),2,'settings detail actions use SVG chevrons');
+ for(const selector of ['.help-btn svg','.b3-extra button svg']){
+  const geometry=await page.locator(selector).first().evaluate(el=>{
+   const st=getComputedStyle(el);return {w:st.width,h:st.height,stroke:st.strokeWidth}
+  });
+  assert.deepEqual(geometry,{w:'20px',h:'20px',stroke:'2px'},'functional icon system '+selector);
+ }
+
  assert.equal(await page.locator('#b3-panel-close svg').count(),1,'Dialog close uses consistent SVG icon');
  for(const selector of ['.b3-home-btn svg','#b3-panel-close svg']){
   const style=await page.locator(selector).evaluate(el=>({w:getComputedStyle(el).width,h:getComputedStyle(el).height,stroke:getComputedStyle(el).strokeWidth}));
