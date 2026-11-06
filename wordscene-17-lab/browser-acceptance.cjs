@@ -169,7 +169,7 @@ async function run(name, browserType, contextOptions) {
    await page.locator('[data-action="manualSummaryClose"]').last().click();
    assert.equal(await page.locator('.ws-selected-sheet').count(),0);
   }
-  assert.match(await page.locator('.ws-manual-total').innerText(),/2 \\/ (?:10|15)/);
+  assert.match(await page.locator('.ws-manual-total').innerText(),/2 \/ (?:10|15)/);
   assert.equal(await page.locator('[data-action="startManual"]').isDisabled(),true);
   await page.locator('[data-action="manualTopic:food"]').click();
   await page.locator('[data-action="pick:apple"]').click();
