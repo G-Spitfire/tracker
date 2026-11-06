@@ -393,7 +393,7 @@ function paperPauseOverlay(){
   '<span class="ws-paper-pause-icon" aria-hidden="true">Ⅱ</span><h2 id="ws-paper-pause-title">Занятие на паузе</h2>'+
   '<p>Ты вернёшься к тому же слову и той же стороне листа.</p>'+
   '<p class="ws-paper-pause-timer" id="pause-time">'+pauseTime()+'</p>'+
-  '<p class="ws-paper-pause-note">30-минутное ограничение бездействия продолжает действовать.</p>'+
+  '<p class="ws-paper-pause-note">Пауза не останавливает отсчёт времени.</p>'+
   '<div class="ws-paper-pause-buttons">'+btn('Продолжить','continue','ws-paper-resume')+
   (session.mode==='practice'?btn('Закончить тренировку','stopPractice','ws-paper-pause-cancel'):btn('Отменить занятие','cancel','ws-paper-pause-cancel'))+
   '</div></section></div>';
@@ -653,7 +653,24 @@ function restoreBackup(){
  try{accounts.recover('local');window.location.reload()}
  catch(err){notice('Не удалось восстановить копию. Исходные данные не изменены.')}
 }
-function confirmCancel(){const yes=window.confirm('Отменить занятие? Все незавершённые результаты будут потеряны.');if(yes){session=null;selection=null;store();home()}else if(session){render()}}
+function confirmExit(practice=false){
+ if(!session)return;
+ const old=root.querySelector('.ws-paper-exit-confirm');if(old)return;
+ const title=practice?'Закончить тренировку?':'Отменить занятие?';
+ const message=practice?'Результаты досрочно завершённой тренировки не сохранятся.':'Все незавершённые результаты будут потеряны.';
+ const dialog=document.createElement('div');
+ dialog.className='ws-paper-pause ws-paper-exit-confirm';
+ dialog.innerHTML='<section class="ws-paper-pause-dialog" role="dialog" aria-modal="true" aria-labelledby="ws-paper-exit-title">'+
+  '<h2 id="ws-paper-exit-title">'+title+'</h2><p>'+message+'</p>'+
+  '<div class="ws-paper-pause-buttons"><button type="button" class="ws-paper-resume" data-exit="stay">'+(practice?'Продолжить тренировку':'Продолжить занятие')+'</button>'+
+  '<button type="button" class="ws-paper-pause-cancel" data-exit="leave">'+(practice?'Закончить':'Отменить занятие')+'</button></div></section>';
+ root.appendChild(dialog);
+ const stay=dialog.querySelector('[data-exit="stay"]'),leave=dialog.querySelector('[data-exit="leave"]');
+ stay.addEventListener('click',()=>{dialog.remove();root.querySelector('[data-action="'+(practice?'stopPractice':'cancel')+'"]')?.focus()});
+ leave.addEventListener('click',()=>{dialog.remove();session=null;selection=null;store();home()});
+ stay.focus();
+}
+function confirmCancel(){confirmExit(false)}
 function render(){if(session){if(E.timedOut(session,Date.now()))return expire(new Error('30 минут бездействия'));if(session.stage==='complete'&&view!=='home')return completed();if(view==='learn')return learn();if(view==='recall')return recall()}if(view==='select')return selectionScreen();if(view==='manual'||view==='fill')return manualView(view==='fill');if(view==='sources')return home(true);if(view==='progress')return progress();if(view==='dictionary')return dictionaryView();return home()}
 function dispatch(act,el){
  if(storageFailure&&!['home','dictionary','progress','recover','restoreBackup'].includes(act)&&!act.startsWith('word:')&&!act.startsWith('say:'))return notice('Сохранение заблокировано. Никакие данные не перезаписываются.');
@@ -674,7 +691,7 @@ function dispatch(act,el){
  switch(act){
  case 'home':return home();case 'closeSources':return home();case 'restoreBackup':return restoreBackup();case 'recover':return recoverScreen();case 'sources':return sources();case 'manual':manual.clear();manualThemes.clear();manualThemes.add('food');manualMode='topics';manualShowAll=false;manualSummaryOpen=false;query='';manualSearchBaseHeight=0;return manualView();
  case 'auto':return makeSelection('auto');
- case 'review':return review();case 'practice':return review('practice');case 'stopPractice':session=null;store();return home();case 'progress':return progress();case 'dictionaryOpen':query='';dictionaryFilter='all';return dictionaryView();case 'dictionary':return dictionaryView();
+ case 'review':return review();case 'practice':return review('practice');case 'stopPractice':return confirmExit(true);case 'progress':return progress();case 'dictionaryOpen':query='';dictionaryFilter='all';return dictionaryView();case 'dictionary':return dictionaryView();
  case 'known':return selectionGrade(true);case 'unknown':return selectionGrade(false);case 'stopSelection':return stopSelection();
  case 'reveal':showAnswer=!showAnswer;return selectionScreen();
  case 'startManual':return startLearning([...manual],selection?.known||[]);
