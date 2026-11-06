@@ -1,6 +1,6 @@
 const {chromium}=require('playwright');
 const assert=require('node:assert/strict'),fs=require('node:fs');
-const fixtures={A:{schemaVersion:1,source:'petersburgedu',grades:[5,5,5,4,4,4].map((value,i)=>({id:'a'+i,subject:'Математика',value:String(value),date:`2026-10-${10+i}`,type:'Устный ответ',quarter:1})).concat([{id:'f',subject:'Русский язык',value:'5',date:'2026-10-20',type:'Четвертная',quarter:1},{id:'c',subject:'Русский язык',value:'4',date:'2026-10-15',type:'Итоговая контрольная работа',quarter:1},{id:'n',subject:'Русский язык',value:'неизвестная',valueCode:'2',date:'2026-10-14',quarter:1}])},B:{schemaVersion:1,source:'petersburgedu',grades:[{id:'b1',subject:'История',value:'3',date:'31.10.2026',type:'Ответ',quarter:1}]}};
+const fixtures={A:{schemaVersion:1,source:'petersburgedu',grades:[5,5,5,4,4,4].map((value,i)=>({id:'a'+i,subject:'Математика',value:String(value),date:`2026-10-${10+i}`,type:'Устный ответ',quarter:1})).concat([{id:'f',subject:'Русский язык',value:'5',date:'2026-10-20',type:'Четвертная',quarter:1},{id:'c',subject:'Русский язык',value:'4',date:'2026-10-15',type:'Итоговая контрольная работа',weight:2,quarter:1},{id:'n',subject:'Русский язык',value:'неизвестная',valueCode:'2',date:'2026-10-14',quarter:1}])},B:{schemaVersion:1,source:'petersburgedu',grades:[{id:'b1',subject:'История',value:'3',date:'31.10.2026',type:'Ответ',quarter:1}]}};
 const authMock=`export const getAuth=()=>window.__auth;export const browserLocalPersistence={};export const setPersistence=async()=>{};export function onAuthStateChanged(a,fn){window.__listeners.push(fn);setTimeout(()=>fn(a.currentUser),0);return ()=>{}}export async function signInWithEmailAndPassword(a,email){window.__switchUser(email.startsWith('b')?'B':'A')}export async function signOut(){window.__switchUser(null)}`;
 const storeMock=`export const getFirestore=()=>({});export const doc=(db,...parts)=>parts;export const serverTimestamp=()=>0;export const runTransaction=async(db,fn)=>fn({get:async path=>({exists:()=>!!JSON.parse(sessionStorage.getItem('cloud:'+path.join('/'))||'null'),data:()=>JSON.parse(sessionStorage.getItem('cloud:'+path.join('/')))}),set:(path,value)=>sessionStorage.setItem('cloud:'+path.join('/'),JSON.stringify(value))});export async function getDocFromServer(path){if(window.__offline)throw Error('offline');const [kind,uid]=path;if(kind==='profiles')return {exists:()=>true,data:()=>({name:uid==='A'?'Полина':'Матвей'})};if(kind==='schoolGrades')return {exists:()=>true,data:()=>window.__fixtures[uid]};const value=JSON.parse(sessionStorage.getItem('cloud:'+path.join('/'))||'null');return {exists:()=>!!value,data:()=>value};}export const getDoc=getDocFromServer;`;
 fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
@@ -71,6 +71,10 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.match(await page.locator('#school-subject-detail').innerText(),/Нет оценок этого типа/);
  await page.getByRole('button',{name:'← К предметам'}).click();
  assert.equal(await page.locator('.school-header').isVisible(),true);
+ await page.locator('#school-subjects .subject-row').filter({hasText:'Русский язык'}).click();
+ assert.equal(await page.locator('#school-subject-detail .grade-entry__weight').count(),1);
+ assert.equal(await page.locator('#school-subject-detail .grade-entry__weight').innerText(),'Вес ×2');
+ await page.getByRole('button',{name:'← К предметам'}).click();
  await page.screenshot({path:'outputs/leveli-school.png',fullPage:true});
  await page.evaluate(()=>window.__switchUser('B'));await page.waitForFunction(()=>document.querySelector('#school-period').options.length>=4);
  assert.equal(await page.locator('#home-greeting').innerText(),'Привет, Матвей!');
