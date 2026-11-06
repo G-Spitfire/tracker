@@ -55,6 +55,18 @@ test('automatic 10 word selection -> memorization -> 3 two-way passes -> atomic 
  const data=JSON.parse(b.map.get('wordscene-17-lab-v1'));
  assert.equal(data.sessions.length,1);assert.equal(Object.keys(data.words).length,10);
  assert.match(b.root.html,/Занятие завершено/);
+ assert.match(b.root.html,/class="ws-result-page"/);
+ assert.match(b.root.html,/Изучено слов[\\s\\S]*<strong>10<\\/strong>/);
+ assert.match(b.root.html,/Успешно в обе стороны[\\s\\S]*<strong>10<\\/strong>/);
+ assert.match(b.root.html,/Успешность контрольного прогона[\\s\\S]*100%/);
+ assert.match(b.root.html,/3-й обязательный прогон/);
+ assert.match(b.root.html,/Потребовались дополнительные прогоны/);
+ assert.match(b.root.html,/Остались трудными после занятия/);
+ assert.match(b.root.html,/Трудных слов не осталось/);
+ assert.match(b.root.html,/Что дальше\\?/);
+ assert.match(b.root.html,/Твой уровень/);
+ assert.match(b.root.html,/data-action="home" class="ws-result-home"/);
+ assert.doesNotMatch(b.root.html,/data-action="practice"|Тренировка без изменения прогресса/);
 });
 test('approved memorization UI keeps illustration visible, progress and unchanged recall help',()=>{
  const b=boot();b.click('sources');b.click('auto');
@@ -202,6 +214,36 @@ test('mandatory review unlocks voluntary practice for final errors without chang
  assert.doesNotMatch(b.root.html,/Повторить ещё раз/);
 });
 
+test('review results show real remaining hard words and only then offer voluntary practice',()=>{
+ const initial=boot(),E=initial.window.WS17Engine,id=initial.window.WS17_SEED[0].en;
+ const profile=E.empty(),key='wordscene-17-lab-v1';
+ profile.words[id]={origin:'learned',schedule:E.newSchedule(initial.now()-2*86400000),history:[]};
+ initial.map.set(key,JSON.stringify(profile));
+ const b=boot({map:initial.map,now:initial.now()});
+ b.click('review');
+ for(let i=0;i<4;i++){b.click('no');b.click('advance');b.click('yes')}
+ const saved=JSON.parse(b.map.get(key)),last=saved.sessions.at(-1);
+ assert.equal(last.mode,'review');
+ assert.equal(last.successful,0);
+ assert.equal(last.hard,1);
+ assert.equal(last.extraWords,1);
+ assert.match(b.root.html,/Занятие завершено/);
+ assert.match(b.root.html,/Повторено слов/);
+ assert.match(b.root.html,/1-й обязательный прогон/);
+ assert.match(b.root.html,/Успешность контрольного прогона[\\s\\S]*0%/);
+ assert.match(b.root.html,/Потребовались дополнительные прогоны[\\s\\S]*<strong>1<\\/strong>/);
+ assert.match(b.root.html,/Остались трудными после занятия[\\s\\S]*<strong>1<\\/strong>/);
+ assert.match(b.root.html,/class="ws-result-hard"/);
+ assert.match(b.root.html,new RegExp(id));
+ assert.match(b.root.html,/data-action="practice"/);
+ b.click('practice');
+ for(let i=0;i<2;i++)b.click('yes');
+ assert.match(b.root.html,/Тренировка завершена/);
+ assert.match(b.root.html,/Тренировка без изменения прогресса/);
+ assert.doesNotMatch(b.root.html,/Успешность контрольного прогона|data-action="practice"/);
+ assert.equal(b.map.get(key),JSON.stringify(saved),'voluntary practice must not alter saved progress');
+ assert.match(b.root.html,/data-action="home" class="ws-result-home"/);
+});
 test('My Progress retains aggregates and periods without detailed lesson history',()=>{
  const fresh=boot(),E=fresh.window.WS17Engine,p=E.empty();
  const base=Date.now()-11*86400000;
