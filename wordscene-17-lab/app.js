@@ -117,7 +117,6 @@ const paperIcons={
  book:'<path fill="#fff2cf" stroke="#ffa600" d="M12 5C9 2 5 2 2 3v15c4-1 7-1 10 2 3-3 6-3 10-2V3c-3-1-7-1-10 2v15"/><path stroke="#0877ff" d="M22 3v15c-4-1-7-1-10 2" class="paper-book-edge"/><path stroke="#efc16d" stroke-width=".65" d="M4 7q3-.6 6 1M4 10q3-.6 6 1M4 13q3-.6 6 1m4-6q3-1.6 6-1m-6 4q3-1.6 6-1m-6 4q3-1.6 6-1"/>',
  cap:'<path fill="#005cae" stroke="none" d="M5 11h14v7q-7 5-14 0z"/><path fill="#007bd8" stroke="none" d="m0 10 12-6 12 6-12 6z"/><path stroke="#ffa600" d="m12 10-8 4v6"/>',
  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/>',
- plus:'<path d="M12 3v18M3 12h18"/>',
  lock:'<path d="M7 10V7a5 5 0 0 1 10 0v3"/><rect x="3" y="9" width="18" height="14" rx="2" fill="currentColor" stroke="none"/><path stroke="#f4ede5" d="M12 15v4"/>',
  repeat:'<path d="M20 8a8 8 0 1 0 0 8m0-12v5h-5"/>',
  progress:'<path stroke="#0877ff" stroke-width="4.5" d="M5 20v-4m7 4v-9m7 9V4"/>',
@@ -127,42 +126,58 @@ function paperIcon(name){
  return '<svg class="paper-icon paper-icon-'+name+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+paperIcons[name]+'</svg>';
 }
 function paperAction(label,action,reason='',subtitle=''){
- const icon=reason?'lock':action==='sources'?'plus':'repeat';
- return btn('<span class="paper-action-icon">'+paperIcon(icon)+'</span><span>'+label+
-  (reason||subtitle?'<small>'+(reason||subtitle)+'</small>':'')+'</span>'+(!reason?paperIcon('next'):''),
+ const icon=reason?'lock':action==='sources'?null:'repeat';
+ return btn((icon?'<span class="paper-action-icon">'+paperIcon(icon)+'</span>':'')+
+  '<span class="paper-action-copy">'+label+
+  (reason||subtitle?'<small>'+(reason||subtitle)+'</small>':'')+'</span>'+
+  (!reason?paperIcon('next'):''),
   action,'paper-action paper-'+action,!!reason);
+}
+function paperDone(){
+ return '<div class="paper-done" role="status"><span class="paper-done-mark" aria-hidden="true">✓</span>'+
+  '<span><strong>Отлично! Всё повторено</strong><small>На сегодня заданий больше нет</small></span></div>';
+}
+function weeklyLearned(){
+ const today=E.day(),weekday=new Date(today+'T12:00:00').getDay();
+ const monday=E.addDays(today,-((weekday+6)%7)),ids=new Set();
+ for(const s of profile.sessions)if(s.mode==='new'&&E.day(s.at)>=monday&&E.day(s.at)<=today)
+  for(const id of s.ids)if(profile.words[id]?.origin==='learned')ids.add(id);
+ return ids.size;
 }
 function wordCount(n){
  const tail=n%100,last=n%10;
  return n+' '+(tail>=11&&tail<=14?'слов':last===1?'слово':last>=2&&last<=4?'слова':'слов');
 }
 function paperLevel(){
- const p=E.levelProgress(profile);
- const count=p.window||0;
+ const p=E.levelProgress(profile),count=Math.min(3,p.window||0);
  const detail=p.target?
-  '<p class="paper-target">Следующий уровень — '+p.target+'</p><p>Три занятия, от '+p.min+' новых слов в каждом. На повторении вспомни от '+Math.round(p.threshold*100)+'% в обе стороны.</p>'+
+  '<p class="paper-target">Следующий уровень — '+p.target+'</p>'+
   '<div class="paper-confirmed"><small>Подтверждено занятий: <strong>'+count+' из 3</strong></small>'+
   '<div class="paper-steps" aria-hidden="true">'+[1,2,3].map(i=>i<=count?'<i class="filled">✓</i>':'<i></i>').join('')+'</div></div>'+
-  (count===3?'<small>Вспомнил в обе стороны: <strong>'+Math.floor(p.successRate*100)+'%</strong></small>':''):
-  '<p>Ты на самом высоком уровне.</p>';
+  (count===3?'<small class="paper-level-rate">Вспомнил в обе стороны: <strong>'+Math.floor(p.successRate*100)+'%</strong></small>':'')+
+  '<details class="paper-level-help"><summary>'+paperIcon('info')+' Как перейти на следующий уровень</summary>'+
+  '<p>Нужно подтвердить три занятия, в каждом не менее '+p.min+' новых слов. На последующем повторении правильно вспомнить не менее '+Math.round(p.threshold*100)+'% слов в обе стороны.</p></details>':
+  '<p class="paper-level-finished">Ты на самом высоком уровне.</p>';
  return '<section class="paper-card paper-level" aria-labelledby="paper-level">'+
   '<div class="paper-level-heading">'+paperIcon('cap')+'<div><h2 id="paper-level">Твой уровень</h2><div class="paper-rank">'+levelLabels[profile.level]+'</div></div>'+
   '</div>'+detail+'</section>';
 }
 function paperProgress(){
- const total=dictionary.length;
- const words=dictionary.map(w=>profile.words[w.en]);
+ const total=dictionary.length,words=dictionary.map(w=>profile.words[w.en]);
  const learned=words.filter(w=>w?.origin==='learned').length;
  const mastered=words.filter(w=>E.status(w)==='mastered').length;
+ const weekly=weeklyLearned(),weekGoal=30;
  const percent=n=>total?100*n/total:0;
  const circle=(r,value,kind)=>'<circle class="ring-track '+kind+'" cx="58" cy="58" r="'+r+'"/>'+
-  (value?'<circle class="ring-fill '+kind+'" cx="58" cy="58" r="'+r+'" pathLength="100" stroke-dasharray="'+value+' 100" transform="rotate(-90 58 58)"/>':'');
+  (value?'<circle class="ring-fill '+kind+'" cx="58" cy="58" r="'+r+'" pathLength="100" stroke-dasharray="'+Math.min(100,value)+' 100" style="--ring-value:'+Math.min(100,value)+'"/>':'');
  const label=percent(learned).toLocaleString('ru-RU',{maximumFractionDigits:1})+'%';
- const rings='<svg class="paper-rings" viewBox="0 0 116 116" role="img" aria-label="Изучено '+label+' словаря">'+circle(52,percent(learned),'learned')+circle(39,percent(mastered),'mastered')+
+ const rings='<svg class="paper-rings" viewBox="0 0 116 116" role="img" aria-label="Изучено '+label+' словаря; за неделю '+weekly+' из '+weekGoal+'">'+
+  circle(52,percent(learned),'learned')+circle(39,percent(mastered),'mastered')+circle(26,100*weekly/weekGoal,'weekly')+
   '<text x="58" y="58" text-anchor="middle" dominant-baseline="central">'+label+'</text></svg>';
- return '<section class="paper-card paper-progress" aria-label="Прогресс по словарю">'+rings+'<dl>'+
+ return '<section class="paper-card paper-progress" aria-label="Прогресс по словарю и за неделю">'+rings+'<dl>'+
   '<div><dt class="learned">Изучено:</dt><dd>'+learned+' из '+total+'</dd></div>'+
-  '<div><dt class="mastered">Закреплено:</dt><dd>'+mastered+' из '+total+'</dd></div></dl></section>';
+  '<div><dt class="mastered">Закреплено:</dt><dd>'+mastered+' из '+total+'</dd></div>'+
+  '<div><dt class="weekly">За неделю:</dt><dd>'+weekly+' из '+weekGoal+'</dd></div></dl></section>';
 }
 function home(openPicker=false){
  view=openPicker?'sources':'home';
@@ -174,7 +189,7 @@ function home(openPicker=false){
  const fresh=paperAction('Учить новые слова','sources',blocked||(pending.length?'Сначала повтори слова на сегодня. После этого сможешь учить новые.':''),'Выбери способ подбора');
  const repeat=pending.length?paperAction('Повторить сегодня: '+wordCount(pending.length),'review',blocked):
   errors.length?paperAction('Повторить ещё раз','practice',blocked,'Если хочешь, потренируй ещё '+errors.length+' '+(errors.length%100>=11&&errors.length%100<=14?'трудных слов':errors.length%10===1?'трудное слово':errors.length%10>=2&&errors.length%10<=4?'трудных слова':'трудных слов')):
-  paperAction('На сегодня всё повторено','review',blocked||'Повторений на сегодня нет');
+  paperDone();
  shell('', '', '<main class="paper"><div class="paper-heading"><h1>'+paperIcon('book')+'WordScene</h1></div>'+
  '<div class="paper-hero"><img src="./paper-lighthouse.svg" alt="" width="729" height="160"></div>'+
  paperLevel()+paperProgress()+'<div class="paper-actions">'+fresh+repeat+'</div>'+
