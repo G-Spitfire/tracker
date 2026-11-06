@@ -49,33 +49,57 @@ async function run(name, browserType, contextOptions) {
   const snap=async suffix=>page.screenshot({path:path.join(shots,label+'-'+suffix+'.png')});
   await snap('topics');
   const wordList=page.locator('.ws-manual-word-scroll');
-  const note=page.locator('.ws-manual-scroll-note');
-  await page.waitForFunction(()=>{const el=document.querySelector('.ws-manual-word-scroll'),n=document.querySelector('.ws-manual-scroll-note');return n.hidden===(el.scrollHeight-el.clientHeight-el.scrollTop<=3)});
-  if(await wordList.evaluate(el=>el.scrollHeight>el.clientHeight+3)){
-   assert.equal(await note.isVisible(),true,'long list should advertise scrolling');
-   await wordList.evaluate(el=>el.scrollTop=el.scrollHeight);
-   await page.waitForFunction(()=>document.querySelector('.ws-manual-scroll-note').hidden);
+  const singleScroll=await page.locator('.ws-manual-v3').count()>0;
+  if(singleScroll){
+   const geometry=await page.evaluate(()=>{
+    const page=document.querySelector('.ws-manual-page'),list=document.querySelector('.ws-manual-word-scroll'),topics=document.querySelector('.ws-manual-topics'),footer=document.querySelector('.ws-manual-bottom');
+    return {pageScrollable:page.scrollHeight>page.clientHeight+5,pageOverflow:getComputedStyle(page).overflowY,listOverflow:getComputedStyle(list).overflowY,topicsOverflow:getComputedStyle(topics).overflowY,footerBottom:footer.getBoundingClientRect().bottom,viewport:innerHeight,initialTopics:topics.children.length};
+   });
+   assert.equal(geometry.pageOverflow,'auto','page owns the only vocabulary scroll');
+   assert.equal(geometry.listOverflow,'visible','words should not scroll independently');
+   assert.equal(geometry.topicsOverflow,'visible','topics should not scroll independently');
+   assert.equal(geometry.initialTopics,3,'collapsed topics show only one row');
+   assert.ok(Math.abs(geometry.footerBottom-geometry.viewport)<=10,'pinned action footer must stay at bottom: '+JSON.stringify(geometry));
+   await page.locator('.ws-manual-page').evaluate(el=>el.scrollTop=el.scrollHeight);
    await snap('end-of-list');
-   await wordList.evaluate(el=>el.scrollTop=0);
+   assert.ok(await page.locator('[data-action="startManual"]').isVisible(),'bottom action stays visible when page scrolls');
+   await page.locator('.ws-manual-page').evaluate(el=>el.scrollTop=0);
+   await page.locator('[data-action="manualAllTopics"]').click();
+   assert.ok(await page.locator('.ws-manual-topics .ws-manual-topic').count()>3,'all topics expand into one page');
+   assert.equal(await page.locator('.ws-manual-topics').evaluate(el=>getComputedStyle(el).overflowY),'visible');
+   await snap('all-topics');
+   await page.locator('[data-action="manualTopic:travel"]').click();
+   assert.equal(await page.locator('.ws-manual-topics .ws-manual-topic').count(),3,'choice collapses topics');
+   assert.ok(await page.locator('.ws-manual-topics .is-active').count()===1);
+   assert.match(await page.locator('.ws-manual-topics .ws-manual-topic').first().innerText(),/Путешеств/);
+  }else{
+   const note=page.locator('.ws-manual-scroll-note');
+   await page.waitForFunction(()=>{const el=document.querySelector('.ws-manual-word-scroll'),n=document.querySelector('.ws-manual-scroll-note');return n.hidden===(el.scrollHeight-el.clientHeight-el.scrollTop<=3)});
+   if(await wordList.evaluate(el=>el.scrollHeight>el.clientHeight+3)){
+    assert.equal(await note.isVisible(),true);
+    await wordList.evaluate(el=>el.scrollTop=el.scrollHeight);
+    await page.waitForFunction(()=>document.querySelector('.ws-manual-scroll-note').hidden);
+    await snap('end-of-list');
+    await wordList.evaluate(el=>el.scrollTop=0);
+   }
+   await page.locator('[data-action="manualAllTopics"]').click();
+   await snap('all-topics');
+   await page.locator('[data-action="manualTopic:travel"]').click();
+   await page.locator('[data-action="manualAllTopics"]').click();
+   await page.waitForFunction(()=>{
+    const parent=document.querySelector('.ws-manual-topics'),selected=parent?.querySelector('.is-active');
+    if(!selected)return false;
+    if(parent.scrollWidth<=parent.clientWidth+3)return true;
+    const a=parent.getBoundingClientRect(),b=selected.getBoundingClientRect();
+    return b.left>=a.left-2&&b.right<=a.right+2;
+   });
   }
-  await page.locator('[data-action="manualAllTopics"]').click();
-  await snap('all-topics');
-  const travel=page.locator('[data-action="manualTopic:travel"]');
-  await travel.click();
-  await page.locator('[data-action="manualAllTopics"]').click();
-  await page.waitForFunction(()=>{
-   const parent=document.querySelector('.ws-manual-topics'),selected=parent?.querySelector('.is-active');
-   if(!selected)return false;
-   if(parent.scrollWidth<=parent.clientWidth+3)return true;
-   const a=parent.getBoundingClientRect(),b=selected.getBoundingClientRect();
-   return b.left>=a.left-2&&b.right<=a.right+2;
-  });
   await page.locator('[data-action="manualTab:search"]').click();
   await page.locator('#manual-search').focus();
   assert.equal(await page.locator('.ws-manual-word-scroll .ws-manual-word').count(),0,'empty search should not show results');
   await snap('empty-focused-search');
   await page.locator('#manual-search').fill('pineapple');
-  await page.waitForFunction(()=>document.querySelector('.ws-manual-scroll-note').hidden);
+  if(!singleScroll)await page.waitForFunction(()=>document.querySelector('.ws-manual-scroll-note').hidden);
   assert.equal(await page.locator('[data-action="pick:pineapple"]').count(),1);
   await snap('short-search');
   // Search keeps one focused input during typing, without a second focus outline.
