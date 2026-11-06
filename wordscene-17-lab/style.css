@@ -1037,3 +1037,24 @@ html:has(#app > header),body:has(#app > header){
 @media(max-height:700px){
  .ws-picker-v2 .ws-picker-study-inner{min-height:0;gap:5px;padding:9px 8px}
 }
+
+/* Recall stage reserves all variable height; scoring and session controls never move. */
+.ws-recall-v4 .ws-recall-stage{
+ flex:1 1 auto;min-height:0;width:100%;display:flex;flex-direction:column;
+ justify-content:flex-end;overflow:hidden;
+}
+.ws-recall-v4 .ws-recall-stage .ws-recall-card{
+ flex:0 0 auto;
+ width:100%;
+ max-height:100%;
+ margin:0 0 10px;
+}
+.ws-recall-v4 .ws-recall-stage .ws-recall-card.is-expanded{
+ flex:1 1 auto;height:auto;min-height:0;
+ margin:0 0 10px;
+}
+.ws-recall-v4 .ws-recall-actions{flex:0 0 auto;margin:0}
+@media(max-height:700px){
+ .ws-recall-v4 .ws-recall-stage .ws-recall-card{margin-bottom:6px}
+ .ws-recall-v4 .ws-recall-stage .ws-recall-card.is-expanded{margin-bottom:6px}
+}
