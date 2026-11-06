@@ -830,7 +830,11 @@ window.LeveliAppearance=(()=>{
   const packBox=document.querySelector('#personal-pack-options');packBox.replaceChildren();for(const [k,title,emoji] of packs)packBox.append(button(emoji+' '+title,profile.pack===k,()=>set({pack:k})));
  }
  function set(v){
-  if(!uid)return;profile=valid({...profile,...v});try{localStorage.setItem('leveli-personal-v1-'+uid,JSON.stringify(profile))}catch(e){document.querySelector('#profile-save-status').textContent='Не удалось сохранить настройки на этом устройстве.';return}
+  if(!uid)return;
+  const next=valid({...profile,...v});
+  try{localStorage.setItem('leveli-personal-v1-'+uid,JSON.stringify(next))}
+  catch(e){document.querySelector('#profile-save-status').textContent='Не удалось сохранить настройки на этом устройстве.';return}
+  profile=next;
   document.querySelector('#profile-save-status').textContent='Сохранено на этом устройстве';
   paint();document.dispatchEvent(new CustomEvent('leveliAppearanceChanged',{detail:{profile:{...profile}}}));
  }
