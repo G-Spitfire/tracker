@@ -283,7 +283,6 @@ html:has(.ws-manual),body:has(.ws-manual){background:#fdf7ed}
 /* Mobile usability audit: clear scrolling affordances, readable secondary actions */
 .ws-picker-hint{color:#304f71}
 .ws-picker-exit{color:#3c5574}
-.ws-manual-scroll-note{flex:none;align-self:flex-end;padding:5px 6px 4px;color:#385a80;font-size:12px;font-weight:600}
 .ws-manual-word-scroll{scrollbar-width:thin;scrollbar-color:#7da5d8 #edf3f9;position:relative}
 .ws-manual-word-scroll::-webkit-scrollbar,.ws-manual-topics::-webkit-scrollbar{width:5px;height:5px}
 .ws-manual-word-scroll::-webkit-scrollbar-thumb,.ws-manual-topics::-webkit-scrollbar-thumb{background:#7da5d8;border-radius:6px}
@@ -311,7 +310,6 @@ html:has(.ws-manual),body:has(.ws-manual){background:#fdf7ed}
  .ws-manual-list-head{padding:2px 0 5px}
  .ws-manual-list-head h2{font-size:16px}
  .ws-manual-list-head small{font-size:11px}
- .ws-manual-scroll-note{padding:1px 4px 2px;font-size:11px}
  .ws-manual-word{min-height:50px}
  .ws-manual-bottom{padding-top:5px}
  .ws-manual-total{padding:6px 10px;margin-bottom:6px;border-radius:15px}
@@ -345,8 +343,7 @@ html:has(.ws-manual),body:has(.ws-manual){background:#fdf7ed}
 }
 
 /* UX audit P2/P3: contextual hints, selected-word drawer, long topic labels */
-.ws-manual-scroll-note[hidden],.ws-manual-topics-note[hidden],.paper-scroll-cue[hidden]{display:none!important}
-.ws-manual-topics-note{align-self:flex-end;flex:none;font-size:11px;font-weight:650;color:#3c5d82;line-height:1;padding:0 5px 1px}
+.paper-scroll-cue[hidden]{display:none!important}
 .ws-manual-topic span:last-child{word-break:normal;overflow-wrap:normal;hyphens:none}
 .ws-manual-summary-toggle{margin-left:8px;padding:6px 8px;border-radius:10px;background:#e4edff;color:#154a86;font-size:12px;white-space:nowrap;line-height:1.25}
 .ws-manual-summary-toggle:disabled{opacity:.5}
@@ -364,7 +361,6 @@ html:has(.ws-manual),body:has(.ws-manual){background:#fdf7ed}
  .ws-manual-summary>div{min-height:34px}
  .ws-manual-total>div{font-size:14px}
  .ws-manual-summary-toggle{font-size:11px;padding:5px 7px}
- .ws-manual-topics-note{font-size:11px}
 }
 @media(max-width:350px){
  .ws-manual-topic span:last-child{font-size:12px}
@@ -395,7 +391,6 @@ html:has(.ws-manual),body:has(.ws-manual){background:#fdf7ed}
 .ws-manual.is-search.is-keyboard .ws-manual-list{padding:5px 9px 3px;border-radius:16px}
 .ws-manual.is-search.is-keyboard .ws-manual-list-head{padding:2px 0 4px}
 .ws-manual.is-search.is-keyboard .ws-manual-list-head h2{font-size:15px}
-.ws-manual.is-search.is-keyboard .ws-manual-scroll-note{padding:1px 3px;font-size:10px}
 .ws-manual.is-search.is-keyboard .ws-manual-bottom{padding-top:4px}
 .ws-manual.is-search.is-keyboard .ws-manual-total{padding:5px 9px;margin-bottom:5px;border-radius:13px}
 .ws-manual.is-search.is-keyboard .ws-manual-total>div{font-size:14px}
@@ -670,7 +665,6 @@ html:has(#app > header),body:has(#app > header){
 .ws-manual-v3 .ws-manual-topic.is-active{padding:6px 3px}
 .ws-manual-v3 .ws-manual-list{display:block;min-height:0;overflow:visible;flex:none;margin-top:6px;padding:12px 12px 5px}
 .ws-manual-v3 .ws-manual-word-scroll{overflow:visible;flex:none;min-height:0;max-height:none;overscroll-behavior:auto;touch-action:auto;scrollbar-width:none}
-.ws-manual-v3 .ws-manual-scroll-note,.ws-manual-v3 .ws-manual-topics-note{display:none!important}
 .ws-manual-v3 .ws-manual-bottom{z-index:2;flex:none;padding:8px max(14px,env(safe-area-inset-right)) max(9px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));border-top:1px solid #e8decf;background:#fdf7ed;box-shadow:0 -4px 12px #98643112}
 .ws-manual-v3 .ws-manual-total{margin:0 0 6px;padding:0;border:0;box-shadow:none;background:transparent;border-radius:0}
 .ws-manual-v3 .ws-manual-total>div:first-child{justify-content:space-between;gap:8px}
