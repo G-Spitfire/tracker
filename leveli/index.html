@@ -507,7 +507,54 @@ const selected=periodSelect.value;const nowPeriod=currentSchoolPeriod();const sc
 periodSelect.replaceChildren(...years.flatMap(year=>[1,2,3,4].map(q=>new Option(q+' четверть'+(year===schoolYear?'':' · '+year+'/'+(year+1)),year+'-'+q))));
 periodSelect.value=[...periodSelect.options].some(o=>o.value===selected)?selected:nowPeriod;refreshChoiceButtons();renderGrades()}
 
-async function load(){const user=auth.currentUser;if(!user)return;const uid=user.uid,generation=++loadGeneration;const active=()=>auth.currentUser?.uid===uid&&generation===loadGeneration;error.textContent='';let cached=null;try{cached=await readGradeCache(uid);if(!active())return;if(cached?.data){applySchoolData(cached.data);status.textContent+=' · сохранено '+new Date(cached.savedAt).toLocaleString('ru-RU')+' · проверяем обновления…'}else{status.textContent='Загрузка оценок…';subjects.replaceChildren()}}catch(e){cached=null;console.warn('Локальный кэш недоступен',e)}try{const snap=await getDocFromServer(doc(db,'schoolGrades',uid));if(!active())return;if(!snap.exists()){if(!cached){clearSchool();status.textContent='Оценки пока не загружены.'}return}const data=snap.data();if(data.schemaVersion!==1||data.source!=='petersburgedu'||!Array.isArray(data.grades))throw Error('Неизвестный формат школьных данных.');if(!cached||JSON.stringify(cached.data)!==JSON.stringify(data))applySchoolData(data);try{await writeGradeCache(uid,{data,savedAt:Date.now()})}catch(e){console.warn('Не удалось сохранить оценки локально',e)}if(active()){const fresh=document.getElementById('school-freshness');const last=data.lastSuccessfulSyncAt??data.lastSyncAt??data.syncedAt??data.updatedAt;const valid=typeof last==='string'||typeof last==='number';const parsed=valid?new Date(last):null;fresh.textContent=parsed&&!Number.isNaN(parsed.getTime())?'Последняя синхронизация дневника: '+parsed.toLocaleString('ru-RU'):'Дата последней синхронизации дневника не передана';fresh.dataset.state='ok';status.textContent='Предметов: '+subjects.children.length+' · проверено в Firebase'}}catch(e){if(!active())return;if(cached){document.getElementById('school-freshness').textContent='Сохранённые оценки · проверка обновлений отложена';}else{status.textContent='Не удалось загрузить оценки. Повторяем автоматически.';showError(e)}if(!retryHandle)retryHandle=setTimeout(()=>{retryHandle=null;if(active()&&!document.hidden)load()},15000)}}
+function showDiarySyncTime(data){
+ const fresh=document.getElementById('school-freshness');
+ const last=data?.lastSuccessfulSyncAt??data?.lastSyncAt??data?.syncedAt??data?.updatedAt;
+ const parsed=(typeof last==='string'||typeof last==='number')?new Date(last):null;
+ fresh.textContent=parsed&&!Number.isNaN(parsed.getTime())?'Последняя синхронизация дневника: '+parsed.toLocaleString('ru-RU'):'Дата последней синхронизации дневника не передана';
+ fresh.dataset.state='ok';
+}
+function readFirebaseWithDeadline(uid,timeoutMs=20000){
+ let timer;
+ return Promise.race([
+  getDocFromServer(doc(db,'schoolGrades',uid)),
+  new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('Превышено время ожидания Firebase')),timeoutMs)})
+ ]).finally(()=>clearTimeout(timer));
+}
+async function load(){
+ const user=auth.currentUser;if(!user)return;
+ const uid=user.uid,generation=++loadGeneration;
+ const active=()=>auth.currentUser?.uid===uid&&generation===loadGeneration;
+ error.textContent='';
+ let cached=null;
+ try{
+  cached=await readGradeCache(uid);if(!active())return;
+  if(cached?.data){
+   applySchoolData(cached.data);showDiarySyncTime(cached.data);
+   status.textContent='Сохранённые оценки · проверяем Firebase…';
+  }else{status.textContent='Загрузка оценок…';subjects.replaceChildren()}
+ }catch(e){cached=null;console.warn('Локальный кэш недоступен',e)}
+ try{
+  const snap=await readFirebaseWithDeadline(uid);if(!active())return;
+  if(!snap.exists()){
+   if(!cached){clearSchool();status.textContent='Оценки пока не загружены.'}
+   else status.textContent='Сохранённые оценки · документ Firebase пока недоступен';
+   return;
+  }
+  const data=snap.data();
+  if(data.schemaVersion!==1||data.source!=='petersburgedu'||!Array.isArray(data.grades))throw Error('Неизвестный формат школьных данных.');
+  if(!cached||JSON.stringify(cached.data)!==JSON.stringify(data))applySchoolData(data);
+  try{await writeGradeCache(uid,{data,savedAt:Date.now()})}catch(e){console.warn('Не удалось сохранить оценки локально',e)}
+  if(active()){showDiarySyncTime(data);status.textContent='Предметов: '+subjects.children.length+' · проверено в Firebase'}
+ }catch(e){
+  if(!active())return;
+  if(cached){
+   status.textContent='Сохранённые оценки · Firebase временно недоступен';
+   showDiarySyncTime(cached.data);
+  }else{status.textContent='Не удалось загрузить оценки. Повторяем автоматически.';showError(e)}
+  if(!retryHandle)retryHandle=setTimeout(()=>{retryHandle=null;if(active()&&!document.hidden)load()},15000);
+ }
+}
 document.getElementById('school-form').addEventListener('submit',async e=>{e.preventDefault();error.textContent='';try{await setPersistence(auth,browserLocalPersistence);await signInWithEmailAndPassword(auth,document.getElementById('school-email').value.trim(),document.getElementById('school-password').value);document.getElementById('school-password').value=''}catch(err){showError(err)}});
 document.getElementById('school-refresh').addEventListener('click',load);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&auth.currentUser)load()});window.addEventListener('online',load);
 document.getElementById('school-logout').addEventListener('click',()=>signOut(auth).catch(showError));
