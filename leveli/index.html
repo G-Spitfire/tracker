@@ -5,54 +5,38 @@
 *{box-sizing:border-box}
 body{margin:0}
 .app{max-width:540px;min-height:100dvh;margin:auto}
-.content{}
 section[hidden],[hidden]{display:none!important}
 .school-header{display:flex;justify-content:space-between;gap:12px;}
-.school-header h1{}
 .school-header p{font-size:14px;margin:0}
-.eyebrow{}
 .settings-button{border:1px solid #e7dcf2;padding:10px 14px;font-size:23px;cursor:pointer}
-.card{}
-.card h2{}
 .card p{color:#796d89;line-height:1.5;margin:0;font-size:14px}
 
 .muted{color:#837790;font-size:13px}
 .section-title{font-size:23px;margin:12px 0 20px}
 .btn{margin-top:14px;border:1px solid #7654d4;border-radius:12px;padding:12px 16px;font:750 14px Manrope,system-ui,sans-serif;cursor:pointer}
-.btn.secondary{}
 .btn:active{transform:translateY(1px)}
 .btn:focus-visible,.subject-row:focus-visible,.settings-button:focus-visible,summary:focus-visible{outline:3px solid #9c82f1;outline-offset:2px}
 .choice-buttons{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
 .subject-row{width:100%;text-align:left;border-top:1px solid #eee;color:inherit;font:600 14px Manrope,system-ui,sans-serif;line-height:1.6;cursor:pointer}
 
-
 #school-form label{display:block;margin-top:14px;font-size:13px;font-weight:700}
 #school-form input{display:block;width:100%;padding:12px;margin-top:7px;border:1px solid #ddd;border-radius:12px;font:inherit}
 #profile-actions{flex-wrap:wrap;gap:8px}
-#school-status{}
-@media(max-width:360px){.content{}}
+@media(max-width:360px){}
 
 /* Readable school dashboard */
 
-
 #school-subjects{display:grid;}
 .subject-row{border-radius:15px;justify-content:space-between;transition:background .15s ease}
-.subject-row:hover{}
 .subject-row__main{display:grid;}
 .subject-row__name{line-height:1.4;}
 .subject-row__meta{line-height:1.5;font-weight:600}
 .subject-row__meta.attention{color:#825b19}
 
 
-
 .choice-buttons button{min-height:38px;cursor:pointer}
 #school-status{line-height:1.5}
 @media(prefers-reduced-motion:reduce){.subject-row{transition:none}}
-
-:root{}
-.content{}
-.school-header{}.school-header h1{}.school-header p{}
-.eyebrow{}
 .settings-button{border-radius:999px;}
 .card{margin-top:15px;}
 .card h2{font-size:19px;line-height:1.3;color:#3c276b;margin:0}
@@ -65,41 +49,32 @@ section[hidden],[hidden]{display:none!important}
 .forecast-center span{font-size:10px;font-weight:700;color:#8775a5}
 .forecast-legend{flex:1;min-width:0}
 .forecast-legend button{display:flex;align-items:center;gap:7px;width:100%;border:1px solid transparent;background:transparent;color:#3c276b;font:700 12px Manrope,system-ui,sans-serif;padding:8px 5px;border-radius:12px;cursor:pointer;text-align:left}
-.forecast-legend button[aria-pressed=true]{}
 .forecast-legend .legend-dot{flex:none;border-radius:50%}
 .forecast-legend .legend-label{flex:1;}.forecast-legend .legend-count{font-weight:800}
 #school-analytics{font-size:12px;line-height:1.5;margin-top:8px}
 #school-status{font-size:11px;color:#9185a7;margin:6px 0 0}
-.trend-card{}
 .trend-change{font-weight:800}
 #school-trend{margin-top:10px}
-.trend-axis{display:flex;justify-content:space-between;font-size:11px;margin-top:2px}
-
-.orient-heading{}.orient-heading h2{margin:0;color:#3c276b}.orient-heading p{font-size:12px;color:#897ca2;margin:2px 0}
+.trend-axis{display:flex;justify-content:space-between;font-size:11px;margin-top:2px}.orient-heading h2{margin:0;color:#3c276b}.orient-heading p{font-size:12px;color:#897ca2;margin:2px 0}
 .orient-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);}
 .orient-panel{min-width:0}
-.orient-good{}.orient-attention{}
-.orient-title{font-weight:800;margin-bottom:10px;}.orient-attention .orient-title{}
+.orient-title{font-weight:800;margin-bottom:10px;}
 .orient-link{display:flex;flex-direction:column;text-align:left;background:transparent;border:0;border-top:1px solid #ffffff8c;width:100%;min-width:0;font:700 12px Manrope,system-ui,sans-serif;cursor:pointer}
 .orient-link small{font-size:11px;color:#6c6480;font-weight:600}
 .orient-empty{font-size:12px;}
 .subjects-card{margin-top:17px}
 #school-subjects{margin-top:12px}
-.subject-row{}
-.subject-row__name{}
 
 .subject-row:focus-visible,.orient-link:focus-visible,.forecast-legend button:focus-visible{outline:3px solid #9778f1;outline-offset:2px}
 .profile-period{padding-top:16px;margin-top:16px;border-top:1px solid #eee6f6}
 .profile-period h2{font-size:17px;margin:0 0 6px}
 .profile-period .btn{margin-top:9px}
-@media(max-width:360px){.forecast-chart{width:48%}.forecast-legend button{font-size:11px;padding:7px 2px}.card{}.orient-panel{}}
+@media(max-width:360px){.forecast-chart{width:48%}.forecast-legend button{font-size:11px;padding:7px 2px}}
 .grade-delta{display:inline-flex;align-items:center;gap:4px;font-weight:800}
-.grade-delta.up{}.grade-delta.down{}.grade-delta.flat{}
 
 .detail-kpi{display:grid;}
 .detail-kpi>div{border-radius:14px}
 .detail-kpi strong{display:block;}
-.detail-kpi span{}
 .detail-goal{margin:12px 0;}
 .detail-chart-scroll{overscroll-behavior-x:contain}
 .detail-chart-scroll svg{display:block;}
@@ -107,10 +82,8 @@ section[hidden],[hidden]{display:none!important}
 .grade-entry__value{font-weight:800;}
 .detail-toggle{flex-wrap:wrap;}
 .detail-toggle button{border:1px solid #d8c9f0;font:750 12px Manrope,system-ui;cursor:pointer}
-.detail-toggle button[aria-pressed=true]{}
 .school-empty{padding:22px 10px;text-align:center;font-weight:700;}
 #school-freshness{font-size:11px;color:#85789a;margin-top:7px}
-#school-freshness[data-state=error]{}
 
 /* Approved Leveli dark dashboard (2026-11-06). Works for all three existing screens. */
 :root{color:#f6f0ff;background:#0e0c21;color-scheme:dark}
@@ -191,12 +164,8 @@ body{background:#0e0c21;color:#f6f0ff}
 .btn.secondary{background:#302747;border-color:#574275;color:#e4d4ff}
 #school-form input{color:#fff;background:#29223f;border-color:#54436b}
 .profile-period{border-top-color:#44365e}
-.choice-buttons button{background:#302747;color:#e3d8f4;border-color:#55446f}
-.detail-kpi>div{}.detail-kpi strong,.grade-entry__value{color:#c5a8ff}
-.detail-kpi span{}.detail-goal{background:#19392f;color:#a5e8c5}
+.choice-buttons button{background:#302747;color:#e3d8f4;border-color:#55446f}.detail-kpi strong,.grade-entry__value{color:#c5a8ff}.detail-goal{background:#19392f;color:#a5e8c5}
 .detail-toggle button{background:#29223f;color:#ebdcff;border-color:#604a83}
-.detail-toggle button[aria-pressed=true]{}
-.grade-entry{}
 .school-empty{color:#ac9dc5}
 @media(max-width:360px){.content{padding:12px 10px 24px}.card{padding:12px}.donut-panel{padding:6px}.orient-panel{padding:10px 7px}.subject-row{padding:10px 7px;gap:4px}.subject-row__number{width:43px}.subject-row__grade{width:38px}.subject-row__dynamics{width:51px}}
 /* Subject details: compact, readable layout on phones. */
@@ -328,7 +297,6 @@ body{background:#0e0c21;color:#f6f0ff}
 :root[data-leveli-theme="light"] .orient-link__metrics strong{color:#302448}
 :root[data-leveli-theme="light"] .grade-entry span{color:#574568}
 :root[data-leveli-theme="light"] #school-subject-detail{background:#f7f4fc}
-:root[data-leveli-theme="light"] #school-subject-detail .detail-hero{}
 :root[data-leveli-theme="light"] #school-subject-detail .detail-hero-label,:root[data-leveli-theme="light"] #school-subject-detail .detail-hero-hint,:root[data-leveli-theme="light"] #school-subject-detail .detail-hero-score{color:#302448}
 :root[data-leveli-theme="light"] #school-subject-detail h3,:root[data-leveli-theme="light"] #school-subject-detail .detail-kpi strong{color:#302448}
 :root[data-leveli-theme="light"] #school-subject-detail .detail-kpi span{color:#746489}
@@ -422,7 +390,6 @@ body{background:#0e0c21;color:#f6f0ff}
 :root .help-btn{width:44px;height:44px;min-width:44px;min-height:44px;display:grid;place-items:center}
 :root .btn{min-height:46px}
 :root .btn:not(.secondary){min-height:48px}
-:root .detail-toggle button,:root #school-period-buttons button{}
 :root .forecast-legend button{min-height:44px}
 :root .orient-link{min-height:44px}
 :root .leveli-pack-heading{width:20px;height:20px;flex:none}
@@ -526,7 +493,6 @@ body{background:#0e0c21;color:#f6f0ff}
 :root .b3-change-avatar[hidden],:root .b3-extra button[hidden]{display:none!important}
 @media(max-width:360px){
  :root .b3-tile{padding:12px;min-height:124px}
- :root .b3-tiles{}
  :root .b3-settings .b3-tile strong{font-size:12px}
  :root .b3-dialog .personal-choice-grid,:root .b3-dialog .personal-color-grid{gap:5px}
 }
