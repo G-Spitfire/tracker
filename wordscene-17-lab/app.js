@@ -647,8 +647,16 @@ function confirmExit(practice=false){
   '<button type="button" class="ws-paper-pause-cancel" data-exit="leave">'+(practice?'Закончить':'Отменить занятие')+'</button></div></section>';
  root.appendChild(dialog);
  const stay=dialog.querySelector('[data-exit="stay"]'),leave=dialog.querySelector('[data-exit="leave"]');
- stay.addEventListener('click',()=>{dialog.remove();root.querySelector('[data-action="'+(practice?'stopPractice':'cancel')+'"]')?.focus()});
+ const previousFocus=document.activeElement;
+ const close=()=>{dialog.remove();previousFocus?.focus?.()};
+ stay.addEventListener('click',close);
  leave.addEventListener('click',()=>{dialog.remove();session=null;selection=null;store();home()});
+ dialog.addEventListener('keydown',event=>{
+  if(event.key==='Escape'){event.preventDefault();close();return}
+  if(event.key!=='Tab')return;
+  if(event.shiftKey&&document.activeElement===stay){event.preventDefault();leave.focus()}
+  else if(!event.shiftKey&&document.activeElement===leave){event.preventDefault();stay.focus()}
+ });
  stay.focus();
 }
 function confirmCancel(){confirmExit(false)}
