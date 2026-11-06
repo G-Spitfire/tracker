@@ -850,8 +850,10 @@ html:has(#app > header),body:has(#app > header){
 }
 .ws-recall-face-back{transform:rotateY(180deg);justify-content:flex-start}
 .ws-recall-face-back::before,.ws-recall-face-back::after{content:"";flex:1 0 0;min-height:0}
-.ws-recall-face[aria-hidden="true"]{visibility:hidden;transition:visibility 0s linear 340ms}
-.ws-recall-face[aria-hidden="false"]{visibility:visible}
+@keyframes ws-recall-flip-back{from{transform:rotateY(0)}to{transform:rotateY(180deg)}}
+@keyframes ws-recall-flip-front{from{transform:rotateY(180deg)}to{transform:rotateY(0)}}
+.ws-recall-flip.turn-to-back .ws-recall-flip-inner{animation:ws-recall-flip-back 340ms cubic-bezier(.2,.75,.3,1) both}
+.ws-recall-flip.turn-to-front .ws-recall-flip-inner{animation:ws-recall-flip-front 340ms cubic-bezier(.2,.75,.3,1) both}
 .ws-recall-v4 .ws-recall-word{margin:2px 0;font-size:clamp(30px,8.5vw,40px)}
 .ws-recall-v4 .ws-recall-direction{margin:0;color:#61758e;font-size:12px}
 .ws-recall-pronunciation{display:flex;align-items:center;justify-content:center;gap:2px;min-height:44px;flex:none}
@@ -897,5 +899,5 @@ html:has(#app > header),body:has(#app > header){
 }
 @media(prefers-reduced-motion:reduce){
  .ws-recall-flip-inner{transition:none}
- .ws-recall-face[aria-hidden="true"]{transition:none}
+  .ws-recall-flip.turn-to-back .ws-recall-flip-inner,.ws-recall-flip.turn-to-front .ws-recall-flip-inner{animation:none}
 }
