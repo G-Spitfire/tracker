@@ -290,10 +290,11 @@ function wirePaperFlip(onTurn){
 function selectionScreen(){
  const id=selection.current?.[selection.cursor],w=byId[id];if(!w){nextBatch();return}
  view='select';
+ if(!selection.seen.includes(id))selection.seen.push(id);
  const known=selection.known.length,unknown=selection.unknown.length,seen=selection.seen.length;
  const actions='<div class="ws-paper-decisions">'+btn('Знаю','known','ws-paper-negative')+btn('Не знаю','unknown','ws-paper-positive')+'</div>';
  shell('','', '<main class="ws-paper-page ws-paper-select"><div class="ws-paper-header"><div><h1>Подбор слов</h1><small>Неизвестных: '+unknown+' из 10 · Просмотрено: '+seen+' из 50</small></div><span class="ws-paper-count">'+seen+'/50</span></div>'+
-  '<div class="ws-paper-track" role="progressbar" aria-label="Просмотр кандидатов" aria-valuemin="0" aria-valuemax="50" aria-valuenow="'+seen+'"><span style="width:'+Math.min(100,seen*2)+'%"></span></div>'+
+
   '<div class="ws-paper-main">'+paperSheet(w,true,showAnswer)+paperDream(w,'select',false,false)+'</div>'+
   '<div class="ws-paper-bottom"><p class="ws-paper-instruction">Знаешь значение этого слова? Переверни лист, если нужно.</p>'+actions+
   '<div class="ws-paper-minors">'+btn('Завершить подбор','stopSelection','ws-paper-minor')+'</div></div></main>');
