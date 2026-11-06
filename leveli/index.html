@@ -262,6 +262,15 @@ body{background:#0e0c21;color:#f6f0ff}
  #school-period-buttons{gap:7px}
  #school-period-buttons button{font-size:11px}
 }
+/* Subject details are a standalone view, without the home greeting and settings. */
+.subject-detail-active>.school-header{display:none}
+.subject-detail-active #school-subject-detail{margin-top:0}
+#school-subject-detail .detail-chart-scroll{overflow-x:hidden}
+#school-subject-detail .detail-chart-scroll svg{height:185px}
+#school-subject-detail .detail-chart-caption{font-size:11px;line-height:1.55;color:#b9a9d3;margin:9px 3px 2px}
+#school-subject-detail .grade-entry{min-height:0;padding:7px 2px;gap:8px}
+#school-subject-detail .grade-entry span{font-size:11px;line-height:1.45}
+#school-subject-detail .grade-entry__value{font-size:19px}
 </style></head><body><div class="app"><main class="content" id="main">
 <section data-page="home"><header class="school-header"><div><div class="eyebrow">Левели</div><h1 id="home-greeting">Привет!</h1><p>Мои оценки и успеваемость</p><div class="header-period" id="school-header-period">II четверть · 2026/27 учебный год</div></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
 <article class="card" id="school-login"><h2>Войди, чтобы увидеть оценки</h2><p>Оценки загружаются из электронного дневника.</p><form id="school-form"><label>Почта<input id="school-email" type="email" autocomplete="username" required></label><label>Пароль<input id="school-password" type="password" autocomplete="current-password" required></label><button class="btn" type="submit">Войти</button></form></article>
@@ -309,7 +318,7 @@ const S=window.LeveliSchool;
 const isMark=v=>S.score(v)!==null;
 const isFinal=g=>!!S.officialKind(g);
 let cachedGrades=[],loadGeneration=0;let schoolDataMeta=null;let retryHandle=null;
-let forecastFilter=null;function clearSchool(){cachedGrades=[];subjects.replaceChildren();for(const id of ['school-analytics','school-trend','school-subject-detail','school-period-buttons','school-filter-buttons','school-forecast-legend','school-good-list','school-attention-list'])document.getElementById(id).replaceChildren();document.getElementById('school-donut').replaceChildren();document.getElementById('school-subject-detail').hidden=true;document.getElementById('school-overview').hidden=false;periodSelect.replaceChildren();subjectFilter.value='all';forecastFilter=null;status.textContent='';document.getElementById('school-grades-donut').replaceChildren();document.getElementById('school-grades-legend').replaceChildren();document.getElementById('school-grades-total').textContent='0';schoolDataMeta=null;document.getElementById('school-freshness').textContent='';document.getElementById('school-overall').textContent='—';document.getElementById('school-trend-change').textContent='';}
+let forecastFilter=null;function clearSchool(){document.querySelector('[data-page="home"]').classList.remove('subject-detail-active');cachedGrades=[];subjects.replaceChildren();for(const id of ['school-analytics','school-trend','school-subject-detail','school-period-buttons','school-filter-buttons','school-forecast-legend','school-good-list','school-attention-list'])document.getElementById(id).replaceChildren();document.getElementById('school-donut').replaceChildren();document.getElementById('school-subject-detail').hidden=true;document.getElementById('school-overview').hidden=false;periodSelect.replaceChildren();subjectFilter.value='all';forecastFilter=null;status.textContent='';document.getElementById('school-grades-donut').replaceChildren();document.getElementById('school-grades-legend').replaceChildren();document.getElementById('school-grades-total').textContent='0';schoolDataMeta=null;document.getElementById('school-freshness').textContent='';document.getElementById('school-overall').textContent='—';document.getElementById('school-trend-change').textContent='';}
 const periodSelect=document.getElementById('school-period');
 const subjectFilter=document.getElementById('school-filter'),analytics=document.getElementById('school-analytics');
 const gradeDate=S.date,periodOf=S.period;
@@ -430,6 +439,7 @@ function renderOrientations(all,strong,attention){
 }
 function renderGrades(){
  const detail=document.getElementById('school-subject-detail');detail.hidden=true;
+ document.querySelector('[data-page="home"]').classList.remove('subject-detail-active');
  document.getElementById('school-overview').hidden=false;subjects.replaceChildren();
  const chosen=periodSelect.value,rows=cachedGrades.filter(g=>periodOf(g)===chosen);
  const groups=new Map();
@@ -493,8 +503,12 @@ function renderGrades(){
 function openSubject(name,grades){
  const main=document.getElementById('school-overview'),detail=document.getElementById('school-subject-detail');
  main.hidden=true;detail.hidden=false;detail.replaceChildren();
+ document.querySelector('[data-page="home"]').classList.add('subject-detail-active');
  const head=document.createElement('div');head.className='detail-header';
- const back=document.createElement('button');back.className='btn secondary detail-back';back.textContent='← К предметам';back.onclick=()=>{detail.hidden=true;main.hidden=false;window.scrollTo(0,0)};
+ const back=document.createElement('button');back.className='btn secondary detail-back';back.textContent='← К предметам';back.onclick=()=>{
+  document.querySelector('[data-page="home"]').classList.remove('subject-detail-active');
+  detail.hidden=true;main.hidden=false;renderGrades();window.scrollTo(0,0)
+ };
  const title=document.createElement('h2');title.className='detail-title';title.textContent=name;
  const quarter=document.createElement('span');quarter.className='detail-period';
  quarter.textContent=({1:'I',2:'II',3:'III',4:'IV'}[Number(periodSelect.value.split('-')[1])]||'')+' четверть';
@@ -530,8 +544,11 @@ function openSubject(name,grades){
   for(const [mode,label] of [['average','Средний балл'],['marks','Оценки']]){
    const b=document.createElement('button');b.type='button';b.textContent=label;b.setAttribute('aria-pressed',String(chartMode===mode));b.onclick=()=>{chartMode=mode;drawChart()};chartControls.append(b);
   }
-  if(!dated.length){chartHost.textContent='Нет оценок с указанными датами.';return}
-  const width=Math.max(320,dated.length*36+34),height=185,baseY=151;
+  if(!dated.length){chartHost.textContent='Нет оценок с указанными датами.';detail.querySelector('.detail-chart-caption')?.remove();return}
+  // The marks view shows only the most recent bars fitting the phone: no swipe needed.
+  const capacity=Math.max(3,Math.floor((chartHost.clientWidth-32)/36));
+  const plotted=chartMode==='marks'?dated.slice(-capacity):dated;
+  const width=chartMode==='marks'?Math.max(250,chartHost.clientWidth-20):Math.max(320,dated.length*36+34),height=185,baseY=151;
   const svg=svgEl('svg',{viewBox:'0 0 '+width+' '+height,width,height,role:'img','aria-label':chartMode==='average'?'Накопительный средний балл':'Оценки по порядку'});
   const defs=svgEl('defs');
   const glow=svgEl('filter',{id:'leveli-subject-line-glow',x:'-50%',y:'-100%',width:'200%',height:'300%'});
@@ -562,20 +579,27 @@ function openSubject(name,grades){
     svg.append(svgEl('polyline',{points,fill:'none',stroke:'#d1adff','stroke-width':3,'stroke-linecap':'round','stroke-linejoin':'round'}));
    }
    coords.forEach(([x,cy],i)=>svg.append(svgEl('circle',{cx:x,cy,r:i===coords.length-1?4.5:2.5,fill:'#f2e6ff'})));
-  }else dated.forEach((g,i)=>{
-   const x=25+i*36,top=y(g.value),barHeight=baseY-top,glowColor=colors[g.value]?.[0]||'#c8a3ff';
+  }else plotted.forEach((g,i)=>{
+   const step=(width-65)/Math.max(1,plotted.length-1);
+   const x=25+i*step,top=y(g.value),barHeight=baseY-top,glowColor=colors[g.value]?.[0]||'#c8a3ff';
    svg.append(svgEl('rect',{x:x-2,y:top+2,width:22,height:barHeight-2,rx:5,fill:glowColor,opacity:'.38',filter:'url(#leveli-subject-bar-glow)'}));
    svg.append(svgEl('rect',{x,y:top,width:18,height:barHeight,rx:5,fill:'url(#leveli-subject-grade-'+g.value+')'}));
    svg.append(svgEl('line',{x1:x+4,x2:x+14,y1:top+2,y2:top+2,stroke:glowColor,'stroke-width':2.5,'stroke-linecap':'round'}));
    const label=svgEl('text',{x:x+9,y:top-7,'text-anchor':'middle',fill:glowColor,'font-size':12,'font-weight':800});
    label.textContent=String(g.value);svg.append(label);
   });
-  for(const i of [...new Set([0,Math.floor((dated.length-1)/2),dated.length-1])]){
-   const x=chartMode==='average'?35+i*(width-55)/Math.max(1,dated.length-1):34+i*36;
-   const caption=svgEl('text',{x,y:177,'text-anchor':i===0?'start':i===dated.length-1?'end':'middle',fill:'#a99bc9','font-size':10});
-   caption.textContent=dated[i].date.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'});svg.append(caption);
+  for(const i of [...new Set([0,Math.floor((plotted.length-1)/2),plotted.length-1])]){
+   const x=chartMode==='average'?35+i*(width-55)/Math.max(1,plotted.length-1):34+i*(width-65)/Math.max(1,plotted.length-1);
+   const caption=svgEl('text',{x,y:177,'text-anchor':i===0?'start':i===plotted.length-1?'end':'middle',fill:'#a99bc9','font-size':10});
+   caption.textContent=plotted[i].date.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'});svg.append(caption);
   }
   chartHost.append(svg);
+  const existing=detail.querySelector('.detail-chart-caption');if(existing)existing.remove();
+  if(chartMode==='marks'){
+   const tip=document.createElement('p');tip.className='detail-chart-caption';
+   tip.textContent=dated.length>plotted.length?'Показаны последние '+plotted.length+' из '+dated.length+' оценок. Все оценки — в истории ниже.':'Показаны все '+plotted.length+' оценок. Подробности — в истории ниже.';
+   chartHost.after(tip);
+  }
  }
  drawChart();
  const historyTitle=document.createElement('h3');historyTitle.textContent='История оценок';detail.append(historyTitle);
@@ -616,7 +640,9 @@ function applySchoolData(data){if(data.schemaVersion!==1||data.source!=='petersb
 schoolDataMeta=data;cachedGrades=data.grades.filter(g=>g&&typeof g==='object').map(g=>({...g,value:S.mark(g)}));updateIdentity(auth.currentUser,cachedGrades);
 const selected=periodSelect.value;const nowPeriod=currentSchoolPeriod();const schoolYear=Number(nowPeriod.slice(0,4));const years=[...new Set([schoolYear,...cachedGrades.map(periodOf).filter(Boolean).map(p=>Number(p.slice(0,4)))])].sort((a,b)=>b-a);
 periodSelect.replaceChildren(...years.flatMap(year=>[1,2,3,4].map(q=>new Option(q+' четверть'+(year===schoolYear?'':' · '+year+'/'+(year+1)),year+'-'+q))));
-periodSelect.value=[...periodSelect.options].some(o=>o.value===selected)?selected:nowPeriod;refreshChoiceButtons();renderGrades()}
+periodSelect.value=[...periodSelect.options].some(o=>o.value===selected)?selected:nowPeriod;refreshChoiceButtons();
+ // A background Firebase refresh must never close the subject the child is reading.
+ if(document.getElementById('school-subject-detail').hidden)renderGrades()}
 
 // syncStatus (string or {state, retryCount}) is written by the Mac uploader.
 // Missing/old status must never be shown as a confirmed success.
@@ -680,7 +706,8 @@ async function load(){
   }
   const data=snap.data();
   if(data.schemaVersion!==1||data.source!=='petersburgedu'||!Array.isArray(data.grades))throw Error('Неизвестный формат школьных данных.');
-  if(!cached||JSON.stringify(cached.data)!==JSON.stringify(data))applySchoolData(data);
+  // Status-only writes must not recreate the subject view or reset the chart/history.
+  if(!cached||JSON.stringify(cached.data.grades)!==JSON.stringify(data.grades)||JSON.stringify(cached.data.subjects)!==JSON.stringify(data.subjects))applySchoolData(data);
   try{await writeGradeCache(uid,{data,savedAt:Date.now()})}catch(e){console.warn('Не удалось сохранить оценки локально',e)}
   if(active()){showDiarySyncTime(data);status.textContent='Предметов: '+subjects.children.length+' · проверено в Firebase'}
  }catch(e){
