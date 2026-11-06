@@ -246,10 +246,13 @@ function selectionScreen(){
  '<span class="ws-picker-position" aria-label="Просмотрено '+seen+' из 50 слов">'+seen+'/50</span></div>'+
  '<div class="ws-picker-stats" aria-label="Результаты подбора"><div>'+pickerIcon('known')+'<span>Знаю<strong>'+known+'</strong></span></div><div>'+pickerIcon('learn')+'<span>Изучить<strong>'+unknown+'</strong></span></div></div>'+
  '<p class="ws-picker-instruction">Знаешь значение этого слова?</p>'+
- '<section class="ws-picker-card"><button class="ws-picker-reveal" data-action="reveal" type="button" aria-label="'+(showAnswer?'Скрыть перевод слова '+h(w.en):'Показать перевод слова '+h(w.en))+'" aria-pressed="'+showAnswer+'"><span class="ws-picker-word">'+h(w.en)+'</span><span class="ws-picker-ipa">'+h(w.ipa||'')+'</span>'+
+ '<section class="ws-picker-card"><div class="ws-picker-study-inner">'+
+ '<button class="ws-picker-reveal" data-action="reveal" type="button" aria-label="'+(showAnswer?'Скрыть перевод слова '+h(w.en):'Показать перевод слова '+h(w.en))+'" aria-pressed="'+showAnswer+'"></button>'+
+ '<span class="ws-picker-word">'+h(w.en)+'</span>'+
+ '<div class="ws-picker-pronunciation"><span class="ws-picker-ipa">'+h(w.ipa||'')+'</span>'+
+ btn(pickerIcon('volume'),'say:'+h(id),'ws-picker-speak')+'</div>'+
  (showAnswer?'<span class="ws-picker-translation">'+h(w.ru)+'</span>':'')+
- '<span class="ws-picker-hint">'+(showAnswer?'Нажми, чтобы скрыть перевод':'Нажми на карточку, чтобы увидеть перевод')+'</span></button>'+
- btn(pickerIcon('volume'),'say:'+h(id),'ws-picker-speak')+'</section>'+
+ '<span class="ws-picker-hint">'+(showAnswer?'Нажми, чтобы скрыть перевод':'Нажми на карточку, чтобы увидеть перевод')+'</span></div></section>'+
  '<div class="ws-picker-choices">'+
  btn(pickerIcon('known')+'<span>Знаю</span>','known','ws-picker-known')+
  btn(pickerIcon('learn')+'<span>Не знаю</span>','unknown','ws-picker-unknown')+'</div></main>';
