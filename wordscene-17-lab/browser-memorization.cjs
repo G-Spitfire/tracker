@@ -46,7 +46,7 @@ async function checkMemorization(page,snap=async()=>{}){
     assert.equal(await page.locator('.learn h2').evaluate(el=>document.activeElement===el),true);
    }
   }
-  assert.ok(await page.locator('[data-action="yes"]').isVisible(),'final word starts recall');
+  assert.ok(await page.locator('.ws-recall-v2').count()?await page.locator('[data-action="check"]').isVisible():await page.locator('[data-action="yes"]').isVisible(),'final word starts recall');
   assert.equal(await page.evaluate(()=>{
    const old=localStorage.getItem('wordscene-17-lab-current-account-v1');
    return localStorage.getItem('wordscene-17-lab-v1'+(['child-1','child-2'].includes(old)?'-account-'+old:''));
