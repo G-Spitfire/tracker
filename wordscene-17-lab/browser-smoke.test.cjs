@@ -220,6 +220,31 @@ test('manual selection keeps cross-topic picks and search is independent of topi
  assert.match(b.root.html,/Запоминание/);
 });
 
+test('manual UI Kit v2 keeps the approved hierarchy, scoped controls and progress meter',()=>{
+ const b=boot();b.click('sources');b.click('manual');
+ assert.match(b.root.html,/class="ws-manual ws-manual-v2"/);
+ assert.match(b.root.html,/Ручной подбор/);
+ assert.match(b.root.html,/По темам/);
+ assert.match(b.root.html,/Поиск/);
+ assert.match(b.root.html,/aria-label="Выбрано слов"/);
+ assert.match(b.root.html,/aria-valuenow="0"/);
+ assert.match(b.root.html,/Нажми на слово, чтобы выбрать/);
+ assert.match(b.root.html,/Начать изучение \(0 слов\)/);
+ b.click('pick:apple');
+ assert.match(b.root.html,/aria-valuenow="1"/);
+ assert.match(b.root.html,/Выбрано слов:[\s\S]*1 \/ 10/);
+ b.click('manualSummary');
+ assert.match(b.root.html,/data-action="removeManual:apple"/);
+ b.click('manualTab:search');
+ assert.match(b.root.html,/aria-valuenow="1"/);
+ b.click('manualTab:topics');
+ assert.match(b.root.html,/data-action="removeManual:apple"/);
+ const css=file('style.css');
+ assert.match(css,/\.ws-manual-v2 \.ws-manual-topic\{/);
+ assert.match(css,/\.ws-manual-v2 \.ws-manual-audio\{min-width:44px;min-height:44px/);
+ assert.match(css,/\.ws-manual-v2 \.ws-manual-start\{min-height:63px/);
+});
+
 test('mobile Paper selection layout keeps visible scrolling cues and shared controls',()=>{
  const css=file('style.css');
  assert.match(css,/\.ws-manual-scroll-note/);
