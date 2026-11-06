@@ -380,11 +380,12 @@ function renderGrades(){
  const available=all.filter(x=>x.count>0||x.stats.official!==null);
  const current=chosen===currentSchoolPeriod(),empty=available.length===0;
  for(const id of ['school-donut','school-forecast-legend','school-grades-donut','school-grades-legend','school-trend'])document.getElementById(id).replaceChildren();
- document.getElementById('school-header-period').textContent=(periodSelect.selectedOptions[0]?.textContent||'Текущая четверть')+' · '+chosen.slice(0,4)+'/'+(Number(chosen.slice(0,4))+1)+' учебный год';
+ document.getElementById('school-header-period').textContent=({1:'I',2:'II',3:'III',4:'IV'}[Number(chosen.split('-')[1])]||'')+' четверть · '+chosen.slice(0,4)+'/'+(Number(chosen.slice(0,4))+1)+' учебный год';
  document.getElementById('school-subject-count').textContent=all.length+' предметов';
  if(empty){
   const msg=current?'Новая четверть началась!':'За эту четверть пока нет оценок.';
   document.getElementById('school-overall').textContent='—';
+  document.getElementById('school-grades-total').textContent='0';
   document.getElementById('school-trend-change').textContent='';
   document.getElementById('school-analytics').textContent=msg;
   document.getElementById('school-trend').textContent=msg;
