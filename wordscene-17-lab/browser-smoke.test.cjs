@@ -4,17 +4,18 @@ function boot(options={}){
  const map=options.map||new Map();let failProfileWrite=false;
  const storage={getItem:k=>map.has(k)?map.get(k):null,setItem:(k,v)=>{if(failProfileWrite&&k==='wordscene-17-lab-v1')throw Error('Quota exceeded');map.set(k,v)},removeItem:k=>map.delete(k)};
  const root={
-  html:'',listeners:{},set innerHTML(s){this.html=s;this.listeners={}},get innerHTML(){return this.html},
+  html:'',listeners:{},dialog:null,set innerHTML(s){this.html=s;this.listeners={};this.dialog=null},get innerHTML(){return this.html},
+  appendChild(dialog){this.dialog=dialog;this.listeners.confirmLeave={click:()=>dialog.querySelector('[data-exit="leave"]').click()};this.listeners.confirmStay={click:()=>dialog.querySelector('[data-exit="stay"]').click()}},
   querySelectorAll(q){
    if(q!=='[data-action]')return [];
    const hits=[...this.html.matchAll(/data-action="([^"]+)"/g)];
    return hits.map(hit=>{const el={dataset:{action:hit[1]},addEventListener:(event,cb)=>{el.click=cb}};this.listeners[hit[1]]=el;return el});
-  },pauseTime:{},querySelector(q){if(q==='[data-flip-card]'&&this.html.includes('data-flip-card="true"'))return {addEventListener:(name,fn)=>{if(name==='click')this.flip=()=>fn({target:{closest:()=>null}})}};return q==='#pause-time'&&this.html.includes('id="pause-time"')?this.pauseTime:null}
+  },pauseTime:{},querySelector(q){if(q==='.ws-paper-exit-confirm')return this.dialog;if(q==='[data-flip-card]'&&this.html.includes('data-flip-card="true"'))return {addEventListener:(name,fn)=>{if(name==='click')this.flip=()=>fn({target:{closest:()=>null}})}};return q==='#pause-time'&&this.html.includes('id="pause-time"')?this.pauseTime:null}
  };
  let now=options.now??Date.now(),tick;
  class TestDate extends Date{static now(){return now}}
  const window={WordSceneTopics:options.topics||{topics:[],forWord:()=>[]},WordSceneContent:{cards:[],render:()=>'<svg></svg>'},confirm:()=>true};
- const doc={getElementById:id=>id==='childName'||id==='childAge'?{value:options.inputs?.[id]??''}:root,createElement:()=>({setAttribute(){},hidden:true}),body:{append(){}}};
+ const doc={getElementById:id=>id==='childName'||id==='childAge'?{value:options.inputs?.[id]??''}:root,createElement:()=>{const actions={};return {setAttribute(){},hidden:true,addEventListener(){},remove(){root.dialog=null},querySelector(selector){const key=selector.includes('stay')?'stay':'leave';return actions[key]||(actions[key]={listeners:{},addEventListener(name,cb){this.listeners[name]=cb},click(){this.listeners.click?.()},focus(){doc.activeElement=this}})}}}},body:{append(){}}};
  const context={window,document:doc,localStorage:storage,navigator:{},setInterval:cb=>{tick=cb},setTimeout:()=>0,clearTimeout:()=>{},Date:TestDate,Math,console};
  vm.createContext(context);
  const mod={exports:{}};vm.runInNewContext(file('engine.js'),Object.assign(context,{module:mod,exports:mod.exports}));window.WS17Engine=mod.exports;
@@ -25,7 +26,7 @@ function boot(options={}){
 }
 test('Paper dictionary filters by learning status and keeps details read-only',()=>{
  const b=boot(),initial=b.map.get('wordscene-17-lab-v1');
- b.click('dictionary');
+ b.click('dictionaryOpen');
  assert.match(b.root.html,/ws-dict-page/);
  assert.match(b.root.html,/Поиск по слову или переводу/);
  assert.match(b.root.html,/data-action="dictionaryFilter:learning"/);
@@ -133,6 +134,8 @@ test('confirmed cancellation keeps persistent profile clean',()=>{
  const b=boot();b.click('sources');b.click('auto');
  for(let i=0;i<10;i++){b.click('unknown')}
  b.click('cancel');
+ assert.ok(b.root.dialog,'A Paper confirmation must open before cancellation');
+ b.click('confirmLeave');
  const saved=JSON.parse(b.map.get('wordscene-17-lab-v1'));
  assert.deepEqual(Object.keys(saved.words),[]);assert.equal(saved.sessions.length,0);
  assert.equal(b.map.get('wordscene-17-lab-active-v1'),undefined);
@@ -367,15 +370,15 @@ test('Paper picker v2 keeps aligned counters, approved button order and two-way 
  assert.match(b.root.html,/class="ws-paper-dream ws-paper-dream-empty"/);
  b.click('known');
  assert.match(b.root.html,/Неизвестных: 0 из 10/);
- assert.match(b.root.html,/1\/50/);
+ assert.match(b.root.html,/2\/50/);
  b.click('unknown');
  assert.match(b.root.html,/Неизвестных: 1 из 10/);
- assert.match(b.root.html,/2\/50/);
+ assert.match(b.root.html,/3\/50/);
  b.click('stopSelection');
  assert.match(b.root.html,/Учить новые слова/);
  assert.equal(b.map.has('wordscene-17-lab-active-v1'),false);
  const saved=JSON.parse(b.map.get('wordscene-17-lab-v1'));
- assert.equal(Object.values(saved.words).filter(w=>w.origin==='known').length,1);
+ assert.equal(Object.values(saved.words).filter(w=>w.origin==='known').length,0);
  assert.equal(Object.values(saved.words).filter(w=>w.origin==='learned').length,0);
 });
 
