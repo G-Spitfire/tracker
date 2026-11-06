@@ -544,6 +544,16 @@ body{background:#0e0c21;color:#f6f0ff}
  :root .b3-dialog .personal-choice-grid,:root .b3-dialog .personal-color-grid{gap:5px}
 }
 @media(prefers-reduced-motion:reduce){:root .b3-tile,:root .b3-dialog .personal-option{transition:none!important}}
+
+/* Transparent character portraits load only when the optional, versioned assets exist.
+   Until then the already-shipped WebP atlas remains the intact fallback. */
+.b3-avatar-stand:has(.avatar-illustration.cutout-ready){background:transparent;border:0;box-shadow:none;padding:0}
+.b3-avatar-stand .profile-avatar:has(.avatar-illustration.cutout-ready){overflow:visible;background:transparent;border:0}
+.b3-avatar-stand .avatar-illustration.cutout-ready{position:absolute;top:-34%;left:-23%;width:146%;height:146%;max-width:none;aspect-ratio:auto;border-radius:0;background-size:contain;background-repeat:no-repeat;filter:drop-shadow(0 10px 16px #0b071d66)}
+.b3-hero-space:has(.avatar-illustration.cutout-ready){padding-top:138px}
+.personal-avatar-option .avatar-illustration.cutout-ready{background-size:contain;background-repeat:no-repeat;background-color:transparent;border-radius:0}
+:root[data-leveli-theme="light"] .b3-avatar-stand:has(.avatar-illustration.cutout-ready){background:transparent;box-shadow:none}
+@media(max-width:360px){.b3-hero-space:has(.avatar-illustration.cutout-ready){padding-top:129px}}
 </style></head><body><div class="app"><main class="content" id="main">
 <section data-page="home"><header class="school-header"><div><div class="eyebrow brand-lockup"><img src="./brand/mark.svg" alt="" width="30" height="30" aria-hidden="true"><span>Левели</span></div><h1 id="home-greeting">Привет!</h1><p id="home-birthday-greeting" class="home-birthday-greeting" hidden></p><p>Мои оценки и успеваемость</p><div class="header-period" id="school-header-period">II четверть · 2026/27 учебный год</div></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
 <article class="card" id="school-login"><h2>Войди, чтобы увидеть оценки</h2><p>Оценки загружаются из электронного дневника.</p><form id="school-form"><label>Почта<input id="school-email" type="email" autocomplete="username" required></label><label>Пароль<input id="school-password" type="password" autocomplete="current-password" required></label><button class="btn" type="submit">Войти</button></form></article>
@@ -667,9 +677,29 @@ window.LeveliAppearance=(()=>{
   yellow:{main:'#f4c75f',soft:'#ffe6a3',dim:'#76602c',border:'#f4c75f',line:'#ffe7a1',glow:'#f4c75f',track:'#69582f'},
   mint:{main:'#69d9bd',soft:'#bdf9e7',dim:'#286b5c',border:'#69d9bd',line:'#bcf9e9',glow:'#69d9bd',track:'#365f55'}
  };
- // Each portrait corresponds to one 64×64 cell of a 5×2 sprite. The index is stable for saved profiles.
- const avatars=[['Кошка',0],['Танцы',2],['Лапки',3],['Музыка',4],['Звезда',1],['Футбол',6],['Гейминг',8],['Гонки',7],['Мяч',5],['Наушники',9]];
- function avatarImage(tile,cls){const node=document.createElement('span');node.className='avatar-illustration'+(cls?' '+cls:'');node.setAttribute('aria-hidden','true');node.style.backgroundPosition=(tile%5*25)+'% '+(tile>=5?'100%':'0%');return node}
+ // Stable legacy saved indices: existing profiles still use the original atlas tile mappings.
+ // New transparent portraits follow the visual order of the approved 5x2 character sheet.
+ const avatars=[['Наушники с ушками',0],['Кепка',2],['С котёнком',3],['С книгой',4],['Звёздочка',1],['Наушники',6],['Баскетбол',8],['С ноутбуком',7],['В очках',5],['Музыка',9]];
+ const newPortraitIndex=new Map(avatars.map(([label,tile],index)=>[tile,index+1]));
+ const cutoutCache=new Map();
+ function avatarImage(tile,cls){
+  const node=document.createElement('span');node.className='avatar-illustration'+(cls?' '+cls:'');node.setAttribute('aria-hidden','true');
+  node.style.backgroundPosition=(tile%5*25)+'% '+(tile>=5?'100%':'0%');
+  const index=newPortraitIndex.get(tile);if(!index)return node;
+  const url='./avatars/cutouts/avatar-'+String(index).padStart(2,'0')+'.webp';
+  const ready=()=>{node.classList.add('cutout-ready');node.style.backgroundImage='url("'+url+'")';node.style.backgroundPosition='center bottom';};
+  const state=cutoutCache.get(index);
+  if(state===true)ready();
+  else if(state!==false){
+   if(state){state.then(ok=>{if(ok)ready()});}
+   else{
+    const request=new Promise(resolve=>{const img=new Image();img.onload=()=>resolve(img.naturalWidth>0&&img.naturalHeight>0);img.onerror=()=>resolve(false);img.src=url});
+    cutoutCache.set(index,request);
+    request.then(ok=>{cutoutCache.set(index,ok);if(ok)ready()});
+   }
+  }
+  return node
+ }
  const packs=[['classic','Вариант 1','✦'],['cats','Вариант 2','🐱'],['sports','Вариант 3','⚽']];
  const defaults={theme:'dark',accent:'violet',avatar:0,customAvatar:'',pack:'classic',birthday:''};
  let uid=null,profile={...defaults},render=null;
