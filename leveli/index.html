@@ -549,11 +549,21 @@ body{background:#0e0c21;color:#f6f0ff}
    Until then the already-shipped WebP atlas remains the intact fallback. */
 .b3-avatar-stand:has(.avatar-illustration.cutout-ready){background:transparent;border:0;box-shadow:none;padding:0}
 .b3-avatar-stand .profile-avatar:has(.avatar-illustration.cutout-ready){overflow:visible;background:transparent;border:0}
-.b3-avatar-stand .avatar-illustration.cutout-ready{position:absolute;top:-34%;left:-23%;width:146%;height:146%;max-width:none;aspect-ratio:auto;border-radius:0;background-size:contain;background-repeat:no-repeat;filter:drop-shadow(0 10px 16px #0b071d66)}
-.b3-hero-space:has(.avatar-illustration.cutout-ready){padding-top:138px}
+.b3-avatar-stand .avatar-illustration.cutout-ready{position:absolute;top:-24%;left:-10%;width:120%;height:120%;max-width:none;aspect-ratio:auto;border-radius:0;background-size:contain;background-repeat:no-repeat;background-color:transparent;filter:drop-shadow(0 8px 12px #0b071d55)}
+.b3-hero-space:has(.avatar-illustration.cutout-ready){padding-top:125px}
 .personal-avatar-option .avatar-illustration.cutout-ready{background-size:contain;background-repeat:no-repeat;background-color:transparent;border-radius:0}
 :root[data-leveli-theme="light"] .b3-avatar-stand:has(.avatar-illustration.cutout-ready){background:transparent;box-shadow:none}
-@media(max-width:360px){.b3-hero-space:has(.avatar-illustration.cutout-ready){padding-top:129px}}
+@media(max-width:360px){.b3-hero-space:has(.avatar-illustration.cutout-ready){padding-top:115px}.b3-avatar-stand .avatar-illustration.cutout-ready{top:-23%;left:-10%;width:120%;height:120%}}
+
+/* B3 post-iPhone review: a transparent character is not a square image card.
+   Keep the child-sized character separated from name and avoid a coloured tile behind alpha. */
+.b3-avatar-stand:has(.avatar-illustration.cutout-ready){top:-87px;width:160px;height:160px}
+.b3-avatar-stand .profile-avatar:has(.avatar-illustration.cutout-ready){position:relative;overflow:visible}
+.b3-avatar-stand .avatar-illustration.cutout-ready{background-color:transparent}
+.b3-hero:has(.avatar-illustration.cutout-ready){padding-top:88px}
+.b3-dialog .personal-choice-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+.b3-dialog .personal-avatar-option{min-width:0}
+@media(max-width:360px){.b3-avatar-stand:has(.avatar-illustration.cutout-ready){top:-81px;width:148px;height:148px}}
 </style></head><body><div class="app"><main class="content" id="main">
 <section data-page="home"><header class="school-header"><div><div class="eyebrow brand-lockup"><img src="./brand/mark.svg" alt="" width="30" height="30" aria-hidden="true"><span>Левели</span></div><h1 id="home-greeting">Привет!</h1><p id="home-birthday-greeting" class="home-birthday-greeting" hidden></p><p>Мои оценки и успеваемость</p><div class="header-period" id="school-header-period">II четверть · 2026/27 учебный год</div></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
 <article class="card" id="school-login"><h2>Войди, чтобы увидеть оценки</h2><p>Оценки загружаются из электронного дневника.</p><form id="school-form"><label>Почта<input id="school-email" type="email" autocomplete="username" required></label><label>Пароль<input id="school-password" type="password" autocomplete="current-password" required></label><button class="btn" type="submit">Войти</button></form></article>
@@ -745,7 +755,14 @@ window.LeveliAppearance=(()=>{
   const b=document.createElement('button');b.type='button';b.className='personal-option'+(extra?' '+extra:'');b.textContent=label;b.setAttribute('aria-pressed',String(selected));if(style)b.style.cssText=style;b.onclick=action;return b
  }
  function drawControls(){
-  const av=document.querySelector('#personal-avatar-options');av.replaceChildren();avatars.forEach(([label,tile],i)=>{if(i===0||i===5){const heading=document.createElement('div');heading.className='avatar-gallery-label';heading.textContent=i===0?'Кошки и танцы':'Футбол и игры';av.append(heading)}const b=button('',profile.avatar===i,()=>set({avatar:i}),'personal-avatar-option');b.title=label;b.setAttribute('aria-label',label);b.dataset.avatarIndex=String(i);b.append(avatarImage(tile));av.append(b)});if(profile.customAvatar){const b=button('',profile.avatar==='custom',()=>set({avatar:'custom'}),'personal-avatar-option');b.setAttribute('aria-label','Моя картинка');const img=document.createElement('img');img.src=profile.customAvatar;img.alt='';img.className='personal-avatar-custom';b.append(img);av.append(b)}
+  const av=document.querySelector('#personal-avatar-options');av.replaceChildren();
+  // One shared gallery, interleaved for variety. Saved avatar indices never change.
+  for(const i of [0,5,1,6,2,7,3,8,4,9]){
+   const tile=avatars[i][1],label='Аватар '+(i+1);
+   const b=button('',profile.avatar===i,()=>set({avatar:i}),'personal-avatar-option');
+   b.title=label;b.setAttribute('aria-label',label);b.dataset.avatarIndex=String(i);
+   b.append(avatarImage(tile));av.append(b)
+  }if(profile.customAvatar){const b=button('',profile.avatar==='custom',()=>set({avatar:'custom'}),'personal-avatar-option');b.setAttribute('aria-label','Моя картинка');const img=document.createElement('img');img.src=profile.customAvatar;img.alt='';img.className='personal-avatar-custom';b.append(img);av.append(b)}
   const themeBox=document.querySelector('#personal-theme-options');themeBox.replaceChildren();for(const [k,t] of [['light','☀ Светлая'],['dark','☾ Тёмная'],['system','◐ Системная']])themeBox.append(button(t,profile.theme===k,()=>set({theme:k})));
   const colorBox=document.querySelector('#personal-accent-options');colorBox.replaceChildren();for(const [k,title] of [['violet','Фиолетовый'],['pink','Розовый'],['blue','Синий'],['yellow','Жёлтый'],['mint','Мятный']]){const b=button(title,profile.accent===k,()=>set({accent:k}));const swatch=document.createElement('span');swatch.className='personal-color-swatch';swatch.style.background=accents[k].main;b.prepend(swatch);colorBox.append(b)}
   const packBox=document.querySelector('#personal-pack-options');packBox.replaceChildren();for(const [k,title,emoji] of packs)packBox.append(button(emoji+' '+title,profile.pack===k,()=>set({pack:k})));

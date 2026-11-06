@@ -37,11 +37,13 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.locator('#b3-panel-close').click();
  assert.equal(await page.locator('html').getAttribute('data-leveli-theme'),'light');
  await page.locator('[data-b3-panel="avatar"]').first().click();
- await page.getByRole('button',{name:'Наушники с ушками',exact:true}).click();
+ await page.getByRole('button',{name:'Аватар 1',exact:true}).click();
  assert.equal(await page.locator('#profile-avatar-display').getAttribute('data-avatar-index'),'0');
  assert.equal(await page.locator('#profile-avatar-display .avatar-illustration').count(),1);
  assert.equal(await page.locator('#personal-avatar-options .personal-avatar-option').count(),10);
- assert.equal(await page.locator('#personal-avatar-options .avatar-gallery-label').count(),2);
+ assert.equal(await page.locator('#personal-avatar-options .avatar-gallery-label').count(),0);
+ assert.deepEqual(await page.locator('#personal-avatar-options .personal-avatar-option').evaluateAll(items=>items.map(el=>Number(el.dataset.avatarIndex))),[0,5,1,6,2,7,3,8,4,9]);
+ assert.doesNotMatch(await page.locator('#profile-personalization').innerText(),/Кошки и танцы|Футбол и игры/);
  const avatarAtlas=await page.request.get((process.env.TEST_BASE_URL||'http://127.0.0.1:8765')+'/leveli/avatars/portraits-atlas.webp');
  assert.equal(avatarAtlas.status(),200);
  assert.match(avatarAtlas.headers()['content-type']||'',/image\/webp/);
@@ -62,9 +64,20 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   assert.ok((await response.body()).length>10000,'transparent avatar '+n+' must have actual image content');
  }
  for(let i=0;i<10;i++){
-  await page.locator('#personal-avatar-options .personal-avatar-option').nth(i).click();
+  await page.locator('#personal-avatar-options .personal-avatar-option[data-avatar-index="'+i+'"]').click();
   assert.equal(await page.locator('#profile-avatar-display').getAttribute('data-avatar-index'),String(i));
   await page.waitForFunction(()=>document.querySelector('#profile-avatar-display .cutout-ready'));
+  const box=await page.evaluate(()=>{
+   const hero=document.querySelector('.b3-hero').getBoundingClientRect();
+   const name=document.querySelector('#profile-name').getBoundingClientRect();
+   const character=document.querySelector('.b3-avatar-stand .cutout-ready').getBoundingClientRect();
+   const style=getComputedStyle(document.querySelector('.b3-avatar-stand .cutout-ready'));
+   return {heroTop:hero.top,nameTop:name.top,characterBottom:character.bottom,characterTop:character.top,background:style.backgroundColor,width:character.width};
+  });
+  assert.equal(box.background,'rgba(0, 0, 0, 0)','transparent avatars must not show a colored square');
+  assert.ok(box.characterTop<box.heroTop,'character must rise above hero');
+  assert.ok(box.characterBottom<=box.nameTop-5,'character must not cover the profile name');
+  assert.ok(box.width<210,'transparent avatar must stay compact');
  }
  await page.locator('#b3-panel-close').click();
  await page.locator('[data-b3-panel="icons"]').click();
@@ -202,7 +215,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.getByRole('button',{name:'Синий'}).click();
  await page.locator('#b3-panel-close').click();
  await page.locator('[data-b3-panel="avatar"]').first().click();
- await page.getByRole('button',{name:'Наушники',exact:true}).click();
+ await page.getByRole('button',{name:'Аватар 6',exact:true}).click();
  assert.equal(await page.locator('#profile-avatar-display').getAttribute('data-avatar-index'),'5');
  assert.equal(await page.locator('#profile-avatar-display .avatar-illustration').count(),1);
  assert.equal(await page.locator('#personal-avatar-options [data-avatar-index="5"][aria-pressed="true"]').count(),1);
