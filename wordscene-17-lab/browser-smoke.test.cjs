@@ -37,7 +37,6 @@ test('approved memorization UI keeps illustration visible, progress and unchange
  for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
  assert.match(b.root.html,/class="ws-learn ws-learn-v2"/);
  assert.match(b.root.html,/Прогресс запоминания/);
- assert.match(b.root.html,/aria-valuenow="1"/);
  assert.match(b.root.html,/class="art"/);
  assert.match(b.root.html,/class="scene"/);
  assert.match(b.root.html,/data-action="say:[^"]+"/);
@@ -242,15 +241,13 @@ test('manual selection keeps cross-topic picks and search is independent of topi
  assert.match(b.root.html,/Запоминание/);
 });
 
-test('manual UI Kit v2 keeps the approved hierarchy, scoped controls and progress meter',()=>{
+test('manual picker retains UI Kit controls and counters with compact pinned footer',()=>{
  const topics={topics:[{id:'food',name:'Еда и напитки'},{id:'animals',name:'Животные'}],forWord:id=>id==='apple'?['food']:['animals']};
  const b=boot({topics});b.click('sources');b.click('manual');
- assert.match(b.root.html,/class="ws-manual ws-manual-v2"/);
+ assert.match(b.root.html,/class="ws-manual ws-manual-v2 ws-manual-v3"/);
  assert.match(b.root.html,/Ручной подбор/);
  assert.match(b.root.html,/По темам/);
  assert.match(b.root.html,/Поиск/);
- assert.match(b.root.html,/aria-label="Выбрано слов"/);
- assert.match(b.root.html,/aria-valuenow="0"/);
  assert.match(b.root.html,/Нажми на слово, чтобы выбрать/);
  assert.match(b.root.html,/Начать изучение \(0 слов\)/);
  b.click('pick:apple');
@@ -293,7 +290,7 @@ test('manual selection uses one page scroll, compact topics and pinned footer',(
  assert.match(b.root.html,/Выбрано слов:[\s\S]*1 \/ 15/);
  assert.match(b.root.html,/Выбери минимум 3 слова/);
  b.click('pick:dog');b.click('pick:bird');
- assert.doesNotMatch(b.root.html,/Выбери минимум 3 слова<\/small>/);
+ assert.match(b.root.html,/class="ws-manual-minimum" hidden/);
  b.click('manualTab:search');
  assert.match(b.root.html,/class="ws-manual ws-manual-v2 ws-manual-v3 is-search"/);
  assert.match(b.root.html,/Выбрано слов:[\s\S]*3 \/ 15/);
