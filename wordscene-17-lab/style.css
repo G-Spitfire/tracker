@@ -657,3 +657,48 @@ html:has(#app > header),body:has(#app > header){
  .ws-learn-v2 .ws-learn-session-actions>button.quiet{padding:8px}
 }
 @media(prefers-reduced-motion:reduce){.ws-learn-progress>span{transition:none}}
+
+
+/* Manual picker v3: exactly one scroll region for header, topics and words.
+   Only the compact selection/action footer stays pinned. */
+.ws-manual-v3{display:flex;flex-direction:column;overflow:hidden;padding:0;min-height:0;height:100dvh;max-height:100dvh}
+.ws-manual-v3 .ws-manual-page{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:max(12px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) 16px max(14px,env(safe-area-inset-left))}
+.ws-manual-v3 .ws-manual-body{display:block;flex:none;min-height:0;overflow:visible}
+.ws-manual-v3 .ws-manual-topic-head{margin:0 0 8px}
+.ws-manual-v3 .ws-manual-topics,.ws-manual-v3 .ws-manual-topics.is-expanded{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;max-height:none;min-height:0;overflow:visible;padding:2px 1px 9px}
+.ws-manual-v3 .ws-manual-topic,.ws-manual-v3 .ws-manual-topics.is-expanded .ws-manual-topic{min-height:70px;min-width:0;flex:auto;flex-direction:column;padding:7px 4px;scroll-snap-align:none}
+.ws-manual-v3 .ws-manual-topic.is-active{padding:6px 3px}
+.ws-manual-v3 .ws-manual-list{display:block;min-height:0;overflow:visible;flex:none;margin-top:6px;padding:12px 12px 5px}
+.ws-manual-v3 .ws-manual-word-scroll{overflow:visible;flex:none;min-height:0;max-height:none;overscroll-behavior:auto;touch-action:auto;scrollbar-width:none}
+.ws-manual-v3 .ws-manual-scroll-note,.ws-manual-v3 .ws-manual-topics-note{display:none!important}
+.ws-manual-v3 .ws-manual-bottom{z-index:2;flex:none;padding:8px max(14px,env(safe-area-inset-right)) max(9px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));border-top:1px solid #e8decf;background:#fdf7ed;box-shadow:0 -4px 12px #98643112}
+.ws-manual-v3 .ws-manual-total{margin:0 0 6px;padding:0;border:0;box-shadow:none;background:transparent;border-radius:0}
+.ws-manual-v3 .ws-manual-total>div:first-child{justify-content:space-between;gap:8px}
+.ws-manual-v3 .ws-manual-total strong{margin-left:0;font-size:19px}
+.ws-manual-v3 .ws-manual-summary-toggle{margin-left:auto;min-height:38px}
+.ws-manual-v3 .ws-manual-minimum{display:block;margin:0 0 4px;font-size:11px}
+.ws-manual-v3 .ws-manual-minimum[hidden]{display:none}
+.ws-manual-v3 .ws-manual-summary{max-height:min(130px,22dvh);margin:0 0 6px}
+.ws-manual-v3 .ws-manual-start{min-height:63px}
+.ws-manual-v3.is-search .ws-manual-search-wrap{margin-bottom:9px}
+.ws-manual-v3 .ws-manual-page:focus-visible{outline:3px solid #087bfa;outline-offset:-3px}
+@media(max-height:700px){
+ .ws-manual-v3 .ws-manual-page{padding-top:max(6px,env(safe-area-inset-top));padding-bottom:8px}
+ .ws-manual-v3 .ws-manual-topic,.ws-manual-v3 .ws-manual-topics.is-expanded .ws-manual-topic{min-height:64px;flex-direction:column}
+ .ws-manual-v3 .ws-manual-list{padding:9px 9px 3px}
+ .ws-manual-v3 .ws-manual-bottom{padding-top:5px;padding-bottom:max(5px,env(safe-area-inset-bottom))}
+ .ws-manual-v3 .ws-manual-start{min-height:60px}
+ .ws-manual-v3 .ws-manual-minimum{font-size:11px}
+}
+@media(max-height:650px){
+ .ws-manual-v3 .ws-manual-topics,.ws-manual-v3 .ws-manual-topics.is-expanded{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));max-height:none;min-height:0;overflow:visible}
+ .ws-manual-v3 .ws-manual-topic,.ws-manual-v3 .ws-manual-topics.is-expanded .ws-manual-topic{min-width:0;min-height:60px;flex:auto;flex-direction:column}
+ .ws-manual-v3 .ws-manual-list-head p{display:none}
+ .ws-manual-v3 .ws-manual-summary-toggle{min-height:38px}
+}
+.ws-manual-v3.is-search.is-keyboard{padding:0;overflow:hidden}
+.ws-manual-v3.is-search.is-keyboard .ws-manual-page{min-height:0;overflow-y:auto;padding:4px 12px 6px}
+.ws-manual-v3.is-search.is-keyboard .ws-manual-body{display:block;overflow:visible}
+.ws-manual-v3.is-search.is-keyboard .ws-manual-word-scroll{overflow:visible;max-height:none}
+.ws-manual-v3.is-search.is-keyboard .ws-manual-bottom{padding:4px 12px 5px}
+.ws-manual-v3.is-search.is-keyboard .ws-manual-summary{max-height:min(75px,18dvh)}
