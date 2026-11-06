@@ -77,29 +77,10 @@ function refreshManualSearch(){
  const counter=root.querySelector?.('.ws-manual-list-head small');
  if(counter)counter.textContent=q?'Найдено: '+filtered.length:'Введите слово для поиска';
  list.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click',()=>dispatch(el.dataset.action,el)));
- refreshManualScroll();
  syncManualViewport();
 }
-function refreshManualScroll(){
- const list=root.querySelector?.('.ws-manual-word-scroll');
- const note=root.querySelector?.('.ws-manual-scroll-note');
- if(list&&note)note.hidden=list.scrollHeight-list.clientHeight-list.scrollTop<=3;
- const topics=root.querySelector?.('.ws-manual-topics');
- const topicsNote=root.querySelector?.('.ws-manual-topics-note');
- if(topics&&topicsNote){
-  const horizontal=topics.scrollWidth>topics.clientWidth+3;
-  const vertical=topics.scrollHeight>topics.clientHeight+3;
-  topicsNote.hidden=!(horizontal||vertical);
-  if(!topicsNote.hidden)topicsNote.textContent=horizontal?'Темы → листай в сторону':'Темы ↓ листай вниз';
- }
-}
 function wireManualScroll(){
- const list=root.querySelector?.('.ws-manual-word-scroll');
  const topics=root.querySelector?.('.ws-manual-topics');
- list?.addEventListener('scroll',refreshManualScroll,{passive:true});
- topics?.addEventListener('scroll',refreshManualScroll,{passive:true});
- if(typeof window.requestAnimationFrame==='function')window.requestAnimationFrame(refreshManualScroll);
- else refreshManualScroll();
  const active=topics?.querySelector?.('.is-active');
  if(active&&topics.scrollWidth>topics.clientWidth+3){
   const rect=active.getBoundingClientRect(),container=topics.getBoundingClientRect();
@@ -353,7 +334,7 @@ function manualView(fill=false){
  btn('<svg class="ws-picker-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg> Поиск','manualTab:search','ws-manual-tab'+(!themed?' is-active':''))+'</div>'+
  '<div class="ws-manual-body">'+
  (themed?'<div class="ws-manual-topic-head"><h2>Выбери тему</h2>'+btn(manualShowAll?'Свернуть':'Все темы ›','manualAllTopics','ws-manual-all')+'</div>'+
- '<div class="ws-manual-topics-note" aria-hidden="true" hidden></div><div class="ws-manual-topics'+(manualShowAll?' is-expanded':'')+'" aria-label="Темы словаря">'+shownTopics.map(t=>btn(topicIcon(t.id)+'<span>'+h(t.name)+'</span>','manualTopic:'+h(t.id),'ws-manual-topic'+(topicId===t.id?' is-active':''))).join('')+'</div>':
+ '<div class="ws-manual-topics'+(manualShowAll?' is-expanded':'')+'" aria-label="Темы словаря">'+shownTopics.map(t=>btn(topicIcon(t.id)+'<span>'+h(t.name)+'</span>','manualTopic:'+h(t.id),'ws-manual-topic'+(topicId===t.id?' is-active':''))).join('')+'</div>':
  '<label class="ws-manual-search-label" for="manual-search">Поиск по всему словарю</label><div class="ws-manual-search-wrap"><span aria-hidden="true"><svg class="ws-picker-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg></span><input id="manual-search" data-input="search" type="search" placeholder="Английское слово или перевод" autocomplete="off" value="'+h(query)+'"></div>')+
  '<section class="ws-manual-list"><div class="ws-manual-list-head"><div><h2>'+(themed?h(topic?.name||'Слова'):'Результаты поиска')+'</h2><p>Нажми на слово, чтобы выбрать</p></div><small>'+(themed?'В этой теме выбрано: '+chosenInTopic:q?'Найдено: '+filtered.length:'Введите слово для поиска')+'</small></div>'+
  '<div class="ws-manual-word-scroll" role="region" aria-label="Список слов" tabindex="0">'+(listing||'<p class="ws-manual-empty">'+(themed?'В этой теме пока нет слов. Выбери другую тему.':q?'Ничего не найдено. Попробуй другой запрос.':'Начни вводить слово на русском или английском.')+'</p>')+'</div></section></div></div>'+
