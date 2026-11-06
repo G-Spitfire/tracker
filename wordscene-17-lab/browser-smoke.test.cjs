@@ -131,7 +131,7 @@ test('pause displays a countdown without extending the saved deadline',()=>{
 
 test('Paper shows real totals with new words first and the reason inside the locked button',()=>{
  const b=boot();
- assert.match(b.root.html,/Учить новые слова[\s\S]*Выбери способ подбора[\s\S]*Отлично! Всё повторено/);
+ assert.match(b.root.html,/Учить новые слова[\s\S]*Выбери способ подбора[\s\S]*Твоё обучение начинается!/);
  assert.match(b.root.html,/class="paper-rings"/);
  assert.doesNotMatch(b.root.html,/Добавить 10|Тренировка написания/);
 });
@@ -415,9 +415,9 @@ test('Paper weekly goal counts only completed new-word lessons for Monday-Sunday
  assert.equal(nextWeek.map.get('wordscene-17-lab-v1'),map.get('wordscene-17-lab-v1'));
 });
 
-test('Paper uses an informational success card, simplified level, and no plus for enabled learning',()=>{
+test('Paper uses first-session welcome, simplified level, and no plus for enabled learning',()=>{
  const b=boot();
- assert.match(b.root.html,/class="paper-done" role="status"/);
+ assert.match(b.root.html,/class="paper-welcome" role="status"/);
  assert.doesNotMatch(b.root.html,/data-action="review"/);
  assert.match(b.root.html,/class="paper-level-help"/);
  assert.match(b.root.html,/Как перейти на уровень «Опытный»/);
@@ -469,10 +469,10 @@ test('Paper level metrics use only confirmed relevant lessons, not all reviews',
  assert.equal(b.map.get('wordscene-17-lab-v1'),JSON.stringify(p));
 });
 
-test('Paper main actions keep 78px minimum and success text has approved accessible contrast',()=>{
+test('Paper main actions keep 78px minimum and new-user welcome has approved layout',()=>{
  const b=boot(),css=file('style.css');
  assert.match(b.root.html,/class="paper-actions"/);
- assert.match(b.root.html,/class="paper-done" role="status"/);
+ assert.match(b.root.html,/class="paper-welcome" role="status"/);
  assert.ok(css.includes('--ws-home-action-height:78px'));
  assert.ok(css.includes('.paper-actions>.paper-action,.paper-actions>.paper-done{height:100%;min-height:var(--ws-home-action-height)}'));
  assert.ok(css.includes('.paper-actions .paper-done strong{color:#174f29}'));
