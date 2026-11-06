@@ -260,6 +260,13 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   width:getComputedStyle(el).width,height:getComputedStyle(el).height,stroke:getComputedStyle(el).strokeWidth
  }));
  assert.equal(iconStyle.width,'24px');assert.equal(iconStyle.height,'24px');assert.equal(iconStyle.stroke,'2px');
+ assert.equal(await page.locator('.b3-home-btn svg').count(),1,'Back navigation uses consistent SVG icon');
+ assert.equal(await page.locator('#b3-panel-close svg').count(),1,'Dialog close uses consistent SVG icon');
+ for(const selector of ['.b3-home-btn svg','#b3-panel-close svg']){
+  const style=await page.locator(selector).evaluate(el=>({w:getComputedStyle(el).width,h:getComputedStyle(el).height,stroke:getComputedStyle(el).strokeWidth}));
+  assert.equal(style.w,'24px');assert.equal(style.h,'24px');assert.equal(style.stroke,'2px');
+ }
+
  // Visual baseline checks: text/background contrast in both themes (WCAG 4.5:1 normal text).
  const themeAudit=await page.evaluate(()=>{
   const root=document.documentElement,old=root.dataset.leveliTheme;
