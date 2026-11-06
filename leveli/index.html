@@ -154,6 +154,11 @@ body{background:#0e0c21;color:#f6f0ff}
 @media(min-width:390px){.donut-panel{padding:10px}.forecast-legend .legend-item{font-size:11px}}
 #school-status,#school-freshness{font-size:11px;margin:9px 5px;color:#a99bc9}
 #school-freshness[data-state=error]{color:#ff8fa1}
+#school-freshness[data-state=ok]{color:#78e7ae}
+#school-freshness[data-state=waiting],#school-freshness[data-state=unknown]{color:#b7aacc}
+#school-freshness{display:flex;align-items:center;gap:8px;line-height:1.45}
+#school-freshness .sync-symbol{font-size:16px;font-weight:800;flex:0 0 19px;text-align:center}
+#school-freshness .sync-copy{flex:1;min-width:0}
 .trend-card{background:#1c1735}
 .trend-change{font-size:15px;color:#c6bbd9;font-variant-numeric:tabular-nums}
 .trend-change.positive{color:#78e7ae}.trend-change.negative{color:#ff839d}
@@ -507,12 +512,38 @@ const selected=periodSelect.value;const nowPeriod=currentSchoolPeriod();const sc
 periodSelect.replaceChildren(...years.flatMap(year=>[1,2,3,4].map(q=>new Option(q+' четверть'+(year===schoolYear?'':' · '+year+'/'+(year+1)),year+'-'+q))));
 periodSelect.value=[...periodSelect.options].some(o=>o.value===selected)?selected:nowPeriod;refreshChoiceButtons();renderGrades()}
 
-function showDiarySyncTime(data){
+// syncStatus (string or {state, retryCount}) is written by the Mac uploader.
+// Missing/old status must never be shown as a confirmed success.
+function showDiarySyncTime(data,fromCache=false){
  const fresh=document.getElementById('school-freshness');
- const last=data?.lastSuccessfulSyncAt??data?.lastSyncAt??data?.syncedAt??data?.updatedAt;
- const parsed=(typeof last==='string'||typeof last==='number')?new Date(last):null;
- fresh.textContent=parsed&&!Number.isNaN(parsed.getTime())?'Последняя синхронизация дневника: '+parsed.toLocaleString('ru-RU'):'Дата последней синхронизации дневника не передана';
- fresh.dataset.state='ok';
+ const info=data?.syncStatus;
+ const rawState=typeof info==='string'?info:(info?.state??info?.status??'');
+ const state=String(rawState).toLowerCase();
+ const count=Number(info?.retryCount??data?.syncRetryCount??0);
+ const last=data?.lastSuccessfulSyncAt??data?.lastSyncAt??data?.syncedAt;
+ const value=last&&typeof last==='object'&&typeof last.toDate==='function'?last.toDate():last;
+ const parsed=(typeof value==='string'||typeof value==='number'||value instanceof Date)?new Date(value):null;
+ const valid=parsed&&!Number.isNaN(parsed.getTime());
+ const age=valid?Date.now()-parsed.getTime():Infinity;
+ const dateLabel=valid?parsed.toLocaleString('ru-RU'):'время не указано';
+ let label='Статус синхронизации неизвестен',symbol='?',kind='unknown';
+ if(state==='failed'||state==='error'){
+   if(count>=1){label='Не удалось обновить оценки · последнее успешное обновление: '+dateLabel;symbol='✕';kind='error'}
+   else {label='Сбой синхронизации · ожидаем повторную попытку';symbol='↻';kind='waiting'}
+ }else if(state==='retrying'||state==='pending'||state==='running'){
+   label='Ожидаем повторную синхронизацию';symbol='↻';kind='waiting';
+ }else if(state==='success'||state==='ok'){
+   if(!fromCache&&valid&&age>=0&&age<24*60*60*1000){
+     label='Оценки обновлены · '+dateLabel;symbol='✓';kind='ok';
+   }else {label='Последнее успешное обновление: '+dateLabel+' · актуальный статус неизвестен'}
+ }else if(valid){
+   label='Последнее успешное обновление: '+dateLabel+' · статус не подтверждён';
+ }
+ fresh.dataset.state=kind;
+ fresh.replaceChildren();
+ const mark=document.createElement('span');mark.className='sync-symbol';mark.setAttribute('aria-hidden','true');mark.textContent=symbol;
+ const copy=document.createElement('span');copy.className='sync-copy';copy.textContent=label;
+ fresh.append(mark,copy);
 }
 function readFirebaseWithDeadline(uid,timeoutMs=20000){
  let timer;
@@ -530,7 +561,7 @@ async function load(){
  try{
   cached=await readGradeCache(uid);if(!active())return;
   if(cached?.data){
-   applySchoolData(cached.data);showDiarySyncTime(cached.data);
+   applySchoolData(cached.data);showDiarySyncTime(cached.data,true);
    status.textContent='Сохранённые оценки · проверяем Firebase…';
   }else{status.textContent='Загрузка оценок…';subjects.replaceChildren()}
  }catch(e){cached=null;console.warn('Локальный кэш недоступен',e)}
@@ -550,7 +581,7 @@ async function load(){
   if(!active())return;
   if(cached){
    status.textContent='Сохранённые оценки · Firebase временно недоступен';
-   showDiarySyncTime(cached.data);
+   showDiarySyncTime(cached.data,true);
   }else{status.textContent='Не удалось загрузить оценки. Повторяем автоматически.';showError(e)}
   if(!retryHandle)retryHandle=setTimeout(()=>{retryHandle=null;if(active()&&!document.hidden)load()},15000);
  }
