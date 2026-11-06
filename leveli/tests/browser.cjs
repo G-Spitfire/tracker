@@ -47,17 +47,17 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.locator('#b3-panel-close').click();
  assert.equal(await page.locator('html').getAttribute('data-leveli-theme'),'light');
  await page.locator('[data-b3-panel="avatar"]').first().click();
- await page.getByRole('button',{name:'Эталонный аватар',exact:true}).click();
+ await page.getByRole('button',{name:'Полина',exact:true}).click();
  assert.equal(await page.locator('#profile-avatar-display').getAttribute('data-avatar-index'),'0');
  assert.equal(await page.locator('#profile-avatar-display .avatar-illustration').count(),1);
 
- assert.equal(await page.locator('#personal-avatar-options .personal-avatar-option').count(),1);
+ assert.equal(await page.locator('#personal-avatar-options .personal-avatar-option').count(),2);
  const prototype=await page.request.get((process.env.TEST_BASE_URL||'http://127.0.0.1:8765')+'/leveli/avatars/prototype-girl.svg');
  assert.equal(prototype.status(),200);
  assert.match(prototype.headers()['content-type']||'',/svg/);
  const layout=await page.evaluate(()=>{
   const card=document.querySelector('.b3-hero').getBoundingClientRect();
-  const image=document.querySelector('.b3-avatar-stand .prototype-avatar').getBoundingClientRect();
+  const image=document.querySelector('.b3-avatar-stand .avatar-illustration').getBoundingClientRect();
   const name=document.querySelector('#profile-name').getBoundingClientRect();
   return {cardTop:card.top,imageTop:image.top,imageHeight:image.height,avatarRight:image.right,nameLeft:name.left};
  });
@@ -207,7 +207,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await page.locator('html').evaluate(el=>el.style.getPropertyValue('--leveli-accent')),'#a882ff');
  assert.equal(await page.locator('#home-birthday-greeting').isVisible(),false);
  await page.getByRole('button',{name:'Профиль и настройки'}).click();
- assert.equal(await page.locator('#profile-avatar-display img').count(),0);
+ assert.equal(await page.locator('#profile-avatar-display img.profile-avatar-custom').count(),0);
  await page.locator('.b3-home-btn').click();
 
  await page.getByRole('button',{name:'Профиль и настройки'}).click();
@@ -215,7 +215,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.getByRole('button',{name:'Синий'}).click();
  await page.locator('#b3-panel-close').click();
  await page.locator('[data-b3-panel="avatar"]').first().click();
- await page.getByRole('button',{name:'Эталонный аватар',exact:true}).click();
+ await page.getByRole('button',{name:'Полина',exact:true}).click();
  assert.equal(await page.locator('#profile-avatar-display').getAttribute('data-avatar-index'),'0');
  assert.equal(await page.locator('#profile-avatar-display .avatar-illustration').count(),1);
  assert.equal(await page.locator('#personal-avatar-options [data-avatar-index="0"][aria-pressed="true"]').count(),1);
