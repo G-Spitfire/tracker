@@ -331,6 +331,24 @@ async function run(name, browserType, contextOptions) {
    for(let i=0;i<18;i++)await page.locator('[data-action="yes"]').click();
   }
   await page.getByText('Занятие завершено').waitFor();
+  assert.equal(await page.locator('.ws-result-page').count(),1,'approved Paper results screen must be used');
+  assert.equal(await page.locator('.ws-result-total').count(),2,'two visually dominant metrics');
+  assert.equal(await page.locator('.ws-result-metrics > div').count(),2,'two additional mandatory metrics');
+  assert.equal(await page.locator('.ws-result-quality-track[role="progressbar"]').count(),1,'verified success percentage track');
+  assert.equal(await page.locator('.ws-result-level').count(),1,'actual level progress');
+  assert.equal(await page.locator('.ws-result-next').count(),1,'next steps');
+  assert.equal(await page.locator('.ws-result-no-hard').count(),1,'zero hard words does not show empty disclosure');
+  assert.equal(await page.locator('[data-action="practice"]').count(),0,'new lesson cannot offer voluntary practice');
+  const resultGeometry=await page.evaluate(()=>{
+   const find=s=>{const r=document.querySelector(s).getBoundingClientRect();return {top:r.top,bottom:r.bottom,height:r.height}};
+   return {page:find('.ws-result-page'),footer:find('.ws-result-actions'),scroll:find('.ws-result-scroll'),button:find('.ws-result-home'),viewport:innerHeight};
+  });
+  assert.ok(resultGeometry.button.height>=63,'results primary button must be at least 63px');
+  assert.ok(Math.abs(resultGeometry.page.bottom-resultGeometry.viewport)<=12,'results page must fit viewport');
+  assert.ok(resultGeometry.footer.bottom<=resultGeometry.viewport+2,'result actions cannot leave viewport');
+  assert.ok(resultGeometry.scroll.bottom<=resultGeometry.footer.top+2,'result scroll must end above fixed actions');
+  await snap('final-results');
+
   const stored=await page.evaluate(()=> {
    const id=localStorage.getItem('wordscene-17-lab-current-account-v1');
    const suffix=id==='child-1'||id==='child-2'?'-account-'+id:'';
