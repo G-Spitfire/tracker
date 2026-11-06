@@ -309,6 +309,9 @@ body{background:#0e0c21;color:#f6f0ff}
 @media(max-width:360px){.school-header .brand-lockup img{width:27px;height:27px}}
 
 /* Personalization tokens: separate visual accents from semantic grade colors. */
+.leveli-pack-settings{width:22px;height:22px;display:block}
+.school-header .settings-button svg[hidden]{display:none!important}
+.leveli-pack-heading{width:21px;height:21px;vertical-align:middle;margin-right:7px;object-fit:contain}
 :root{--leveli-accent:#a882ff;--leveli-accent-soft:#e2cdff;--leveli-accent-dim:#514071;--leveli-accent-border:#b48cf3}
 :root:not([data-leveli-theme="light"]){color-scheme:dark}
 :root[data-leveli-theme="light"]{color-scheme:light;background:#f7f4fc;color:#302448}
@@ -436,6 +439,21 @@ window.LeveliAppearance=(()=>{
   const c=accents[profile.accent],s=document.documentElement.style;
   for(const [key,val] of Object.entries({accent:c.main,'accent-soft':c.soft,'accent-dim':c.dim,'accent-border':c.border}))s.setProperty('--leveli-'+key,val);
   document.querySelector('#profile-avatar-display').textContent=avatars[profile.avatar][1];
+  // A themed icon pack changes navigation and card headings, not the immutable Leveli brand mark.
+  const settingsButton=document.querySelector('.settings-button');
+  let settingsImage=settingsButton.querySelector('.leveli-pack-settings');
+  if(profile.pack==='classic'){if(settingsImage)settingsImage.remove();settingsButton.querySelector('svg').hidden=false}
+  else{
+   if(!settingsImage){settingsImage=document.createElement('img');settingsImage.className='leveli-pack-settings';settingsImage.alt='';settingsButton.append(settingsImage)}
+   settingsImage.src='./icons/'+profile.pack+'/settings.svg';settingsButton.querySelector('svg').hidden=true;
+  }
+  for(const [selector,name] of [['.forecast-card .card-heading h2','chart'],['.trend-card .card-heading h2','chart'],['.subjects-card .card-heading h2','book'],['.orient-heading h2','trophy']]){
+   const label=document.querySelector(selector);if(!label)continue;
+   let img=label.querySelector('.leveli-pack-heading');
+   if(profile.pack==='classic'){img?.remove();continue}
+   if(!img){img=document.createElement('img');img.className='leveli-pack-heading';img.alt='';label.prepend(img)}
+   img.src='./icons/'+profile.pack+'/'+name+'.svg';
+  }
   document.querySelector('#home-birthday-greeting').hidden=true;
   const b=profile.birthday?new Date(profile.birthday+'T12:00:00'):null,now=new Date();
   if(uid&&b&&Number.isFinite(b.getTime())&&b.getMonth()===now.getMonth()&&b.getDate()===now.getDate()){
