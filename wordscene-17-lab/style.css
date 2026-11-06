@@ -828,3 +828,74 @@ html:has(#app > header),body:has(#app > header){
 .ws-recall-v3 .ws-recall-card-tools{margin-top:3px}
 }
 @media(prefers-reduced-motion:reduce){.ws-recall-v3 button{transition:none}}
+
+/* Recall v4 · compact, accessible flip card. Scoring remains in the fixed lower bar. */
+.ws-recall-v4{justify-content:initial}
+.ws-recall-v4 .ws-recall-card{
+ flex:1 1 auto;min-height:210px;max-height:min(44dvh,360px);
+ width:100%;margin:auto 0;padding:0;overflow:visible;
+ display:block;perspective:1100px;background:transparent;border:0;box-shadow:none;
+}
+.ws-recall-flip{height:100%;width:100%;border-radius:21px;cursor:pointer;outline-offset:3px;position:relative}
+.ws-recall-flip:focus-visible{outline:3px solid #087bfa}
+.ws-recall-flip-inner{height:100%;width:100%;position:relative;transform-style:preserve-3d;transition:transform 340ms cubic-bezier(.2,.75,.3,1)}
+.ws-recall-flip.is-flipped .ws-recall-flip-inner{transform:rotateY(180deg)}
+.ws-recall-face{
+ position:absolute;inset:0;display:flex;flex-direction:column;
+ justify-content:center;align-items:center;gap:8px;
+ padding:15px 14px;min-height:0;overflow-y:auto;
+ border-radius:21px;background:#fffbf5;border:1px solid #e8decf;
+ backface-visibility:hidden;-webkit-backface-visibility:hidden;
+ text-align:center;overscroll-behavior:contain;
+}
+.ws-recall-face-back{transform:rotateY(180deg);justify-content:flex-start}
+.ws-recall-face-back::before,.ws-recall-face-back::after{content:"";flex:1 0 0;min-height:0}
+.ws-recall-face[aria-hidden="true"]{visibility:hidden;transition:visibility 0s linear 340ms}
+.ws-recall-face[aria-hidden="false"]{visibility:visible}
+.ws-recall-v4 .ws-recall-word{margin:2px 0;font-size:clamp(30px,8.5vw,40px)}
+.ws-recall-v4 .ws-recall-direction{margin:0;color:#61758e;font-size:12px}
+.ws-recall-pronunciation{display:flex;align-items:center;justify-content:center;gap:2px;min-height:44px;flex:none}
+.ws-recall-v4 .ws-recall-ipa{margin:0;font-size:16px}
+.ws-recall-v4 .ws-recall-speak{
+ width:44px;height:44px;min-height:44px;min-width:44px;
+ margin:0;padding:11px;background:transparent;border-radius:50%;
+ color:#087bfa;position:relative;
+}
+.ws-recall-v4 .ws-recall-speak::before{content:"";position:absolute;inset:7px;background:#eaf3ff;border-radius:50%}
+.ws-recall-v4 .ws-recall-speak .ws-picker-svg{width:20px;height:20px;position:relative;z-index:1}
+.ws-recall-tap-note{font-size:12px;line-height:1.35;color:#596676;margin-top:8px}
+.ws-recall-v4 .ws-recall-answer{min-height:0;background:none;padding:0;gap:3px}
+.ws-recall-v4 .ws-recall-answer strong{font-size:clamp(25px,7vw,32px)}
+.ws-recall-original{font-size:13px;color:#61758e;overflow-wrap:anywhere}
+.ws-recall-v4 .ws-recall-association{
+ margin:1px auto;min-height:44px;padding:9px 11px;
+ background:transparent;border:0;color:#0753bb;text-decoration:underline;
+ text-underline-offset:3px;font-size:14px;flex:none;
+}
+.ws-recall-v4 .ws-recall-clue{width:100%;padding:10px;margin-top:2px;flex:none;text-align:left}
+.ws-recall-v4 .ws-recall-clue-art{max-height:110px;overflow:hidden}
+.ws-recall-v4 .ws-recall-clue-art img,.ws-recall-v4 .ws-recall-clue-art svg{max-height:105px;width:auto}
+.ws-recall-v4 .ws-recall-correction{margin:2px 0;font-size:12px}
+.ws-recall-v4 .ws-recall-actions{gap:6px}
+.ws-recall-v4 .ws-recall-decisions{min-height:63px}
+.ws-recall-v4 .ws-recall-next{
+ grid-column:1 / -1;min-height:63px;border-radius:21px;
+ color:white;background:linear-gradient(#087bfa,#0046aa);font-size:18px;font-weight:700;
+}
+.ws-recall-v4 .ws-recall-session-actions{min-height:44px}
+@media(max-height:700px){
+ .ws-recall-v4 .ws-recall-card{min-height:175px;max-height:min(43dvh,270px)}
+ .ws-recall-v4 .ws-recall-face{padding:9px 10px;gap:4px}
+ .ws-recall-v4 .ws-recall-word{font-size:clamp(27px,8vw,34px)}
+ .ws-recall-v4 .ws-recall-tap-note{margin-top:3px}
+}
+@media(max-height:580px){
+ .ws-recall-v4 .ws-recall-card{min-height:156px;max-height:40dvh}
+ .ws-recall-v4 .ws-recall-face{padding:7px 9px;gap:2px}
+ .ws-recall-v4 .ws-recall-direction{font-size:11px}
+ .ws-recall-v4 .ws-recall-tap-note{font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){
+ .ws-recall-flip-inner{transition:none}
+ .ws-recall-face[aria-hidden="true"]{transition:none}
+}
