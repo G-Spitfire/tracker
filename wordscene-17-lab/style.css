@@ -729,3 +729,63 @@ html:has(#app > header),body:has(#app > header){
 .ws-selected-sheet :focus-visible{outline:3px solid #087bfa;outline-offset:2px}
 @media(max-height:590px){.ws-selected-sheet{height:min(84dvh,680px)}.ws-selected-handle{margin-bottom:7px}.ws-selected-head{padding-bottom:6px}.ws-selected-row{min-height:54px}.ws-selected-done{min-height:49px}}
 @media(prefers-reduced-motion:reduce){.ws-selected-sheet,.ws-selected-layer{animation:none;transition:none}}
+
+
+/* Recall v2: aligned with the approved memorization card and UI Kit 1.0. */
+.ws-recall-v2{display:flex;flex-direction:column;gap:9px;height:100dvh;min-height:0;max-height:100dvh;overflow:hidden;padding:max(12px,env(safe-area-inset-top)) 14px max(10px,env(safe-area-inset-bottom));color:#0c1731;background:#fdf7ed}
+.ws-recall-header{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:51px;flex:none}
+.ws-recall-header h1{font-size:clamp(22px,6vw,29px);font-weight:800;letter-spacing:-.035em;color:#0c1731;margin:0;line-height:1.18}
+.ws-recall-header small{display:block;color:#596676;font-size:12px;margin-top:3px}
+.ws-recall-count{flex:none;padding:9px 11px;background:#fffbf5;border:1px solid #e8decf;border-radius:11px;color:#0c1731;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.ws-recall-progress{flex:none;height:6px;border-radius:99px;background:#e2e6ea;overflow:hidden}
+.ws-recall-progress span{display:block;background:#087bfa;height:100%;border-radius:99px;transition:width .14s}
+.ws-recall-v2 .ws-recall-card{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:16px 15px 18px;background:#fffbf5;border:1px solid #e8decf;border-radius:21px;box-shadow:none;text-align:center}
+.ws-recall-prompt{color:#596676;font-size:13px;font-weight:650;margin-bottom:14px}
+.ws-recall-direction{color:#61758e;font-size:12px;margin-bottom:8px}
+.ws-recall-v2 .ws-recall-word{font-size:clamp(32px,9vw,42px);color:#0c1731;line-height:1.15;letter-spacing:-.018em;margin:0 0 7px;overflow-wrap:anywhere;max-width:100%}
+.ws-recall-ipa{color:#61758e;font-size:17px;margin:0 0 6px}
+.ws-recall-speak{display:grid;place-items:center;flex:none;width:48px;height:48px;min-height:48px;border-radius:50%;background:#eaf3ff;color:#087bfa;padding:11px;margin:6px auto}
+.ws-recall-speak .ws-picker-svg{height:25px;width:25px}
+.ws-recall-separator{height:1px;background:#e8decf;width:100%;margin:12px 0 14px;flex:none}
+.ws-recall-placeholder{display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;min-height:87px;margin:auto 0;color:#596676;font-size:14px}
+.ws-recall-placeholder .ws-picker-svg{height:28px;width:28px;color:#9dadc2}
+.ws-recall-answer{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:100%;min-height:92px;border-radius:18px;background:#e8f3ff;padding:15px}
+.ws-recall-answer span{font-size:13px;color:#0753bb}
+.ws-recall-answer strong{font-size:clamp(23px,7vw,30px);line-height:1.2;color:#0c1731;overflow-wrap:anywhere}
+.ws-recall-after-sound{display:flex;align-items:center;gap:8px;justify-content:center;color:#61758e;font-size:16px}
+.ws-recall-after-sound .ws-recall-speak{width:44px;height:44px;min-height:44px;margin:6px 0}
+.ws-recall-clue{width:100%;text-align:left;border-radius:16px;background:#e8f3ff;padding:13px;color:#0c1731}
+.ws-recall-clue-title{display:flex;align-items:center;gap:8px;color:#0753bb;font-size:13px;font-weight:700}
+.ws-recall-clue-title .ws-picker-svg{height:19px;width:19px}
+.ws-recall-clue p{margin:8px 0 0;font-size:14px;line-height:1.45;color:#0c1731}
+.ws-recall-clue-art{max-height:170px;overflow:hidden;margin-top:8px}
+.ws-recall-clue-art img,.ws-recall-clue-art svg{max-width:100%;max-height:140px;object-fit:contain}
+.ws-recall-actions{flex:none;display:flex;flex-direction:column;gap:8px}
+.ws-recall-v2 .ws-recall-primary{display:flex;align-items:center;justify-content:center;gap:8px;min-height:63px;border-radius:21px;background:linear-gradient(#087bfa,#0046aa);color:#fff;font-size:clamp(17px,4.7vw,20px);font-weight:700}
+.ws-recall-primary .ws-picker-svg{width:20px;height:20px;transform:rotate(180deg)}
+.ws-recall-v2 .ws-recall-hint{min-height:44px;border:1px solid #d2dfed;background:#fffbf5;color:#0753bb;border-radius:16px;font-size:15px;font-weight:650}
+.ws-recall-question{text-align:center;margin:0;font-size:15px;color:#0c1731;font-weight:700}
+.ws-recall-decisions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.ws-recall-decisions button{min-width:0;min-height:63px;padding:10px 7px;font-size:clamp(14px,4vw,17px);font-weight:700;border-radius:18px}
+.ws-recall-negative{background:#fff0ea;color:#963f31;border:1px solid #e9b9a9}
+.ws-recall-positive{background:#e8f5e7;color:#216b30;border:1px solid #b5d9b3}
+.ws-recall-guidance{font-size:12px;line-height:1.3;color:#596676;margin:0;text-align:center}
+.ws-recall-session-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px}
+.ws-recall-session-actions>.quiet{min-height:44px;padding:10px 15px;background:transparent;color:#596676}
+.ws-recall-session-actions>.primary{min-height:44px;padding:10px 15px;border-radius:13px}
+.ws-recall-session-actions .reason{flex-basis:100%;text-align:center;font-size:12px;color:#596676;margin:0}
+.ws-recall-v2 button:focus-visible{outline:3px solid #087bfa;outline-offset:2px}
+@media(max-height:700px){
+.ws-recall-v2{padding-top:max(7px,env(safe-area-inset-top));padding-bottom:max(6px,env(safe-area-inset-bottom));gap:6px}
+.ws-recall-header{min-height:43px}.ws-recall-header h1{font-size:23px}
+.ws-recall-v2 .ws-recall-card{padding:10px 11px}
+.ws-recall-prompt{margin-bottom:7px}.ws-recall-direction{margin-bottom:4px}
+.ws-recall-v2 .ws-recall-word{font-size:clamp(29px,8.5vw,36px)}
+.ws-recall-separator{margin:7px 0 10px}.ws-recall-placeholder{min-height:70px}
+.ws-recall-v2 .ws-recall-primary,.ws-recall-decisions button{min-height:60px}
+.ws-recall-guidance{font-size:11px}.ws-recall-clue{padding:9px}
+}
+@media(max-height:580px){.ws-recall-header small{display:none}.ws-recall-v2 .ws-recall-card{padding:8px}.ws-recall-prompt{margin-bottom:3px}.ws-recall-separator{margin:5px 0}.ws-recall-placeholder{min-height:45px}}
+@media(prefers-reduced-motion:reduce){.ws-recall-progress span{transition:none}}
+
+.ws-recall-association{display:block;min-height:44px;flex:none;margin:8px auto 0;padding:9px 12px;border:1px solid #d2dfed;background:#fffbf5;border-radius:13px;color:#0753bb;font-size:14px;font-weight:650}

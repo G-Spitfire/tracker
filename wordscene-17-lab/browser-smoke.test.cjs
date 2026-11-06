@@ -27,7 +27,7 @@ test('automatic 10 word selection -> memorization -> 3 two-way passes -> atomic 
  const b=boot();b.click('sources');b.click('auto');
  for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
  for(let i=0;i<10;i++)b.click('learnNext');
- for(let i=0;i<60;i++)b.click('yes');
+ for(let i=0;i<60;i++){b.click('check');b.click('checkedYes')}
  const data=JSON.parse(b.map.get('wordscene-17-lab-v1'));
  assert.equal(data.sessions.length,1);assert.equal(Object.keys(data.words).length,10);
  assert.match(b.root.html,/Занятие завершено/);
@@ -53,6 +53,41 @@ test('approved memorization UI keeps illustration visible, progress and unchange
  assert.match(b.root.html,/data-action="help"/);
 });
 
+test('recall UI v2 follows question, hint, reveal, evaluation and next card with saved state',()=>{
+ const b=boot();b.click('sources');b.click('auto');
+ for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
+ for(let i=0;i<10;i++)b.click('learnNext');
+ assert.match(b.root.html,/class="ws-recall-v2"/);
+ assert.match(b.root.html,/Проверка знаний/);
+ assert.match(b.root.html,/data-action="recallHint"/);
+ assert.match(b.root.html,/data-action="check"/);
+ assert.doesNotMatch(b.root.html,/data-action="checkedYes"/);
+ assert.doesNotMatch(b.root.html,/class="ws-recall-answer"/);
+ b.click('recallHint');
+ assert.match(b.root.html,/Ассоциация/);
+ assert.match(b.root.html,/Скрыть подсказку/);
+ b.click('recallHint');
+ assert.match(b.root.html,/Нужна подсказка/);
+ b.click('check');
+ assert.match(b.root.html,/class="ws-recall-answer"/);
+ assert.match(b.root.html,/data-action="checkedYes"/);
+ assert.match(b.root.html,/data-action="checkedNo"/);
+ assert.match(b.root.html,/data-action="help"/);
+ b.click('help');
+ assert.match(b.root.html,/ws-recall-clue-art/);
+ b.click('pause');
+ assert.match(b.root.html,/data-action="continue"/);
+ b.click('continue');
+ assert.match(b.root.html,/ws-recall-clue-art/);
+ b.click('checkedYes');
+ assert.match(b.root.html,/class="ws-recall-v2"/);
+ assert.doesNotMatch(b.root.html,/class="ws-recall-answer"/);
+ assert.match(b.root.html,/data-action="check"/);
+ const css=file('style.css');
+ assert.ok(css.includes('.ws-recall-v2{display:flex;flex-direction:column'));
+ assert.ok(css.includes('.ws-recall-decisions{display:grid;grid-template-columns:repeat(2'));
+});
+
 test('confirmed cancellation keeps persistent profile clean',()=>{
  const b=boot();b.click('sources');b.click('auto');
  for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
@@ -66,8 +101,8 @@ test('failed final profile write does not falsely display completion',()=>{
  const b=boot();b.click('sources');b.click('auto');
  for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
  for(let i=0;i<10;i++)b.click('learnNext');
- for(let i=0;i<59;i++)b.click('yes');
- b.setFailProfileWrite(true);b.click('yes');
+ for(let i=0;i<59;i++){b.click('check');b.click('checkedYes')}
+ b.click('check');b.setFailProfileWrite(true);b.click('checkedYes');
  const data=JSON.parse(b.map.get('wordscene-17-lab-v1'));
  assert.equal(data.sessions.length,0);
  assert.doesNotMatch(b.root.html,/Занятие завершено/);
@@ -119,13 +154,13 @@ test('mandatory review unlocks voluntary practice for final errors without chang
  assert.match(b.root.html,/Сначала повтори слова/);
  assert.doesNotMatch(b.root.html,/Выбери способ подбора/);
  b.click('review');
- for(let i=0;i<4;i++){b.click('no');b.click('advance');b.click('yes')}
+ for(let i=0;i<4;i++){b.click('check');b.click('checkedNo');b.click('check');b.click('checkedYes')}
  const saved=b.map.get(key);
  b.click('home');
  assert.match(b.root.html,/Повторить ещё раз[\s\S]*Если хочешь, потренируй ещё 1 трудное слово/);
  b.click('practice');
- for(let i=0;i<4;i++){b.click('no');b.click('advance');b.click('yes')}
- b.click('yes');b.click('yes');
+ for(let i=0;i<4;i++){b.click('check');b.click('checkedNo');b.click('check');b.click('checkedYes')}
+ b.click('check');b.click('checkedYes');b.click('check');b.click('checkedYes');
  assert.equal(b.map.get(key),saved);
  assert.equal(b.map.has('wordscene-17-lab-active-v1'),false);
  b.click('home');
