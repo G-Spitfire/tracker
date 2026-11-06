@@ -1,51 +1,47 @@
 <!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0e0c21"><title>Левели</title><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" type="image/svg+xml" href="./brand/app-icon.svg"><link rel="apple-touch-icon" href="./brand/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Левели">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><style>
-:root{font-family:Manrope,system-ui,-apple-system,sans-serif;color:#45365c;background:#f9f5fc}
+:root{font-family:Manrope,system-ui,-apple-system,sans-serif;}
 *{box-sizing:border-box}
 body{margin:0}
 .app{max-width:540px;min-height:100dvh;margin:auto}
-.content{padding:18px 16px max(35px,env(safe-area-inset-bottom))}
+.content{}
 section[hidden],[hidden]{display:none!important}
-.school-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin:6px 0 18px}
-.school-header h1{font-size:27px;margin:8px 0 3px}
-.school-header p{font-size:14px;color:#796d89;margin:0}
-.eyebrow{font-size:12px;color:#8064aa;font-weight:750}
-.settings-button{border:1px solid #e7dcf2;border-radius:15px;background:#fff;padding:10px 14px;font-size:23px;color:#65548b;cursor:pointer}
-.card{border-radius:20px;background:#fff;padding:18px;margin-top:12px;border:1px solid #f0e8f7;box-shadow:0 4px 16px #75569a0c}
-.card h2{font-size:17px;margin:0 0 9px}
+.school-header{display:flex;justify-content:space-between;gap:12px;}
+.school-header h1{}
+.school-header p{font-size:14px;margin:0}
+.eyebrow{}
+.settings-button{border:1px solid #e7dcf2;padding:10px 14px;font-size:23px;cursor:pointer}
+.card{}
+.card h2{}
 .card p{color:#796d89;line-height:1.5;margin:0;font-size:14px}
-
 
 .muted{color:#837790;font-size:13px}
 .section-title{font-size:23px;margin:12px 0 20px}
-.btn{margin-top:14px;border:1px solid #7654d4;background:#8061e5;color:#fff;border-radius:12px;padding:12px 16px;font:750 14px Manrope,system-ui,sans-serif;cursor:pointer}
-.btn.secondary{background:#fff;color:#7654d4}
+.btn{margin-top:14px;border:1px solid #7654d4;border-radius:12px;padding:12px 16px;font:750 14px Manrope,system-ui,sans-serif;cursor:pointer}
+.btn.secondary{}
 .btn:active{transform:translateY(1px)}
 .btn:focus-visible,.subject-row:focus-visible,.settings-button:focus-visible,summary:focus-visible{outline:3px solid #9c82f1;outline-offset:2px}
 .choice-buttons{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
-.subject-row{display:block;width:100%;text-align:left;padding:15px 5px;border:0;border-top:1px solid #eee;background:transparent;color:inherit;font:600 14px Manrope,system-ui,sans-serif;line-height:1.6;cursor:pointer}
-
+.subject-row{width:100%;text-align:left;border-top:1px solid #eee;color:inherit;font:600 14px Manrope,system-ui,sans-serif;line-height:1.6;cursor:pointer}
 
 
 #school-form label{display:block;margin-top:14px;font-size:13px;font-weight:700}
 #school-form input{display:block;width:100%;padding:12px;margin-top:7px;border:1px solid #ddd;border-radius:12px;font:inherit}
-#profile-actions{display:flex;flex-wrap:wrap;gap:8px}
-#school-status{margin:0 0 10px}
-@media(max-width:360px){.content{padding:14px 12px 24px}}
+#profile-actions{flex-wrap:wrap;gap:8px}
+#school-status{}
+@media(max-width:360px){.content{}}
 
 /* Readable school dashboard */
 
 
-
-#school-subjects{display:grid;gap:9px;margin-top:14px}
-.subject-row{border:1px solid #ece5f4;border-radius:15px;padding:14px 13px;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:78px;background:#fff;box-shadow:0 1px 4px #45365c08;transition:background .15s ease}
-.subject-row:hover{background:#faf7ff}
-.subject-row__main{display:grid;gap:5px;min-width:0;flex:1}
-.subject-row__name{font-weight:800;font-size:14px;line-height:1.4;overflow-wrap:anywhere}
-.subject-row__meta{font-size:12px;color:#756783;line-height:1.5;font-weight:600}
+#school-subjects{display:grid;}
+.subject-row{border-radius:15px;justify-content:space-between;transition:background .15s ease}
+.subject-row:hover{}
+.subject-row__main{display:grid;}
+.subject-row__name{line-height:1.4;}
+.subject-row__meta{line-height:1.5;font-weight:600}
 .subject-row__meta.attention{color:#825b19}
-
 
 
 
@@ -53,70 +49,68 @@ section[hidden],[hidden]{display:none!important}
 #school-status{line-height:1.5}
 @media(prefers-reduced-motion:reduce){.subject-row{transition:none}}
 
-:root{color:#3c276b;background:#f3efff}
-.content{padding:20px 16px max(34px,env(safe-area-inset-bottom))}
-.school-header{margin:5px 0 16px}.school-header h1{font-size:29px;color:#3c276b}.school-header p{color:#8775a5}
-.eyebrow{color:#8b70e4;letter-spacing:.13em}
-.settings-button{border-radius:999px;color:#845be0;box-shadow:0 5px 18px #6646ae10}
-.card{border:0;border-radius:23px;padding:19px;margin-top:15px;box-shadow:0 8px 26px #7044a80d}
+:root{}
+.content{}
+.school-header{}.school-header h1{}.school-header p{}
+.eyebrow{}
+.settings-button{border-radius:999px;}
+.card{margin-top:15px;}
 .card h2{font-size:19px;line-height:1.3;color:#3c276b;margin:0}
 .card-heading{display:flex;justify-content:space-between;align-items:center;gap:8px}
-
 
 .forecast-chart{width:51%;aspect-ratio:1;max-width:205px;position:relative;flex:none}
 .forecast-chart svg{width:100%;height:100%;overflow:visible}
 .forecast-center{position:absolute;inset:25%;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;white-space:nowrap}
 .forecast-center strong{font-size:clamp(24px,7vw,37px);font-weight:800;letter-spacing:-.06em;color:#3c276b;font-variant-numeric:tabular-nums}
 .forecast-center span{font-size:10px;font-weight:700;color:#8775a5}
-.forecast-legend{flex:1;display:grid;gap:6px;min-width:0}
+.forecast-legend{flex:1;min-width:0}
 .forecast-legend button{display:flex;align-items:center;gap:7px;width:100%;border:1px solid transparent;background:transparent;color:#3c276b;font:700 12px Manrope,system-ui,sans-serif;padding:8px 5px;border-radius:12px;cursor:pointer;text-align:left}
-.forecast-legend button[aria-pressed=true]{background:#eee6ff;border-color:#d4c3fc}
-.forecast-legend .legend-dot{width:10px;height:10px;flex:none;border-radius:50%}
-.forecast-legend .legend-label{flex:1;min-width:0}.forecast-legend .legend-count{font-size:15px;font-weight:800}
+.forecast-legend button[aria-pressed=true]{}
+.forecast-legend .legend-dot{flex:none;border-radius:50%}
+.forecast-legend .legend-label{flex:1;}.forecast-legend .legend-count{font-weight:800}
 #school-analytics{font-size:12px;line-height:1.5;margin-top:8px}
 #school-status{font-size:11px;color:#9185a7;margin:6px 0 0}
-.trend-card{background:linear-gradient(140deg,#fff,#f9f5ff)}
-.trend-change{font-size:12px;color:#3f946a;font-weight:800}
+.trend-card{}
+.trend-change{font-weight:800}
 #school-trend{margin-top:10px}
-.trend-axis{display:flex;justify-content:space-between;font-size:11px;color:#897fa0;margin-top:2px}
+.trend-axis{display:flex;justify-content:space-between;font-size:11px;margin-top:2px}
 
-.orient-heading{margin:22px 2px 10px}.orient-heading h2{font-size:20px;margin:0;color:#3c276b}.orient-heading p{font-size:12px;color:#897ca2;margin:2px 0}
-.orient-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
-.orient-panel{border-radius:19px;padding:13px 10px;min-width:0}
-.orient-good{background:#e4f7ed}.orient-attention{background:#fff0d9}
-.orient-title{font-size:13px;font-weight:800;margin-bottom:10px;color:#376d51}.orient-attention .orient-title{color:#92612c}
-.orient-link{display:flex;flex-direction:column;gap:2px;text-align:left;background:transparent;border:0;border-top:1px solid #ffffff8c;padding:9px 2px;width:100%;min-width:0;font:700 12px Manrope,system-ui,sans-serif;color:#403452;cursor:pointer}
+.orient-heading{}.orient-heading h2{margin:0;color:#3c276b}.orient-heading p{font-size:12px;color:#897ca2;margin:2px 0}
+.orient-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);}
+.orient-panel{min-width:0}
+.orient-good{}.orient-attention{}
+.orient-title{font-weight:800;margin-bottom:10px;}.orient-attention .orient-title{}
+.orient-link{display:flex;flex-direction:column;text-align:left;background:transparent;border:0;border-top:1px solid #ffffff8c;width:100%;min-width:0;font:700 12px Manrope,system-ui,sans-serif;cursor:pointer}
 .orient-link small{font-size:11px;color:#6c6480;font-weight:600}
-.orient-empty{font-size:12px;color:#776e87}
+.orient-empty{font-size:12px;}
 .subjects-card{margin-top:17px}
 #school-subjects{margin-top:12px}
-.subject-row{border:1px solid #eee8f9;min-height:72px}
-.subject-row__name{color:#3c276b}
+.subject-row{}
+.subject-row__name{}
 
 .subject-row:focus-visible,.orient-link:focus-visible,.forecast-legend button:focus-visible{outline:3px solid #9778f1;outline-offset:2px}
 .profile-period{padding-top:16px;margin-top:16px;border-top:1px solid #eee6f6}
 .profile-period h2{font-size:17px;margin:0 0 6px}
 .profile-period .btn{margin-top:9px}
-@media(max-width:360px){.forecast-chart{width:48%}.forecast-legend button{font-size:11px;padding:7px 2px}.card{padding:15px}.orient-panel{padding:11px 8px}}
-.grade-delta{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:800}
-.grade-delta.up{color:#23835b}.grade-delta.down{color:#c44853}.grade-delta.flat{color:#7d728c}
+@media(max-width:360px){.forecast-chart{width:48%}.forecast-legend button{font-size:11px;padding:7px 2px}.card{}.orient-panel{}}
+.grade-delta{display:inline-flex;align-items:center;gap:4px;font-weight:800}
+.grade-delta.up{}.grade-delta.down{}.grade-delta.flat{}
 
-
-.detail-kpi{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
-.detail-kpi>div{background:#f3efff;padding:13px;border-radius:14px}
-.detail-kpi strong{display:block;font-size:24px;color:#52369b}
-.detail-kpi span{font-size:12px;color:#796d89}
-.detail-goal{background:#e9f7ef;border-radius:14px;padding:13px;margin:12px 0;font-size:13px;line-height:1.5;color:#275d45}
-.detail-chart-scroll{overflow-x:auto;max-width:100%;overscroll-behavior-x:contain}
-.detail-chart-scroll svg{display:block;height:165px}
-.grade-entry{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid #eee8f9;font-size:13px}
-.grade-entry__value{font-size:19px;font-weight:800;color:#6043b4}
-.detail-toggle{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}
-.detail-toggle button{padding:9px 12px;border-radius:10px;border:1px solid #d8c9f0;background:#fff;color:#513889;font:750 12px Manrope,system-ui;cursor:pointer}
-.detail-toggle button[aria-pressed=true]{background:#e6d9fb}
-.school-empty{padding:22px 10px;text-align:center;font-weight:700;color:#756783}
+.detail-kpi{display:grid;}
+.detail-kpi>div{border-radius:14px}
+.detail-kpi strong{display:block;}
+.detail-kpi span{}
+.detail-goal{margin:12px 0;}
+.detail-chart-scroll{overscroll-behavior-x:contain}
+.detail-chart-scroll svg{display:block;}
+.grade-entry{display:flex;justify-content:space-between;border-bottom:1px solid #eee8f9;font-size:13px}
+.grade-entry__value{font-weight:800;}
+.detail-toggle{flex-wrap:wrap;}
+.detail-toggle button{border:1px solid #d8c9f0;font:750 12px Manrope,system-ui;cursor:pointer}
+.detail-toggle button[aria-pressed=true]{}
+.school-empty{padding:22px 10px;text-align:center;font-weight:700;}
 #school-freshness{font-size:11px;color:#85789a;margin-top:7px}
-#school-freshness[data-state=error]{color:#b45155}
+#school-freshness[data-state=error]{}
 
 /* Approved Leveli dark dashboard (2026-11-06). Works for all three existing screens. */
 :root{color:#f6f0ff;background:#0e0c21;color-scheme:dark}
@@ -198,15 +192,15 @@ body{background:#0e0c21;color:#f6f0ff}
 #school-form input{color:#fff;background:#29223f;border-color:#54436b}
 .profile-period{border-top-color:#44365e}
 .choice-buttons button{background:#302747;color:#e3d8f4;border-color:#55446f}
-.detail-kpi>div{background:#302747}.detail-kpi strong,.grade-entry__value{color:#c5a8ff}
-.detail-kpi span{color:#cabcdc}.detail-goal{background:#19392f;color:#a5e8c5}
+.detail-kpi>div{}.detail-kpi strong,.grade-entry__value{color:#c5a8ff}
+.detail-kpi span{}.detail-goal{background:#19392f;color:#a5e8c5}
 .detail-toggle button{background:#29223f;color:#ebdcff;border-color:#604a83}
-.detail-toggle button[aria-pressed=true]{background:#483267}
-.grade-entry{border-bottom-color:#46365e}
+.detail-toggle button[aria-pressed=true]{}
+.grade-entry{}
 .school-empty{color:#ac9dc5}
 @media(max-width:360px){.content{padding:12px 10px 24px}.card{padding:12px}.donut-panel{padding:6px}.orient-panel{padding:10px 7px}.subject-row{padding:10px 7px;gap:4px}.subject-row__number{width:43px}.subject-row__grade{width:38px}.subject-row__dynamics{width:51px}}
 /* Subject details: compact, readable layout on phones. */
-#school-subject-detail{min-width:0;overflow:hidden;padding:17px 15px 21px}
+#school-subject-detail{min-width:0;overflow:hidden;}
 .detail-header{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:9px 12px}
 .detail-back{grid-column:1/-1;justify-self:start;margin:0 0 4px;padding:10px 13px;font-size:12px;min-height:40px}
 .detail-title{min-width:0;margin:0!important;font-size:clamp(19px,5.5vw,25px)!important;line-height:1.25;overflow-wrap:anywhere}
@@ -266,7 +260,7 @@ body{background:#0e0c21;color:#f6f0ff}
 .subject-detail-active>.school-header{display:none}
 .subject-detail-active #school-subject-detail{margin-top:0}
 #school-subject-detail .detail-chart-scroll{overflow-x:hidden;width:100%;min-width:0}
-#school-subject-detail .detail-chart-scroll svg{width:100%;max-width:100%;height:auto;aspect-ratio:var(--subject-chart-ratio, 1.7);display:block}
+#school-subject-detail .detail-chart-scroll svg{width:100%;max-width:100%;aspect-ratio:var(--subject-chart-ratio, 1.7);display:block}
 #school-subject-detail .detail-chart-scroll svg{height:185px}
 #school-subject-detail .detail-chart-caption{font-size:11px;line-height:1.55;color:#b9a9d3;margin:9px 3px 2px}
 #school-subject-detail .grade-entry{min-height:0;padding:7px 2px;gap:8px}
@@ -334,7 +328,7 @@ body{background:#0e0c21;color:#f6f0ff}
 :root[data-leveli-theme="light"] .orient-link__metrics strong{color:#302448}
 :root[data-leveli-theme="light"] .grade-entry span{color:#574568}
 :root[data-leveli-theme="light"] #school-subject-detail{background:#f7f4fc}
-:root[data-leveli-theme="light"] #school-subject-detail .detail-hero{background:linear-gradient(145deg,#efe3ff,#f9f4ff);border-color:#d9c5f3}
+:root[data-leveli-theme="light"] #school-subject-detail .detail-hero{}
 :root[data-leveli-theme="light"] #school-subject-detail .detail-hero-label,:root[data-leveli-theme="light"] #school-subject-detail .detail-hero-hint,:root[data-leveli-theme="light"] #school-subject-detail .detail-hero-score{color:#302448}
 :root[data-leveli-theme="light"] #school-subject-detail h3,:root[data-leveli-theme="light"] #school-subject-detail .detail-kpi strong{color:#302448}
 :root[data-leveli-theme="light"] #school-subject-detail .detail-kpi span{color:#746489}
@@ -428,7 +422,7 @@ body{background:#0e0c21;color:#f6f0ff}
 :root .help-btn{width:44px;height:44px;min-width:44px;min-height:44px;display:grid;place-items:center}
 :root .btn{min-height:46px}
 :root .btn:not(.secondary){min-height:48px}
-:root .detail-toggle button,:root #school-period-buttons button{min-height:44px}
+:root .detail-toggle button,:root #school-period-buttons button{}
 :root .forecast-legend button{min-height:44px}
 :root .orient-link{min-height:44px}
 :root .leveli-pack-heading{width:20px;height:20px;flex:none}
@@ -508,12 +502,10 @@ body{background:#0e0c21;color:#f6f0ff}
 
 /* DS v2: icon role and hit area are separate. Unified interactive geometry. */
 :root{
- --ds-icon:20px;--ds-icon-lg:24px;--ds-hit:44px;
- --ds-button-height:48px;--ds-control-height:44px;
- --ds-radius-card:20px;--ds-radius-control:12px;
+ --ds-icon:20px;--ds-icon-lg:24px;--ds-control-height:44px;
  --ds-space-1:4px;--ds-space-2:8px;--ds-space-3:12px;--ds-space-4:16px;--ds-space-5:24px;--ds-space-6:32px;
 }
-:root .b3-tile-icon svg{width:var(--ds-icon-lg);height:var(--ds-icon-lg);fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+:root .b3-tile-icon svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 :root .b3-home-btn{font-size:var(--ds-icon-lg)}
 :root .b3-settings .b3-tile{border-radius:var(--ds-radius-card)}
 :root #school-current-period,:root #profile-remove-avatar,:root #profile-upload-avatar,:root .profile-actions .btn{min-height:var(--ds-hit)}
@@ -534,7 +526,7 @@ body{background:#0e0c21;color:#f6f0ff}
 :root .b3-change-avatar[hidden],:root .b3-extra button[hidden]{display:none!important}
 @media(max-width:360px){
  :root .b3-tile{padding:12px;min-height:124px}
- :root .b3-tiles{gap:8px}
+ :root .b3-tiles{}
  :root .b3-settings .b3-tile strong{font-size:12px}
  :root .b3-dialog .personal-choice-grid,:root .b3-dialog .personal-color-grid{gap:5px}
 }
@@ -543,8 +535,8 @@ body{background:#0e0c21;color:#f6f0ff}
 /* Transparent character portraits load only when the optional, versioned assets exist.
    Until then the already-shipped WebP atlas remains the intact fallback. */
 .b3-avatar-stand:has(.avatar-illustration.cutout-ready){background:transparent;border:0;box-shadow:none;padding:0}
-.b3-avatar-stand .profile-avatar:has(.avatar-illustration.cutout-ready){overflow:visible;background:transparent;border:0}
-.b3-avatar-stand .avatar-illustration.cutout-ready{position:absolute;top:-24%;left:-10%;width:120%;height:120%;max-width:none;aspect-ratio:auto;border-radius:0;background-size:contain;background-repeat:no-repeat;background-color:transparent;filter:drop-shadow(0 8px 12px #0b071d55)}
+.b3-avatar-stand .profile-avatar:has(.avatar-illustration.cutout-ready){background:transparent;border:0}
+.b3-avatar-stand .avatar-illustration.cutout-ready{position:absolute;top:-24%;left:-10%;width:120%;height:120%;max-width:none;aspect-ratio:auto;border-radius:0;background-size:contain;background-repeat:no-repeat;filter:drop-shadow(0 8px 12px #0b071d55)}
 .b3-hero-space:has(.avatar-illustration.cutout-ready){padding-top:125px}
 .personal-avatar-option .avatar-illustration.cutout-ready{background-size:contain;background-repeat:no-repeat;background-color:transparent;border-radius:0}
 :root[data-leveli-theme="light"] .b3-avatar-stand:has(.avatar-illustration.cutout-ready){background:transparent;box-shadow:none}
