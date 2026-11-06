@@ -6,9 +6,9 @@
 
 - [x] Синтаксис `app.js`, `engine.js`, `seed.js`, `topics.js`, `legacy-art.js`, `accounts.js` проверен в JS-движке.
 - [x] 11/11 изолированных регрессионных сценариев прошли (эмуляция Node.js test/assert).
-- [ ] Запустить **настоящий** `node --test wordscene-17-lab/audit-regression.test.cjs`.
-- [ ] Проверить GitHub Actions: workflow `.github/workflows/wordscene-audit.yml` добавлен, подтверждённого запуска нет.
-- [ ] Выполнить существующие тесты проекта, если они есть; проверить отсутствие регрессий сохранения и расписания.
+- [x] Запущен настоящий Node.js-тест через GitHub Actions «WordScene audit regression» (run #14, success). После последующих исправлений требуется повторный прогон.
+- [x] GitHub Actions workflow `.github/workflows/wordscene-audit.yml` выполнился успешно (run #14).
+- [ ] Общий workflow «Family applications checks» завершился с ошибками (run #251): обнаружены устаревшие ожидания в тестах и ReferenceError при ручном выборе. Исправления отправлены; повторный прогон ещё не подтверждён.
 
 ## 2. Функциональная ручная проверка
 
@@ -41,3 +41,9 @@
 - [ ] Только после этого — merge PR в `main` и smoke test опубликованного GitHub Pages.
 
 **Текущий вердикт: NOT READY TO MERGE.** Никаких изменений опубликованного приложения до завершения пунктов выше.
+
+## Результаты CI и исправления
+
+- GitHub Actions run `42245288572` («WordScene audit regression») — **success**.
+- GitHub Actions run `42245288431` («Family applications checks») — **failure**: Node-тесты ожидали старое имя действия словаря и старый момент увеличения счётчика; браузерные тесты выявили вызов удалённой функции `refreshManualScroll`.
+- В ветке исправлены вызов удалённой функции, соответствующие устаревшие тестовые ожидания и сообщение ошибки лимита; добавлен регрессионный тест. **Результат повторного CI ещё неизвестен**.
