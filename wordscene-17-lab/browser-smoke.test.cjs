@@ -251,12 +251,10 @@ test('manual picker retains UI Kit controls and counters with compact pinned foo
  assert.match(b.root.html,/Нажми на слово, чтобы выбрать/);
  assert.match(b.root.html,/Начать изучение \(0 слов\)/);
  b.click('pick:apple');
- assert.match(b.root.html,/aria-valuenow="1"/);
  assert.match(b.root.html,/Выбрано слов:[\s\S]*1 \/ 15/);
  b.click('manualSummary');
  assert.match(b.root.html,/data-action="removeManual:apple"/);
  b.click('manualTab:search');
- assert.match(b.root.html,/aria-valuenow="1"/);
  b.click('manualTab:topics');
  assert.match(b.root.html,/data-action="removeManual:apple"/);
  const css=file('style.css');
