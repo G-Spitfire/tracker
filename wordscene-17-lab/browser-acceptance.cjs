@@ -193,16 +193,16 @@ async function run(name, browserType, contextOptions) {
   assert.equal(await page.locator('[data-action="startManual"]').isEnabled(),true);
   await page.locator('[data-action="startManual"]').click();
   await checkMemorization(page,snap);
-  if(await page.locator('.ws-recall-v3').count()){
+  if(await page.locator('.ws-recall-v4').count()){
    const measure=()=>page.evaluate(()=>{
-    const controls=['.ws-recall-decisions','.ws-recall-translation','.ws-recall-session-actions'];
-    const bounds=controls.map(selector=>{
+    const selectors=['.ws-recall-decisions','.ws-recall-session-actions'];
+    const bounds=selectors.map(selector=>{
      const r=document.querySelector(selector)?.getBoundingClientRect();
      return r?{x:r.x,y:r.y,width:r.width,height:r.height}:null;
     });
     const card=document.querySelector('.ws-recall-card').getBoundingClientRect();
-    const root=document.querySelector('.ws-recall-v3').getBoundingClientRect();
-    return {bounds,card:{top:card.top,bottom:card.bottom,height:card.height},root:{height:root.height,bottom:root.bottom},viewport:innerHeight};
+    const root=document.querySelector('.ws-recall-v4').getBoundingClientRect();
+    return {bounds,card:{top:card.top,bottom:card.bottom,height:card.height},root:{bottom:root.bottom},viewport:innerHeight};
    });
    const checkPositions=(before,after,label)=>{
     for(let i=0;i<before.bounds.length;i++)for(const k of ['x','y','width','height']){
@@ -210,52 +210,53 @@ async function run(name, browserType, contextOptions) {
     }
    };
    const before=await measure();
-   const buttonKit=await page.evaluate(()=>[...document.querySelectorAll('.ws-recall-decisions button')].map(el=>({
-    height:el.getBoundingClientRect().height,
-    radius:parseFloat(getComputedStyle(el).borderTopLeftRadius)
+   assert.ok(before.card.height>=156,'compact recall card needs usable height');
+   assert.ok(before.card.height<=Math.min(.45*before.viewport,361),'recall card should stay compact');
+   assert.ok(Math.abs(before.root.bottom-before.viewport)<3,'recall should fill viewport');
+   const grades=await page.locator('.ws-recall-decisions button').evaluateAll(els=>els.map(el=>({
+    height:el.getBoundingClientRect().height,radius:parseFloat(getComputedStyle(el).borderTopLeftRadius)
    })));
-   assert.equal(buttonKit.length,2,'both scoring buttons are present');
-   for(const item of buttonKit){
-    assert.ok(item.height>=63,'scoring button should be at least 63px high: '+JSON.stringify(item));
-    assert.ok(Math.abs(item.radius-21)<=1,'scoring button should use 21px Paper radius');
-   }
-   assert.ok(before.card.height>100,'recall card must use available height');
-   assert.ok(Math.abs(before.root.bottom-before.viewport)<3,'recall screen should fill viewport');
-   assert.ok(await page.locator('[data-action="yes"]').isVisible(),'direct success is visible');
-   assert.ok(await page.locator('[data-action="no"]').isVisible(),'direct failure is visible');
-   assert.ok(await page.locator('[data-action="check"]').isVisible(),'optional translation is visible');
-   assert.equal(await page.locator('.ws-recall-answer').count(),0,'translation initially hidden');
-   await page.locator('[data-action="recallHint"]').click();
-   assert.ok(await page.locator('.ws-recall-clue').count()>0,'hint available');
-   checkPositions(before,await measure(),'show hint');
-   await page.locator('[data-action="recallHint"]').click();
-   checkPositions(before,await measure(),'hide hint');
-   await page.locator('[data-action="check"]').click();
-   assert.equal(await page.locator('.ws-recall-answer').count(),1);
+   assert.equal(grades.length,2);
+   grades.forEach(g=>{assert.ok(g.height>=63,'63px grading buttons');assert.ok(Math.abs(g.radius-21)<1,'21px grading radius')});
+   assert.ok(await page.locator('[data-action="yes"]').isVisible());
+   assert.ok(await page.locator('[data-action="no"]').isVisible());
+   assert.equal(await page.locator('.ws-recall-face-back[aria-hidden="true"]').count(),1);
+   assert.equal(await page.locator('[data-action="help"]:not([inert] *)').count(),0);
+   const sound=await page.locator('.ws-recall-pronunciation').first().evaluate(el=>{
+    const r=el.getBoundingClientRect(),btn=el.querySelector('button').getBoundingClientRect();
+    return {height:btn.height,inside:btn.top>=r.top-1&&btn.bottom<=r.bottom+1};
+   });
+   assert.ok(sound.height>=44&&sound.inside,'inline sound with 44px touch target');
+   await page.locator('[data-flip-card]').click({position:{x:20,y:20}});
+   assert.equal(await page.locator('.ws-recall-face-back[aria-hidden="false"]').count(),1,'tap opens translation');
    checkPositions(before,await measure(),'show translation');
    await snap('recall-optional-translation');
-   await page.locator('[data-action="hideTranslation"]').click();
-   assert.equal(await page.locator('.ws-recall-answer').count(),0);
+   await page.locator('[data-action="help"]').click();
+   assert.ok(await page.locator('.ws-recall-clue-art').count()>0,'association and image appear only after translation');
+   checkPositions(before,await measure(),'show association');
+   await snap('recall-association');
+   await page.locator('[data-action="help"]').click();
+   await page.locator('[data-flip-card]').click({position:{x:20,y:20}});
+   assert.equal(await page.locator('.ws-recall-face-front[aria-hidden="false"]').count(),1,'tap returns front');
    checkPositions(before,await measure(),'hide translation');
    await page.locator('[data-action="pause"]').click();
    const continueStyle=await page.locator('.ws-recall-session-actions > .primary').evaluate(el=>({
     text:el.textContent.trim(),background:getComputedStyle(el).backgroundImage
    }));
-   assert.equal(continueStyle.text,'Продолжить','pause should show Continue');
-   assert.ok(continueStyle.background.includes('linear-gradient'),'Continue must use the Paper blue gradient');
+   assert.equal(continueStyle.text,'Продолжить');
+   assert.ok(continueStyle.background.includes('linear-gradient'),'Continue is Paper blue');
    await page.locator('[data-action="continue"]').click();
-   checkPositions(before,await measure(),'resume recall');
+   checkPositions(before,await measure(),'resume');
    await page.locator('[data-action="no"]').click();
-   assert.equal(await page.locator('.ws-recall-answer').count(),1);
-   assert.ok(await page.locator('[data-action="yes"]').count()===0,'after failure grading is blocked');
-   assert.equal(await page.locator('[data-action="advance"]').count(),1,'failed word needs corrective continuation');
-   checkPositions(before,await measure(),'failed answer');
+   assert.equal(await page.locator('.ws-recall-face-back[aria-hidden="false"]').count(),1,'failure reveals back');
+   assert.equal(await page.locator('[data-action="yes"]').count(),0,'cannot score again after error');
+   assert.equal(await page.locator('[data-action="advance"]').count(),1,'next replaces scoring buttons');
+   checkPositions(before,await measure(),'failure');
    await snap('recall-corrective-answer');
    await page.locator('[data-action="advance"]').click();
-   // One mistake creates an extra remediation round; finish it without changing the scoring engine.
    let guard=0;
-   while(await page.locator('.ws-recall-v3').count()){
-    if(++guard>80)throw new Error('recall loop did not complete after direct scoring');
+   while(await page.locator('.ws-recall-v4').count()){
+    if(++guard>80)throw new Error('recall loop did not complete');
     await page.locator('[data-action="yes"]').click();
    }
   }else if(await page.locator('.ws-recall-v2').count()){
