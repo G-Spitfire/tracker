@@ -588,6 +588,8 @@ async function load(){
 }
 document.getElementById('school-form').addEventListener('submit',async e=>{e.preventDefault();error.textContent='';try{await setPersistence(auth,browserLocalPersistence);await signInWithEmailAndPassword(auth,document.getElementById('school-email').value.trim(),document.getElementById('school-password').value);document.getElementById('school-password').value=''}catch(err){showError(err)}});
 document.getElementById('school-refresh').addEventListener('click',load);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&auth.currentUser)load()});window.addEventListener('online',load);
+// Sync status updates may arrive independently of grade uploads.
+setInterval(()=>{if(!document.hidden&&auth.currentUser)load()},60000);
 document.getElementById('school-logout').addEventListener('click',()=>signOut(auth).catch(showError));
 onAuthStateChanged(auth,user=>{if(retryHandle){clearTimeout(retryHandle);retryHandle=null}++loadGeneration;firestoreProfileName='';clearSchool();login.hidden=!!user;results.hidden=!user;error.textContent='';updateIdentity(user);if(user){loadProfile(user);load()}else {clearSchool()}},showError);
 </script></body></html>
