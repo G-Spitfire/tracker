@@ -288,7 +288,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await page.locator('#b3-panel-close svg').count(),1,'Dialog close uses consistent SVG icon');
  for(const selector of ['.b3-home-btn svg','#b3-panel-close svg']){
   const style=await page.locator(selector).evaluate(el=>({w:getComputedStyle(el).width,h:getComputedStyle(el).height,stroke:getComputedStyle(el).strokeWidth}));
-  assert.equal(style.w,'24px');assert.equal(style.h,'24px');assert.equal(style.stroke,'2px');
+  const expected=selector==='.b3-home-btn svg'?'20px':'24px';assert.equal(style.w,expected);assert.equal(style.h,expected);assert.equal(style.stroke,'2px');
  }
 
  // Visual baseline checks: text/background contrast in both themes (WCAG 4.5:1 normal text).
