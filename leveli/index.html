@@ -265,7 +265,8 @@ body{background:#0e0c21;color:#f6f0ff}
 /* Subject details are a standalone view, without the home greeting and settings. */
 .subject-detail-active>.school-header{display:none}
 .subject-detail-active #school-subject-detail{margin-top:0}
-#school-subject-detail .detail-chart-scroll{overflow-x:hidden}
+#school-subject-detail .detail-chart-scroll{overflow-x:hidden;width:100%;min-width:0}
+#school-subject-detail .detail-chart-scroll svg{width:100%;max-width:100%;height:auto;aspect-ratio:var(--subject-chart-ratio, 1.7);display:block}
 #school-subject-detail .detail-chart-scroll svg{height:185px}
 #school-subject-detail .detail-chart-caption{font-size:11px;line-height:1.55;color:#b9a9d3;margin:9px 3px 2px}
 #school-subject-detail .grade-entry{min-height:0;padding:7px 2px;gap:8px}
@@ -594,7 +595,9 @@ function openSubject(name,grades){
   // The marks view shows only the most recent bars fitting the phone: no swipe needed.
   const capacity=Math.max(3,Math.floor((chartHost.clientWidth-32)/36));
   const plotted=chartMode==='marks'?dated.slice(-capacity):dated;
-  const width=chartMode==='marks'?Math.max(250,chartHost.clientWidth-20):Math.max(320,dated.length*36+34),height=185,baseY=151;
+  // Keep the full cumulative-average series within the visible card.
+  // The bars already show only the most recent marks that fit.
+  const width=Math.max(1,chartHost.clientWidth-16),height=185,baseY=151;
   const svg=svgEl('svg',{viewBox:'0 0 '+width+' '+height,width,height,role:'img','aria-label':chartMode==='average'?'Накопительный средний балл':'Оценки по порядку'});
   const defs=svgEl('defs');
   const glow=svgEl('filter',{id:'leveli-subject-line-glow',x:'-50%',y:'-100%',width:'200%',height:'300%'});
@@ -639,6 +642,7 @@ function openSubject(name,grades){
    const caption=svgEl('text',{x,y:177,'text-anchor':i===0?'start':i===plotted.length-1?'end':'middle',fill:'#a99bc9','font-size':10});
    caption.textContent=plotted[i].date.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'});svg.append(caption);
   }
+  chartHost.style.setProperty('--subject-chart-ratio',String(width/height));
   chartHost.append(svg);
   const existing=detail.querySelector('.detail-chart-caption');if(existing)existing.remove();
   if(chartMode==='marks'){
@@ -692,31 +696,33 @@ periodSelect.value=[...periodSelect.options].some(o=>o.value===selected)?selecte
 
 // syncStatus (string or {state, retryCount}) is written by the Mac uploader.
 // Missing/old status must never be shown as a confirmed success.
+// Child-facing status describes the age of the grades, not the Mac's retry machinery.
+// A failed background attempt leaves the previously collected grades intact.
 function showDiarySyncTime(data,fromCache=false){
  const fresh=document.getElementById('school-freshness');
  const info=data?.syncStatus;
  const rawState=typeof info==='string'?info:(info?.state??info?.status??'');
  const state=String(rawState).toLowerCase();
- const count=Number(info?.retryCount??data?.syncRetryCount??0);
  const last=data?.lastSuccessfulSyncAt??data?.lastSyncAt??data?.syncedAt;
  const value=last&&typeof last==='object'&&typeof last.toDate==='function'?last.toDate():last;
  const parsed=(typeof value==='string'||typeof value==='number'||value instanceof Date)?new Date(value):null;
  const valid=parsed&&!Number.isNaN(parsed.getTime());
  const age=valid?Date.now()-parsed.getTime():Infinity;
- const dateLabel=valid?parsed.toLocaleString('ru-RU'):'время не указано';
- let label='Статус синхронизации неизвестен',symbol='?',kind='unknown';
- if(state==='failed'||state==='error'){
-   if(count>=1){label='Не удалось обновить оценки · последнее успешное обновление: '+dateLabel;symbol='✕';kind='error'}
-   else {label='Сбой синхронизации · ожидаем повторную попытку';symbol='↻';kind='waiting'}
- }else if(state==='retrying'||state==='pending'||state==='running'){
-   label='Ожидаем повторную синхронизацию';symbol='↻';kind='waiting';
- }else if(state==='success'||state==='ok'){
-   if(!fromCache&&valid&&age>=0&&age<24*60*60*1000){
-     label='Оценки обновлены · '+dateLabel;symbol='✓';kind='ok';
-   }else {label='Последнее успешное обновление: '+dateLabel+' · актуальный статус неизвестен'}
- }else if(valid){
-   label='Последнее успешное обновление: '+dateLabel+' · статус не подтверждён';
+ let label='',symbol='',kind='unknown';
+ if(valid){
+  const dateLabel=parsed.toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  label='Оценки по состоянию на '+dateLabel;
+  if(age>=0&&age<24*60*60*1000&&!fromCache){
+   symbol='✓';kind='ok';
+  }else{
+   symbol='◷';kind='unknown';
+  }
+ }else{
+  label=fromCache?'Сохранённые оценки':'Время обновления оценок неизвестно';
+  symbol='◷';kind='unknown';
  }
+ // Preserve failure/retry information in Firebase and console, without alarming children.
+ if(state==='failed'||state==='error')console.info('Leveli: фоновое обновление оценок не удалось; показана последняя успешная копия.');
  fresh.dataset.state=kind;
  fresh.replaceChildren();
  const mark=document.createElement('span');mark.className='sync-symbol';mark.setAttribute('aria-hidden','true');mark.textContent=symbol;
