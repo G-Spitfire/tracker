@@ -50,8 +50,22 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.waitForTimeout(300);
  assert.equal(await page.locator('#profile-avatar-display .avatar-illustration').count(),1);
  const cutoutAvailable=await page.request.get((process.env.TEST_BASE_URL||'http://127.0.0.1:8765')+'/leveli/avatars/cutouts/avatar-01.webp');
- if(cutoutAvailable.ok())assert.equal(await page.locator('#profile-avatar-display .cutout-ready').count(),1);
- else assert.equal(await page.locator('#profile-avatar-display .cutout-ready').count(),0);
+ assert.equal(cutoutAvailable.ok(),true,'all approved WebP files must be in repository');
+ await page.waitForFunction(()=>document.querySelector('#profile-avatar-display .cutout-ready'));
+ assert.equal(await page.locator('#profile-avatar-display .cutout-ready').count(),1);
+ assert.equal(await page.locator('.b3-avatar-stand:has(.cutout-ready)').count(),1);
+ for(let avatarNumber=1;avatarNumber<=10;avatarNumber++){
+  const n=String(avatarNumber).padStart(2,'0');
+  const response=await page.request.get((process.env.TEST_BASE_URL||'http://127.0.0.1:8765')+'/leveli/avatars/cutouts/avatar-'+n+'.webp');
+  assert.equal(response.status(),200,'transparent avatar '+n+' must be present');
+  assert.match(response.headers()['content-type']||'',/image\/webp/);
+  assert.ok((await response.body()).length>10000,'transparent avatar '+n+' must have actual image content');
+ }
+ for(let i=0;i<10;i++){
+  await page.locator('#personal-avatar-options .personal-avatar-option').nth(i).click();
+  assert.equal(await page.locator('#profile-avatar-display').getAttribute('data-avatar-index'),String(i));
+  await page.waitForFunction(()=>document.querySelector('#profile-avatar-display .cutout-ready'));
+ }
  await page.locator('#b3-panel-close').click();
  await page.locator('[data-b3-panel="icons"]').click();
  await page.getByRole('button',{name:/Вариант 2/}).last().click();
