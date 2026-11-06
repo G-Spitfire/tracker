@@ -272,7 +272,7 @@ function paperFlipInPlace(flipped){
 }
 function paperDream(w,mode,shown,canToggle){
  if(mode==='select')return '<div class="ws-paper-dream ws-paper-dream-empty" aria-hidden="true"></div>';
- return '<section class="ws-paper-dream" aria-label="Пространство фантазии"><div class="ws-paper-dream-head"><strong>✦ ПРОСТРАНСТВО ФАНТАЗИИ</strong>'+
+ return '<section class="ws-paper-dream'+(shown?' is-open':' is-collapsed')+'" aria-label="Пространство фантазии"><div class="ws-paper-dream-head"><strong>✦ ПРОСТРАНСТВО ФАНТАЗИИ</strong>'+
   (canToggle?btn(shown?'Скрыть образ':'Показать образ','help','ws-paper-dream-toggle'):'')+'</div>'+
   '<div class="ws-paper-dream-scroll">'+(shown?'<div class="ws-paper-art">'+visual(w)+'</div><p class="ws-paper-scene">'+h(w.scene||'')+'</p>':
   '<p class="ws-paper-dream-hint">Сначала попробуй вспомнить слово. Образ можно открыть отдельно.</p>')+'</div></section>';
@@ -288,7 +288,7 @@ function selectionScreen(){
  const id=selection.current?.[selection.cursor],w=byId[id];if(!w){nextBatch();return}
  view='select';
  const known=selection.known.length,unknown=selection.unknown.length,seen=selection.seen.length;
- const actions='<div class="ws-paper-decisions">'+btn('Не знаю','unknown','ws-paper-negative')+btn('Знаю','known','ws-paper-positive')+'</div>';
+ const actions='<div class="ws-paper-decisions">'+btn('Знаю','known','ws-paper-negative')+btn('Не знаю','unknown','ws-paper-positive')+'</div>';
  shell('','', '<main class="ws-paper-page ws-paper-select"><div class="ws-paper-header"><div><h1>Подбор слов</h1><small>Неизвестных: '+unknown+' из 10 · Просмотрено: '+seen+' из 50</small></div><span class="ws-paper-count">'+seen+'/50</span></div>'+
   '<div class="ws-paper-track" role="progressbar" aria-label="Просмотр кандидатов" aria-valuemin="0" aria-valuemax="50" aria-valuenow="'+seen+'"><span style="width:'+Math.min(100,seen*2)+'%"></span></div>'+
   '<div class="ws-paper-main">'+paperSheet(w,true,showAnswer)+paperDream(w,'select',false,false)+'</div>'+
@@ -381,21 +381,31 @@ function review(mode='review'){
  }catch(e){notice(e.message)}
 }
 function cardActions(){
- return (session.pausedAt!==null?'<p class="reason" id="pause-time">'+pauseTime()+'</p>':'')+
-  (session.pausedAt!==null?btn('Продолжить','continue','primary'):btn('Пауза','pause','quiet'))+
+ return btn('Пауза','pause','quiet')+
   (session.mode==='practice'?btn('Закончить тренировку','stopPractice','quiet'):btn('Отменить занятие','cancel','quiet'));
+}
+function paperPauseOverlay(){
+ if(!session||session.pausedAt===null)return '';
+ return '<div class="ws-paper-pause" role="presentation"><section class="ws-paper-pause-dialog" role="dialog" aria-modal="true" aria-labelledby="ws-paper-pause-title">'+
+  '<span class="ws-paper-pause-icon" aria-hidden="true">Ⅱ</span><h2 id="ws-paper-pause-title">Занятие на паузе</h2>'+
+  '<p>Ты вернёшься к тому же слову и той же стороне листа.</p>'+
+  '<p class="ws-paper-pause-timer" id="pause-time">'+pauseTime()+'</p>'+
+  '<p class="ws-paper-pause-note">30-минутное ограничение бездействия продолжает действовать.</p>'+
+  '<div class="ws-paper-pause-buttons">'+btn('Продолжить','continue','ws-paper-resume')+
+  (session.mode==='practice'?btn('Закончить тренировку','stopPractice','ws-paper-pause-cancel'):btn('Отменить занятие','cancel','ws-paper-pause-cancel'))+
+  '</div></section></div>';
 }
 function visual(w){if(window.WS17_illustration){try{return window.WS17_illustration(w.en)}catch(e){}}if(w.props&&C?.render){try{return C.render(w)}catch(e){}}return '<div class="simple-art">'+h(w.cue||w.en)+'</div>'}
 function learn(focusWord=false){
  if(!session)return home();view='learn';const w=byId[session.ids[session.learnIndex]];
  const position=session.learnIndex+1,total=session.ids.length,progress=Math.round(100*position/total);
  const back=!!session.paperLearnFace;
- shell('','', '<main class="ws-paper-page ws-paper-learn"><div class="ws-paper-header"><div><h1>Запоминание</h1><small>Изучаем новые слова</small></div><span class="ws-paper-count">'+position+' из '+total+'</span></div>'+
+ shell('','', '<main class="ws-paper-page ws-paper-learn'+(session.pausedAt!==null?' is-paused':'')+'"><div class="ws-paper-header"><div><h1>Запоминание</h1><small>Изучаем новые слова</small></div><span class="ws-paper-count">'+position+' из '+total+'</span></div>'+
   '<div class="ws-paper-track" role="progressbar" aria-label="Прогресс запоминания" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+position+'"><span style="width:'+progress+'%"></span></div>'+
   '<div class="ws-paper-main">'+paperSheet(w,true,back)+paperDream(w,'learn',true,false)+'</div>'+
   '<div class="ws-paper-bottom"><p class="ws-paper-instruction">Изучи обе стороны и представь образ</p>'+
   '<div class="ws-paper-decisions">'+btn(position===total?'Начать проверку':'Дальше','learnNext','ws-paper-positive ws-paper-full')+'</div>'+
-  '<div class="ws-paper-minors">'+cardActions()+'</div></div></main>');
+  '<div class="ws-paper-minors">'+cardActions()+'</div></div>'+paperPauseOverlay()+'</main>');
  wirePaperFlip(()=>{if(session.pausedAt!==null)return;session.paperLearnFace=!session.paperLearnFace;if(!store())return home();if(!paperFlipInPlace(session.paperLearnFace))learn()});
  if(focusWord){window.scrollTo?.(0,0);root.querySelector?.('[data-flip-card]')?.focus?.({preventScroll:true})}
 }
@@ -412,11 +422,11 @@ function recall(){
  const grade='<div class="ws-paper-decisions">'+(failed?btn('Дальше','advance','ws-paper-positive ws-paper-full'):
   btn('Не вспомнил',answerVisible?'checkedNo':'no','ws-paper-negative')+
   btn('Вспомнил',answerVisible?'checkedYes':'yes','ws-paper-positive'))+'</div>';
- shell('','', '<main class="ws-paper-page ws-paper-recall ws-recall-v4"><div class="ws-paper-header"><div><h1>'+title+'</h1><small>Проход '+session.round+' · '+direction+'</small></div><span class="ws-paper-count">'+position+' из '+total+'</span></div>'+
+ shell('','', '<main class="ws-paper-page ws-paper-recall ws-recall-v4'+(session.pausedAt!==null?' is-paused':'')+'"><div class="ws-paper-header"><div><h1>'+title+'</h1><small>Проход '+session.round+' · '+direction+'</small></div><span class="ws-paper-count">'+position+' из '+total+'</span></div>'+
   '<div class="ws-paper-track" role="progressbar" aria-label="Прогресс проверки" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+(position-1)+'"><span style="width:'+progress+'%"></span></div>'+
   '<div class="ws-paper-main">'+paperSheet(w,item.dir!==1,answerVisible,failed,flipMotion)+paperDream(w,'recall',showHelp,answerVisible)+'</div>'+
   '<div class="ws-paper-bottom"><p class="ws-paper-instruction">'+(failed?'Посмотри правильный ответ и переходи дальше':'Вспомни слово и оцени себя')+'</p>'+
-  grade+'<div class="ws-paper-minors">'+cardActions()+'</div></div></main>');
+  grade+'<div class="ws-paper-minors">'+cardActions()+'</div></div>'+paperPauseOverlay()+'</main>');
  wirePaperFlip(()=>{if(session.pausedAt!==null||failed)return;dispatch(answerVisible?'hideTranslation':'check')});
 }
 function sendAnswer(ok,checked=false){
