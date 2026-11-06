@@ -21,7 +21,7 @@ test('last three are sorted by date and a drop of exactly 0.5 triggers the warni
  const result=S.summary(rows,[{value:5,date:new Date(2026,9,1),officialKind:'За четверть'}]);
  assert.equal(result.average,4.5);assert.equal(result.recentAverage,4);assert.equal(result.deteriorating,true);assert.equal(result.forecast,4);assert.equal(result.official,5);
  assert.equal(S.summary(rows.slice(0,2)).deteriorating,false);
- assert.equal(S.summary([{value:4,date:null},{value:3,date:null},{value:2,date:null}]).deteriorating,false);
+ assert.equal(S.summary([{value:4,date:null},{value:3,date:null},{value:2,date:null}]).deteriorating,true);
 });
 test('normalization preserves source objects and excludes non-marks',()=>{
  const row={value:'5/5',type:'Контрольная',date:'01.09.2026'};const normalized=S.normalize([row,{value:'н'},null]);
@@ -45,7 +45,7 @@ test('forecast needs at least three regular grades and ignores other final types
  assert.equal(S.officialKind({type:'Годовая',isFinal:true}),'За год');
  assert.equal(S.officialKind({type:'Итоговая контрольная работа',isFinal:true}),'');
 });
-test('weighted trend measures last three against quarter average',()=>{
+test('weighted trend compares last three against preceding three',()=>{
  const grades=[{value:5,weight:2},{value:5,weight:2},{value:4,weight:1},{value:3,weight:1},{value:3,weight:1},{value:4,weight:1}]
   .map((g,i)=>({...g,date:new Date(2026,8,i+1)}));
  const result=S.summary(grades);
@@ -90,4 +90,26 @@ test('2026/27 school calendar uses supplied term dates and excludes holiday reco
   ['2027-05-27',null]
  ])assert.equal(inPeriod(date),expected,date);
  assert.equal(S.period({date:'2026-11-04',quarter:1}),'2026-1');
+});
+
+test('combined trend has no reading for zero or one grade',()=>{
+ assert.equal(S.subjectTrend([]).difference,null);
+ assert.equal(S.subjectTrend([{value:5}]).difference,null);
+});
+test('2 to 5 grades compare last grade with weighted mean of all preceding grades',()=>{
+ const dates=[1,2,3,4,5].map(d=>new Date(2026,10,d));
+ const four=[{value:4,date:dates[0]},{value:5,date:dates[1]},{value:3,date:dates[2]},{value:5,date:dates[3]}];
+ assert.equal(S.summary(four).difference,1);
+ assert.equal(S.summary(four).recentAverage,5);
+ assert.equal(S.summary(four).previousAverage,4);
+ assert.equal(S.summary(four.slice(0,2)).difference,1);
+ assert.equal(S.summary([{value:2,weight:3,date:dates[0]},{value:4,weight:1,date:dates[1]},{value:5,weight:9,date:dates[2]}]).difference,2.5);
+ assert.equal(S.summary([...four,{value:5,date:dates[4]}]).difference,1);
+});
+test('6+ grades compare disjoint groups of three, ignoring earlier marks',()=>{
+ const data=[2,4,5,4,2,5,5].map((value,i)=>({value,date:new Date(2026,10,i+1)}));
+ const res=S.summary(data);
+ assert.ok(Math.abs(res.difference-(-1/3))<1e-10);
+ assert.equal(res.deteriorating,false);
+ assert.equal(S.summary(data.slice(-6)).difference,res.difference);
 });
