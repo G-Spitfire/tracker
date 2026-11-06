@@ -66,3 +66,9 @@ test('approved 44px minimum applies to four touch targets',()=>{
  }
  assert.match(css,/\.ws-progress-page \.progress-switch button\{min-height:44px;min-width:44px\}/);
 });
+
+test('manual viewport no longer calls deleted scroll hint handler',()=>{
+ const viewport=app.split('function syncManualViewport(){')[1].split('function manualWordRow(')[0];
+ assert.doesNotMatch(viewport,/refreshManualScroll/);
+ assert.doesNotMatch(app,/function refreshManualScroll\(/);
+});
