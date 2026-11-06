@@ -33,6 +33,8 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.getByRole('button',{name:'Кошка',exact:true}).click();
  assert.equal(await page.locator('#profile-avatar-display').innerText(),'🐱');
  await page.getByRole('button',{name:'Кошки и танцы'}).click();
+ assert.equal(await page.locator('.settings-button img.leveli-pack-settings').getAttribute('src'),'./icons/cats/settings.svg');
+ assert.equal(await page.locator('.forecast-card img.leveli-pack-heading').getAttribute('src'),'./icons/cats/chart.svg');
  assert.equal(await page.locator('html').getAttribute('data-leveli-pack'),'cats');
  await page.getByRole('button',{name:'← На главную'}).click();
  assert.equal(await page.locator('#school-subjects').count(),1);
@@ -111,7 +113,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await page.locator('html').evaluate(el=>el.style.getPropertyValue('--leveli-accent')),'#a882ff');
  await page.getByRole('button',{name:'Профиль и настройки'}).click();
  await page.getByRole('button',{name:'Синий'}).click();
- await page.getByRole('button',{name:'Футбол'}).click();
+ await page.getByRole('button',{name:'Футбол',exact:true}).click();
  await page.getByRole('button',{name:'← На главную'}).click();
 
  await page.getByRole('button',{name:'Профиль и настройки'}).click();
