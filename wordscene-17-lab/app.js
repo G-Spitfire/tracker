@@ -342,13 +342,18 @@ function cardActions(){
 function visual(w){if(window.WS17_illustration){try{return window.WS17_illustration(w.en)}catch(e){}}if(w.props&&C?.render){try{return C.render(w)}catch(e){}}return '<div class="simple-art">'+h(w.cue||w.en)+'</div>'}
 function learn(focusWord=false){
  if(!session)return home();view='learn';const w=byId[session.ids[session.learnIndex]];
- const title='Запоминание · '+(session.learnIndex+1)+' / '+session.ids.length;
- shell('', '', '<main class="ws-learn"><div class="ws-picker-header"><h1>'+title+'</h1></div>'+
- '<section class="flash learn" tabindex="0" aria-label="Материалы слова"><h2 id="learn-word" tabindex="-1">'+h(w.en)+'</h2><div class="ipa">'+h(w.ipa||'')+'</div>'+btn('▶ Произнести','say:'+h(w.en),'quiet')+'<div class="translation">'+h(w.ru)+'</div>'+
- (!showHelp?'<div class="art">'+visual(w)+'</div><p class="scene">'+h(w.scene||'')+'</p>':'')+'</section>'+
+ const position=session.learnIndex+1,total=session.ids.length;
+ const progress=Math.round(100*position/total);
+ shell('', '', '<main class="ws-learn ws-learn-v2">'+
+ '<div class="ws-learn-header"><div><h1>Запоминание</h1><small>Изучаем новые слова</small></div><span class="ws-learn-count" aria-label="Слово '+position+' из '+total+'">'+position+' из '+total+'</span></div>'+
+ '<div class="ws-learn-progress" role="progressbar" aria-label="Прогресс запоминания" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+position+'"><span style="width:'+progress+'%"></span></div>'+
+ '<section class="flash learn" tabindex="0" aria-label="Материалы слова"><h2 id="learn-word" tabindex="-1">'+h(w.en)+'</h2>'+
+ '<div class="ipa">'+h(w.ipa||'')+'</div>'+
+ btn(pickerIcon('volume'),'say:'+h(w.en),'ws-learn-speak')+
+ '<div class="translation">'+h(w.ru)+'</div>'+
+ '<div class="art">'+visual(w)+'</div><p class="scene">'+h(w.scene||'')+'</p></section>'+
  '<div class="ws-learn-actions"><p class="ws-learn-scroll-note" hidden aria-hidden="true">Прокрути карточку ↓</p>'+
- btn(showHelp?'Показать ассоциацию':'Представить без картинки','toggleArt','quiet')+
- btn(session.learnIndex===session.ids.length-1?'Начать проверку':'Дальше','learnNext','primary')+
+ btn((session.learnIndex===total-1?'Начать проверку':'Дальше')+' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>','learnNext','primary')+
  '<div class="ws-learn-session-actions">'+cardActions()+'</div></div></main>');
  const card=root.querySelector?.('.learn'),cue=root.querySelector?.('.ws-learn-scroll-note');
  if(card&&cue){
@@ -497,7 +502,7 @@ function dispatch(act,el){
  case 'startManual':return startLearning([...manual],selection?.known||[]);
  case 'leaveFill':saveFamiliar(selection.known);selection=null;manual.clear();return home();
  case 'learnNext':try{E.learnNext(session);session.artHidden=false;if(!store())return home();showHelp=false;return session.stage==='learn'?learn(true):recall()}catch(err){return expire(err)}
- case 'toggleArt':E.action(session);showHelp=!showHelp;session.artHidden=showHelp;store();return learn();
+ 
  case 'yes':return sendAnswer(true);case 'no':return showFeedback(true);
  case 'check':return showFeedback(false);
  case 'checkedYes':return sendAnswer(true,true);case 'checkedNo':return sendAnswer(false,true);

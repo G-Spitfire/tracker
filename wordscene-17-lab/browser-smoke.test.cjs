@@ -32,6 +32,28 @@ test('automatic 10 word selection -> memorization -> 3 two-way passes -> atomic 
  assert.equal(data.sessions.length,1);assert.equal(Object.keys(data.words).length,10);
  assert.match(b.root.html,/Занятие завершено/);
 });
+test('approved memorization UI keeps illustration visible, progress and unchanged recall help',()=>{
+ const b=boot();b.click('sources');b.click('auto');
+ for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
+ assert.match(b.root.html,/class="ws-learn ws-learn-v2"/);
+ assert.match(b.root.html,/Прогресс запоминания/);
+ assert.match(b.root.html,/aria-valuenow="1"/);
+ assert.match(b.root.html,/class="art"/);
+ assert.match(b.root.html,/class="scene"/);
+ assert.match(b.root.html,/data-action="say:[^"]+"/);
+ assert.doesNotMatch(b.root.html,/data-action="toggleArt"|Представить без картинки|Показать ассоциацию/);
+ b.click('pause');assert.match(b.root.html,/data-action="continue"/);
+ b.click('continue');assert.match(b.root.html,/class="art"/);
+ b.click('learnNext');assert.match(b.root.html,/aria-valuenow="2"/);
+ b.click('learnNext');assert.match(b.root.html,/aria-valuenow="3"/);
+ for(let i=0;i<7;i++)b.click('learnNext');
+ assert.match(b.root.html,/Начать проверку/);
+ b.click('learnNext');
+ assert.match(b.root.html,/data-action="check"/);
+ b.click('check');
+ assert.match(b.root.html,/data-action="help"/);
+});
+
 test('confirmed cancellation keeps persistent profile clean',()=>{
  const b=boot();b.click('sources');b.click('auto');
  for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
@@ -82,7 +104,7 @@ test('reload restores the same card before the deadline without moving it',()=>{
  b.click('learnNext');b.click('pause');
  const key='wordscene-17-lab-active-v1', saved=b.map.get(key);
  const restored=boot({map:b.map,now:b.now()+29*60000});
- assert.match(restored.root.html,/Запоминание · 2 \/ 10/);
+ assert.match(restored.root.html,/Слово 2 из 10/);
  assert.equal(b.map.get(key),saved);
  const expired=boot({map:b.map,now:b.now()+30*60000});
  assert.match(expired.root.html,/Учить новые слова/);
