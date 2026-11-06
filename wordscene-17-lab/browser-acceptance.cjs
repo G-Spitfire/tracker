@@ -59,6 +59,7 @@ async function run(name, browserType, contextOptions) {
    assert.equal(geometry.listOverflow,'visible','words should not scroll independently');
    assert.equal(geometry.topicsOverflow,'visible','topics should not scroll independently');
    assert.equal(geometry.initialTopics,3,'collapsed topics show only one row');
+   assert.equal(await page.locator('.ws-manual-topics .ws-topic-icon').count(),3,'topic tiles use SVG icons');
    assert.ok(Math.abs(geometry.footerBottom-geometry.viewport)<=10,'pinned action footer must stay at bottom: '+JSON.stringify(geometry));
    await page.locator('.ws-manual-page').evaluate(el=>el.scrollTop=el.scrollHeight);
    await snap('end-of-list');
@@ -66,6 +67,7 @@ async function run(name, browserType, contextOptions) {
    await page.locator('.ws-manual-page').evaluate(el=>el.scrollTop=0);
    await page.locator('[data-action="manualAllTopics"]').click();
    assert.ok(await page.locator('.ws-manual-topics .ws-manual-topic').count()>3,'all topics expand into one page');
+   assert.equal(await page.locator('.ws-manual-topics .ws-topic-icon').count(),resources.topics,'all dictionary topics use SVG icons');
    assert.equal(await page.locator('.ws-manual-topics').evaluate(el=>getComputedStyle(el).overflowY),'visible');
    await snap('all-topics');
    await page.locator('[data-action="manualTopic:travel"]').click();
@@ -148,9 +150,25 @@ async function run(name, browserType, contextOptions) {
   await page.locator('[data-action="pick:cat"]').click();
   await page.locator('[data-action="pick:dog"]').click();
   await page.locator('[data-action="manualSummary"]').click();
+  if(await page.locator('.ws-selected-sheet').count()){
+   const selectedSheet=page.locator('.ws-selected-sheet'),selectedList=page.locator('.ws-selected-list');
+   assert.equal(await selectedSheet.getAttribute('aria-modal'),'true','selected words open in modal bottom sheet');
+   const height=await selectedSheet.evaluate(el=>el.getBoundingClientRect().height);
+   const viewport=page.viewportSize();
+   assert.ok(height>=viewport.height*.72&&height<=viewport.height*.85,'sheet must be about 75-80% of viewport: '+height+' / '+viewport.height);
+   assert.equal(await selectedList.evaluate(el=>getComputedStyle(el).overflowY),'auto');
+   assert.equal(await page.locator('.ws-manual-page').getAttribute('inert'),'','background list is inert when sheet is open');
+   assert.ok(await page.locator('.ws-selected-done').isVisible(),'Done button always visible');
+   await snap('selection-sheet');
+  }
   await snap('three-selected');
   assert.ok(await page.getByText('Выбрано слов:').count()>0);
   await page.locator('[data-action="removeManual:apple"]').click();
+  if(await page.locator('.ws-selected-sheet').count()){
+   assert.equal(await page.locator('.ws-selected-row').count(),2);
+   await page.locator('[data-action="manualSummaryClose"]').last().click();
+   assert.equal(await page.locator('.ws-selected-sheet').count(),0);
+  }
   assert.match(await page.locator('.ws-manual-total').innerText(),/2 \/ (?:10|15)/);
   assert.equal(await page.locator('[data-action="startManual"]').isDisabled(),true);
   await page.locator('[data-action="manualTopic:food"]').click();

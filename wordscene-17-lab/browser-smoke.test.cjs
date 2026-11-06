@@ -254,9 +254,12 @@ test('manual picker retains UI Kit controls and counters with compact pinned foo
  assert.match(b.root.html,/Выбрано слов:[\s\S]*1 \/ 15/);
  b.click('manualSummary');
  assert.match(b.root.html,/data-action="removeManual:apple"/);
+ assert.match(b.root.html,/role="dialog" aria-modal="true"/);
+ b.click('manualSummaryClose');
  b.click('manualTab:search');
  b.click('manualTab:topics');
- assert.match(b.root.html,/data-action="removeManual:apple"/);
+ assert.match(b.root.html,/data-action="manualSummary"/);
+ assert.doesNotMatch(b.root.html,/role="dialog"/);
  const css=file('style.css');
  assert.match(css,/\.ws-manual-v2 \.ws-manual-topic\{/);
  assert.match(css,/\.ws-manual-v2 \.ws-manual-audio\{min-width:44px;min-height:44px/);
@@ -294,6 +297,44 @@ test('manual selection uses one page scroll, compact topics and pinned footer',(
  assert.match(b.root.html,/Выбрано слов:[\s\S]*3 \/ 15/);
 });
 
+test('all 22 dictionary topics receive distinct SVG icon paths and active state',()=>{
+ const topics={topics:[{id:'animals',name:'animals'},{id:'food',name:'food'},{id:'kitchen',name:'kitchen'},{id:'home',name:'home'},{id:'family',name:'family'},{id:'body',name:'body'},{id:'clothes',name:'clothes'},{id:'school',name:'school'},{id:'nature',name:'nature'},{id:'weather',name:'weather'},{id:'time',name:'time'},{id:'colours',name:'colours'},{id:'actions',name:'actions'},{id:'descriptions',name:'descriptions'},{id:'sports',name:'sports'},{id:'town',name:'town'},{id:'travel',name:'travel'},{id:'arts',name:'arts'},{id:'tech',name:'tech'},{id:'quantity',name:'quantity'},{id:'objects',name:'objects'},{id:'countries',name:'countries'}],forWord:()=>[]};
+ const b=boot({topics});b.click('sources');b.click('manual');b.click('manualAllTopics');
+ const cards=[...b.root.html.matchAll(/data-action="manualTopic:([^"]+)"[^>]*>([\s\S]*?)<\/button>/g)];
+ assert.equal(cards.length,22);
+ const paths=new Set();
+ for(const [,id,markup] of cards){
+  assert.match(markup,/<svg class="ws-topic-icon"/);
+  assert.doesNotMatch(markup,/📚|<span aria-hidden="true">/);
+  const shape=markup.match(/<svg[^>]*>([\s\S]*?)<\/svg>/);
+  assert.ok(shape,'missing SVG for '+id);
+  paths.add(shape[1]);
+ }
+ assert.equal(paths.size,22,'icons must be distinct per topic');
+ assert.match(b.root.html,/data-action="manualTopic:food"/);
+ b.click('manualTopic:tech');
+ assert.match(b.root.html,/data-action="manualTopic:tech" class="ws-manual-topic is-active"/);
+ const css=file('style.css');
+ assert.match(css,/\.ws-manual-v3 \.ws-topic-icon\{width:28px;height:28px/);
+});
+test('selected-words sheet closes and preserves selections while removing words',()=>{
+ const topics={topics:[{id:'food',name:'Еда и напитки'},{id:'animals',name:'Животные'}],forWord:id=>id==='apple'?['food']:['animals']};
+ const b=boot({topics});b.click('sources');b.click('manual');
+ b.click('pick:apple');b.click('manualTopic:animals');b.click('pick:cat');b.click('pick:dog');
+ b.click('manualSummary');
+ assert.match(b.root.html,/role="dialog" aria-modal="true"/);
+ assert.match(b.root.html,/class="ws-selected-list" role="region"/);
+ assert.match(b.root.html,/data-action="manualSummaryClose"/);
+ assert.match(b.root.html,/data-action="removeManual:apple"/);
+ assert.match(b.root.html,/data-action="removeManual:cat"/);
+ b.click('removeManual:apple');
+ assert.match(b.root.html,/role="dialog" aria-modal="true"/);
+ assert.doesNotMatch(b.root.html,/data-action="removeManual:apple"/);
+ b.click('manualSummaryClose');
+ assert.doesNotMatch(b.root.html,/role="dialog"/);
+ assert.match(b.root.html,/Выбрано слов:[\s\S]*2 \/ 15/);
+ assert.match(b.root.html,/Начать изучение \(2 слова\)/);
+});
 test('selection summary removes cross-topic words and updates total and lesson button',()=>{
  const topics={topics:[{id:'food',name:'Еда и напитки'},{id:'animals',name:'Животные'}],forWord:id=>id==='apple'?['food']:['animals']};
  const b=boot({topics});b.click('sources');b.click('manual');
@@ -302,6 +343,9 @@ test('selection summary removes cross-topic words and updates total and lesson b
  assert.match(b.root.html,/Начать изучение \(3 слова\)/);
  b.click('manualSummary');
  assert.match(b.root.html,/aria-label="Выбранные слова"/);
+ assert.match(b.root.html,/role="dialog" aria-modal="true"/);
+ assert.match(b.root.html,/class="ws-selected-sheet"/);
+ assert.match(b.root.html,/Готово/);
  assert.match(b.root.html,/data-action="removeManual:apple"/);
  assert.match(b.root.html,/data-action="removeManual:cat"/);
  b.click('removeManual:apple');
