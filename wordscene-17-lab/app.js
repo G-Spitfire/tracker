@@ -379,7 +379,7 @@ function recall(){
   '<div class="ws-recall-placeholder">'+pickerIcon('learn')+'<span>Как переводится это слово?</span></div>';
  const revealed=showAnswer?'<div class="ws-recall-answer"><span>Перевод</span><strong>'+h(back)+'</strong></div>'+
   (item.dir===1?'<div class="ws-recall-after-sound">'+sound+'<span>'+h(w.ipa||'')+'</span></div>':'')+
-  (showHelp?'<div class="ws-recall-clue"><div class="ws-recall-clue-title">'+pickerIcon('learn')+' Ассоциация</div><p>'+h(w.scene||'')+'</p><div class="ws-recall-clue-art">'+visual(w)+'</div></div>':''):'';
+  btn(showHelp?'Скрыть ассоциацию':'Показать ассоциацию','help','ws-recall-association')+(showHelp?'<div class="ws-recall-clue"><div class="ws-recall-clue-title">'+pickerIcon('learn')+' Ассоциация</div><p>'+h(w.scene||'')+'</p><div class="ws-recall-clue-art">'+visual(w)+'</div></div>':''):'';
  const actions=showAnswer?
   (confirmed?btn('Следующая карточка','advance','ws-recall-primary'):
    '<p class="ws-recall-question">Удалось вспомнить перевод?</p><div class="ws-recall-decisions">'+
@@ -533,7 +533,7 @@ function dispatch(act,el){
  case 'recallHint':E.action(session);session.recallHint=!session.recallHint;showHelp=!!session.recallHint;if(!store())return home();return recall();
  case 'checkedYes':return sendAnswer(true,true);case 'checkedNo':return sendAnswer(false,true);
  case 'advance':return sendAnswer(false);
- case 'help':E.action(session);showHelp=true;if(session.feedback)session.feedback.help=true;else session.recallHint=true;store();return recall();
+ case 'help':E.action(session);showHelp=!showHelp;if(session.feedback)session.feedback.help=showHelp;else session.recallHint=showHelp;store();return recall();
  case 'pause':suspend();return storageFailure?home():render();
   case 'continue':session.pausedAt=null;if(!store())return home();return render();
  case 'cancel':return confirmCancel();
