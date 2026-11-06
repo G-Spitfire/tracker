@@ -380,6 +380,50 @@ body{background:#0e0c21;color:#f6f0ff}
 :root[data-leveli-theme="light"] .birthday-note,:root[data-leveli-theme="light"] #profile-save-status{color:#5b3c79}
 .home-birthday-greeting{padding:8px 12px;border:1px solid var(--leveli-accent-border);background:var(--leveli-accent-dim);border-radius:12px;font-size:13px!important;margin:9px 0!important;color:#fff!important}
 @media(max-width:360px){.personal-choice-grid,.personal-color-grid{gap:5px}.personal-option{font-size:10px;padding:6px 2px}.personal-theme-grid{gap:5px}}
+
+/* Universal decorative tokens: grade, forecast and trend-status semantics remain fixed. */
+:root{
+ --leveli-accent-track:#55416e;--leveli-accent-line:#d1adff;--leveli-accent-glow:#ab7aff;
+ --leveli-accent-ink:#fff;
+}
+:root .btn:not(.secondary),:root .settings-button,:root .help-btn,:root .detail-toggle button,:root #school-period-buttons button,:root .personal-option{transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease}
+:root .settings-button:focus-visible,:root .btn:focus-visible,:root .help-btn:focus-visible,
+:root .subject-row:focus-visible,:root .orient-link:focus-visible,
+:root .forecast-legend button:focus-visible,:root .detail-toggle button:focus-visible,
+:root #school-period-buttons button:focus-visible{outline:3px solid var(--leveli-accent);outline-offset:3px}
+:root .btn.secondary:not(.profile-logout){border-color:var(--leveli-accent-border);color:var(--leveli-accent-soft)}
+:root .settings-button,:root .help-btn{border-color:var(--leveli-accent-border)}
+:root .header-period{border:1px solid var(--leveli-accent-border);background:var(--leveli-accent-dim);color:#fff}
+:root .forecast-center{border-color:var(--leveli-accent-border)}
+:root .forecast-legend button[aria-pressed="true"]{background:var(--leveli-accent-dim);border-color:var(--leveli-accent-border)}
+:root .detail-period,:root #school-subject-detail .detail-goal.complete{
+ border-color:var(--leveli-accent-border);
+}
+:root #school-subject-detail .detail-goal.complete{background:var(--leveli-accent-dim)}
+:root #school-subject-detail .detail-goal.complete .detail-goal-label{color:var(--leveli-accent-soft)}
+:root #school-subject-detail .detail-goal.complete .detail-goal-main{color:#fff}
+:root #school-subject-detail .detail-hero{
+ border-color:var(--leveli-accent-border);
+ box-shadow:0 0 24px -15px var(--leveli-accent-glow);
+ background:linear-gradient(145deg,var(--leveli-accent-dim),#242040 76%,#1e1b38);
+}
+:root .detail-toggle button[aria-pressed="true"],:root #school-period-buttons button[aria-pressed="true"]{box-shadow:0 0 0 1px var(--leveli-accent-border)}
+:root #school-subject-detail .grade-entry__weight{border-color:var(--leveli-accent-border)}
+:root .avatar-gallery-label,:root .profile-card .profile-label{color:var(--leveli-accent-soft)}
+:root[data-leveli-theme="light"]{--leveli-accent-ink:#302448}
+:root[data-leveli-theme="light"] .btn.secondary:not(.profile-logout){color:#3b2b50}
+:root[data-leveli-theme="light"] .header-period{color:#fff}
+:root[data-leveli-theme="light"] .forecast-legend button[aria-pressed="true"]{background:#ede5f4;border-color:var(--leveli-accent-border)}
+:root[data-leveli-theme="light"] .forecast-center{color:#302448}
+:root[data-leveli-theme="light"] #school-subject-detail .detail-hero{
+ background:linear-gradient(145deg,#fff,#f7f1ff);
+ border-color:var(--leveli-accent-border);
+}
+:root[data-leveli-theme="light"] #school-subject-detail .detail-goal.complete .detail-goal-main{color:#fff}
+:root[data-leveli-theme="light"] .avatar-gallery-label{color:#554167}
+@media(prefers-reduced-motion:reduce){
+ :root .btn,:root .settings-button,:root .help-btn,:root .detail-toggle button,:root #school-period-buttons button,:root .personal-option{transition:none!important}
+}
 </style></head><body><div class="app"><main class="content" id="main">
 <section data-page="home"><header class="school-header"><div><div class="eyebrow brand-lockup"><img src="./brand/mark.svg" alt="" width="30" height="30" aria-hidden="true"><span>Левели</span></div><h1 id="home-greeting">Привет!</h1><p id="home-birthday-greeting" class="home-birthday-greeting" hidden></p><p>Мои оценки и успеваемость</p><div class="header-period" id="school-header-period">II четверть · 2026/27 учебный год</div></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
 <article class="card" id="school-login"><h2>Войди, чтобы увидеть оценки</h2><p>Оценки загружаются из электронного дневника.</p><form id="school-form"><label>Почта<input id="school-email" type="email" autocomplete="username" required></label><label>Пароль<input id="school-password" type="password" autocomplete="current-password" required></label><button class="btn" type="submit">Войти</button></form></article>
@@ -429,11 +473,11 @@ addEventListener('hashchange',()=>navigate(location.hash.slice(1)));navigate(loc
 /* Local-first, UID-scoped preferences. No personal data sent to analytics or public URLs. */
 window.LeveliAppearance=(()=>{
  const accents={
-  violet:{main:'#a882ff',soft:'#e2cdff',dim:'#514071',border:'#b48cf3',line:'#d1adff',glow:'#ab7aff'},
-  pink:{main:'#f18bc9',soft:'#ffd3ed',dim:'#804567',border:'#f18bc9',line:'#ffd0eb',glow:'#f18bc9'},
-  blue:{main:'#68adff',soft:'#c8e4ff',dim:'#32537d',border:'#68adff',line:'#bedbff',glow:'#68adff'},
-  yellow:{main:'#f4c75f',soft:'#ffe6a3',dim:'#76602c',border:'#f4c75f',line:'#ffe7a1',glow:'#f4c75f'},
-  mint:{main:'#69d9bd',soft:'#bdf9e7',dim:'#286b5c',border:'#69d9bd',line:'#bcf9e9',glow:'#69d9bd'}
+  violet:{main:'#a882ff',soft:'#e2cdff',dim:'#514071',border:'#b48cf3',line:'#d1adff',glow:'#ab7aff',track:'#55416e'},
+  pink:{main:'#f18bc9',soft:'#ffd3ed',dim:'#804567',border:'#f18bc9',line:'#ffd0eb',glow:'#f18bc9',track:'#70435e'},
+  blue:{main:'#68adff',soft:'#c8e4ff',dim:'#32537d',border:'#68adff',line:'#bedbff',glow:'#68adff',track:'#3b5375'},
+  yellow:{main:'#f4c75f',soft:'#ffe6a3',dim:'#76602c',border:'#f4c75f',line:'#ffe7a1',glow:'#f4c75f',track:'#69582f'},
+  mint:{main:'#69d9bd',soft:'#bdf9e7',dim:'#286b5c',border:'#69d9bd',line:'#bcf9e9',glow:'#69d9bd',track:'#365f55'}
  };
  // Each portrait corresponds to one 64×64 cell of a 5×2 sprite. The index is stable for saved profiles.
  const avatars=[['Кошка',0],['Танцы',2],['Лапки',3],['Музыка',4],['Звезда',1],['Футбол',6],['Гейминг',8],['Гонки',7],['Мяч',5],['Наушники',9]];
@@ -450,7 +494,7 @@ window.LeveliAppearance=(()=>{
   document.documentElement.dataset.leveliTheme=theme;
   document.documentElement.dataset.leveliPack=profile.pack;
   const c=accents[profile.accent],s=document.documentElement.style;
-  for(const [key,val] of Object.entries({accent:c.main,'accent-soft':c.soft,'accent-dim':c.dim,'accent-border':c.border}))s.setProperty('--leveli-'+key,val);
+  for(const [key,val] of Object.entries({accent:c.main,'accent-soft':c.soft,'accent-dim':c.dim,'accent-border':c.border,'accent-track':c.track,'accent-line':c.line,'accent-glow':c.glow}))s.setProperty('--leveli-'+key,val);
   const avatarDisplay=document.querySelector('#profile-avatar-display');avatarDisplay.replaceChildren();if(profile.avatar==='custom'&&profile.customAvatar){const img=document.createElement('img');img.src=profile.customAvatar;img.alt='';img.className='profile-avatar-custom';avatarDisplay.append(img)}else if(avatars[profile.avatar])avatarDisplay.append(avatarImage(avatars[profile.avatar][1]));else avatarDisplay.textContent='★';avatarDisplay.dataset.avatarIndex=String(profile.avatar);document.querySelector('#profile-remove-avatar').hidden=!profile.customAvatar;
   // A themed icon pack changes navigation and card headings, not the immutable Leveli brand mark.
   const settingsButton=document.querySelector('.settings-button');
@@ -610,18 +654,22 @@ function renderInsights(groups,rows,baseline){
  }
 }
 function renderDonut(svgId,legendId,rows,valueId,value,mode){
+ // Grade segments are semantic and invariant. The track and selected category reflect the child's accent.
  const colors={'5':'#6ee6ae','4':'#a68bff','3':'#f6c078','2':'#f47e9c','none':'#8f8ba6'};
  const categories=['5','4','3','2','none'],counts=new Map(categories.map(k=>[k,0]));
  for(const row of rows){const key=mode==='subjects'?(row.stats.official!==null?String(row.stats.official):row.stats.forecast!==null?String(row.stats.forecast):'none'):String(row.value);if(counts.has(key))counts.set(key,counts.get(key)+1)}
  const svg=document.getElementById(svgId),legend=document.getElementById(legendId);svg.replaceChildren();legend.replaceChildren();
  const total=rows.length,circumference=2*Math.PI*72;
- svg.append(svgEl('circle',{cx:100,cy:100,r:72,fill:'none',stroke:'#453958','stroke-width':23}));
+ svg.append(svgEl('circle',{cx:100,cy:100,r:72,fill:'none',stroke:accentColor().track,'stroke-width':23,'data-accent-track':'true'}));
  let offset=0;
  for(const key of categories){
   const n=counts.get(key)||0;if(!n)continue;
   const arc=svgEl('circle',{cx:100,cy:100,r:72,fill:'none',stroke:colors[key],'stroke-width':23,'stroke-dasharray':Math.max(0,circumference*n/total-2)+' '+circumference,'stroke-dashoffset':-offset,'transform':'rotate(-90 100 100)'});
   if(mode==='subjects'){arc.setAttribute('role','button');arc.setAttribute('tabindex','0');arc.style.cursor='pointer';const activate=()=>{forecastFilter=forecastFilter===key?null:key;renderGrades()};arc.addEventListener('click',activate);arc.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activate()}})}
-  svg.append(arc);offset+=circumference*n/total;
+  svg.append(arc);
+  // Accent outline around the selected forecast category, without changing its grade color.
+  if(mode==='subjects'&&forecastFilter===key){svg.append(svgEl('circle',{cx:100,cy:100,r:86,fill:'none',stroke:accentColor().main,'stroke-width':3,'stroke-dasharray':Math.max(0,circumference*n/total*86/72-2)+' '+(2*Math.PI*86),'stroke-dashoffset':-offset*86/72,'transform':'rotate(-90 100 100)','data-accent-selection':'true'}))}
+  offset+=circumference*n/total;
   const button=document.createElement(mode==='subjects'?'button':'div');
   button.className='legend-item';if(mode==='subjects'){button.type='button';button.setAttribute('aria-pressed',String(forecastFilter===key));button.onclick=()=>{forecastFilter=forecastFilter===key?null:key;renderGrades()}}
   const l=document.createElement('span');l.className='legend-label';const dot=document.createElement('span');dot.className='legend-dot';dot.style.background=colors[key];l.append(dot,document.createTextNode(key==='none'?'Без прогноза':'Оценка '+key));
