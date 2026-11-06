@@ -637,7 +637,7 @@ test('installed PWA uses consistent WordScene lighthouse icon assets and Paper c
  assert.equal(mask.readUInt32BE(16),512);
  assert.equal(mask.readUInt32BE(20),512);
  const sw=file('sw.js');
- assert.match(sw,/wordscene-17-lab-cache-v43/);
+ assert.match(sw,/wordscene-17-lab-cache-v44/);
  assert.match(sw,/icon-maskable-512\.png/);
  assert.match(sw,/wordscene-lighthouse-icon\.svg/);
 });
