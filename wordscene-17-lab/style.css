@@ -1231,13 +1231,12 @@ html:has(.ws-paper-page),body:has(.ws-paper-page){background:#fdf7ed}
 .ws-paper-face-back{transform:rotateY(180deg)}
 .ws-paper-grain{
  position:absolute;inset:0;z-index:-1;pointer-events:none;
- background:
- repeating-linear-gradient(18deg,transparent 0px,transparent 4px,#9c856019 5px,transparent 6px,transparent 15px),
- repeating-linear-gradient(101deg,transparent 0,transparent 9px,#8f785517 10px,transparent 11px,transparent 21px),
- radial-gradient(circle at 22% 27%,#a48d6930 0 1px,transparent 1.6px),
- radial-gradient(circle at 65% 57%,#96795224 0 1px,transparent 1.7px),
- linear-gradient(95deg,#aa946b12,transparent 17%,#fffdfa44 65%,#9b835f08);
- background-size:auto,auto,13px 17px,19px 23px,auto;
+ /* Approved natural paper: irregular fibers and fine noise, NEVER a drawn grid. */
+ background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22360%22%20height%3D%22360%22%20viewBox%3D%220%200%20360%20360%22%3E%3Cfilter%20id%3D%22grain%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.51%22%20numOctaves%3D%223%22%20seed%3D%2217%22%20stitchTiles%3D%22stitch%22%2F%3E%3CfeColorMatrix%20type%3D%22saturate%22%20values%3D%220%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22360%22%20height%3D%22360%22%20filter%3D%22url(%23grain)%22%20opacity%3D%22.18%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%239e8664%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.29%22%3E%3Cpath%20stroke-width%3D%22.65%22%20d%3D%22M17%2069q14%20-7%2027%20-3M116%2034q7%203%2018%200M260%2049q16%20-4%2025%20-1M315%20139q12%204%2024%202M47%20209q11%20-4%2023%200M154%20185q15%205%2025%200M280%20244q11%20-3%2020%20-1M88%20295q6%203%2015%200M212%20327q14%20-3%2020%202%22%2F%3E%3Cpath%20stroke-width%3D%22.4%22%20d%3D%22M64%2025q2%209%206%2015M189%2059q3%2011%200%2016M300%2083q-7%209%20-4%2015M19%20159q5%2011%202%2018M92%20114q-2%2012%200%2019M230%20145q9%208%207%2016M335%20203q-2%2012%202%2018M139%20267q3%208%209%2010M279%20312q-6%208%20-5%2017%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+ background-size:360px 360px;
+ background-repeat:repeat;
+ opacity:.44;
+ mix-blend-mode:multiply;
 }
 .ws-paper-metadata,.ws-paper-foot{
  position:absolute;left:19px;right:19px;display:flex;justify-content:space-between;align-items:center;
@@ -1319,4 +1318,29 @@ html:has(.ws-paper-page),body:has(.ws-paper-page){background:#fdf7ed}
 .ws-paper-turn-front .ws-paper-inner{animation:ws-paper-flip-to-front .48s cubic-bezier(.22,.65,.24,1) both}
 @media(prefers-reduced-motion:reduce){
  .ws-paper-turn-back .ws-paper-inner,.ws-paper-turn-front .ws-paper-inner{animation:none!important}
+}
+
+/* Imagination is compact when closed; its expansion never moves the paper or action row. */
+.ws-paper-dream.is-collapsed{flex:0 0 auto;height:82px;min-height:82px}
+.ws-paper-dream.is-collapsed .ws-paper-dream-head{min-height:39px}
+.ws-paper-dream.is-collapsed .ws-paper-dream-scroll{padding:2px 12px 10px}
+.ws-paper-dream.is-collapsed .ws-paper-dream-hint{margin:0 auto;font-size:11px;line-height:1.35}
+.ws-paper-dream.is-open{flex:1 1 0;min-height:0}
+.ws-paper-dream-empty{display:none}
+/* Pause is a real modal over the same card, not another button row. */
+.ws-paper-page.is-paused>:not(.ws-paper-pause){pointer-events:none;user-select:none}
+.ws-paper-pause{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px max(16px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom));background:rgba(13,26,45,.62);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.ws-paper-pause-dialog{width:min(100%,390px);background:#fffaf1;border:1px solid #e9dcc9;border-radius:23px;box-shadow:0 24px 65px #0a193555;padding:24px 20px 21px;text-align:center;color:#12213a}
+.ws-paper-pause-icon{display:grid;place-items:center;width:46px;height:46px;background:#eaf3ff;border-radius:50%;color:#087bfa;font-weight:850;font-size:24px;margin:0 auto 12px}
+.ws-paper-pause-dialog h2{font-size:23px;line-height:1.15;margin:0 0 10px}
+.ws-paper-pause-dialog p{font-size:14px;line-height:1.45;color:#5c6b80;margin:0 0 12px}
+.ws-paper-pause-dialog .ws-paper-pause-timer{color:#9a6c25;background:#faf0dc;border-radius:13px;padding:12px;font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;margin:10px 0}
+.ws-paper-pause-dialog .ws-paper-pause-note{font-size:12px;margin:10px 0 19px}
+.ws-paper-pause-buttons{display:flex;flex-direction:column;gap:9px}
+.ws-paper-pause-buttons button{border-radius:16px;border:0;min-height:58px;padding:12px;font-size:16px;font-weight:800}
+.ws-paper-resume{background:#087bfa;color:white}
+.ws-paper-pause-cancel{background:transparent;color:#5c6b80;border:1px solid #e7dac8!important;font-size:14px!important}
+@media(max-height:690px){
+ .ws-paper-dream.is-collapsed{height:70px;min-height:70px}
+ .ws-paper-dream.is-collapsed .ws-paper-dream-head{min-height:32px}
 }
