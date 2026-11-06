@@ -14,6 +14,7 @@ const root=document.getElementById('app');
 let profile,session=null,selection=null,view='home',batch=[],showAnswer=false,showHelp=false,manual=new Set(),manualThemes=new Set(),query='',confirmed=false,storageFailure=false,savedProfileRaw=null,savedActiveRaw=null;
 let lastRecallKey='',lastRecallFace=false;
 let progressRange='30',qualityRange='28',homeDay=null,manualMode='topics',manualShowAll=false,manualSummaryOpen=false;
+let dictionaryFilter='all';
 const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const accounts=window.WS17Accounts.create({storage:localStorage,empty:E.empty,valid:window.WS17Accounts.validProfile,keyFor:()=>({main:KEY,active:ACTIVE,backup:'wordscene-17-lab-last-good-v1'+legacyStorageSuffix})});
 function store(){
@@ -518,13 +519,62 @@ function progress(){
   '<section class="panel ws-progress-panel"><h2>Как хорошо я помню слова</h2><div class="progress-switch">'+qualityButtons+'</div>'+quality+explanation+'</section>'+
   btn('На главную','home','ws-progress-home')+'</main>');
 }
+const dictionaryStatuses={
+ new:{label:'Не изучено',filter:'new'},
+ known:{label:'Уже знакомо',filter:'known'},
+ learning:{label:'Закрепляется',filter:'learning'},
+ mastered:{label:'Закреплено',filter:'mastered'}
+};
+function dictionaryMatches(w){
+ const q=query.trim().toLocaleLowerCase('ru');
+ return (!q||(w.en+' '+w.ru).toLocaleLowerCase('ru').includes(q))&&
+  (dictionaryFilter==='all'||E.status(profile.words[w.en])===dictionaryFilter);
+}
+function dictionaryRow(w){
+ const status=E.status(profile.words[w.en]);
+ return '<button type="button" class="ws-dict-row" data-action="word:'+h(w.en)+'">'+
+  '<span class="ws-dict-row-copy"><strong>'+h(w.en)+'</strong><small>'+h(w.ru)+'</small></span>'+
+  '<span class="ws-dict-status ws-dict-status-'+status+'">'+dictionaryStatuses[status].label+'</span>'+
+  '<span class="ws-dict-row-arrow" aria-hidden="true">›</span></button>';
+}
+function refreshDictionaryResults(){
+ const list=dictionary.filter(dictionaryMatches);
+ const container=root.querySelector?.('#ws-dict-results');
+ const counter=root.querySelector?.('#ws-dict-count');
+ if(counter)counter.textContent=list.length+' из '+dictionary.length+' слов';
+ if(!container)return;
+ container.innerHTML=list.length?list.map(dictionaryRow).join(''):
+  '<div class="ws-dict-empty"><strong>Ничего не найдено</strong><p>Попробуй другой запрос или выбери фильтр «Все».</p></div>';
+ container.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click',()=>dispatch(el.dataset.action,el)));
+}
 function dictionaryView(){
- view='dictionary';const list=dictionary.filter(w=>(w.en+' '+w.ru).toLowerCase().includes(query.toLowerCase()));
- shell('Словарь','<section class="panel"><input data-input="search" value="'+h(query)+'" placeholder="Поиск слова" /><div class="word-picker">'+list.map(w=>'<button class="word-option" data-action="word:'+h(w.en)+'"><span><b>'+h(w.en)+'</b> · '+h(w.ru)+'</span><small>'+({new:'Не изучено',known:'Предварительно знакомо',learning:'Закрепляется',mastered:'Закреплено'}[E.status(profile.words[w.en])]||'')+'</small></button>').join('')+'</div></section>'+btn('На главную','home','quiet'));
+ view='dictionary';
+ const filters=[['all','Все'],['learning','Закрепляются'],['mastered','Закреплены'],['known','Уже знакомы'],['new','Не изучены']];
+ const chips=filters.map(([id,label])=>'<button type="button" data-action="dictionaryFilter:'+id+'" class="ws-dict-filter'+(dictionaryFilter===id?' is-active':'')+'" aria-pressed="'+(dictionaryFilter===id)+'">'+label+'</button>').join('');
+ shell('','', '<main class="ws-dict-page"><div class="ws-dict-header">'+btn(pickerIcon('back'),'home','ws-dict-back')+
+  '<div><h1>Словарь</h1><p>Все слова WordScene</p></div></div>'+
+  '<div class="ws-dict-search"><label for="ws-dict-input">Поиск по слову или переводу</label><input id="ws-dict-input" type="search" autocomplete="off" spellcheck="false" value="'+h(query)+'" placeholder="Например, apple или яблоко"></div>'+
+  '<div class="ws-dict-filters" role="group" aria-label="Фильтр по статусу">'+chips+'</div>'+
+  '<section class="ws-dict-list-card" aria-label="Список слов"><div class="ws-dict-list-head"><h2>Слова</h2><span id="ws-dict-count"></span></div><div id="ws-dict-results" class="ws-dict-results"></div></section>'+
+  '<p class="ws-dict-footnote">Просмотр слов не изменяет прогресс обучения.</p></main>');
+ const input=root.querySelector?.('#ws-dict-input');
+ input?.addEventListener('input',()=>{query=input.value;refreshDictionaryResults()});
+ refreshDictionaryResults();
 }
 function wordDetail(id){
- const w=byId[id],p=profile.words[id];
- shell(h(w.en),'<section class="flash learn"><div class="ipa">'+h(w.ipa||'')+'</div><div class="translation">'+h(w.ru)+'</div>'+btn('▶ Произнести','say:'+h(w.en),'quiet')+'<div class="art">'+visual(w)+'</div><p>'+h(w.scene||'')+'</p><p class="reason">Статус: '+({new:'Не изучено',known:'Предварительно знакомо',learning:'Закрепляется',mastered:'Закреплено'}[E.status(p)]||'')+'</p></section>'+btn('Словарь','dictionary','quiet'));
+ const w=byId[id];if(!w)return dictionaryView();
+ view='word';
+ const state=E.status(profile.words[id]);
+ const status=dictionaryStatuses[state].label;
+ shell('','', '<main class="ws-dict-page ws-dict-detail"><div class="ws-dict-header">'+btn(pickerIcon('back'),'dictionary','ws-dict-back')+
+  '<div><h1>Карточка слова</h1><p>Словарь WordScene</p></div></div>'+
+  '<section class="ws-dict-detail-card"><div class="ws-dict-word">'+
+  '<span class="ws-dict-status ws-dict-status-'+state+'">'+status+'</span>'+
+  '<div class="ws-dict-word-heading"><h2>'+h(w.en)+'</h2>'+btn(pickerIcon('volume'),'say:'+h(w.en),'ws-dict-audio')+'</div>'+
+  '<p class="ws-dict-ipa">'+h(w.ipa||'')+'</p><div class="ws-dict-translation">'+h(w.ru)+'</div></div>'+
+  '<div class="ws-dict-art">'+visual(w)+'</div>'+
+  '<div class="ws-dict-association"><h3>Ассоциация для запоминания</h3><p>'+h(w.scene||'Для этого слова нет текстовой ассоциации.')+'</p></div>'+
+  '</section>'+btn('Вернуться в словарь','dictionary','ws-dict-return')+'</main>');
 }
 function recoverScreen(){
  view='recover';let backup;
@@ -541,6 +591,7 @@ function render(){if(session){if(E.timedOut(session,Date.now()))return expire(ne
 function dispatch(act,el){
  if(storageFailure&&!['home','dictionary','progress','recover','restoreBackup'].includes(act)&&!act.startsWith('word:')&&!act.startsWith('say:'))return notice('Сохранение заблокировано. Никакие данные не перезаписываются.');
  if(act.startsWith('say:'))return speak(act.slice(4));
+ if(act.startsWith('dictionaryFilter:')){dictionaryFilter=act.slice(17);return dictionaryView();}
  if(act.startsWith('removeManual:')){manual.delete(act.slice(13));if(!manual.size)manualSummaryOpen=false;return manualView(view==='fill')}
  if(act==='manualSummary'){manualSummaryOpen=!manualSummaryOpen;return manualView(view==='fill')}
  if(act==='manualSummaryClose'){manualSummaryOpen=false;manualView(view==='fill');root.querySelector?.('.ws-manual-summary-toggle')?.focus?.({preventScroll:true});return}
