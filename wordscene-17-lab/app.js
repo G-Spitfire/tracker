@@ -150,17 +150,29 @@ function wordCount(n){
 }
 function paperLevel(){
  const p=E.levelProgress(profile),count=Math.min(3,p.window||0);
- const detail=p.target?
-  '<p class="paper-target">Следующий уровень — '+p.target+'</p>'+
-  '<div class="paper-confirmed"><small>Подтверждено занятий: <strong>'+count+' из 3</strong></small>'+
-  '<div class="paper-steps" aria-hidden="true">'+[1,2,3].map(i=>i<=count?'<i class="filled">✓</i>':'<i></i>').join('')+'</div></div>'+
-  (count===3?'<small class="paper-level-rate">Вспомнил в обе стороны: <strong>'+Math.floor(p.successRate*100)+'%</strong></small>':'')+
-  '<details class="paper-level-help"><summary>'+paperIcon('info')+' Как перейти на следующий уровень</summary>'+
-  '<p>Нужно подтвердить три занятия, в каждом не менее '+p.min+' новых слов. На последующем повторении правильно вспомнить не менее '+Math.round(p.threshold*100)+'% слов в обе стороны.</p></details>':
+ const rate=p.successRate===null||!Number.isFinite(p.successRate)?null:Math.round(p.successRate*100);
+ const threshold=p.threshold?Math.round(p.threshold*100):null;
+ const details=p.target?
+  '<div class="paper-level-stats">'+
+   '<div class="paper-level-stat"><span class="paper-level-stat-label">Занятия</span>'+
+    '<div class="paper-level-stat-value"><strong>'+count+'</strong><span>из 3</span></div>'+
+    '<div class="paper-level-segments" aria-label="Подтверждено '+count+' из 3 занятий">'+
+     [1,2,3].map(i=>'<i'+(i<=count?' class="filled"':'')+'></i>').join('')+'</div></div>'+
+   '<div class="paper-level-stat"><span class="paper-level-stat-label">Качество повторений</span>'+
+    '<div class="paper-level-stat-value"><strong>'+(rate===null?'—':rate+'%')+'</strong><span>цель '+threshold+'%</span></div>'+
+    '<div class="paper-level-quality-track" aria-label="'+(rate===null?'Пока нет подтверждённых проверок':'Успешность '+rate+'%, цель '+threshold+'%')+'">'+
+      (rate===null?'':'<i class="'+(rate>=threshold?'reached':'')+'" style="width:'+Math.max(0,Math.min(100,rate))+'%"></i>')+
+    '</div></div></div>'+
+   '<p class="paper-level-next">Следующий уровень — <strong>'+p.target+'</strong></p>'+
+   '<details class="paper-level-help"><summary>Подробнее '+paperIcon('next')+'</summary>'+
+    '<div class="paper-level-explain"><strong>Как перейти на уровень «'+p.target+'»</strong>'+
+     '<p>Нужно подтвердить три подходящих занятия, изучив не менее '+p.min+' новых слов в каждом.</p>'+
+     '<p>На последующих повторениях вспомнить не менее '+threshold+'% слов в обе стороны. Учитываются первые проверки.</p>'+
+     '<p>Три занятия сами по себе не гарантируют повышение.</p></div></details>':
   '<p class="paper-level-finished">Ты на самом высоком уровне.</p>';
  return '<section class="paper-card paper-level" aria-labelledby="paper-level">'+
-  '<div class="paper-level-heading">'+paperIcon('cap')+'<div><h2 id="paper-level">Твой уровень</h2><div class="paper-rank">'+levelLabels[profile.level]+'</div></div>'+
-  '</div>'+detail+'</section>';
+  '<div class="paper-level-heading">'+paperIcon('cap')+'<div><h2 id="paper-level">Твой уровень</h2><div class="paper-rank">'+levelLabels[profile.level]+'</div></div></div>'+
+  details+'</section>';
 }
 function paperProgress(){
  const total=dictionary.length,words=dictionary.map(w=>profile.words[w.en]);

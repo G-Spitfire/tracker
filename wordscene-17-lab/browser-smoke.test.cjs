@@ -265,7 +265,7 @@ test('Paper uses an informational success card, simplified level, and no plus fo
  assert.match(b.root.html,/class="paper-done" role="status"/);
  assert.doesNotMatch(b.root.html,/data-action="review"/);
  assert.match(b.root.html,/class="paper-level-help"/);
- assert.match(b.root.html,/Как перейти на следующий уровень/);
+ assert.match(b.root.html,/Как перейти на уровень «Опытный»/);
  assert.doesNotMatch(b.root.html,/paper-icon-plus/);
  assert.match(b.root.html,/class="paper-action paper-sources"/);
  const css=file('style.css');
@@ -282,4 +282,34 @@ test('mandatory due review keeps new-word button locked and never shows the all-
  assert.match(b.root.html,/paper-icon-lock/);
  assert.match(b.root.html,/Повторить сегодня: 1 слово/);
  assert.doesNotMatch(b.root.html,/class="paper-done"/);
+});
+
+
+test('Paper level card displays confirmed sessions, recall success and only reveals rules on demand',()=>{
+ const b=boot();
+ assert.ok(b.root.html.includes('Твой уровень'));
+ assert.ok(b.root.html.includes('Новичок'));
+ assert.ok(b.root.html.includes('<strong>0</strong><span>из 3</span>'));
+ assert.ok(b.root.html.includes('<strong>—</strong><span>цель 80%</span>'));
+ assert.ok(b.root.html.includes('Следующий уровень — <strong>Опытный</strong>'));
+ assert.ok(b.root.html.includes('<details class="paper-level-help"><summary>Подробнее'));
+ assert.ok(!b.root.html.includes('class="paper-target"'));
+ const css=file('style.css');
+ assert.ok(css.includes('.paper-level-stats{display:grid;grid-template-columns:1fr 1fr'));
+ assert.ok(css.includes('.paper-actions{grid-auto-rows:minmax(var(--ws-action-min-height),1fr)}'));
+});
+test('Paper level metrics use only confirmed relevant lessons, not all reviews',()=>{
+ const seed=boot(),E=seed.window.WS17Engine,p=E.empty(),at=new Date(2026,10,6,12).getTime();
+ for(let k=0;k<2;k++){
+  const lessonAt=at-(k+5)*86400000,reviewAt=at-(k+3)*86400000;
+  const ids=Array.from({length:10},(_,i)=>'level-'+k+'-'+i);
+  p.sessions.push({id:'learn-'+k,mode:'new',at:lessonAt,ids,successful:8});
+  ids.forEach((id,i)=>p.words[id]={origin:'learned',schedule:{...E.newSchedule(lessonAt),nextDay:'2099-01-01'},history:[{at:reviewAt,ok:i<8}]});
+ }
+ const map=new Map([['wordscene-17-lab-v1',JSON.stringify(p)]]);
+ const b=boot({map,now:at});
+ assert.ok(b.root.html.includes('<strong>2</strong><span>из 3</span>'));
+ assert.ok(b.root.html.includes('<strong>80%</strong><span>цель 80%</span>'));
+ assert.ok(b.root.html.includes('class="reached" style="width:80%"'));
+ assert.equal(b.map.get('wordscene-17-lab-v1'),JSON.stringify(p));
 });
