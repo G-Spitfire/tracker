@@ -1311,3 +1311,12 @@ html:has(.ws-paper-page),body:has(.ws-paper-page){background:#fdf7ed}
 @media(prefers-reduced-motion:reduce){
  .ws-paper-inner{transition:none!important}
 }
+
+/* Flip-specific animation is used when grading re-renders the active recall sheet. */
+@keyframes ws-paper-flip-to-back{from{transform:rotateY(0deg)}to{transform:rotateY(180deg)}}
+@keyframes ws-paper-flip-to-front{from{transform:rotateY(180deg)}to{transform:rotateY(0deg)}}
+.ws-paper-turn-back .ws-paper-inner{animation:ws-paper-flip-to-back .48s cubic-bezier(.22,.65,.24,1) both}
+.ws-paper-turn-front .ws-paper-inner{animation:ws-paper-flip-to-front .48s cubic-bezier(.22,.65,.24,1) both}
+@media(prefers-reduced-motion:reduce){
+ .ws-paper-turn-back .ws-paper-inner,.ws-paper-turn-front .ws-paper-inner{animation:none!important}
+}
