@@ -352,11 +352,11 @@ function learn(focusWord=false){
  shell('', '', '<main class="ws-learn ws-learn-v2">'+
  '<div class="ws-learn-header"><div><h1>Запоминание</h1><small>Изучаем новые слова</small></div><span class="ws-learn-count" aria-label="Слово '+position+' из '+total+'">'+position+' из '+total+'</span></div>'+
  '<div class="ws-learn-progress" role="progressbar" aria-label="Прогресс запоминания" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+position+'"><span style="width:'+progress+'%"></span></div>'+
- '<section class="flash learn" tabindex="0" aria-label="Материалы слова"><h2 id="learn-word" tabindex="-1">'+h(w.en)+'</h2>'+
+ '<section class="flash learn" tabindex="0" aria-label="Материалы слова"><div class="ws-learn-primary"><h2 id="learn-word" tabindex="-1">'+h(w.en)+'</h2>'+
  '<div class="ws-learn-pronunciation"><span class="ipa">'+h(w.ipa||'')+'</span>'+
  btn(pickerIcon('volume'),'say:'+h(w.en),'ws-learn-speak')+'</div>'+
- '<div class="translation">'+h(w.ru)+'</div>'+
- '<div class="art">'+visual(w)+'</div><p class="scene">'+h(w.scene||'')+'</p></section>'+
+ '<div class="translation">'+h(w.ru)+'</div></div>'+
+ '<div class="ws-learn-association"><div class="art">'+visual(w)+'</div><p class="scene">'+h(w.scene||'')+'</p></div></section>'+
  '<div class="ws-learn-actions"><p class="ws-learn-scroll-note" hidden aria-hidden="true">Прокрути карточку ↓</p>'+
  btn((session.learnIndex===total-1?'Начать проверку':'Дальше')+' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>','learnNext','primary')+
  '<div class="ws-learn-session-actions">'+cardActions()+'</div></div></main>');
