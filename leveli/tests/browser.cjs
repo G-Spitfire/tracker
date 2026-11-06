@@ -321,6 +321,15 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   assert.equal(await page.locator('.b3-header h1').innerText(),'Настройки');
 
   assert.equal(state.tileCount,4,'all quick-setting tiles remain readable on '+width+'px screen');
+  const tileLayout=await page.locator('.b3-tile').first().evaluate(el=>{
+   const icon=el.querySelector('.b3-tile-icon'),svg=icon?.querySelector('svg'),label=el.querySelector('strong');
+   const i=icon?.getBoundingClientRect(),t=label?.getBoundingClientRect(),v=svg?.getBoundingClientRect();
+   return {display:getComputedStyle(el).display,iconRight:i?.right,labelLeft:t?.left,svgWidth:v?.width,svgHeight:v?.height};
+  });
+  assert.equal(tileLayout.display,'grid','quick settings use compact grid layout at '+width+'px');
+  assert.ok(tileLayout.iconRight<=tileLayout.labelLeft+1,'settings icon remains left of its label at '+width+'px');
+  assert.equal(tileLayout.svgWidth,24,'settings icon artwork width at '+width+'px');
+  assert.equal(tileLayout.svgHeight,24,'settings icon artwork height at '+width+'px');
  }
  await page.locator('[data-b3-panel="theme"]').click();
  assert.equal(await page.locator('#b3-panel-overlay').isVisible(),true);
