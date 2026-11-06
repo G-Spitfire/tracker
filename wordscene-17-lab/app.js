@@ -353,8 +353,8 @@ function learn(focusWord=false){
  '<div class="ws-learn-header"><div><h1>Запоминание</h1><small>Изучаем новые слова</small></div><span class="ws-learn-count" aria-label="Слово '+position+' из '+total+'">'+position+' из '+total+'</span></div>'+
  '<div class="ws-learn-progress" role="progressbar" aria-label="Прогресс запоминания" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+position+'"><span style="width:'+progress+'%"></span></div>'+
  '<section class="flash learn" tabindex="0" aria-label="Материалы слова"><h2 id="learn-word" tabindex="-1">'+h(w.en)+'</h2>'+
- '<div class="ipa">'+h(w.ipa||'')+'</div>'+
- btn(pickerIcon('volume'),'say:'+h(w.en),'ws-learn-speak')+
+ '<div class="ws-learn-pronunciation"><span class="ipa">'+h(w.ipa||'')+'</span>'+
+ btn(pickerIcon('volume'),'say:'+h(w.en),'ws-learn-speak')+'</div>'+
  '<div class="translation">'+h(w.ru)+'</div>'+
  '<div class="art">'+visual(w)+'</div><p class="scene">'+h(w.scene||'')+'</p></section>'+
  '<div class="ws-learn-actions"><p class="ws-learn-scroll-note" hidden aria-hidden="true">Прокрути карточку ↓</p>'+
@@ -395,7 +395,7 @@ function recall(){
   association+
   (!failed?'<div class="ws-recall-tap-note">Нажми на карточку, чтобы вернуть слово</div>':'')+
   '</div>';
- const card='<section class="flash recall ws-recall-card" aria-label="Карточка проверки">'+
+ const card='<section class="flash recall ws-recall-card'+(showHelp?' is-expanded':'')+'" aria-label="Карточка проверки">'+
   '<div class="ws-recall-flip '+(answerVisible?'is-flipped':'')+flipMotion+'" data-flip-card="true" role="button" tabindex="0" aria-label="'+(failed?'Правильный перевод':answerVisible?'Вернуть исходное слово':'Показать перевод')+'" aria-expanded="'+answerVisible+'">'+
   '<div class="ws-recall-flip-inner">'+frontFace+backFace+'</div></div></section>';
  const grade='<div class="ws-recall-decisions">'+(failed?
