@@ -210,6 +210,15 @@ async function run(name, browserType, contextOptions) {
     }
    };
    const before=await measure();
+   const buttonKit=await page.evaluate(()=>[...document.querySelectorAll('.ws-recall-decisions button')].map(el=>({
+    height:el.getBoundingClientRect().height,
+    radius:parseFloat(getComputedStyle(el).borderTopLeftRadius)
+   })));
+   assert.equal(buttonKit.length,2,'both scoring buttons are present');
+   for(const item of buttonKit){
+    assert.ok(item.height>=63,'scoring button should be at least 63px high: '+JSON.stringify(item));
+    assert.ok(Math.abs(item.radius-21)<=1,'scoring button should use 21px Paper radius');
+   }
    assert.ok(before.card.height>100,'recall card must use available height');
    assert.ok(Math.abs(before.root.bottom-before.viewport)<3,'recall screen should fill viewport');
    assert.ok(await page.locator('[data-action="yes"]').isVisible(),'direct success is visible');
@@ -218,7 +227,9 @@ async function run(name, browserType, contextOptions) {
    assert.equal(await page.locator('.ws-recall-answer').count(),0,'translation initially hidden');
    await page.locator('[data-action="recallHint"]').click();
    assert.ok(await page.locator('.ws-recall-clue').count()>0,'hint available');
+   checkPositions(before,await measure(),'show hint');
    await page.locator('[data-action="recallHint"]').click();
+   checkPositions(before,await measure(),'hide hint');
    await page.locator('[data-action="check"]').click();
    assert.equal(await page.locator('.ws-recall-answer').count(),1);
    checkPositions(before,await measure(),'show translation');
@@ -226,6 +237,14 @@ async function run(name, browserType, contextOptions) {
    await page.locator('[data-action="hideTranslation"]').click();
    assert.equal(await page.locator('.ws-recall-answer').count(),0);
    checkPositions(before,await measure(),'hide translation');
+   await page.locator('[data-action="pause"]').click();
+   const continueStyle=await page.locator('.ws-recall-session-actions > .primary').evaluate(el=>({
+    text:el.textContent.trim(),background:getComputedStyle(el).backgroundImage
+   }));
+   assert.equal(continueStyle.text,'Продолжить','pause should show Continue');
+   assert.ok(continueStyle.background.includes('linear-gradient'),'Continue must use the Paper blue gradient');
+   await page.locator('[data-action="continue"]').click();
+   checkPositions(before,await measure(),'resume recall');
    await page.locator('[data-action="no"]').click();
    assert.equal(await page.locator('.ws-recall-answer').count(),1);
    assert.ok(await page.locator('[data-action="yes"]').count()===0,'after failure grading is blocked');
