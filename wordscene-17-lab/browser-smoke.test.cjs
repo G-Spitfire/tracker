@@ -15,7 +15,7 @@ function boot(options={}){
  let now=options.now??Date.now(),tick;
  class TestDate extends Date{static now(){return now}}
  const window={WordSceneTopics:options.topics||{topics:[],forWord:()=>[]},WordSceneContent:{cards:[],render:()=>'<svg></svg>'},confirm:()=>true};
- const doc={getElementById:id=>id==='childName'||id==='childAge'?{value:options.inputs?.[id]??''}:root,createElement:()=>{const actions={};return {setAttribute(){},hidden:true,addEventListener(){},remove(){root.dialog=null},querySelector(selector){const key=selector.includes('stay')?'stay':'leave';return actions[key]||(actions[key]={listeners:{},addEventListener(name,cb){this.listeners[name]=cb},click(){this.listeners.click?.()},focus(){doc.activeElement=this}})}}}},body:{append(){}}};
+ const doc={getElementById:id=>id==='childName'||id==='childAge'?{value:options.inputs?.[id]??''}:root,createElement(){const actions={};const dialog={setAttribute(){},hidden:true,addEventListener(){},remove(){root.dialog=null},querySelector(selector){const key=selector.includes('stay')?'stay':'leave';if(!actions[key])actions[key]={listeners:{},addEventListener(name,cb){this.listeners[name]=cb},click(){this.listeners.click?.()},focus(){doc.activeElement=this}};return actions[key]}};return dialog},body:{append(){}}};
  const context={window,document:doc,localStorage:storage,navigator:{},setInterval:cb=>{tick=cb},setTimeout:()=>0,clearTimeout:()=>{},Date:TestDate,Math,console};
  vm.createContext(context);
  const mod={exports:{}};vm.runInNewContext(file('engine.js'),Object.assign(context,{module:mod,exports:mod.exports}));window.WS17Engine=mod.exports;
