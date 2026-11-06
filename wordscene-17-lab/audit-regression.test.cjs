@@ -57,7 +57,7 @@ test('removed manual scrolling hints leave no dead markup or CSS selectors',()=>
 test('Paper confirmation supports Escape and focus trapping',()=>{
  const dialog=app.split('function confirmExit(practice=false){')[1].split('function confirmCancel()')[0];
  assert.match(dialog,/event.key==='Escape'/);
- assert.match(dialog,/event.key==='Tab'/);
+ assert.match(dialog,/event.key!=='Tab'/);
  assert.match(dialog,/previousFocus\?\.focus\?\.\(\)/);
 });
 test('approved 44px minimum applies to four touch targets',()=>{
