@@ -608,6 +608,28 @@ body{background:#0e0c21;color:#f6f0ff}
 @media(prefers-reduced-motion:reduce){
  :root .b3-tile,:root .b3-change-avatar,:root .orient-more{transition:none!important}
 }
+
+/* B3 character window: open top, accent sides and rounded base, no square portrait frame.
+   Portrait stays over the card; its straight bitmap ending disappears behind the base. */
+.b3-avatar-stand:has(.avatar-illustration.cutout-ready){isolation:isolate}
+.b3-avatar-stand:has(.avatar-illustration.cutout-ready)::after{
+ content:"";position:absolute;z-index:2;pointer-events:none;
+ top:15%;right:-12px;bottom:0;left:-12px;
+ border-inline:2px solid var(--leveli-accent-border);
+ border-bottom:2px solid var(--leveli-accent-border);
+ border-radius:0 0 16px 16px;
+ filter:drop-shadow(0 2px 4px #0b071d40);
+}
+.b3-avatar-stand .avatar-illustration.cutout-ready{
+ -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 88%,transparent 100%);
+ mask-image:linear-gradient(to bottom,#000 0%,#000 88%,transparent 100%);
+}
+:root[data-leveli-theme="light"] .b3-avatar-stand:has(.avatar-illustration.cutout-ready)::after{
+ filter:drop-shadow(0 1px 3px #34214e1f);
+}
+@media(max-width:360px){
+ .b3-avatar-stand:has(.avatar-illustration.cutout-ready)::after{right:-10px;left:-10px;top:15%;border-radius:0 0 13px 13px}
+}
 </style></head><body><div class="app"><main class="content" id="main">
 <section data-page="home"><header class="school-header"><div><div class="eyebrow brand-lockup"><img src="./brand/mark.svg" alt="" width="30" height="30" aria-hidden="true"><span>Левели</span></div><h1 id="home-greeting">Привет!</h1><p id="home-birthday-greeting" class="home-birthday-greeting" hidden></p><p>Мои оценки и успеваемость</p><div class="header-period" id="school-header-period">II четверть · 2026/27 учебный год</div></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
 <article class="card" id="school-login"><h2>Войди, чтобы увидеть оценки</h2><p>Оценки загружаются из электронного дневника.</p><form id="school-form"><label>Почта<input id="school-email" type="email" autocomplete="username" required></label><label>Пароль<input id="school-password" type="password" autocomplete="current-password" required></label><button class="btn" type="submit">Войти</button></form></article>
