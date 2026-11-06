@@ -79,6 +79,8 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  ];
  for(const [label,accent,track,glow] of accents){
   await page.getByRole('button',{name:label,exact:true}).click();
+  // Wait for the agreed 160ms color transition before inspecting computed borders.
+  await page.waitForTimeout(220);
   const state=await page.evaluate(()=>({
    accent:document.documentElement.style.getPropertyValue('--leveli-accent'),
    track:document.querySelector('#school-donut circle[data-accent-track="true"]')?.getAttribute('stroke'),
