@@ -1138,3 +1138,63 @@ html:has(.ws-progress-page),body:has(.ws-progress-page){background:#fdf7ed}
  .ws-progress-page .quality-value{font-size:40px;min-width:95px}
 }
 @media(prefers-reduced-motion:reduce){.ws-progress-quality-track span{transition:none}}
+
+/* Approved WordScene Paper dictionary and word detail, stage 2. */
+html:has(.ws-dict-page),body:has(.ws-dict-page){background:#fdf7ed}
+.ws-dict-page{max-width:550px;min-height:100dvh;margin:0 auto;padding:17px max(15px,env(safe-area-inset-right)) max(28px,env(safe-area-inset-bottom)) max(15px,env(safe-area-inset-left));background:#fdf7ed;color:#0c1731}
+.ws-dict-header{display:flex;align-items:center;gap:12px;margin:0 0 18px}
+.ws-dict-header h1{font-size:clamp(23px,6.5vw,26px);font-weight:850;letter-spacing:-.04em;margin:0;color:#0c1731}
+.ws-dict-header p{font-size:12px;margin:3px 0 0;color:#596676}
+.ws-dict-back{flex:none;width:44px;height:44px;display:grid;place-items:center;border:1px solid #e8decf;border-radius:13px;padding:9px;background:#fffbf5;color:#0c1731}
+.ws-dict-back svg{width:22px;height:22px}
+.ws-dict-search{margin:0 0 12px}
+.ws-dict-search label{display:block;font-size:12px;font-weight:700;color:#506176;margin-bottom:8px}
+.ws-dict-search input{min-height:48px;width:100%;border:1px solid #d5dfe8;border-radius:15px;background:#fffbf5;padding:11px 14px;color:#0c1731;box-shadow:0 1px 5px #392d1b09;font-size:15px;outline-offset:2px}
+.ws-dict-search input:focus{border-color:#087bfa;outline:2px solid #087bfa60}
+.ws-dict-filters{display:flex;gap:7px;overflow-x:auto;scrollbar-width:thin;white-space:nowrap;padding:2px 0 12px;-webkit-overflow-scrolling:touch}
+.ws-dict-filter{min-height:44px;flex:none;border:1px solid #e0d9cf;border-radius:100px;padding:9px 12px;background:#fffbf5;color:#536174;font-size:12px;font-weight:700}
+.ws-dict-filter.is-active{border-color:#087bfa;background:#eaf3ff;color:#0753bb}
+.ws-dict-list-card,.ws-dict-detail-card{background:#fffbf5;border:1px solid #e8decf;border-radius:24px;box-shadow:0 5px 18px rgba(57,45,27,.075),0 1px 2px rgba(57,45,27,.04);overflow:hidden}
+.ws-dict-list-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 15px 10px;border-bottom:1px solid #e8decf}
+.ws-dict-list-head h2{font-size:17px;font-weight:800;margin:0;color:#0c1731}
+.ws-dict-list-head span{font-size:12px;color:#596676;font-weight:600;white-space:nowrap}
+.ws-dict-results{display:block}
+.ws-dict-row{display:flex;width:100%;align-items:center;gap:9px;min-height:68px;border:0;border-radius:0;background:transparent;text-align:left;padding:10px 13px;color:#0c1731}
+.ws-dict-row+.ws-dict-row{border-top:1px solid #ece5dc}
+.ws-dict-row:active{background:#eaf3ff}
+.ws-dict-row-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}
+.ws-dict-row-copy strong{font-size:16px;font-weight:800;overflow-wrap:anywhere}
+.ws-dict-row-copy small{font-size:13px;color:#596676;line-height:1.3;overflow-wrap:anywhere}
+.ws-dict-status{display:inline-flex;max-width:100%;width:max-content;align-items:center;justify-content:center;flex:none;border-radius:100px;padding:6px 8px;font-size:11px;font-weight:750;line-height:1.2;white-space:nowrap}
+.ws-dict-status-new{background:#eef0f3;color:#4f5c6d}
+.ws-dict-status-known{background:#f4eafa;color:#6c3e83}
+.ws-dict-status-learning{background:#eaf3ff;color:#0753bb}
+.ws-dict-status-mastered{background:#e2f4e6;color:#257238}
+.ws-dict-row-arrow{font-size:24px;color:#7d8b9c;font-weight:400}
+.ws-dict-empty{text-align:center;padding:40px 16px;color:#0c1731}
+.ws-dict-empty strong{font-size:15px}
+.ws-dict-empty p{font-size:13px;line-height:1.45;color:#657184}
+.ws-dict-footnote{font-size:12px;color:#657184;text-align:center;line-height:1.5;margin:15px auto}
+.ws-dict-detail-card{padding:15px}
+.ws-dict-word{background:#eaf3ff;border-radius:19px;padding:18px;margin-bottom:14px}
+.ws-dict-word-heading{display:flex;align-items:center;justify-content:center;gap:12px;margin:9px 0 2px}
+.ws-dict-word-heading h2{font-size:clamp(27px,9vw,40px);letter-spacing:-.045em;color:#0c1731;overflow-wrap:anywhere;text-align:center;line-height:1.15;margin:0}
+.ws-dict-audio{flex:none;width:44px;height:44px;border-radius:50%;padding:10px;background:#fffbf5;border:1px solid #ccddeb;color:#0753bb;display:grid;place-items:center}
+.ws-dict-audio svg{width:21px;height:21px}
+.ws-dict-ipa{font-size:15px;text-align:center;color:#59738c;margin:3px 0 13px}
+.ws-dict-translation{text-align:center;border-top:1px solid #cbdceb;padding-top:13px;font-size:21px;font-weight:750;color:#0c1731;overflow-wrap:anywhere}
+.ws-dict-art{display:grid;place-items:center;min-height:150px;margin:4px 0 15px;overflow:hidden;border-radius:17px;background:#f4efe7}
+.ws-dict-art svg,.ws-dict-art img{width:100%;max-width:100%;max-height:290px;height:auto;object-fit:contain;display:block}
+.ws-dict-art .simple-art{width:100%;color:#0c1731}
+.ws-dict-association{background:#f3ecf8;border-radius:16px;padding:14px}
+.ws-dict-association h3{font-size:13px;font-weight:800;color:#33445c;margin:0 0 7px}
+.ws-dict-association p{font-size:14px;line-height:1.55;color:#46536a;margin:0;overflow-wrap:anywhere}
+.ws-dict-return{display:block;width:100%;min-height:52px;border-radius:16px;background:#eaf3ff;color:#0753bb;font-size:15px;margin:15px 0 0}
+@media(max-width:365px){
+ .ws-dict-page{padding-inline:12px}
+ .ws-dict-row{padding-inline:10px;gap:6px}
+ .ws-dict-status{font-size:10px;padding-inline:6px}
+ .ws-dict-row-copy strong{font-size:14px}
+ .ws-dict-row-copy small{font-size:12px}
+ .ws-dict-detail-card{padding:11px}
+}
