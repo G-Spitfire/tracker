@@ -241,18 +241,18 @@ function pickerIcon(name){
  };
  return '<svg class="ws-picker-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+shapes[name]+'</svg>';
 }
-function paperWordSide(w,english,back=false,hidden=false){
+function paperWordSide(w,english,back=false,hidden=false,locked=false){
  return '<div class="ws-paper-face'+(back?' ws-paper-face-back':'')+'" aria-hidden="'+hidden+'" '+(hidden?'inert':'')+'>'+
   '<div class="ws-paper-grain" aria-hidden="true"></div>'+
   '<div class="ws-paper-wordbox"><strong class="ws-paper-word">'+h(english?w.en:w.ru)+'</strong>'+
   '<span class="ws-paper-ipa">'+(english?h(w.ipa||''):'')+'</span>'+
   '<span class="ws-paper-sound-slot">'+(english?btn(pickerIcon('volume'),'say:'+h(w.en),'ws-paper-sound'):'')+'</span></div>'+
-  '<div class="ws-paper-foot"><span>↻ ПЕРЕВЕРНИ</span></div></div>';
+  (locked?'':'<div class="ws-paper-foot"><span>↻ ПЕРЕВЕРНИ</span></div>')+'</div>';
 }
 function paperSheet(w,frontEnglish,flipped=false,locked=false,motion=''){
  return '<div class="ws-paper-stage"><div class="ws-paper-underlay" aria-hidden="true"></div>'+
   '<div class="ws-paper-sheet'+(flipped?' is-flipped':'')+(motion?' ws-paper-turn-'+motion:'')+'" data-flip-card="true" role="button" tabindex="0" aria-label="'+(locked?'Ответ открыт':flipped?'Вернуть исходное слово':'Перевернуть лист')+'" aria-expanded="'+flipped+'">'+
-  '<div class="ws-paper-inner">'+paperWordSide(w,frontEnglish,false,flipped)+paperWordSide(w,!frontEnglish,true,!flipped)+'</div></div></div>';
+  '<div class="ws-paper-inner">'+paperWordSide(w,frontEnglish,false,flipped,locked)+paperWordSide(w,!frontEnglish,true,!flipped,locked)+'</div></div></div>';
 }
 function paperFlipInPlace(flipped){
  const sheet=root.querySelector?.('[data-flip-card]');
