@@ -49,7 +49,7 @@ test('Paper dictionary filters by learning status and keeps details read-only',(
 });
 test('automatic 10 word selection -> memorization -> 3 two-way passes -> atomic result',()=>{
  const b=boot();b.click('sources');b.click('auto');
- for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
+ for(let i=0;i<10;i++){b.click('unknown')}
  for(let i=0;i<10;i++)b.click('learnNext');
  for(let i=0;i<60;i++)b.click('yes')
  const data=JSON.parse(b.map.get('wordscene-17-lab-v1'));
@@ -58,15 +58,15 @@ test('automatic 10 word selection -> memorization -> 3 two-way passes -> atomic 
 });
 test('approved memorization UI keeps illustration visible, progress and unchanged recall help',()=>{
  const b=boot();b.click('sources');b.click('auto');
- for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
- assert.match(b.root.html,/class="ws-learn ws-learn-v2"/);
+ for(let i=0;i<10;i++){b.click('unknown')}
+ assert.match(b.root.html,/class="ws-paper-page ws-paper-learn"/);
  assert.match(b.root.html,/Прогресс запоминания/);
- assert.match(b.root.html,/class="art"/);
- assert.match(b.root.html,/class="scene"/);
+ assert.match(b.root.html,/class="ws-paper-art"/);
+ assert.match(b.root.html,/class="ws-paper-scene"/);
  assert.match(b.root.html,/data-action="say:[^"]+"/);
  assert.doesNotMatch(b.root.html,/data-action="toggleArt"|Представить без картинки|Показать ассоциацию/);
  b.click('pause');assert.match(b.root.html,/data-action="continue"/);
- b.click('continue');assert.match(b.root.html,/class="art"/);
+ b.click('continue');assert.match(b.root.html,/class="ws-paper-art"/);
  b.click('learnNext');assert.match(b.root.html,/aria-valuenow="2"/);
  b.click('learnNext');assert.match(b.root.html,/aria-valuenow="3"/);
  for(let i=0;i<7;i++)b.click('learnNext');
@@ -79,7 +79,7 @@ test('approved memorization UI keeps illustration visible, progress and unchange
 
 test('recall v4 offers optional flip and association only after reveal',()=>{
  const b=boot();b.click('sources');b.click('auto');
- for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
+ for(let i=0;i<10;i++){b.click('unknown')}
  for(let i=0;i<10;i++)b.click('learnNext');
  assert.match(b.root.html,/ws-recall-v4/);
  assert.match(b.root.html,/data-action="yes"/);
@@ -92,7 +92,7 @@ test('recall v4 offers optional flip and association only after reveal',()=>{
  assert.match(b.root.html,/data-action="help"/);
  assert.match(b.root.html,/data-action="checkedYes"/);
  b.click('help');
- assert.match(b.root.html,/ws-recall-clue-art/);
+ assert.match(b.root.html,/ws-paper-art/);
  b.click('help');
  b.click('flip');
  assert.match(b.root.html,/aria-expanded="false"/);
@@ -104,22 +104,22 @@ test('recall v4 offers optional flip and association only after reveal',()=>{
  assert.match(b.root.html,/data-action="advance"/);
  assert.doesNotMatch(b.root.html,/data-action="yes"/);
  b.click('help');
- assert.match(b.root.html,/ws-recall-clue-art/);
+ assert.match(b.root.html,/ws-paper-art/);
  b.click('pause');
  assert.match(b.root.html,/data-action="continue"/);
  b.click('continue');
- assert.match(b.root.html,/ws-recall-clue-art/);
+ assert.match(b.root.html,/ws-paper-art/);
  b.click('advance');
  assert.match(b.root.html,/data-action="yes"/);
  const css=file('style.css');
- assert.ok(css.includes('.ws-recall-v4 .ws-recall-card'));
- assert.ok(css.includes('.ws-recall-v4 .ws-recall-speak'));
- assert.ok(css.includes('.ws-recall-v4 .ws-recall-next'));
+ assert.ok(css.includes('.ws-paper-stage'));
+ assert.ok(css.includes('.ws-paper-sound'));
+ assert.ok(css.includes('.ws-paper-decisions'));
 });
 
 test('confirmed cancellation keeps persistent profile clean',()=>{
  const b=boot();b.click('sources');b.click('auto');
- for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
+ for(let i=0;i<10;i++){b.click('unknown')}
  b.click('cancel');
  const saved=JSON.parse(b.map.get('wordscene-17-lab-v1'));
  assert.deepEqual(Object.keys(saved.words),[]);assert.equal(saved.sessions.length,0);
@@ -128,7 +128,7 @@ test('confirmed cancellation keeps persistent profile clean',()=>{
 
 test('failed final profile write does not falsely display completion',()=>{
  const b=boot();b.click('sources');b.click('auto');
- for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
+ for(let i=0;i<10;i++){b.click('unknown')}
  for(let i=0;i<10;i++)b.click('learnNext');
  for(let i=0;i<59;i++)b.click('yes')
  b.setFailProfileWrite(true);b.click('yes');
@@ -140,7 +140,7 @@ test('failed final profile write does not falsely display completion',()=>{
 
 test('pause displays a countdown without extending the saved deadline',()=>{
  const b=boot();b.click('sources');b.click('auto');
- for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
+ for(let i=0;i<10;i++){b.click('unknown')}
  b.click('pause');
  assert.match(b.root.html,/Осталось 30:00/);
  const active='wordscene-17-lab-active-v1';
@@ -163,7 +163,7 @@ test('Paper shows real totals with new words first and the reason inside the loc
 test('reload restores the same card before the deadline without moving it',()=>{
  const b=boot();
  b.click('sources');b.click('auto');
- for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
+ for(let i=0;i<10;i++){b.click('unknown')}
  b.click('learnNext');b.click('pause');
  const key='wordscene-17-lab-active-v1', saved=b.map.get(key);
  const restored=boot({map:b.map,now:b.now()+29*60000});
@@ -245,19 +245,19 @@ test('Paper home has no profile gear and retains navigation',()=>{
 });
 test('Paper picker v2 keeps aligned counters, approved button order and two-way card reveal',()=>{
  const b=boot();b.click('sources');b.click('auto');
- assert.match(b.root.html,/class="ws-picker ws-picker-v2"/);
- assert.match(b.root.html,/Знаю<strong>0<\/strong>/);
- assert.match(b.root.html,/Изучить<strong>0<\/strong>/);
+ assert.match(b.root.html,/class="ws-paper-page ws-paper-select"/);
+ assert.match(b.root.html,/Неизвестных: 0 из 10/);
+ assert.match(b.root.html,/Просмотрено: 0 из 50/);
  assert.match(b.root.html,/0\/50/);
- assert.ok(b.root.html.indexOf('data-action="known"')<b.root.html.indexOf('data-action="unknown"'));
- assert.doesNotMatch(b.root.html,/Завершить подбор|ws-picker-exit/);
- assert.match(b.root.html,/Нажми на карточку, чтобы увидеть перевод/);
- b.click('reveal');
- assert.match(b.root.html,/aria-pressed="true"/);
- assert.match(b.root.html,/ws-picker-translation/);
- b.click('reveal');
- assert.match(b.root.html,/aria-pressed="false"/);
- assert.doesNotMatch(b.root.html,/ws-picker-translation/);
+ assert.ok(b.root.html.indexOf('data-action="unknown"')<b.root.html.indexOf('data-action="known"'));
+ assert.match(b.root.html,/Завершить подбор/);
+ assert.match(b.root.html,/aria-label="Перевернуть лист"/);
+ b.click('flip');
+ assert.match(b.root.html,/aria-expanded="true"/);
+ assert.match(b.root.html,/class="ws-paper-face ws-paper-face-back"/);
+ b.click('flip');
+ assert.match(b.root.html,/aria-expanded="false"/);
+ assert.match(b.root.html,/class="ws-paper-dream ws-paper-dream-empty"/);
  b.click('known');
  assert.match(b.root.html,/Знаю<strong>1<\/strong>/);
  assert.match(b.root.html,/1\/50/);
@@ -300,7 +300,7 @@ test('manual selection keeps cross-topic picks and search is independent of topi
  assert.match(b.root.html,/Выбрано слов:[\s\S]*3 \/ 15/);
  assert.match(b.root.html,/data-action="startManual"[^>]*>/);
  b.click('manualTopic:food');
- assert.match(b.root.html,/aria-pressed="true"/);
+ assert.match(b.root.html,/aria-expanded="true"/);
  b.click('startManual');
  assert.match(b.root.html,/Запоминание/);
 });
