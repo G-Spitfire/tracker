@@ -1344,3 +1344,6 @@ html:has(.ws-paper-page),body:has(.ws-paper-page){background:#fdf7ed}
  .ws-paper-dream.is-collapsed{height:70px;min-height:70px}
  .ws-paper-dream.is-collapsed .ws-paper-dream-head{min-height:32px}
 }
+
+/* Final paper typography: only the flip instruction remains as a secondary annotation. */
+.ws-paper-foot{justify-content:flex-end}
