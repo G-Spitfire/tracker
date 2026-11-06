@@ -80,6 +80,41 @@ body:has(.paper){background:#fdf7ed;min-height:100dvh}
  .paper-progress dt::before{width:8px;height:8px}
 }
 
+
+/* Paper: three-ring progress, weekly goal and simplified level */
+.paper-level-help{margin-top:9px;padding-top:7px;border-top:1px solid #eee5d8;color:var(--muted);font-size:clamp(12px,3.35vw,14px)}
+.paper-level-help summary{display:flex;align-items:center;gap:6px;cursor:pointer;list-style:none;padding:6px 0;min-height:40px;font-weight:600}
+.paper-level-help summary::-webkit-details-marker{display:none}
+.paper-level-help summary::after{content:"⌄";margin-left:auto;font-size:20px;line-height:1}
+.paper-level-help[open] summary::after{transform:rotate(180deg)}
+.paper-level-help summary:focus-visible{outline:3px solid #7461be;outline-offset:3px;border-radius:8px}
+.paper-level-help .paper-icon{width:18px;height:18px}
+.paper-level-help p{margin:5px 0 4px;line-height:1.4}
+.paper-level-rate{display:block;padding-top:7px}
+.paper-level-finished{padding:8px 0 2px}
+.paper-rings .ring-track.weekly{stroke:#f1e7c9}
+.paper-rings .ring-fill.weekly{stroke:#ecb431}
+.paper-rings text{font-size:22px}
+.paper-rings .ring-fill{animation:ws-ring-fill .65s ease-out both}
+@keyframes ws-ring-fill{from{stroke-dasharray:0 100}to{stroke-dasharray:var(--ring-value) 100}}
+.paper-progress dt.weekly::before{background:#ecb431}
+.paper-progress dl div{padding:10px 0}
+.paper-progress{min-height:140px}
+.paper-sources:not(:disabled){grid-template-columns:minmax(0,1fr) auto;padding-left:clamp(19px,5vw,26px)}
+.paper-sources:not(:disabled) .paper-action-copy{min-width:0}
+.paper-done{display:flex;align-items:center;gap:clamp(10px,3.3vw,15px);padding:14px 18px;min-height:var(--ws-action-min-height);border-radius:var(--ws-action-radius);border:1px solid #cfebca;background:linear-gradient(#edf9ec,#dff2dd);color:#195d2a}
+.paper-done-mark{display:grid;place-items:center;flex:none;width:clamp(45px,13vw,60px);height:clamp(45px,13vw,60px);border-radius:15px;background:#c9eac3;color:#23783b;font-size:clamp(27px,7vw,34px);font-weight:800;animation:ws-check-in .35s ease-out both}
+.paper-done strong{display:block;font-size:clamp(17px,5vw,22px);line-height:1.18}
+.paper-done small{display:block;margin-top:5px;font-size:clamp(12px,3.45vw,14px);line-height:1.3;color:#376d43}
+@keyframes ws-check-in{from{transform:scale(.83);opacity:.4}to{transform:scale(1);opacity:1}}
+/* Small, immediate touch response without animated page transitions. */
+.paper button:not(:disabled),.paper-sheet-choice,.ws-manual-word,.ws-manual-topic,.ws-picker-choices button,.ws-learn-actions button,.flash button{transition:transform .14s ease-out,filter .14s ease-out,background-color .14s ease-out}
+.paper button:not(:disabled):active,.paper-sheet-choice:active,.ws-manual-word:active,.ws-manual-topic:active,.ws-picker-choices button:not(:disabled):active,.ws-learn-actions button:not(:disabled):active,.flash button:not(:disabled):active{transform:scale(.975);filter:brightness(.97)}
+@media(prefers-reduced-motion:reduce){
+ .paper-rings .ring-fill,.paper-done-mark{animation:none!important}
+ .paper button,.paper-sheet-choice,.ws-manual-word,.ws-manual-topic,.ws-picker-choices button,.ws-learn-actions button,.flash button{transition:none!important}
+}
+
 /* Approved My Progress layout */
 .progress-total{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:6px 0 15px}
 .progress-total small{color:#665b73;font-size:14px}
