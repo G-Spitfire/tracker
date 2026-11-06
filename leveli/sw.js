@@ -1,4 +1,4 @@
-const CACHE='leveli-v18-profile-personalization';
+const CACHE='leveli-v19-thematic-icon-packs';
 const FILES=['./','./index.html','./school-model.js','./manifest.webmanifest','./brand/mark.svg','./brand/app-icon.svg','./brand/app-icon-maskable.svg','./brand/app-icon-192.png','./brand/apple-touch-icon.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('leveli-v')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
