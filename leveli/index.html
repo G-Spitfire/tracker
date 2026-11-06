@@ -416,8 +416,6 @@ function renderGrades(){
   btn.append(main,average,grade,dynamics);btn.onclick=()=>{openSubject(name,grades);window.scrollTo(0,0)};
   subjects.append(btn);
  }
- if(!subjects.children.length)  subjects.append(btn);
- }
  if(!subjects.children.length){const p=document.createElement('p');p.className='school-empty';p.textContent=forecastFilter?'Нет предметов в этой категории.':'Предметы пока не загружены.';subjects.append(p)}
 }
 function openSubject(name,grades){
