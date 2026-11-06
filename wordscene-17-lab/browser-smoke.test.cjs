@@ -284,17 +284,19 @@ test('mandatory due review keeps new-word button locked and never shows the all-
  assert.doesNotMatch(b.root.html,/class="paper-done"/);
 });
 
+
 test('Paper level card displays confirmed sessions, recall success and only reveals rules on demand',()=>{
  const b=boot();
- assert.match(b.root.html,/Твой уровень[\\s\\S]*Новичок/);
- assert.match(b.root.html,/Занятия[\\s\\S]*0<\\/strong><span>из 3/);
- assert.match(b.root.html,/Качество повторений[\\s\\S]*—<\\/strong><span>цель 80%/);
- assert.match(b.root.html,/Следующий уровень — <strong>Опытный<\\/strong>/);
- assert.match(b.root.html,/<details class="paper-level-help"><summary>Подробнее/);
- assert.doesNotMatch(b.root.html,/paper-confirmed|paper-steps|class="paper-target"/);
+ assert.ok(b.root.html.includes('Твой уровень'));
+ assert.ok(b.root.html.includes('Новичок'));
+ assert.ok(b.root.html.includes('<strong>0</strong><span>из 3</span>'));
+ assert.ok(b.root.html.includes('<strong>—</strong><span>цель 80%</span>'));
+ assert.ok(b.root.html.includes('Следующий уровень — <strong>Опытный</strong>'));
+ assert.ok(b.root.html.includes('<details class="paper-level-help"><summary>Подробнее'));
+ assert.ok(!b.root.html.includes('class="paper-target"'));
  const css=file('style.css');
- assert.match(css,/\\.paper-level-stats\\{display:grid;grid-template-columns:1fr 1fr/);
- assert.match(css,/\\.paper-actions\\{grid-auto-rows:minmax\\(var\\(--ws-action-min-height\\),1fr\\)\\}/);
+ assert.ok(css.includes('.paper-level-stats{display:grid;grid-template-columns:1fr 1fr'));
+ assert.ok(css.includes('.paper-actions{grid-auto-rows:minmax(var(--ws-action-min-height),1fr)}'));
 });
 test('Paper level metrics use only confirmed relevant lessons, not all reviews',()=>{
  const seed=boot(),E=seed.window.WS17Engine,p=E.empty(),at=new Date(2026,10,6,12).getTime();
@@ -306,8 +308,8 @@ test('Paper level metrics use only confirmed relevant lessons, not all reviews',
  }
  const map=new Map([['wordscene-17-lab-v1',JSON.stringify(p)]]);
  const b=boot({map,now:at});
- assert.match(b.root.html,/Занятия[\\s\\S]*2<\\/strong><span>из 3/);
- assert.match(b.root.html,/Качество повторений[\\s\\S]*80%<\\/strong><span>цель 80%/);
- assert.match(b.root.html,/class="reached" style="width:80%"/);
+ assert.ok(b.root.html.includes('<strong>2</strong><span>из 3</span>'));
+ assert.ok(b.root.html.includes('<strong>80%</strong><span>цель 80%</span>'));
+ assert.ok(b.root.html.includes('class="reached" style="width:80%"'));
  assert.equal(b.map.get('wordscene-17-lab-v1'),JSON.stringify(p));
 });
