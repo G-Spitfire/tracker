@@ -1,4 +1,4 @@
-const CACHE='leveli-v22-design-system-b3';
+const CACHE='leveli-v23-design-accessibility';
 const FILES=['./','./index.html','./school-model.js','./manifest.webmanifest','./brand/mark.svg','./brand/app-icon.svg','./brand/app-icon-maskable.svg','./brand/app-icon-192.png','./brand/apple-touch-icon.png','./avatars/portraits-atlas.webp'];
 // Keep both themes available offline after the app is installed.
 const PACK_ICONS={cats:['home','book','chart','trophy','calendar','cat','paw','ballet','music','star','target','heart','palette','feather','settings'],sports:['home','book','chart','trophy','calendar','soccer','controller','steering','car','bolt','target','headset','flag','skateboard','settings']};
