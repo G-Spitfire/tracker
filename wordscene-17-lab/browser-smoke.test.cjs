@@ -475,3 +475,33 @@ test('Paper main actions keep 78px minimum and success text has approved accessi
  assert.match(css,/\.paper button:not\(:disabled\):active[^\n]*scale\(\.975\)/);
  assert.match(css,/prefers-reduced-motion:reduce/);
 });
+
+test('installed PWA uses consistent WordScene lighthouse icon assets and Paper colors',()=>{
+ const manifest=JSON.parse(file('manifest.webmanifest'));
+ assert.equal(manifest.theme_color,'#FDF7ED');
+ assert.equal(manifest.background_color,'#FDF7ED');
+ assert.ok(manifest.icons.some(i=>i.sizes==='192x192'&&i.src==='./assets/icon-192.png'));
+ assert.ok(manifest.icons.some(i=>i.sizes==='512x512'&&i.src==='./assets/icon-512.png'));
+ assert.ok(manifest.icons.some(i=>i.purpose==='maskable'&&i.src.includes('maskable-512')));
+ assert.ok(manifest.icons.some(i=>i.type==='image/svg+xml'&&i.sizes==='any'));
+ const html=file('index.html');
+ assert.match(html,/rel="apple-touch-icon" sizes="180x180"/);
+ assert.match(html,/rel="icon" type="image\/svg\+xml"/);
+ const svg=file('assets/wordscene-lighthouse-icon.svg');
+ assert.match(svg,/<svg[^>]+viewBox="0 0 512 512"/);
+ assert.match(svg,/aria-label="WordScene — маяк"/);
+ for(const size of [180,192,512]){
+  const buf=fs.readFileSync(path.join(__dirname,'assets','icon-'+size+'.png'));
+  assert.equal(buf.subarray(0,8).toString('hex'),'89504e470d0a1a0a','PNG signature for '+size);
+  assert.equal(buf.readUInt32BE(16),size,'PNG width '+size);
+  assert.equal(buf.readUInt32BE(20),size,'PNG height '+size);
+  assert.ok(buf.length>1000,'PNG icon unexpectedly small');
+ }
+ const mask=fs.readFileSync(path.join(__dirname,'assets/icon-maskable-512.png'));
+ assert.equal(mask.readUInt32BE(16),512);
+ assert.equal(mask.readUInt32BE(20),512);
+ const sw=file('sw.js');
+ assert.match(sw,/wordscene-17-lab-cache-v42/);
+ assert.match(sw,/icon-maskable-512\.png/);
+ assert.match(sw,/wordscene-lighthouse-icon\.svg/);
+});
