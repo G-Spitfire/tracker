@@ -74,12 +74,10 @@ function subjectTrend(regular){
   return da===null||db===null?a.index-b.index:da-db||a.index-b.index;
  });
  const n=items.length;
- if(n<2)return {difference:null,recentAverage:null,previousAverage:null};
- const recent=n<6?[items[n-1]]:items.slice(-3);
- const previous=n<6?items.slice(0,-1):items.slice(-6,-3);
- const recentAverage=mean(recent),previousAverage=mean(previous);
- // For 2–5 grades compare the last mark's face value, not its weight.
- const difference=n<6?Number(recent[0].value)-previousAverage:recentAverage-previousAverage;
+ if(n<3)return {difference:null,recentAverage:null,previousAverage:null};
+ // Compare the weighted last three marks to the weighted full-quarter mean.
+ const recentAverage=mean(items.slice(-3)),previousAverage=mean(items);
+ const difference=recentAverage-previousAverage;
  return {difference,recentAverage,previousAverage};
 }
 function summary(regular,final=[]){
