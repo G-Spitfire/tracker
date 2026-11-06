@@ -53,6 +53,41 @@ test('approved memorization UI keeps illustration visible, progress and unchange
  assert.match(b.root.html,/data-action="help"/);
 });
 
+test('recall UI v2 follows question, hint, reveal, evaluation and next card with saved state',()=>{
+ const b=boot();b.click('sources');b.click('auto');
+ for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
+ for(let i=0;i<10;i++)b.click('learnNext');
+ assert.match(b.root.html,/class="ws-recall-v2"/);
+ assert.match(b.root.html,/Проверка знаний/);
+ assert.match(b.root.html,/data-action="recallHint"/);
+ assert.match(b.root.html,/data-action="check"/);
+ assert.doesNotMatch(b.root.html,/data-action="checkedYes"/);
+ assert.doesNotMatch(b.root.html,/class="ws-recall-answer"/);
+ b.click('recallHint');
+ assert.match(b.root.html,/Ассоциация/);
+ assert.match(b.root.html,/Скрыть подсказку/);
+ b.click('recallHint');
+ assert.match(b.root.html,/Нужна подсказка/);
+ b.click('check');
+ assert.match(b.root.html,/class="ws-recall-answer"/);
+ assert.match(b.root.html,/data-action="checkedYes"/);
+ assert.match(b.root.html,/data-action="checkedNo"/);
+ assert.match(b.root.html,/data-action="help"/);
+ b.click('help');
+ assert.match(b.root.html,/ws-recall-clue-art/);
+ b.click('pause');
+ assert.match(b.root.html,/data-action="continue"/);
+ b.click('continue');
+ assert.match(b.root.html,/ws-recall-clue-art/);
+ b.click('checkedYes');
+ assert.match(b.root.html,/class="ws-recall-v2"/);
+ assert.doesNotMatch(b.root.html,/class="ws-recall-answer"/);
+ assert.match(b.root.html,/data-action="check"/);
+ const css=file('style.css');
+ assert.match(css,/\\.ws-recall-v2\\{display:flex;flex-direction:column/);
+ assert.match(css,/\\.ws-recall-decisions\\{display:grid;grid-template-columns:repeat\\(2/);
+});
+
 test('confirmed cancellation keeps persistent profile clean',()=>{
  const b=boot();b.click('sources');b.click('auto');
  for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
