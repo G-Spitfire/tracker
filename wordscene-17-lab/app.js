@@ -12,6 +12,7 @@ const legacyStorageSuffix=(()=>{
 const KEY='wordscene-17-lab-v1'+legacyStorageSuffix,ACTIVE='wordscene-17-lab-active-v1'+legacyStorageSuffix,PRACTICE='wordscene-17-lab-practice-cleared-v1'+legacyStorageSuffix;
 const root=document.getElementById('app');
 let profile,session=null,selection=null,view='home',batch=[],showAnswer=false,showHelp=false,manual=new Set(),manualThemes=new Set(),query='',confirmed=false,storageFailure=false,savedProfileRaw=null,savedActiveRaw=null;
+let lastRecallKey='',lastRecallFace=false;
 let progressRange='30',qualityRange='28',homeDay=null,manualMode='topics',manualShowAll=false,manualSummaryOpen=false;
 const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const accounts=window.WS17Accounts.create({storage:localStorage,empty:E.empty,valid:window.WS17Accounts.validProfile,keyFor:()=>({main:KEY,active:ACTIVE,backup:'wordscene-17-lab-last-good-v1'+legacyStorageSuffix})});
@@ -230,7 +231,8 @@ function pickerIcon(name){
   back:'<path d="m15 18-6-6 6-6"/>',
   known:'<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
   learn:'<path d="M12 6C9 4 5 4 2 5v14c4-1 7-1 10 2 3-3 6-3 10-2V5c-3-1-7-1-10 1v15"/>',
-  volume:'<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9q4 3 0 6m3-9q7 6 0 12"/>'
+  volume:'<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9q4 3 0 6m3-9q7 6 0 12"/>',
+  flip:'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 3v18M8 8l-3 4 3 4m8-8 3 4-3 4"/>'
  };
  return '<svg class="ws-picker-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+shapes[name]+'</svg>';
 }
@@ -372,15 +374,19 @@ function recall(){
  const direction=item.dir===1?'Русский → Английский':'Английский → Русский';
  const title=session.mode==='practice'?'Повторяем ошибки':session.mode==='review'?'Повторение':'Проверка знаний';
  const failed=!!session.feedback?.failed,answerVisible=showAnswer;
+ const recallKey=[session.mode,session.round,session.index,item.id,item.dir].join(':');
+ if(recallKey!==lastRecallKey){lastRecallFace=false;lastRecallKey=recallKey}
+ const flipMotion=answerVisible!==lastRecallFace?(answerVisible?' turn-to-back':' turn-to-front'):'';
+ lastRecallFace=answerVisible;
  const sound=()=>btn(pickerIcon('volume'),'say:'+h(w.en),'ws-recall-speak','');
  const pronunciation='<div class="ws-recall-pronunciation"><span class="ws-recall-ipa">'+h(w.ipa||'')+'</span>'+sound()+'</div>';
- const frontFace='<div class="ws-recall-face ws-recall-face-front" aria-hidden="'+(answerVisible?'true':'false')+'">'+
+ const frontFace='<div class="ws-recall-face ws-recall-face-front" aria-hidden="'+(answerVisible?'true':'false')+'" '+(answerVisible?'inert':'')+'>'+
   '<div class="ws-recall-direction">'+direction+'</div>'+
   '<h2 class="ws-recall-word" id="recall-word">'+h(front)+'</h2>'+
   (item.dir!==1?pronunciation:'')+
   '<div class="ws-recall-tap-note">'+pickerIcon('flip')+' Нажми на карточку, чтобы увидеть перевод</div></div>';
  const association=showHelp?'<div class="ws-recall-clue"><div class="ws-recall-clue-title">'+pickerIcon('learn')+' Ассоциация</div><p>'+h(w.scene||'')+'</p><div class="ws-recall-clue-art">'+visual(w)+'</div></div>':'';
- const backFace='<div class="ws-recall-face ws-recall-face-back" aria-hidden="'+(!answerVisible?'true':'false')+'">'+
+ const backFace='<div class="ws-recall-face ws-recall-face-back" aria-hidden="'+(!answerVisible?'true':'false')+'" '+(!answerVisible?'inert':'')+'>'+
   '<div class="ws-recall-direction">Перевод</div><div class="ws-recall-answer"><strong>'+h(back)+'</strong></div>'+
   '<div class="ws-recall-original">'+h(front)+'</div>'+
   (item.dir===1?pronunciation:'')+
@@ -390,7 +396,7 @@ function recall(){
   (!failed?'<div class="ws-recall-tap-note">Нажми на карточку, чтобы вернуть слово</div>':'')+
   '</div>';
  const card='<section class="flash recall ws-recall-card" aria-label="Карточка проверки">'+
-  '<div class="ws-recall-flip '+(answerVisible?'is-flipped':'')+'" data-flip-card="true" role="button" tabindex="0" aria-label="'+(failed?'Правильный перевод':answerVisible?'Вернуть исходное слово':'Показать перевод')+'" aria-expanded="'+answerVisible+'">'+
+  '<div class="ws-recall-flip '+(answerVisible?'is-flipped':'')+flipMotion+'" data-flip-card="true" role="button" tabindex="0" aria-label="'+(failed?'Правильный перевод':answerVisible?'Вернуть исходное слово':'Показать перевод')+'" aria-expanded="'+answerVisible+'">'+
   '<div class="ws-recall-flip-inner">'+frontFace+backFace+'</div></div></section>';
  const grade='<div class="ws-recall-decisions">'+(failed?
   btn('Дальше','advance','ws-recall-next'):
