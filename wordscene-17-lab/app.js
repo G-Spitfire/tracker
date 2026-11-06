@@ -56,7 +56,6 @@ function syncManualViewport(){
   panel.style.removeProperty('--ws-search-vh');
   panel.style.removeProperty('--ws-search-top');
  }
- refreshManualScroll();
 }
 function manualWordRow(w){
  const picked=manual.has(w.en),used=!!profile.words[w.en]?.origin,blocked=used||(!picked&&manual.size>=E.levelLimit(profile));
