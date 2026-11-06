@@ -45,8 +45,15 @@ async function checkMemorization(page,snap=async()=>{}){
    await snap('paper-learn-'+(i+1)+'-back');
    if(i===0){
     await page.locator('[data-action="pause"]').click();
+    assert.equal(await page.locator('.ws-paper-pause[role="presentation"]').count(),1,'pause is a separate overlay');
+    assert.equal(await page.locator('.ws-paper-pause-dialog[role="dialog"][aria-modal="true"]').count(),1,'pause is an accessible modal');
+    assert.equal(await page.locator('[data-action="continue"]').count(),1,'Continue appears only in the modal');
+    const pauseBounds=await bounds('.ws-paper-pause-dialog');
+    assert.ok(pauseBounds.y>=0&&pauseBounds.y+pauseBounds.height<=page.viewportSize().height,'pause dialog fits viewport');
+    await snap('paper-learn-paused');
     await visibleAction(page,'continue');
     await page.locator('[data-action="continue"]').click();
+    assert.equal(await page.locator('.ws-paper-pause').count(),0,'dialog closes on resume');
     assert.equal(await page.locator('[data-flip-card]').getAttribute('aria-expanded'),'true','learn flip side survives pause');
     close(grade,await bounds('[data-action="learnNext"]'),'fixed bottom button after resume');
    }
