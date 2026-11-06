@@ -66,13 +66,28 @@ function mean(items){
 }
 function forecast(value){return value===null||!Number.isFinite(value)?null:value>=4.6?5:value>=3.6?4:value>=2.6?3:2}
 function normalize(rows){return rows.filter(g=>g&&typeof g==='object').map(g=>({...g,value:mark(g)})).filter(g=>g.value!==null)}
+function subjectTrend(regular){
+ const dated=regular.map((g,index)=>({...g,index})).filter(g=>g.date instanceof Date&&!Number.isNaN(g.date.getTime())).sort((a,b)=>a.date-b.date||a.index-b.index);
+ // If a mark has no date, preserve its source order as an explicit fallback.
+ const items=dated.length===regular.length?dated:regular.map((g,index)=>({...g,index})).sort((a,b)=>{
+  const da=a.date instanceof Date?a.date.getTime():null,db=b.date instanceof Date?b.date.getTime():null;
+  return da===null||db===null?a.index-b.index:da-db||a.index-b.index;
+ });
+ const n=items.length;
+ if(n<2)return {difference:null,recentAverage:null,previousAverage:null};
+ const recent=n<6?[items[n-1]]:items.slice(-3);
+ const previous=n<6?items.slice(0,-1):items.slice(-6,-3);
+ const recentAverage=mean(recent),previousAverage=mean(previous);
+ // For 2–5 grades compare the last mark's face value, not its weight.
+ const difference=n<6?Number(recent[0].value)-previousAverage:recentAverage-previousAverage;
+ return {difference,recentAverage,previousAverage};
+}
 function summary(regular,final=[]){
- const average=mean(regular),dated=regular.filter(g=>g.date instanceof Date&&!Number.isNaN(g.date.getTime())).sort((a,b)=>a.date-b.date);
- const recent=dated.slice(-3),recentAverage=recent.length===3?mean(recent):null;
+ const average=mean(regular);
+ const {difference,recentAverage,previousAverage}=subjectTrend(regular);
  const official=final.filter(g=>g.officialKind==='За четверть'||officialKind(g)==='За четверть')
   .slice().sort((a,b)=>(a.date?.getTime()||0)-(b.date?.getTime()||0)).at(-1)?.value??null;
- const difference=recentAverage===null||average===null?null:recentAverage-average;
- return {average,forecast:regular.length>=3?forecast(average):null,official,recentAverage,difference,
+ return {average,forecast:regular.length>=3?forecast(average):null,official,recentAverage,previousAverage,difference,
   deteriorating:difference!==null&&difference<=-0.5+1e-10};
 }
 // Assume future marks of 5 have weight 1. Calculation is only a scenario.
@@ -86,6 +101,6 @@ function fivesNeeded(regular){
  for(let n=1;n<=100000;n++)if((sum+5*n)/(total+n)+1e-12>=threshold)return n;
  return null;
 }
-const api={score,mark,officialKind,date,period,academicYear,weight,mean,forecast,normalize,summary,fivesNeeded};
+const api={score,mark,officialKind,date,period,academicYear,weight,mean,forecast,normalize,subjectTrend,summary,fivesNeeded};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.LeveliSchool=api;
 })(typeof globalThis!=='undefined'?globalThis:this);
