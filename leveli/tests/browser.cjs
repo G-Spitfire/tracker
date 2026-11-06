@@ -19,6 +19,16 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await page.locator('link[rel="apple-touch-icon"]').getAttribute('href'),'./brand/apple-touch-icon.png');
  await page.getByRole('button',{name:'Профиль и настройки'}).click();
  assert.equal(await page.locator('[data-page="profile"]').isVisible(),true);
+ assert.equal(await page.locator('.b3-header h1').innerText(),'Настройки');
+ assert.equal(await page.locator('.b3-header p').count(),0,'redundant personal-space subtitle removed');
+ assert.equal(await page.locator('.b3-home-btn').innerText(),'Назад');
+ const navStyle=await page.locator('.b3-home-btn').evaluate(el=>({
+  height:el.getBoundingClientRect().height,radius:getComputedStyle(el).borderTopLeftRadius,
+  fontSize:getComputedStyle(el).fontSize,iconSize:getComputedStyle(el.querySelector('svg')).width
+ }));
+ assert.equal(navStyle.height,44);assert.equal(navStyle.radius,'12px');
+ assert.equal(navStyle.fontSize,'13px');assert.equal(navStyle.iconSize,'20px');
+
  await page.locator('.b3-home-btn').click();
  assert.equal(await page.locator('[data-page="home"]').isVisible(),true);
  await page.evaluate(()=>window.__switchUser('A'));await page.waitForFunction(()=>document.querySelector('#school-period').options.length>=4);
@@ -179,6 +189,20 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.locator('#school-forecast-legend .legend-item').filter({hasText:'Оценка 5'}).click();
  await page.locator('#school-subjects .subject-row').filter({hasText:'Математика'}).click();
  assert.equal(await page.locator('#school-subject-detail .detail-hero-score').innerText(),'4');
+ assert.equal(await page.locator('#school-subject-detail .detail-back').innerText(),'Назад');
+ assert.equal(await page.locator('#school-subject-detail .detail-period').count(),1);
+ const headers=await page.evaluate(()=>{
+  const back=document.querySelector('.detail-back'),title=document.querySelector('.detail-title'),period=document.querySelector('.detail-period');
+  const one=back.getBoundingClientRect(),two=title.getBoundingClientRect(),three=period.getBoundingClientRect();
+  const style=getComputedStyle(back);
+  return {height:one.height,radius:style.borderTopLeftRadius,font:style.fontSize,svg:getComputedStyle(back.querySelector('svg')).width,
+    sameRow:Math.abs((one.top+one.height/2)-(two.top+two.height/2))<25,periodBelow:three.top>=Math.max(one.bottom,two.bottom)-1}
+ });
+ assert.equal(headers.height,44);assert.equal(headers.radius,'12px');
+ assert.equal(headers.font,'13px');assert.equal(headers.svg,'20px');
+ assert.ok(headers.sameRow,'subject title and back action share a row');
+ assert.ok(headers.periodBelow,'quarter pill is below subject header row');
+
  assert.equal(await page.locator('#school-subject-detail .detail-trend-pill').innerText(),'↘ Последние оценки стали ниже');
  assert.equal(await page.locator('#school-subject-detail .detail-kpi').innerText(), 'Средний балл\n4,50\nПолучено оценок\n6');
  assert.equal(await page.locator('.school-header').isVisible(),false);
@@ -204,12 +228,12 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.ok((await page.locator('#school-subject-detail').evaluate(el=>el.scrollWidth<=el.clientWidth+1)),'subject detail must not overflow phone viewport');
  await page.getByRole('button',{name:'Контрольные'}).click();
  assert.match(await page.locator('#school-subject-detail').innerText(),/Нет оценок этого типа/);
- await page.getByRole('button',{name:'← К предметам'}).click();
+ await page.getByRole('button',{name:'Назад к предметам'}).click();
  assert.equal(await page.locator('.school-header').isVisible(),true);
  await page.locator('#school-subjects .subject-row').filter({hasText:'Русский язык'}).click();
  assert.equal(await page.locator('#school-subject-detail .grade-entry__weight').count(),1);
  assert.equal(await page.locator('#school-subject-detail .grade-entry__weight').innerText(),'Вес ×2');
- await page.getByRole('button',{name:'← К предметам'}).click();
+ await page.getByRole('button',{name:'Назад к предметам'}).click();
  await page.screenshot({path:'outputs/leveli-school.png',fullPage:true});
  await page.evaluate(()=>window.__switchUser('B'));await page.waitForFunction(()=>document.querySelector('#school-period').options.length>=4);
  assert.equal(await page.locator('#home-greeting').innerText(),'Привет, Матвей!');
@@ -299,6 +323,9 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   }));
   assert.ok(state.doc<=state.viewport+1,'B3 must not scroll horizontally at '+width+'px');
   assert.ok(state.size>=44,'back action hit area must be at least 44px');
+  assert.equal(await page.locator('.b3-home-btn').innerText(),'Назад');
+  assert.equal(await page.locator('.b3-header h1').innerText(),'Настройки');
+
   assert.equal(state.tileCount,4,'all quick-setting tiles remain readable on '+width+'px screen');
  }
  await page.locator('[data-b3-panel="theme"]').click();
