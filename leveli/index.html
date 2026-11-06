@@ -440,9 +440,13 @@ function openSubject(name,grades){
   const cell=document.createElement('div'),num=document.createElement('strong'),text=document.createElement('span');num.textContent=value;text.textContent=label;cell.append(num,text);kpis.append(cell)
  }
  detail.append(kpis);
+ if(!grades.regular.length){
+  const empty=document.createElement('p');empty.className='school-empty';
+  empty.textContent='Пока нет оценок за эту четверть';detail.append(empty);
+ }
  if(stats.difference!==null){
   const d=document.createElement('p');d.className='grade-delta '+(stats.difference>=0.5?'up':stats.difference<=-0.5?'down':'flat');
-  d.textContent=(grades.regular.length<6?'Последняя оценка: ':'Последние три, средний: ')+formatMean(stats.recentAverage)+' · изменение '+(stats.difference>0?'+':'')+formatMean(stats.difference);detail.append(d);
+  d.textContent='Последние три, средний: '+formatMean(stats.recentAverage)+' · за четверть: '+formatMean(stats.previousAverage)+' · изменение '+(stats.difference>0?'+':'')+formatMean(stats.difference);detail.append(d);
  }
  const goal=document.createElement('div');goal.className='detail-goal';
  if(stats.official!==null)goal.textContent='Четвертная оценка выставлена — '+stats.official;
@@ -468,7 +472,12 @@ function openSubject(name,grades){
    const coords=dated.map((g,i)=>[20+i*(width-40)/Math.max(1,dated.length-1),130-(S.mean(dated.slice(0,i+1))-2)*35]);
    if(coords.length>1)svg.append(svgEl('polyline',{points:coords.map(x=>x.join(',')).join(' '),fill:'none',stroke:'#8061e5','stroke-width':3,'stroke-linejoin':'round'}));
    for(const [x,y] of coords)svg.append(svgEl('circle',{cx:x,cy:y,r:3,fill:'#8061e5'}));
-  }else dated.forEach((g,i)=>{const x=20+i*36,y=130-(g.value-2)*35;svg.append(svgEl('rect',{x:x-9,y,width:18,height:130-y+1,rx:4,fill:'#8061e5'}))});
+   }else dated.forEach((g,i)=>{
+   const x=20+i*36,y=130-(g.value-2)*35;
+   svg.append(svgEl('rect',{x:x-9,y,width:18,height:130-y+1,rx:4,fill:'#8061e5'}));
+   const label=svgEl('text',{x,y:y-7,'text-anchor':'middle',fill:'#eaddff','font-size':12,'font-weight':800});
+   label.textContent=String(g.value);svg.append(label);
+  });
   chartHost.append(svg);
  }
  drawChart();
