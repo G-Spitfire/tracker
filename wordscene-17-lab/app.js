@@ -409,7 +409,7 @@ function recall(){
   '</h1><small>'+(session.mode==='new'?'Вспомни изученное слово':'Проход '+session.round+' · '+direction)+
   '</small></div><span class="ws-recall-count" aria-label="Карточка '+position+' из '+total+'">'+position+' из '+total+'</span></div>'+
   '<div class="ws-recall-progress" role="progressbar" aria-label="Прогресс проверки" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+(position-1)+'"><span style="width:'+progress+'%"></span></div>'+
-  card+'<div class="ws-recall-actions">'+grade+
+  '<div class="ws-recall-stage">'+card+'</div><div class="ws-recall-actions">'+grade+
   '<div class="ws-recall-session-actions">'+cardActions()+'</div></div></main>');
  const flip=root.querySelector?.('[data-flip-card]');
  if(flip){
