@@ -258,7 +258,8 @@ test('manual picker retains UI Kit controls and counters with compact pinned foo
  b.click('manualSummaryClose');
  b.click('manualTab:search');
  b.click('manualTab:topics');
- assert.match(b.root.html,/data-action="manualSummaryClose"/);
+ assert.match(b.root.html,/data-action="manualSummary"/);
+ assert.doesNotMatch(b.root.html,/role="dialog"/);
  const css=file('style.css');
  assert.match(css,/\.ws-manual-v2 \.ws-manual-topic\{/);
  assert.match(css,/\.ws-manual-v2 \.ws-manual-audio\{min-width:44px;min-height:44px/);
