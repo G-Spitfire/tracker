@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="WordScene — маяк">
+<rect width="512" height="512" rx="106" fill="#FDF7ED"/>
+<path d="M199 171 49 128Q33 123 33 145v47q0 21 17 16l149-35" fill="#F9C94E"/>
+<path d="m313 171 150-43q16-5 16 17v47q0 21-17 16l-149-35" fill="#F9C94E"/>
+<g fill="#FFFBF5"><circle cx="85" cy="342" r="55"/><circle cx="146" cy="329" r="64"/><circle cx="382" cy="349" r="64"/><circle cx="445" cy="357" r="48"/></g>
+<path d="M210 233h92l51 215H159l51-215Z" fill="#0C1731"/>
+<path d="M221 242h70l47 206H174l47-206Z" fill="#FFFBF5"/>
+<path d="M206 287h100l7 32H199zM187 376h138l10 34H177z" fill="#FF6640"/>
+<rect x="209" y="160" width="94" height="77" rx="9" fill="#0C1731"/>
+<rect x="221" y="174" width="70" height="50" rx="5" fill="#F9C94E"/>
+<path d="m173 160 83-56 83 56q6 12-10 15H183q-18-3-10-15Z" fill="#0C1731"/>
+<path d="m189 160 67-45 67 45Z" fill="#FF6640"/>
+<circle cx="256" cy="94" r="14" fill="#0C1731"/><circle cx="256" cy="94" r="7" fill="#FF6640"/>
+<rect x="181" y="226" width="150" height="27" rx="10" fill="#0C1731"/>
+<path d="M198 232v11m29-11v11m29-11v11m29-11v11m29-11v11" stroke="#FFFBF5" stroke-width="9"/>
+<rect x="236" y="337" width="40" height="56" rx="20" fill="#0C1731"/><rect x="246" y="349" width="20" height="32" rx="10" fill="#F9C94E"/>
+<path d="M230 421h52v27h-52z" fill="#0C1731"/><path d="M201 454v-21a55 55 0 0 1 110 0v21" fill="#0C1731"/>
+<path d="M0 445Q69 403 135 442T265 440t128 0 119 0v72H0Z" fill="#087BFA"/>
+<path d="M0 462Q80 420 146 460t118-1 123-1 125 2v52H0Z" fill="#68BDF7"/>
+<path d="M0 480Q70 447 133 478t128 0 126 0 125 0v34H0Z" fill="#0046AA"/>
+</svg>

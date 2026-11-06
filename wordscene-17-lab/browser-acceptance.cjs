@@ -39,6 +39,22 @@ async function run(name, browserType, contextOptions) {
   assert.ok(resources.topics > 1,'topics not loaded: '+JSON.stringify(resources));
   assert.ok(resources.scriptSrcs.every(x=>!x.includes('/wordscene/')),'legacy scripts remain');
 
+  // New brand icon assets must decode in desktop and iPhone-like browser viewports.
+  if(await page.locator('link[rel="apple-touch-icon"]').count()){
+   const validIcons=await page.evaluate(async()=>{
+    const paths=['./assets/icon-180.png','./assets/icon-192.png','./assets/icon-512.png','./assets/icon-maskable-512.png'];
+    return Promise.all(paths.map(async src=>{
+     const img=new Image();img.src=src;
+     try{await img.decode();return {src,width:img.naturalWidth,height:img.naturalHeight}}catch(e){return {src,error:String(e)}}
+    }));
+   });
+   for(const icon of validIcons){
+    assert.ok(!icon.error,'branded app icon must decode '+JSON.stringify(icon));
+    assert.equal(icon.width,icon.height,'app icons must be square: '+icon.src);
+   }
+   assert.ok(await page.locator('link[rel="icon"][type="image/svg+xml"]').count()>0,'branded SVG favicon is linked');
+  }
+
   // The retired profile editor is absent; historical stored fields remain intact.
   assert.equal(await page.locator('[data-action="childProfile"]').count(),0);
 
