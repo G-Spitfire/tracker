@@ -300,6 +300,25 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   const expected=selector==='.b3-home-btn svg'?'20px':'24px';assert.equal(style.w,expected);assert.equal(style.h,expected);assert.equal(style.stroke,'2px');
  }
 
+ // Consolidated CSS must preserve key card, navigation, and theme contracts.
+ const cascadeAudit=await page.evaluate(()=>{
+  const root=document.documentElement,old=root.dataset.leveliTheme,out=[];
+  for(const theme of ['dark','light']){
+   root.dataset.leveliTheme=theme;
+   const read=selector=>{const element=document.querySelector(selector),style=getComputedStyle(element);return {radius:style.borderTopLeftRadius,background:style.backgroundColor,minHeight:style.minHeight,color:style.color}};
+   out.push({theme,card:read('.card'),tile:read('.b3-tile'),back:read('.leveli-back-btn'),extra:read('.b3-extra')});
+  }
+  root.dataset.leveliTheme=old;
+  return out;
+ });
+ for(const state of cascadeAudit){
+  assert.equal(state.card.radius,'20px','cards retain DS 20px radius in '+state.theme);
+  assert.equal(state.tile.radius,'15px','B3 tile retains inner radius in '+state.theme);
+  assert.equal(state.back.radius,'12px','back navigation retains DS 12px radius');
+  assert.equal(state.back.minHeight,'44px','navigation hit targets remain 44px');
+  assert.notEqual(state.tile.background,'rgba(0, 0, 0, 0)','tiles remain visible in '+state.theme);
+ }
+ assert.notEqual(cascadeAudit[0].card.background,cascadeAudit[1].card.background,'light/dark card surfaces must remain distinct');
  // Visual baseline checks: text/background contrast in both themes (WCAG 4.5:1 normal text).
  const themeAudit=await page.evaluate(()=>{
   const root=document.documentElement,old=root.dataset.leveliTheme;
