@@ -211,6 +211,30 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.getByRole('button',{name:'Профиль и настройки'}).click();
  assert.equal(await page.locator('#profile-avatar-display img.profile-avatar-custom').count(),1);
  assert.equal(await page.locator('#profile-birthday').inputValue(),'2017-09-08');
+ // DS v2: the four B3 tile icons are real consistent 24px line SVGs (not font glyphs).
+ assert.equal(await page.locator('.b3-tiles .b3-tile-icon svg').count(),4);
+ const iconStyle=await page.locator('.b3-tile-icon svg').first().evaluate(el=>({
+  width:getComputedStyle(el).width,height:getComputedStyle(el).height,stroke:getComputedStyle(el).strokeWidth
+ }));
+ assert.equal(iconStyle.width,'24px');assert.equal(iconStyle.height,'24px');assert.equal(iconStyle.stroke,'2px');
+ for(const width of [320,360,390,430]){
+  await page.setViewportSize({width,height:844});
+  const state=await page.evaluate(()=>({
+   doc:document.documentElement.scrollWidth,viewport:document.documentElement.clientWidth,
+   size:document.querySelector('.b3-home-btn').getBoundingClientRect().width,
+   tileCount:[...document.querySelectorAll('.b3-tile')].filter(el=>el.getBoundingClientRect().width>=140).length
+  }));
+  assert.ok(state.doc<=state.viewport+1,'B3 must not scroll horizontally at '+width+'px');
+  assert.ok(state.size>=44,'back action hit area must be at least 44px');
+  assert.equal(state.tileCount,4,'all quick-setting tiles remain readable on '+width+'px screen');
+ }
+ await page.locator('[data-b3-panel="theme"]').click();
+ assert.equal(await page.locator('#b3-panel-overlay').isVisible(),true);
+ assert.equal(await page.locator('body').evaluate(el=>getComputedStyle(el).overflow),'hidden');
+ await page.keyboard.press('Escape');
+ assert.equal(await page.locator('#b3-panel-overlay').isVisible(),false);
+ assert.equal(await page.locator('[data-b3-panel="theme"]').evaluate(el=>document.activeElement===el),true);
+ await page.setViewportSize({width:390,height:844});
  await page.locator('.b3-home-btn').click();
  await page.evaluate(()=>window.__switchUser(null));assert.equal(await page.locator('#school-results').isVisible(),false);assert.equal(await page.locator('#school-subjects').innerText(),'');
  await page.screenshot({path:'outputs/leveli-home.png',fullPage:true});
