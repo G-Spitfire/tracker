@@ -134,6 +134,10 @@ function paperAction(label,action,reason='',subtitle=''){
   (!reason?paperIcon('next'):''),
   action,'paper-action paper-'+action,!!reason);
 }
+function paperWelcome(){
+ return '<div class="paper-welcome" role="status"><span class="paper-welcome-mark" aria-hidden="true">'+paperIcon('book')+'</span>'+
+  '<span><strong>Твоё обучение начинается!</strong><small>Выбери первые слова и начни своё первое занятие.</small></span></div>';
+}
 function paperDone(){
  return '<div class="paper-done" role="status"><span class="paper-done-mark" aria-hidden="true">✓</span>'+
   '<span><strong>Отлично! Всё повторено</strong><small>На сегодня заданий больше нет</small></span></div>';
@@ -202,7 +206,7 @@ function home(openPicker=false){
  const fresh=paperAction('Учить новые слова','sources',blocked||(pending.length?'Сначала повтори слова на сегодня. После этого сможешь учить новые.':''),'Выбери способ подбора');
  const repeat=pending.length?paperAction('Повторить сегодня: '+wordCount(pending.length),'review',blocked):
   errors.length?paperAction('Повторить ещё раз','practice',blocked,'Если хочешь, потренируй ещё '+errors.length+' '+(errors.length%100>=11&&errors.length%100<=14?'трудных слов':errors.length%10===1?'трудное слово':errors.length%10>=2&&errors.length%10<=4?'трудных слова':'трудных слов')):
-  paperDone();
+  (profile.sessions.some(s=>s.mode==='new'||s.mode==='review')?paperDone():paperWelcome());
  shell('', '', '<main class="paper"><div class="paper-heading"><h1>'+paperIcon('book')+'WordScene</h1></div>'+
  '<div class="paper-hero"><img src="./paper-lighthouse.svg" alt="" width="729" height="160"></div>'+
  paperLevel()+paperProgress()+'<div class="paper-actions">'+fresh+repeat+'</div>'+
@@ -498,15 +502,21 @@ function progress(){
  const reviews=profile.sessions.filter(x=>x.mode==='review'&&(qualityRange==='all'||x.at>=now-28*86400000));
  const attempts=reviews.reduce((a,x)=>a+new Set(x.ids).size,0);
  const hits=reviews.reduce((a,x)=>a+x.successful,0);
- const quality=attempts?'<strong class="quality-value">'+Math.round(100*hits/attempts)+'%</strong><p>'+hits+' из '+attempts+' слов успешно вспомнены в обе стороны на первом прогоне</p>':'<p>Пока нет проверок за этот период</p>';
- const metrics='<section class="panel"><h2>Мой словарь</h2><div class="progress-total"><small>Знакомых слов</small><strong>'+(learned+known)+' из '+total+'</strong></div>'+
+ const rate=attempts?Math.max(0,Math.min(100,Math.round(100*hits/attempts))):null;
+ const quality=attempts?'<div class="ws-progress-quality" aria-label="Успешность повторений"><strong class="quality-value">'+rate+'%</strong><p><b>'+hits+' из '+attempts+'</b> слов успешно вспомнены в обе стороны на первом прогоне</p></div>'+
+  '<div class="ws-progress-quality-track" role="progressbar" aria-label="Успешность повторений" aria-valuenow="'+rate+'" aria-valuemin="0" aria-valuemax="100"><span style="width:'+rate+'%"></span></div>':
+  '<div class="ws-progress-empty"><strong>Пока нет проверок за этот период</strong><p>Показатель появится после обязательного повторения.</p></div>';
+ const metrics='<section class="panel ws-progress-panel ws-progress-summary"><h2>Мой словарь</h2><div class="progress-total"><small>Знакомых слов</small><strong>'+(learned+known)+' <span>из '+total+'</span></strong></div>'+
   '<div class="progress-breakdown"><span>Выучил в WordScene <strong>'+learned+'</strong></span><span>Уже знал <strong>'+known+'</strong></span><span>Из них закреплено <strong>'+mastered+'</strong></span></div></section>';
- const rangeButtons=btn('30 дней','progressRange:30',progressRange==='30'?'primary':'secondary')+btn('Всё время','progressRange:all',progressRange==='all'?'primary':'secondary');
- const qualityButtons=btn('28 дней','qualityRange:28',qualityRange==='28'?'primary':'secondary')+btn('Всё время','qualityRange:all',qualityRange==='all'?'primary':'secondary');
- shell('Мой прогресс',metrics+
-  '<section class="panel"><h2>Сколько слов я выучил</h2><div class="progress-switch">'+rangeButtons+'</div>'+chart+'</section>'+
-  '<section class="panel"><h2>Как хорошо я помню слова</h2><div class="progress-switch">'+qualityButtons+'</div>'+quality+'</section>'+
-  btn('На главную','home','quiet'));
+ const rangeButtons=btn('30 дней','progressRange:30',(progressRange==='30'?'primary':'secondary')+(progressRange==='30'?' is-active':''))+btn('Всё время','progressRange:all',(progressRange==='all'?'primary':'secondary')+(progressRange==='all'?' is-active':''));
+ const qualityButtons=btn('28 дней','qualityRange:28',(qualityRange==='28'?'primary':'secondary')+(qualityRange==='28'?' is-active':''))+btn('Всё время','qualityRange:all',(qualityRange==='all'?'primary':'secondary')+(qualityRange==='all'?' is-active':''));
+ const explanation='<details class="ws-progress-explanation"><summary>Как рассчитывается успешность?</summary><p>Учитываются завершённые обязательные повторения. Слово успешно, если в первом полном прогоне ты вспомнил его в обе стороны. Дополнительные попытки исходную оценку не меняют.</p></details>';
+ shell('', '', '<main class="ws-progress-page"><div class="ws-progress-header">'+btn(pickerIcon('back'),'home','ws-progress-back')+'<div><h1>Мой прогресс</h1><p>Как продвигается обучение</p></div></div>'+metrics+
+  '<section class="panel ws-progress-panel"><h2>Сколько слов я выучил</h2><div class="progress-switch">'+rangeButtons+'</div>'+
+  (lessons.length?chart:'<div class="ws-progress-empty"><strong>Пока нет данных</strong><p>После первого завершённого занятия здесь появится график изучения слов.</p></div>')+
+  '<p class="ws-progress-note">Накопленное количество слов, изученных в WordScene. Ранее знакомые слова не учитываются.</p></section>'+
+  '<section class="panel ws-progress-panel"><h2>Как хорошо я помню слова</h2><div class="progress-switch">'+qualityButtons+'</div>'+quality+explanation+'</section>'+
+  btn('На главную','home','ws-progress-home')+'</main>');
 }
 function dictionaryView(){
  view='dictionary';const list=dictionary.filter(w=>(w.en+' '+w.ru).toLowerCase().includes(query.toLowerCase()));
