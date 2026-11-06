@@ -69,6 +69,30 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await page.locator('#school-period-notice').isVisible(),false);
  await page.getByRole('button',{name:'1 четверть'}).click();
  assert.equal(await page.locator('#school-period-buttons button[aria-pressed="true"]').innerText(),'1 четверть');
+ // All five personalized accent palettes must reach the chart SVG and selected controls.
+ const accents=[
+  ['Фиолетовый','#a882ff','#55416e','#ab7aff'],
+  ['Розовый','#f18bc9','#70435e','#f18bc9'],
+  ['Синий','#68adff','#3b5375','#68adff'],
+  ['Жёлтый','#f4c75f','#69582f','#f4c75f'],
+  ['Мятный','#69d9bd','#365f55','#69d9bd']
+ ];
+ for(const [label,accent,track,glow] of accents){
+  await page.getByRole('button',{name:label,exact:true}).click();
+  const state=await page.evaluate(()=>({
+   accent:document.documentElement.style.getPropertyValue('--leveli-accent'),
+   track:document.querySelector('#school-donut circle[data-accent-track="true"]')?.getAttribute('stroke'),
+   line:document.querySelector('#school-trend polyline[filter="url(#leveli-line-glow)"]')?.getAttribute('stroke'),
+   grade:document.querySelector('#school-donut circle[stroke="#6ee6ae"]')?.getAttribute('stroke'),
+   pressed:getComputedStyle(document.querySelector('#school-period-buttons button[aria-pressed="true"]')).borderTopColor
+  }));
+  assert.equal(state.accent,accent);
+  assert.equal(state.track,track);
+  assert.equal(state.line,glow);
+  assert.equal(state.grade,'#6ee6ae','semantic fifth-grade segment must not change');
+  assert.equal(state.pressed,'rgb('+[parseInt(accent.slice(1,3),16),parseInt(accent.slice(3,5),16),parseInt(accent.slice(5,7),16)].join(', ')+')');
+ }
+ await page.getByRole('button',{name:'Розовый',exact:true}).click();
  await page.getByRole('button',{name:'← На главную'}).click();
  await page.waitForFunction(()=>document.querySelector('#school-subjects').textContent.includes('Математика'));
  assert.equal(await page.locator('#school-overall').innerText(),'4,25');
@@ -84,6 +108,8 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await page.locator('.donut-unit').last().innerText(),'Количество оценок');
  assert.equal(await page.locator('#school-donut circle[role="button"]').count(),2);
  await page.locator('#school-forecast-legend .legend-item').filter({hasText:'Оценка 5'}).click();
+ assert.equal(await page.locator('#school-donut circle[data-accent-selection="true"]').count(),1);
+ assert.equal(await page.locator('#school-donut circle[data-accent-selection="true"]').getAttribute('stroke'),'#f18bc9');
  assert.equal(await page.locator('#school-subjects .subject-row').count(),1);
  assert.match(await page.locator('#school-subjects').innerText(),/Русский язык/);
  await page.locator('#school-forecast-legend .legend-item').filter({hasText:'Оценка 5'}).click();
