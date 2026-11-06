@@ -674,6 +674,9 @@ body{background:#0e0c21;color:#f6f0ff}
 .b3-tile strong{grid-column:2;grid-row:1;margin:0!important;font-size:12px!important;line-height:1.25}
 .b3-tile small{grid-column:2;grid-row:2;font-size:11px!important;line-height:1.3}
 @media(max-width:360px){.b3-tile{grid-template-columns:32px minmax(0,1fr);column-gap:7px;padding:9px!important}.b3-tile-icon{width:32px;height:32px}.b3-tile strong{font-size:11px!important}.b3-tile small{font-size:10px!important}}
+/* Approved 3D portraits, with legacy SVG fallback until files are published. */
+.b3-avatar-stand .avatar-illustration.leveli-3d-avatar{display:block;position:absolute;inset:0;width:100%;height:100%;max-width:none;aspect-ratio:auto;object-fit:contain;object-position:center bottom;border:0;border-radius:0;background:none;filter:drop-shadow(0 6px 8px #09061640);mask-image:linear-gradient(to bottom,#000 0%,#000 77%,transparent 99%);-webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 77%,transparent 99%)}
+.personal-avatar-option .avatar-illustration.leveli-3d-avatar{display:block;width:100%;height:100%;max-width:none;aspect-ratio:1;object-fit:contain;background:none;border:0;border-radius:0}
 </style></head><body><div class="app"><main class="content" id="main">
 <section data-page="home"><header class="school-header"><div><div class="eyebrow brand-lockup"><img src="./brand/mark.svg" alt="" width="30" height="30" aria-hidden="true"><span>Левели</span></div><h1 id="home-greeting">Привет!</h1><p id="home-birthday-greeting" class="home-birthday-greeting" hidden></p><p>Мои оценки и успеваемость</p><div class="header-period" id="school-header-period">II четверть · 2026/27 учебный год</div></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
 <article class="card" id="school-login"><h2>Войди, чтобы увидеть оценки</h2><p>Оценки загружаются из электронного дневника.</p><form id="school-form"><label>Почта<input id="school-email" type="email" autocomplete="username" required></label><label>Пароль<input id="school-password" type="password" autocomplete="current-password" required></label><button class="btn" type="submit">Войти</button></form></article>
@@ -797,18 +800,20 @@ window.LeveliAppearance=(()=>{
   yellow:{main:'#f4c75f',soft:'#ffe6a3',dim:'#76602c',border:'#f4c75f',line:'#ffe7a1',glow:'#f4c75f',track:'#69582f'},
   mint:{main:'#69d9bd',soft:'#bdf9e7',dim:'#286b5c',border:'#69d9bd',line:'#bcf9e9',glow:'#69d9bd',track:'#365f55'}
  };
- // Single trial character; former built-in avatar choices are retired, custom images remain per account.
- const avatars=[['Эталонный аватар']];
- function avatarImage(){
-  const node=document.createElement('span');node.className='avatar-illustration prototype-avatar';
-  node.setAttribute('aria-hidden','true');return node
+ // Two approved portraits; map old avatar 0 to the child's name until a new choice is saved.
+ const avatars=[['Полина','./avatars/leveli-polina-3d.webp'],['Матвей','./avatars/leveli-matvey-3d.webp']];
+ function avatarImage(index=profile.avatar){
+  const node=document.createElement('img');node.className='avatar-illustration leveli-3d-avatar';
+  node.src=avatars[index]?.[1]||avatars[0][1];node.alt='';node.setAttribute('aria-hidden','true');
+  node.onerror=()=>{const fallback=document.createElement('span');fallback.className='avatar-illustration prototype-avatar';fallback.setAttribute('aria-hidden','true');node.replaceWith(fallback)};
+  return node
  }
  const packs=[['classic','Вариант 1','✦'],['cats','Вариант 2','🐱'],['sports','Вариант 3','⚽']];
- const defaults={theme:'dark',accent:'violet',avatar:0,customAvatar:'',pack:'classic',birthday:''};
+ const defaults={theme:'dark',accent:'violet',avatar:0,avatarRevision:0,customAvatar:'',pack:'classic',birthday:''};
  let uid=null,profile={...defaults},render=null;
  const safe=x=>typeof x==='string'&&/^[-\w]{1,150}$/.test(x)?x:null;
  function read(id){try{const p=JSON.parse(localStorage.getItem('leveli-personal-v1-'+id)||'{}');return {...defaults,...p}}catch{return {...defaults}}}
- function valid(p){return {theme:['dark','light','system'].includes(p.theme)?p.theme:'dark',accent:accents[p.accent]?p.accent:'violet',avatar:p.avatar==='custom'||(Number.isInteger(p.avatar)&&p.avatar>=0&&p.avatar<avatars.length)?p.avatar:0,customAvatar:typeof p.customAvatar==='string'&&p.customAvatar.length<120000&&/^data:image\/(webp|png|jpeg);base64,/.test(p.customAvatar)?p.customAvatar:'',pack:packs.some(a=>a[0]===p.pack)?p.pack:'classic',birthday:/^\d{4}-\d{2}-\d{2}$/.test(p.birthday||'')?p.birthday:''}}
+ function valid(p){return {theme:['dark','light','system'].includes(p.theme)?p.theme:'dark',accent:accents[p.accent]?p.accent:'violet',avatar:p.avatar==='custom'||(Number.isInteger(p.avatar)&&p.avatar>=0&&p.avatar<avatars.length)?p.avatar:0,avatarRevision:p.avatarRevision===2?2:0,customAvatar:typeof p.customAvatar==='string'&&p.customAvatar.length<120000&&/^data:image\/(webp|png|jpeg);base64,/.test(p.customAvatar)?p.customAvatar:'',pack:packs.some(a=>a[0]===p.pack)?p.pack:'classic',birthday:/^\d{4}-\d{2}-\d{2}$/.test(p.birthday||'')?p.birthday:''}}
  function age(){if(!profile.birthday)return null;const b=new Date(profile.birthday+'T12:00:00');const now=new Date();if(!Number.isFinite(b.getTime())||b>now)return null;let n=now.getFullYear()-b.getFullYear();if(now.getMonth()<b.getMonth()||(now.getMonth()===b.getMonth()&&now.getDate()<b.getDate()))n--;return n>=0&&n<=120?n:null}
  function paint(){
   const theme=profile.theme==='system'?(window.matchMedia?.('(prefers-color-scheme: light)').matches?'light':'dark'):profile.theme;
@@ -850,11 +855,11 @@ window.LeveliAppearance=(()=>{
  function drawControls(){
   const av=document.querySelector('#personal-avatar-options');av.replaceChildren();
   // One shared gallery, interleaved for variety. Saved avatar indices never change.
-  for(const i of [0]){
-   const label='Эталонный аватар';
-   const b=button('',profile.avatar===i,()=>set({avatar:i}),'personal-avatar-option');
+  for(const i of [0,1]){
+   const label=avatars[i][0];
+   const b=button('',profile.avatar===i,()=>set({avatar:i,avatarRevision:2}),'personal-avatar-option');
    b.title=label;b.setAttribute('aria-label',label);b.dataset.avatarIndex=String(i);
-   b.append(avatarImage());av.append(b)
+   b.append(avatarImage(i));av.append(b)
   }if(profile.customAvatar){const b=button('',profile.avatar==='custom',()=>set({avatar:'custom'}),'personal-avatar-option');b.setAttribute('aria-label','Моя картинка');const img=document.createElement('img');img.src=profile.customAvatar;img.alt='';img.className='personal-avatar-custom';b.append(img);av.append(b)}
   const themeBox=document.querySelector('#personal-theme-options');themeBox.replaceChildren();for(const [k,t] of [['light','☀ Светлая'],['dark','☾ Тёмная'],['system','◐ Системная']])themeBox.append(button(t,profile.theme===k,()=>set({theme:k})));
   const colorBox=document.querySelector('#personal-accent-options');colorBox.replaceChildren();for(const [k,title] of [['violet','Фиолетовый'],['pink','Розовый'],['blue','Синий'],['yellow','Жёлтый'],['mint','Мятный']]){const b=button(title,profile.accent===k,()=>set({accent:k}));const swatch=document.createElement('span');swatch.className='personal-color-swatch';swatch.style.background=accents[k].main;b.prepend(swatch);colorBox.append(b)}
@@ -869,10 +874,10 @@ window.LeveliAppearance=(()=>{
   document.querySelector('#profile-save-status').textContent='Сохранено на этом устройстве';
   paint();document.dispatchEvent(new CustomEvent('leveliAppearanceChanged',{detail:{profile:{...profile}}}));
  }
- function suggestAvatar(name){if(!uid||!name)return;try{if(localStorage.getItem('leveli-personal-v1-'+uid))return}catch{return}profile.avatar=0;paint()}
+ function suggestAvatar(name){if(!uid||!name||profile.avatar==='custom'||profile.avatarRevision===2)return;profile.avatar=/матвей/i.test(name)?1:0;paint()}
  function activate(id){uid=safe(id);profile=uid?valid(read(uid)):{...defaults};document.querySelector('.b3-change-avatar').hidden=!uid;document.querySelector('#profile-personalization').hidden=!uid;document.querySelector('#profile-birthday-card').hidden=!uid;document.querySelector('#profile-save-status').textContent='';paint()}
  document.querySelector('#profile-upload-avatar').addEventListener('click',()=>{if(uid)document.querySelector('#profile-avatar-file').click()});
- document.querySelector('#profile-remove-avatar').addEventListener('click',()=>set({customAvatar:'',avatar:0}));
+ document.querySelector('#profile-remove-avatar').addEventListener('click',()=>set({customAvatar:'',avatar:0,avatarRevision:2}));
  document.querySelector('#profile-avatar-file').addEventListener('change',async e=>{
   const file=e.target.files?.[0];e.target.value='';if(!uid||!file)return;const owner=uid;
   const status=document.querySelector('#profile-save-status');
