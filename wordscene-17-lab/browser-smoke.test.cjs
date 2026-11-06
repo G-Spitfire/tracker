@@ -248,6 +248,13 @@ test('Paper home has no profile gear and retains navigation',()=>{
  assert.match(b.root.html,/data-action="progress"/);
  assert.match(b.root.html,/data-action="dictionary"/);
 });
+test('paper sheet has no decorative copy beyond its flip hint',()=>{
+ const b=boot();b.click('sources');b.click('auto');
+ assert.match(b.root.html,/↻ ПЕРЕВЕРНИ/);
+ assert.doesNotMatch(b.root.html,/LEARN BY IMAGINATION|01 \/ FRONT|02 \/ BACK/);
+ assert.doesNotMatch(b.root.html,/class="ws-paper-metadata"/);
+ assert.match(b.root.html,/class="ws-paper-word"/);
+});
 test('Paper picker v2 keeps aligned counters, approved button order and two-way card reveal',()=>{
  const b=boot();b.click('sources');b.click('auto');
  assert.match(b.root.html,/class="ws-paper-page ws-paper-select"/);
