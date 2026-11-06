@@ -296,7 +296,7 @@ test('Paper level card displays confirmed sessions, recall success and only reve
  assert.ok(!b.root.html.includes('class="paper-target"'));
  const css=file('style.css');
  assert.ok(css.includes('.paper-level-stats{display:grid;grid-template-columns:1fr 1fr'));
- assert.ok(css.includes('.paper-actions{grid-auto-rows:minmax(var(--ws-action-min-height),1fr)}'));
+ assert.ok(css.includes('.paper-actions{--ws-home-action-height:78px;grid-auto-rows:minmax(var(--ws-home-action-height),1fr)}'));
 });
 test('Paper level metrics use only confirmed relevant lessons, not all reviews',()=>{
  const seed=boot(),E=seed.window.WS17Engine,p=E.empty(),at=new Date(2026,10,6,12).getTime();
@@ -312,4 +312,16 @@ test('Paper level metrics use only confirmed relevant lessons, not all reviews',
  assert.ok(b.root.html.includes('<strong>80%</strong><span>цель 80%</span>'));
  assert.ok(b.root.html.includes('class="reached" style="width:80%"'));
  assert.equal(b.map.get('wordscene-17-lab-v1'),JSON.stringify(p));
+});
+
+test('Paper main actions keep 78px minimum and success text has approved accessible contrast',()=>{
+ const b=boot(),css=file('style.css');
+ assert.match(b.root.html,/class="paper-actions"/);
+ assert.match(b.root.html,/class="paper-done" role="status"/);
+ assert.ok(css.includes('--ws-home-action-height:78px'));
+ assert.ok(css.includes('.paper-actions>.paper-action,.paper-actions>.paper-done{height:100%;min-height:var(--ws-home-action-height)}'));
+ assert.ok(css.includes('.paper-actions .paper-done strong{color:#174f29}'));
+ assert.ok(css.includes('.paper-actions .paper-done small{color:#285d38;font-size:14px;font-weight:500}'));
+ assert.match(css,/\.paper button:not\(:disabled\):active[^\n]*scale\(\.975\)/);
+ assert.match(css,/prefers-reduced-motion:reduce/);
 });
