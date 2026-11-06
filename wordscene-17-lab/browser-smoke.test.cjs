@@ -158,26 +158,43 @@ test('Paper home has no profile gear and retains navigation',()=>{
  assert.match(b.root.html,/data-action="progress"/);
  assert.match(b.root.html,/data-action="dictionary"/);
 });
-test('Paper word picker allows immediate decisions and optional translation reveal',()=>{
+test('Paper picker v2 keeps aligned counters, approved button order and two-way card reveal',()=>{
  const b=boot();b.click('sources');b.click('auto');
- assert.match(b.root.html,/Неизвестных:[\s\S]*0 из 10/);
- assert.match(b.root.html,/Просмотрено:[\s\S]*0 из 50/);
- assert.match(b.root.html,/Нажми, чтобы увидеть перевод/);
- assert.match(b.root.html,/data-action="known"/);
- assert.match(b.root.html,/data-action="unknown"/);
- assert.doesNotMatch(b.root.html,/progress-track|paper-shore|paper-sand/);
- b.click('known');
- assert.match(b.root.html,/Просмотрено:[\s\S]*1 из 50/);
+ assert.match(b.root.html,/class="ws-picker ws-picker-v2"/);
+ assert.match(b.root.html,/Знаю<strong>0<\/strong>/);
+ assert.match(b.root.html,/Изучить<strong>0<\/strong>/);
+ assert.match(b.root.html,/0\/50/);
+ assert.ok(b.root.html.indexOf('data-action="known"')<b.root.html.indexOf('data-action="unknown"'));
+ assert.doesNotMatch(b.root.html,/Завершить подбор|ws-picker-exit/);
+ assert.match(b.root.html,/Нажми на карточку, чтобы увидеть перевод/);
  b.click('reveal');
- assert.doesNotMatch(b.root.html,/Нажми, чтобы увидеть перевод/);
+ assert.match(b.root.html,/aria-pressed="true"/);
  assert.match(b.root.html,/ws-picker-translation/);
+ b.click('reveal');
+ assert.match(b.root.html,/aria-pressed="false"/);
+ assert.doesNotMatch(b.root.html,/ws-picker-translation/);
+ b.click('known');
+ assert.match(b.root.html,/Знаю<strong>1<\/strong>/);
+ assert.match(b.root.html,/1\/50/);
  b.click('unknown');
- assert.match(b.root.html,/Неизвестных:[\s\S]*1 из 10/);
+ assert.match(b.root.html,/Изучить<strong>1<\/strong>/);
+ assert.match(b.root.html,/2\/50/);
  b.click('stopSelection');
  assert.match(b.root.html,/Учить новые слова/);
  assert.equal(b.map.has('wordscene-17-lab-active-v1'),false);
+ const saved=JSON.parse(b.map.get('wordscene-17-lab-v1'));
+ assert.equal(Object.values(saved.words).filter(w=>w.origin==='known').length,1);
+ assert.equal(Object.values(saved.words).filter(w=>w.origin==='learned').length,0);
 });
 
+test('Paper picker v2 uses mobile 44px touch targets, 63px choices and scoped styles',()=>{
+ const css=file('style.css');
+ assert.match(css,/\.ws-picker-v2 \.ws-picker-back\{width:44px;height:44px/);
+ assert.match(css,/\.ws-picker-v2 \.ws-picker-speak\{min-width:48px;min-height:48px/);
+ assert.match(css,/\.ws-picker-v2 \.ws-picker-choices button\{min-height:63px/);
+ assert.match(css,/@media\(max-height:700px\)/);
+ assert.match(css,/\.ws-picker-v2 \.ws-picker-card\{min-height:0;flex:1/);
+});
 test('manual selection keeps cross-topic picks and search is independent of topic',()=>{
  const topics={topics:[{id:'food',name:'Еда и напитки'},{id:'animals',name:'Животные'}],forWord:id=>id==='apple'?['food']:['animals']};
  const b=boot({topics});

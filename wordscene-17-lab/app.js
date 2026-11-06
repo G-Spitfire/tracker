@@ -225,18 +225,32 @@ function nextBatch(){
  selection.current=batch.map(w=>w.en);renderSelection();
 }
 function makeSelection(kind){if(warnLocked())return;selection=E.beginSelection('auto');selection.skipped=[];nextBatch()}
+function pickerIcon(name){
+ const shapes={
+  back:'<path d="m15 18-6-6 6-6"/>',
+  known:'<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
+  learn:'<path d="M12 6C9 4 5 4 2 5v14c4-1 7-1 10 2 3-3 6-3 10-2V5c-3-1-7-1-10 1v15"/>',
+  volume:'<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9q4 3 0 6m3-9q7 6 0 12"/>'
+ };
+ return '<svg class="ws-picker-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+shapes[name]+'</svg>';
+}
 function selectionScreen(){
  const id=selection.current?.[selection.cursor],w=byId[id];if(!w){nextBatch();return}
  view='select';
- const unseen=selection.unknown.length,seen=selection.seen.length;
- const content='<main class="ws-picker"><div class="ws-picker-header">'+btn('‹','stopSelection','ws-picker-back')+'<h1>Подбор слов</h1></div>'+
- '<div class="ws-picker-stats" aria-label="Ход подбора"><div><span class="ws-picker-stat-icon" aria-hidden="true">◎</span><span>Неизвестных:<strong>'+unseen+' из 10</strong></span></div><div><span class="ws-picker-stat-icon" aria-hidden="true">▱</span><span>Просмотрено:<strong>'+seen+' из 50</strong></span></div></div>'+
- '<p class="ws-picker-instruction">Посмотри на слово и реши, знаешь ли ты его.</p>'+
- '<section class="ws-picker-card"><button class="ws-picker-reveal" data-action="reveal" type="button" aria-label="'+(showAnswer?'Перевод: '+h(w.ru):'Показать перевод слова '+h(w.en))+'"><span class="ws-picker-word">'+h(w.en)+'</span><span class="ws-picker-ipa">'+h(w.ipa||'')+'</span>'+
- (showAnswer?'<span class="ws-picker-translation">'+h(w.ru)+'</span>':'<span class="ws-picker-hint">Нажми, чтобы увидеть перевод</span>')+'</button>'+
- btn('▶','say:'+h(id),'ws-picker-speak')+'</section>'+
- '<div class="ws-picker-choices">'+btn('Не знаю','unknown','ws-picker-unknown')+btn('Знаю','known','ws-picker-known')+'</div>'+
- btn('Завершить подбор','stopSelection','ws-picker-exit')+'</main>';
+ const known=selection.known.length,unknown=selection.unknown.length,seen=selection.seen.length;
+ const content='<main class="ws-picker ws-picker-v2"><div class="ws-picker-header">'+
+ btn(pickerIcon('back'),'stopSelection','ws-picker-back')+
+ '<div class="ws-picker-heading"><h1>Подбор слов</h1><small>Автоматический подбор</small></div>'+
+ '<span class="ws-picker-position" aria-label="Просмотрено '+seen+' из 50 слов">'+seen+'/50</span></div>'+
+ '<div class="ws-picker-stats" aria-label="Результаты подбора"><div>'+pickerIcon('known')+'<span>Знаю<strong>'+known+'</strong></span></div><div>'+pickerIcon('learn')+'<span>Изучить<strong>'+unknown+'</strong></span></div></div>'+
+ '<p class="ws-picker-instruction">Знаешь значение этого слова?</p>'+
+ '<section class="ws-picker-card"><button class="ws-picker-reveal" data-action="reveal" type="button" aria-label="'+(showAnswer?'Скрыть перевод слова '+h(w.en):'Показать перевод слова '+h(w.en))+'" aria-pressed="'+showAnswer+'"><span class="ws-picker-word">'+h(w.en)+'</span><span class="ws-picker-ipa">'+h(w.ipa||'')+'</span>'+
+ (showAnswer?'<span class="ws-picker-translation">'+h(w.ru)+'</span>':'')+
+ '<span class="ws-picker-hint">'+(showAnswer?'Нажми, чтобы скрыть перевод':'Нажми на карточку, чтобы увидеть перевод')+'</span></button>'+
+ btn(pickerIcon('volume'),'say:'+h(id),'ws-picker-speak')+'</section>'+
+ '<div class="ws-picker-choices">'+
+ btn(pickerIcon('known')+'<span>Знаю</span>','known','ws-picker-known')+
+ btn(pickerIcon('learn')+'<span>Не знаю</span>','unknown','ws-picker-unknown')+'</div></main>';
  shell('','',content);
 }
 function renderSelection(){showAnswer=false;selectionScreen()}
@@ -270,7 +284,11 @@ function saveFamiliar(ids){
  profile=previous;
  return false;
 }
-function stopSelection(){selection=null;home()}
+function stopSelection(){
+ // A partial automatic selection contains already recognised words: keep them on exit.
+ if(selection?.known?.length&&!saveFamiliar(selection.known))return;
+ selection=null;home();
+}
 function manualView(fill=false){
  view=fill?'fill':'manual';
  const selected=[...manual],limit=E.levelLimit(profile),topicId=[...manualThemes][0]||'food';
@@ -475,7 +493,7 @@ function dispatch(act,el){
  case 'auto':return makeSelection('auto');
  case 'review':return review();case 'practice':return review('practice');case 'stopPractice':session=null;store();return home();case 'progress':return progress();case 'dictionary':query='';return dictionaryView();
  case 'known':return selectionGrade(true);case 'unknown':return selectionGrade(false);case 'stopSelection':return stopSelection();
- case 'reveal':showAnswer=true;return selectionScreen();
+ case 'reveal':showAnswer=!showAnswer;return selectionScreen();
  case 'startManual':return startLearning([...manual],selection?.known||[]);
  case 'leaveFill':saveFamiliar(selection.known);selection=null;manual.clear();return home();
  case 'learnNext':try{E.learnNext(session);session.artHidden=false;if(!store())return home();showHelp=false;return session.stage==='learn'?learn(true):recall()}catch(err){return expire(err)}
