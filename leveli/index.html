@@ -301,6 +301,8 @@ body{background:#0e0c21;color:#f6f0ff}
 #school-subject-detail .grade-entry__weight{display:inline-flex;align-items:center;justify-content:center;border:1px solid #775b9d;background:#382a53;color:#dcc3ff;font-size:10px;font-weight:800;border-radius:8px;padding:5px 7px;line-height:1.2;white-space:nowrap}
 #school-subject-detail .grade-entry__value{min-width:20px;text-align:right}
 @media(max-width:360px){#school-subject-detail .grade-entry__grade{gap:5px}#school-subject-detail .grade-entry__weight{font-size:9px;padding:4px 5px}}
+#school-period-buttons button[aria-pressed="true"]{background:#514071!important;border-color:#b48cf3!important;color:#fff!important}
+#school-period-notice.period-notice{margin:10px 0 0;padding:11px 12px;border-radius:11px;background:#302747;border:1px solid #614b80;color:#e7d4ff;font-size:12px;line-height:1.5}
 </style></head><body><div class="app"><main class="content" id="main">
 <section data-page="home"><header class="school-header"><div><div class="eyebrow">Левели</div><h1 id="home-greeting">Привет!</h1><p>Мои оценки и успеваемость</p><div class="header-period" id="school-header-period">II четверть · 2026/27 учебный год</div></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
 <article class="card" id="school-login"><h2>Войди, чтобы увидеть оценки</h2><p>Оценки загружаются из электронного дневника.</p><form id="school-form"><label>Почта<input id="school-email" type="email" autocomplete="username" required></label><label>Пароль<input id="school-password" type="password" autocomplete="current-password" required></label><button class="btn" type="submit">Войти</button></form></article>
@@ -324,7 +326,7 @@ body{background:#0e0c21;color:#f6f0ff}
 <section data-page="profile" hidden>
  <header class="profile-header"><button class="btn secondary profile-back" data-go="home">← К оценкам</button><div class="eyebrow">Левели</div><h1 class="section-title">Настройки и профиль</h1><p>Аккаунт и параметры отображения оценок</p></header>
  <article class="card profile-card"><div class="profile-label">УЧЕНИК</div><h2 id="profile-name">Гость</h2><p id="profile-account">Войди на главной, чтобы подключить профиль.</p><p id="profile-school" class="muted"></p></article>
- <article class="card profile-card"><h2>Учебный период</h2><p>Выбери четверть для просмотра оценок, графиков и прогнозов.</p><div class="profile-period"><div id="school-period-buttons" class="choice-buttons"></div><select id="school-period" hidden><option value="all">Все оценки</option></select><button type="button" id="school-current-period" class="btn secondary">Вернуться к текущей четверти</button></div></article>
+ <article class="card profile-card"><h2>Учебный период</h2><p>Выбери четверть для просмотра оценок, графиков и прогнозов.</p><div class="profile-period"><div id="school-period-buttons" class="choice-buttons"></div><p id="school-period-notice" class="period-notice" role="status" aria-live="polite" hidden></p><select id="school-period" hidden><option value="all">Все оценки</option></select><button type="button" id="school-current-period" class="btn secondary">Вернуться к текущей четверти</button></div></article>
  <article class="card profile-card" id="profile-actions" hidden><h2>Аккаунт и данные</h2><p>Обновление проверяет данные в Firebase. Сбор оценок из дневника выполняется автоматически на Mac.</p><div class="profile-actions"><button class="btn secondary" id="school-refresh">Проверить обновления</button><button class="btn secondary profile-logout" id="school-logout">Выйти из аккаунта</button></div></article>
 </section>
 </main></div><script src="./school-model.js"></script><script>
@@ -685,9 +687,17 @@ function openSubject(name,grades){
  }
  drawHistory();
 }
-function renderChoiceButtons(select,containerId){const container=document.getElementById(containerId);container.replaceChildren();for(const option of select.options){const b=document.createElement('button');b.type='button';b.textContent=option.textContent;b.setAttribute('aria-pressed',String(select.value===option.value));b.style.cssText='border:1px solid #d7cbe5;border-radius:12px;padding:9px 12px;font:inherit;font-size:12px;font-weight:700;color:#45365c;background:'+(select.value===option.value?'#e6d9fb':'#fff');b.addEventListener('click',()=>{select.value=option.value;renderGrades()});container.append(b)}}
+const periodNotice=document.getElementById('school-period-notice');
+function setPeriodNotice(message){periodNotice.textContent=message;periodNotice.hidden=!message}
+function selectSchoolPeriod(value){
+ if(value>currentSchoolPeriod()){
+  const quarter=Number(value.split('-')[1]);setPeriodNotice(quarter+' четверть ещё не наступила. Пока можно посмотреть текущую или предыдущие четверти.');return false;
+ }
+ periodSelect.value=value;forecastFilter=null;setPeriodNotice('');refreshChoiceButtons();renderGrades();return true;
+}
+function renderChoiceButtons(select,containerId){const container=document.getElementById(containerId);container.replaceChildren();for(const option of select.options){const b=document.createElement('button');b.type='button';const future=option.value>currentSchoolPeriod();b.textContent=option.textContent+(future?' · скоро':'');b.setAttribute('aria-pressed',String(select.value===option.value));b.setAttribute('aria-disabled',String(future));b.style.cssText='border:1px solid #55446f;border-radius:11px;padding:10px 7px;font:700 12px Manrope,system-ui,sans-serif;color:#e3d8f4;background:#302747;cursor:pointer';if(future)b.style.opacity='.65';b.addEventListener('click',()=>selectSchoolPeriod(option.value));container.append(b)}}
 function refreshChoiceButtons(){renderChoiceButtons(periodSelect,'school-period-buttons')}
-periodSelect.addEventListener('change',()=>{forecastFilter=null;refreshChoiceButtons();renderGrades()});document.getElementById('school-current-period').addEventListener('click',()=>{periodSelect.value=currentSchoolPeriod();forecastFilter=null;refreshChoiceButtons();renderGrades()});
+periodSelect.addEventListener('change',()=>selectSchoolPeriod(periodSelect.value));document.getElementById('school-current-period').addEventListener('click',()=>selectSchoolPeriod(currentSchoolPeriod()));
 async function loadProfile(user){firestoreProfileName='';if(!user){updateIdentity(null);return}try{const snap=await getDocFromServer(doc(db,'profiles',user.uid));if(snap.exists()){const profile=snap.data();const value=[profile.name,profile.firstName,profile.displayName,profile.childName].find(v=>typeof v==='string'&&v.trim());if(auth.currentUser?.uid===user.uid)firestoreProfileName=value?.trim()||''}}catch(e){console.warn('Профиль Firestore недоступен:',e.code||e.message)}if(auth.currentUser?.uid===user.uid)updateIdentity(user,cachedGrades)}
 function gradeCacheDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open('leveli-school-cache',1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('grades'))req.result.createObjectStore('grades')};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
 async function readGradeCache(uid){const db=await gradeCacheDB();try{return await new Promise((resolve,reject)=>{const tx=db.transaction('grades','readonly'),req=tx.objectStore('grades').get(uid);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error)})}finally{db.close()}}
@@ -703,7 +713,7 @@ function applySchoolData(data){if(data.schemaVersion!==1||data.source!=='petersb
 schoolDataMeta=data;cachedGrades=data.grades.filter(g=>g&&typeof g==='object').map(g=>({...g,value:S.mark(g)}));updateIdentity(auth.currentUser,cachedGrades);
 const selected=periodSelect.value;const nowPeriod=currentSchoolPeriod();const schoolYear=Number(nowPeriod.slice(0,4));const years=[...new Set([schoolYear,...cachedGrades.map(periodOf).filter(Boolean).map(p=>Number(p.slice(0,4)))])].sort((a,b)=>b-a);
 periodSelect.replaceChildren(...years.flatMap(year=>[1,2,3,4].map(q=>new Option(q+' четверть'+(year===schoolYear?'':' · '+year+'/'+(year+1)),year+'-'+q))));
-periodSelect.value=[...periodSelect.options].some(o=>o.value===selected)?selected:nowPeriod;refreshChoiceButtons();
+periodSelect.value=[...periodSelect.options].some(o=>o.value===selected)&&selected<=nowPeriod?selected:nowPeriod;refreshChoiceButtons();
  // A background Firebase refresh must never close the subject the child is reading.
  if(document.getElementById('school-subject-detail').hidden)renderGrades()}
 
