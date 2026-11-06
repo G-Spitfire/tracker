@@ -297,11 +297,10 @@ function manualView(fill=false){
  const themed=manualMode==='topics';
  const filtered=themed?dictionary.filter(w=>T.forWord(w.en).includes(topicId)):q?dictionary.filter(w=>(w.en+' '+w.ru).toLocaleLowerCase('ru').includes(q)):[];
  const chosenInTopic=filtered.filter(w=>manual.has(w.en)).length;
- const mainTopics=['food','home','school','animals','sports','travel'];
- const shownTopics=manualShowAll?T.topics:mainTopics.map(id=>T.topics.find(t=>t.id===id)).filter(Boolean);
+ const shownTopics=manualShowAll?T.topics:[...T.topics.filter(t=>t.id===topicId),...T.topics.filter(t=>t.id!==topicId)].slice(0,3);
  const topicIcons={food:'🍎',home:'🏠',school:'🎒',animals:'🐾',sports:'⚽',travel:'✈️',family:'👨‍👩‍👧',clothes:'👕',nature:'🌿',weather:'☀️',colours:'🎨',body:'🖐️'};
  const listing=filtered.map(manualWordRow).join('');
- const main='<main class="ws-manual ws-manual-v2'+(themed?'':' is-search')+'"><div class="ws-picker-header">'+btn(pickerIcon('back'),fill?'leaveFill':'sources','ws-picker-back')+'<div class="ws-manual-heading"><h1>'+(fill?'Добавь слова':'Выбор слов')+'</h1><small>Ручной подбор</small></div><span class="ws-manual-limit">до '+limit+' слов</span></div>'+
+ const main='<main class="ws-manual ws-manual-v2 ws-manual-v3'+(themed?'':' is-search')+'"><div class="ws-manual-page"><div class="ws-picker-header">'+btn(pickerIcon('back'),fill?'leaveFill':'sources','ws-picker-back')+'<div class="ws-manual-heading"><h1>'+(fill?'Добавь слова':'Выбор слов')+'</h1><small>Ручной подбор</small></div><span class="ws-manual-limit">до '+limit+' слов</span></div>'+
  '<div class="ws-manual-tabs" role="group" aria-label="Способ выбора слов">'+
  btn(pickerIcon('learn')+' По темам','manualTab:topics','ws-manual-tab'+(themed?' is-active':''))+
  btn('<svg class="ws-picker-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg> Поиск','manualTab:search','ws-manual-tab'+(!themed?' is-active':''))+'</div>'+
@@ -310,13 +309,13 @@ function manualView(fill=false){
  '<div class="ws-manual-topics-note" aria-hidden="true" hidden></div><div class="ws-manual-topics'+(manualShowAll?' is-expanded':'')+'" aria-label="Темы словаря">'+shownTopics.map(t=>btn('<span aria-hidden="true">'+(topicIcons[t.id]||'📚')+'</span><span>'+h(t.name)+'</span>','manualTopic:'+h(t.id),'ws-manual-topic'+(topicId===t.id?' is-active':''))).join('')+'</div>':
  '<label class="ws-manual-search-label" for="manual-search">Поиск по всему словарю</label><div class="ws-manual-search-wrap"><span aria-hidden="true"><svg class="ws-picker-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg></span><input id="manual-search" data-input="search" type="search" placeholder="Английское слово или перевод" autocomplete="off" value="'+h(query)+'"></div>')+
  '<section class="ws-manual-list"><div class="ws-manual-list-head"><div><h2>'+(themed?h(topic?.name||'Слова'):'Результаты поиска')+'</h2><p>Нажми на слово, чтобы выбрать</p></div><small>'+(themed?'В этой теме выбрано: '+chosenInTopic:q?'Найдено: '+filtered.length:'Введите слово для поиска')+'</small></div>'+
- '<div class="ws-manual-scroll-note" aria-hidden="true" hidden>Прокрути список ↓</div><div class="ws-manual-word-scroll" role="region" aria-label="Список слов" tabindex="0">'+(listing||'<p class="ws-manual-empty">'+(themed?'В этой теме пока нет слов. Выбери другую тему.':q?'Ничего не найдено. Попробуй другой запрос.':'Начни вводить слово на русском или английском.')+'</p>')+'</div></section></div>'+
- '<div class="ws-manual-bottom"><div class="ws-manual-total"><div><span class="ws-manual-total-label">Выбрано слов:</span><strong>'+selected.length+' / '+limit+'</strong>'+btn(manualSummaryOpen?'Скрыть ▲':'Посмотреть ▼','manualSummary','ws-manual-summary-toggle',!selected.length)+'</div><div class="ws-manual-meter" role="progressbar" aria-label="Выбрано слов" aria-valuemin="0" aria-valuemax="'+limit+'" aria-valuenow="'+selected.length+'"><span style="width:'+(100*selected.length/limit)+'%"></span></div><small>Начать изучение можно с 3 слов. Максимум для уровня — '+limit+'.</small></div>'+ (manualSummaryOpen&&selected.length?'<div class="ws-manual-summary" role="region" aria-label="Выбранные слова">'+selected.map(id=>'<div><span>'+h(id)+' <small>'+h(byId[id]?.ru||'')+'</small></span>'+btn('Убрать ×','removeManual:'+h(id),'ws-manual-remove')+'</div>').join('')+'</div>':'')+
+ '<div class="ws-manual-word-scroll" role="region" aria-label="Список слов" tabindex="0">'+(listing||'<p class="ws-manual-empty">'+(themed?'В этой теме пока нет слов. Выбери другую тему.':q?'Ничего не найдено. Попробуй другой запрос.':'Начни вводить слово на русском или английском.')+'</p>')+'</div></section></div></div>'+
+ '<div class="ws-manual-bottom"><div class="ws-manual-total"><div><span class="ws-manual-total-label">Выбрано слов:</span><strong>'+selected.length+' / '+limit+'</strong>'+btn(manualSummaryOpen?'Скрыть ▲':'Посмотреть ▼','manualSummary','ws-manual-summary-toggle',!selected.length)+'</div><small class="ws-manual-minimum"'+(selected.length>=3?' hidden':'')+'>Выбери минимум 3 слова</small></div>'+ (manualSummaryOpen&&selected.length?'<div class="ws-manual-summary" role="region" aria-label="Выбранные слова">'+selected.map(id=>'<div><span>'+h(id)+' <small>'+h(byId[id]?.ru||'')+'</small></span>'+btn('Убрать ×','removeManual:'+h(id),'ws-manual-remove')+'</div>').join('')+'</div>':'')+
  btn('Начать изучение ('+selected.length+' '+(selected.length%100>=11&&selected.length%100<=14?'слов':selected.length%10===1?'слово':selected.length%10>=2&&selected.length%10<=4?'слова':'слов')+')','startManual','ws-manual-start',!E.eligible(profile,selected))+
  '</div></main>';
- const scroll=root.querySelector?.('.ws-manual-word-scroll')?.scrollTop??0;
+ const scroll=root.querySelector?.('.ws-manual-page')?.scrollTop??0;
  shell('','',main);
- const next=root.querySelector?.('.ws-manual-word-scroll');if(next)next.scrollTop=scroll;
+ const page=root.querySelector?.('.ws-manual-page');if(page)page.scrollTop=scroll;
  wireManualScroll();
  syncManualViewport();
 }
@@ -484,7 +483,7 @@ function dispatch(act,el){
  if(act.startsWith('say:'))return speak(act.slice(4));
  if(act.startsWith('removeManual:')){manual.delete(act.slice(13));if(!manual.size)manualSummaryOpen=false;return manualView(view==='fill')}
  if(act==='manualSummary'){manualSummaryOpen=!manualSummaryOpen;return manualView(view==='fill')}
- if(act.startsWith('manualTopic:')){const v=act.slice(12);manualThemes.clear();manualThemes.add(v);return manualView(view==='fill')}
+ if(act.startsWith('manualTopic:')){const v=act.slice(12);manualThemes.clear();manualThemes.add(v);manualShowAll=false;manualView(view==='fill');const page=root.querySelector?.('.ws-manual-page'),list=root.querySelector?.('.ws-manual-list');if(page&&list)page.scrollTop=Math.max(0,list.offsetTop-page.offsetTop-8);return}
  if(act.startsWith('manualTab:')){manualMode=act.slice(10);if(manualMode==='search')manualSearchBaseHeight=window.visualViewport?.height||window.innerHeight;return manualView(view==='fill')}
  if(act==='manualAllTopics'){manualShowAll=!manualShowAll;return manualView(view==='fill')}
  if(act.startsWith('pick:')){const v=act.slice(5);if(profile.words[v]?.origin||!byId[v])return;manual.has(v)?manual.delete(v):manual.size<E.levelLimit(profile)&&manual.add(v);return manualView(view==='fill')}
