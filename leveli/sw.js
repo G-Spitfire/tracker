@@ -1,5 +1,8 @@
 const CACHE='leveli-v19-thematic-icon-packs';
 const FILES=['./','./index.html','./school-model.js','./manifest.webmanifest','./brand/mark.svg','./brand/app-icon.svg','./brand/app-icon-maskable.svg','./brand/app-icon-192.png','./brand/apple-touch-icon.png'];
+// Keep both themes available offline after the app is installed.
+const PACK_ICONS={cats:['home','book','chart','trophy','calendar','cat','paw','ballet','music','star','target','heart','palette','feather','settings'],sports:['home','book','chart','trophy','calendar','soccer','controller','steering','car','bolt','target','headset','flag','skateboard','settings']};
+for(const [pack,names] of Object.entries(PACK_ICONS))for(const name of names)FILES.push('./icons/'+pack+'/'+name+'.svg');
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('leveli-v')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{
