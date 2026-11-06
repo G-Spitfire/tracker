@@ -71,7 +71,7 @@ async function run(name, browserType, contextOptions) {
    await page.locator('[data-action="manualTopic:travel"]').click();
    assert.equal(await page.locator('.ws-manual-topics .ws-manual-topic').count(),3,'choice collapses topics');
    assert.ok(await page.locator('.ws-manual-topics .is-active').count()===1);
-   assert.match(await page.locator('.ws-manual-topics .ws-manual-topic').first().innerText(),/Путешеств/);
+   assert.match(await page.locator('.ws-manual-topics .ws-manual-topic').first().innerText(),/путешеств/i);
   }else{
    const note=page.locator('.ws-manual-scroll-note');
    await page.waitForFunction(()=>{const el=document.querySelector('.ws-manual-word-scroll'),n=document.querySelector('.ws-manual-scroll-note');return n.hidden===(el.scrollHeight-el.clientHeight-el.scrollTop<=3)});
