@@ -23,6 +23,30 @@ function boot(options={}){
  function click(action){if(action==='flip'){assert.ok(root.flip,'Flip handler missing');return root.flip()}const el=root.listeners[action];assert.ok(el,'Missing action '+action+'; available '+Object.keys(root.listeners).join(','));el.click()}
  return {click,root,map,window,now:()=>now,advanceTime:ms=>{now+=ms;tick()},setFailProfileWrite:v=>{failProfileWrite=v}};
 }
+test('Paper dictionary filters by learning status and keeps details read-only',()=>{
+ const b=boot(),initial=b.map.get('wordscene-17-lab-v1');
+ b.click('dictionary');
+ assert.match(b.root.html,/ws-dict-page/);
+ assert.match(b.root.html,/Поиск по слову или переводу/);
+ assert.match(b.root.html,/data-action="dictionaryFilter:learning"/);
+ assert.match(b.root.html,/data-action="dictionaryFilter:mastered"/);
+ assert.match(b.root.html,/data-action="dictionaryFilter:known"/);
+ assert.match(b.root.html,/data-action="dictionaryFilter:new"/);
+ assert.match(b.root.html,/ws-dict-row/);
+ assert.doesNotMatch(b.root.html,/emoji/);
+ b.click('dictionaryFilter:mastered');
+ assert.match(b.root.html,/Ничего не найдено/);
+ b.click('dictionaryFilter:new');
+ assert.match(b.root.html,/ws-dict-row/);
+ b.click('word:apple');
+ assert.match(b.root.html,/ws-dict-detail-card/);
+ assert.match(b.root.html,/ws-dict-art/);
+ assert.match(b.root.html,/ws-dict-association/);
+ assert.match(b.root.html,/data-action="say:apple"/);
+ assert.equal(b.map.get('wordscene-17-lab-v1'),initial,'dictionary must not change profile');
+ b.click('dictionary');
+ assert.match(b.root.html,/data-action="dictionaryFilter:new" class="ws-dict-filter is-active"/);
+});
 test('automatic 10 word selection -> memorization -> 3 two-way passes -> atomic result',()=>{
  const b=boot();b.click('sources');b.click('auto');
  for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
