@@ -270,8 +270,8 @@ test('Paper uses an informational success card, simplified level, and no plus fo
  assert.match(b.root.html,/class="paper-action paper-sources"/);
  const css=file('style.css');
  assert.match(css,/prefers-reduced-motion:reduce/);
- assert.match(css,/\\.paper-done-mark/);
- assert.match(css,/\\.paper-rings \\.ring-fill/);
+ assert.match(css,/\.paper-done-mark/);
+ assert.match(css,/\.paper-rings \.ring-fill/);
 });
 
 test('mandatory due review keeps new-word button locked and never shows the all-done card',()=>{
