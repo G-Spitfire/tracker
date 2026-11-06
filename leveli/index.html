@@ -614,6 +614,30 @@ body{background:#0e0c21;color:#f6f0ff}
 :root .b3-extra button svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;color:var(--ds-text-secondary)}
 :root[data-leveli-theme="light"] .b3-extra button svg{color:#746489}
 
+/* Shared dashboard surfaces and spacing; grade/status colours stay semantic. */
+:root{
+ --ds-surface-inner:#25203d;
+ --ds-surface-kpi:#29223f;
+ --ds-surface-chart:#1c1735;
+}
+:root[data-leveli-theme="light"]{
+ --ds-surface-inner:#f3eefb;
+ --ds-surface-kpi:#f3eefb;
+ --ds-surface-chart:#f3eefb;
+}
+:root .forecast-card,:root .trend-card,:root .subjects-card{
+ background:var(--ds-card-surface);
+ border-color:var(--ds-border);
+ padding:var(--ds-space-4);
+}
+:root .donut-panel{background:var(--ds-surface-inner);padding:var(--ds-space-2)}
+:root #school-subject-detail .detail-kpi>div{background:var(--ds-surface-kpi);border-radius:var(--ds-radius-inner)}
+:root #school-subject-detail .detail-chart-scroll{background:var(--ds-surface-chart);border-radius:var(--ds-radius-inner)}
+@media(max-width:360px){
+ :root .forecast-card,:root .trend-card,:root .subjects-card{padding:var(--ds-space-3)}
+ :root .donut-panel{padding:var(--ds-space-1)}
+}
+
 /* Design-kit typography: shared screen and card title sizes across dashboard and subject. */
 :root .school-header h1{font-size:var(--ds-font-screen);line-height:var(--ds-line-heading)}
 :root .forecast-card .card-heading h2,:root .trend-card .card-heading h2,:root .subjects-card h2,:root .orient-heading h2{font-size:var(--ds-font-card);line-height:var(--ds-line-heading)}
