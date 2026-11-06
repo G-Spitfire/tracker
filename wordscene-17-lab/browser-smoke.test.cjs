@@ -337,7 +337,7 @@ test('paper texture has no repeating diagonal grid and actions are fixed',()=>{
  const css=file('style.css');
  const grain=css.slice(css.indexOf('.ws-paper-grain{'),css.indexOf('.ws-paper-metadata'));
  assert.ok(grain.includes('feTurbulence'),'natural grain uses noise');
- assert.doesNotMatch(grain,/repeating-linear-gradient|radial-gradient\\(circle/);
+ assert.doesNotMatch(grain,/repeating-linear-gradient|radial-gradient/);
  assert.match(css,/\.ws-paper-bottom\{flex:none/);
  assert.match(css,/\.ws-paper-decisions\{display:grid/);
  assert.match(css,/\.ws-paper-dream\.is-collapsed\{flex:0/);
