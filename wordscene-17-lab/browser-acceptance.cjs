@@ -177,7 +177,29 @@ async function run(name, browserType, contextOptions) {
   assert.equal(await page.locator('[data-action="startManual"]').isEnabled(),true);
   await page.locator('[data-action="startManual"]').click();
   await checkMemorization(page,snap);
-  for(let i=0;i<18;i++)await page.locator('[data-action="yes"]').click();
+  if(await page.locator('.ws-recall-v2').count()){
+   assert.equal(await page.locator('[data-action="yes"]').count(),0,'no self-scoring before reveal');
+   assert.equal(await page.locator('[data-action="check"]').count(),1);
+   await page.locator('[data-action="recallHint"]').click();
+   assert.ok(await page.locator('.ws-recall-clue').count()>0,'hint is available before answer');
+   await page.locator('[data-action="recallHint"]').click();
+   await snap('recall-question');
+   await page.locator('[data-action="check"]').click();
+   assert.equal(await page.locator('.ws-recall-answer').count(),1);
+   assert.ok(await page.locator('[data-action="checkedYes"]').count()>0);
+   assert.ok(await page.locator('[data-action="checkedNo"]').count()>0);
+   await snap('recall-answer');
+   await page.locator('[data-action="help"]').click();
+   assert.ok(await page.locator('.ws-recall-clue-art').count()>0);
+   await snap('recall-association');
+   await page.locator('[data-action="checkedYes"]').click();
+   for(let i=1;i<18;i++){
+    await page.locator('[data-action="check"]').click();
+    await page.locator('[data-action="checkedYes"]').click();
+   }
+  }else{
+   for(let i=0;i<18;i++)await page.locator('[data-action="yes"]').click();
+  }
   await page.getByText('Занятие завершено').waitFor();
   const stored=await page.evaluate(()=> {
    const id=localStorage.getItem('wordscene-17-lab-current-account-v1');
