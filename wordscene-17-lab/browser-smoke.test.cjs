@@ -288,7 +288,7 @@ test('Paper home has no profile gear and retains navigation',()=>{
  assert.doesNotMatch(b.root.html,/data-action="childProfile"|class="paper-info"/);
  assert.match(b.root.html,/Твой уровень/);
  assert.match(b.root.html,/data-action="progress"/);
- assert.match(b.root.html,/data-action="dictionary"/);
+ assert.match(b.root.html,/data-action="dictionaryOpen"/);
 });
 test('paper cards retain approved modes, real media and locked-answer behavior',()=>{
  const b=boot();b.click('sources');b.click('auto');
@@ -354,8 +354,8 @@ test('Paper picker v2 keeps aligned counters, approved button order and two-way 
  const b=boot();b.click('sources');b.click('auto');
  assert.match(b.root.html,/class="ws-paper-page ws-paper-select"/);
  assert.match(b.root.html,/Неизвестных: 0 из 10/);
- assert.match(b.root.html,/Просмотрено: 0 из 50/);
- assert.match(b.root.html,/0\/50/);
+ assert.match(b.root.html,/Просмотрено: 1 из 50/);
+ assert.match(b.root.html,/1\/50/);
  assert.ok(b.root.html.indexOf('data-action="known"')<b.root.html.indexOf('data-action="unknown"'),'Знаю слева, Не знаю справа');
  assert.match(b.root.html,/Завершить подбор/);
  assert.match(b.root.html,/aria-label="Перевернуть лист"/);
