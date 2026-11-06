@@ -20,7 +20,10 @@ async function run(name, browserType, contextOptions) {
   page.on('response',res=>{if(res.url().includes('/wordscene-17-lab/') && res.status() >= 400)failures.push('HTTP '+res.status()+' '+res.url())});
   await page.goto(url,{waitUntil:'load',timeout:60000});
   await page.locator('[data-action="sources"]').waitFor({timeout:30000});
-  assert.equal(await page.locator('text=На сегодня всё повторено').count()>0,true);
+  assert.equal(await page.locator('text=Отлично! Всё повторено').count()>0,true);
+  assert.equal(await page.locator('.paper-done').count(),1,'completed reviews should show a non-clickable success card');
+  assert.equal(await page.locator('.paper-progress .ring-track').count(),3,'three progress rings');
+  assert.ok((await page.locator('.paper-progress').innerText()).includes('За неделю:'));
   const resources=await page.evaluate(()=>({
    cardCount:window.WordSceneContent?.cards?.length,
    topics:window.WordSceneTopics?.topics?.length,
