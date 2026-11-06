@@ -26,7 +26,7 @@ function beginSelection(kind='auto',themes=[]){return {kind,stage:'select',theme
 function selectionAnswer(sel,id,knows){
  if(sel.stage!=='select'||sel.known.includes(id)||sel.unknown.includes(id)||sel.seen.length>50)throw Error('Selection closed or duplicate');
  if(!sel.seen.includes(id)){
-  if(sel.seen.length>=50)throw Error('Selection limit reached');
+  if(sel.seen.length>=50)throw Error('Selection closed or duplicate');
   sel.seen.push(id);
  }
  (knows?sel.known:sel.unknown).push(id);
