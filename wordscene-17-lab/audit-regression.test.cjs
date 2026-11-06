@@ -48,3 +48,21 @@ test('exiting session uses a Paper dialog instead of native confirmation',()=>{
  assert.match(app,/ws-paper-exit-confirm/);
  assert.match(app,/case 'stopPractice':return confirmExit\(true\)/);
 });
+
+const css=fs.readFileSync(path.join(__dirname,'style.css'),'utf8');
+test('removed manual scrolling hints leave no dead markup or CSS selectors',()=>{
+ assert.doesNotMatch(app,/ws-manual-(?:scroll|topics)-note/);
+ assert.doesNotMatch(css,/ws-manual-(?:scroll|topics)-note/);
+});
+test('Paper confirmation supports Escape and focus trapping',()=>{
+ const dialog=app.split('function confirmExit(practice=false){')[1].split('function confirmCancel()')[0];
+ assert.match(dialog,/event.key==='Escape'/);
+ assert.match(dialog,/event.key==='Tab'/);
+ assert.match(dialog,/previousFocus\?\.focus\?\.\(\)/);
+});
+test('approved 44px minimum applies to four touch targets',()=>{
+ for(const selector of ['.ws-paper-dream-toggle','.ws-manual-v3 .ws-manual-all','.ws-manual-v3 .ws-manual-summary-toggle','.ws-progress-page .progress-switch button']){
+  assert.ok(css.includes(selector));
+ }
+ assert.match(css,/\.ws-progress-page \.progress-switch button\{min-height:44px;min-width:44px\}/);
+});
