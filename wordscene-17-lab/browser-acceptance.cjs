@@ -23,10 +23,11 @@ async function run(name, browserType, contextOptions) {
   // On PRs the live site is still on main, so allow the previous published Paper version.
   // New Paper UI is asserted strictly on the branch's locally served app.
   if(process.env.WS17_TEST_ORIGIN){
-   assert.ok(await page.getByText(/Отлично! Всё повторено|На сегодня всё повторено/).count()>0);
+   assert.ok(await page.getByText(/Твоё обучение начинается!|Отлично! Всё повторено|На сегодня всё повторено/).count()>0);
   }else{
-   assert.equal(await page.getByText('Отлично! Всё повторено').count(),1);
-   assert.equal(await page.locator('.paper-done').count(),1,'completed reviews should show a non-clickable success card');
+   assert.equal(await page.getByText('Твоё обучение начинается!').count(),1,'a new user should see the welcome state');
+   assert.equal(await page.locator('.paper-welcome').count(),1,'new user should see a non-clickable welcome card');
+   assert.equal(await page.locator('.paper-done').count(),0,'new user must not see the completed reviews state');
    assert.equal(await page.locator('.paper-progress .ring-track').count(),3,'three progress rings');
    assert.ok((await page.locator('.paper-progress').innerText()).includes('За неделю:'));
   }
@@ -301,6 +302,9 @@ async function run(name, browserType, contextOptions) {
   await page.locator('[data-action="progress"]').click();
   await page.getByText('Мой словарь').waitFor();
   assert.ok(await page.getByText('Выучил в WordScene').count()>0,'offline progress missing');
+   assert.ok(await page.getByText('Как хорошо я помню слова').count()>0,'quality section missing');
+   assert.ok(await page.getByText('Пока нет проверок за этот период').count()>0,'quality empty state missing');
+   assert.equal(await page.locator('.ws-progress-explanation').count(),1,'methodology disclosure missing');
   await context.setOffline(false);
   assert.deepEqual(failures,[],'browser errors '+JSON.stringify(failures));
   await context.close();
