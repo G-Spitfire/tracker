@@ -460,18 +460,76 @@ function suspend(){
  
   E.pause(session);store();
 }
+function resultWordList(ids){
+ const unique=[...new Set(ids||[])].filter(id=>byId[id]);
+ if(!unique.length)return '<p class="ws-result-no-hard">Трудных слов не осталось.</p>';
+ return '<details class="ws-result-hard"><summary><span>Трудные слова</span><strong>'+unique.length+'</strong><span class="ws-result-chevron" aria-hidden="true">⌄</span></summary>'+
+  '<ul>'+unique.map(id=>'<li><strong>'+h(byId[id].en)+'</strong><span>'+h(byId[id].ru)+'</span></li>').join('')+'</ul></details>';
+}
+function resultLevel(previousLevel){
+ const p=E.levelProgress(profile),name=levelLabels[profile.level]||profile.level;
+ if(previousLevel!==profile.level)return '<section class="ws-result-level"><h2>Твой уровень</h2><p>Новый уровень — <strong>'+h(name)+'</strong>.</p></section>';
+ if(!p.target)return '<section class="ws-result-level"><h2>Твой уровень</h2><p><strong>Профи</strong> — высший уровень достигнут.</p></section>';
+ const confirmed=Math.min(3,p.window||0),quality=p.successRate===null?'Пока нет подтверждённых проверок':Math.round(p.successRate*100)+'% при цели '+Math.round(p.threshold*100)+'%';
+ return '<section class="ws-result-level"><h2>Твой уровень — '+h(name)+'</h2>'+
+  '<p>К уровню «'+h(p.target)+'»: подтверждено <strong>'+confirmed+' из 3</strong> подходящих занятий.</p>'+
+  '<p class="ws-result-level-note">Качество повторений: '+quality+'.</p></section>';
+}
+function resultScreen({mode,ids,successful=null,extraWords=null,hardIds=[],previousLevel=profile.level,reviewId=null}){
+ view='result';
+ const amount=new Set(ids||[]).size;
+ const meaningful=successful!==null&&Number.isFinite(successful);
+ const rate=meaningful&&amount?Math.round(100*successful/amount):null;
+ const hard=[...new Set(hardIds)].filter(id=>byId[id]);
+ const isPractice=mode==='practice',isNew=mode==='new';
+ const title=isPractice?'Тренировка завершена':'Занятие завершено';
+ const headline=isPractice?'Ты потренировал трудные слова.':isNew?'Новые слова изучены.':'Обязательное повторение завершено.';
+ const label=isPractice?'Потренировано':isNew?'Изучено слов':'Повторено слов';
+ const checkLabel=isNew?'Вспомнил в обе стороны на 3-м прогоне':'Вспомнил в обе стороны на 1-м прогоне';
+ const hero='<section class="ws-result-hero"><div class="ws-result-hero-head"><div class="ws-result-total"><span>'+label+'</span><strong>'+amount+'</strong></div>'+
+  (meaningful?'<div class="ws-result-total"><span>Успешно в обе стороны</span><strong>'+successful+'</strong></div>':'<div class="ws-result-total"><span>Остались трудными</span><strong>'+hard.length+'</strong></div>')+'</div>'+
+  (rate!==null?'<div class="ws-result-quality"><div><span>Успешность контрольного прогона</span><strong>'+rate+'%</strong></div>'+
+   '<div class="ws-result-quality-track" role="progressbar" aria-label="Успешность контрольного прогона" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+rate+'"><span style="width:'+rate+'%"></span></div>'+
+   '<p>'+successful+' из '+amount+' слов · '+(isNew?'3-й обязательный прогон':'1-й обязательный прогон')+'</p></div>':'')+
+  '</section>';
+ const details=isPractice?'<section class="ws-result-metrics"><div><span>В ходе тренировки</span><strong>Дополнительная практика</strong></div><div><span>Остались трудными</span><strong>'+hard.length+'</strong></div></section>':
+  '<section class="ws-result-metrics"><div><span>Потребовались дополнительные прогоны</span><strong>'+extraWords+'</strong></div>'+
+  '<div><span>Остались трудными после занятия</span><strong>'+hard.length+'</strong></div></section>';
+ const next=isPractice?'Результат добровольной тренировки не изменяет прогресс, расписание, закрепление слов и уровень.':
+  isNew?'Слова добавлены в словарь. Обязательное повторение появится по расписанию.':
+  hard.length?'Можешь дополнительно потренировать трудные слова. Основной результат уже сохранён.':
+  E.due(profile).length?'На главной доступно обязательное повторение.':'На сегодня всё повторено. Можно вернуться к новым словам.';
+ const lastReview=profile.sessions.findLast(s=>s.mode==='review');
+ const practiceAvailable=mode==='review'&&hard.length>0&&lastReview?.id===reviewId&&
+  E.residualErrors(profile).some(id=>byId[id])&&!E.due(profile).length&&localStorage.getItem(PRACTICE)!==reviewId;
+ const actions='<div class="ws-result-actions">'+btn('На главную','home','ws-result-home')+
+  (practiceAvailable?btn('Потренировать трудные слова','practice','ws-result-practice'):'')+'</div>';
+ shell('','', '<main class="ws-result-page"><div class="ws-result-scroll"><header class="ws-result-heading"><span class="ws-result-check" aria-hidden="true">✓</span>'+
+  '<h1>'+title+'</h1><p>'+headline+'</p></header>'+hero+details+
+  (isPractice?'<section class="ws-result-level"><h2>Тренировка без изменения прогресса</h2><p>Постоянная статистика, уровень и расписание остались прежними.</p></section>':resultLevel(previousLevel))+
+  '<section class="ws-result-next"><h2>Что дальше?</h2><p>'+next+'</p></section>'+
+  resultWordList(hard)+'</div>'+actions+'</main>');
+}
 function finishPractice(){
- const finished=session.stage==='complete',lastReview=profile.sessions.findLast(s=>s.mode==='review');
+ const finished=session.stage==='complete',snapshot=session;
  session=null;
  if(!store())return home();
- if(finished&&lastReview){try{localStorage.setItem(PRACTICE,lastReview.id)}catch(err){notice('Не удалось сохранить отметку добровольной тренировки')}}
- view='result';
- shell('Тренировка завершена','<section class="panel">'+btn('Готово','home','primary')+'</section>');
+ if(!finished)return home();
+ const lastReview=profile.sessions.findLast(s=>s.mode==='review');
+ if(lastReview){try{localStorage.setItem(PRACTICE,lastReview.id)}catch(err){notice('Не удалось сохранить отметку добровольной тренировки')}}
+ return resultScreen({mode:'practice',ids:snapshot.ids,hardIds:snapshot.roundHard||[]});
 }
 function completed(){
  if(session.mode==='practice')return finishPractice();
- try{const previousLevel=profile.level,previousProfile=profile,previousSession=session;const result=E.completed(profile,session,Date.now());profile=result;session=null;if(!store()){profile=previousProfile;session=previousSession;return home()}view='result';
- const entry=profile.sessions.at(-1);shell('Занятие завершено','<section class="panel"><div class="result-metrics"><div><strong>'+entry.ids.length+'</strong><small>'+(entry.mode==='new'?'Изучено':'Повторено')+'</small></div><div><strong>'+entry.successful+'</strong><small>В обе стороны · '+(entry.mode==='new'?'3-й прогон':'1-й прогон')+'</small></div><div><strong>'+(entry.extraWords||0)+'</strong><small>Нужны дополнительные прогоны</small></div></div><p class="reason">Остались трудными: '+entry.hard+' слов.</p>'+(previousLevel!==profile.level?'<p><strong>Новый уровень: '+({novice:'Новичок',experienced:'Опытный',pro:'Профи'}[profile.level])+'</strong></p>':'')+levelInfo()+btn('Готово','home','primary')+'</section>');
+ try{
+  const previousLevel=profile.level,previousProfile=profile,previousSession=session;
+  const result=E.completed(profile,session,Date.now());
+  profile=result;session=null;
+  if(!store()){profile=previousProfile;session=previousSession;return home()}
+  const entry=profile.sessions.at(-1);
+  return resultScreen({mode:entry.mode,ids:entry.ids,successful:entry.successful,
+   extraWords:entry.extraWords,hardIds:entry.mode==='review'?(entry.hardIds||[]):(previousSession.roundHard||[]),
+   previousLevel,reviewId:entry.mode==='review'?entry.id:null});
  }catch(err){expire(err)}
 }
 function expire(err){session=null;if(!storageFailure)store();notice('Занятие аннулировано: '+(err?.message||'истекло время'));home()}
