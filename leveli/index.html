@@ -444,6 +444,9 @@ body{background:#0e0c21;color:#f6f0ff}
 :root .trend-card.trend-short{padding-bottom:15px}
 :root .orient-grid[hidden],:root .orient-heading[hidden],:root .orient-panel[hidden]{display:none!important}
 :root .orient-grid.orient-single{grid-template-columns:1fr}
+:root .orient-sparse{padding:13px 15px;border-radius:14px;border:1px solid #493b62;background:#241d3b;font-size:12px;line-height:1.5;color:#c9badf}
+:root .orient-sparse[hidden]{display:none!important}
+:root[data-leveli-theme="light"] .orient-sparse{background:#f2ecf8;border-color:#e1d4ed;color:#5e4c71}
 :root[data-leveli-theme="light"] .trend-sparse{background:#f4eefa}
 :root[data-leveli-theme="light"] .trend-sparse strong{color:#624295}
 :root[data-leveli-theme="light"] .trend-sparse span{color:#665678}
@@ -523,6 +526,7 @@ body{background:#0e0c21;color:#f6f0ff}
  <div id="school-trend-help" class="inline-help" hidden>Светящаяся линия показывает накопительный средний балл за выбранную четверть. Изменение справа — разница с сохранённым средним на конец предыдущего дня. Если вчерашних данных нет, изменение не показывается.</div>
  <div id="school-trend"></div></article>
 <div class="orient-heading"><h2>Мои ориентиры</h2><button class="help-btn" type="button" data-help="school-orient-help" aria-label="Что означает динамика?" aria-expanded="false">?</button></div><div id="school-orient-help" class="inline-help" hidden>Динамика — разница между средним последних трёх текущих оценок и средним за всю выбранную четверть с учётом весов. При отклонении от ±0,50 показываем цветной индикатор. Если оценок меньше трёх, динамика не рассчитывается.</div>
+<div id="school-orient-empty" class="orient-sparse" hidden>Пока недостаточно данных для рекомендаций по предметам. Они появятся, когда сформируется прогноз.</div>
 <div class="orient-grid"><article class="orient-panel orient-good"><div class="orient-title">★ Молодец</div><div id="school-good-list"></div></article><article class="orient-panel orient-attention"><div class="orient-title">◎ Подтянуть</div><div id="school-attention-list"></div></article></div>
 <article class="card subjects-card"><div class="card-heading"><h2>Все предметы</h2><span id="school-subject-count" class="muted"></span></div>
 <div id="school-filter-buttons" hidden></div><select id="school-filter" hidden><option value="all">Все предметы</option><option value="strong">Сильные</option><option value="attention">Требуют внимания</option></select><div id="school-subjects"></div></article><p id="school-status" class="muted">Загрузка…</p><p id="school-freshness" aria-live="polite"></p></div></div><p id="school-error" role="alert" class="muted"></p></section>
@@ -678,7 +682,7 @@ window.LeveliAppearance=(()=>{
   paint();document.dispatchEvent(new CustomEvent('leveliAppearanceChanged',{detail:{profile:{...profile}}}));
  }
  function suggestAvatar(name){if(!uid||!name)return;try{if(localStorage.getItem('leveli-personal-v1-'+uid))return}catch{return}profile.avatar=/матвей/i.test(name)?5:0;paint()}
- function activate(id){uid=safe(id);profile=uid?valid(read(uid)):{...defaults};document.querySelector('#profile-personalization').hidden=!uid;document.querySelector('#profile-birthday-card').hidden=!uid;document.querySelector('#profile-save-status').textContent='';paint()}
+ function activate(id){uid=safe(id);profile=uid?valid(read(uid)):{...defaults};document.querySelector('.b3-change-avatar').hidden=!uid;document.querySelector('#profile-personalization').hidden=!uid;document.querySelector('#profile-birthday-card').hidden=!uid;document.querySelector('#profile-save-status').textContent='';paint()}
  document.querySelector('#profile-upload-avatar').addEventListener('click',()=>{if(uid)document.querySelector('#profile-avatar-file').click()});
  document.querySelector('#profile-remove-avatar').addEventListener('click',()=>set({customAvatar:'',avatar:0}));
  document.querySelector('#profile-avatar-file').addEventListener('change',async e=>{
@@ -836,7 +840,8 @@ function renderForecastChart(rows,baseline,regular){
 }
 function renderOrientations(all,strong,attention){
  const container=document.querySelector('.orient-grid'),heading=document.querySelector('.orient-heading'),goodPanel=document.querySelector('.orient-good'),attentionPanel=document.querySelector('.orient-attention');
- const hasAny=strong.length+attention.length>0;container.hidden=!hasAny;heading.hidden=!hasAny;
+ const hasAny=strong.length+attention.length>0;container.hidden=!hasAny;heading.hidden=false;
+ document.getElementById('school-orient-empty').hidden=hasAny;
  goodPanel.hidden=strong.length===0;attentionPanel.hidden=attention.length===0;
  container.classList.toggle('orient-single',strong.length===0||attention.length===0);
  const good=document.getElementById('school-good-list'),weak=document.getElementById('school-attention-list');good.replaceChildren();weak.replaceChildren();
