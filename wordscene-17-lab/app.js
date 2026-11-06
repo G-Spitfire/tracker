@@ -61,9 +61,9 @@ function manualWordRow(w){
  return '<div class="ws-manual-word'+(used?' is-learned':'')+'">'+
   '<button type="button" class="ws-manual-pick" data-action="pick:'+h(w.en)+'" aria-pressed="'+picked+'" '+(blocked?'disabled':'')+'>'+
   '<span class="ws-manual-check" aria-hidden="true">'+(picked?'✓':'')+'</span>'+
-  '<span class="ws-manual-word-copy"><strong>'+h(w.en)+'</strong><small>'+h(w.ipa||'')+' · '+h(w.ru)+'</small></span>'+
+  '<span class="ws-manual-word-copy"><strong>'+h(w.en)+'</strong><small>'+h(w.ru)+'</small></span>'+
   (used?'<span class="ws-manual-learned">Уже изучено</span>':'')+'</button>'+
-  btn('◖))','say:'+h(w.en),'ws-manual-audio')+'</div>';
+  btn(pickerIcon('volume'),'say:'+h(w.en),'ws-manual-audio')+'</div>';
 }
 function refreshManualSearch(){
  const q=query.trim().toLocaleLowerCase('ru');
@@ -301,17 +301,17 @@ function manualView(fill=false){
  const shownTopics=manualShowAll?T.topics:mainTopics.map(id=>T.topics.find(t=>t.id===id)).filter(Boolean);
  const topicIcons={food:'🍎',home:'🏠',school:'🎒',animals:'🐾',sports:'⚽',travel:'✈️',family:'👨‍👩‍👧',clothes:'👕',nature:'🌿',weather:'☀️',colours:'🎨',body:'🖐️'};
  const listing=filtered.map(manualWordRow).join('');
- const main='<main class="ws-manual'+(themed?'':' is-search')+'"><div class="ws-picker-header">'+btn('‹',fill?'leaveFill':'sources','ws-picker-back')+'<h1>'+(fill?'Добавь слова':'Выбор слов')+'</h1></div>'+
+ const main='<main class="ws-manual ws-manual-v2'+(themed?'':' is-search')+'"><div class="ws-picker-header">'+btn(pickerIcon('back'),fill?'leaveFill':'sources','ws-picker-back')+'<div class="ws-manual-heading"><h1>'+(fill?'Добавь слова':'Выбор слов')+'</h1><small>Ручной подбор</small></div><span class="ws-manual-limit">до '+limit+' слов</span></div>'+
  '<div class="ws-manual-tabs" role="group" aria-label="Способ выбора слов">'+
- btn('▦　По темам','manualTab:topics','ws-manual-tab'+(themed?' is-active':''))+
- btn('⌕　Поиск слов','manualTab:search','ws-manual-tab'+(!themed?' is-active':''))+'</div>'+
+ btn(pickerIcon('learn')+' По темам','manualTab:topics','ws-manual-tab'+(themed?' is-active':''))+
+ btn('<svg class="ws-picker-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg> Поиск','manualTab:search','ws-manual-tab'+(!themed?' is-active':''))+'</div>'+
  '<div class="ws-manual-body">'+
  (themed?'<div class="ws-manual-topic-head"><h2>Выбери тему</h2>'+btn(manualShowAll?'Свернуть':'Все темы ›','manualAllTopics','ws-manual-all')+'</div>'+
  '<div class="ws-manual-topics-note" aria-hidden="true" hidden></div><div class="ws-manual-topics'+(manualShowAll?' is-expanded':'')+'" aria-label="Темы словаря">'+shownTopics.map(t=>btn('<span aria-hidden="true">'+(topicIcons[t.id]||'📚')+'</span><span>'+h(t.name)+'</span>','manualTopic:'+h(t.id),'ws-manual-topic'+(topicId===t.id?' is-active':''))).join('')+'</div>':
- '<label class="ws-manual-search-label" for="manual-search">Поиск по всему словарю</label><div class="ws-manual-search-wrap"><span aria-hidden="true">⌕</span><input id="manual-search" data-input="search" type="search" placeholder="Английское слово или перевод" autocomplete="off" value="'+h(query)+'"></div>')+
- '<section class="ws-manual-list"><div class="ws-manual-list-head"><h2>'+(themed?h(topic?.name||'Слова'):'Результаты поиска')+'</h2><small>'+(themed?'В этой теме выбрано: '+chosenInTopic:q?'Найдено: '+filtered.length:'Введите слово для поиска')+'</small></div>'+
+ '<label class="ws-manual-search-label" for="manual-search">Поиск по всему словарю</label><div class="ws-manual-search-wrap"><span aria-hidden="true"><svg class="ws-picker-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg></span><input id="manual-search" data-input="search" type="search" placeholder="Английское слово или перевод" autocomplete="off" value="'+h(query)+'"></div>')+
+ '<section class="ws-manual-list"><div class="ws-manual-list-head"><div><h2>'+(themed?h(topic?.name||'Слова'):'Результаты поиска')+'</h2><p>Нажми на слово, чтобы выбрать</p></div><small>'+(themed?'В этой теме выбрано: '+chosenInTopic:q?'Найдено: '+filtered.length:'Введите слово для поиска')+'</small></div>'+
  '<div class="ws-manual-scroll-note" aria-hidden="true" hidden>Прокрути список ↓</div><div class="ws-manual-word-scroll" role="region" aria-label="Список слов" tabindex="0">'+(listing||'<p class="ws-manual-empty">'+(themed?'В этой теме пока нет слов. Выбери другую тему.':q?'Ничего не найдено. Попробуй другой запрос.':'Начни вводить слово на русском или английском.')+'</p>')+'</div></section></div>'+
- '<div class="ws-manual-bottom"><div class="ws-manual-total"><div><span aria-hidden="true">▱</span> Выбрано слов: <strong>'+selected.length+' / 10</strong>'+btn(manualSummaryOpen?'Скрыть ▲':'Список ▼','manualSummary','ws-manual-summary-toggle',!selected.length)+'</div><small>Рекомендуется 10 слов. Начать изучение можно с 3 слов.'+(Number.isFinite(limit)&&limit!==10?' Максимум уровня: '+limit+'.':'')+'</small></div>'+ (manualSummaryOpen&&selected.length?'<div class="ws-manual-summary" role="region" aria-label="Выбранные слова">'+selected.map(id=>'<div><span>'+h(id)+' <small>'+h(byId[id]?.ru||'')+'</small></span>'+btn('Убрать ×','removeManual:'+h(id),'ws-manual-remove')+'</div>').join('')+'</div>':'')+
+ '<div class="ws-manual-bottom"><div class="ws-manual-total"><div><span class="ws-manual-total-label">Выбрано слов:</span><strong>'+selected.length+' / '+limit+'</strong>'+btn(manualSummaryOpen?'Скрыть ▲':'Посмотреть ▼','manualSummary','ws-manual-summary-toggle',!selected.length)+'</div><div class="ws-manual-meter" role="progressbar" aria-label="Выбрано слов" aria-valuemin="0" aria-valuemax="'+limit+'" aria-valuenow="'+selected.length+'"><span style="width:'+(100*selected.length/limit)+'%"></span></div><small>Начать изучение можно с 3 слов. Максимум для уровня — '+limit+'.</small></div>'+ (manualSummaryOpen&&selected.length?'<div class="ws-manual-summary" role="region" aria-label="Выбранные слова">'+selected.map(id=>'<div><span>'+h(id)+' <small>'+h(byId[id]?.ru||'')+'</small></span>'+btn('Убрать ×','removeManual:'+h(id),'ws-manual-remove')+'</div>').join('')+'</div>':'')+
  btn('Начать изучение ('+selected.length+' '+(selected.length%100>=11&&selected.length%100<=14?'слов':selected.length%10===1?'слово':selected.length%10>=2&&selected.length%10<=4?'слова':'слов')+')','startManual','ws-manual-start',!E.eligible(profile,selected))+
  '</div></main>';
  const scroll=root.querySelector?.('.ws-manual-word-scroll')?.scrollTop??0;
