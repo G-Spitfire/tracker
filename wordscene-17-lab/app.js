@@ -197,7 +197,9 @@ function paperProgress(){
   '<div><dt class="mastered">Закреплено:</dt><dd>'+mastered+' из '+total+'</dd></div>'+
   '<div><dt class="weekly">За неделю:</dt><dd>'+weekly+' из '+weekGoal+'</dd></div></dl></section>';
 }
+let homeScrollCueListener=null;
 function home(openPicker=false){
+ if(homeScrollCueListener){window.removeEventListener?.('scroll',homeScrollCueListener);homeScrollCueListener=null;}
  view=openPicker?'sources':'home';
  homeDay=E.day();
  const pending=E.due(profile),lastReview=profile.sessions.findLast(s=>s.mode==='review');
@@ -211,7 +213,7 @@ function home(openPicker=false){
  shell('', '', '<main class="paper"><div class="paper-heading"><h1>'+paperIcon('book')+'WordScene</h1></div>'+
  '<div class="paper-hero"><img src="./paper-lighthouse.svg" alt="" width="729" height="160"></div>'+
  paperLevel()+paperProgress()+'<div class="paper-actions">'+fresh+repeat+'</div>'+
- '<p class="paper-scroll-cue" hidden aria-hidden="true">Листай вниз ↓</p><nav class="paper-nav" aria-label="Разделы">'+btn(paperIcon('progress')+'Мой прогресс','progress')+btn(paperIcon('book')+'Словарь','dictionary')+'</nav></main>'+
+ '<p class="paper-scroll-cue" hidden aria-hidden="true">Листай вниз ↓</p><nav class="paper-nav" aria-label="Разделы">'+btn(paperIcon('progress')+'Мой прогресс','progress')+btn(paperIcon('book')+'Словарь','dictionaryOpen')+'</nav></main>'+
  (openPicker?'<div class="paper-sheet-backdrop" data-action="closeSources"><section class="paper-sheet" role="dialog" aria-modal="true" aria-labelledby="picker-title"><div class="paper-sheet-handle" aria-hidden="true"></div><div class="paper-sheet-head"><h2 id="picker-title">Как будем учить?</h2>'+btn('×','closeSources','paper-sheet-close')+'</div>'+
  btn('<span class="paper-sheet-symbol" aria-hidden="true">✦</span><span><strong>Автоматически</strong><small>Подберём слова для тебя</small></span>'+paperIcon('next'),'auto','paper-sheet-choice')+
  btn('<span class="paper-sheet-symbol" aria-hidden="true">☷</span><span><strong>Выбрать самому</strong><small>Найди слова или выбери тему</small></span>'+paperIcon('next'),'manual','paper-sheet-choice')+'</section></div>':'') );
@@ -219,7 +221,8 @@ function home(openPicker=false){
  if(scrollCue&&nav&&typeof window.innerHeight==='number'){
   const updateCue=()=>{scrollCue.hidden=nav.getBoundingClientRect().bottom<=window.innerHeight-4};
   updateCue();
-  window.addEventListener?.('scroll',updateCue,{passive:true,once:true});
+  homeScrollCueListener=updateCue;
+  window.addEventListener?.('scroll',updateCue,{passive:true});
  }
  if(openPicker){const sheet=root.querySelector('.paper-sheet');const close=root.querySelector('.paper-sheet-close');close?.setAttribute('aria-label','Закрыть');close?.focus();let touchY=null;sheet?.addEventListener('click',event=>event.stopPropagation());sheet?.addEventListener('touchstart',event=>{touchY=event.touches[0]?.clientY??null},{passive:true});sheet?.addEventListener('touchend',event=>{if(touchY!==null&&event.changedTouches[0].clientY-touchY>75)home();touchY=null},{passive:true});}
 }
@@ -328,8 +331,7 @@ function saveFamiliar(ids){
  return false;
 }
 function stopSelection(){
- // A partial automatic selection contains already recognised words: keep them on exit.
- if(selection?.known?.length&&!saveFamiliar(selection.known))return;
+ // An interrupted automatic selection is discarded without saving familiar words.
  selection=null;home();
 }
 const topicSvgPaths={"animals":"<circle cx=\"12\" cy=\"17.5\" r=\"3.3\"/><ellipse cx=\"5\" cy=\"11\" rx=\"1.6\" ry=\"2.1\"/><ellipse cx=\"9.4\" cy=\"6.6\" rx=\"1.5\" ry=\"2\"/><ellipse cx=\"15\" cy=\"6.6\" rx=\"1.5\" ry=\"2\"/><ellipse cx=\"19.3\" cy=\"11\" rx=\"1.6\" ry=\"2.1\"/>","food":"<path d=\"M12 7c-3-4-9-2-9 4 0 5 4 10 9 10s9-5 9-10c0-6-6-8-9-4Z\"/><path d=\"M12 7c0-3 1-5 4-6\"/><path d=\"M12 6c-2-3-4-3-6-3 1 3 3 4 6 3Z\"/>","kitchen":"<path d=\"M4 10h16v7a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-7Z\"/><path d=\"M3 10h18M9 7V4h6v3M2 13H1m22 0h-1\"/>","home":"<path d=\"m3 10 9-7 9 7v11H3V10Z\"/><path d=\"M9 21v-8h6v8\"/>","family":"<circle cx=\"8\" cy=\"8\" r=\"3\"/><circle cx=\"17\" cy=\"9\" r=\"2.5\"/><path d=\"M2 21v-3a6 6 0 0 1 12 0v3M15 15a4.5 4.5 0 0 1 7 4v2\"/>","body":"<path d=\"M20.8 8.5c0 4-8.8 10.7-8.8 10.7S3.2 12.5 3.2 8.5A4.7 4.7 0 0 1 12 6a4.7 4.7 0 0 1 8.8 2.5Z\"/><path d=\"M3.8 12h4l2-3 3.2 6 2.1-3H20\"/>","clothes":"<path d=\"m8 3 4 2 4-2 5 4-3 5-2-1v10H8V11l-2 1-3-5 5-4Z\"/>","school":"<path d=\"m2 9 10-6 10 6-10 6L2 9ZM6 12v5c4 4 8 4 12 0v-5M22 9v8\"/>","nature":"<path d=\"m12 2-7 9h4l-5 7h16l-5-7h4l-7-9ZM12 18v4\"/>","weather":"<circle cx=\"8\" cy=\"7\" r=\"3\"/><path d=\"M8 1v2M2.5 3l1.6 1.5M1 8h2M17 2l-2 2\"/><path d=\"M7 19h12a4 4 0 0 0 0-8 6 6 0 0 0-11 2 3 3 0 0 0-1 6Z\"/>","time":"<rect x=\"3\" y=\"5\" width=\"18\" height=\"16\" rx=\"2\"/><path d=\"M7 3v4M17 3v4M3 10h18M8 14h3v3H8z\"/>","colours":"<path d=\"M12 3a9 9 0 1 0 0 18c2.4 0 2.8-2.3 1.3-3.4-.9-.6-.6-2.1.7-2.1H17a4 4 0 0 0 4-4A9 9 0 0 0 12 3Z\"/><circle cx=\"7.5\" cy=\"11\" r=\"1\"/><circle cx=\"10\" cy=\"7\" r=\"1\"/><circle cx=\"15\" cy=\"7\" r=\"1\"/><circle cx=\"18\" cy=\"11\" r=\"1\"/>","actions":"<path d=\"M19 15c1.2-1.2 2-2.7 2-4.5 0-4-4-7.5-9-7.5S3 6.5 3 10.5 7 18 12 18h2l5 3v-6Z\"/><path d=\"M8 10h8M8 13h5\"/>","descriptions":"<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M8 15c2 3 6 3 8 0M8 9h.01M16 9h.01\"/>","sports":"<path d=\"M7 4h10v6a5 5 0 0 1-10 0V4ZM7 6H3v3a4 4 0 0 0 4 4M17 6h4v3a4 4 0 0 1-4 4M12 15v5M8 21h8\"/>","town":"<rect x=\"4\" y=\"3\" width=\"16\" height=\"18\" rx=\"1\"/><path d=\"M8 7h2M14 7h2M8 11h2M14 11h2M8 15h2M14 15h2M10 21v-4h4v4\"/>","travel":"<path d=\"m21 3-7 18-3.5-7.5L3 10l18-7ZM10.5 13.5 21 3\"/>","arts":"<path d=\"M3 5c5-2 9-2 13 0v10c0 4-3 6-6.5 7C5 20 3 17 3 13V5ZM16 6l5-1v8c0 3-2 5-5 6\"/><path d=\"M7 10h.01M13 10h.01M7 15c2 2 4 2 6 0\"/>","tech":"<rect x=\"4\" y=\"4\" width=\"16\" height=\"13\" rx=\"2\"/><path d=\"M2 21h20l-2-4H4l-2 4Z\"/>","quantity":"<rect x=\"3\" y=\"4\" width=\"8\" height=\"8\" rx=\"1\"/><circle cx=\"17\" cy=\"8\" r=\"4\"/><path d=\"m7 15-4 7h8l-4-7ZM16 16h6v6h-6z\"/>","objects":"<path d=\"M14.5 6.5a5 5 0 0 0-6.4 6.4L3.5 17a2.4 2.4 0 0 0 3.5 3.5l4.1-4.6a5 5 0 0 0 6.4-6.4l-3 3-3-1 1-3 3-3Z\"/>","countries":"<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M3 12h18M12 3c-5 5-5 13 0 18M12 3c5 5 5 13 0 18M5 7h14M5 17h14\"/>"};
@@ -671,7 +673,7 @@ function dispatch(act,el){
  switch(act){
  case 'home':return home();case 'closeSources':return home();case 'restoreBackup':return restoreBackup();case 'recover':return recoverScreen();case 'sources':return sources();case 'manual':manual.clear();manualThemes.clear();manualThemes.add('food');manualMode='topics';manualShowAll=false;manualSummaryOpen=false;query='';manualSearchBaseHeight=0;return manualView();
  case 'auto':return makeSelection('auto');
- case 'review':return review();case 'practice':return review('practice');case 'stopPractice':session=null;store();return home();case 'progress':return progress();case 'dictionary':query='';return dictionaryView();
+ case 'review':return review();case 'practice':return review('practice');case 'stopPractice':session=null;store();return home();case 'progress':return progress();case 'dictionaryOpen':query='';dictionaryFilter='all';return dictionaryView();case 'dictionary':return dictionaryView();
  case 'known':return selectionGrade(true);case 'unknown':return selectionGrade(false);case 'stopSelection':return stopSelection();
  case 'reveal':showAnswer=!showAnswer;return selectionScreen();
  case 'startManual':return startLearning([...manual],selection?.known||[]);
