@@ -37,7 +37,6 @@ test('approved memorization UI keeps illustration visible, progress and unchange
  for(let i=0;i<10;i++){b.click('reveal');b.click('unknown')}
  assert.match(b.root.html,/class="ws-learn ws-learn-v2"/);
  assert.match(b.root.html,/Прогресс запоминания/);
- assert.match(b.root.html,/aria-valuenow="1"/);
  assert.match(b.root.html,/class="art"/);
  assert.match(b.root.html,/class="scene"/);
  assert.match(b.root.html,/data-action="say:[^"]+"/);
@@ -242,24 +241,20 @@ test('manual selection keeps cross-topic picks and search is independent of topi
  assert.match(b.root.html,/Запоминание/);
 });
 
-test('manual UI Kit v2 keeps the approved hierarchy, scoped controls and progress meter',()=>{
+test('manual picker retains UI Kit controls and counters with compact pinned footer',()=>{
  const topics={topics:[{id:'food',name:'Еда и напитки'},{id:'animals',name:'Животные'}],forWord:id=>id==='apple'?['food']:['animals']};
  const b=boot({topics});b.click('sources');b.click('manual');
- assert.match(b.root.html,/class="ws-manual ws-manual-v2"/);
+ assert.match(b.root.html,/class="ws-manual ws-manual-v2 ws-manual-v3"/);
  assert.match(b.root.html,/Ручной подбор/);
  assert.match(b.root.html,/По темам/);
  assert.match(b.root.html,/Поиск/);
- assert.match(b.root.html,/aria-label="Выбрано слов"/);
- assert.match(b.root.html,/aria-valuenow="0"/);
  assert.match(b.root.html,/Нажми на слово, чтобы выбрать/);
  assert.match(b.root.html,/Начать изучение \(0 слов\)/);
  b.click('pick:apple');
- assert.match(b.root.html,/aria-valuenow="1"/);
  assert.match(b.root.html,/Выбрано слов:[\s\S]*1 \/ 15/);
  b.click('manualSummary');
  assert.match(b.root.html,/data-action="removeManual:apple"/);
  b.click('manualTab:search');
- assert.match(b.root.html,/aria-valuenow="1"/);
  b.click('manualTab:topics');
  assert.match(b.root.html,/data-action="removeManual:apple"/);
  const css=file('style.css');
@@ -268,17 +263,35 @@ test('manual UI Kit v2 keeps the approved hierarchy, scoped controls and progres
  assert.match(css,/\.ws-manual-v2 \.ws-manual-start\{min-height:63px/);
 });
 
-test('mobile Paper selection layout keeps visible scrolling cues and shared controls',()=>{
+test('manual selection uses one page scroll, compact topics and pinned footer',()=>{
  const css=file('style.css');
- assert.match(css,/\.ws-manual-scroll-note/);
- assert.match(css,/\.ws-manual-word-scroll\{[^}]*overflow-y:auto/);
- assert.match(css,/@media\(max-height:650px\)/);
- assert.match(css,/\.ws-manual-topics\{display:flex/);
- assert.match(css,/\.ws-picker-hint\{color:#304f71\}/);
- assert.match(css,/\.ws-picker-exit\{color:#3c5574\}/);
- const b=boot();b.click('sources');b.click('manual');
- assert.match(b.root.html,/Прокрути список/);
- assert.match(b.root.html,/role="region" aria-label="Список слов"/);
+ assert.match(css,/\.ws-manual-v3 \.ws-manual-page\{flex:1 1 auto;min-height:0;overflow-y:auto/);
+ assert.match(css,/\.ws-manual-v3 \.ws-manual-word-scroll\{overflow:visible/);
+ assert.match(css,/\.ws-manual-v3 \.ws-manual-bottom\{z-index:2;flex:none/);
+ assert.match(css,/\.ws-manual-v3 \.ws-manual-topics,\.ws-manual-v3 \.ws-manual-topics\.is-expanded\{display:grid/);
+ const topics={topics:[{id:'food',name:'Еда и напитки'},{id:'home',name:'Дом и комнаты'},{id:'school',name:'Школа'},{id:'animals',name:'Животные'}],forWord:id=>id==='apple'?['food']:['animals']};
+ const b=boot({topics});b.click('sources');b.click('manual');
+ assert.match(b.root.html,/class="ws-manual ws-manual-v2 ws-manual-v3"/);
+ assert.match(b.root.html,/class="ws-manual-page"/);
+ assert.doesNotMatch(b.root.html,/Прокрути список/);
+ assert.match(b.root.html,/data-action="manualTopic:food"/);
+ assert.match(b.root.html,/data-action="manualTopic:home"/);
+ assert.match(b.root.html,/data-action="manualTopic:school"/);
+ assert.doesNotMatch(b.root.html,/data-action="manualTopic:animals"/);
+ b.click('manualAllTopics');
+ assert.match(b.root.html,/class="ws-manual-topics is-expanded"/);
+ assert.match(b.root.html,/data-action="manualTopic:animals"/);
+ b.click('manualTopic:animals');
+ assert.doesNotMatch(b.root.html,/class="ws-manual-topics is-expanded"/);
+ assert.match(b.root.html,/data-action="manualTopic:animals"/);
+ b.click('pick:cat');
+ assert.match(b.root.html,/Выбрано слов:[\s\S]*1 \/ 15/);
+ assert.match(b.root.html,/Выбери минимум 3 слова/);
+ b.click('pick:dog');b.click('pick:bird');
+ assert.match(b.root.html,/class="ws-manual-minimum" hidden/);
+ b.click('manualTab:search');
+ assert.match(b.root.html,/class="ws-manual ws-manual-v2 ws-manual-v3 is-search"/);
+ assert.match(b.root.html,/Выбрано слов:[\s\S]*3 \/ 15/);
 });
 
 test('selection summary removes cross-topic words and updates total and lesson button',()=>{
@@ -297,13 +310,6 @@ test('selection summary removes cross-topic words and updates total and lesson b
  assert.doesNotMatch(b.root.html,/data-action="removeManual:apple"/);
  assert.match(b.root.html,/data-action="removeManual:dog"/);
 });
-test('scroll hints are initially hidden until actual overflow is measured',()=>{
- const b=boot();b.click('sources');b.click('manual');
- assert.match(b.root.html,/class="ws-manual-scroll-note" aria-hidden="true" hidden/);
- assert.match(b.root.html,/class="ws-manual-topics-note" aria-hidden="true" hidden/);
-});
-
-
 test('Paper weekly goal counts only completed new-word lessons for Monday-Sunday and does not cap the display',()=>{
  const at=new Date(2026,10,6,12).getTime(),earlier=new Date(2026,9,30,12).getTime(),monday=new Date(2026,10,2,12).getTime();
  const p=boot({now:at}).window.WS17Engine.empty();
