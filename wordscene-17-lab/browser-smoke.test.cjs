@@ -142,6 +142,11 @@ test('pause displays a countdown without extending the saved deadline',()=>{
  const b=boot();b.click('sources');b.click('auto');
  for(let i=0;i<10;i++){b.click('unknown')}
  b.click('pause');
+ assert.match(b.root.html,/role="dialog" aria-modal="true"/);
+ assert.match(b.root.html,/Занятие на паузе/);
+ assert.match(b.root.html,/class="ws-paper-page ws-paper-learn is-paused"/);
+ assert.match(b.root.html,/class="ws-paper-pause-buttons"/);
+ assert.equal((b.root.html.match(/data-action="continue"/g)||[]).length,1,'Continue only within modal');
  assert.match(b.root.html,/Осталось 30:00/);
  const active='wordscene-17-lab-active-v1';
  const checkpoint=b.map.get(active);
@@ -249,7 +254,7 @@ test('Paper picker v2 keeps aligned counters, approved button order and two-way 
  assert.match(b.root.html,/Неизвестных: 0 из 10/);
  assert.match(b.root.html,/Просмотрено: 0 из 50/);
  assert.match(b.root.html,/0\/50/);
- assert.ok(b.root.html.indexOf('data-action="unknown"')<b.root.html.indexOf('data-action="known"'));
+ assert.ok(b.root.html.indexOf('data-action="known"')<b.root.html.indexOf('data-action="unknown"'),'Знаю слева, Не знаю справа');
  assert.match(b.root.html,/Завершить подбор/);
  assert.match(b.root.html,/aria-label="Перевернуть лист"/);
  b.click('flip');
