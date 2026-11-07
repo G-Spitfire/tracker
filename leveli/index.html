@@ -104,11 +104,11 @@ body{background:#0e0c21;color:#f6f0ff}
 .double-donut{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px;margin-top:13px}
 .donut-panel{background:#25203d;border-radius:15px;padding:9px;display:flex;flex-direction:column;align-items:center;min-width:0}
 .donut-title{font-weight:750;font-size:12px;color:var(--ds-text-primary)}
-.donut-panel .forecast-chart{width:100%;max-width:170px;margin:3px auto}
+.donut-panel .forecast-chart{width:100%;max-width:138px;margin:0 auto}
 .donut-panel .forecast-center strong{font-size:clamp(23px,6vw,32px);color:var(--ds-text-primary)}
 .donut-panel .forecast-center span{font-size:9px;color:var(--ds-text-secondary)}
-.forecast-legend{display:grid;gap:1px;width:100%;margin-top:2px}
-.forecast-legend .legend-item{width:100%;display:flex;align-items:center;justify-content:space-between;border:1px solid transparent;background:transparent;color:#ded2f1;font:600 10px Manrope,system-ui,sans-serif;padding:4px 2px;border-radius:7px;text-align:left;min-height:23px}
+.forecast-legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;gap:2px 4px;width:100%;margin-top:2px}
+.forecast-legend .legend-item{width:100%;display:flex;align-items:center;justify-content:space-between;border:1px solid transparent;background:transparent;color:#ded2f1;font:600 10px Manrope,system-ui,sans-serif;padding:4px 2px;border-radius:7px;text-align:left;min-height:var(--ds-hit);gap:2px}
 .forecast-legend button.legend-item{cursor:pointer}
 .forecast-legend button[aria-pressed=true]{background:#44345e;border-color:#6e558f}
 .forecast-legend .legend-label{display:flex;align-items:center;gap:5px;min-width:0}
@@ -116,6 +116,8 @@ body{background:#0e0c21;color:#f6f0ff}
 .forecast-legend .legend-count{font-size:12px;color:#fff}
 .donut-unit{font-size:9px;color:#a89abe;margin-top:auto;padding-top:4px;text-align:center;line-height:1.35}
 .forecast-legend .legend-item{min-width:0}
+.forecast-legend .legend-item[data-grade="none"]{grid-column:1 / -1}
+.forecast-legend .legend-item:not([data-grade="none"]) .legend-count::before{content:"×";margin-inline-end:2px;color:var(--ds-text-secondary)}
 .forecast-legend .legend-label{white-space:normal;overflow-wrap:anywhere}
 @media(min-width:390px){.donut-panel{padding:10px}.forecast-legend .legend-item{font-size:11px}}
 #school-status,#school-freshness{font-size:11px;margin:9px 5px;color:var(--ds-text-secondary)}
@@ -640,9 +642,10 @@ body{background:#0e0c21;color:#f6f0ff}
 :root .school-header .settings-button{min-width:52px;min-height:52px;padding:12px;color:var(--ds-text-primary);background:var(--ds-surface-inner);border:1px solid var(--ds-border)}
 :root .school-header .settings-button svg{width:27px;height:27px}
 :root .help-btn{background:transparent;color:var(--ds-text-secondary);border:1px solid var(--ds-border)}
-:root .forecast-card .card-heading,:root .trend-card .card-heading,:root .orient-heading{position:relative}
-:root .forecast-card .card-heading,:root .trend-card .card-heading{padding-right:49px}
-:root .forecast-card .help-btn,:root .trend-card .help-btn,:root .orient-heading .help-btn{position:absolute;right:0;top:0}
+:root .trend-card .card-heading{position:relative}
+:root .trend-card .card-heading{padding-right:49px}
+:root .forecast-card .double-donut{margin-top:4px}
+:root .trend-card .help-btn{position:absolute;right:0;top:0}
 :root .trend-card .card-heading{flex-wrap:wrap;gap:4px 12px}
 :root .trend-card .heading-with-help{display:flex;flex-wrap:wrap;align-items:center;gap:5px 9px}
 :root .trend-card .header-period{margin:0;padding:3px 0;border:0;background:none;color:var(--ds-text-secondary);font-size:12px}
@@ -1005,8 +1008,8 @@ function renderDonut(svgId,legendId,rows,valueId,value,mode){
   if(mode==='subjects'&&forecastFilter===key){svg.append(svgEl('circle',{cx:100,cy:100,r:86,fill:'none',stroke:'var(--leveli-accent)','stroke-width':3,'stroke-dasharray':Math.max(0,circumference*n/total*86/72-2)+' '+(2*Math.PI*86),'stroke-dashoffset':-offset*86/72,'transform':'rotate(-90 100 100)','data-accent-selection':'true'}))}
   offset+=circumference*n/total;
   const button=document.createElement(mode==='subjects'?'button':'div');
-  button.className='legend-item';if(mode==='subjects'){button.type='button';button.setAttribute('aria-pressed',String(forecastFilter===key));button.onclick=()=>{forecastFilter=forecastFilter===key?null:key;renderGrades()}}
-  const l=document.createElement('span');l.className='legend-label';const dot=document.createElement('span');dot.className='legend-dot';dot.style.background=colors[key];l.append(dot,document.createTextNode(key==='none'?'Без прогноза':'Оценка '+key));
+  button.className='legend-item';button.dataset.grade=key;if(mode==='subjects'){button.type='button';button.setAttribute('aria-label',(key==='none'?'Без прогноза':'Оценка '+key)+', предметов: '+n);button.setAttribute('aria-pressed',String(forecastFilter===key));button.onclick=()=>{forecastFilter=forecastFilter===key?null:key;renderGrades()}}
+  const l=document.createElement('span');l.className='legend-label';const dot=document.createElement('span');dot.className='legend-dot';dot.style.background=colors[key];l.append(dot,document.createTextNode(key==='none'?'Без прогноза':key));
   const count=document.createElement('strong');count.className='legend-count';count.textContent=String(n);
   button.append(l,count);legend.append(button);
  }

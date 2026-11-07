@@ -157,12 +157,31 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await page.locator('.donut-unit').first().innerText(),'Количество предметов');
  assert.equal(await page.locator('.donut-unit').last().innerText(),'Количество оценок');
  assert.equal(await page.locator('#school-donut circle[role="button"]').count(),2);
- await page.locator('#school-forecast-legend .legend-item').filter({hasText:'Оценка 5'}).click();
+ const orientHelp=page.getByRole('button',{name:'Что означает динамика?'});
+ for(const width of [320,390,430]){
+  await page.setViewportSize({width,height:844});
+  const help=await orientHelp.boundingBox();
+  const cards=await page.locator('.orient-grid').boundingBox();
+  assert.ok(help.y+help.height<=cards.y,'orientation help must clear the cards at '+width+'px');
+  assert.ok(help.width>=44&&help.height>=44,'orientation help keeps a 44px hit area');
+  const tiles=await page.locator('#school-forecast-legend button').evaluateAll(buttons=>buttons.map(b=>{
+   const box=b.getBoundingClientRect();return {x:box.x,y:box.y,w:box.width,h:box.height,overflow:b.scrollWidth>b.clientWidth+1};
+  }));
+  assert.equal(tiles[0].y,tiles[1].y,'grade filters fit on one row at '+width+'px');
+  assert.notEqual(tiles[0].x,tiles[1].x);
+  assert.ok(tiles.every(tile=>tile.h>=44&&tile.w>=44&&!tile.overflow),'grade filters remain readable and tappable');
+ }
+ await page.setViewportSize({width:390,height:844});
+ await orientHelp.click();
+ assert.equal(await page.locator('#school-orient-help').isVisible(),true);
+ await orientHelp.click();
+ assert.equal(await page.locator('#school-orient-help').isVisible(),false);
+ await page.getByRole('button',{name:'Оценка 5, предметов: 1'}).click();
  assert.equal(await page.locator('#school-donut circle[data-accent-selection="true"]').count(),1);
  assert.equal(await page.locator('#school-donut circle[data-accent-selection="true"]').evaluate(el=>el.style.stroke),'var(--leveli-accent)');
  assert.equal(await page.locator('#school-subjects .subject-row').count(),1);
  assert.match(await page.locator('#school-subjects').innerText(),/Русский язык/);
- await page.locator('#school-forecast-legend .legend-item').filter({hasText:'Оценка 5'}).click();
+ await page.getByRole('button',{name:'Оценка 5, предметов: 1'}).click();
  await page.locator('#school-subjects .subject-row').filter({hasText:'Математика'}).click();
  assert.equal(await page.locator('#school-subject-detail .detail-hero-score').innerText(),'4');
  assert.equal(await page.locator('#school-subject-detail .detail-back').innerText(),'Назад');
