@@ -644,12 +644,19 @@ body{background:#0e0c21;color:#f6f0ff}
 :root .school-header .settings-button{min-width:52px;min-height:52px;padding:12px;color:var(--ds-text-primary);background:var(--ds-surface-inner);border:0}
 :root .school-header .settings-button svg{width:27px;height:27px}
 :root .help-btn{background:transparent;color:var(--ds-text-secondary);border:0}
-:root .trend-card .card-heading{position:relative}
-:root .trend-card .card-heading{padding-right:49px}
+/* Keep every contextual help button in a dedicated right-hand track on narrow screens. */
+:root .forecast-card .card-heading,:root .trend-card .card-heading,:root .orient-heading{
+ display:grid;grid-template-columns:minmax(0,1fr) 44px;column-gap:8px;align-items:start;
+}
+:root .forecast-card .card-heading>.help-btn,:root .trend-card .card-heading>.help-btn,:root .orient-heading>.help-btn{
+ position:static;grid-column:2;grid-row:1;justify-self:end;align-self:start;
+ width:44px;height:44px;min-width:44px;min-height:44px;
+}
+:root .forecast-card .card-heading>h2,:root .orient-heading>h2{grid-column:1;grid-row:1;min-width:0}
 :root .forecast-card .double-donut{margin-top:4px}
-:root .trend-card .help-btn{position:absolute;right:0;top:0}
-:root .trend-card .card-heading{flex-wrap:wrap;gap:4px 12px}
-:root .trend-card .heading-with-help{display:flex;flex-wrap:wrap;align-items:center;gap:5px 9px}
+:root .trend-card .heading-with-help{grid-column:1;grid-row:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:5px 9px}
+:root .trend-card .trend-change{grid-column:1;grid-row:2;min-width:0}
+:root .trend-card .trend-change:empty{display:none}
 :root .trend-card .header-period{margin:0;padding:3px 0;border:0;background:none;color:var(--ds-text-secondary);font-size:12px}
 :root .b3-tile[hidden],:root .personal-group[hidden]{display:none!important}
 :root #school-subject-detail .detail-chart-caption{min-height:38px}
@@ -667,7 +674,7 @@ body{background:#0e0c21;color:#f6f0ff}
  </div>
  <div id="school-analytics" class="muted" hidden></div></article>
 <article class="card trend-card">
- <div class="card-heading"><div class="heading-with-help"><h2>Моя успеваемость</h2><span class="header-period" id="school-header-period">2 четверть</span><button class="help-btn" type="button" data-help="school-trend-help" aria-label="Как считается успеваемость?" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4"/><path d="M12 17h.01"/></svg></button></div><span id="school-trend-change" class="trend-change"></span></div>
+ <div class="card-heading"><div class="heading-with-help"><h2>Моя успеваемость</h2><span class="header-period" id="school-header-period">2 четверть</span></div><button class="help-btn" type="button" data-help="school-trend-help" aria-label="Как считается успеваемость?" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4"/><path d="M12 17h.01"/></svg></button><span id="school-trend-change" class="trend-change"></span></div>
  <div id="school-trend-help" class="inline-help" hidden>Светящаяся линия показывает накопительный средний балл за выбранную четверть. Подпись «Ко вчерашнему среднему» сравнивает общий средний балл с последним сохранённым значением за вчера. Если вчерашних данных нет, изменение не показывается.</div>
  <div id="school-trend"></div></article>
 <div class="orient-heading"><h2>Мои ориентиры</h2><button class="help-btn" type="button" data-help="school-orient-help" aria-label="Что означает динамика?" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4"/><path d="M12 17h.01"/></svg></button></div><div id="school-orient-help" class="inline-help" hidden>Динамика показывает изменение оценок за выбранную четверть. При 0–1 оценке её нет; при 2–5 сравниваем последнюю оценку со взвешенным средним предыдущих; при 6 и более — среднее последних трёх со средним трёх перед ними. Официальные веса учитываются, отсутствующий вес при расчёте равен 1. Изменение от +0,50 или до −0,50 включительно выделяется стрелкой; порог проверяем до округления. Нажми на показатель динамики, чтобы увидеть расчёт.</div>
