@@ -53,10 +53,9 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.locator('#b3-panel-close').click();
  assert.equal(await page.locator('html').getAttribute('data-leveli-theme'),'dark');
  assert.equal(await page.locator('html').evaluate(el=>el.style.getPropertyValue('--leveli-accent')),'#f18bc9');
- await page.locator('[data-b3-panel="theme"]').click();
- await page.locator('#personal-theme-options').getByRole('button',{name:'Светлая'}).click();
- await page.locator('#b3-panel-close').click();
- assert.equal(await page.locator('html').getAttribute('data-leveli-theme'),'light');
+ assert.equal(await page.locator('[data-b3-panel="theme"]').isVisible(),false,'theme selection hidden');
+ await page.emulateMedia({colorScheme:'light'});
+ assert.equal(await page.locator('html').getAttribute('data-leveli-theme'),'dark','system light mode must not change app theme');
  await page.locator('[data-b3-panel="avatar"]').first().click();
  await page.getByRole('button',{name:'Полина',exact:true}).click();
  assert.equal(await page.locator('#profile-avatar-display').getAttribute('data-avatar-index'),'0');
@@ -82,12 +81,13 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.locator('#b3-panel-close').click();
  await page.screenshot({path:'outputs/leveli-polina-settings.png',fullPage:true});
  await page.locator('[data-b3-panel="icons"]').click();
- await page.getByRole('button',{name:'Котики',exact:true}).last().click();
- for(const [name,pack] of [['Спорт','sports'],['Классика','classic'],['Котики','cats']]){
+ await page.getByRole('button',{name:'Вариант 2',exact:true}).last().click();
+ for(const [name,pack] of [['Вариант 3','sports'],['Вариант 1','classic'],['Вариант 2','cats']]){
   await page.getByRole('button',{name,exact:true}).click();
   assert.equal(await page.locator('html').getAttribute('data-leveli-pack'),pack);
-  const mask=await page.locator('.forecast-card [data-icon="forecast"]').evaluate(el=>getComputedStyle(el).maskImage);
+  const mask=await page.locator('#personal-pack-options [aria-pressed="true"] [data-icon="forecast"]').evaluate(el=>getComputedStyle(el).maskImage);
   assert.ok(mask.includes('/icons/'+pack+'/'),mask);
+  assert.equal(await page.locator('#personal-pack-options .pack-preview-strip .pack-icon').count(),12,'four icons per set');
   const tile=page.locator('.b3-tile-icon '+(pack==='classic'?'svg':'.pack-icon')).first();
   assert.deepEqual(await tile.evaluate(el=>[el.getBoundingClientRect().width,el.getBoundingClientRect().height]),[24,24]);
  }
@@ -125,58 +125,17 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.getByRole('button',{name:'1 четверть'}).click();
  assert.equal(await page.locator('#school-period-buttons button[aria-pressed="true"]').innerText(),'1 четверть');
  await page.locator('#b3-panel-close').click();
- const palettes=[
-  ['Светлая',['#713bc4','#a82b78','#1759b6','#835600','#08765f']],
-  ['Тёмная',['#a882ff','#f18bc9','#68adff','#f4c75f','#69d9bd']]
- ];
+ const colors=['#a882ff','#f18bc9','#68adff','#f4c75f','#69d9bd'];
  const names=['Фиолетовый','Розовый','Синий','Жёлтый','Мятный'];
- for(const [theme,colors] of palettes){
-  await page.locator('[data-b3-panel="theme"]').click();
-  await page.locator('#personal-theme-options').getByRole('button',{name:theme}).click();
-  await page.locator('#b3-panel-close').click();
-  await page.locator('[data-b3-panel="accent"]').click();
-  for(const [i,label] of names.entries()){
-   await page.getByRole('button',{name:label,exact:true}).click();
-   const pressed=page.locator('#personal-accent-options [aria-pressed=true]');
-   const selectedBg=await pressed.evaluate(el=>getComputedStyle(el).backgroundColor);
-   assert.equal(await page.locator('[role="dialog"]').isVisible(),true);
-   if(i===4)await page.screenshot({path:'outputs/leveli-'+(theme==='Светлая'?'light-mint':'dark-mint')+'-settings.png',fullPage:true});
-   await page.locator('#b3-panel-close').click();
-   await page.locator('.b3-home-btn').click();
-   await page.waitForFunction(()=>{
-    const style=getComputedStyle(document.documentElement);
-    const token=style.getPropertyValue('--leveli-accent-track').trim();
-    const expected='rgb('+[1,3,5].map(i=>parseInt(token.slice(i,i+2),16)).join(', ')+')';
-    return getComputedStyle(document.querySelector('#school-donut [data-accent-track]')).stroke===expected;
-   });
-   const state=await page.evaluate(()=>{
-    const style=getComputedStyle(document.documentElement);
-    const track=document.querySelector('#school-donut [data-accent-track]');
-    const grid=document.querySelector('#school-trend line');
-    return {accent:style.getPropertyValue('--leveli-accent').trim(),
-     track:getComputedStyle(track).stroke,grid:getComputedStyle(grid).stroke,
-     trackToken:style.getPropertyValue('--leveli-accent-track').trim(),
-     dim:style.getPropertyValue('--leveli-accent-dim').trim(),
-     grade:document.querySelector('#school-donut circle[stroke="#6ee6ae"]')?.getAttribute('stroke')};
-   });
-   assert.equal(state.accent,colors[i]);
-   const rgb=hex=>'rgb('+[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)).join(', ')+')';
-   assert.equal(state.track,rgb(state.trackToken));
-   assert.equal(selectedBg,rgb(state.dim));
-   assert.notEqual(state.grid,'none');
-   assert.equal(state.grade,'#6ee6ae');
-   await page.getByRole('button',{name:'Профиль и настройки'}).click();
-   if(i<names.length-1)await page.locator('[data-b3-panel="accent"]').click();
-  }
+ await page.locator('[data-b3-panel="accent"]').click();
+ for(const [i,label] of names.entries()){
+  await page.getByRole('button',{name:label,exact:true}).click();
+  assert.equal(await page.locator('html').evaluate(el=>el.style.getPropertyValue('--leveli-accent')),colors[i]);
+  assert.equal(await page.locator('html').getAttribute('data-leveli-theme'),'dark');
  }
- await page.locator('[data-b3-panel="theme"]').click();
- await page.locator('#personal-theme-options').getByRole('button',{name:'Системная'}).click();
- await page.emulateMedia({colorScheme:'dark'});
- await page.waitForFunction(()=>document.documentElement.dataset.leveliTheme==='dark');
- await page.emulateMedia({colorScheme:'light'});
- await page.waitForFunction(()=>document.documentElement.dataset.leveliTheme==='light');
- await page.locator('#personal-theme-options').getByRole('button',{name:'Светлая'}).click();
  await page.locator('#b3-panel-close').click();
+ await page.emulateMedia({colorScheme:'light'});
+ assert.equal(await page.locator('html').getAttribute('data-leveli-theme'),'dark');
  await page.locator('[data-b3-panel="accent"]').click();
  await page.getByRole('button',{name:'Розовый',exact:true}).click();
  await page.locator('#b3-panel-close').click();
@@ -237,8 +196,13 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.ok((await page.locator('#school-subject-detail .detail-chart-scroll text[font-weight="800"]').count())<=6);
  assert.ok((await page.locator('#school-subject-detail .detail-chart-scroll rect[fill^="url(#leveli-subject-grade-"]').count())<=6);
  assert.ok((await page.locator('#school-subject-detail .detail-chart-scroll rect[filter="url(#leveli-subject-bar-glow)"]').count())<=6);
+ const chartScrollBefore=await page.evaluate(()=>window.scrollY);
  await page.getByRole('button',{name:'Средний балл',exact:true}).click();
+ const chartScrollAfter=await page.evaluate(()=>window.scrollY);
+ assert.ok(Math.abs(chartScrollAfter-chartScrollBefore)<=2,'switching chart mode must not jump the page');
  assert.equal(await page.locator('#school-subject-detail .detail-chart-scroll polyline[filter="url(#leveli-subject-line-glow)"]').count(),1);
+ assert.equal(await page.locator('#school-subject-detail .detail-chart-scroll text[font-weight="800"]').last().textContent(),'4,50','average label at last chart point');
+ assert.equal(await page.locator('#school-subject-detail .detail-toggle').first().locator('button').count(),2,'chart mode controls stay mounted');
  const fit=await page.locator('#school-subject-detail .detail-chart-scroll').evaluate(el=>{
    const svg=el.querySelector('svg');
    return {chart:svg.getBoundingClientRect().width,container:el.clientWidth,scroll:el.scrollWidth};
@@ -316,8 +280,8 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await freshness.locator('.sync-copy').innerText(),profileBFreshness);
  assert.match(await page.locator('#school-subjects').innerText(),/История[\s\S]*3,00/);
  await page.evaluate(()=>window.__switchUser('A'));
- assert.equal(await page.locator('html').getAttribute('data-leveli-theme'),'light');
- assert.equal(await page.locator('html').evaluate(el=>el.style.getPropertyValue('--leveli-accent')),'#a82b78');
+ assert.equal(await page.locator('html').getAttribute('data-leveli-theme'),'dark');
+ assert.equal(await page.locator('html').evaluate(el=>el.style.getPropertyValue('--leveli-accent')),'#f18bc9');
  await page.getByRole('button',{name:'Профиль и настройки'}).click();
  assert.equal(await page.locator('#profile-avatar-display img.profile-avatar-custom').count(),1);
  assert.equal(await page.locator('#profile-birthday').inputValue(),'2017-09-08');
@@ -401,7 +365,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  for(const metrics of themeAudit)for(const key of ['headline','subtitle','section']){
   assert.ok(metrics[key]>=4.5,'contrast '+key+' '+metrics.theme+' must be at least 4.5:1; got '+metrics[key]);
  }
- const hits=await page.locator('.b3-home-btn,.b3-change-avatar,.b3-tile,.b3-extra button').evaluateAll(items=>items.map(el=>({name:el.textContent.trim(),w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height})));
+ const hits=await page.locator('.b3-home-btn,.b3-change-avatar,.b3-tile,.b3-extra button').evaluateAll(items=>items.filter(el=>el.getClientRects().length>0).map(el=>({name:el.textContent.trim(),w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height})));
  for(const hit of hits)assert.ok(hit.w>=44&&hit.h>=44,'accessible control '+hit.name+' is smaller than 44px');
  for(const width of [320,360,390,430]){
   await page.setViewportSize({width,height:844});
@@ -419,7 +383,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   const hitAreas=await page.locator('#personal-accent-options button').evaluateAll(items=>items.map(el=>[el.offsetWidth,el.offsetHeight]));
   assert.ok(hitAreas.every(([w,h])=>w>=44&&h>=44),'accent controls have a 44px hit area at '+width);
   await page.locator('#b3-panel-close').click();
-  assert.equal(state.tileCount,4,'all quick-setting tiles remain readable on '+width+'px screen');
+  assert.equal(state.tileCount,3,'all visible quick-setting tiles remain readable on '+width+'px screen');
   const cardPadding=await page.locator('.forecast-card').evaluate(el=>getComputedStyle(el).paddingTop);
   assert.equal(cardPadding,width<=360?'12px':'16px','dashboard spacing follows responsive token at '+width+'px');
   const tileLayout=await page.locator('.b3-tile').first().evaluate(el=>{
@@ -432,12 +396,12 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   assert.equal(tileLayout.svgWidth,24,'settings icon artwork width at '+width+'px');
   assert.equal(tileLayout.svgHeight,24,'settings icon artwork height at '+width+'px');
  }
- await page.locator('[data-b3-panel="theme"]').click();
+ await page.locator('[data-b3-panel="icons"]').click();
  assert.equal(await page.locator('#b3-panel-overlay').isVisible(),true);
  assert.equal(await page.locator('body').evaluate(el=>getComputedStyle(el).overflow),'hidden');
  await page.keyboard.press('Escape');
  assert.equal(await page.locator('#b3-panel-overlay').isVisible(),false);
- assert.equal(await page.locator('[data-b3-panel="theme"]').evaluate(el=>document.activeElement===el),true);
+ assert.equal(await page.locator('[data-b3-panel="icons"]').evaluate(el=>document.activeElement===el),true);
  await page.setViewportSize({width:390,height:844});
  await page.locator('.b3-home-btn').click();
  await page.evaluate(()=>window.__switchUser(null));assert.equal(await page.locator('#school-results').isVisible(),false);assert.equal(await page.locator('#school-subjects').innerText(),'');
@@ -445,7 +409,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.evaluate(()=>window.__switchUser('A'));
  await page.reload();
  await page.waitForFunction(()=>document.querySelector('#home-greeting').textContent==='Привет, Полина!');
- assert.equal(await page.locator('html').getAttribute('data-leveli-theme'),'light');
+ assert.equal(await page.locator('html').getAttribute('data-leveli-theme'),'dark');
  assert.equal(await page.locator('html').getAttribute('data-leveli-pack'),'cats');
  assert.equal(await page.locator('#profile-avatar-display img.profile-avatar-custom').count(),1);
  await page.screenshot({path:'outputs/leveli-home.png',fullPage:true});

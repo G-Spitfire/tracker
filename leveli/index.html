@@ -687,12 +687,40 @@ body{background:#0e0c21;color:#f6f0ff}
 .pack-icon[data-preview="classic"]{--icon-image:url("./icons/classic/goals.svg")}
 .pack-icon[data-preview="cats"]{--icon-image:url("./icons/cats/paw.svg")}
 .pack-icon[data-preview="sports"]{--icon-image:url("./icons/sports/soccer.svg")}
+
+/* UI batch: neutral header actions and consistent contextual help. */
+:root .school-header .settings-button{min-width:52px;min-height:52px;padding:12px;color:var(--ds-text-primary);background:var(--ds-surface-inner);border:1px solid var(--ds-border)}
+:root .school-header .settings-button svg{width:27px;height:27px}
+:root .help-btn{background:transparent;color:var(--ds-text-secondary);border:1px solid var(--ds-border)}
+:root .forecast-card .card-heading,:root .trend-card .card-heading,:root .orient-heading{position:relative}
+:root .forecast-card .card-heading,:root .trend-card .card-heading{padding-right:49px}
+:root .forecast-card .help-btn,:root .trend-card .help-btn,:root .orient-heading .help-btn{position:absolute;right:0;top:0}
+:root .trend-card .heading-with-help{display:flex;flex-wrap:wrap;align-items:center;gap:5px 9px}
+:root .trend-card .header-period{margin:0;padding:3px 0;border:0;background:none;color:var(--ds-text-secondary);font-size:12px}
+:root .pack-preview-strip{display:flex;gap:9px;justify-content:center;align-items:center;width:100%;margin-top:8px}
+:root .pack-preview-strip .pack-icon{margin:0;width:22px;height:22px;background:var(--ds-text-primary)}
+:root .b3-tile[hidden],:root .personal-group[hidden]{display:none!important}
+:root #school-subject-detail .detail-chart-caption{min-height:38px}
+
+/* Preview each icon set independently of the currently selected pack. */
+.pack-preview-strip [data-pack-preview="classic"][data-icon="forecast"]{--icon-image:url("./icons/classic/forecast.svg")}
+.pack-preview-strip [data-pack-preview="classic"][data-icon="trend"]{--icon-image:url("./icons/classic/trend.svg")}
+.pack-preview-strip [data-pack-preview="classic"][data-icon="goals"]{--icon-image:url("./icons/classic/goals.svg")}
+.pack-preview-strip [data-pack-preview="classic"][data-icon="book"]{--icon-image:url("./icons/classic/book.svg")}
+.pack-preview-strip [data-pack-preview="cats"][data-icon="forecast"]{--icon-image:url("./icons/cats/chart.svg")}
+.pack-preview-strip [data-pack-preview="cats"][data-icon="trend"]{--icon-image:url("./icons/cats/feather.svg")}
+.pack-preview-strip [data-pack-preview="cats"][data-icon="goals"]{--icon-image:url("./icons/cats/paw.svg")}
+.pack-preview-strip [data-pack-preview="cats"][data-icon="book"]{--icon-image:url("./icons/cats/book.svg")}
+.pack-preview-strip [data-pack-preview="sports"][data-icon="forecast"]{--icon-image:url("./icons/sports/chart.svg")}
+.pack-preview-strip [data-pack-preview="sports"][data-icon="trend"]{--icon-image:url("./icons/sports/bolt.svg")}
+.pack-preview-strip [data-pack-preview="sports"][data-icon="goals"]{--icon-image:url("./icons/sports/target.svg")}
+.pack-preview-strip [data-pack-preview="sports"][data-icon="book"]{--icon-image:url("./icons/sports/book.svg")}
 </style></head><body><div class="app"><main class="content" id="main">
-<section data-page="home"><header class="school-header"><div><div class="eyebrow brand-lockup"><img src="./brand/mark.svg" alt="" width="30" height="30" aria-hidden="true"><span>Левели</span></div><h1 id="home-greeting">Привет!</h1><p id="home-birthday-greeting" class="home-birthday-greeting" hidden></p><p>Мои оценки и успеваемость</p><div class="header-period" id="school-header-period">II четверть · 2026/27 учебный год</div></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><span class="pack-icon pack-icon--alternate" data-icon="settings" aria-hidden="true"></span><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
+<section data-page="home"><header class="school-header"><div><div class="eyebrow brand-lockup"><img src="./brand/mark.svg" alt="" width="30" height="30" aria-hidden="true"><span>Левели</span></div><h1 id="home-greeting">Привет!</h1><p id="home-birthday-greeting" class="home-birthday-greeting" hidden></p><p>Мои оценки и успеваемость</p></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><span class="pack-icon pack-icon--alternate" data-icon="settings" aria-hidden="true"></span><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
 <article class="card" id="school-login"><h2>Войди, чтобы увидеть оценки</h2><p>Оценки загружаются из электронного дневника.</p><form id="school-form"><label>Почта<input id="school-email" type="email" autocomplete="username" required></label><label>Пароль<input id="school-password" type="password" autocomplete="current-password" required></label><button class="btn" type="submit">Войти</button></form></article>
 <div id="school-results" hidden><div id="school-subject-detail" class="card" hidden></div><div id="school-overview">
 <article class="card forecast-card">
- <div class="card-heading"><h2><span class="pack-icon" data-icon="forecast" aria-hidden="true"></span>Как у меня дела?</h2><button class="help-btn" type="button" data-help="school-chart-help" aria-label="Как считаются диаграммы?" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4"/><path d="M12 17h.01"/></svg></button></div>
+ <div class="card-heading"><h2>Как у меня дела?</h2><button class="help-btn" type="button" data-help="school-chart-help" aria-label="Как считаются диаграммы?" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4"/><path d="M12 17h.01"/></svg></button></div>
  <div id="school-chart-help" class="inline-help" hidden>Слева — распределение предметов по прогнозу или выставленной четвертной оценке. Средний балл в центре — среднее по предметам с оценками. Справа — количество обычных полученных оценок за четверть по значениям 5, 4, 3 и 2; итоговые четвертные не включаются. Нажатие на категорию слева фильтрует список предметов.</div>
  <div class="double-donut">
   <div class="donut-panel"><div class="donut-title">По предметам</div><div class="forecast-chart"><svg id="school-donut" viewBox="0 0 200 200" role="img" aria-label="Распределение предметов"></svg><div class="forecast-center"><strong id="school-overall">—</strong><span>Средний балл</span></div></div><div id="school-forecast-legend" class="forecast-legend" aria-label="Количество предметов по оценкам"></div><div class="donut-unit">Количество предметов</div></div>
@@ -700,13 +728,13 @@ body{background:#0e0c21;color:#f6f0ff}
  </div>
  <div id="school-analytics" class="muted" hidden></div></article>
 <article class="card trend-card">
- <div class="card-heading"><div class="heading-with-help"><h2><span class="pack-icon" data-icon="trend" aria-hidden="true"></span>Моя успеваемость</h2><button class="help-btn" type="button" data-help="school-trend-help" aria-label="Как считается успеваемость?" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4"/><path d="M12 17h.01"/></svg></button></div><span id="school-trend-change" class="trend-change"></span></div>
+ <div class="card-heading"><div class="heading-with-help"><h2>Моя успеваемость</h2><span class="header-period" id="school-header-period">2 четверть</span><button class="help-btn" type="button" data-help="school-trend-help" aria-label="Как считается успеваемость?" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4"/><path d="M12 17h.01"/></svg></button></div><span id="school-trend-change" class="trend-change"></span></div>
  <div id="school-trend-help" class="inline-help" hidden>Светящаяся линия показывает накопительный средний балл за выбранную четверть. Изменение справа — разница с сохранённым средним на конец предыдущего дня. Если вчерашних данных нет, изменение не показывается.</div>
  <div id="school-trend"></div></article>
-<div class="orient-heading"><h2><span class="pack-icon" data-icon="goals" aria-hidden="true"></span>Мои ориентиры</h2><button class="help-btn" type="button" data-help="school-orient-help" aria-label="Что означает динамика?" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4"/><path d="M12 17h.01"/></svg></button></div><div id="school-orient-help" class="inline-help" hidden>Динамика показывает изменение оценок за выбранную четверть. При 0–1 оценке её нет; при 2–5 сравниваем последнюю оценку со взвешенным средним предыдущих; при 6 и более — среднее последних трёх со средним трёх перед ними. Официальные веса учитываются, отсутствующий вес при расчёте равен 1. Изменение от +0,50 или до −0,50 включительно выделяется стрелкой; порог проверяем до округления. Нажми на показатель динамики, чтобы увидеть расчёт.</div>
+<div class="orient-heading"><h2>Мои ориентиры</h2><button class="help-btn" type="button" data-help="school-orient-help" aria-label="Что означает динамика?" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4"/><path d="M12 17h.01"/></svg></button></div><div id="school-orient-help" class="inline-help" hidden>Динамика показывает изменение оценок за выбранную четверть. При 0–1 оценке её нет; при 2–5 сравниваем последнюю оценку со взвешенным средним предыдущих; при 6 и более — среднее последних трёх со средним трёх перед ними. Официальные веса учитываются, отсутствующий вес при расчёте равен 1. Изменение от +0,50 или до −0,50 включительно выделяется стрелкой; порог проверяем до округления. Нажми на показатель динамики, чтобы увидеть расчёт.</div>
 <div id="school-orient-empty" class="orient-sparse" hidden>Пока недостаточно данных для рекомендаций по предметам. Они появятся, когда сформируется прогноз.</div>
-<div class="orient-grid"><article class="orient-panel orient-good"><div class="orient-title">★ Молодец</div><div id="school-good-list"></div></article><article class="orient-panel orient-attention"><div class="orient-title">◎ Подтянуть</div><div id="school-attention-list"></div></article></div>
-<article class="card subjects-card"><div class="card-heading"><h2><span class="pack-icon" data-icon="book" aria-hidden="true"></span>Все предметы</h2><span id="school-subject-count" class="muted"></span></div>
+<div class="orient-grid"><article class="orient-panel orient-good"><div class="orient-title">Молодец</div><div id="school-good-list"></div></article><article class="orient-panel orient-attention"><div class="orient-title">Подтянуть</div><div id="school-attention-list"></div></article></div>
+<article class="card subjects-card"><div class="card-heading"><h2>Все предметы</h2><span id="school-subject-count" class="muted"></span></div>
 <div id="school-filter-buttons" hidden></div><select id="school-filter" hidden><option value="all">Все предметы</option><option value="strong">Сильные</option><option value="attention">Требуют внимания</option></select><div id="school-subjects"></div></article><p id="school-status" class="muted">Загрузка…</p><p id="school-freshness" aria-live="polite"></p></div></div><p id="school-error" role="alert" class="muted"></p></section>
 <section data-page="profile" hidden>
  <div class="b3-settings" id="b3-settings">
@@ -715,13 +743,13 @@ body{background:#0e0c21;color:#f6f0ff}
   <h2 class="b3-section-label">Быстрые настройки</h2>
   <div class="b3-tiles">
     <button type="button" class="b3-tile" data-b3-panel="quarter"><span class="b3-tile-icon"><span class="pack-icon pack-icon--alternate" data-icon="quarter" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><strong>Выбрать четверть</strong><small id="b3-quarter-status">II четверть</small></button>
-    <button type="button" class="b3-tile" data-b3-panel="theme"><span class="b3-tile-icon"><span class="pack-icon pack-icon--alternate" data-icon="theme" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/></svg></span><strong>Тема</strong><small id="b3-theme-status">Тёмная</small></button>
+    <button type="button" class="b3-tile" data-b3-panel="theme" hidden><span class="b3-tile-icon"><span class="pack-icon pack-icon--alternate" data-icon="theme" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/></svg></span><strong>Тема</strong><small id="b3-theme-status">Тёмная</small></button>
     <button type="button" class="b3-tile" data-b3-panel="accent"><span class="b3-tile-icon"><span class="pack-icon pack-icon--alternate" data-icon="accent" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="9" r="1"/><circle cx="15" cy="8" r="1"/><circle cx="16" cy="14" r="1"/><path d="M8 17h2"/></svg></span><strong>Акцентные цвета</strong><small id="b3-accent-status">Фиолетовый</small></button>
     <button type="button" class="b3-tile" data-b3-panel="icons"><span class="b3-tile-icon"><span class="pack-icon pack-icon--alternate" data-icon="icons" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></span><strong>Вариант иконок</strong><small id="b3-icons-status">Классика</small></button>
   </div>
   <h2 class="b3-section-label">Дополнительно</h2>
   <div class="b3-extra">
-    <button type="button" data-b3-panel="birthday"><span class="pack-icon" data-icon="birthday" aria-hidden="true"></span>День рождения <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+    <button type="button" data-b3-panel="birthday">День рождения <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
     <button type="button" data-b3-panel="account">Аккаунт и данные <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
   </div>
  </div>
@@ -826,7 +854,7 @@ window.LeveliAppearance=(()=>{
   node.onerror=()=>{const fallback=document.createElement('span');fallback.className='avatar-illustration prototype-avatar';fallback.setAttribute('aria-hidden','true');node.replaceWith(fallback)};
   return node
  }
- const packs=[['classic','Классика'],['cats','Котики'],['sports','Спорт']];
+ const packs=[['classic','Вариант 1'],['cats','Вариант 2'],['sports','Вариант 3']];
  const defaults={theme:'dark',accent:'violet',avatar:0,avatarRevision:0,customAvatar:'',pack:'classic',birthday:''};
  let uid=null,profile={...defaults},defaultAvatar=0,uploadVersion=0;
  const safe=x=>typeof x==='string'&&/^[-\w]{1,150}$/.test(x)?x:null;
@@ -834,7 +862,7 @@ window.LeveliAppearance=(()=>{
  function valid(p){return {theme:['dark','light','system'].includes(p.theme)?p.theme:'dark',accent:Object.hasOwn(darkAccents,p.accent)?p.accent:'violet',avatar:p.avatar==='custom'||(Number.isInteger(p.avatar)&&p.avatar>=0&&p.avatar<avatars.length)?p.avatar:0,avatarRevision:p.avatarRevision===2?2:0,customAvatar:typeof p.customAvatar==='string'&&p.customAvatar.length<120000&&/^data:image\/(webp|png|jpeg);base64,/.test(p.customAvatar)?p.customAvatar:'',pack:packs.some(a=>a[0]===p.pack)?p.pack:'classic',birthday:/^\d{4}-\d{2}-\d{2}$/.test(p.birthday||'')?p.birthday:''}}
  function age(){if(!profile.birthday)return null;const b=new Date(profile.birthday+'T12:00:00');const now=new Date();if(!Number.isFinite(b.getTime())||b>now)return null;let n=now.getFullYear()-b.getFullYear();if(now.getMonth()<b.getMonth()||(now.getMonth()===b.getMonth()&&now.getDate()<b.getDate()))n--;return n>=0&&n<=120?n:null}
  function paint(){
-  const theme=profile.theme==='system'?(colorScheme.matches?'light':'dark'):profile.theme;
+  const theme='dark'; // Сохранённое предпочтение остаётся, но не применяется.
   document.documentElement.dataset.leveliTheme=theme;
   document.documentElement.dataset.leveliPack=profile.pack;
   const c=(theme==='light'?lightAccents:darkAccents)[profile.accent],s=document.documentElement.style;
@@ -847,7 +875,7 @@ window.LeveliAppearance=(()=>{
   }
   const ageLabel=document.querySelector('#profile-age'),n=age();ageLabel.textContent=n===null?'Дата рождения необязательна.':('Возраст: '+n);
   const date=document.querySelector('#profile-birthday');if(date.value!==profile.birthday)date.value=profile.birthday;
-  document.getElementById('b3-theme-status').textContent={dark:'Тёмная',light:'Светлая',system:'Системная'}[profile.theme];
+  document.getElementById('b3-theme-status').textContent='Тёмная';
   document.getElementById('b3-accent-status').textContent={violet:'Фиолетовый',pink:'Розовый',blue:'Синий',yellow:'Жёлтый',mint:'Мятный'}[profile.accent];
   document.getElementById('b3-icons-status').textContent=packs.find(([key])=>key===profile.pack)[1];
   if(uid){
@@ -869,12 +897,12 @@ window.LeveliAppearance=(()=>{
    b.title=label;b.setAttribute('aria-label',label);b.dataset.avatarIndex=String(i);
    b.append(avatarImage(i));av.append(b)
   }if(profile.customAvatar){const b=button('',profile.avatar==='custom',()=>set({avatar:'custom'}),'personal-avatar-option');b.setAttribute('aria-label','Моя картинка');const img=document.createElement('img');img.src=profile.customAvatar;img.alt='';img.className='personal-avatar-custom';b.append(img);av.append(b)}
-  const themeBox=document.querySelector('#personal-theme-options');themeBox.replaceChildren();for(const [k,t] of [['light','☀ Светлая'],['dark','☾ Тёмная'],['system','◐ Системная']])themeBox.append(button(t,profile.theme===k,()=>set({theme:k})));
+  const themeBox=document.querySelector('#personal-theme-options');themeBox.replaceChildren();themeBox.closest('.personal-group').hidden=true;
   const colorBox=document.querySelector('#personal-accent-options');colorBox.replaceChildren();for(const [k,title] of [['violet','Фиолетовый'],['pink','Розовый'],['blue','Синий'],['yellow','Жёлтый'],['mint','Мятный']]){const b=button(title,profile.accent===k,()=>set({accent:k}));const swatch=document.createElement('span');swatch.className='personal-color-swatch';swatch.style.background=(document.documentElement.dataset.leveliTheme==='light'?lightAccents:darkAccents)[k].main;b.prepend(swatch);colorBox.append(b)}
   const packBox=document.querySelector('#personal-pack-options');packBox.replaceChildren();for(const [k,title] of packs){
    const choice=button(title,profile.pack===k,()=>set({pack:k}));
-   const preview=document.createElement('span');preview.className='pack-icon pack-icon-preview';
-   preview.dataset.preview=k;preview.setAttribute('aria-hidden','true');choice.prepend(preview);packBox.append(choice);
+   const preview=document.createElement('span');preview.className='pack-preview-strip';
+   preview.setAttribute('aria-hidden','true');for(const role of ['forecast','trend','goals','book']){const icon=document.createElement('span');icon.className='pack-icon';icon.dataset.icon=role;icon.dataset.packPreview=k;preview.append(icon)}choice.append(preview);packBox.append(choice);
   }
  }
  function set(v){
@@ -1118,7 +1146,7 @@ function renderGrades(){
  const available=all.filter(x=>x.count>0||x.stats.official!==null);
  const current=chosen===currentSchoolPeriod(),empty=available.length===0;
  for(const id of ['school-donut','school-forecast-legend','school-grades-donut','school-grades-legend','school-trend'])document.getElementById(id).replaceChildren();
- document.getElementById('school-header-period').textContent=({1:'I',2:'II',3:'III',4:'IV'}[Number(chosen.split('-')[1])]||'')+' четверть · '+chosen.slice(0,4)+'/'+(Number(chosen.slice(0,4))+1)+' учебный год';
+ document.getElementById('school-header-period').textContent=Number(chosen.split('-')[1])+' четверть';
  document.getElementById('school-subject-count').textContent=pluralRu(all.length,'предмет','предмета','предметов');
  if(empty){
   const msg=current?'Новая четверть началась!':'За эту четверть пока нет оценок.';
@@ -1171,7 +1199,7 @@ function openSubject(name,grades){
   document.querySelector('[data-page="home"]').classList.remove('subject-detail-active');
   detail.hidden=true;main.hidden=false;renderGrades();window.scrollTo(0,0)
  };
- const title=document.createElement('h2');title.className='detail-title';title.textContent=name;title.prepend(packIcon('book'));
+ const title=document.createElement('h2');title.className='detail-title';title.textContent=name;
  const quarter=document.createElement('span');quarter.className='detail-period';
  quarter.textContent=({1:'I',2:'II',3:'III',4:'IV'}[Number(periodSelect.value.split('-')[1])]||'')+' четверть';
  const firstRow=document.createElement('div');firstRow.className='detail-header-main';firstRow.append(back,title);head.append(firstRow,quarter);detail.append(head);
@@ -1221,17 +1249,16 @@ function openSubject(name,grades){
   if(n!==null&&n<=10)goalNote.textContent='Если следующие оценки будут пятёрками с обычным весом (1). Это расчётный сценарий, не гарантия.';
  }
  goal.append(goalLabel,goalMain,goalNote);detail.append(goal);
- const chartTitle=document.createElement('h3');chartTitle.textContent='Динамика';chartTitle.prepend(packIcon("trend"));detail.append(chartTitle);
+ const chartTitle=document.createElement('h3');chartTitle.textContent='Динамика';detail.append(chartTitle);
  const chartControls=document.createElement('div');chartControls.className='detail-toggle';detail.append(chartControls);
  const chartHost=document.createElement('div');chartHost.className='detail-chart-scroll';detail.append(chartHost);
  const dated=grades.regular.map((g,i)=>({...g,originalIndex:i})).filter(g=>g.date instanceof Date&&!Number.isNaN(g.date.getTime())).sort((a,b)=>a.date-b.date||a.originalIndex-b.originalIndex);
  let chartMode='average';
+ for(const [mode,label] of [['average','Средний балл'],['marks','Оценки']]){const b=document.createElement('button');b.type='button';b.dataset.mode=mode;b.textContent=label;b.onclick=()=>{if(chartMode!==mode){chartMode=mode;drawChart()}};chartControls.append(b)}
+ const chartCaption=document.createElement('p');chartCaption.className='detail-chart-caption';chartHost.after(chartCaption);
  function drawChart(){
-  chartControls.replaceChildren();chartHost.replaceChildren();
-  for(const [mode,label] of [['average','Средний балл'],['marks','Оценки']]){
-   const b=document.createElement('button');b.type='button';b.textContent=label;b.setAttribute('aria-pressed',String(chartMode===mode));b.onclick=()=>{chartMode=mode;drawChart()};chartControls.append(b);
-  }
-  if(!dated.length){chartHost.textContent='Нет оценок с указанными датами.';detail.querySelector('.detail-chart-caption')?.remove();return}
+  chartHost.replaceChildren();chartControls.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===chartMode)));
+  if(!dated.length){chartHost.textContent='Нет оценок с указанными датами.';chartCaption.textContent='';return}
   // The marks view shows only the most recent bars fitting the phone: no swipe needed.
   const capacity=Math.max(3,Math.floor((chartHost.clientWidth-32)/36));
   const plotted=chartMode==='marks'?dated.slice(-capacity):dated;
@@ -1268,6 +1295,7 @@ function openSubject(name,grades){
     svg.append(svgEl('polyline',{points,fill:'none',stroke:'var(--leveli-accent-line)','stroke-width':3,'stroke-linecap':'round','stroke-linejoin':'round'}));
    }
    coords.forEach(([x,cy],i)=>svg.append(svgEl('circle',{cx:x,cy,r:i===coords.length-1?4.5:2.5,fill:'var(--leveli-accent-soft)'})));
+   if(coords.length){const [x,cy]=coords.at(-1),tagX=Math.max(25,Math.min(x-35,width-80)),tagY=Math.max(2,cy-36);svg.append(svgEl('rect',{x:tagX,y:tagY,width:70,height:25,rx:9,fill:'var(--leveli-accent-dim)',stroke:'var(--leveli-accent)'}));const score=svgEl('text',{x:tagX+35,y:tagY+17,'text-anchor':'middle','font-size':14,'font-weight':800,fill:'var(--leveli-accent-ink)'});score.textContent=formatMean(S.mean(dated));svg.append(score)}
   }else plotted.forEach((g,i)=>{
    const step=(width-65)/Math.max(1,plotted.length-1);
    const x=25+i*step,top=y(g.value),barHeight=baseY-top,glowColor=colors[g.value]?.[0]||'#c8a3ff';
@@ -1284,15 +1312,10 @@ function openSubject(name,grades){
   }
   chartHost.style.setProperty('--subject-chart-ratio',String(width/height));
   chartHost.append(svg);
-  const existing=detail.querySelector('.detail-chart-caption');if(existing)existing.remove();
-  if(chartMode==='marks'){
-   const tip=document.createElement('p');tip.className='detail-chart-caption';
-   tip.textContent=dated.length>plotted.length?'Показаны последние '+plotted.length+' из '+dated.length+' оценок. Все оценки — в истории ниже.':'Показаны все '+plotted.length+' оценок. Подробности — в истории ниже.';
-   chartHost.after(tip);
-  }
+  chartCaption.textContent=chartMode==='marks'?(dated.length>plotted.length?'Показаны последние '+plotted.length+' из '+dated.length+' оценок. Все оценки — в истории ниже.':'Показаны все '+plotted.length+' оценок. Подробности — в истории ниже.'):' ';
  }
  drawChart();
- const historyTitle=document.createElement('h3');historyTitle.textContent='История оценок';historyTitle.prepend(packIcon("history"));detail.append(historyTitle);
+ const historyTitle=document.createElement('h3');historyTitle.textContent='История оценок';detail.append(historyTitle);
  const controls=document.createElement('div');controls.className='detail-toggle';
  const list=document.createElement('div');detail.append(controls,list);
  let mode='all',visible=10;
