@@ -278,7 +278,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.match(await page.locator('#school-subjects').innerText(),/История[\s\S]*3,00/);
  await page.evaluate(()=>window.__switchUser('A'));
  assert.equal(await page.locator('html').getAttribute('data-leveli-theme'),'dark');
- assert.equal(await page.locator('html').evaluate(el=>el.style.getPropertyValue('--leveli-accent')),'#a82b78');
+ assert.equal(await page.locator('html').evaluate(el=>el.style.getPropertyValue('--leveli-accent')),'#f18bc9');
  await page.getByRole('button',{name:'Профиль и настройки'}).click();
  assert.equal(await page.locator('#profile-avatar-display img.profile-avatar-custom').count(),1);
  assert.equal(await page.locator('#profile-birthday').inputValue(),'2017-09-08');
