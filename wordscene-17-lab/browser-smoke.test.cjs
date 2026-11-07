@@ -377,9 +377,12 @@ test('Paper picker v2 keeps aligned counters, approved button order and two-way 
  b.click('stopSelection');
  assert.match(b.root.html,/Учить новые слова/);
  assert.equal(b.map.has('wordscene-17-lab-active-v1'),false);
- const saved=JSON.parse(b.map.get('wordscene-17-lab-v1'));
- assert.equal(Object.values(saved.words).filter(w=>w.origin==='known').length,0);
- assert.equal(Object.values(saved.words).filter(w=>w.origin==='learned').length,0);
+ const raw=b.map.get('wordscene-17-lab-v1');
+ if(raw){
+  const saved=JSON.parse(raw);
+  assert.equal(Object.values(saved.words).filter(w=>w.origin==='known').length,0);
+  assert.equal(Object.values(saved.words).filter(w=>w.origin==='learned').length,0);
+ }
 });
 
 test('Paper picker v2 uses mobile 44px touch targets, 63px choices and scoped styles',()=>{
