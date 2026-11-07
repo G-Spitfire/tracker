@@ -1,12 +1,14 @@
-const {chromium}=require('playwright');
+const {chromium,webkit}=require('playwright');
 const assert=require('node:assert/strict'),fs=require('node:fs');
 const fixtures={A:{schemaVersion:1,source:'petersburgedu',grades:[5,5,5,4,4,4].map((value,i)=>({id:'a'+i,subject:'Математика',value:String(value),date:`2026-10-${10+i}`,type:'Устный ответ',quarter:1})).concat([{id:'f',subject:'Русский язык',value:'5',date:'2026-10-20',type:'Четвертная',quarter:1},{id:'c',subject:'Русский язык',value:'4',date:'2026-10-15',type:'Итоговая контрольная работа',weight:2,quarter:1},{id:'n',subject:'Русский язык',value:'неизвестная',valueCode:'2',date:'2026-10-14',quarter:1}])},B:{schemaVersion:1,source:'petersburgedu',grades:[{id:'b1',subject:'История',value:'3',date:'31.10.2026',type:'Ответ',quarter:1}]}};
 const authMock=`export const getAuth=()=>window.__auth;export const browserLocalPersistence={};export const setPersistence=async()=>{};export function onAuthStateChanged(a,fn){window.__listeners.push(fn);setTimeout(()=>fn(a.currentUser),0);return ()=>{}}export async function signInWithEmailAndPassword(a,email){window.__switchUser(email.startsWith('b')?'B':'A')}export async function signOut(){window.__switchUser(null)}`;
 const storeMock=`export const getFirestore=()=>({});export const doc=(db,...parts)=>parts;export const serverTimestamp=()=>0;export const runTransaction=async(db,fn)=>fn({get:async path=>({exists:()=>!!JSON.parse(sessionStorage.getItem('cloud:'+path.join('/'))||'null'),data:()=>JSON.parse(sessionStorage.getItem('cloud:'+path.join('/')))}),set:(path,value)=>sessionStorage.setItem('cloud:'+path.join('/'),JSON.stringify(value))});export async function getDocFromServer(path){if(window.__offline)throw Error('offline');const [kind,uid]=path;if(kind==='profiles')return {exists:()=>true,data:()=>({name:uid==='A'?'Полина':'Матвей'})};if(kind==='schoolGrades')return {exists:()=>true,data:()=>window.__fixtures[uid]};const value=JSON.parse(sessionStorage.getItem('cloud:'+path.join('/'))||'null');return {exists:()=>!!value,data:()=>value};}export const getDoc=getDocFromServer;`;
 fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
 (async()=>{
- const browser=await chromium.launch({headless:true,...(process.env.BROWSER_BINARY?{executablePath:process.env.BROWSER_BINARY}:{})});
- const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'allow'});
+ const browser=await (process.env.BROWSER_ENGINE==='webkit'?webkit:chromium).launch({headless:true,...(process.env.BROWSER_BINARY?{executablePath:process.env.BROWSER_BINARY}:{})});
+ const context=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'});
+ // Keep Firebase module requests under the test routes, including after reload.
+ await context.addInitScript(()=>{if(navigator.serviceWorker)navigator.serviceWorker.register=async()=>{}});
  await context.addInitScript(({fixtures})=>{window.__fixtures=fixtures;window.__auth={currentUser:JSON.parse(sessionStorage.getItem('test-user')||'null')};window.__listeners=[];window.__switchUser=uid=>{window.__auth.currentUser=uid?{uid,email:uid==='A'?'a@example.test':'b@example.test'}:null;sessionStorage.setItem('test-user',JSON.stringify(window.__auth.currentUser));for(const fn of window.__listeners)fn(window.__auth.currentUser)}},{fixtures});
  await context.route('https://www.gstatic.com/firebasejs/**',route=>{const url=route.request().url();route.fulfill({contentType:'text/javascript',body:url.endsWith('firebase-app.js')?'export const initializeApp=(c,n)=>({name:n})':url.endsWith('firebase-auth.js')?authMock:storeMock})});
  await context.route('https://fonts.googleapis.com/**',route=>route.abort());await context.route('https://fonts.gstatic.com/**',route=>route.abort());
@@ -48,7 +50,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await page.locator('html').getAttribute('data-leveli-theme'),'dark');
  assert.equal(await page.locator('html').evaluate(el=>el.style.getPropertyValue('--leveli-accent')),'#f18bc9');
  await page.locator('[data-b3-panel="theme"]').click();
- await page.getByRole('button',{name:'Светлая'}).click();
+ await page.locator('#personal-theme-options').getByRole('button',{name:'Светлая'}).click();
  await page.locator('#b3-panel-close').click();
  assert.equal(await page.locator('html').getAttribute('data-leveli-theme'),'light');
  await page.locator('[data-b3-panel="avatar"]').first().click();
@@ -57,9 +59,12 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await page.locator('#profile-avatar-display .avatar-illustration').count(),1);
 
  assert.equal(await page.locator('#personal-avatar-options .personal-avatar-option').count(),2);
- const prototype=await page.request.get((process.env.TEST_BASE_URL||'http://127.0.0.1:8765')+'/leveli/avatars/prototype-girl.svg');
- assert.equal(prototype.status(),200);
- assert.match(prototype.headers()['content-type']||'',/svg/);
+ for(const name of ['polina','matvey']){
+  const response=await page.request.get((process.env.TEST_BASE_URL||'http://127.0.0.1:8765')+'/leveli/avatars/leveli-'+name+'-3d.webp');
+  assert.equal(response.status(),200);
+  assert.match(response.headers()['content-type']||'',/webp/);
+ }
+ await page.waitForFunction(()=>document.querySelector('#profile-avatar-display img')?.naturalHeight>=500);
  const layout=await page.evaluate(()=>{
   const card=document.querySelector('.b3-hero').getBoundingClientRect();
   const image=document.querySelector('.b3-avatar-stand .avatar-illustration').getBoundingClientRect();
@@ -71,10 +76,17 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.ok(layout.avatarRight<=layout.nameLeft+14,'portrait must not cover profile text');
  assert.equal(await page.locator('.b3-avatar-stand').evaluate(el=>getComputedStyle(el,'::after').content),'none','no U-shaped decorative frame');
  await page.locator('#b3-panel-close').click();
+ await page.screenshot({path:'outputs/leveli-polina-settings.png',fullPage:true});
  await page.locator('[data-b3-panel="icons"]').click();
- await page.getByRole('button',{name:/Вариант 2/}).last().click();
- assert.equal(await page.locator('.settings-button img.leveli-pack-settings').getAttribute('src'),'./icons/cats/settings.svg');
- assert.equal(await page.locator('.forecast-card img.leveli-pack-heading').getAttribute('src'),'./icons/cats/chart.svg');
+ await page.getByRole('button',{name:'Котики',exact:true}).last().click();
+ for(const [name,pack] of [['Спорт','sports'],['Классика','classic'],['Котики','cats']]){
+  await page.getByRole('button',{name,exact:true}).click();
+  assert.equal(await page.locator('html').getAttribute('data-leveli-pack'),pack);
+  const mask=await page.locator('.forecast-card [data-icon="forecast"]').evaluate(el=>getComputedStyle(el).maskImage);
+  assert.ok(mask.includes('/icons/'+pack+'/'),mask);
+  const tile=page.locator('.b3-tile-icon '+(pack==='classic'?'svg':'.pack-icon')).first();
+  assert.deepEqual(await tile.evaluate(el=>[el.getBoundingClientRect().width,el.getBoundingClientRect().height]),[24,24]);
+ }
  await page.locator('#b3-panel-close').click();
  await page.locator('[data-b3-panel="birthday"]').click();
  await page.locator('#profile-birthday').fill('2017-09-08');
@@ -84,7 +96,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.locator('[data-b3-panel="avatar"]').first().click();
  await page.locator('#profile-avatar-file').setInputFiles(avatarFile);
  await page.locator('#profile-avatar-display img.profile-avatar-custom').waitFor({state:'visible'});
- assert.match(await page.locator('#profile-avatar-display img').getAttribute('src'),/^data:image\/webp;base64,/);
+ assert.match(await page.locator('#profile-avatar-display img').getAttribute('src'),/^data:image\/(webp|png);base64,/);
 
  assert.equal(await page.locator('html').getAttribute('data-leveli-pack'),'cats');
  await page.locator('#b3-panel-close').click();
@@ -109,33 +121,59 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.getByRole('button',{name:'1 четверть'}).click();
  assert.equal(await page.locator('#school-period-buttons button[aria-pressed="true"]').innerText(),'1 четверть');
  await page.locator('#b3-panel-close').click();
- await page.locator('[data-b3-panel="accent"]').click();
- // All five personalized accent palettes must reach the chart SVG and selected controls.
- const accents=[
-  ['Фиолетовый','#a882ff','#55416e','#ab7aff'],
-  ['Розовый','#f18bc9','#70435e','#f18bc9'],
-  ['Синий','#68adff','#3b5375','#68adff'],
-  ['Жёлтый','#f4c75f','#69582f','#f4c75f'],
-  ['Мятный','#69d9bd','#365f55','#69d9bd']
+ const palettes=[
+  ['Светлая',['#713bc4','#a82b78','#1759b6','#835600','#08765f']],
+  ['Тёмная',['#a882ff','#f18bc9','#68adff','#f4c75f','#69d9bd']]
  ];
- for(const [label,accent,track,glow] of accents){
-  await page.getByRole('button',{name:label,exact:true}).click();
-  // Wait for the agreed 160ms color transition before inspecting computed borders.
-  await page.waitForTimeout(220);
-  const state=await page.evaluate(()=>({
-   accent:document.documentElement.style.getPropertyValue('--leveli-accent'),
-   track:document.querySelector('#school-donut circle[data-accent-track="true"]')?.getAttribute('stroke'),
-   line:document.querySelector('#school-trend polyline[filter="url(#leveli-line-glow)"]')?.getAttribute('stroke'),
-   grade:document.querySelector('#school-donut circle[stroke="#6ee6ae"]')?.getAttribute('stroke'),
-   pressed:getComputedStyle(document.querySelector('#school-period-buttons button[aria-pressed="true"]')).borderTopColor,
-   borderToken:getComputedStyle(document.documentElement).getPropertyValue('--leveli-accent-border').trim()
-  }));
-  assert.equal(state.accent,accent);
-  assert.equal(state.track,track);
-  assert.equal(state.line,glow);
-  assert.equal(state.grade,'#6ee6ae','semantic fifth-grade segment must not change');
-  assert.equal(state.pressed,'rgb('+[parseInt(state.borderToken.slice(1,3),16),parseInt(state.borderToken.slice(3,5),16),parseInt(state.borderToken.slice(5,7),16)].join(', ')+')');
+ const names=['Фиолетовый','Розовый','Синий','Жёлтый','Мятный'];
+ for(const [theme,colors] of palettes){
+  await page.locator('[data-b3-panel="theme"]').click();
+  await page.locator('#personal-theme-options').getByRole('button',{name:theme}).click();
+  await page.locator('#b3-panel-close').click();
+  await page.locator('[data-b3-panel="accent"]').click();
+  for(const [i,label] of names.entries()){
+   await page.getByRole('button',{name:label,exact:true}).click();
+   const pressed=page.locator('#personal-accent-options [aria-pressed=true]');
+   const selectedBg=await pressed.evaluate(el=>getComputedStyle(el).backgroundColor);
+   assert.equal(await page.locator('[role="dialog"]').isVisible(),true);
+   if(i===4)await page.screenshot({path:'outputs/leveli-'+(theme==='Светлая'?'light-mint':'dark-mint')+'-settings.png',fullPage:true});
+   await page.locator('#b3-panel-close').click();
+   await page.locator('.b3-home-btn').click();
+   await page.waitForFunction(()=>{
+    const style=getComputedStyle(document.documentElement);
+    const token=style.getPropertyValue('--leveli-accent-track').trim();
+    const expected='rgb('+[1,3,5].map(i=>parseInt(token.slice(i,i+2),16)).join(', ')+')';
+    return getComputedStyle(document.querySelector('#school-donut [data-accent-track]')).stroke===expected;
+   });
+   const state=await page.evaluate(()=>{
+    const style=getComputedStyle(document.documentElement);
+    const track=document.querySelector('#school-donut [data-accent-track]');
+    const grid=document.querySelector('#school-trend line');
+    return {accent:style.getPropertyValue('--leveli-accent').trim(),
+     track:getComputedStyle(track).stroke,grid:getComputedStyle(grid).stroke,
+     trackToken:style.getPropertyValue('--leveli-accent-track').trim(),
+     dim:style.getPropertyValue('--leveli-accent-dim').trim(),
+     grade:document.querySelector('#school-donut circle[stroke="#6ee6ae"]')?.getAttribute('stroke')};
+   });
+   assert.equal(state.accent,colors[i]);
+   const rgb=hex=>'rgb('+[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)).join(', ')+')';
+   assert.equal(state.track,rgb(state.trackToken));
+   assert.equal(selectedBg,rgb(state.dim));
+   assert.notEqual(state.grid,'none');
+   assert.equal(state.grade,'#6ee6ae');
+   await page.getByRole('button',{name:'Профиль и настройки'}).click();
+   if(i<names.length-1)await page.locator('[data-b3-panel="accent"]').click();
+  }
  }
+ await page.locator('[data-b3-panel="theme"]').click();
+ await page.locator('#personal-theme-options').getByRole('button',{name:'Системная'}).click();
+ await page.emulateMedia({colorScheme:'dark'});
+ await page.waitForFunction(()=>document.documentElement.dataset.leveliTheme==='dark');
+ await page.emulateMedia({colorScheme:'light'});
+ await page.waitForFunction(()=>document.documentElement.dataset.leveliTheme==='light');
+ await page.locator('#personal-theme-options').getByRole('button',{name:'Светлая'}).click();
+ await page.locator('#b3-panel-close').click();
+ await page.locator('[data-b3-panel="accent"]').click();
  await page.getByRole('button',{name:'Розовый',exact:true}).click();
  await page.locator('#b3-panel-close').click();
  await page.locator('.b3-home-btn').click();
@@ -157,7 +195,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await page.locator('#school-donut circle[role="button"]').count(),2);
  await page.locator('#school-forecast-legend .legend-item').filter({hasText:'Оценка 5'}).click();
  assert.equal(await page.locator('#school-donut circle[data-accent-selection="true"]').count(),1);
- assert.equal(await page.locator('#school-donut circle[data-accent-selection="true"]').getAttribute('stroke'),'#f18bc9');
+ assert.equal(await page.locator('#school-donut circle[data-accent-selection="true"]').evaluate(el=>el.style.stroke),'var(--leveli-accent)');
  assert.equal(await page.locator('#school-subjects .subject-row').count(),1);
  assert.match(await page.locator('#school-subjects').innerText(),/Русский язык/);
  await page.locator('#school-forecast-legend .legend-item').filter({hasText:'Оценка 5'}).click();
@@ -221,6 +259,9 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await page.locator('#home-birthday-greeting').isVisible(),false);
  await page.getByRole('button',{name:'Профиль и настройки'}).click();
  assert.equal(await page.locator('#profile-avatar-display img.profile-avatar-custom').count(),0);
+ assert.equal(await page.locator('#profile-avatar-display').getAttribute('data-avatar-index'),'1');
+ await page.waitForFunction(()=>document.querySelector('#profile-avatar-display img')?.naturalHeight>=500);
+ await page.screenshot({path:'outputs/leveli-matvey-settings.png',fullPage:true});
  await page.locator('.b3-home-btn').click();
 
  await page.getByRole('button',{name:'Профиль и настройки'}).click();
@@ -253,16 +294,16 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.match(await page.locator('#school-subjects').innerText(),/История[\s\S]*3,00/);
  await page.evaluate(()=>window.__switchUser('A'));
  assert.equal(await page.locator('html').getAttribute('data-leveli-theme'),'light');
- assert.equal(await page.locator('html').evaluate(el=>el.style.getPropertyValue('--leveli-accent')),'#f18bc9');
+ assert.equal(await page.locator('html').evaluate(el=>el.style.getPropertyValue('--leveli-accent')),'#a82b78');
  await page.getByRole('button',{name:'Профиль и настройки'}).click();
  assert.equal(await page.locator('#profile-avatar-display img.profile-avatar-custom').count(),1);
  assert.equal(await page.locator('#profile-birthday').inputValue(),'2017-09-08');
  // DS v2: the four B3 tile icons are real consistent 24px line SVGs (not font glyphs).
  assert.equal(await page.locator('.b3-tiles .b3-tile-icon svg').count(),4);
- const iconStyle=await page.locator('.b3-tile-icon svg').first().evaluate(el=>({
-  width:getComputedStyle(el).width,height:getComputedStyle(el).height,stroke:getComputedStyle(el).strokeWidth
+ const iconStyle=await page.locator('.b3-tile-icon .pack-icon').first().evaluate(el=>({
+  width:getComputedStyle(el).width,height:getComputedStyle(el).height
  }));
- assert.equal(iconStyle.width,'24px');assert.equal(iconStyle.height,'24px');assert.equal(iconStyle.stroke,'2px');
+ assert.equal(iconStyle.width,'24px');assert.equal(iconStyle.height,'24px');
  assert.equal(await page.locator('.b3-home-btn svg').count(),1,'Back navigation uses consistent SVG icon');
  assert.equal(await page.locator('.help-btn svg').count(),3,'all help actions use SVG icons');
  assert.equal(await page.locator('.b3-extra button svg').count(),2,'settings detail actions use SVG chevrons');
@@ -290,12 +331,16 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  // Consolidated CSS must preserve key card, navigation, and theme contracts.
  const cascadeAudit=await page.evaluate(()=>{
   const root=document.documentElement,old=root.dataset.leveliTheme,out=[];
+  const home=document.querySelector('[data-page="home"]'),wasHidden=home.hidden;
+  // WebKit may report cached styles for display:none subtrees.
+  home.hidden=false;
   for(const theme of ['dark','light']){
    root.dataset.leveliTheme=theme;
    const read=selector=>{const element=document.querySelector(selector),style=getComputedStyle(element);return {radius:style.borderTopLeftRadius,background:style.backgroundColor,minHeight:style.minHeight,color:style.color}};
    out.push({theme,card:read('.card'),tile:read('.b3-tile'),back:read('.leveli-back-btn'),extra:read('.b3-extra'),dashboard:['.forecast-card','.trend-card','.subjects-card'].map(selector=>({background:read(selector).background,padding:getComputedStyle(document.querySelector(selector)).paddingTop})),donut:read('.donut-panel')});
   }
   root.dataset.leveliTheme=old;
+  home.hidden=wasHidden;
   return out;
  });
  for(const state of cascadeAudit){
@@ -347,11 +392,15 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   assert.equal(await page.locator('.b3-home-btn').innerText(),'Назад');
   assert.equal(await page.locator('.b3-header h1').innerText(),'Настройки');
 
+  await page.locator('[data-b3-panel="accent"]').click();
+  const hitAreas=await page.locator('#personal-accent-options button').evaluateAll(items=>items.map(el=>[el.offsetWidth,el.offsetHeight]));
+  assert.ok(hitAreas.every(([w,h])=>w>=44&&h>=44),'accent controls have a 44px hit area at '+width);
+  await page.locator('#b3-panel-close').click();
   assert.equal(state.tileCount,4,'all quick-setting tiles remain readable on '+width+'px screen');
   const cardPadding=await page.locator('.forecast-card').evaluate(el=>getComputedStyle(el).paddingTop);
   assert.equal(cardPadding,width<=360?'12px':'16px','dashboard spacing follows responsive token at '+width+'px');
   const tileLayout=await page.locator('.b3-tile').first().evaluate(el=>{
-   const icon=el.querySelector('.b3-tile-icon'),svg=icon?.querySelector('svg'),label=el.querySelector('strong');
+   const icon=el.querySelector('.b3-tile-icon'),svg=icon?.querySelector('.pack-icon'),label=el.querySelector('strong');
    const i=icon?.getBoundingClientRect(),t=label?.getBoundingClientRect(),v=svg?.getBoundingClientRect();
    return {display:getComputedStyle(el).display,iconRight:i?.right,labelLeft:t?.left,svgWidth:v?.width,svgHeight:v?.height};
   });
@@ -369,6 +418,13 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.setViewportSize({width:390,height:844});
  await page.locator('.b3-home-btn').click();
  await page.evaluate(()=>window.__switchUser(null));assert.equal(await page.locator('#school-results').isVisible(),false);assert.equal(await page.locator('#school-subjects').innerText(),'');
+ assert.equal(await page.evaluate(()=>Object.keys(sessionStorage).some(key=>key.startsWith('cloud:'))),false);
+ await page.evaluate(()=>window.__switchUser('A'));
+ await page.reload();
+ await page.waitForFunction(()=>document.querySelector('#home-greeting').textContent==='Привет, Полина!');
+ assert.equal(await page.locator('html').getAttribute('data-leveli-theme'),'light');
+ assert.equal(await page.locator('html').getAttribute('data-leveli-pack'),'cats');
+ assert.equal(await page.locator('#profile-avatar-display img.profile-avatar-custom').count(),1);
  await page.screenshot({path:'outputs/leveli-home.png',fullPage:true});
  assert.deepEqual(errors,[]);fs.writeFileSync('work/browser-result.json',JSON.stringify({passed:true,checks:['one school home','profile navigation','exact school forecast','official final','decline warning','A/B isolation','offline cached grades','logout clear'],errors},null,2));
  await browser.close();console.log('Browser integration: PASS');
