@@ -44,6 +44,9 @@ async function checkMemorization(page,snap=async()=>{}){
    await snap('paper-learn-'+(i+1)+'-back');
    if(i===0){
     await page.reload();
+    // The deployed version can still pause on reload until this PR ships.
+    const legacyResume=page.locator('.ws-paper-pause [data-action="continue"]');
+    if(process.env.WS17_TEST_ORIGIN&&await legacyResume.isVisible())await legacyResume.click();
     assert.equal(await page.locator('[data-flip-card]').getAttribute('aria-expanded'),'true','learn flip side survives reload');
     close(grade,await bounds('[data-action="learnNext"]'),'fixed bottom button after reload');
    }

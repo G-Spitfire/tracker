@@ -229,6 +229,9 @@ async function run(name, browserType, contextOptions) {
    assert.equal(await page.locator('.ws-paper-face:not(.ws-paper-face-back)[aria-hidden="false"]').count(),1);
    compare(original,await measure(),'return to front');
    await page.reload();
+   // The deployed version can still pause on reload until this PR ships.
+   const legacyResume=page.locator('.ws-paper-pause [data-action="continue"]');
+   if(process.env.WS17_TEST_ORIGIN&&await legacyResume.isVisible())await legacyResume.click();
    await page.locator('[data-action="no"]').waitFor();
    compare(original,await measure(),'restore after reload');
    await page.locator('[data-action="no"]').click();
