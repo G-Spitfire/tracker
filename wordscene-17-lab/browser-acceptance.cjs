@@ -228,9 +228,9 @@ async function run(name, browserType, contextOptions) {
    await page.locator('[data-flip-card]').click({position:{x:20,y:20}});
    assert.equal(await page.locator('.ws-paper-face:not(.ws-paper-face-back)[aria-hidden="false"]').count(),1);
    compare(original,await measure(),'return to front');
-   await page.locator('[data-action="pause"]').click();
-   await page.locator('[data-action="continue"]').click();
-   compare(original,await measure(),'resume');
+   await page.reload();
+   await page.locator('[data-action="no"]').waitFor();
+   compare(original,await measure(),'restore after reload');
    await page.locator('[data-action="no"]').click();
    assert.equal(await page.locator('.ws-paper-face-back[aria-hidden="false"]').count(),1);
    assert.equal(await page.locator('[data-action="yes"]').count(),0);

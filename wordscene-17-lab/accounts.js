@@ -44,6 +44,12 @@ function create({storage,empty,valid,keyFor}){
   if(session&&info.profile?.sessions.some(entry=>entry.id===session.id))session=null;
   return {status:info.status,profile:info.profile||empty(),session};
  }
+ function saveCheckpoint(uid,session,expectedRaw,expectedActive){
+  const k=keys(uid);
+  if(storage.getItem(k.main)!==expectedRaw)throw Error('Profile changed in another tab');
+  if(storage.getItem(k.active)!==expectedActive)throw Error('Session changed in another tab');
+  if(session)storage.setItem(k.active,JSON.stringify(session));else storage.removeItem(k.active);
+ }
  function save(uid,p,session=null,expectedRaw,expectedActive){
   if(!valid(p))throw Error('Invalid profile');
   const info=inspect(uid);
@@ -70,7 +76,7 @@ function create({storage,empty,valid,keyFor}){
   return {profile:clone(info.backup),archive};
  }
  function exportData(uid){const k=keys(uid);return JSON.stringify({format:'wordscene17-local-backup',uid,exportedAt:new Date().toISOString(),main:storage.getItem(k.main),backup:storage.getItem(k.backup),active:storage.getItem(k.active)},null,2)}
- return {keys,inspect,load,save,recover,exportData};
+ return {keys,inspect,load,save,saveCheckpoint,recover,exportData};
 }
 const api={create,validProfile};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.WS17Accounts=api;

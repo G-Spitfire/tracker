@@ -7,13 +7,6 @@ const E=require('./engine.js');
 const root=__dirname;
 const file=name=>fs.readFileSync(path.join(root,name),'utf8');
 
-test('inactivity timeout has one thirty-minute deadline, including a pause',()=>{
- const start=Date.UTC(2026,10,5,9);
- const s=E.start(E.empty(),'new',['alpha','beta','gamma'],[],start);
- E.pause(s,start+5*60000);
- assert.equal(E.timedOut(s,start+29*60000),false);
- assert.equal(E.timedOut(s,start+30*60000),true);
-});
 test('learning results do not record response duration',()=>{
  const s=E.start(E.empty(),'new',['alpha','beta','gamma'],[],Date.now());
  E.learnNext(s);E.learnNext(s);E.learnNext(s);

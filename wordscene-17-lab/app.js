@@ -11,7 +11,8 @@ const legacyStorageSuffix=(()=>{
 })();
 const KEY='wordscene-17-lab-v1'+legacyStorageSuffix,ACTIVE='wordscene-17-lab-active-v1'+legacyStorageSuffix,PRACTICE='wordscene-17-lab-practice-cleared-v1'+legacyStorageSuffix;
 const root=document.getElementById('app');
-let profile,session=null,selection=null,view='home',batch=[],showAnswer=false,showHelp=false,manual=new Set(),manualThemes=new Set(),query='',confirmed=false,storageFailure=false,savedProfileRaw=null,savedActiveRaw=null;
+let profile,session=null,selection=null,view='home',showAnswer=false,showHelp=false,manual=new Set(),manualThemes=new Set(),query='',storageFailure=false,savedProfileRaw=null,savedActiveRaw=null;
+let pickStartedAt=null;
 let lastRecallKey='',lastRecallFace=false;
 let progressRange='30',qualityRange='28',homeDay=null,manualMode='topics',manualShowAll=false,manualSummaryOpen=false;
 let dictionaryFilter='all';
@@ -22,20 +23,44 @@ function store(){
  try{accounts.save('local',profile,session,savedProfileRaw,savedActiveRaw);savedProfileRaw=localStorage.getItem(KEY);savedActiveRaw=localStorage.getItem(ACTIVE);return true}
  catch(err){storageFailure=true;notice('Не удалось сохранить: '+err.message+'. Данные защищены от перезаписи.');return false}
 }
+function savePick(checkpoint){
+ if(storageFailure)return false;
+ try{
+  accounts.saveCheckpoint('local',checkpoint,savedProfileRaw,savedActiveRaw);
+  savedActiveRaw=localStorage.getItem(ACTIVE);
+  return true;
+ }catch(err){storageFailure=true;notice('Не удалось сохранить: '+err.message+'. Данные защищены от перезаписи.');return false}
+}
+function checkpointPick(){
+ if(pickStartedAt===null)return true;
+ return savePick({stage:'pick',startedAt:pickStartedAt,view,selection,showAnswer,
+  manual:[...manual],themes:[...manualThemes],manualMode,manualShowAll,manualSummaryOpen,query});
+}
+function resumePick(checkpoint){
+ pickStartedAt=checkpoint.startedAt;
+ ({view,selection,showAnswer,manualMode,manualShowAll,manualSummaryOpen,query}=checkpoint);
+ manual=new Set(checkpoint.manual.filter(id=>!unavailableForNew(id)));
+ manualThemes=new Set(checkpoint.themes);
+ render();
+}
+function discardPick(){
+ if(pickStartedAt!==null){pickStartedAt=null;savePick(null)}
+ selection=null;
+ manual.clear();
+}
 function load(){
  try{
  const state=accounts.load('local');
  if(!['new','ok'].includes(state.status))throw Error('Сохранение требует восстановления: '+state.status);
  profile=state.profile;session=state.session;savedProfileRaw=localStorage.getItem(KEY);savedActiveRaw=localStorage.getItem(ACTIVE);
  }catch(err){storageFailure=true;profile=E.empty();session=null;notice('Сохранение повреждено. Исходные данные не перезаписываются.')}
- if(session&&E.timedOut(session,Date.now())){session=null;store();notice('Прошло 30 минут. Незавершённое занятие отменено.')}
 }
 function notice(s){let el=document.getElementById('notice');if(!el){el=document.createElement('div');el.id='notice';el.setAttribute('role','status');document.body.append(el)}el.textContent=s;el.hidden=false;clearTimeout(notice.id);notice.id=setTimeout(()=>el.hidden=true,5500)}
 function speak(id){if(!('speechSynthesis' in window))return notice('Озвучивание недоступно на этом устройстве');const u=new SpeechSynthesisUtterance(id);u.lang='en-US';u.rate=.83;speechSynthesis.cancel();speechSynthesis.speak(u)}
 function btn(label,event,cls='',disabled=false){return '<button type="button" data-action="'+event+'" class="'+cls+'" '+(disabled?'disabled':'')+'>'+label+'</button>'}
 function head(name){return '<header><span class="brand">WordScene <b>17</b></span></header><main><h1>'+name+'</h1>'}
 function end(){return '</main>'}
-function shell(title,html,layout){root.innerHTML=layout||head(title)+html+end();root.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click',()=>{if(root.contains?.(el)===false)return;return dispatch(el.dataset.action,el)}));root.querySelectorAll('[data-input]').forEach(el=>el.addEventListener('input',()=>{query=el.value;if(view==='manual'&&manualMode==='search'){refreshManualSearch();return}const caret=el.selectionStart;render();const next=root.querySelector('[data-input]');if(next){next.focus();try{if(caret!==null)next.setSelectionRange(caret,caret)}catch{}}}));}
+function shell(title,html,layout){root.innerHTML=layout||head(title)+html+end();root.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click',()=>{if(root.contains?.(el)===false)return;return dispatch(el.dataset.action,el)}));root.querySelectorAll('[data-input]').forEach(el=>el.addEventListener('input',()=>{query=el.value;if((view==='manual'||view==='fill')&&manualMode==='search'){if(checkpointPick())refreshManualSearch();return}const caret=el.selectionStart;render();const next=root.querySelector('[data-input]');if(next){next.focus();try{if(caret!==null)next.setSelectionRange(caret,caret)}catch{}}}));}
 let manualSearchBaseHeight=0;
 function syncManualViewport(){
  const panel=root.querySelector?.('.ws-manual.is-search');
@@ -57,13 +82,14 @@ function syncManualViewport(){
   panel.style.removeProperty('--ws-search-top');
  }
 }
+function unavailableForNew(id){return !!profile.words[id]?.origin||selection?.known.includes(id)}
 function manualWordRow(w){
- const picked=manual.has(w.en),used=!!profile.words[w.en]?.origin,blocked=used||(!picked&&manual.size>=E.levelLimit(profile));
+ const picked=manual.has(w.en),used=unavailableForNew(w.en),blocked=used||(!picked&&manual.size>=E.levelLimit(profile));
  return '<div class="ws-manual-word'+(used?' is-learned':'')+'">'+
   '<button type="button" class="ws-manual-pick" data-action="pick:'+h(w.en)+'" aria-pressed="'+picked+'" '+(blocked?'disabled':'')+'>'+
   '<span class="ws-manual-check" aria-hidden="true">'+(picked?'✓':'')+'</span>'+
   '<span class="ws-manual-word-copy"><strong>'+h(w.en)+'</strong><small>'+h(w.ru)+'</small></span>'+
-  (used?'<span class="ws-manual-learned">Уже изучено</span>':'')+'</button>'+
+  (used?'<span class="ws-manual-learned">'+(profile.words[w.en]?.origin?'Уже изучено':'Отмечено «Знаю»')+'</span>':'')+'</button>'+
   btn(pickerIcon('volume'),'say:'+h(w.en),'ws-manual-audio')+'</div>';
 }
 function refreshManualSearch(){
@@ -90,10 +116,6 @@ function wireManualScroll(){
 }
 function warnLocked(){if(storageFailure){notice('Сохранение недоступно, изменения заблокированы');return true}if(session){notice('Сначала закончи или отмени текущее занятие');return true}return false}
 function levelInfo(){const p=E.levelProgress(profile);return !p.target?'<p class="reason">Уровень Профи достигнут.</p>':'<p class="reason">До уровня «'+p.target+'»: подтверждено '+Math.min(3,p.window||0)+' из 3 подходящих занятий · минимум '+p.min+' новых слов в занятии · '+Math.round(p.threshold*100)+'% успешных первых проверок.</p>'}
-function pauseTime(){
- const seconds=Math.ceil(E.remainingTime(session,Date.now())/1000);
- return 'Осталось '+Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0');
-}
 const levelLabels={novice:'Новичок',experienced:'Опытный',pro:'Профи'};
 const paperIcons={
  book:'<path fill="#fff2cf" stroke="#ffa600" d="M12 5C9 2 5 2 2 3v15c4-1 7-1 10 2 3-3 6-3 10-2V3c-3-1-7-1-10 2v15"/><path stroke="#0877ff" d="M22 3v15c-4-1-7-1-10 2" class="paper-book-edge"/><path stroke="#efc16d" stroke-width=".65" d="M4 7q3-.6 6 1M4 10q3-.6 6 1M4 13q3-.6 6 1m4-6q3-1.6 6-1m-6 4q3-1.6 6-1m-6 4q3-1.6 6-1"/>',
@@ -208,12 +230,12 @@ function home(openPicker=false){
 }
 function sources(){if(warnLocked())return;home(true)}
 function nextBatch(){
- batch=E.selectCandidates(dictionary,profile,{seen:selection.seen,skipped:selection.skipped||[],unknown:selection.unknown,themes:selection.themes,topic:T.forWord});
+ const batch=E.selectCandidates(dictionary,profile,{seen:selection.seen,skipped:selection.skipped||[],unknown:selection.unknown,themes:selection.themes,topic:T.forWord});
  selection.cursor=0;
  if(!batch.length){finishSelection();return}
  selection.current=batch.map(w=>w.en);renderSelection();
 }
-function makeSelection(kind){if(warnLocked())return;selection=E.beginSelection('auto');selection.skipped=[];nextBatch()}
+function makeSelection(){if(warnLocked()||E.due(profile).length)return home();pickStartedAt=Date.now();selection=E.beginSelection('auto');selection.skipped=[];nextBatch()}
 function pickerIcon(name){
  const shapes={
   back:'<path d="m15 18-6-6 6-6"/>',
@@ -271,14 +293,15 @@ function selectionScreen(){
  const id=selection.current?.[selection.cursor],w=byId[id];if(!w){nextBatch();return}
  view='select';
  if(!selection.seen.includes(id))selection.seen.push(id);
- const known=selection.known.length,unknown=selection.unknown.length,seen=selection.seen.length;
+ if(!checkpointPick())return home();
+ const unknown=selection.unknown.length,seen=selection.seen.length;
  const actions='<div class="ws-paper-decisions">'+btn('Знаю','known','ws-paper-negative')+btn('Не знаю','unknown','ws-paper-positive')+'</div>';
- shell('','', '<main class="ws-paper-page ws-paper-select"><div class="ws-paper-header"><div><h1>Подбор слов</h1><small>Неизвестных: '+unknown+' из 10 · Просмотрено: '+seen+' из 50</small></div><span class="ws-paper-count">'+seen+'/50</span></div>'+
+ shell('','', '<main class="ws-paper-page ws-paper-select"><div class="ws-paper-header"><div><h1>Подбор слов</h1><small>Неизвестных: '+unknown+' из 10 · Просмотрено: '+seen+' из 50</small></div></div>'+
 
   '<div class="ws-paper-main">'+paperSheet(w,true,showAnswer)+paperDream(w,'select',false,false)+'</div>'+
   '<div class="ws-paper-bottom"><p class="ws-paper-instruction">Знаешь значение этого слова? Переверни лист, если нужно.</p>'+actions+
-  '<div class="ws-paper-minors">'+btn('Завершить подбор','stopSelection','ws-paper-minor')+'</div></div></main>');
- wirePaperFlip(()=>{showAnswer=!showAnswer;if(!paperFlipInPlace(showAnswer))selectionScreen()});
+  '<div class="ws-paper-minors">'+btn('Отменить подбор','stopSelection','ws-paper-minor')+'</div></div></main>');
+ wirePaperFlip(()=>{showAnswer=!showAnswer;if(!checkpointPick())return home();if(!paperFlipInPlace(showAnswer))selectionScreen()});
 }
 function renderSelection(){showAnswer=false;selectionScreen()}
 function selectionGrade(knows){
@@ -292,13 +315,14 @@ function finishSelection(){
  if(n>=3){startLearning(selection.unknown,selection.known);return}
  if(n===0){
   const ids=selection.known;
-  selection=null;
+  selection=null;pickStartedAt=null;
   if(!saveFamiliar(ids))return home();
   view='selectionDone';
   shell('Неизвестных слов не найдено','<section class="panel">'+btn('Повторить знакомые','review','primary',!E.due(profile).length)+btn('На главную','home','quiet')+'</section>');
   return;
  }
- manual=new Set(selection.unknown);manualThemes=new Set(selection.themes||[]);query='';view='fill';manualView(true);
+ manual=new Set(selection.unknown);manualThemes=new Set(selection.themes||[]);
+ manualMode='topics';manualShowAll=false;manualSummaryOpen=false;query='';manualSearchBaseHeight=0;manualView(true);
 }
 function saveFamiliar(ids){
  const previous=profile;
@@ -312,13 +336,13 @@ function saveFamiliar(ids){
  return false;
 }
 function stopSelection(){
- // An interrupted automatic selection is discarded without saving familiar words.
- selection=null;home();
+ confirmCancel();
 }
 const topicSvgPaths={"animals":"<circle cx=\"12\" cy=\"17.5\" r=\"3.3\"/><ellipse cx=\"5\" cy=\"11\" rx=\"1.6\" ry=\"2.1\"/><ellipse cx=\"9.4\" cy=\"6.6\" rx=\"1.5\" ry=\"2\"/><ellipse cx=\"15\" cy=\"6.6\" rx=\"1.5\" ry=\"2\"/><ellipse cx=\"19.3\" cy=\"11\" rx=\"1.6\" ry=\"2.1\"/>","food":"<path d=\"M12 7c-3-4-9-2-9 4 0 5 4 10 9 10s9-5 9-10c0-6-6-8-9-4Z\"/><path d=\"M12 7c0-3 1-5 4-6\"/><path d=\"M12 6c-2-3-4-3-6-3 1 3 3 4 6 3Z\"/>","kitchen":"<path d=\"M4 10h16v7a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-7Z\"/><path d=\"M3 10h18M9 7V4h6v3M2 13H1m22 0h-1\"/>","home":"<path d=\"m3 10 9-7 9 7v11H3V10Z\"/><path d=\"M9 21v-8h6v8\"/>","family":"<circle cx=\"8\" cy=\"8\" r=\"3\"/><circle cx=\"17\" cy=\"9\" r=\"2.5\"/><path d=\"M2 21v-3a6 6 0 0 1 12 0v3M15 15a4.5 4.5 0 0 1 7 4v2\"/>","body":"<path d=\"M20.8 8.5c0 4-8.8 10.7-8.8 10.7S3.2 12.5 3.2 8.5A4.7 4.7 0 0 1 12 6a4.7 4.7 0 0 1 8.8 2.5Z\"/><path d=\"M3.8 12h4l2-3 3.2 6 2.1-3H20\"/>","clothes":"<path d=\"m8 3 4 2 4-2 5 4-3 5-2-1v10H8V11l-2 1-3-5 5-4Z\"/>","school":"<path d=\"m2 9 10-6 10 6-10 6L2 9ZM6 12v5c4 4 8 4 12 0v-5M22 9v8\"/>","nature":"<path d=\"m12 2-7 9h4l-5 7h16l-5-7h4l-7-9ZM12 18v4\"/>","weather":"<circle cx=\"8\" cy=\"7\" r=\"3\"/><path d=\"M8 1v2M2.5 3l1.6 1.5M1 8h2M17 2l-2 2\"/><path d=\"M7 19h12a4 4 0 0 0 0-8 6 6 0 0 0-11 2 3 3 0 0 0-1 6Z\"/>","time":"<rect x=\"3\" y=\"5\" width=\"18\" height=\"16\" rx=\"2\"/><path d=\"M7 3v4M17 3v4M3 10h18M8 14h3v3H8z\"/>","colours":"<path d=\"M12 3a9 9 0 1 0 0 18c2.4 0 2.8-2.3 1.3-3.4-.9-.6-.6-2.1.7-2.1H17a4 4 0 0 0 4-4A9 9 0 0 0 12 3Z\"/><circle cx=\"7.5\" cy=\"11\" r=\"1\"/><circle cx=\"10\" cy=\"7\" r=\"1\"/><circle cx=\"15\" cy=\"7\" r=\"1\"/><circle cx=\"18\" cy=\"11\" r=\"1\"/>","actions":"<path d=\"M19 15c1.2-1.2 2-2.7 2-4.5 0-4-4-7.5-9-7.5S3 6.5 3 10.5 7 18 12 18h2l5 3v-6Z\"/><path d=\"M8 10h8M8 13h5\"/>","descriptions":"<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M8 15c2 3 6 3 8 0M8 9h.01M16 9h.01\"/>","sports":"<path d=\"M7 4h10v6a5 5 0 0 1-10 0V4ZM7 6H3v3a4 4 0 0 0 4 4M17 6h4v3a4 4 0 0 1-4 4M12 15v5M8 21h8\"/>","town":"<rect x=\"4\" y=\"3\" width=\"16\" height=\"18\" rx=\"1\"/><path d=\"M8 7h2M14 7h2M8 11h2M14 11h2M8 15h2M14 15h2M10 21v-4h4v4\"/>","travel":"<path d=\"m21 3-7 18-3.5-7.5L3 10l18-7ZM10.5 13.5 21 3\"/>","arts":"<path d=\"M3 5c5-2 9-2 13 0v10c0 4-3 6-6.5 7C5 20 3 17 3 13V5ZM16 6l5-1v8c0 3-2 5-5 6\"/><path d=\"M7 10h.01M13 10h.01M7 15c2 2 4 2 6 0\"/>","tech":"<rect x=\"4\" y=\"4\" width=\"16\" height=\"13\" rx=\"2\"/><path d=\"M2 21h20l-2-4H4l-2 4Z\"/>","quantity":"<rect x=\"3\" y=\"4\" width=\"8\" height=\"8\" rx=\"1\"/><circle cx=\"17\" cy=\"8\" r=\"4\"/><path d=\"m7 15-4 7h8l-4-7ZM16 16h6v6h-6z\"/>","objects":"<path d=\"M14.5 6.5a5 5 0 0 0-6.4 6.4L3.5 17a2.4 2.4 0 0 0 3.5 3.5l4.1-4.6a5 5 0 0 0 6.4-6.4l-3 3-3-1 1-3 3-3Z\"/>","countries":"<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M3 12h18M12 3c-5 5-5 13 0 18M12 3c5 5 5 13 0 18M5 7h14M5 17h14\"/>"};
 function topicIcon(id){return '<svg class="ws-topic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(topicSvgPaths[id]||topicSvgPaths.objects)+'</svg>'}
 function manualView(fill=false){
  view=fill?'fill':'manual';
+ if(!checkpointPick())return home();
  const selected=[...manual],limit=E.levelLimit(profile),topicId=[...manualThemes][0]||'food';
  const topic=T.topics.find(t=>t.id===topicId);
  const q=query.trim().toLocaleLowerCase('ru');
@@ -327,7 +351,7 @@ function manualView(fill=false){
  const chosenInTopic=filtered.filter(w=>manual.has(w.en)).length;
  const shownTopics=manualShowAll?T.topics:[...T.topics.filter(t=>t.id===topicId),...T.topics.filter(t=>t.id!==topicId)].slice(0,3);
  const listing=filtered.map(manualWordRow).join('');
- const main='<main class="ws-manual ws-manual-v2 ws-manual-v3'+(themed?'':' is-search')+'"><div class="ws-manual-page"><div class="ws-picker-header">'+btn(pickerIcon('back'),fill?'leaveFill':'sources','ws-picker-back')+'<div class="ws-manual-heading"><h1>'+(fill?'Добавь слова':'Выбор слов')+'</h1><small>Ручной подбор</small></div><span class="ws-manual-limit">до '+limit+' слов</span></div>'+
+ const main='<main class="ws-manual ws-manual-v2 ws-manual-v3'+(themed?'':' is-search')+'"><div class="ws-manual-page"><div class="ws-picker-header"><button type="button" class="ws-picker-back" data-action="stopSelection" aria-label="Отменить подбор">'+pickerIcon('back')+'</button><div class="ws-manual-heading"><h1>'+(fill?'Добавь слова':'Выбор слов')+'</h1><small>Ручной подбор</small></div><span class="ws-manual-limit">до '+limit+' слов</span></div>'+
  '<div class="ws-manual-tabs" role="group" aria-label="Способ выбора слов">'+
  btn(pickerIcon('learn')+' По темам','manualTab:topics','ws-manual-tab'+(themed?' is-active':''))+
  btn('<svg class="ws-picker-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg> Поиск','manualTab:search','ws-manual-tab'+(!themed?' is-active':''))+'</div>'+
@@ -350,7 +374,7 @@ function manualView(fill=false){
  syncManualViewport();
 }
 function startLearning(ids,known=[]){
- try{session=E.start(profile,'new',ids,known);selection=null;manual.clear();if(!store())return home();showAnswer=false;showHelp=false;confirmed=false;learn()}catch(e){notice(e.message);home()}
+ try{session=E.start(profile,'new',ids,known,Date.now(),pickStartedAt??undefined);pickStartedAt=null;selection=null;manual.clear();if(!store())return home();showAnswer=false;showHelp=false;learn()}catch(e){discardPick();notice(e.message);home()}
 }
 function review(mode='review'){
  if(warnLocked())return;
@@ -358,38 +382,26 @@ function review(mode='review'){
  if(!ids.length)return home();
  try{
   session=E.start(profile,mode,ids);
-  showAnswer=false;showHelp=false;confirmed=false;
+  showAnswer=false;showHelp=false;
   if(!store())return home();
   recall();
  }catch(e){notice(e.message)}
 }
 function cardActions(){
- return btn('Пауза','pause','quiet')+
-  (session.mode==='practice'?btn('Закончить тренировку','stopPractice','quiet'):btn('Отменить занятие','cancel','quiet'));
-}
-function paperPauseOverlay(){
- if(!session||session.pausedAt===null)return '';
- return '<div class="ws-paper-pause" role="presentation"><section class="ws-paper-pause-dialog" role="dialog" aria-modal="true" aria-labelledby="ws-paper-pause-title">'+
-  '<span class="ws-paper-pause-icon" aria-hidden="true">Ⅱ</span><h2 id="ws-paper-pause-title">Занятие на паузе</h2>'+
-  '<p>Ты вернёшься к тому же слову и той же стороне листа.</p>'+
-  '<p class="ws-paper-pause-timer" id="pause-time">'+pauseTime()+'</p>'+
-  '<p class="ws-paper-pause-note">Пауза не останавливает отсчёт времени.</p>'+
-  '<div class="ws-paper-pause-buttons">'+btn('Продолжить','continue','ws-paper-resume')+
-  (session.mode==='practice'?btn('Закончить тренировку','stopPractice','ws-paper-pause-cancel'):btn('Отменить занятие','cancel','ws-paper-pause-cancel'))+
-  '</div></section></div>';
+ return session.mode==='practice'?btn('Закончить тренировку','stopPractice','quiet'):btn('Отменить занятие','cancel','quiet');
 }
 function visual(w){if(window.WS17_illustration){try{return window.WS17_illustration(w.en)}catch(e){}}if(w.props&&C?.render){try{return C.render(w)}catch(e){}}return '<div class="simple-art">'+h(w.cue||w.en)+'</div>'}
 function learn(focusWord=false){
  if(!session)return home();view='learn';const w=byId[session.ids[session.learnIndex]];
  const position=session.learnIndex+1,total=session.ids.length,progress=Math.round(100*position/total);
  const back=!!session.paperLearnFace;
- shell('','', '<main class="ws-paper-page ws-paper-learn'+(session.pausedAt!==null?' is-paused':'')+'"><div class="ws-paper-header"><div><h1>Запоминание</h1><small>Изучаем новые слова</small></div><span class="ws-paper-count">'+position+' из '+total+'</span></div>'+
+ shell('','', '<main class="ws-paper-page ws-paper-learn"><div class="ws-paper-header"><div><h1>Запоминание</h1><small>Изучаем новые слова</small></div><span class="ws-paper-count">'+position+' из '+total+'</span></div>'+
   '<div class="ws-paper-track" role="progressbar" aria-label="Прогресс запоминания" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+position+'"><span style="width:'+progress+'%"></span></div>'+
   '<div class="ws-paper-main">'+paperSheet(w,true,back)+paperDream(w,'learn',true,false)+'</div>'+
   '<div class="ws-paper-bottom"><p class="ws-paper-instruction">Изучи обе стороны и представь образ</p>'+
   '<div class="ws-paper-decisions">'+btn(position===total?'Начать проверку':'Дальше','learnNext','ws-paper-positive ws-paper-full')+'</div>'+
-  '<div class="ws-paper-minors">'+cardActions()+'</div></div>'+paperPauseOverlay()+'</main>');
- wirePaperFlip(()=>{if(session.pausedAt!==null)return;session.paperLearnFace=!session.paperLearnFace;if(!store())return home();if(!paperFlipInPlace(session.paperLearnFace))learn()});
+  '<div class="ws-paper-minors">'+cardActions()+'</div></div></main>');
+ wirePaperFlip(()=>{session.paperLearnFace=!session.paperLearnFace;if(!store())return home();if(!paperFlipInPlace(session.paperLearnFace))learn()});
  if(focusWord){window.scrollTo?.(0,0);root.querySelector?.('[data-flip-card]')?.focus?.({preventScroll:true})}
 }
 function recall(){
@@ -405,43 +417,38 @@ function recall(){
  const grade='<div class="ws-paper-decisions">'+(failed?btn('Дальше','advance','ws-paper-positive ws-paper-full'):
   btn('Не вспомнил',answerVisible?'checkedNo':'no','ws-paper-negative')+
   btn('Вспомнил',answerVisible?'checkedYes':'yes','ws-paper-positive'))+'</div>';
- shell('','', '<main class="ws-paper-page ws-paper-recall ws-recall-v4'+(session.pausedAt!==null?' is-paused':'')+'"><div class="ws-paper-header"><div><h1>'+title+'</h1><small>Проход '+session.round+' · '+direction+'</small></div><span class="ws-paper-count">'+position+' из '+total+'</span></div>'+
+ shell('','', '<main class="ws-paper-page ws-paper-recall ws-recall-v4"><div class="ws-paper-header"><div><h1>'+title+'</h1><small>Проход '+session.round+' · '+direction+'</small></div><span class="ws-paper-count">'+position+' из '+total+'</span></div>'+
   '<div class="ws-paper-track" role="progressbar" aria-label="Прогресс проверки" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+(position-1)+'"><span style="width:'+progress+'%"></span></div>'+
   '<div class="ws-paper-main">'+paperSheet(w,item.dir!==1,answerVisible,failed,flipMotion)+paperDream(w,'recall',showHelp,answerVisible)+'</div>'+
   '<div class="ws-paper-bottom"><p class="ws-paper-instruction">'+(failed?'Посмотри правильный ответ и переходи дальше':'Вспомни слово и оцени себя')+'</p>'+
-  grade+'<div class="ws-paper-minors">'+cardActions()+'</div></div>'+paperPauseOverlay()+'</main>');
- wirePaperFlip(()=>{if(session.pausedAt!==null||failed)return;dispatch(answerVisible?'hideTranslation':'check')});
+  grade+'<div class="ws-paper-minors">'+cardActions()+'</div></div></main>');
+ wirePaperFlip(()=>{if(failed)return;dispatch(answerVisible?'hideTranslation':'check')});
 }
 function sendAnswer(ok,checked=false){
  try{
+  const feedback=session.feedback;
   delete session.feedback;
   delete session.recallHint;
-   const r=E.answer(session,ok,Date.now(),null,checked);
+  const at=!ok&&feedback?.failed?(feedback.at??Date.now()):Date.now();
+  const r=E.answer(session,ok,at,null,checked);
   if(!store())return home();
   if(r.done)return completed();
-  showAnswer=false;showHelp=false;confirmed=false;recall();
+  showAnswer=false;showHelp=false;recall();
  }catch(e){expire(e)}
 }
 function showFeedback(failed){
- E.action(session);
- session.feedback={failed,help:false};
+ session.feedback=failed?{failed,help:false,at:Date.now()}:{failed,help:false};
  delete session.recallHint;
- showAnswer=true;confirmed=failed;showHelp=false;
+ showAnswer=true;showHelp=false;
  if(!store())return home();
  recall();
 }
 function resume(){
- if(E.timedOut(session,Date.now()))return expire(new Error('30 минут бездействия'));
  if(session.stage==='complete')return completed();
  const feedback=session.feedback;
  view=session.stage==='learn'?'learn':'recall';
- showAnswer=!!feedback;confirmed=!!feedback?.failed;showHelp=!!(feedback?.help||session.recallHint);
+ showAnswer=!!feedback;showHelp=!!(feedback?.help||session.recallHint);
  render();
-}
-function suspend(){
- if(!session||storageFailure||session.pausedAt!==null||E.timedOut(session,Date.now()))return;
- 
-  E.pause(session);store();
 }
 function resultWordList(ids){
  const unique=[...new Set(ids||[])].filter(id=>byId[id]);
@@ -468,7 +475,6 @@ function resultScreen({mode,ids,successful=null,extraWords=null,hardIds=[],previ
  const title=isPractice?'Тренировка завершена':'Занятие завершено';
  const headline=isPractice?'Ты потренировал трудные слова.':isNew?'Новые слова изучены.':'Обязательное повторение завершено.';
  const label=isPractice?'Потренировано':isNew?'Изучено слов':'Повторено слов';
- const checkLabel=isNew?'Вспомнил в обе стороны на 3-м прогоне':'Вспомнил в обе стороны на 1-м прогоне';
  const hero='<section class="ws-result-hero"><div class="ws-result-hero-head"><div class="ws-result-total"><span>'+label+'</span><strong>'+amount+'</strong></div>'+
   (meaningful?'<div class="ws-result-total"><span>Успешно в обе стороны</span><strong>'+successful+'</strong></div>':'<div class="ws-result-total"><span>Остались трудными</span><strong>'+hard.length+'</strong></div>')+'</div>'+
   (rate!==null?'<div class="ws-result-quality"><div><span>Успешность контрольного прогона</span><strong>'+rate+'%</strong></div>'+
@@ -478,13 +484,15 @@ function resultScreen({mode,ids,successful=null,extraWords=null,hardIds=[],previ
  const details=isPractice?'<section class="ws-result-metrics"><div><span>В ходе тренировки</span><strong>Дополнительная практика</strong></div><div><span>Остались трудными</span><strong>'+hard.length+'</strong></div></section>':
   '<section class="ws-result-metrics"><div><span>Потребовались дополнительные прогоны</span><strong>'+extraWords+'</strong></div>'+
   '<div><span>Остались трудными после занятия</span><strong>'+hard.length+'</strong></div></section>';
- const next=isPractice?'Результат добровольной тренировки не изменяет прогресс, расписание, закрепление слов и уровень.':
-  isNew?'Слова добавлены в словарь. Обязательное повторение появится по расписанию.':
-  hard.length?'Можешь дополнительно потренировать трудные слова. Основной результат уже сохранён.':
-  E.due(profile).length?'На главной доступно обязательное повторение.':'На сегодня всё повторено. Можно вернуться к новым словам.';
+ const hasDue=E.due(profile).length>0;
  const lastReview=profile.sessions.findLast(s=>s.mode==='review');
  const practiceAvailable=mode==='review'&&hard.length>0&&lastReview?.id===reviewId&&
-  E.residualErrors(profile).some(id=>byId[id])&&!E.due(profile).length&&localStorage.getItem(PRACTICE)!==reviewId;
+  E.residualErrors(profile).some(id=>byId[id])&&!hasDue&&localStorage.getItem(PRACTICE)!==reviewId;
+ const next=isPractice?'Результат добровольной тренировки не изменяет прогресс, расписание, закрепление слов и уровень.':
+  isNew?'Слова добавлены в словарь. Обязательное повторение появится по расписанию.':
+  hasDue?'На главной доступно обязательное повторение.':
+  practiceAvailable?'Можешь дополнительно потренировать трудные слова. Основной результат уже сохранён.':
+  'На сегодня всё повторено. Можно вернуться к новым словам.';
  const actions='<div class="ws-result-actions">'+btn('На главную','home','ws-result-home')+
   (practiceAvailable?btn('Потренировать трудные слова','practice','ws-result-practice'):'')+'</div>';
  shell('','', '<main class="ws-result-page"><div class="ws-result-scroll"><header class="ws-result-heading"><span class="ws-result-check" aria-hidden="true">✓</span>'+
@@ -634,22 +642,24 @@ function restoreBackup(){
  catch(err){notice('Не удалось восстановить копию. Исходные данные не изменены.')}
 }
 function confirmExit(practice=false){
- if(!session)return;
+ if(!session&&pickStartedAt===null)return;
  const old=root.querySelector('.ws-paper-exit-confirm');if(old)return;
- const title=practice?'Закончить тренировку?':'Отменить занятие?';
+ const picking=!session;
+ const title=picking?'Отменить подбор?':practice?'Закончить тренировку?':'Отменить занятие?';
  const message=practice?'Результаты досрочно завершённой тренировки не сохранятся.':'Все незавершённые результаты будут потеряны.';
  const dialog=document.createElement('div');
- dialog.className='ws-paper-pause ws-paper-exit-confirm';
- dialog.innerHTML='<section class="ws-paper-pause-dialog" role="dialog" aria-modal="true" aria-labelledby="ws-paper-exit-title">'+
+ dialog.className='ws-paper-exit-confirm';
+ dialog.innerHTML='<section class="ws-paper-exit-dialog" role="dialog" aria-modal="true" aria-labelledby="ws-paper-exit-title">'+
   '<h2 id="ws-paper-exit-title">'+title+'</h2><p>'+message+'</p>'+
-  '<div class="ws-paper-pause-buttons"><button type="button" class="ws-paper-resume" data-exit="stay">'+(practice?'Продолжить тренировку':'Продолжить занятие')+'</button>'+
-  '<button type="button" class="ws-paper-pause-cancel" data-exit="leave">'+(practice?'Закончить':'Отменить занятие')+'</button></div></section>';
+  '<div class="ws-paper-exit-buttons"><button type="button" class="ws-paper-resume" data-exit="stay">'+(picking?'Продолжить подбор':practice?'Продолжить тренировку':'Продолжить занятие')+'</button>'+
+  '<button type="button" class="ws-paper-exit-cancel" data-exit="leave">'+(picking?'Отменить подбор':practice?'Закончить':'Отменить занятие')+'</button></div></section>';
  root.appendChild(dialog);
  const stay=dialog.querySelector('[data-exit="stay"]'),leave=dialog.querySelector('[data-exit="leave"]');
- const previousFocus=document.activeElement;
- const close=()=>{dialog.remove();previousFocus?.focus?.()};
+ const previousFocus=document.activeElement,background=root.querySelector('main');
+ background?.setAttribute('inert','');
+ const close=()=>{dialog.remove();background?.removeAttribute('inert');previousFocus?.focus?.()};
  stay.addEventListener('click',close);
- leave.addEventListener('click',()=>{dialog.remove();session=null;selection=null;store();home()});
+ leave.addEventListener('click',()=>{dialog.remove();if(picking)discardPick();else{session=null;store()}home()});
  dialog.addEventListener('keydown',event=>{
   if(event.key==='Escape'){event.preventDefault();close();return}
   if(event.key!=='Tab')return;
@@ -659,7 +669,7 @@ function confirmExit(practice=false){
  stay.focus();
 }
 function confirmCancel(){confirmExit(false)}
-function render(){if(session){if(E.timedOut(session,Date.now()))return expire(new Error('30 минут бездействия'));if(session.stage==='complete'&&view!=='home')return completed();if(view==='learn')return learn();if(view==='recall')return recall()}if(view==='select')return selectionScreen();if(view==='manual'||view==='fill')return manualView(view==='fill');if(view==='sources')return home(true);if(view==='progress')return progress();if(view==='dictionary')return dictionaryView();return home()}
+function render(){if(session){if(session.stage==='complete'&&view!=='home')return completed();if(view==='learn')return learn();if(view==='recall')return recall()}if(view==='select')return selectionScreen();if(view==='manual'||view==='fill')return manualView(view==='fill');if(view==='sources')return home(true);if(view==='progress')return progress();if(view==='dictionary')return dictionaryView();return home()}
 function dispatch(act,el){
  if(storageFailure&&!['home','dictionary','progress','recover','restoreBackup'].includes(act)&&!act.startsWith('word:')&&!act.startsWith('say:'))return notice('Сохранение заблокировано. Никакие данные не перезаписываются.');
  if(act.startsWith('say:'))return speak(act.slice(4));
@@ -670,55 +680,44 @@ function dispatch(act,el){
  if(act.startsWith('manualTopic:')){const v=act.slice(12);manualThemes.clear();manualThemes.add(v);manualShowAll=false;manualView(view==='fill');const page=root.querySelector?.('.ws-manual-page'),list=root.querySelector?.('.ws-manual-list');if(page&&list)page.scrollTop=Math.max(0,list.offsetTop-page.offsetTop-8);return}
  if(act.startsWith('manualTab:')){manualMode=act.slice(10);if(manualMode==='search')manualSearchBaseHeight=window.visualViewport?.height||window.innerHeight;return manualView(view==='fill')}
  if(act==='manualAllTopics'){manualShowAll=!manualShowAll;return manualView(view==='fill')}
- if(act.startsWith('pick:')){const v=act.slice(5);if(profile.words[v]?.origin||!byId[v])return;manual.has(v)?manual.delete(v):manual.size<E.levelLimit(profile)&&manual.add(v);return manualView(view==='fill')}
+ if(act.startsWith('pick:')){const v=act.slice(5);if(unavailableForNew(v)||!byId[v])return;manual.has(v)?manual.delete(v):manual.size<E.levelLimit(profile)&&manual.add(v);return manualView(view==='fill')}
  if(act.startsWith('progressRange:')){progressRange=act.slice(14);return progress()}
  if(act.startsWith('qualityRange:')){qualityRange=act.slice(13);return progress()}
  if(act.startsWith('word:'))return wordDetail(act.slice(5));
- if(session&&E.timedOut(session,Date.now()))return expire();
- if(session&&session.pausedAt!==null&&!['continue','cancel','stopPractice'].includes(act))return notice('Сначала продолжи занятие');
  switch(act){
- case 'home':return home();case 'closeSources':return home();case 'restoreBackup':return restoreBackup();case 'recover':return recoverScreen();case 'sources':return sources();case 'manual':manual.clear();manualThemes.clear();manualThemes.add('food');manualMode='topics';manualShowAll=false;manualSummaryOpen=false;query='';manualSearchBaseHeight=0;return manualView();
- case 'auto':return makeSelection('auto');
+ case 'home':return home();case 'closeSources':return home();case 'restoreBackup':return restoreBackup();case 'recover':return recoverScreen();case 'sources':return sources();case 'manual':if(warnLocked()||E.due(profile).length)return home();pickStartedAt=Date.now();manual.clear();manualThemes.clear();manualThemes.add('food');manualMode='topics';manualShowAll=false;manualSummaryOpen=false;query='';manualSearchBaseHeight=0;return manualView();
+ case 'auto':return makeSelection();
  case 'review':return review();case 'practice':return review('practice');case 'stopPractice':return confirmExit(true);case 'progress':return progress();case 'dictionaryOpen':query='';dictionaryFilter='all';return dictionaryView();case 'dictionary':return dictionaryView();
  case 'known':return selectionGrade(true);case 'unknown':return selectionGrade(false);case 'stopSelection':return stopSelection();
- case 'reveal':showAnswer=!showAnswer;return selectionScreen();
  case 'startManual':return startLearning([...manual],selection?.known||[]);
- case 'leaveFill':saveFamiliar(selection.known);selection=null;manual.clear();return home();
- case 'learnNext':try{E.learnNext(session);session.artHidden=false;session.paperLearnFace=false;if(!store())return home();showHelp=false;return session.stage==='learn'?learn(true):recall()}catch(err){return expire(err)}
+ case 'learnNext':try{E.learnNext(session);session.paperLearnFace=false;if(!store())return home();showHelp=false;return session.stage==='learn'?learn(true):recall()}catch(err){return expire(err)}
  
  case 'yes':return sendAnswer(true);case 'no':return showFeedback(true);
  case 'check':return showFeedback(false);
- case 'hideTranslation':if(!session.feedback||session.feedback.failed)return;E.action(session);delete session.feedback;showAnswer=false;showHelp=false;confirmed=false;if(!store())return home();return recall();
- case 'recallHint':E.action(session);session.recallHint=!session.recallHint;showHelp=!!session.recallHint;if(!store())return home();return recall();
+ case 'hideTranslation':if(!session.feedback||session.feedback.failed)return;delete session.feedback;showAnswer=false;showHelp=false;if(!store())return home();return recall();
  case 'checkedYes':return sendAnswer(true,true);case 'checkedNo':return showFeedback(true);
  case 'advance':return sendAnswer(false);
- case 'help':E.action(session);showHelp=!showHelp;if(session.feedback)session.feedback.help=showHelp;else session.recallHint=showHelp;if(!store())return home();return recall();
- case 'pause':suspend();return storageFailure?home():render();
-  case 'continue':session.pausedAt=null;if(!store())return home();return render();
+ case 'help':if(!session.feedback)return;showHelp=!showHelp;session.feedback.help=showHelp;if(!store())return home();return recall();
  case 'cancel':return confirmCancel();
  }
 }
 function refreshHomeDay(){
  if(!storageFailure&&!session&&view==='home'&&homeDay!==E.day())home();
 }
-function returnToCard(){if(session&&!storageFailure)resume();else refreshHomeDay()}
 document.addEventListener?.('keydown',event=>{if(view==='sources'&&event.key==='Escape')home()});
-document.addEventListener?.('visibilitychange',()=>{if(document.hidden)suspend();else returnToCard()});
-window.addEventListener?.('pagehide',suspend);
-window.addEventListener?.('pageshow',event=>{if(event.persisted)returnToCard()});
+document.addEventListener?.('visibilitychange',()=>{if(!document.hidden)refreshHomeDay()});
+window.addEventListener?.('pageshow',event=>{if(event.persisted)refreshHomeDay()});
 window.addEventListener?.('focus',refreshHomeDay);
 window.visualViewport?.addEventListener?.('resize',syncManualViewport,{passive:true});
 window.visualViewport?.addEventListener?.('scroll',syncManualViewport,{passive:true});
 window.addEventListener?.('resize',syncManualViewport,{passive:true});
 document.addEventListener?.('focusin',event=>{if(event.target?.id==='manual-search')syncManualViewport()});
 document.addEventListener?.('focusout',event=>{if(event.target?.id==='manual-search'&&typeof window.requestAnimationFrame==='function')window.requestAnimationFrame(syncManualViewport)});
-load();if(storageFailure)recoverScreen();else if(session)resume();else home();
-setInterval(()=>{
- refreshHomeDay();
- if(!session||storageFailure)return;
- if(E.timedOut(session,Date.now()))return expire(new Error('30 минут бездействия'));
- const timer=root.querySelector('#pause-time');
- if(timer)timer.textContent=pauseTime();
-},1000);
+load();
+if(storageFailure)recoverScreen();
+else if(session?.stage==='pick'){const checkpoint=session;session=null;resumePick(checkpoint)}
+else if(session)resume();
+else home();
+setInterval(refreshHomeDay,1000);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 })();

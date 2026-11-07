@@ -1,7 +1,7 @@
 /* WordScene 17.0 - independent pure learning engine. Browser and Node compatible. */
 (function(root){
 'use strict';
-const MS=60000, DAY=86400000, INTERVALS=[3,7,14,30], LIMIT={novice:15,experienced:30,pro:Infinity};
+const INTERVALS=[3,7,14,30], LIMIT={novice:15,experienced:30,pro:Infinity};
 const day=(at=Date.now())=>{const d=new Date(at);return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
 const addDays=(d,n)=>{const [y,m,k]=d.split('-').map(Number);return new Date(Date.UTC(y,m-1,k+n)).toISOString().slice(0,10)};
 const unique=a=>[...new Set(a)];
@@ -38,22 +38,18 @@ function residualErrors(p){
  const last=p.sessions.findLast(s=>s.mode==='review');
  return last?.hardIds||[];
 }
-function start(p,mode,ids,known=[],at=Date.now()){
+function start(p,mode,ids,known=[],at=Date.now(),pickedAt=at){
  if(!['new','review','practice'].includes(mode)||!ids.length)throw Error('Invalid session');
  if(mode==='new'&&!eligible(p,ids))throw Error('Invalid new-word selection');
- if(mode==='new'&&due(p,at).length)throw Error('Complete due reviews first');
+ if(mode==='new'&&due(p,pickedAt).length)throw Error('Complete due reviews first');
  if(mode==='review'){const required=due(p,at);if(ids.length!==required.length||new Set(ids).size!==ids.length||ids.some(id=>!required.includes(id)))throw Error('Review must include every due word exactly once');}
  if(mode==='practice'&&(due(p,at).length||ids.some(id=>!residualErrors(p).includes(id))))throw Error('Only residual errors');
  const all=unique(ids);
- return {id:'ws17-'+at+'-'+Math.random().toString(36).slice(2,10),mode,ids:all,known:unique(known),stage:mode==='new'?'learn':'recall',learnIndex:0,round:1,extra:0,items:queue(all),index:0,answers:[],hard:[],roundHard:[],startedAt:at,lastActionAt:at,pausedAt:null,openedAt:at,locked:false};
+ return {id:'ws17-'+at+'-'+Math.random().toString(36).slice(2,10),mode,ids:all,known:unique(known),stage:mode==='new'?'learn':'recall',learnIndex:0,round:1,extra:0,items:queue(all),index:0,answers:[],hard:[],roundHard:[],startedAt:at,openedAt:at,locked:false};
 }
-function remainingTime(s,now){return Math.max(0,30*MS-(now-s.lastActionAt))}
-function timedOut(s,now){return remainingTime(s,now)===0}
-function action(s,at=Date.now()){if(timedOut(s,at))throw Error('Session expired');s.lastActionAt=at;s.pausedAt=null}
-function pause(s,at=Date.now()){if(timedOut(s,at))throw Error('Session expired');if(s.pausedAt===null)s.pausedAt=at}
-function learnNext(s,at=Date.now()){action(s,at);if(s.stage!=='learn')throw Error('Not learning');if(s.learnIndex<s.ids.length-1)s.learnIndex++;else{s.stage='recall';s.items=queue(s.ids);s.index=0}}
+function learnNext(s){if(s.stage!=='learn')throw Error('Not learning');if(s.learnIndex<s.ids.length-1)s.learnIndex++;else{s.stage='recall';s.items=queue(s.ids);s.index=0}}
 function answer(s,ok,at=Date.now(),_unusedMs=null,checked=false){
- action(s,at);if(s.stage!=='recall'||s.index>=s.items.length)throw Error('No active recall');
+ if(s.stage!=='recall'||s.index>=s.items.length)throw Error('No active recall');
  const {id,dir}=s.items[s.index];
  if(s.mode!=='practice')s.answers.push({id,dir,round:s.round,extra:s.extra,ok:!!ok,at,checked});
  if(!ok&&!s.roundHard.includes(id))s.roundHard.push(id);
@@ -90,7 +86,7 @@ function scheduler(old,ok,at){
 }
 function newSchedule(at){return {stage:'daily',days:[],checks:[],interval:0,nextDay:addDays(day(at),1),firstLearnedAt:at,masteredAt:null}}
 function completed(p,s,at=Date.now()){
- if(s.stage!=='complete'||timedOut(s,at))throw Error('Incomplete or expired');
+ if(s.stage!=='complete')throw Error('Incomplete session');
  if(s.mode==='practice')return p;
  if(p.sessions.some(x=>x.id===s.id))return clone(p);
  const next=clone(p);
@@ -131,6 +127,6 @@ function levelProgress(p){
  return {level:p.level,target:cfg.label,eligible:eligible.length,confirmed:confirmed.length,window:three.length,successRate,threshold:cfg.threshold,min:cfg.min};
 }
 function status(w){if(!w)return 'new';if(w.schedule?.masteredAt&&w.schedule.stage==='spaced'&&w.schedule.interval===3&&w.schedule.currentMastered!==false)return 'mastered';if(w.origin==='known')return 'known';return 'learning'}
-const api={day,addDays,empty,clone,due,levelLimit,selectCandidates,beginSelection,selectionAnswer,eligible,queue,start,residualErrors,remainingTime,timedOut,action,pause,learnNext,answer,firstPair,scheduler,newSchedule,completed,recalcLevel,levelProgress,status};
+const api={day,addDays,empty,clone,due,levelLimit,selectCandidates,beginSelection,selectionAnswer,eligible,queue,start,residualErrors,learnNext,answer,firstPair,scheduler,newSchedule,completed,recalcLevel,levelProgress,status};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.WS17Engine=api;
 })(typeof globalThis!=='undefined'?globalThis:this);

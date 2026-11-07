@@ -1215,7 +1215,7 @@ html:has(.ws-paper-page),body:has(.ws-paper-page){background:#fdf7ed}
 .ws-paper-underlay{position:absolute;inset:9px 4px 6px 9px;border-radius:4px 9px 9px 4px;background:#e7d9c3;transform:rotate(1deg);pointer-events:none;box-shadow:0 7px 13px #65533a22}
 .ws-paper-sheet{height:100%;width:100%;position:relative;transform-style:preserve-3d;cursor:pointer;outline:none}
 .ws-paper-sheet:focus-visible{outline:3px solid #087bfa;outline-offset:3px;border-radius:8px}
-.ws-paper-inner{height:100%;width:100%;position:relative;transform-style:preserve-3d;transition:transform .48s cubic-bezier(.22,.65,.24,1)}
+.ws-paper-inner{height:100%;width:100%;position:relative;transform-style:preserve-3d;transition:transform .48s ease-in-out}
 .ws-paper-sheet.is-flipped .ws-paper-inner{transform:rotateY(180deg)}
 .ws-paper-face{
  position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;isolation:isolate;
@@ -1223,6 +1223,20 @@ html:has(.ws-paper-page),body:has(.ws-paper-page){background:#fdf7ed}
  border-radius:4px 10px 10px 4px;box-shadow:inset 2px 0 5px #9e88630c,inset -2px 0 6px #917a5f0b,0 4px 12px #6350391b;
 }
 .ws-paper-face-back{transform:rotateY(180deg)}
+/* Switch the painted face at the midpoint, including on WebKit when it composites the grain separately. */
+.ws-paper-face{transition:visibility 0s .24s}
+.ws-paper-face[aria-hidden="true"]{visibility:hidden}
+@keyframes ws-paper-face-in{0%,49.99%{visibility:hidden}50%,100%{visibility:visible}}
+@keyframes ws-paper-face-out{0%,49.99%{visibility:visible}50%,100%{visibility:hidden}}
+.ws-paper-turn-back .ws-paper-face,.ws-paper-turn-front .ws-paper-face{
+ animation:ws-paper-face-in .48s linear both;
+}
+.ws-paper-turn-back .ws-paper-face[aria-hidden="true"],.ws-paper-turn-front .ws-paper-face[aria-hidden="true"]{
+ animation-name:ws-paper-face-out;
+}
+@media(prefers-reduced-motion:reduce){
+ .ws-paper-sheet .ws-paper-face{animation:none!important;transition:none}
+}
 .ws-paper-grain{
  position:absolute;inset:0;z-index:-1;pointer-events:none;
  /* Approved natural paper: irregular fibers and fine noise, NEVER a drawn grid. */
@@ -1272,9 +1286,6 @@ html:has(.ws-paper-page),body:has(.ws-paper-page){background:#fdf7ed}
 .ws-paper-minors>button.primary{background:#087bfa;color:#fff;border-radius:13px;min-height:44px}
 .ws-paper-minors .reason{margin:0;font-size:12px;color:#73591c}
 .ws-paper-minors .reason:empty{display:none}
-.ws-paper-page:has(#pause-time) .ws-paper-sheet{pointer-events:none}
-.ws-paper-page:has(#pause-time) .ws-paper-decisions button{opacity:.4;pointer-events:none}
-.ws-paper-page:has(#pause-time) .ws-paper-dream-toggle{pointer-events:none;opacity:.5}
 @media(max-height:690px){
  .ws-paper-page{padding-top:max(5px,env(safe-area-inset-top));padding-bottom:max(3px,env(safe-area-inset-bottom))}
  .ws-paper-header{min-height:43px}
@@ -1308,8 +1319,8 @@ html:has(.ws-paper-page),body:has(.ws-paper-page){background:#fdf7ed}
 /* Flip-specific animation is used when grading re-renders the active recall sheet. */
 @keyframes ws-paper-flip-to-back{from{transform:rotateY(0deg)}to{transform:rotateY(180deg)}}
 @keyframes ws-paper-flip-to-front{from{transform:rotateY(180deg)}to{transform:rotateY(0deg)}}
-.ws-paper-turn-back .ws-paper-inner{animation:ws-paper-flip-to-back .48s cubic-bezier(.22,.65,.24,1) both}
-.ws-paper-turn-front .ws-paper-inner{animation:ws-paper-flip-to-front .48s cubic-bezier(.22,.65,.24,1) both}
+.ws-paper-turn-back .ws-paper-inner{animation:ws-paper-flip-to-back .48s ease-in-out both}
+.ws-paper-turn-front .ws-paper-inner{animation:ws-paper-flip-to-front .48s ease-in-out both}
 @media(prefers-reduced-motion:reduce){
  .ws-paper-turn-back .ws-paper-inner,.ws-paper-turn-front .ws-paper-inner{animation:none!important}
 }
@@ -1322,18 +1333,14 @@ html:has(.ws-paper-page),body:has(.ws-paper-page){background:#fdf7ed}
 .ws-paper-dream.is-open{flex:1 1 0;min-height:0}
 .ws-paper-dream-empty{display:none}
 /* Pause is a real modal over the same card, not another button row. */
-.ws-paper-page.is-paused>:not(.ws-paper-pause){pointer-events:none;user-select:none}
-.ws-paper-pause{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px max(16px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom));background:rgba(13,26,45,.62);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
-.ws-paper-pause-dialog{width:min(100%,390px);background:#fffaf1;border:1px solid #e9dcc9;border-radius:23px;box-shadow:0 24px 65px #0a193555;padding:24px 20px 21px;text-align:center;color:#12213a}
-.ws-paper-pause-icon{display:grid;place-items:center;width:46px;height:46px;background:#eaf3ff;border-radius:50%;color:#087bfa;font-weight:850;font-size:24px;margin:0 auto 12px}
-.ws-paper-pause-dialog h2{font-size:23px;line-height:1.15;margin:0 0 10px}
-.ws-paper-pause-dialog p{font-size:14px;line-height:1.45;color:#5c6b80;margin:0 0 12px}
-.ws-paper-pause-dialog .ws-paper-pause-timer{color:#9a6c25;background:#faf0dc;border-radius:13px;padding:12px;font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;margin:10px 0}
-.ws-paper-pause-dialog .ws-paper-pause-note{font-size:12px;margin:10px 0 19px}
-.ws-paper-pause-buttons{display:flex;flex-direction:column;gap:9px}
-.ws-paper-pause-buttons button{border-radius:16px;border:0;min-height:58px;padding:12px;font-size:16px;font-weight:800}
+.ws-paper-exit-confirm{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px max(16px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom));background:rgba(13,26,45,.62);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.ws-paper-exit-dialog{width:min(100%,390px);background:#fffaf1;border:1px solid #e9dcc9;border-radius:23px;box-shadow:0 24px 65px #0a193555;padding:24px 20px 21px;text-align:center;color:#12213a}
+.ws-paper-exit-dialog h2{font-size:23px;line-height:1.15;margin:0 0 10px}
+.ws-paper-exit-dialog p{font-size:14px;line-height:1.45;color:#5c6b80;margin:0 0 12px}
+.ws-paper-exit-buttons{display:flex;flex-direction:column;gap:9px}
+.ws-paper-exit-buttons button{border-radius:16px;border:0;min-height:58px;padding:12px;font-size:16px;font-weight:800}
 .ws-paper-resume{background:#087bfa;color:white}
-.ws-paper-pause-cancel{background:transparent;color:#5c6b80;border:1px solid #e7dac8!important;font-size:14px!important}
+.ws-paper-exit-cancel{background:transparent;color:#5c6b80;border:1px solid #e7dac8!important;font-size:14px!important}
 @media(max-height:690px){
  .ws-paper-dream.is-collapsed{height:70px;min-height:70px}
  .ws-paper-dream.is-collapsed .ws-paper-dream-head{min-height:32px}
