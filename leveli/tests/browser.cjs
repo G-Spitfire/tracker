@@ -1,7 +1,8 @@
 const {chromium,webkit}=require('playwright');
 const assert=require('node:assert/strict'),fs=require('node:fs');
 const fixtures={A:{schemaVersion:1,source:'petersburgedu',grades:[5,5,5,4,4,4].map((value,i)=>({id:'a'+i,subject:'Математика',value:String(value),date:`2026-10-${10+i}`,type:'Устный ответ',quarter:1})).concat([{id:'f',subject:'Русский язык',value:'5',date:'2026-10-20',type:'Четвертная',quarter:1},{id:'c',subject:'Русский язык',value:'4',date:'2026-10-15',type:'Итоговая контрольная работа',weight:2,quarter:1},{id:'n',subject:'Русский язык',value:'неизвестная',valueCode:'2',date:'2026-10-14',quarter:1}])},B:{schemaVersion:1,source:'petersburgedu',grades:[{id:'b1',subject:'История',value:'3',date:'31.10.2026',type:'Ответ',quarter:1}]}};
-fixtures.A.syncedAt=new Date(Date.now()-3600000).toISOString();
+const testTime=new Date(2026,10,7,12).getTime();
+fixtures.A.syncedAt=new Date(testTime-3600000).toISOString();
 const authMock=`export const getAuth=()=>window.__auth;export const browserLocalPersistence={};export const setPersistence=async()=>{};export function onAuthStateChanged(a,fn){window.__listeners.push(fn);setTimeout(()=>fn(a.currentUser),0);return ()=>{}}export async function signInWithEmailAndPassword(a,email){window.__switchUser(email.startsWith('b')?'B':'A')}export async function signOut(){window.__switchUser(null)}`;
 const storeMock=`export const getFirestore=()=>({});export const doc=(db,...parts)=>parts;export const serverTimestamp=()=>0;export const runTransaction=async(db,fn)=>fn({get:async path=>({exists:()=>!!JSON.parse(sessionStorage.getItem('cloud:'+path.join('/'))||'null'),data:()=>JSON.parse(sessionStorage.getItem('cloud:'+path.join('/')))}),set:(path,value)=>sessionStorage.setItem('cloud:'+path.join('/'),JSON.stringify(value))});export async function getDocFromServer(path){if(window.__offline)throw Error('offline');const [kind,uid]=path;if(kind==='profiles')return {exists:()=>true,data:()=>({name:uid==='A'?'Полина':'Матвей'})};if(kind==='schoolGrades')return {exists:()=>true,data:()=>window.__fixtures[uid]};const value=JSON.parse(sessionStorage.getItem('cloud:'+path.join('/'))||'null');return {exists:()=>!!value,data:()=>value};}export const getDoc=getDocFromServer;`;
 fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
@@ -14,6 +15,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await context.route('https://www.gstatic.com/firebasejs/**',route=>{const url=route.request().url();route.fulfill({contentType:'text/javascript',body:url.endsWith('firebase-app.js')?'export const initializeApp=(c,n)=>({name:n})':url.endsWith('firebase-auth.js')?authMock:storeMock})});
  await context.route('https://fonts.googleapis.com/**',route=>route.abort());await context.route('https://fonts.gstatic.com/**',route=>route.abort());
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.clock.setFixedTime(testTime);
  await page.goto((process.env.TEST_BASE_URL||'http://127.0.0.1:8765')+'/leveli/');await page.waitForFunction(()=>window.leveliFirebase);
  assert.equal(await page.locator('[data-tab]').count(),0);
  assert.equal(await page.locator('[data-page="home"]').isVisible(),true);
@@ -39,14 +41,22 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
 
  await page.locator('.b3-home-btn').click();
  assert.equal(await page.locator('[data-page="home"]').isVisible(),true);
- await page.evaluate(()=>window.__switchUser('A'));await page.waitForFunction(()=>document.querySelector('#school-period').options.length>=4);
+ await page.evaluate(()=>{
+  localStorage.setItem('leveli-personal-v1-A',JSON.stringify({pack:'cats',accent:'mint',avatar:1,avatarRevision:2}));
+  localStorage.setItem('leveli-personal-v1-B',JSON.stringify({pack:'sports'}));
+  window.__switchUser('A');
+ });await page.waitForFunction(()=>document.querySelector('#school-period').options.length>=4);
  assert.equal(await page.locator('#home-greeting').innerText(),'Привет, Полина!');
  const freshness=page.locator('#school-freshness');
  await page.waitForFunction(()=>document.querySelector('#school-freshness').dataset.state==='ok');
  assert.match(await freshness.innerText(),/Оценки по состоянию на/);
  await page.getByRole('button',{name:'Профиль и настройки'}).click();
  assert.equal(await page.locator('.b3-hero').isVisible(),true);
- assert.equal(await page.locator('.b3-tiles .b3-tile').count(),4);
+ assert.equal(await page.locator('.b3-tiles .b3-tile:visible').count(),2);
+ assert.equal(await page.locator('[data-b3-panel="icons"],#personal-pack-options').count(),0);
+ assert.equal(await page.locator('html').getAttribute('data-leveli-pack'),null);
+ assert.equal(await page.locator('html').evaluate(el=>el.style.getPropertyValue('--leveli-accent')),'#69d9bd');
+ assert.equal(await page.locator('#profile-avatar-display').getAttribute('data-avatar-index'),'1');
  assert.ok((await page.locator('.b3-avatar-stand').evaluate(el=>el.getBoundingClientRect().top < el.closest('.b3-hero').getBoundingClientRect().top)),'avatar rises above card');
  await page.locator('[data-b3-panel="accent"]').click();
  await page.getByRole('button',{name:'Розовый',exact:true}).click();
@@ -80,18 +90,6 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await page.locator('.b3-avatar-stand').evaluate(el=>getComputedStyle(el,'::after').content),'none','no U-shaped decorative frame');
  await page.locator('#b3-panel-close').click();
  await page.screenshot({path:'outputs/leveli-polina-settings.png',fullPage:true});
- await page.locator('[data-b3-panel="icons"]').click();
- await page.getByRole('button',{name:'Вариант 2',exact:true}).last().click();
- for(const [name,pack] of [['Вариант 3','sports'],['Вариант 1','classic'],['Вариант 2','cats']]){
-  await page.getByRole('button',{name,exact:true}).click();
-  assert.equal(await page.locator('html').getAttribute('data-leveli-pack'),pack);
-  const mask=await page.locator('#personal-pack-options [aria-pressed="true"] [data-icon="forecast"]').evaluate(el=>getComputedStyle(el).maskImage);
-  assert.ok(mask.includes('/icons/'+pack+'/'),mask);
-  assert.equal(await page.locator('#personal-pack-options .pack-preview-strip .pack-icon').count(),12,'four icons per set');
-  const tile=page.locator('.b3-tile-icon '+(pack==='classic'?'svg':'.pack-icon')).first();
-  assert.deepEqual(await tile.evaluate(el=>[el.getBoundingClientRect().width,el.getBoundingClientRect().height]),[24,24]);
- }
- await page.locator('#b3-panel-close').click();
  await page.locator('[data-b3-panel="birthday"]').click();
  await page.locator('#profile-birthday').fill('2017-09-08');
  assert.match(await page.locator('#profile-age').innerText(),/Возраст: \d+/);
@@ -102,13 +100,14 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.locator('#profile-avatar-display img.profile-avatar-custom').waitFor({state:'visible'});
  assert.match(await page.locator('#profile-avatar-display img').getAttribute('src'),/^data:image\/(webp|png);base64,/);
 
- assert.equal(await page.locator('html').getAttribute('data-leveli-pack'),'cats');
+ assert.equal(await page.locator('html').getAttribute('data-leveli-pack'),null);
  await page.locator('#b3-panel-close').click();
  await page.locator('.b3-home-btn').click();
  assert.equal(await page.locator('#school-subjects').count(),1);
 
  assert.equal(await page.locator('#school-period').inputValue(),'2026-2');
  assert.equal(await page.locator('#school-subjects .subject-row').count(),0);
+ assert.equal(await page.locator('#school-trend-change').textContent(),'');
  await page.getByRole('button',{name:'Профиль и настройки'}).click();
  await page.locator('[data-b3-panel="quarter"]').click();
  await page.getByRole('button',{name:'1 четверть'}).click();
@@ -152,6 +151,8 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  const russianRow=page.locator('#school-subjects .subject-row').filter({hasText:'Русский язык'});
  assert.match(await russianRow.innerText(),/Русский язык[\s\S]*1 оценка[\s\S]*4,00[\s\S]*5[\s\S]*итог/);
  assert.equal(await russianRow.locator('.official-box').innerText(),'5');
+ assert.equal(await russianRow.locator('.grade-delta').textContent(),'—');
+ assert.equal(await mathRow.locator('.grade-delta').textContent(),'↘ −1,00');
  assert.equal(await page.locator('.double-donut .donut-panel').count(),2);
  assert.equal(await page.locator('.donut-unit').first().innerText(),'Количество предметов');
  assert.equal(await page.locator('.donut-unit').last().innerText(),'Количество оценок');
@@ -216,6 +217,8 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.getByRole('button',{name:'Назад к предметам'}).click();
  assert.equal(await page.locator('.school-header').isVisible(),true);
  await page.locator('#school-subjects .subject-row').filter({hasText:'Русский язык'}).click();
+ assert.equal(await page.locator('#school-subject-detail .detail-hero-score').innerText(),'5');
+ assert.equal(await page.locator('#school-subject-detail .detail-goal').count(),0);
  assert.equal(await page.locator('#school-subject-detail .grade-entry__weight').count(),1);
  assert.equal(await page.locator('#school-subject-detail .grade-entry__weight').innerText(),'Вес ×2');
  await page.getByRole('button',{name:'Назад к предметам'}).click();
@@ -229,12 +232,12 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   window.__fixtures.B.syncedAt=syncedAt;
   document.getElementById('school-refresh').click();
  },timestamp);
- const profileBTimestamp=new Date(Date.now()-7200000).toISOString();
+ const profileBTimestamp=new Date(testTime-7200000).toISOString();
  await refreshProfileB(profileBTimestamp);
  await page.waitForFunction(()=>document.querySelector('#school-freshness').dataset.state==='ok');
  const profileBFreshness=await freshness.locator('.sync-copy').innerText();
  assert.match(profileBFreshness,/Оценки по состоянию на/);
- await refreshProfileB(new Date(Date.now()+3600000).toISOString());
+ await refreshProfileB(new Date(testTime+3600000).toISOString());
  await unknownFreshness.waitFor({timeout:5000});
  await refreshProfileB(profileBTimestamp);
  await page.waitForFunction(()=>document.querySelector('#school-freshness').dataset.state==='ok');
@@ -285,9 +288,9 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.getByRole('button',{name:'Профиль и настройки'}).click();
  assert.equal(await page.locator('#profile-avatar-display img.profile-avatar-custom').count(),1);
  assert.equal(await page.locator('#profile-birthday').inputValue(),'2017-09-08');
- // DS v2: the four B3 tile icons are real consistent 24px line SVGs (not font glyphs).
- assert.equal(await page.locator('.b3-tiles .b3-tile-icon svg').count(),4);
- const iconStyle=await page.locator('.b3-tile-icon .pack-icon').first().evaluate(el=>({
+ // DS v2: the B3 tile icons are real consistent 24px line SVGs (not font glyphs).
+ assert.equal(await page.locator('.b3-tiles .b3-tile-icon svg').count(),3);
+ const iconStyle=await page.locator('.b3-tile-icon svg').first().evaluate(el=>({
   width:getComputedStyle(el).width,height:getComputedStyle(el).height
  }));
  assert.equal(iconStyle.width,'24px');assert.equal(iconStyle.height,'24px');
@@ -367,7 +370,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  }
  const hits=await page.locator('.b3-home-btn,.b3-change-avatar,.b3-tile,.b3-extra button').evaluateAll(items=>items.filter(el=>el.getClientRects().length>0).map(el=>({name:el.textContent.trim(),w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height})));
  for(const hit of hits)assert.ok(hit.w>=44&&hit.h>=44,'accessible control '+hit.name+' is smaller than 44px');
- for(const width of [320,360,390,430]){
+ for(const width of [320,360,390,430,1280]){
   await page.setViewportSize({width,height:844});
   const state=await page.evaluate(()=>({
    doc:document.documentElement.scrollWidth,viewport:document.documentElement.clientWidth,
@@ -383,11 +386,11 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   const hitAreas=await page.locator('#personal-accent-options button').evaluateAll(items=>items.map(el=>[el.offsetWidth,el.offsetHeight]));
   assert.ok(hitAreas.every(([w,h])=>w>=44&&h>=44),'accent controls have a 44px hit area at '+width);
   await page.locator('#b3-panel-close').click();
-  assert.equal(state.tileCount,3,'all visible quick-setting tiles remain readable on '+width+'px screen');
+  assert.equal(state.tileCount,2,'all visible quick-setting tiles remain readable on '+width+'px screen');
   const cardPadding=await page.locator('.forecast-card').evaluate(el=>getComputedStyle(el).paddingTop);
   assert.equal(cardPadding,width<=360?'12px':'16px','dashboard spacing follows responsive token at '+width+'px');
   const tileLayout=await page.locator('.b3-tile').first().evaluate(el=>{
-   const icon=el.querySelector('.b3-tile-icon'),svg=icon?.querySelector('.pack-icon'),label=el.querySelector('strong');
+   const icon=el.querySelector('.b3-tile-icon'),svg=icon?.querySelector('svg'),label=el.querySelector('strong');
    const i=icon?.getBoundingClientRect(),t=label?.getBoundingClientRect(),v=svg?.getBoundingClientRect();
    return {display:getComputedStyle(el).display,iconRight:i?.right,labelLeft:t?.left,svgWidth:v?.width,svgHeight:v?.height};
   });
@@ -396,12 +399,12 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   assert.equal(tileLayout.svgWidth,24,'settings icon artwork width at '+width+'px');
   assert.equal(tileLayout.svgHeight,24,'settings icon artwork height at '+width+'px');
  }
- await page.locator('[data-b3-panel="icons"]').click();
+ await page.locator('[data-b3-panel="accent"]').click();
  assert.equal(await page.locator('#b3-panel-overlay').isVisible(),true);
  assert.equal(await page.locator('body').evaluate(el=>getComputedStyle(el).overflow),'hidden');
  await page.keyboard.press('Escape');
  assert.equal(await page.locator('#b3-panel-overlay').isVisible(),false);
- assert.equal(await page.locator('[data-b3-panel="icons"]').evaluate(el=>document.activeElement===el),true);
+ assert.equal(await page.locator('[data-b3-panel="accent"]').evaluate(el=>document.activeElement===el),true);
  await page.setViewportSize({width:390,height:844});
  await page.locator('.b3-home-btn').click();
  await page.evaluate(()=>window.__switchUser(null));assert.equal(await page.locator('#school-results').isVisible(),false);assert.equal(await page.locator('#school-subjects').innerText(),'');
@@ -410,9 +413,64 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.reload();
  await page.waitForFunction(()=>document.querySelector('#home-greeting').textContent==='Привет, Полина!');
  assert.equal(await page.locator('html').getAttribute('data-leveli-theme'),'dark');
- assert.equal(await page.locator('html').getAttribute('data-leveli-pack'),'cats');
+ assert.equal(await page.locator('html').getAttribute('data-leveli-pack'),null);
  assert.equal(await page.locator('#profile-avatar-display img.profile-avatar-custom').count(),1);
+ assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('leveli-personal-v1-A')).pack),undefined);
  await page.screenshot({path:'outputs/leveli-home.png',fullPage:true});
+ // Compare the same synthetic quarter on mobile and desktop.
+ const marks=(subject,values,weights=[])=>values.map((value,i)=>({
+  id:subject+i,subject,value,weight:weights[i],date:'2026-11-0'+(5+i),quarter:2,type:'Ответ'
+ }));
+ const official={id:'final',subject:'Физика',value:5,date:'2026-11-07',quarter:2,type:'Четвертная'};
+ const physics=marks('Физика',[4,4,4]);
+ const empty=page.locator('#school-orient-empty');
+ const detail=page.locator('#school-subject-detail');
+ const row=name=>page.locator('#school-subjects .subject-row').filter({hasText:name});
+ const refresh=grades=>page.evaluate(grades=>{
+  window.__fixtures.A.grades=grades;
+  document.getElementById('school-refresh').click();
+ },grades);
+ await page.getByRole('button',{name:'Профиль и настройки'}).click();
+ await page.locator('[data-b3-panel="quarter"]').click();
+ await page.getByRole('button',{name:'2 четверть'}).click();
+ await page.locator('#b3-panel-close').click();
+ await page.locator('.b3-home-btn').click();
+ for(const width of [390,1280]){
+  await page.setViewportSize({width,height:844});
+  await page.evaluate(()=>localStorage.setItem('leveli-daily-average-A-2026-2',JSON.stringify({'2026-11-06':4.25})));
+  await refresh([...physics,official]);
+  await empty.filter({hasText:'Четвертные итоги выставлены'}).waitFor();
+  assert.equal(await page.locator('#school-trend-change').textContent(),'Ко вчерашнему среднему −0,25');
+  assert.equal(await page.locator('.orient-grid').isVisible(),false);
+  assert.equal(await page.locator('.forecast-card .card-heading h2 svg,.trend-card .card-heading h2 svg,.orient-heading h2 svg').count(),0);
+  assert.equal(await page.locator('#leveli-line-glow feGaussianBlur').getAttribute('stdDeviation'),'3');
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  await row('Физика').click();
+  assert.equal(await detail.locator('.detail-hero-label').textContent(),'Официальная оценка за четверть');
+  assert.equal(await detail.locator('.detail-goal').count(),0);
+  assert.equal(await detail.locator('.detail-trend-pill').textContent(),'0,00 · Как посчитано?');
+  await detail.locator('.detail-back').click();
+  await refresh([...physics,official,...marks('Геометрия',[4])]);
+  await empty.filter({hasText:'По части предметов уже выставлены итоги'}).waitFor();
+  await refresh([
+   ...physics,
+   ...marks('Геометрия',[5,4,4],[499,501,1]),
+   ...marks('Химия',[5,4,4],[1,999,1])
+  ]);
+  await empty.filter({hasText:'Сейчас нет предметов'}).waitFor();
+  const small=row('Геометрия').locator('.grade-delta');
+  assert.equal(await small.textContent(),'−0,50');
+  assert.match(await small.getAttribute('class'),/\bflat\b/);
+  assert.equal(await row('Химия').locator('.grade-delta').textContent(),'0,00');
+  await small.click();
+  assert.match(await page.locator('.trend-explain-result').textContent(),/= −0,50$/);
+  await page.getByRole('button',{name:'Понятно'}).click();
+  await row('Геометрия').click();
+  assert.equal(await detail.locator('.detail-trend-pill').textContent(),'−0,50 · Как посчитано?');
+  assert.equal(await detail.locator('.detail-goal').isVisible(),true);
+  assert.equal(await detail.locator('.detail-goal').evaluate(el=>getComputedStyle(el).backgroundColor),await page.locator('.settings-button').evaluate(el=>getComputedStyle(el).backgroundColor));
+  await detail.locator('.detail-back').click();
+ }
  assert.deepEqual(errors,[]);fs.writeFileSync('work/browser-result.json',JSON.stringify({passed:true,checks:['one school home','profile navigation','exact school forecast','official final','decline warning','A/B isolation','offline cached grades','logout clear'],errors},null,2));
  await browser.close();console.log('Browser integration: PASS');
 })().catch(e=>{console.error(e);process.exit(1)});
