@@ -73,7 +73,7 @@ test('equal dates retain source order and exactly +/-0.50 is significant',()=>{
  const rows=[{value:5,date:new Date(2026,8,1)},{value:4,date:new Date(2026,8,1)},{value:4,date:new Date(2026,8,1)}];
  const t=S.summary(rows);assert.equal(t.difference,-0.5);assert.equal(t.deteriorating,true);
  assert.equal(S.summary([{value:4},{value:5},{value:5}]).difference,0.5);
- assert.equal(S.summary([{value:4},{value:4},{value:4},{value:4},{value:4},{value:5}]).difference,1/3);
+ assert.ok(Math.abs(S.summary([{value:4},{value:4},{value:4},{value:4},{value:4},{value:5}]).difference-1/3)<1e-10);
 });
 test('improvement goal uses hypothetical weight-one fives and thresholds',()=>{
  const grades=[{value:4,weight:3},{value:4,weight:1},{value:4,weight:1}];
@@ -114,16 +114,17 @@ test('2026/27 school calendar uses supplied term dates and excludes holiday reco
  assert.equal(S.period({date:'2026-11-04',quarter:1}),'2026-1');
 });
 
-test('no trend below three marks; three marks are neutral against themselves',()=>{
+test('trend is available after two marks; one mark is insufficient',()=>{
  assert.equal(S.subjectTrend([]).difference,null);
  assert.equal(S.subjectTrend([{value:5}]).difference,null);
- assert.equal(S.subjectTrend([{value:5},{value:4}]).difference,null);
- assert.equal(S.subjectTrend([{value:5},{value:4},{value:3}]).difference,0);
+ assert.equal(S.subjectTrend([{value:5},{value:4}]).difference,-1);
+ assert.equal(S.subjectTrend([{value:5},{value:4},{value:3}]).difference,-1.5);
 });
-test('older quarter marks affect the baseline',()=>{
+test('marks older than the last six affect total average but not trend',()=>{
  const data=[2,4,5,4,2,5,5].map((value,i)=>({value,date:new Date(2026,10,i+1)}));
- const res=S.summary(data);
- assert.ok(Math.abs(res.difference-(4-27/7))<1e-10);
- assert.equal(res.deteriorating,false);
- assert.notEqual(S.summary(data.slice(-6)).difference,res.difference);
+ const full=S.summary(data),recent=S.summary(data.slice(-6));
+ assert.ok(Math.abs(full.difference+1/3)<1e-10);
+ assert.equal(full.deteriorating,false);
+ assert.ok(Math.abs(full.difference-recent.difference)<1e-10);
+ assert.notEqual(full.average,recent.average);
 });
