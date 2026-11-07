@@ -4,17 +4,18 @@ function boot(options={}){
  const map=options.map||new Map();let failProfileWrite=false;
  const storage={getItem:k=>map.has(k)?map.get(k):null,setItem:(k,v)=>{if(failProfileWrite&&k==='wordscene-17-lab-v1')throw Error('Quota exceeded');map.set(k,v)},removeItem:k=>map.delete(k)};
  const root={
-  html:'',listeners:{},set innerHTML(s){this.html=s;this.listeners={}},get innerHTML(){return this.html},
+  html:'',listeners:{},dialog:null,set innerHTML(s){this.html=s;this.listeners={};this.dialog=null},get innerHTML(){return this.html},
+  appendChild(dialog){this.dialog=dialog;this.listeners.confirmLeave={click:()=>dialog.querySelector('[data-exit="leave"]').click()};this.listeners.confirmStay={click:()=>dialog.querySelector('[data-exit="stay"]').click()}},
   querySelectorAll(q){
    if(q!=='[data-action]')return [];
    const hits=[...this.html.matchAll(/data-action="([^"]+)"/g)];
    return hits.map(hit=>{const el={dataset:{action:hit[1]},addEventListener:(event,cb)=>{el.click=cb}};this.listeners[hit[1]]=el;return el});
-  },pauseTime:{},querySelector(q){if(q==='[data-flip-card]'&&this.html.includes('data-flip-card="true"'))return {addEventListener:(name,fn)=>{if(name==='click')this.flip=()=>fn({target:{closest:()=>null}})}};return q==='#pause-time'&&this.html.includes('id="pause-time"')?this.pauseTime:null}
+  },pauseTime:{},querySelector(q){if(q==='.ws-paper-exit-confirm')return this.dialog;if(q==='[data-flip-card]'&&this.html.includes('data-flip-card="true"'))return {addEventListener:(name,fn)=>{if(name==='click')this.flip=()=>fn({target:{closest:()=>null}})}};return q==='#pause-time'&&this.html.includes('id="pause-time"')?this.pauseTime:null}
  };
  let now=options.now??Date.now(),tick;
  class TestDate extends Date{static now(){return now}}
  const window={WordSceneTopics:options.topics||{topics:[],forWord:()=>[]},WordSceneContent:{cards:[],render:()=>'<svg></svg>'},confirm:()=>true};
- const doc={getElementById:id=>id==='childName'||id==='childAge'?{value:options.inputs?.[id]??''}:root,createElement:()=>({setAttribute(){},hidden:true}),body:{append(){}}};
+ const doc={getElementById:id=>id==='childName'||id==='childAge'?{value:options.inputs?.[id]??''}:root,createElement(){const actions={};const dialog={setAttribute(){},hidden:true,addEventListener(){},remove(){root.dialog=null},querySelector(selector){const key=selector.includes('stay')?'stay':'leave';if(!actions[key])actions[key]={listeners:{},addEventListener(name,cb){this.listeners[name]=cb},click(){this.listeners.click?.()},focus(){doc.activeElement=this}};return actions[key]}};return dialog},body:{append(){}}};
  const context={window,document:doc,localStorage:storage,navigator:{},setInterval:cb=>{tick=cb},setTimeout:()=>0,clearTimeout:()=>{},Date:TestDate,Math,console};
  vm.createContext(context);
  const mod={exports:{}};vm.runInNewContext(file('engine.js'),Object.assign(context,{module:mod,exports:mod.exports}));window.WS17Engine=mod.exports;
@@ -25,7 +26,7 @@ function boot(options={}){
 }
 test('Paper dictionary filters by learning status and keeps details read-only',()=>{
  const b=boot(),initial=b.map.get('wordscene-17-lab-v1');
- b.click('dictionary');
+ b.click('dictionaryOpen');
  assert.match(b.root.html,/ws-dict-page/);
  assert.match(b.root.html,/Поиск по слову или переводу/);
  assert.match(b.root.html,/data-action="dictionaryFilter:learning"/);
@@ -77,8 +78,8 @@ test('approved memorization UI keeps illustration visible, progress and unchange
  assert.match(b.root.html,/class="ws-paper-scene"/);
  assert.match(b.root.html,/data-action="say:[^"]+"/);
  assert.doesNotMatch(b.root.html,/data-action="toggleArt"|Представить без картинки|Показать ассоциацию/);
- b.click('pause');assert.match(b.root.html,/data-action="continue"/);
- b.click('continue');assert.match(b.root.html,/class="ws-paper-art"/);
+
+ assert.doesNotMatch(b.root.html,/data-action="pause"|data-action="continue"/);assert.match(b.root.html,/class="ws-paper-art"/);
  b.click('learnNext');assert.match(b.root.html,/aria-valuenow="2"/);
  b.click('learnNext');assert.match(b.root.html,/aria-valuenow="3"/);
  for(let i=0;i<7;i++)b.click('learnNext');
@@ -117,9 +118,8 @@ test('recall v4 offers optional flip and association only after reveal',()=>{
  assert.doesNotMatch(b.root.html,/data-action="yes"/);
  b.click('help');
  assert.match(b.root.html,/ws-paper-art/);
- b.click('pause');
- assert.match(b.root.html,/data-action="continue"/);
- b.click('continue');
+
+ assert.doesNotMatch(b.root.html,/data-action="pause"|data-action="continue"/);
  assert.match(b.root.html,/ws-paper-art/);
  b.click('advance');
  assert.match(b.root.html,/data-action="yes"/);
@@ -133,6 +133,8 @@ test('confirmed cancellation keeps persistent profile clean',()=>{
  const b=boot();b.click('sources');b.click('auto');
  for(let i=0;i<10;i++){b.click('unknown')}
  b.click('cancel');
+ assert.ok(b.root.dialog,'A Paper confirmation must open before cancellation');
+ b.click('confirmLeave');
  const saved=JSON.parse(b.map.get('wordscene-17-lab-v1'));
  assert.deepEqual(Object.keys(saved.words),[]);assert.equal(saved.sessions.length,0);
  assert.equal(b.map.get('wordscene-17-lab-active-v1'),undefined);
@@ -150,26 +152,6 @@ test('failed final profile write does not falsely display completion',()=>{
  assert.match(b.root.html,/сохранение заблокировано/i);
 });
 
-test('pause displays a countdown without extending the saved deadline',()=>{
- const b=boot();b.click('sources');b.click('auto');
- for(let i=0;i<10;i++){b.click('unknown')}
- b.click('pause');
- assert.match(b.root.html,/role="dialog" aria-modal="true"/);
- assert.match(b.root.html,/Занятие на паузе/);
- assert.match(b.root.html,/class="ws-paper-page ws-paper-learn is-paused"/);
- assert.match(b.root.html,/class="ws-paper-pause-buttons"/);
- assert.equal((b.root.html.match(/data-action="continue"/g)||[]).length,1,'Continue only within modal');
- assert.match(b.root.html,/Осталось 30:00/);
- const active='wordscene-17-lab-active-v1';
- const checkpoint=b.map.get(active);
- b.advanceTime(29999);
- assert.equal(b.root.pauseTime.textContent,'Осталось 29:31');
- assert.equal(b.map.get(active),checkpoint);
- b.advanceTime(30*60000-29999);
- assert.equal(b.map.has(active),false);
- assert.doesNotMatch(b.root.html,/Незавершённое занятие/);
-});
-
 test('Paper shows real totals with new words first and the reason inside the locked button',()=>{
  const b=boot();
  assert.match(b.root.html,/Учить новые слова[\s\S]*Выбери способ подбора[\s\S]*Твоё обучение начинается!/);
@@ -177,18 +159,16 @@ test('Paper shows real totals with new words first and the reason inside the loc
  assert.doesNotMatch(b.root.html,/Добавить 10|Тренировка написания/);
 });
 
-test('reload restores the same card before the deadline without moving it',()=>{
+test('reload restores the same card after several days',()=>{
  const b=boot();
  b.click('sources');b.click('auto');
  for(let i=0;i<10;i++){b.click('unknown')}
- b.click('learnNext');b.click('pause');
+ b.click('learnNext');
  const key='wordscene-17-lab-active-v1', saved=b.map.get(key);
- const restored=boot({map:b.map,now:b.now()+29*60000});
+ const restored=boot({map:b.map,now:b.now()+3*86400000});
  assert.match(restored.root.html,/2 из 10/);
  assert.equal(b.map.get(key),saved);
- const expired=boot({map:b.map,now:b.now()+30*60000});
- assert.match(expired.root.html,/Учить новые слова/);
- assert.equal(b.map.has(key),false);
+
 });
 
 test('mandatory review unlocks voluntary practice for final errors without changing saved progress',()=>{
@@ -288,7 +268,7 @@ test('Paper home has no profile gear and retains navigation',()=>{
  assert.doesNotMatch(b.root.html,/data-action="childProfile"|class="paper-info"/);
  assert.match(b.root.html,/Твой уровень/);
  assert.match(b.root.html,/data-action="progress"/);
- assert.match(b.root.html,/data-action="dictionary"/);
+ assert.match(b.root.html,/data-action="dictionaryOpen"/);
 });
 test('paper cards retain approved modes, real media and locked-answer behavior',()=>{
  const b=boot();b.click('sources');b.click('auto');
@@ -308,10 +288,8 @@ test('paper cards retain approved modes, real media and locked-answer behavior',
  assert.match(b.root.html,/↻ ПЕРЕВЕРНИ/);
  b.click('flip');
  assert.match(b.root.html,/aria-expanded="true"/);
- b.click('pause');
- assert.match(b.root.html,/class="ws-paper-pause"/);
- assert.match(b.root.html,/aria-modal="true"/);
- b.click('continue');
+
+ assert.doesNotMatch(b.root.html,/data-action="pause"|data-action="continue"/);
  assert.match(b.root.html,/aria-expanded="true"/);
  for(let i=0;i<10;i++)b.click('learnNext');
  assert.match(b.root.html,/class="ws-paper-page ws-paper-recall ws-recall-v4"/);
@@ -328,9 +306,8 @@ test('paper cards retain approved modes, real media and locked-answer behavior',
  assert.match(b.root.html,/aria-label="Ответ открыт"/);
  assert.match(b.root.html,/data-action="advance"/);
  assert.doesNotMatch(b.root.html,/↻ ПЕРЕВЕРНИ/,'locked answer cannot invite flipping');
- b.click('pause');
- assert.match(b.root.html,/data-action="continue"/);
- b.click('continue');
+
+ assert.doesNotMatch(b.root.html,/data-action="pause"|data-action="continue"/);
  assert.doesNotMatch(b.root.html,/↻ ПЕРЕВЕРНИ/);
 });
 test('paper texture has no repeating diagonal grid and actions are fixed',()=>{
@@ -341,7 +318,7 @@ test('paper texture has no repeating diagonal grid and actions are fixed',()=>{
  assert.match(css,/\.ws-paper-bottom\{flex:none/);
  assert.match(css,/\.ws-paper-decisions\{display:grid/);
  assert.match(css,/\.ws-paper-dream\.is-collapsed\{flex:0/);
- assert.match(css,/\.ws-paper-pause\{position:fixed/);
+ assert.match(css,/\.ws-paper-exit-confirm\{position:fixed/);
 });
 test('paper sheet has no decorative copy beyond its flip hint',()=>{
  const b=boot();b.click('sources');b.click('auto');
@@ -354,10 +331,10 @@ test('Paper picker v2 keeps aligned counters, approved button order and two-way 
  const b=boot();b.click('sources');b.click('auto');
  assert.match(b.root.html,/class="ws-paper-page ws-paper-select"/);
  assert.match(b.root.html,/Неизвестных: 0 из 10/);
- assert.match(b.root.html,/Просмотрено: 0 из 50/);
- assert.match(b.root.html,/0\/50/);
+ assert.match(b.root.html,/Просмотрено: 1 из 50/);
+ assert.equal((b.root.html.match(/Просмотрено:/g)||[]).length,1);
  assert.ok(b.root.html.indexOf('data-action="known"')<b.root.html.indexOf('data-action="unknown"'),'Знаю слева, Не знаю справа');
- assert.match(b.root.html,/Завершить подбор/);
+ assert.match(b.root.html,/Отменить подбор/);
  assert.match(b.root.html,/aria-label="Перевернуть лист"/);
  b.click('flip');
  assert.match(b.root.html,/aria-expanded="true"/);
@@ -367,16 +344,21 @@ test('Paper picker v2 keeps aligned counters, approved button order and two-way 
  assert.match(b.root.html,/class="ws-paper-dream ws-paper-dream-empty"/);
  b.click('known');
  assert.match(b.root.html,/Неизвестных: 0 из 10/);
- assert.match(b.root.html,/1\/50/);
+ assert.match(b.root.html,/Просмотрено: 2 из 50/);
  b.click('unknown');
  assert.match(b.root.html,/Неизвестных: 1 из 10/);
- assert.match(b.root.html,/2\/50/);
+ assert.match(b.root.html,/Просмотрено: 3 из 50/);
  b.click('stopSelection');
+ assert.ok(b.root.dialog);
+ b.click('confirmLeave');
  assert.match(b.root.html,/Учить новые слова/);
  assert.equal(b.map.has('wordscene-17-lab-active-v1'),false);
- const saved=JSON.parse(b.map.get('wordscene-17-lab-v1'));
- assert.equal(Object.values(saved.words).filter(w=>w.origin==='known').length,1);
- assert.equal(Object.values(saved.words).filter(w=>w.origin==='learned').length,0);
+ const raw=b.map.get('wordscene-17-lab-v1');
+ if(raw){
+  const saved=JSON.parse(raw);
+  assert.equal(Object.values(saved.words).filter(w=>w.origin==='known').length,0);
+  assert.equal(Object.values(saved.words).filter(w=>w.origin==='learned').length,0);
+ }
 });
 
 test('Paper picker v2 uses mobile 44px touch targets, 63px choices and scoped styles',()=>{
@@ -637,7 +619,34 @@ test('installed PWA uses consistent WordScene lighthouse icon assets and Paper c
  assert.equal(mask.readUInt32BE(16),512);
  assert.equal(mask.readUInt32BE(20),512);
  const sw=file('sw.js');
- assert.match(sw,/wordscene-17-lab-cache-v44/);
+ assert.match(sw,/wordscene-17-lab-cache-v45/);
  assert.match(sw,/icon-maskable-512\.png/);
  assert.match(sw,/wordscene-lighthouse-icon\.svg/);
+});
+
+test('auto selection survives reload and confirmed cancellation preserves completed data',()=>{
+ const b=boot();b.click('sources');b.click('auto');b.click('known');b.click('unknown');
+ const started=b.now(),active='wordscene-17-lab-active-v1',key='wordscene-17-lab-v1';
+ const resumed=boot({map:b.map,now:started+7*86400000});
+ assert.match(resumed.root.html,/Неизвестных: 1 из 10/);
+ for(let i=1;i<10;i++)resumed.click('unknown');
+ assert.match(resumed.root.html,/Запоминание/);
+ const saved=b.map.get(key);
+ resumed.click('cancel');resumed.click('confirmLeave');
+ assert.match(resumed.root.html,/Учить новые слова/);
+ assert.equal(b.map.get(key),saved);
+ assert.equal(b.map.has(active),false);
+ assert.deepEqual(JSON.parse(b.map.get(key)).words,{});
+});
+
+test('manual top-up keeps provisional familiar words out of the new set',()=>{
+ const topics={topics:[{id:'food',name:'Еда'}],forWord:()=>['food']};
+ const b=boot({topics});b.click('sources');b.click('auto');b.click('unknown');
+ while(b.root.listeners.known)b.click('known');
+ const checkpoint=JSON.parse(b.map.get('wordscene-17-lab-active-v1'));
+ const known=checkpoint.selection.known[0];
+ assert.equal(checkpoint.view,'fill');
+ assert.match(b.root.html.split('data-action="pick:'+known+'"')[1].split('>')[0],/disabled/);
+ b.click('pick:'+known);
+ assert.deepEqual(JSON.parse(b.map.get('wordscene-17-lab-active-v1')).manual,checkpoint.manual);
 });

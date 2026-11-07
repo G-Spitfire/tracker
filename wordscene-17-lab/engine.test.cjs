@@ -26,12 +26,11 @@ test('third pass errors generate bounded extra passes',()=>{
  assert.equal(s.extra,1);
  assert.equal(s.answers.length,24);
 });
-test('cancel and expired sessions do not touch persisted progress',()=>{
+test('unfinished sessions cannot change persisted progress',()=>{
  const p=E.empty(),s=E.start(p,'new',['a','b','c'],['d'],t('2026-11-04'));
  E.learnNext(s,t('2026-11-04',100));
  assert.equal(Object.keys(p.words).length,0);
- assert.equal(E.timedOut(s,t('2026-11-04',1800100)),true);
- assert.throws(()=>E.completed(p,s,t('2026-11-04',1800100)));
+ assert.throws(()=>E.completed(p,s,t('2026-11-04',3600000)));
  assert.equal(Object.keys(p.words).length,0);
 });
 test('repeat updates schedule only after full two-direction session',()=>{
@@ -74,18 +73,6 @@ test('mastery is current: a mistake removes it until a new 30-day interval succe
  r=E.scheduler(r,true,t('2027-03-28'));
  assert.equal(E.status({origin:'learned',schedule:r}),'mastered');
  assert.equal(r.masteredAt,firstMasteredAt);
-});
-test('single inactivity deadline: a pause never starts a second deadline',()=>{
- const base=t('2026-11-04');
- let s=E.start(E.empty(),'new',['a','b','c'],[],base);
- E.pause(s,base+20*60000);
- assert.equal(E.timedOut(s,base+30*60000-1),false);
- assert.equal(E.timedOut(s,base+30*60000),true);
- s=E.start(E.empty(),'new',['a','b','c'],[],base);
- E.action(s,base+19*60000);
- E.pause(s,base+20*60000);
- assert.equal(E.timedOut(s,base+49*60000-1),false);
- assert.equal(E.timedOut(s,base+49*60000),true);
 });
 
 test('mandatory review rejects a partial queue and duplicate IDs',()=>{

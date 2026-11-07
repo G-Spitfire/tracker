@@ -28,7 +28,6 @@ async function checkMemorization(page,snap=async()=>{}){
    assert.equal(await page.locator('.ws-paper-track').getAttribute('aria-valuenow'),String(i+1));
    assert.equal(await page.locator('.ws-paper-track').getAttribute('aria-valuemax'),'3');
    await visibleAction(page,'learnNext');
-   await visibleAction(page,'pause');
    await visibleAction(page,'cancel');
    const paper=await bounds('.ws-paper-stage');
    const grade=await bounds('[data-action="learnNext"]');
@@ -44,18 +43,12 @@ async function checkMemorization(page,snap=async()=>{}){
    close(grade,await bounds('[data-action="learnNext"]'),'fixed bottom button after flip');
    await snap('paper-learn-'+(i+1)+'-back');
    if(i===0){
-    await page.locator('[data-action="pause"]').click();
-    assert.equal(await page.locator('.ws-paper-pause[role="presentation"]').count(),1,'pause is a separate overlay');
-    assert.equal(await page.locator('.ws-paper-pause-dialog[role="dialog"][aria-modal="true"]').count(),1,'pause is an accessible modal');
-    assert.equal(await page.locator('[data-action="continue"]').count(),1,'Continue appears only in the modal');
-    const pauseBounds=await bounds('.ws-paper-pause-dialog');
-    assert.ok(pauseBounds.y>=0&&pauseBounds.y+pauseBounds.height<=page.viewportSize().height,'pause dialog fits viewport');
-    await snap('paper-learn-paused');
-    await visibleAction(page,'continue');
-    await page.locator('[data-action="continue"]').click();
-    assert.equal(await page.locator('.ws-paper-pause').count(),0,'dialog closes on resume');
-    assert.equal(await page.locator('[data-flip-card]').getAttribute('aria-expanded'),'true','learn flip side survives pause');
-    close(grade,await bounds('[data-action="learnNext"]'),'fixed bottom button after resume');
+    await page.reload();
+    // The deployed version can still pause on reload until this PR ships.
+    const legacyResume=page.locator('.ws-paper-pause [data-action="continue"]');
+    if(process.env.WS17_TEST_ORIGIN&&await legacyResume.isVisible())await legacyResume.click();
+    assert.equal(await page.locator('[data-flip-card]').getAttribute('aria-expanded'),'true','learn flip side survives reload');
+    close(grade,await bounds('[data-action="learnNext"]'),'fixed bottom button after reload');
    }
    if(i===2)assert.match(await page.locator('[data-action="learnNext"]').innerText(),/Начать проверку/);
    await page.locator('[data-action="learnNext"]').click();
