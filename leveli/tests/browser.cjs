@@ -164,14 +164,22 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   const cards=await page.locator('.orient-grid').boundingBox();
   assert.ok(help.y+help.height<=cards.y,'orientation help must clear the cards at '+width+'px');
   assert.ok(help.width>=44&&help.height>=44,'orientation help keeps a 44px hit area');
-  const tiles=await page.locator('#school-forecast-legend button').evaluateAll(buttons=>buttons.map(b=>{
-   const box=b.getBoundingClientRect();return {x:box.x,y:box.y,w:box.width,h:box.height,overflow:b.scrollWidth>b.clientWidth+1};
+  const rows=await page.locator('#school-forecast-legend button').evaluateAll(buttons=>buttons.map(b=>{
+   const box=b.getBoundingClientRect();return {label:b.querySelector('.legend-label').textContent,x:box.x,y:box.y,w:box.width,h:box.height,overflow:b.scrollWidth>b.clientWidth+1};
   }));
-  assert.equal(tiles[0].y,tiles[1].y,'grade filters fit on one row at '+width+'px');
-  assert.notEqual(tiles[0].x,tiles[1].x);
-  assert.ok(tiles.every(tile=>tile.h>=44&&tile.w>=44&&!tile.overflow),'grade filters remain readable and tappable');
+  assert.deepEqual(rows.map(row=>row.label),['Оценка 5','Оценка 4']);
+  assert.equal(rows[0].x,rows[1].x);
+  assert.ok(rows[1].y-rows[0].y<=36,'grade filters are closely spaced at '+width+'px');
+  assert.ok(rows.every(row=>row.h>=36&&row.w>=44&&!row.overflow),'grade filters remain readable and tappable');
  }
  await page.setViewportSize({width:390,height:844});
+ const iconBorders=await page.locator('.school-header .settings-button,.help-btn').evaluateAll(buttons=>buttons.map(b=>getComputedStyle(b).borderTopWidth));
+ assert.ok(iconBorders.every(width=>width==='0px'),'standalone icon controls have no outer border');
+ await orientHelp.focus();
+ await page.keyboard.press('Shift+Tab');
+ await page.keyboard.press('Tab');
+ assert.ok(await orientHelp.evaluate(el=>document.activeElement===el));
+ assert.notEqual(await orientHelp.evaluate(el=>getComputedStyle(el).outlineStyle),'none','keyboard focus remains visible');
  await orientHelp.click();
  assert.equal(await page.locator('#school-orient-help').isVisible(),true);
  await orientHelp.click();
