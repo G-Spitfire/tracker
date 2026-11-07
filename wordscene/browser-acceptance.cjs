@@ -8,7 +8,7 @@ const { chromium, webkit, devices } = require('playwright');
 const { checkMemorization } = require('./browser-memorization.cjs');
 
 const origin = process.env.WS17_TEST_ORIGIN || 'http://127.0.0.1:8765';
-const url = origin + '/wordscene-17-lab/';
+const url = origin + '/wordscene/';
 
 async function run(name, browserType, contextOptions) {
  const browser = await browserType.launch({headless:true});
@@ -17,7 +17,7 @@ async function run(name, browserType, contextOptions) {
   const page = await context.newPage();
   const failures=[];
   page.on('pageerror',error=>failures.push(error.stack || String(error)));
-  page.on('response',res=>{if(res.url().includes('/wordscene-17-lab/') && res.status() >= 400)failures.push('HTTP '+res.status()+' '+res.url())});
+  page.on('response',res=>{if(res.url().includes('/wordscene/') && res.status() >= 400)failures.push('HTTP '+res.status()+' '+res.url())});
   await page.goto(url,{waitUntil:'load',timeout:60000});
   await page.locator('[data-action="sources"]').waitFor({timeout:30000});
   // On PRs the live site is still on main, so allow the previous published Paper version.
