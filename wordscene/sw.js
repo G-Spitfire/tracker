@@ -6,7 +6,7 @@ self.addEventListener('fetch',e=>{
  if(e.request.method!=='GET')return;
  const url=new URL(e.request.url);
  if(url.origin!==self.location.origin)return;
- const refresh=e.request.mode==='navigate'||(url.pathname.includes('/wordscene-17-lab/')&&(['/style.css','/index.html','/app.js','/engine.js'].some(suffix=>url.pathname.endsWith(suffix))));
+ const refresh=e.request.mode==='navigate'||(url.pathname.includes('/wordscene/')&&(['/style.css','/index.html','/app.js','/engine.js'].some(suffix=>url.pathname.endsWith(suffix))));
  if(refresh){
   e.respondWith(fetch(e.request).then(r=>{
    if(r.ok){const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy))}
@@ -15,7 +15,7 @@ self.addEventListener('fetch',e=>{
   return;
  }
  e.respondWith(caches.match(e.request).then(v=>v||fetch(e.request).then(r=>{
-  if(r.ok&&url.pathname.includes('wordscene-17-lab/')){const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy))}
+  if(r.ok&&url.pathname.includes('wordscene/')){const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy))}
   return r;
  })));
 });

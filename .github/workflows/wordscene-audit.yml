@@ -2,13 +2,13 @@ name: WordScene audit regression
 on:
   pull_request:
     paths:
-      - 'wordscene-17-lab/**'
+      - 'wordscene/**'
       - '.github/workflows/wordscene-audit.yml'
   push:
     branches:
       - 'wordscene/audit-approved-batch-1'
     paths:
-      - 'wordscene-17-lab/**'
+      - 'wordscene/**'
       - '.github/workflows/wordscene-audit.yml'
 permissions:
   contents: read
@@ -22,7 +22,7 @@ jobs:
           node-version: '22'
       - name: JavaScript syntax checks
         run: |
-          node --check wordscene-17-lab/app.js
-          node --check wordscene-17-lab/engine.js
+          node --check wordscene/app.js
+          node --check wordscene/engine.js
       - name: WordScene audit regression
-        run: node --test wordscene-17-lab/audit-regression.test.cjs
+        run: node --test wordscene/audit-regression.test.cjs

@@ -3,11 +3,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'wordscene-17-lab/**'
+      - 'wordscene/**'
       - '.github/workflows/wordscene17-local-tests.yml'
   pull_request:
     paths:
-      - 'wordscene-17-lab/**'
+      - 'wordscene/**'
       - 'leveli/**'
       - 'index.html'
       - 'README.md'
@@ -23,14 +23,14 @@ jobs:
           node-version: '24'
       - name: JavaScript syntax checks
         run: |
-          node --check wordscene-17-lab/app.js
-          node --check wordscene-17-lab/engine.js
-          node --check wordscene-17-lab/accounts.js
-          node --check wordscene-17-lab/sw.js
+          node --check wordscene/app.js
+          node --check wordscene/engine.js
+          node --check wordscene/accounts.js
+          node --check wordscene/sw.js
           node --check leveli/school-model.js
           node --check leveli/sw.js
       - name: WordScene and Leveli unit tests
-        run: node --test wordscene-17-lab/*.test.cjs leveli/tests/*.test.cjs
+        run: node --test wordscene/*.test.cjs leveli/tests/*.test.cjs
 
   browser-acceptance:
     runs-on: ubuntu-latest
@@ -48,17 +48,17 @@ jobs:
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/wordscene-http.log 2>&1 &
           for i in $(seq 1 40); do
-            if curl -fsS http://127.0.0.1:8765/wordscene-17-lab/index.html >/dev/null; then break; fi
+            if curl -fsS http://127.0.0.1:8765/wordscene/index.html >/dev/null; then break; fi
             sleep 1
           done
-          node wordscene-17-lab/browser-acceptance.cjs
+          node wordscene/browser-acceptance.cjs
           node leveli/tests/browser.cjs
       - name: Save mobile browser screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: wordscene-mobile-ux-screenshots
-          path: wordscene-17-lab/audit-screenshots/*.png
+          path: wordscene/audit-screenshots/*.png
           if-no-files-found: warn
 
   live-site-acceptance:
@@ -77,4 +77,4 @@ jobs:
       - name: Test deployed GitHub Pages in desktop/mobile browsers and offline
         env:
           WS17_TEST_ORIGIN: https://g-spitfire.github.io/tracker
-        run: node wordscene-17-lab/browser-acceptance.cjs
+        run: node wordscene/browser-acceptance.cjs

@@ -160,7 +160,7 @@ if(require.main===module){
    try{
     const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true});const page=await context.newPage();
     const errors=[];page.on('pageerror',e=>errors.push(e.message));
-    await page.goto((process.env.WS17_TEST_ORIGIN||'http://127.0.0.1:8765')+'/wordscene-17-lab/');
+    await page.goto((process.env.WS17_TEST_ORIGIN||'http://127.0.0.1:8765')+'/wordscene/');
     await page.locator('[data-action="sources"]').click();await page.locator('[data-action="manual"]').click();
     for(const w of ['cake','apple','cheese'])await page.locator('[data-action="pick:'+w+'"]').click();
     await page.locator('[data-action="startManual"]').click();
