@@ -16,14 +16,14 @@ test('official grades are separate from summative tests and comments',()=>{
  assert.equal(S.officialKind({type:'Четвертная'}),'За четверть');assert.equal(S.officialKind({type:'Годовая'}),'За год');
  assert.equal(S.officialKind({type:'Устный ответ',comment:'четверть'}),'');
 });
-test('last three compare against full quarter, regardless of source order',()=>{
+test('six grades compare adjacent three-grade blocks regardless of source order',()=>{
  const rows=[5,5,5,4,4,4].map((value,i)=>({value,date:new Date(2026,8,i+1)})).reverse();
  const result=S.summary(rows,[{value:5,date:new Date(2026,9,1),officialKind:'За четверть'}]);
  assert.equal(result.average,4.5);assert.equal(result.recentAverage,4);
- assert.equal(result.difference,-0.5);assert.equal(result.deteriorating,true);
- assert.equal(result.forecast,4);assert.equal(result.official,5);
- assert.equal(S.summary(rows.slice(0,2)).difference,null);
- assert.equal(S.summary([{value:4},{value:3},{value:2}]).difference,0);
+ assert.equal(result.previousAverage,5);assert.equal(result.difference,-1);
+ assert.equal(result.deteriorating,true);assert.equal(result.forecast,4);assert.equal(result.official,5);
+ assert.equal(S.summary(rows.slice(0,1)).difference,null);
+ assert.equal(S.summary([{value:4},{value:3},{value:2}]).difference,-1.5);
 });
 test('normalization preserves source objects and excludes non-marks',()=>{
  const row={value:'5/5',type:'Контрольная',date:'01.09.2026'};const normalized=S.normalize([row,{value:'н'},null]);
@@ -47,12 +47,33 @@ test('forecast needs at least three regular grades and ignores other final types
  assert.equal(S.officialKind({type:'Годовая',isFinal:true}),'За год');
  assert.equal(S.officialKind({type:'Итоговая контрольная работа',isFinal:true}),'');
 });
-test('trend compares weighted last three against weighted entire quarter',()=>{
+test('trend at 6+ uses weights within both adjacent blocks',()=>{
  const grades=[{value:5,weight:2},{value:5,weight:2},{value:4,weight:1},{value:3,weight:1},{value:3,weight:1},{value:4,weight:1}].map((g,i)=>({...g,date:new Date(2026,8,i+1)}));
  const result=S.summary(grades);
- assert.equal(result.average,4.25);assert.equal(result.recentAverage,10/3);
- assert.ok(Math.abs(result.difference-(10/3-4.25))<1e-10);
+ assert.equal(result.average,4.25);assert.equal(result.previousAverage,24/5);
+ assert.equal(result.recentAverage,10/3);
+ assert.ok(Math.abs(result.difference-(10/3-24/5))<1e-10);
  assert.equal(result.deteriorating,true);
+});
+test('short sequences compare last grade with previous weighted average',()=>{
+ assert.equal(S.subjectTrend([]).difference,null);
+ assert.equal(S.subjectTrend([{value:5}]).difference,null);
+ for(const n of [2,3,4,5]){
+  const grades=Array.from({length:n},(_,i)=>({value:i===n-1?5:3,weight:i===0?3:1,date:new Date(2026,8,i+1)}));
+  const result=S.subjectTrend(grades);
+  assert.equal(result.previousAverage,3);
+  assert.equal(result.recentAverage,5);
+  assert.equal(result.difference,2);
+ }
+ const weighted=S.subjectTrend([{value:5,weight:3},{value:3,weight:1},{value:4,weight:9}]);
+ assert.equal(weighted.previousAverage,4.5);
+ assert.equal(weighted.difference,-0.5);
+});
+test('equal dates retain source order and exactly +/-0.50 is significant',()=>{
+ const rows=[{value:5,date:new Date(2026,8,1)},{value:4,date:new Date(2026,8,1)},{value:4,date:new Date(2026,8,1)}];
+ const t=S.summary(rows);assert.equal(t.difference,-0.5);assert.equal(t.deteriorating,true);
+ assert.equal(S.summary([{value:4},{value:5},{value:5}]).difference,0.5);
+ assert.equal(S.summary([{value:4},{value:4},{value:4},{value:4},{value:4},{value:5}]).difference,1/3);
 });
 test('improvement goal uses hypothetical weight-one fives and thresholds',()=>{
  const grades=[{value:4,weight:3},{value:4,weight:1},{value:4,weight:1}];
