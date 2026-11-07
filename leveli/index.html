@@ -677,6 +677,15 @@ body{background:#0e0c21;color:#f6f0ff}
 /* Approved 3D portraits, with legacy SVG fallback until files are published. */
 .b3-avatar-stand .avatar-illustration.leveli-3d-avatar{display:block;position:absolute;inset:0;width:100%;height:100%;max-width:none;aspect-ratio:auto;object-fit:contain;object-position:center bottom;border:0;border-radius:0;background:none;filter:drop-shadow(0 6px 8px #09061640);mask-image:linear-gradient(to bottom,#000 0%,#000 77%,transparent 99%);-webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 77%,transparent 99%)}
 .personal-avatar-option .avatar-illustration.leveli-3d-avatar{display:block;width:100%;height:100%;max-width:none;aspect-ratio:1;object-fit:contain;background:none;border:0;border-radius:0}
+
+/* Grade trend explanation for keyboard and touch input. */
+.leveli-trend-dialog{width:min(92vw,420px);max-height:85vh;overflow:auto;margin:auto;border:1px solid var(--leveli-accent-border,#a882ff);border-radius:18px;padding:22px;background:var(--ds-surface,#211b33);color:inherit;box-shadow:0 18px 50px #0008}
+.leveli-trend-dialog::backdrop{background:#05030ac9}
+.leveli-trend-dialog h2{font-size:20px;margin:0 0 12px}.leveli-trend-dialog p{line-height:1.45;margin:8px 0}
+.leveli-trend-dialog .trend-explain-group{padding:10px 0;border-top:1px solid #8885}
+.leveli-trend-dialog .trend-explain-result{font-weight:800}
+.leveli-trend-dialog button{min-height:44px;margin-top:10px}
+.detail-trend-pill:is(button){border:1px solid currentColor;cursor:pointer;min-height:44px}
 </style></head><body><div class="app"><main class="content" id="main">
 <section data-page="home"><header class="school-header"><div><div class="eyebrow brand-lockup"><img src="./brand/mark.svg" alt="" width="30" height="30" aria-hidden="true"><span>Левели</span></div><h1 id="home-greeting">Привет!</h1><p id="home-birthday-greeting" class="home-birthday-greeting" hidden></p><p>Мои оценки и успеваемость</p><div class="header-period" id="school-header-period">II четверть · 2026/27 учебный год</div></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
 <article class="card" id="school-login"><h2>Войди, чтобы увидеть оценки</h2><p>Оценки загружаются из электронного дневника.</p><form id="school-form"><label>Почта<input id="school-email" type="email" autocomplete="username" required></label><label>Пароль<input id="school-password" type="password" autocomplete="current-password" required></label><button class="btn" type="submit">Войти</button></form></article>
@@ -1031,6 +1040,26 @@ function renderForecastChart(rows,baseline,regular){
  renderDonut('school-donut','school-forecast-legend',rows,'school-overall',formatMean(baseline),'subjects');
  renderDonut('school-grades-donut','school-grades-legend',regular,'school-grades-total',regular.length,'grades');
 }
+function explainGradeTrend(stats){
+ if(stats.difference===null)return;
+ let dialog=document.getElementById('leveli-trend-dialog');
+ if(!dialog){dialog=document.createElement('dialog');dialog.id='leveli-trend-dialog';dialog.className='leveli-trend-dialog';document.body.append(dialog)}
+ dialog.replaceChildren();
+ const header=document.createElement('h2');header.textContent='Как рассчитана динамика';
+ const lead=document.createElement('p');lead.textContent=(stats.recentGrades.length===1?'Сравниваем последнюю оценку со средним предыдущих.':'Сравниваем три последние оценки с тремя предшествующими.')+' Учитываем веса, если они указаны.';
+ const textGroup=(title,grades,avg)=>{
+  const section=document.createElement('div');section.className='trend-explain-group';
+  const label=document.createElement('strong');label.textContent=title;
+  const values=document.createElement('p');values.textContent=grades.map(g=>String(g.value)+(S.weight(g)!==1?' (вес '+S.weight(g)+')':'')).join(' · ');
+  const result=document.createElement('p');result.textContent='Среднее: '+formatMean(avg);
+  section.append(label,values,result);return section
+ };
+ const result=document.createElement('p');result.className='trend-explain-result';result.textContent='Изменение: '+formatMean(stats.recentAverage)+' − '+formatMean(stats.previousAverage)+' = '+(stats.difference>0?'+':'')+formatMean(stats.difference);
+ const note=document.createElement('p');note.textContent='Стрелка меняется при изменении не менее 0,50 балла. Порог проверяется до округления.';
+ const close=document.createElement('button');close.type='button';close.className='btn secondary';close.textContent='Понятно';close.onclick=()=>dialog.close();
+ dialog.append(header,lead,textGroup('Предыдущие оценки',stats.previousGrades,stats.previousAverage),textGroup('Последние оценки',stats.recentGrades,stats.recentAverage),result,note,close);
+ dialog.showModal();close.focus();
+}
 function renderOrientations(all,strong,attention){
  const container=document.querySelector('.orient-grid'),heading=document.querySelector('.orient-heading'),goodPanel=document.querySelector('.orient-good'),attentionPanel=document.querySelector('.orient-attention');
  const hasAny=strong.length+attention.length>0;container.hidden=!hasAny;heading.hidden=false;
@@ -1045,8 +1074,8 @@ function renderOrientations(all,strong,attention){
    const label=document.createElement('span');label.className='orient-link__name';label.textContent=item.name;
    const metrics=document.createElement('span');metrics.className='orient-link__metrics';
    const avg=document.createElement('strong');avg.textContent=formatMean(item.avg);metrics.append(avg);
-   if(item.stats.difference!==null){const d=item.stats.difference;const delta=document.createElement('small');delta.className='grade-delta '+(d>=.5?'up':d<=-.5?'down':'flat');delta.textContent=(d>=.5?'↗ ':d<=-.5?'↘ ':'– ')+(d>0?'+':'')+formatMean(d);metrics.append(delta)}
-   btn.append(label,metrics);btn.onclick=()=>{openSubject(item.name,item.grades);window.scrollTo(0,0)};container.append(btn);
+   if(item.stats.difference!==null){const d=item.stats.difference;const delta=document.createElement('small');delta.className='grade-delta '+(d>=.5?'up':d<=-.5?'down':'flat');delta.textContent=(d>=.5?'↗ ':d<=-.5?'↘ ':'– ')+(d>0?'+':'')+formatMean(d);delta.title='Нажми, чтобы узнать, как рассчитана динамика';metrics.append(delta)}
+   btn.append(label,metrics);btn.onclick=e=>{if(e.target.closest('.grade-delta')&&item.stats.difference!==null){explainGradeTrend(item.stats);return}openSubject(item.name,item.grades);window.scrollTo(0,0)};container.append(btn);
   }
  }
  paint(good,strong);paint(weak,attention);
@@ -1109,7 +1138,7 @@ function renderGrades(){
   const delta=document.createElement('span');delta.className='grade-delta '+(stats.difference===null?'flat':stats.difference>=.5?'up':stats.difference<=-.5?'down':'flat');
   const d=stats.difference;delta.textContent=d===null?'—':(d>=.5?'↗ ':d<=-.5?'↘ ':'– ')+(d>0?'+':'')+formatMean(d);
   const dLabel=document.createElement('small');dLabel.textContent='динамика';dynamics.append(delta,dLabel);
-  btn.append(main,average,grade,dynamics);btn.onclick=()=>{openSubject(name,grades);window.scrollTo(0,0)};
+  btn.append(main,average,grade,dynamics);if(stats.difference!==null)delta.title='Нажми, чтобы узнать, как рассчитана динамика';btn.onclick=e=>{if(e.target.closest('.grade-delta')&&stats.difference!==null){explainGradeTrend(stats);return}openSubject(name,grades);window.scrollTo(0,0)};
   subjects.append(btn);
  }
  if(!subjects.children.length){const p=document.createElement('p');p.className='school-empty';p.textContent=forecastFilter?'Нет предметов в этой категории.':'Предметы пока не загружены.';subjects.append(p)}
@@ -1135,12 +1164,15 @@ function openSubject(name,grades){
  heroScore.textContent=stats.official??stats.forecast??'—';
  const heroHint=document.createElement('span');heroHint.className='detail-hero-hint';
  heroHint.textContent=stats.official!==null?'Итог выставлен школой':stats.forecast!==null?'Ожидаемый результат':'Пока недостаточно оценок';
- const trend=document.createElement('span');trend.className='detail-trend-pill';
+ const trend=document.createElement(stats.difference===null?'span':'button');trend.className='detail-trend-pill';
  if(stats.difference===null){trend.textContent='Динамика пока неизвестна'}
- else if(stats.difference>=.5){trend.textContent='↗ Результаты стали лучше';trend.classList.add('up')}
- else if(stats.difference<=-.5){trend.textContent='↘ Последние оценки стали ниже';trend.classList.add('down')}
- else trend.textContent='● Результаты стабильные';
- if(stats.difference!==null)trend.title='Последние 3: '+formatMean(stats.recentAverage)+' · вся четверть: '+formatMean(stats.previousAverage)+' · изменение '+formatMean(stats.difference);
+ else{
+  trend.type='button';trend.setAttribute('aria-label','Объяснение динамики оценок');
+  const symbol=stats.difference>=.5?'↗ ':stats.difference<=-.5?'↘ ':'– ';
+  trend.textContent=symbol+(stats.difference>0?'+':'')+formatMean(stats.difference)+' · Как посчитано?';
+  trend.classList.add(stats.difference>=.5?'up':stats.difference<=-.5?'down':'flat');
+  trend.onclick=()=>explainGradeTrend(stats);
+ }
  hero.append(heroLabel,heroScore,heroHint,trend);detail.append(hero);
  const kpis=document.createElement('div');kpis.className='detail-kpi';
  for(const [label,value] of [['Средний балл',formatMean(stats.average)],['Получено оценок',String(grades.regular.length)]]){
