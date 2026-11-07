@@ -679,8 +679,9 @@ body{background:#0e0c21;color:#f6f0ff}
 .personal-avatar-option .avatar-illustration.leveli-3d-avatar{display:block;width:100%;height:100%;max-width:none;aspect-ratio:1;object-fit:contain;background:none;border:0;border-radius:0}
 
 /* Grade trend explanation for keyboard and touch input. */
-.leveli-trend-dialog{width:min(92vw,420px);max-height:85vh;overflow:auto;margin:auto;border:1px solid var(--leveli-accent-border,#a882ff);border-radius:18px;padding:22px;background:var(--ds-surface,#211b33);color:inherit;box-shadow:0 18px 50px #0008}
+.leveli-trend-dialog{width:min(92vw,420px);max-height:85vh;overflow:auto;margin:auto;border:1px solid var(--leveli-accent-border,#a882ff);border-radius:18px;padding:22px;background:#211b33;color:#f5f0ff;box-shadow:0 18px 50px #0008}
 .leveli-trend-dialog::backdrop{background:#05030ac9}
+:root[data-leveli-theme="light"] .leveli-trend-dialog{background:#fff;color:#302448}
 .leveli-trend-dialog h2{font-size:20px;margin:0 0 12px}.leveli-trend-dialog p{line-height:1.45;margin:8px 0}
 .leveli-trend-dialog .trend-explain-group{padding:10px 0;border-top:1px solid #8885}
 .leveli-trend-dialog .trend-explain-result{font-weight:800}
@@ -1045,7 +1046,7 @@ function explainGradeTrend(stats){
  let dialog=document.getElementById('leveli-trend-dialog');
  if(!dialog){dialog=document.createElement('dialog');dialog.id='leveli-trend-dialog';dialog.className='leveli-trend-dialog';document.body.append(dialog)}
  dialog.replaceChildren();
- const header=document.createElement('h2');header.textContent='Как рассчитана динамика';
+ const header=document.createElement('h2');header.id='leveli-trend-dialog-title';dialog.setAttribute('aria-labelledby',header.id);header.textContent='Как рассчитана динамика';
  const lead=document.createElement('p');lead.textContent=(stats.recentGrades.length===1?'Сравниваем последнюю оценку со средним предыдущих.':'Сравниваем три последние оценки с тремя предшествующими.')+' Учитываем веса, если они указаны.';
  const textGroup=(title,grades,avg)=>{
   const section=document.createElement('div');section.className='trend-explain-group';
