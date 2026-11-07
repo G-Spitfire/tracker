@@ -84,3 +84,45 @@ test('failed main write preserves prior committed data and does not replace back
  assert.equal(base.getItem(keys.main),old);
  assert.equal(b.load('child-1').profile.revision,0);
 });
+
+
+test('interrupted backup write leaves committed profile and checkpoint untouched',()=>{
+ const base=memory(),a=A.create({storage:base,empty:E.empty,valid:A.validProfile}),p=E.empty();
+ a.save('child-1',p,{id:'in-progress'});
+ const keys=a.keys('child-1'),original=base.getItem(keys.main),checkpoint=base.getItem(keys.active);
+ const failing={getItem:k=>base.getItem(k),setItem:(k,v)=>{if(k===keys.backup)throw Error('Backup unavailable');base.setItem(k,v)},removeItem:k=>base.removeItem(k)};
+ const next=E.clone(p);next.revision++;
+ assert.throws(()=>A.create({storage:failing,empty:E.empty,valid:A.validProfile}).save('child-1',next,null,original,checkpoint),/Backup unavailable/);
+ assert.equal(base.getItem(keys.main),original);
+ assert.equal(base.getItem(keys.active),checkpoint);
+});
+
+test('committed session is not replayed when cleanup of checkpoint was interrupted',()=>{
+ const base=memory(),a=A.create({storage:base,empty:E.empty,valid:A.validProfile}),p=E.empty();
+ a.save('child-1',p,{id:'finished-session'});
+ const k=a.keys('child-1'),raw=base.getItem(k.main),active=base.getItem(k.active);
+ const result=E.clone(p);result.revision++;result.sessions.push({id:'finished-session',mode:'new',at:Date.now(),ids:['apple'],successful:1});
+ const failing={getItem:key=>base.getItem(key),setItem:(key,v)=>base.setItem(key,v),removeItem:key=>{if(key===k.active)throw Error('Interrupted cleanup');base.removeItem(key)}};
+ assert.throws(()=>A.create({storage:failing,empty:E.empty,valid:A.validProfile}).save('child-1',result,null,raw,active),/Interrupted cleanup/);
+ assert.equal(a.load('child-1').profile.sessions.length,1);
+ assert.equal(a.load('child-1').session,null);
+});
+
+test('stale tab cannot commit a session after another tab changed the active checkpoint',()=>{
+ const storage=memory(),a=A.create({storage,empty:E.empty,valid:A.validProfile}),p=E.empty();
+ a.save('child-1',p,{id:'first'});
+ const k=a.keys('child-1'),raw=storage.getItem(k.main),stale=storage.getItem(k.active);
+ a.save('child-1',p,{id:'second'},raw,stale);
+ const next=E.clone(p);next.revision++;
+ assert.throws(()=>a.save('child-1',next,null,raw,stale),/Session changed/);
+ assert.equal(a.load('child-1').profile.revision,0);
+ assert.equal(a.load('child-1').session.id,'second');
+});
+
+test('historical child data survive profile revisions without any profile editor',()=>{
+ const storage=memory(),a=A.create({storage,empty:E.empty,valid:A.validProfile}),p=E.empty();
+ p.child={name:'Example',age:11};a.save('child-1',p);
+ const updated=E.clone(p);updated.revision++;updated.words.apple={origin:'known'};
+ a.save('child-1',updated);
+ assert.deepEqual(a.load('child-1').profile.child,{name:'Example',age:11});
+});

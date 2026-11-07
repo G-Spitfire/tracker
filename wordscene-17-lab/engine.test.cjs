@@ -26,12 +26,11 @@ test('third pass errors generate bounded extra passes',()=>{
  assert.equal(s.extra,1);
  assert.equal(s.answers.length,24);
 });
-test('cancel and expired sessions do not touch persisted progress',()=>{
+test('unfinished sessions cannot change persisted progress',()=>{
  const p=E.empty(),s=E.start(p,'new',['a','b','c'],['d'],t('2026-11-04'));
  E.learnNext(s,t('2026-11-04',100));
  assert.equal(Object.keys(p.words).length,0);
- assert.equal(E.timedOut(s,t('2026-11-04',1800100)),true);
- assert.throws(()=>E.completed(p,s,t('2026-11-04',1800100)));
+ assert.throws(()=>E.completed(p,s,t('2026-11-04',3600000)));
  assert.equal(Object.keys(p.words).length,0);
 });
 test('repeat updates schedule only after full two-direction session',()=>{
@@ -75,18 +74,6 @@ test('mastery is current: a mistake removes it until a new 30-day interval succe
  assert.equal(E.status({origin:'learned',schedule:r}),'mastered');
  assert.equal(r.masteredAt,firstMasteredAt);
 });
-test('single inactivity deadline: a pause never starts a second deadline',()=>{
- const base=t('2026-11-04');
- let s=E.start(E.empty(),'new',['a','b','c'],[],base);
- E.pause(s,base+20*60000);
- assert.equal(E.timedOut(s,base+30*60000-1),false);
- assert.equal(E.timedOut(s,base+30*60000),true);
- s=E.start(E.empty(),'new',['a','b','c'],[],base);
- E.action(s,base+19*60000);
- E.pause(s,base+20*60000);
- assert.equal(E.timedOut(s,base+49*60000-1),false);
- assert.equal(E.timedOut(s,base+49*60000),true);
-});
 
 test('mandatory review rejects a partial queue and duplicate IDs',()=>{
  const p=E.empty(),at=t('2026-11-05');
@@ -95,4 +82,81 @@ test('mandatory review rejects a partial queue and duplicate IDs',()=>{
  assert.throws(()=>E.start(p,'review',['apple'],[],at),/every due word/);
  assert.throws(()=>E.start(p,'review',['apple','apple'],[],at),/every due word/);
  assert.equal(E.start(p,'review',['cat','apple'],[],at).ids.length,2);
+});
+
+
+test('review covers an overdue queue of 35 words without trimming or unlocking new words early',()=>{
+ const p=E.empty(),at=t('2026-11-20');
+ for(let i=0;i<35;i++){
+  const id='word'+String(i).padStart(2,'0');
+  p.words[id]={origin:'known',schedule:{...E.newSchedule(t('2026-11-02')),nextDay:i%2?'2026-11-17':'2026-11-19'},history:[]};
+ }
+ const ids=E.due(p,at);
+ assert.equal(ids.length,35);
+ assert.throws(()=>E.start(p,'review',ids.slice(0,30),[],at),/every due word/);
+ assert.throws(()=>E.start(p,'new',['a','b','c'],[],at),/Complete due reviews first/);
+ const s=E.start(p,'review',ids,[],at);
+ assert.equal(s.items.length,70);
+ let n=0;while(s.stage==='recall')E.answer(s,true,at+100+n++);
+ const out=E.completed(p,s,at+10000);
+ assert.equal(out.sessions.at(-1).ids.length,35);
+ assert.equal(E.due(out,at).length,0);
+});
+
+test('missed first checks remain highest-priority even after more than one day',()=>{
+ const p=E.empty(),now=t('2026-11-20');
+ p.words.old={origin:'learned',firstLearnedAt:t('2026-11-10'),schedule:E.newSchedule(t('2026-11-10')),history:[]};
+ p.words.repair={origin:'learned',schedule:{...E.newSchedule(t('2026-11-01')),stage:'repair',nextDay:'2026-11-11'},history:[{at:t('2026-11-11'),ok:false}]};
+ p.words.recent={origin:'learned',firstLearnedAt:t('2026-11-19'),schedule:E.newSchedule(t('2026-11-19')),history:[]};
+ assert.deepEqual(E.due(p,now).slice(0,2),['old','recent']);
+});
+
+test('automatic screening stops on exactly the 50th assessed word',()=>{
+ const s=E.beginSelection();
+ for(let i=0;i<49;i++)assert.equal(E.selectionAnswer(s,'word'+i,true),false);
+ assert.equal(s.seen.length,49);
+ assert.equal(E.selectionAnswer(s,'word49',true),true);
+ assert.equal(s.seen.length,50);
+ assert.throws(()=>E.selectionAnswer(s,'word50',false),/Selection closed or duplicate/);
+ assert.equal(s.known.length,50);
+});
+
+test('level upgrade requires three confirmed lessons and the 80 percent aggregate',()=>{
+ const p=E.empty(),learnStart=t('2026-11-01');
+ for(let lessonIndex=0;lessonIndex<3;lessonIndex++){
+  const ids=Array.from({length:10},(_,i)=>'lesson'+lessonIndex+'-'+i);
+  const at=learnStart+lessonIndex*86400000;
+  p.sessions.push({id:'new-'+lessonIndex,mode:'new',ids,at,successful:10});
+  for(let i=0;i<ids.length;i++)p.words[ids[i]]={
+   origin:'learned',firstLearnedAt:at,schedule:E.newSchedule(at),
+   history:[{at:at+86400000,ok:i<8}]
+  };
+ }
+ E.recalcLevel(p);
+ assert.equal(p.level,'experienced');
+ assert.equal(p.levels.length,1);
+ E.recalcLevel(p);
+ assert.equal(p.levels.length,1);
+});
+
+test('unconfirmed lessons and an aggregate below threshold do not upgrade',()=>{
+ const p=E.empty(),at=t('2026-11-01');
+ for(let j=0;j<3;j++){
+  const ids=Array.from({length:10},(_,i)=>'set'+j+'-'+i);
+  p.sessions.push({id:'set'+j,mode:'new',ids,at:at+j*86400000,successful:10});
+  for(let i=0;i<ids.length;i++)p.words[ids[i]]={origin:'learned',schedule:E.newSchedule(at),history:j===2?[]:[{at:at+(j+1)*86400000,ok:i<6}]};
+ }
+ E.recalcLevel(p);
+ assert.equal(p.level,'novice');
+ for(const id of p.sessions[2].ids)p.words[id].history.push({at:at+4*86400000,ok:true});
+ E.recalcLevel(p);
+ assert.equal(p.level,'novice');
+});
+
+test('completed lesson is idempotent for the same session id',()=>{
+ const {s,p}=lesson(E.empty(),['alpha','beta','gamma']);
+ const sessions=p.sessions.length,revision=p.revision;
+ const replay=E.completed(p,s,t('2026-11-04',12000));
+ assert.equal(replay.sessions.length,sessions);
+ assert.equal(replay.revision,revision);
 });

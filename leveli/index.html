@@ -1,128 +1,923 @@
 <!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f8f4ff"><title>Левели</title>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0e0c21"><title>Левели</title><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" type="image/svg+xml" href="./brand/app-icon.svg"><link rel="apple-touch-icon" href="./brand/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Левели">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><style>
-:root{font-family:Manrope,system-ui,-apple-system,sans-serif;color:#45365c;background:#f9f5fc}
+:root{font-family:Manrope,system-ui,-apple-system,sans-serif;}
 *{box-sizing:border-box}
 body{margin:0}
 .app{max-width:540px;min-height:100dvh;margin:auto}
-.content{padding:18px 16px max(35px,env(safe-area-inset-bottom))}
 section[hidden],[hidden]{display:none!important}
-.school-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin:6px 0 18px}
-.school-header h1{font-size:27px;margin:8px 0 3px}
-.school-header p{font-size:14px;color:#796d89;margin:0}
-.eyebrow{font-size:12px;color:#8064aa;font-weight:750}
-.settings-button{border:1px solid #e7dcf2;border-radius:15px;background:#fff;padding:10px 14px;font-size:23px;color:#65548b;cursor:pointer}
-.card{border-radius:20px;background:#fff;padding:18px;margin-top:12px;border:1px solid #f0e8f7;box-shadow:0 4px 16px #75569a0c}
-.card h2{font-size:17px;margin:0 0 9px}
+.school-header{display:flex;justify-content:space-between;gap:12px;}
+.school-header p{font-size:14px;margin:0}
+.settings-button{border:1px solid #e7dcf2;padding:10px 14px;font-size:23px;cursor:pointer}
 .card p{color:#796d89;line-height:1.5;margin:0;font-size:14px}
-.summary-card{background:#f1ebfc}
-.overall-score{font-size:48px;font-weight:800;margin:8px 0;line-height:1.2}
+
 .muted{color:#837790;font-size:13px}
 .section-title{font-size:23px;margin:12px 0 20px}
-.btn{margin-top:14px;border:1px solid #7654d4;background:#8061e5;color:#fff;border-radius:12px;padding:12px 16px;font:750 14px Manrope,system-ui,sans-serif;cursor:pointer}
-.btn.secondary{background:#fff;color:#7654d4}
+.btn{margin-top:14px;border:1px solid #7654d4;border-radius:12px;padding:12px 16px;font:750 14px Manrope,system-ui,sans-serif;cursor:pointer}
 .btn:active{transform:translateY(1px)}
 .btn:focus-visible,.subject-row:focus-visible,.settings-button:focus-visible,summary:focus-visible{outline:3px solid #9c82f1;outline-offset:2px}
 .choice-buttons{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
-.subject-row{display:block;width:100%;text-align:left;padding:15px 5px;border:0;border-top:1px solid #eee;background:transparent;color:inherit;font:600 14px Manrope,system-ui,sans-serif;line-height:1.6;cursor:pointer}
-.extras summary{font-weight:750;cursor:pointer}
-.extras>div{margin-top:18px!important}
-.warning{padding:10px;border-radius:12px;background:#fff0d9;color:#80530b}
+.subject-row{width:100%;text-align:left;border-top:1px solid #eee;color:inherit;font:600 14px Manrope,system-ui,sans-serif;line-height:1.6;cursor:pointer}
+
 #school-form label{display:block;margin-top:14px;font-size:13px;font-weight:700}
 #school-form input{display:block;width:100%;padding:12px;margin-top:7px;border:1px solid #ddd;border-radius:12px;font:inherit}
-#profile-actions{display:flex;flex-wrap:wrap;gap:8px}
-#school-status{margin:0 0 10px}
-@media(max-width:360px){.content{padding:14px 12px 24px}}
+#profile-actions{flex-wrap:wrap;gap:8px}
+@media(max-width:360px){}
 
 /* Readable school dashboard */
-.summary-card{padding:22px;background:#f1ebfc}
-.summary-card .eyebrow{font-size:13px}
-.overall-score{font-variant-numeric:tabular-nums;letter-spacing:-.045em}
-#school-subjects{display:grid;gap:9px;margin-top:14px}
-.subject-row{border:1px solid #ece5f4;border-radius:15px;padding:14px 13px;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:78px;background:#fff;box-shadow:0 1px 4px #45365c08;transition:background .15s ease}
-.subject-row:hover{background:#faf7ff}
-.subject-row__main{display:grid;gap:5px;min-width:0;flex:1}
-.subject-row__name{font-weight:800;font-size:14px;line-height:1.4;overflow-wrap:anywhere}
-.subject-row__meta{font-size:12px;color:#756783;line-height:1.5;font-weight:600}
-.subject-row__meta.attention{color:#825b19}
-.subject-row__value{text-align:right;flex:none;display:grid;gap:3px;justify-items:end}
-.subject-row__average{font-size:23px;font-weight:800;line-height:1.1;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
-.subject-row__label{font-size:11px;font-weight:600;color:#837790}
-.subject-row__hint{font-size:12px;color:#837790}
-.choice-buttons button{min-height:38px;cursor:pointer}
-#school-status{line-height:1.5}
-#school-sync-freshness{font-size:11px;color:#706680;margin:0 0 12px;display:flex;align-items:center;gap:6px;line-height:1.4}
-#school-sync-freshness::before{content:'';display:inline-block;flex:none;width:7px;height:7px;border-radius:50%;background:#9990aa}
-#school-sync-freshness[data-state="ok"]::before{background:#4f9a6d}
-#school-sync-freshness[data-state="failed"]{color:#a03143}
-#school-sync-freshness[data-state="failed"]::before{background:#c94a54}
-@media(prefers-reduced-motion:reduce){.subject-row{transition:none}}
 
-:root{color:#3c276b;background:#f3efff}
-.content{padding:20px 16px max(34px,env(safe-area-inset-bottom))}
-.school-header{margin:5px 0 16px}.school-header h1{font-size:29px;color:#3c276b}.school-header p{color:#8775a5}
-.eyebrow{color:#8b70e4;letter-spacing:.13em}
-.settings-button{border-radius:999px;color:#845be0;box-shadow:0 5px 18px #6646ae10}
-.card{border:0;border-radius:23px;padding:19px;margin-top:15px;box-shadow:0 8px 26px #7044a80d}
+#school-subjects{display:grid;}
+.subject-row{border-radius:15px;justify-content:space-between;transition:background .15s ease}
+.subject-row__main{display:grid;}
+.subject-row__name{line-height:1.4;}
+.subject-row__meta{line-height:1.5;font-weight:600}
+.subject-row__meta.attention{color:#825b19}
+
+
+.choice-buttons button{min-height:44px;border:1px solid var(--ds-border);border-radius:11px;padding:10px 7px;font:700 12px Manrope,system-ui,sans-serif;cursor:pointer}
+#school-status{line-height:1.5}
+@media(prefers-reduced-motion:reduce){.subject-row{transition:none}}
+.settings-button{border-radius:999px;}
+.card{margin-top:15px;}
 .card h2{font-size:19px;line-height:1.3;color:#3c276b;margin:0}
 .card-heading{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.quarter-label{font-size:11px;color:#8775a5;font-weight:700;white-space:nowrap}
-.forecast-layout{display:flex;align-items:center;gap:10px;margin:14px 0}
+
 .forecast-chart{width:51%;aspect-ratio:1;max-width:205px;position:relative;flex:none}
 .forecast-chart svg{width:100%;height:100%;overflow:visible}
 .forecast-center{position:absolute;inset:25%;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;white-space:nowrap}
 .forecast-center strong{font-size:clamp(24px,7vw,37px);font-weight:800;letter-spacing:-.06em;color:#3c276b;font-variant-numeric:tabular-nums}
 .forecast-center span{font-size:10px;font-weight:700;color:#8775a5}
-.forecast-legend{flex:1;display:grid;gap:6px;min-width:0}
+.forecast-legend{flex:1;min-width:0}
 .forecast-legend button{display:flex;align-items:center;gap:7px;width:100%;border:1px solid transparent;background:transparent;color:#3c276b;font:700 12px Manrope,system-ui,sans-serif;padding:8px 5px;border-radius:12px;cursor:pointer;text-align:left}
-.forecast-legend button[aria-pressed=true]{background:#eee6ff;border-color:#d4c3fc}
-.forecast-legend .legend-dot{width:10px;height:10px;flex:none;border-radius:50%}
-.forecast-legend .legend-label{flex:1;min-width:0}.forecast-legend .legend-count{font-size:15px;font-weight:800}
+.forecast-legend .legend-dot{flex:none;border-radius:50%}
+.forecast-legend .legend-label{flex:1;}.forecast-legend .legend-count{font-weight:800}
 #school-analytics{font-size:12px;line-height:1.5;margin-top:8px}
 #school-status{font-size:11px;color:#9185a7;margin:6px 0 0}
-.trend-card{background:linear-gradient(140deg,#fff,#f9f5ff)}
-.trend-change{font-size:12px;color:#3f946a;font-weight:800}
+.trend-change{font-weight:800}
 #school-trend{margin-top:10px}
-.trend-axis{display:flex;justify-content:space-between;font-size:11px;color:#897fa0;margin-top:2px}
-.trend-note{font-size:12px!important;color:#8b80a2}
-.orient-heading{margin:22px 2px 10px}.orient-heading h2{font-size:20px;margin:0;color:#3c276b}.orient-heading p{font-size:12px;color:#897ca2;margin:2px 0}
-.orient-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
-.orient-panel{border-radius:19px;padding:13px 10px;min-width:0}
-.orient-good{background:#e4f7ed}.orient-attention{background:#fff0d9}
-.orient-title{font-size:13px;font-weight:800;margin-bottom:10px;color:#376d51}.orient-attention .orient-title{color:#92612c}
-.orient-link{display:flex;flex-direction:column;gap:2px;text-align:left;background:transparent;border:0;border-top:1px solid #ffffff8c;padding:9px 2px;width:100%;min-width:0;font:700 12px Manrope,system-ui,sans-serif;color:#403452;cursor:pointer}
-.orient-link small{font-size:11px;color:#6c6480;font-weight:600}
-.orient-empty{font-size:12px;color:#776e87}
+.trend-axis{display:flex;justify-content:space-between;font-size:11px;margin-top:2px}.orient-heading h2{margin:0;color:#3c276b}.orient-heading p{font-size:12px;color:#897ca2;margin:2px 0}
+.orient-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);}
+.orient-panel{min-width:0}
+.orient-title{font-weight:800;margin-bottom:10px;}
+.orient-link{display:flex;flex-direction:column;text-align:left;background:transparent;border:0;border-top:1px solid #ffffff8c;width:100%;min-width:0;font:700 12px Manrope,system-ui,sans-serif;cursor:pointer}
+.orient-link small{font-size:11px;color:var(--ds-text-secondary);font-weight:600}
+.orient-empty{font-size:12px;}
 .subjects-card{margin-top:17px}
 #school-subjects{margin-top:12px}
-.subject-row{border:1px solid #eee8f9;min-height:72px}
-.subject-row__name{color:#3c276b}
-.subject-row__average{color:#6043b4}
+
 .subject-row:focus-visible,.orient-link:focus-visible,.forecast-legend button:focus-visible{outline:3px solid #9778f1;outline-offset:2px}
 .profile-period{padding-top:16px;margin-top:16px;border-top:1px solid #eee6f6}
 .profile-period h2{font-size:17px;margin:0 0 6px}
 .profile-period .btn{margin-top:9px}
-@media(max-width:360px){.forecast-chart{width:48%}.forecast-legend button{font-size:11px;padding:7px 2px}.card{padding:15px}.orient-panel{padding:11px 8px}}
+@media(max-width:360px){.forecast-chart{width:48%}.forecast-legend button{font-size:11px;padding:7px 2px}}
+.grade-delta{display:inline-flex;align-items:center;gap:4px;font-weight:800}
+
+.detail-kpi{display:grid;}
+.detail-kpi>div{border-radius:14px}
+.detail-kpi strong{display:block;}
+.detail-goal{margin:12px 0;}
+.detail-chart-scroll{overscroll-behavior-x:contain}
+.detail-chart-scroll svg{display:block;}
+.grade-entry{display:flex;justify-content:space-between;border-bottom:1px solid #eee8f9;font-size:13px}
+.grade-entry__value{font-weight:800;}
+.detail-toggle{flex-wrap:wrap;}
+.detail-toggle button{border:1px solid #d8c9f0;font:750 12px Manrope,system-ui;cursor:pointer}
+.school-empty{padding:22px 10px;text-align:center;font-weight:700;}
+#school-freshness{font-size:11px;color:#85789a;margin-top:7px}
+
+/* Approved Leveli dark dashboard (2026-11-06). Works for all three existing screens. */
+:root{color:#f6f0ff;background:#0e0c21;color-scheme:dark}
+body{background:#0e0c21;color:#f6f0ff}
+.content{padding:18px 14px max(35px,env(safe-area-inset-bottom))}
+.school-header{align-items:center;margin:4px 2px 18px}
+.school-header h1{color:#fff;font-size:27px;margin:8px 0 3px}
+.school-header p{color:#c7b9e8}
+.eyebrow{color:#e0c8ff;font-size:17px;font-weight:800;letter-spacing:.04em}
+.header-period{display:inline-flex;background:#302449;color:#cfc1ed;font-size:11px;padding:6px 10px;border-radius:999px;margin-top:10px}
+.settings-button{background:var(--leveli-accent-dim);border-color:var(--leveli-accent-border);color:var(--leveli-accent-ink);box-shadow:none}
+.card{background:#1c1735;border:1px solid #453360;box-shadow:none;color:#f6f0ff;border-radius:20px;padding:15px}
+.card h2,.orient-heading h2{color:#fff;font-size:18px}
+.card p,.muted{color:#aa9cc8}
+.forecast-card{padding:15px}
+.help-btn{height:28px;width:28px;flex:none;border-radius:50%;background:var(--leveli-accent-dim);color:var(--leveli-accent-ink);border:0;font-size:15px;font-weight:800;cursor:pointer}
+.inline-help{background:var(--ds-surface-inner);color:var(--ds-text-primary);font-size:12px;line-height:1.65;border-radius:11px;padding:12px;margin:10px 0}
+.heading-with-help{display:flex;align-items:center;gap:8px}
+.double-donut{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px;margin-top:13px}
+.donut-panel{background:#25203d;border-radius:15px;padding:9px;display:flex;flex-direction:column;align-items:center;min-width:0}
+.donut-title{font-weight:750;font-size:12px;color:var(--ds-text-primary)}
+.donut-panel .forecast-chart{width:100%;max-width:170px;margin:3px auto}
+.donut-panel .forecast-center strong{font-size:clamp(23px,6vw,32px);color:var(--ds-text-primary)}
+.donut-panel .forecast-center span{font-size:9px;color:var(--ds-text-secondary)}
+.forecast-legend{display:grid;gap:1px;width:100%;margin-top:2px}
+.forecast-legend .legend-item{width:100%;display:flex;align-items:center;justify-content:space-between;border:1px solid transparent;background:transparent;color:#ded2f1;font:600 10px Manrope,system-ui,sans-serif;padding:4px 2px;border-radius:7px;text-align:left;min-height:23px}
+.forecast-legend button.legend-item{cursor:pointer}
+.forecast-legend button[aria-pressed=true]{background:#44345e;border-color:#6e558f}
+.forecast-legend .legend-label{display:flex;align-items:center;gap:5px;min-width:0}
+.forecast-legend .legend-dot{width:7px;height:7px}
+.forecast-legend .legend-count{font-size:12px;color:#fff}
+.donut-unit{font-size:9px;color:#a89abe;margin-top:auto;padding-top:4px;text-align:center;line-height:1.35}
+.forecast-legend .legend-item{min-width:0}
+.forecast-legend .legend-label{white-space:normal;overflow-wrap:anywhere}
+@media(min-width:390px){.donut-panel{padding:10px}.forecast-legend .legend-item{font-size:11px}}
+#school-status,#school-freshness{font-size:11px;margin:9px 5px;color:var(--ds-text-secondary)}
+#school-freshness[data-state=error]{color:var(--ds-status-bad)}
+#school-freshness[data-state=ok]{color:var(--ds-status-good)}
+#school-freshness[data-state=waiting],#school-freshness[data-state=unknown]{color:var(--ds-text-secondary)}
+#school-freshness{display:flex;align-items:center;gap:8px;line-height:1.45}
+#school-freshness .sync-symbol{font-size:16px;font-weight:800;flex:0 0 19px;text-align:center}
+#school-freshness .sync-copy{flex:1;min-width:0}
+.trend-card{background:#1c1735}
+.trend-change{font-size:15px;color:#c6bbd9;font-variant-numeric:tabular-nums}
+.trend-change.positive{color:var(--ds-status-good)}.trend-change.negative{color:var(--ds-status-bad)}
+.trend-axis{color:var(--ds-text-secondary)}
+.orient-heading{display:flex;justify-content:space-between;align-items:center;margin:22px 2px 10px}
+.orient-heading h2{font-size:18px}
+.orient-grid{gap:9px}
+.orient-panel{padding:13px 10px;border:1px solid;border-radius:17px}
+.orient-good{background:#19392f;border-color:#326f55}
+.orient-attention{background:#3a292d;border-color:#72494d}
+.orient-title{color:#84e7b2;font-size:13px}.orient-attention .orient-title{color:#ffd19b}
+.orient-link{color:#fff;border-color:#ffffff26;font-size:12px;padding:10px 1px;gap:5px}
+.orient-link__name{font-size:11px;line-height:1.35;overflow-wrap:anywhere}
+.orient-link__metrics{display:flex;justify-content:space-between;align-items:center;gap:3px}
+.orient-link__metrics strong{font-size:16px;color:#fff;font-weight:800}
+.orient-link__metrics small{font-size:10px;white-space:nowrap}
+.orient-empty{color:var(--ds-text-secondary)}
+.grade-delta{font-size:10px;white-space:nowrap}
+.grade-delta.up{color:var(--ds-status-good)}.grade-delta.down{color:var(--ds-status-bad)}.grade-delta.flat{color:var(--ds-text-secondary)}
+#school-subjects{gap:8px}
+.subject-row{padding:11px 9px;background:color-mix(in srgb,var(--leveli-accent-dim) 24%,var(--ds-surface-inner));border:1px solid var(--ds-border);box-shadow:none;min-height:67px;display:flex;gap:6px;align-items:center}
+.subject-row:hover{background:var(--leveli-accent-dim)}
+.subject-row__main{min-width:0;flex:1;gap:4px}
+.subject-row__name{font-size:12px;color:#fff;font-weight:700;overflow-wrap:anywhere}
+.subject-row__meta{font-size:10px;color:#afa1ca}
+.subject-row__number,.subject-row__grade,.subject-row__dynamics{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;flex:none;font-variant-numeric:tabular-nums}
+.subject-row__number{width:47px}
+.subject-row__number strong{font-size:13px;color:var(--ds-text-primary);font-weight:700}
+.subject-row__grade{width:43px}
+.subject-row__grade strong{font-size:23px;color:var(--leveli-accent-soft);font-weight:800;line-height:1.15}
+.subject-row__grade .official-box{font-size:19px;color:var(--leveli-accent-ink);background:var(--leveli-accent-dim);border:1px solid var(--leveli-accent-border);padding:2px 8px;border-radius:7px}
+.subject-row__dynamics{width:54px;align-items:flex-end}
+.subject-row small{font-size:9px;color:#9688b0;font-weight:600}
+.subjects-card{padding:14px}
+.btn{background:#8061e5;border-color:#9875e8;color:#fff}
+.btn.secondary{background:#302747;border-color:#574275;color:#e4d4ff}
+#school-form input{color:var(--ds-text-primary);background:var(--ds-surface-inner);border-color:var(--ds-border)}
+.profile-period{border-top-color:#44365e}
+.choice-buttons button{background:#302747;color:#e3d8f4;border-color:#55446f}.detail-kpi strong,.grade-entry__value{color:#c5a8ff}.detail-goal{background:#19392f;color:#a5e8c5}
+.detail-toggle button{background:var(--ds-surface-inner);color:var(--ds-text-primary);border-color:var(--ds-border)}
+.school-empty{color:var(--ds-text-secondary)}
+@media(max-width:360px){.content{padding:12px 10px 24px}.card{padding:12px}.donut-panel{padding:6px}.orient-panel{padding:10px 7px}.subject-row{padding:10px 7px;gap:4px}.subject-row__number{width:43px}.subject-row__grade{width:38px}.subject-row__dynamics{width:51px}}
+/* Subject details: compact, readable layout on phones. */
+#school-subject-detail{min-width:0;overflow:hidden;}
+.detail-header{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:9px 12px}
+.detail-back{grid-column:1/-1;justify-self:start;margin:0 0 4px;padding:10px 13px;font-size:12px;min-height:40px}
+.detail-title{min-width:0;margin:0!important;font-size:clamp(19px,5.5vw,25px)!important;line-height:1.25;overflow-wrap:anywhere}
+.detail-period{background:var(--leveli-accent-dim);color:var(--leveli-accent-ink);font-size:11px;font-weight:800;padding:7px 10px;border-radius:999px;white-space:nowrap;align-self:center}
+.detail-kpi{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:16px 0 14px}
+.detail-kpi>div{min-width:0;padding:15px 12px;background:#2b2444;border:1px solid #47365f}
+.detail-kpi strong{font-size:clamp(20px,6vw,27px);line-height:1.2;overflow-wrap:anywhere;color:#e2cdff;font-variant-numeric:tabular-nums}
+.detail-kpi span{display:block;margin-top:7px;font-size:11px;line-height:1.4;color:#b7a7d1}
+#school-subject-detail>.grade-delta{display:block;white-space:normal;font-size:12px;line-height:1.6;margin:12px 2px}
+.detail-goal{padding:15px;border:1px solid #37624c;border-radius:15px;font-size:12px;line-height:1.65}
+#school-subject-detail h3{font-size:16px;line-height:1.35;color:#f4eaff;margin:23px 0 9px}
+.detail-toggle{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 13px}
+.detail-toggle button{min-width:0;min-height:42px;padding:10px 8px;border-radius:11px;line-height:1.35;font-size:12px;white-space:normal}
+.detail-toggle button[aria-pressed=true]{background:#544072;border-color:#aa85e3;color:#fff}
+.detail-chart-scroll{background:#241e39;border:1px solid #3d3057;border-radius:14px;padding:10px 6px 8px;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.detail-chart-scroll svg{height:170px;max-width:none}
+.grade-entry{align-items:center;gap:12px;min-height:60px;padding:12px 2px;border-bottom-color:#433758}
+.grade-entry span{min-width:0;overflow-wrap:anywhere;color:#d9caed;font-size:12px;line-height:1.6}
+.grade-entry__value{flex:none;font-size:20px;color:var(--ds-text-primary);font-variant-numeric:tabular-nums}
+#school-subject-detail .school-empty{padding:16px 8px;background:var(--ds-surface-inner);border-radius:12px;margin:12px 0;color:var(--ds-text-secondary)}
+@media(max-width:360px){
+ #school-subject-detail{padding:14px 11px 18px}
+ .detail-header{gap:8px}
+ .detail-period{font-size:10px;padding:6px 8px}
+ .detail-kpi>div{padding:12px 9px}
+ .detail-kpi strong{font-size:20px}
+ .detail-chart-scroll{padding:8px 3px}
+}
+/* Profile: same dark card system as the dashboard, mobile first. */
+.profile-header{margin:2px 2px 17px}
+.profile-header .profile-back{margin:0 0 22px;min-height:40px;font-size:12px;padding:10px 13px}
+.profile-header .eyebrow{font-size:13px;letter-spacing:.08em}
+.profile-header .section-title{font-size:clamp(23px,7vw,29px);color:#fff;line-height:1.22;margin:8px 0}
+.profile-header p{margin:0;color:#b5a8ce;font-size:12px;line-height:1.55}
+.profile-card{padding:19px 16px;margin-top:13px}
+.profile-card .profile-label{font-size:10px;letter-spacing:.13em;font-weight:800;color:#b69bf4;margin-bottom:9px}
+.profile-card h2{font-size:19px;line-height:1.35;margin-bottom:9px}
+.profile-card p{font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+#profile-name{font-size:24px;color:#fff;overflow-wrap:anywhere}
+#profile-account{color:#d3c4ec}
+#profile-school{margin-top:10px;color:#ac9bc8}
+.profile-card .profile-period{border-top:1px solid #45365d;margin-top:13px;padding-top:13px}
+#school-period-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0}
+#school-period-buttons button{min-height:44px;width:100%;font-size:12px;padding:10px 7px;text-align:center;line-height:1.35;white-space:normal;border-radius:11px}
+#school-current-period{margin-top:13px;width:100%;min-height:43px;white-space:normal}
+#profile-actions{display:block}
+.profile-actions{display:grid;grid-template-columns:minmax(0,1fr);gap:0;margin-top:8px}
+.profile-actions .btn{width:100%;min-height:43px;margin-top:11px}
+.profile-actions .profile-logout{background:transparent;border-color:#665174;color:#e5c9ef}
+@media(max-width:360px){
+ .profile-card{padding:15px 12px}
+ #school-period-buttons{gap:7px}
+ #school-period-buttons button{font-size:11px}
+}
+/* Subject details are a standalone view, without the home greeting and settings. */
+.subject-detail-active>.school-header{display:none}
+.subject-detail-active #school-subject-detail{margin-top:0}
+#school-subject-detail .detail-chart-scroll{overflow-x:hidden;width:100%;min-width:0}
+#school-subject-detail .detail-chart-scroll svg{width:100%;max-width:100%;aspect-ratio:var(--subject-chart-ratio, 1.7);display:block}
+#school-subject-detail .detail-chart-scroll svg{height:185px}
+#school-subject-detail .detail-chart-caption{font-size:11px;line-height:1.55;color:var(--ds-text-secondary);margin:9px 3px 2px}
+#school-subject-detail .grade-entry{min-height:0;padding:7px 2px;gap:8px}
+#school-subject-detail .grade-entry span{font-size:11px;line-height:1.45}
+#school-subject-detail .grade-entry__value{font-size:19px}
+/* Subject overview: approved child-focused hierarchy. */
+#school-subject-detail{background:#0e0c21;border:0;box-shadow:none;padding:10px 0 24px;margin-top:0}
+#school-subject-detail .detail-header{padding:0 2px}
+#school-subject-detail .detail-hero{margin-top:17px;border-radius:20px;padding:21px 15px 19px;text-align:center;background:linear-gradient(145deg,#36264e,#242040 72%,#1e1b38);border:1px solid #634982;display:flex;align-items:center;flex-direction:column;gap:3px}
+#school-subject-detail .detail-hero-label{font-size:12px;font-weight:750;color:#d4c2f1}
+#school-subject-detail .detail-hero-score{font-size:72px;line-height:1.17;color:#f6eaff;font-weight:800;font-variant-numeric:tabular-nums}
+#school-subject-detail .detail-hero-hint{font-size:12px;color:#c4b5da}
+#school-subject-detail .detail-trend-pill{display:inline-block;background:#3a3155;color:#ddccef;border-radius:30px;font-size:11px;font-weight:750;padding:9px 13px;margin-top:11px;line-height:1.35}
+#school-subject-detail .detail-trend-pill.up{background:#203e35;color:#9be9bd}
+#school-subject-detail .detail-trend-pill.down{background:#50303e;color:#ffb1bd}
+#school-subject-detail .detail-kpi{margin:11px 0 12px}
+#school-subject-detail .detail-kpi>div{background:#29223f;border:1px solid #403250}
+#school-subject-detail .detail-kpi strong{font-size:26px;color:#f3eaff;margin-top:5px}
+#school-subject-detail .detail-kpi span{font-size:11px;color:#bfb1d4}
+#school-subject-detail .detail-goal{margin:12px 0 0;background:#18382e;border:1px solid #396c50;border-radius:17px;padding:16px 15px}
+#school-subject-detail .detail-goal.complete{background:#292341;border-color:#5f4984}
+#school-subject-detail .detail-goal-label{font-size:11px;font-weight:800;color:#a3e7be;letter-spacing:.03em}
+#school-subject-detail .detail-goal.complete .detail-goal-label{color:#d4bcff}
+#school-subject-detail .detail-goal-main{font-size:18px;font-weight:800;color:#e1ffed;line-height:1.4;margin:6px 0}
+#school-subject-detail .detail-goal.complete .detail-goal-main{color:#f0e3ff}
+#school-subject-detail .detail-goal-note{font-size:11px;color:#a8d5bb;line-height:1.55}
+#school-subject-detail .detail-chart-scroll{background:#1c1735}
+#school-subject-detail .detail-toggle button{border-radius:10px}
+@media(max-width:360px){#school-subject-detail .detail-hero-score{font-size:62px}#school-subject-detail .detail-goal-main{font-size:16px}}
+/* Visible official grade weights, including controls, without guessing absent values. */
+#school-subject-detail .grade-entry__grade{display:inline-flex;flex:none;align-items:center;gap:9px;justify-content:flex-end;white-space:nowrap}
+#school-subject-detail .grade-entry__weight{display:inline-flex;align-items:center;justify-content:center;border:1px solid #775b9d;background:var(--leveli-accent-dim);color:var(--leveli-accent-ink);font-size:10px;font-weight:800;border-radius:8px;padding:5px 7px;line-height:1.2;white-space:nowrap}
+#school-subject-detail .grade-entry__value{min-width:20px;text-align:right}
+@media(max-width:360px){#school-subject-detail .grade-entry__grade{gap:5px}#school-subject-detail .grade-entry__weight{font-size:9px;padding:4px 5px}}
+#school-period-notice.period-notice{margin:10px 0 0;padding:11px 12px;border-radius:12px;background:var(--ds-surface-inner);border:1px solid var(--ds-border);color:var(--ds-text-primary);font-size:12px;line-height:1.5}
+/* Approved Leveli Steps brand: the wordmark stays legible and does not change with personal themes. */
+.school-header .brand-lockup{display:inline-flex;align-items:center;gap:7px;letter-spacing:0;font-size:17px;font-weight:800;line-height:1.25;color:#f5eaff}
+.school-header .brand-lockup img{width:30px;height:30px;display:block;object-fit:contain;flex:none}
+@media(max-width:360px){.school-header .brand-lockup img{width:27px;height:27px}}
+
+/* Personalization tokens: separate visual accents from semantic grade colors. */
+.school-header .settings-button svg[hidden]{display:none!important}
+:root{--leveli-accent:#a882ff;--leveli-accent-soft:#e2cdff;--leveli-accent-dim:#514071;--leveli-accent-border:#b48cf3}
+:root:not([data-leveli-theme="light"]){color-scheme:dark}
+:root[data-leveli-theme="light"]{color-scheme:light;background:#f7f4fc;color:#302448}
+:root[data-leveli-theme="light"] body{background:#f7f4fc;color:#302448}
+:root[data-leveli-theme="light"] .school-header h1,:root[data-leveli-theme="light"] .card h2,:root[data-leveli-theme="light"] .orient-heading h2,:root[data-leveli-theme="light"] .profile-header .section-title,:root[data-leveli-theme="light"] .subject-row__name{color:#27193d}
+:root[data-leveli-theme="light"] .card,:root[data-leveli-theme="light"] .profile-card{background:#fff;border-color:#e4dbef;color:#302448}
+:root[data-leveli-theme="light"] .school-header p,:root[data-leveli-theme="light"] .profile-header p,:root[data-leveli-theme="light"] .card p,:root[data-leveli-theme="light"] .muted{color:#746588}
+:root[data-leveli-theme="light"] .school-header .brand-lockup{color:#33214e}
+
+:root[data-leveli-theme="light"] .subject-row__name,:root[data-leveli-theme="light"] .donut-title,:root[data-leveli-theme="light"] .forecast-center strong,:root[data-leveli-theme="light"] .forecast-legend .legend-count{color:#342450}
+:root[data-leveli-theme="light"] .subject-row__meta,:root[data-leveli-theme="light"] .subject-row small,:root[data-leveli-theme="light"] .forecast-center span,:root[data-leveli-theme="light"] .donut-unit{color:#746489}
+:root[data-leveli-theme="light"] .subject-row:hover{background:var(--leveli-accent-dim)}
+:root[data-leveli-theme="light"] .forecast-legend .legend-item{color:#413158}
+:root[data-leveli-theme="light"] .trend-card{background:#fff}
+:root[data-leveli-theme="light"] .orient-good{background:#e9f8ef;border-color:#b9e9ce}
+:root[data-leveli-theme="light"] .orient-attention{background:#fff3e5;border-color:#f0d1a8}
+:root[data-leveli-theme="light"] .orient-good .orient-title{color:#245c42}
+:root[data-leveli-theme="light"] .orient-attention .orient-title{color:#855626}
+:root[data-leveli-theme="light"] .orient-link{color:#362847;border-color:#d1c5de}
+:root[data-leveli-theme="light"] .orient-link__metrics strong{color:#302448}
+:root[data-leveli-theme="light"] .grade-entry span{color:#574568}
+:root[data-leveli-theme="light"] #school-subject-detail{background:#f7f4fc}
+:root[data-leveli-theme="light"] #school-subject-detail .detail-hero-label,:root[data-leveli-theme="light"] #school-subject-detail .detail-hero-hint,:root[data-leveli-theme="light"] #school-subject-detail .detail-hero-score{color:#302448}
+:root[data-leveli-theme="light"] #school-subject-detail h3,:root[data-leveli-theme="light"] #school-subject-detail .detail-kpi strong{color:#302448}
+:root[data-leveli-theme="light"] #school-subject-detail .detail-kpi span{color:#746489}
+:root[data-leveli-theme="light"] .profile-actions .profile-logout{color:#5c426e}
+:root[data-leveli-theme="light"] .btn.secondary,:root[data-leveli-theme="light"] .profile-back,:root[data-leveli-theme="light"] .detail-toggle button,:root[data-leveli-theme="light"] #school-period-buttons button{background:var(--ds-surface-inner);color:var(--ds-text-primary);border-color:var(--ds-border)}
+:root .school-header .settings-button,:root .help-btn{color:var(--leveli-accent-soft)}
+:root .btn:not(.secondary),:root #school-period-buttons button[aria-pressed="true"],:root .detail-toggle button[aria-pressed="true"]{background:var(--leveli-accent-dim);border-color:var(--leveli-accent-border);color:var(--leveli-accent-ink)}
+:root .subject-row__average,:root .detail-kpi strong{color:var(--leveli-accent-soft)}
+:root .profile-header .profile-back{margin-bottom:12px}
+.profile-identity{display:flex;gap:13px;align-items:center}
+.profile-identity #profile-name{margin:0 0 4px;font-size:21px}
+.profile-avatar{width:56px;height:56px;border:2px solid var(--leveli-accent-border);background:var(--leveli-accent-dim);border-radius:17px;display:grid;place-items:center;font-size:29px;flex:none}
+.profile-identity #profile-account{font-size:11px;overflow-wrap:anywhere}
+.profile-avatar-custom{display:block;width:100%;height:100%;object-fit:cover;border-radius:15px}
+.personal-avatar-custom{display:block;width:44px;height:44px;object-fit:cover;border-radius:10px}
+.avatar-upload-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+.avatar-upload-row .btn{font-size:11px;margin:0;padding:9px 10px;min-height:42px}
+.profile-account-actions{opacity:.86}
+.profile-account-actions h2{font-size:15px}
+.personal-group{margin-top:18px}
+.personal-group h3{font-size:13px;margin:0 0 9px;font-weight:800}
+.personal-choice-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.personal-theme-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.personal-color-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.personal-option{min-width:0;min-height:48px;border:1px solid var(--ds-border);background:var(--ds-surface-inner);border-radius:12px;color:var(--ds-text-primary);font:700 11px Manrope,system-ui;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;padding:7px 4px;overflow-wrap:anywhere}
+:root .personal-option[aria-pressed="true"]{color:var(--leveli-accent-ink);border:2px solid var(--leveli-accent-border);box-shadow:0 0 0 2px var(--leveli-accent-dim);background:var(--leveli-accent-dim)}
+.personal-option:focus-visible{outline:3px solid var(--leveli-accent);outline-offset:2px}
+.personal-avatar-option{font-size:28px;min-height:59px;padding:4px}
+.avatar-illustration{display:block;width:100%;max-width:58px;aspect-ratio:1;background-image:url('./avatars/prototype-girl.svg');background-repeat:no-repeat;background-size:500% 200%;border-radius:11px;background-color:#34254c}
+.profile-avatar .avatar-illustration{width:100%;max-width:none;border-radius:15px}
+.personal-avatar-option[aria-pressed="true"] .avatar-illustration{outline:2px solid var(--leveli-accent-soft);outline-offset:1px}
+@media(max-width:360px){.personal-avatar-option{min-height:52px;padding:3px}.avatar-illustration{border-radius:8px}}
+.personal-color-swatch{width:27px;height:27px;border-radius:10px;border:1px solid #ffffff50}
+
+.birthday-label{display:block;font-size:12px;font-weight:700;margin:12px 0 7px}
+#profile-birthday{font:600 14px Manrope,system-ui;width:100%;min-height:44px;border:1px solid var(--leveli-accent-border);border-radius:12px;padding:9px 12px;color:inherit;background:var(--ds-surface-inner)}
+
+.birthday-note,#profile-save-status{font-size:12px;margin:9px 0 0;color:var(--leveli-accent-soft)}
+:root[data-leveli-theme="light"] .birthday-note,:root[data-leveli-theme="light"] #profile-save-status{color:var(--leveli-accent-soft)}
+.home-birthday-greeting{padding:8px 12px;border:1px solid var(--leveli-accent-border);background:var(--leveli-accent-dim);border-radius:12px;font-size:13px!important;margin:9px 0!important;color:var(--leveli-accent-ink)!important}
+@media(max-width:360px){.personal-choice-grid,.personal-color-grid{gap:5px}.personal-option{font-size:10px;padding:6px 2px}.personal-theme-grid{gap:5px}}
+
+/* Universal decorative tokens: grade, forecast and trend-status semantics remain fixed. */
+:root{
+ --leveli-accent-track:#55416e;--leveli-accent-line:#d1adff;--leveli-accent-glow:#ab7aff;
+ --leveli-accent-ink:#fff;
+}
+:root .btn:not(.secondary),:root .settings-button,:root .help-btn,:root .detail-toggle button,:root #school-period-buttons button,:root .personal-option{transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease}
+:root .settings-button:focus-visible,:root .btn:focus-visible,:root .help-btn:focus-visible,
+:root .subject-row:focus-visible,:root .orient-link:focus-visible,
+:root .forecast-legend button:focus-visible,:root .detail-toggle button:focus-visible,
+:root #school-period-buttons button:focus-visible{outline:3px solid var(--leveli-accent);outline-offset:3px}
+:root .btn.secondary:not(.profile-logout){border-color:var(--leveli-accent-border);color:var(--leveli-accent-soft)}
+:root .settings-button,:root .help-btn{border-color:var(--leveli-accent-border)}
+:root .header-period{border:1px solid var(--leveli-accent-border);background:var(--leveli-accent-dim);color:var(--leveli-accent-ink)}
+:root .forecast-center{border-color:var(--leveli-accent-border)}
+:root .forecast-legend button[aria-pressed="true"]{background:var(--leveli-accent-dim);border-color:var(--leveli-accent-border)}
+:root .detail-period,:root #school-subject-detail .detail-goal.complete{
+ border-color:var(--leveli-accent-border);
+}
+:root #school-subject-detail .detail-goal.complete{background:var(--leveli-accent-dim)}
+:root #school-subject-detail .detail-goal.complete .detail-goal-label{color:var(--leveli-accent-soft)}
+:root #school-subject-detail .detail-goal.complete .detail-goal-main{color:var(--leveli-accent-ink)}
+:root #school-subject-detail .detail-hero{
+ border-color:var(--leveli-accent-border);
+ box-shadow:0 0 24px -15px var(--leveli-accent-glow);
+ background:linear-gradient(145deg,var(--leveli-accent-dim),var(--ds-card-surface) 82%);
+}
+:root .detail-toggle button[aria-pressed="true"],:root #school-period-buttons button[aria-pressed="true"]{box-shadow:0 0 0 1px var(--leveli-accent-border)}
+:root #school-subject-detail .grade-entry__weight{border-color:var(--leveli-accent-border)}
+:root .profile-card .profile-label{color:var(--leveli-accent-soft)}
+:root[data-leveli-theme="light"]{--leveli-accent-ink:#302448}
+:root[data-leveli-theme="light"] .btn.secondary:not(.profile-logout){color:#3b2b50}
+:root[data-leveli-theme="light"] .forecast-center{color:#302448}
+@media(prefers-reduced-motion:reduce){
+ :root .btn,:root .settings-button,:root .help-btn,:root .detail-toggle button,:root #school-period-buttons button,:root .personal-option{transition:none!important}
+}
+
+/* DS v1: functional icons use 20/24px artwork and independently accessible 44px hit targets. */
+/* Shared DS variables are defined in the unified component contract below. */
+:root .settings-button{width:48px;height:48px;padding:0;display:grid;place-items:center;flex:none;position:relative}
+:root .help-btn{width:44px;height:44px;min-width:44px;min-height:44px;display:grid;place-items:center}
+:root .btn{min-height:46px}
+:root .btn:not(.secondary){min-height:48px}
+:root .forecast-legend button{min-height:44px}
+:root .orient-link{min-height:44px}
+:root .card{border-radius:var(--ds-radius-card)}
+:root .donut-panel{border-radius:var(--ds-radius-inner)}
+:root .trend-sparse{display:flex;gap:10px;align-items:center;min-height:64px;background:#29223f;padding:12px;border-radius:14px;border:1px solid var(--leveli-accent-border)}
+:root .trend-sparse strong{font-size:23px;color:var(--leveli-accent-soft);white-space:nowrap}
+:root .trend-sparse span{font-size:12px;color:#cbbadf;line-height:1.5}
+:root .trend-card.trend-short{padding-bottom:15px}
+:root .orient-grid[hidden],:root .orient-heading[hidden],:root .orient-panel[hidden]{display:none!important}
+:root .orient-grid.orient-single{grid-template-columns:1fr}
+:root .orient-sparse{padding:13px 15px;border-radius:14px;border:1px solid #493b62;background:#241d3b;font-size:12px;line-height:1.5;color:#c9badf}
+:root .orient-sparse[hidden]{display:none!important}
+:root[data-leveli-theme="light"] .orient-sparse{background:#f2ecf8;border-color:#e1d4ed;color:#5e4c71}
+:root[data-leveli-theme="light"] .trend-sparse{background:#f4eefa}
+:root[data-leveli-theme="light"] .trend-sparse strong{color:var(--leveli-accent-soft)}
+:root[data-leveli-theme="light"] .trend-sparse span{color:#665678}
+@media(max-width:360px){:root .help-btn{width:44px;height:44px}:root .forecast-legend button{min-height:44px}}
+
+/* Leveli B3: game-inspired settings. Old form controls and IDs stay intact inside the dialog. */
+[data-page="profile"]{position:relative}
+[data-page="profile"]>.profile-header,[data-page="profile"]>.profile-card{display:none!important}
+[data-page="profile"] .b3-settings{display:block}
+.b3-header{display:flex;align-items:center;gap:12px;margin:4px 0 0}
+.b3-header h1{font-size:24px;line-height:1.2;letter-spacing:-.025em;margin:0;color:#fff;font-weight:800}
+.b3-header p{font-size:12px;color:#baa9d2;margin:4px 0 0}
+.b3-home-btn{width:44px;height:44px;display:grid;place-items:center;flex:none;border-radius:12px;border:1px solid #544069;background:#2b2444;color:#f4eaff;font-size:23px;cursor:pointer}
+.b3-hero{border-radius:24px;border:1px solid var(--leveli-accent-border);background:linear-gradient(125deg,var(--leveli-accent-dim),var(--ds-card-surface) 85%);position:relative;box-shadow:0 16px 36px -27px var(--leveli-accent-glow)}
+.b3-identity-slot .profile-identity{display:block}
+.b3-identity-slot #profile-name{font-size:28px!important;margin:0;color:#fff}
+.b3-identity-slot #profile-account{font-size:12px;color:#c8b9da;margin:6px 0}
+.b3-change-avatar{min-height:44px;margin:14px auto 0;border-radius:12px;background:var(--ds-surface-inner);border:1px solid var(--leveli-accent-border);color:var(--ds-text-primary);padding:10px 15px;font-size:12px;font-weight:800;cursor:pointer}
+.b3-section-label{margin:24px 3px 10px;color:#b9aaca;letter-spacing:.11em;font-size:11px;font-weight:800;text-transform:uppercase}
+.b3-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.b3-tile{min-height:132px;min-width:0;text-align:left;padding:14px;border-radius:18px;display:flex;flex-direction:column;align-items:flex-start;gap:7px;background:var(--ds-card-surface) linear-gradient(135deg,color-mix(in srgb,var(--leveli-accent-dim) 45%,transparent),transparent 72%);border:1px solid color-mix(in srgb,var(--leveli-accent-border) 45%,var(--ds-border));color:var(--ds-text-primary);cursor:pointer}
+.b3-tile-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:13px;background:var(--leveli-accent-dim);color:var(--leveli-accent-ink);font-size:23px}
+.b3-tile strong{font-size:13px;font-weight:800;line-height:1.35;margin-top:auto}
+.b3-tile small{font-size:11px;color:#b8a9ca}
+.b3-extra{background:#1c1735;border:1px solid #453360;border-radius:18px;padding:0 13px}
+.b3-extra button{background:transparent;color:#fff;border:0;border-bottom:1px solid #453360;min-height:54px;width:100%;display:flex;align-items:center;justify-content:space-between;text-align:left;font-weight:700;font-size:13px;cursor:pointer}
+.b3-extra button:last-child{border-bottom:0}
+.b3-extra button span{font-size:21px;color:#b5a6ce}
+.b3-overlay{position:fixed;z-index:30;inset:0;display:flex;justify-content:center;align-items:center;padding:20px 12px;background:#090617d9;overflow:auto}
+.b3-overlay[hidden]{display:none!important}
+.b3-dialog{width:min(100%,480px);max-height:min(84dvh,740px);overflow-y:auto;background:var(--ds-card-surface);border:1px solid var(--leveli-accent-border);border-radius:22px;padding:16px;color:var(--ds-text-primary);box-shadow:0 18px 50px #0007}
+.b3-dialog-header{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.b3-dialog-header h2{font-size:18px;margin:0}
+#b3-panel-close{border:0;background:var(--ds-surface-inner);border-radius:11px;width:44px;height:44px;color:var(--ds-text-primary);font-size:23px;cursor:pointer}
+.b3-dialog .profile-card{display:block!important;margin-top:10px}
+.b3-dialog .profile-card[hidden]{display:none!important}
+.b3-dialog .profile-card h2{display:none}
+.b3-dialog .personal-group{display:none}
+.b3-dialog[data-section="avatar"] .personal-group:has(#personal-avatar-options),.b3-dialog[data-section="theme"] .personal-group:has(#personal-theme-options),.b3-dialog[data-section="accent"] .personal-group:has(#personal-accent-options),.b3-dialog[data-section="icons"] .personal-group:has(#personal-pack-options){display:block}
+.b3-dialog .personal-option{min-height:48px}
+.b3-dialog #profile-personalization{margin-top:0}
+.b3-settings button:focus-visible,.b3-dialog button:focus-visible{outline:3px solid var(--leveli-accent);outline-offset:2px}
+:root[data-leveli-theme="light"] .b3-header h1,:root[data-leveli-theme="light"] .b3-identity-slot #profile-name{color:#302448}
+:root[data-leveli-theme="light"] .b3-header p,:root[data-leveli-theme="light"] .b3-section-label,:root[data-leveli-theme="light"] .b3-identity-slot #profile-account{color:#746489}
+
+:root[data-leveli-theme="light"] .b3-extra{background:var(--ds-card-surface);border-color:var(--ds-border);color:var(--ds-text-primary)}
+:root[data-leveli-theme="light"] .b3-tile small,:root[data-leveli-theme="light"] .b3-extra button span{color:#746489}
+:root[data-leveli-theme="light"] .b3-extra button{color:#302448;border-bottom-color:#e4dbef}
+
+:root[data-leveli-theme="light"] .b3-dialog-header h2{color:#302448}
+@media(max-width:360px){.b3-tile{padding:12px;min-height:124px}}
+
+/* DS v2: icon role and hit area are separate. Unified interactive geometry. */
+:root{
+ --ds-icon:20px;--ds-icon-lg:24px;--ds-control-height:44px;
+ --ds-space-1:4px;--ds-space-2:8px;--ds-space-3:12px;--ds-space-4:16px;--ds-space-5:24px;--ds-space-6:32px;
+}
+:root .b3-tile-icon svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+:root .b3-home-btn{font-size:var(--ds-icon-lg)}
+:root .b3-settings .b3-tile{border-radius:var(--ds-radius-card)}
+:root #school-current-period,:root #profile-remove-avatar,:root #profile-upload-avatar,:root .profile-actions .btn{min-height:var(--ds-hit)}
+:root .detail-toggle button,:root #school-period-buttons button{min-height:var(--ds-hit)}
+:root .forecast-legend button.legend-item{min-height:var(--ds-hit)}
+:root .b3-dialog .personal-option{min-height:var(--ds-control-height)}
+:root .b3-dialog .personal-avatar-option{min-height:64px}
+:root .b3-dialog .avatar-upload-row button{min-height:var(--ds-hit)}
+:root .b3-dialog .personal-option:focus-visible,:root .b3-dialog input:focus-visible,:root .b3-extra button:focus-visible{
+ outline:3px solid var(--leveli-accent);outline-offset:3px
+}
+:root .b3-dialog .personal-option[aria-pressed="true"]{border-width:2px;box-shadow:inset 0 0 0 1px var(--leveli-accent-border)}
+:root .b3-dialog .personal-option{font-size:12px;min-width:0;overflow-wrap:anywhere}
+:root .b3-dialog .personal-color-swatch{width:30px;height:30px}
+:root .b3-dialog-open{overflow:hidden}
+:root .b3-overlay{padding:max(18px,env(safe-area-inset-top)) 12px max(18px,env(safe-area-inset-bottom))}
+:root .b3-dialog{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+:root .b3-change-avatar[hidden],:root .b3-extra button[hidden]{display:none!important}
+@media(max-width:360px){
+ :root .b3-tile{padding:12px;min-height:124px}
+ :root .b3-settings .b3-tile strong{font-size:12px}
+ :root .b3-dialog .personal-choice-grid,:root .b3-dialog .personal-color-grid{gap:5px}
+}
+@media(prefers-reduced-motion:reduce){:root .b3-tile,:root .b3-dialog .personal-option{transition:none!important}}
+
+/* Transparent character portraits load only when the optional, versioned assets exist.
+   Until then the already-shipped WebP atlas remains the intact fallback. */
+
+/* B3 post-iPhone review: a transparent character is not a square image card.
+   Keep the child-sized character separated from name and avoid a coloured tile behind alpha. */
+.b3-dialog .personal-choice-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.b3-dialog .personal-avatar-option{min-width:0}
+
+/* Shared component contract: typography, geometric tokens and touch targets.
+   Semantic grade colors remain intentionally independent from decorative accents. */
+:root{
+ --ds-font-body:14px;--ds-font-support:12px;--ds-font-card:18px;--ds-font-screen:26px;
+ --ds-line-normal:1.5;--ds-line-heading:1.3;
+ --ds-radius-card:20px;--ds-radius-inner:15px;--ds-radius-control:12px;
+ --ds-hit:44px;--ds-button-height:48px;
+ --ds-chart-grid:#594c70;--ds-status-good:#78e7ae;--ds-status-bad:#ff8fa1;
+ --ds-text-primary:#f6f0ff;--ds-text-secondary:#baadcf;
+ --ds-card-surface:#1c1735;--ds-border:#453360;
+}
+:root[data-leveli-theme="light"]{
+ --ds-chart-grid:#b9adc8;--ds-status-good:#216746;--ds-status-bad:#a82e4f;
+ --ds-text-primary:#302448;--ds-text-secondary:#665677;
+ --ds-card-surface:#fff;--ds-border:#e4dbef;
+}
+:root .card:not(.detail-goal){border-radius:var(--ds-radius-card)}
+:root .subject-row,:root .b3-settings .b3-tile,:root .b3-extra{border-radius:var(--ds-radius-inner)}
+:root .btn,:root .detail-toggle button,:root #school-period-buttons button,
+:root .personal-option,:root .b3-change-avatar,:root .b3-home-btn{min-height:var(--ds-hit)}
+:root #school-form button[type="submit"],:root .b3-change-avatar{min-height:var(--ds-button-height)}
+:root .orient-more,:root .detail-back,:root .profile-back{min-height:var(--ds-hit)}
+:root .card-heading h2,:root .subjects-card h2,:root .orient-heading h2{line-height:var(--ds-line-heading)}
+:root .b3-extra button,.b3-dialog button{touch-action:manipulation}
+:root .b3-section-label{color:var(--ds-text-secondary)}
+:root .b3-tile small{color:var(--ds-text-secondary)}
+:root .b3-tile:focus-visible,:root .b3-extra button:focus-visible,:root .b3-change-avatar:focus-visible,
+:root .b3-home-btn:focus-visible,:root .orient-more:focus-visible,:root .detail-back:focus-visible{
+ outline:3px solid var(--leveli-accent-border);outline-offset:3px
+}
+/* White icon artwork stays decorative inside a 44px or larger target. */
+:root .b3-tile-icon{width:var(--ds-hit);height:var(--ds-hit);flex:none}
+:root .b3-tile-icon svg{width:var(--ds-icon-lg);height:var(--ds-icon-lg)}
+/* Keep grade history readable without inadvertently enlarging score glyphs. */
+:root #school-subject-detail .grade-entry span:not(.grade-entry__weight):not(.grade-entry__value){line-height:1.55}
+:root .subject-row__name{line-height:1.45}
+@media(max-width:360px){
+ :root .b3-tiles{gap:8px}
+ :root .b3-tile{min-width:0}
+ :root .b3-tile strong{overflow-wrap:anywhere}
+ :root .b3-dialog{max-width:calc(100vw - 24px)}
+}
+@media(prefers-reduced-motion:reduce){
+ :root .b3-tile,:root .b3-change-avatar,:root .orient-more{transition:none!important}
+}
+
+/* Consistent Lucide-scale functional actions on the B3 navigation and dialog. */
+.b3-home-btn svg,#b3-panel-close svg{
+ width:var(--ds-icon-lg);height:var(--ds-icon-lg);
+ stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+ fill:none;display:block;
+}
+#b3-panel-close{display:grid;place-items:center}
+
+/* Design-system navigation: the same back action on subject and settings screens. */
+:root .leveli-back-btn{
+ display:inline-flex;align-items:center;justify-content:center;gap:var(--ds-space-2);
+ width:auto;min-width:100px;min-height:var(--ds-hit);height:44px;flex:none;
+ margin:0;padding:0 var(--ds-space-3);border:1px solid var(--ds-border);
+ border-radius:var(--ds-radius-control);
+ background:var(--ds-surface-inner);color:var(--ds-text-primary);
+ font:700 13px Manrope,system-ui,sans-serif;line-height:1;
+ cursor:pointer;white-space:nowrap;box-shadow:none;
+}
+:root .leveli-back-btn svg{
+ display:block;flex:none;width:20px;height:20px;
+ fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+}
+:root .leveli-back-btn:hover{background:var(--leveli-accent-dim)}
+:root .leveli-back-btn:active{transform:translateY(1px)}
+:root .leveli-back-btn:focus-visible{outline:3px solid var(--leveli-accent-border);outline-offset:3px}
+:root[data-leveli-theme="light"] .leveli-back-btn{background:var(--ds-surface-inner);color:var(--ds-text-primary);border-color:var(--ds-border)}
+:root[data-leveli-theme="light"] .leveli-back-btn:hover{background:var(--leveli-accent-dim)}
+:root .b3-header{align-items:center;gap:var(--ds-space-3)}
+:root .b3-header h1{font-size:24px;line-height:1.25;overflow-wrap:anywhere}
+:root #school-subject-detail .detail-header{
+ display:flex;flex-direction:column;align-items:stretch;gap:var(--ds-space-2);padding:0 2px;
+}
+:root #school-subject-detail .detail-header-main{
+ display:flex;align-items:center;gap:var(--ds-space-3);min-width:0;
+}
+:root #school-subject-detail .detail-title{
+ font-size:24px!important;font-weight:800;line-height:1.25;letter-spacing:-.025em;min-width:0;flex:1;
+}
+:root #school-subject-detail .detail-period{align-self:flex-end}
+@media(max-width:360px){
+ :root .leveli-back-btn{min-width:92px;padding-inline:10px}
+ :root #school-subject-detail .detail-header-main{gap:8px}
+ :root #school-subject-detail .detail-title{font-size:clamp(19px,6vw,24px)!important}
+}
+@media(prefers-reduced-motion:reduce){:root .leveli-back-btn{transition:none}}
+
+/* Final CSS/icon audit: shared controls use consistent, scalable SVG geometry.
+   Historical color rules are retained only where they encode chart/grade semantics. */
+:root .help-btn svg{width:20px;height:20px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+:root .b3-extra button svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;color:var(--ds-text-secondary)}
+:root[data-leveli-theme="light"] .b3-extra button svg{color:#746489}
+
+/* Shared dashboard surfaces and spacing; grade/status colours stay semantic. */
+:root{
+ --ds-surface-inner:#25203d;
+ --ds-surface-kpi:#29223f;
+ --ds-surface-chart:#1c1735;
+}
+:root[data-leveli-theme="light"]{
+ --ds-surface-inner:#f3eefb;
+ --ds-surface-kpi:#f3eefb;
+ --ds-surface-chart:#f3eefb;
+}
+:root .forecast-card,:root .trend-card,:root .subjects-card{
+ background:var(--ds-card-surface) linear-gradient(150deg,color-mix(in srgb,var(--leveli-accent-dim) 48%,transparent),transparent 48%);
+ border-color:color-mix(in srgb,var(--leveli-accent-border) 48%,var(--ds-border));
+ box-shadow:0 10px 26px -23px var(--leveli-accent-glow);
+ padding:var(--ds-space-4);
+}
+:root .donut-panel{background:var(--ds-surface-inner) linear-gradient(150deg,color-mix(in srgb,var(--leveli-accent-dim) 40%,transparent),transparent 65%);padding:var(--ds-space-2)}
+:root #school-subject-detail .detail-kpi>div{background:color-mix(in srgb,var(--leveli-accent-dim) 34%,var(--ds-surface-kpi));border-radius:var(--ds-radius-inner)}
+:root #school-subject-detail .detail-chart-scroll{background:color-mix(in srgb,var(--leveli-accent-dim) 28%,var(--ds-surface-chart));border-radius:var(--ds-radius-inner)}
+@media(max-width:360px){
+ :root .forecast-card,:root .trend-card,:root .subjects-card{padding:var(--ds-space-3)}
+ :root .donut-panel{padding:var(--ds-space-1)}
+}
+
+/* Design-kit typography: shared screen and card title sizes across dashboard and subject. */
+:root .school-header h1{font-size:var(--ds-font-screen);line-height:var(--ds-line-heading)}
+:root .forecast-card .card-heading h2,:root .trend-card .card-heading h2,:root .subjects-card h2,:root .orient-heading h2{font-size:var(--ds-font-card);line-height:var(--ds-line-heading)}
+:root .card p{line-height:var(--ds-line-normal)}
+@media(max-width:360px){:root .school-header h1{font-size:clamp(23px,7vw,var(--ds-font-screen))}}
+
+/* Horizontal portrait layout. The portrait's own box carries the fade. */
+.b3-hero-space{padding-top:25px}
+.b3-hero{display:grid;grid-template-columns:minmax(0,44%) minmax(0,56%);align-items:center;min-height:165px;padding:14px 15px 14px 0;text-align:left;isolation:isolate}
+.b3-avatar-stand{position:absolute;top:-12px;left:0;width:42%;height:calc(100% + 12px);pointer-events:none}
+.b3-avatar-stand .profile-avatar{position:absolute;inset:0;display:grid;justify-items:center;align-content:start;width:100%;height:100%;border:0;border-radius:0;background:transparent}
+.b3-avatar-stand :is(.avatar-illustration,.profile-avatar-custom){display:block;width:auto;height:auto;max-width:100%;max-height:100%;aspect-ratio:auto;object-fit:contain;border:0;border-radius:0;background:none;-webkit-mask-image:linear-gradient(#000 77%,transparent 100%);mask-image:linear-gradient(#000 77%,transparent 100%)}
+.b3-avatar-stand .prototype-avatar{width:100%;height:100%;background:url('./avatars/prototype-girl.svg') center top/contain no-repeat}
+.b3-profile-copy{grid-column:2;min-width:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:10px;padding-left:4px}
+.b3-identity-slot .profile-identity{display:block}
+.b3-identity-slot #profile-name{font-size:clamp(19px,5vw,25px);line-height:1.16;margin:0 0 5px;overflow-wrap:anywhere}
+.b3-identity-slot #profile-account{font-size:11px;line-height:1.3;margin:0;color:var(--ds-text-secondary);overflow-wrap:anywhere}
+.b3-change-avatar{margin:0;min-height:44px;padding:8px 11px;max-width:100%;font-size:11px;line-height:1.25;white-space:normal}
+@media(max-width:360px){.b3-hero{padding-right:10px}.b3-change-avatar{font-size:10px;padding:7px 8px}}
+
+.b3-tiles{gap:9px!important}
+.b3-tile{min-height:86px!important;padding:12px!important;display:grid!important;grid-template-columns:39px minmax(0,1fr);grid-template-rows:auto auto;align-content:center;align-items:center;column-gap:10px;row-gap:2px}
+.b3-tile-icon{grid-row:1 / span 2;width:39px;height:39px;margin:0!important;flex:none}
+.b3-tile-icon svg{width:24px;height:24px;display:block;flex:none}
+.b3-tile strong{grid-column:2;grid-row:1;margin:0!important;font-size:12px!important;line-height:1.25}
+.b3-tile small{grid-column:2;grid-row:2;font-size:11px!important;line-height:1.3}
+@media(max-width:360px){.b3-tile{grid-template-columns:32px minmax(0,1fr);column-gap:7px;padding:9px!important}.b3-tile-icon{width:32px;height:32px}.b3-tile strong{font-size:11px!important}.b3-tile small{font-size:10px!important}}
+/* Decorative icon size must match the grid track; the old :root token forced 44px and overlapped labels on 320px screens. */
+:root .b3-settings .b3-tile .b3-tile-icon{width:39px;height:39px;min-width:0;grid-column:1;grid-row:1 / span 2}
+@media(max-width:360px){:root .b3-settings .b3-tile .b3-tile-icon{width:32px;height:32px}}
+/* Gallery previews preserve the whole silhouette. */
+.personal-avatar-option .avatar-illustration.leveli-3d-avatar{display:block;width:100%;height:100%;max-width:none;aspect-ratio:1;object-fit:contain;background:none;border:0;border-radius:0}
+
+/* Grade trend explanation for keyboard and touch input. */
+.leveli-trend-dialog{width:min(92vw,420px);max-height:85vh;overflow:auto;margin:auto;border:1px solid var(--leveli-accent-border,#a882ff);border-radius:18px;padding:22px;background:#211b33;color:#f5f0ff;box-shadow:0 18px 50px #0008}
+.leveli-trend-dialog::backdrop{background:#05030ac9}
+:root[data-leveli-theme="light"] .leveli-trend-dialog{background:#fff;color:#302448}
+.leveli-trend-dialog h2{font-size:20px;margin:0 0 12px}.leveli-trend-dialog p{line-height:1.45;margin:8px 0}
+.leveli-trend-dialog .trend-explain-group{padding:10px 0;border-top:1px solid #8885}
+.leveli-trend-dialog .trend-explain-result{font-weight:800}
+.leveli-trend-dialog button{min-height:44px;margin-top:10px}
+.detail-trend-pill:is(button){border:1px solid currentColor;cursor:pointer;min-height:44px}
+/* Icon slots share geometry and use the active ink across packs. */
+.settings-button svg{width:24px;height:24px}
+.pack-icon{display:inline-block;width:20px;height:20px;flex:none;vertical-align:middle;margin-inline-end:7px;background:var(--leveli-accent-soft);-webkit-mask:var(--icon-image) center/contain no-repeat;mask:var(--icon-image) center/contain no-repeat}
+.settings-button .pack-icon,.b3-tile-icon .pack-icon{width:24px;height:24px;margin:0;color:inherit;background:currentColor}
+:root:not([data-leveli-pack="classic"]) :is(.settings-button,.b3-tile-icon)>svg{display:none}
+:root[data-leveli-pack="classic"] .pack-icon--alternate{display:none}
+.pack-icon-preview{display:block;margin:0 auto 3px}
+.b3-extra button[data-b3-panel="birthday"]{justify-content:flex-start;gap:8px}
+.b3-extra button[data-b3-panel="birthday"] svg{margin-inline-start:auto}
+.b3-extra button .pack-icon{margin-inline-end:0}
+:root[data-leveli-pack="classic"] [data-icon="forecast"]{--icon-image:url("./icons/classic/forecast.svg")}
+:root[data-leveli-pack="classic"] [data-icon="trend"]{--icon-image:url("./icons/classic/trend.svg")}
+:root[data-leveli-pack="classic"] [data-icon="book"]{--icon-image:url("./icons/classic/book.svg")}
+:root[data-leveli-pack="classic"] [data-icon="goals"]{--icon-image:url("./icons/classic/goals.svg")}
+:root[data-leveli-pack="classic"] [data-icon="history"]{--icon-image:url("./icons/classic/history.svg")}
+:root[data-leveli-pack="classic"] [data-icon="birthday"]{--icon-image:url("./icons/classic/birthday.svg")}
+:root[data-leveli-pack="cats"] [data-icon="forecast"]{--icon-image:url("./icons/cats/chart.svg")}
+:root[data-leveli-pack="cats"] [data-icon="trend"]{--icon-image:url("./icons/cats/feather.svg")}
+:root[data-leveli-pack="cats"] [data-icon="book"]{--icon-image:url("./icons/cats/book.svg")}
+:root[data-leveli-pack="cats"] [data-icon="goals"]{--icon-image:url("./icons/cats/paw.svg")}
+:root[data-leveli-pack="cats"] [data-icon="history"]{--icon-image:url("./icons/cats/music.svg")}
+:root[data-leveli-pack="cats"] [data-icon="quarter"]{--icon-image:url("./icons/cats/calendar.svg")}
+:root[data-leveli-pack="cats"] [data-icon="theme"]{--icon-image:url("./icons/cats/cat.svg")}
+:root[data-leveli-pack="cats"] [data-icon="accent"]{--icon-image:url("./icons/cats/palette.svg")}
+:root[data-leveli-pack="cats"] [data-icon="icons"]{--icon-image:url("./icons/cats/paw.svg")}
+:root[data-leveli-pack="cats"] [data-icon="settings"]{--icon-image:url("./icons/cats/settings.svg")}
+:root[data-leveli-pack="cats"] [data-icon="birthday"]{--icon-image:url("./icons/cats/heart.svg")}
+:root[data-leveli-pack="sports"] [data-icon="forecast"]{--icon-image:url("./icons/sports/chart.svg")}
+:root[data-leveli-pack="sports"] [data-icon="trend"]{--icon-image:url("./icons/sports/bolt.svg")}
+:root[data-leveli-pack="sports"] [data-icon="book"]{--icon-image:url("./icons/sports/book.svg")}
+:root[data-leveli-pack="sports"] [data-icon="goals"]{--icon-image:url("./icons/sports/target.svg")}
+:root[data-leveli-pack="sports"] [data-icon="history"]{--icon-image:url("./icons/sports/flag.svg")}
+:root[data-leveli-pack="sports"] [data-icon="quarter"]{--icon-image:url("./icons/sports/calendar.svg")}
+:root[data-leveli-pack="sports"] [data-icon="theme"]{--icon-image:url("./icons/sports/bolt.svg")}
+:root[data-leveli-pack="sports"] [data-icon="accent"]{--icon-image:url("./icons/sports/flag.svg")}
+:root[data-leveli-pack="sports"] [data-icon="icons"]{--icon-image:url("./icons/sports/soccer.svg")}
+:root[data-leveli-pack="sports"] [data-icon="settings"]{--icon-image:url("./icons/sports/settings.svg")}
+:root[data-leveli-pack="sports"] [data-icon="birthday"]{--icon-image:url("./icons/sports/trophy.svg")}
+.pack-icon[data-preview="classic"]{--icon-image:url("./icons/classic/goals.svg")}
+.pack-icon[data-preview="cats"]{--icon-image:url("./icons/cats/paw.svg")}
+.pack-icon[data-preview="sports"]{--icon-image:url("./icons/sports/soccer.svg")}
 </style></head><body><div class="app"><main class="content" id="main">
-<section data-page="home"><header class="school-header"><div><div class="eyebrow">ЛЕВЕЛИ</div><h1 id="home-greeting">Привет!</h1><p>Мои оценки и успеваемость</p></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
+<section data-page="home"><header class="school-header"><div><div class="eyebrow brand-lockup"><img src="./brand/mark.svg" alt="" width="30" height="30" aria-hidden="true"><span>Левели</span></div><h1 id="home-greeting">Привет!</h1><p id="home-birthday-greeting" class="home-birthday-greeting" hidden></p><p>Мои оценки и успеваемость</p><div class="header-period" id="school-header-period">II четверть · 2026/27 учебный год</div></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><span class="pack-icon pack-icon--alternate" data-icon="settings" aria-hidden="true"></span><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
 <article class="card" id="school-login"><h2>Войди, чтобы увидеть оценки</h2><p>Оценки загружаются из электронного дневника.</p><form id="school-form"><label>Почта<input id="school-email" type="email" autocomplete="username" required></label><label>Пароль<input id="school-password" type="password" autocomplete="current-password" required></label><button class="btn" type="submit">Войти</button></form></article>
-<div id="school-results" hidden><p id="school-sync-freshness" data-state="unknown" aria-live="polite">Когда проверялся дневник — неизвестно</p><div id="school-subject-detail" class="card" hidden></div><div id="school-overview">
-<article class="card forecast-card"><div class="card-heading"><h2>Как у меня дела?</h2><span class="quarter-label" id="school-quarter-label">Текущая четверть</span></div>
-<div class="forecast-layout"><div class="forecast-chart"><svg id="school-donut" viewBox="0 0 200 200" role="img" aria-label="Распределение прогнозов по предметам"></svg><div class="forecast-center"><strong id="school-overall">—</strong><span>Средний балл</span></div></div>
-<div id="school-forecast-legend" class="forecast-legend"></div></div><div id="school-analytics" class="muted"></div><p id="school-status" class="muted">Загрузка…</p></article>
-<article class="card trend-card"><div class="card-heading"><h2>Моя успеваемость</h2><span id="school-trend-change" class="trend-change"></span></div><div id="school-trend"></div></article>
-<div class="orient-heading"><h2>Мои ориентиры</h2><p>Где всё хорошо и чему уделить внимание</p></div>
+<div id="school-results" hidden><div id="school-subject-detail" class="card" hidden></div><div id="school-overview">
+<article class="card forecast-card">
+ <div class="card-heading"><h2><span class="pack-icon" data-icon="forecast" aria-hidden="true"></span>Как у меня дела?</h2><button class="help-btn" type="button" data-help="school-chart-help" aria-label="Как считаются диаграммы?" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4"/><path d="M12 17h.01"/></svg></button></div>
+ <div id="school-chart-help" class="inline-help" hidden>Слева — распределение предметов по прогнозу или выставленной четвертной оценке. Средний балл в центре — среднее по предметам с оценками. Справа — количество обычных полученных оценок за четверть по значениям 5, 4, 3 и 2; итоговые четвертные не включаются. Нажатие на категорию слева фильтрует список предметов.</div>
+ <div class="double-donut">
+  <div class="donut-panel"><div class="donut-title">По предметам</div><div class="forecast-chart"><svg id="school-donut" viewBox="0 0 200 200" role="img" aria-label="Распределение предметов"></svg><div class="forecast-center"><strong id="school-overall">—</strong><span>Средний балл</span></div></div><div id="school-forecast-legend" class="forecast-legend" aria-label="Количество предметов по оценкам"></div><div class="donut-unit">Количество предметов</div></div>
+  <div class="donut-panel"><div class="donut-title">По оценкам</div><div class="forecast-chart"><svg id="school-grades-donut" viewBox="0 0 200 200" role="img" aria-label="Распределение полученных оценок"></svg><div class="forecast-center"><strong id="school-grades-total">0</strong><span>Всего оценок</span></div></div><div id="school-grades-legend" class="forecast-legend" aria-label="Количество фактически полученных оценок"></div><div class="donut-unit">Количество оценок</div></div>
+ </div>
+ <div id="school-analytics" class="muted" hidden></div></article>
+<article class="card trend-card">
+ <div class="card-heading"><div class="heading-with-help"><h2><span class="pack-icon" data-icon="trend" aria-hidden="true"></span>Моя успеваемость</h2><button class="help-btn" type="button" data-help="school-trend-help" aria-label="Как считается успеваемость?" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4"/><path d="M12 17h.01"/></svg></button></div><span id="school-trend-change" class="trend-change"></span></div>
+ <div id="school-trend-help" class="inline-help" hidden>Светящаяся линия показывает накопительный средний балл за выбранную четверть. Изменение справа — разница с сохранённым средним на конец предыдущего дня. Если вчерашних данных нет, изменение не показывается.</div>
+ <div id="school-trend"></div></article>
+<div class="orient-heading"><h2><span class="pack-icon" data-icon="goals" aria-hidden="true"></span>Мои ориентиры</h2><button class="help-btn" type="button" data-help="school-orient-help" aria-label="Что означает динамика?" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4"/><path d="M12 17h.01"/></svg></button></div><div id="school-orient-help" class="inline-help" hidden>Динамика показывает изменение оценок за выбранную четверть. При 0–1 оценке её нет; при 2–5 сравниваем последнюю оценку со взвешенным средним предыдущих; при 6 и более — среднее последних трёх со средним трёх перед ними. Официальные веса учитываются, отсутствующий вес при расчёте равен 1. Изменение от +0,50 или до −0,50 включительно выделяется стрелкой; порог проверяем до округления. Нажми на показатель динамики, чтобы увидеть расчёт.</div>
+<div id="school-orient-empty" class="orient-sparse" hidden>Пока недостаточно данных для рекомендаций по предметам. Они появятся, когда сформируется прогноз.</div>
 <div class="orient-grid"><article class="orient-panel orient-good"><div class="orient-title">★ Молодец</div><div id="school-good-list"></div></article><article class="orient-panel orient-attention"><div class="orient-title">◎ Подтянуть</div><div id="school-attention-list"></div></article></div>
-<article class="card subjects-card"><div class="card-heading"><h2>Все предметы</h2><span id="school-subject-count" class="muted"></span></div>
-<div id="school-filter-buttons" hidden></div><select id="school-filter" hidden><option value="all">Все предметы</option><option value="strong">Сильные</option><option value="attention">Требуют внимания</option></select><div id="school-subjects"></div></article></div></div><p id="school-error" role="alert" class="muted"></p></section>
-<section data-page="profile" hidden><h1 class="section-title">Настройки и профиль</h1><button class="btn secondary" data-go="home">← К оценкам</button><article class="card"><h2 id="profile-name">Гость</h2><p id="profile-account">Войди на главной, чтобы подключить профиль.</p><p id="profile-school" class="muted"></p><div class="profile-period"><h2>Просмотр четверти</h2><p class="muted">На главной обычно показывается текущая четверть.</p><div id="school-period-buttons" class="choice-buttons"></div><select id="school-period" hidden><option value="all">Все оценки</option></select><button type="button" id="school-current-period" class="btn secondary">Вернуться к текущей четверти</button></div><div id="profile-actions" hidden><button class="btn secondary" id="school-refresh">Обновить оценки</button><button class="btn secondary" id="school-logout">Выйти</button></div></article></section>
-</main></div><script src="./school-model.js"></script><script>
+<article class="card subjects-card"><div class="card-heading"><h2><span class="pack-icon" data-icon="book" aria-hidden="true"></span>Все предметы</h2><span id="school-subject-count" class="muted"></span></div>
+<div id="school-filter-buttons" hidden></div><select id="school-filter" hidden><option value="all">Все предметы</option><option value="strong">Сильные</option><option value="attention">Требуют внимания</option></select><div id="school-subjects"></div></article><p id="school-status" class="muted">Загрузка…</p><p id="school-freshness" aria-live="polite"></p></div></div><p id="school-error" role="alert" class="muted"></p></section>
+<section data-page="profile" hidden>
+ <div class="b3-settings" id="b3-settings">
+  <header class="b3-header"><button type="button" class="b3-home-btn leveli-back-btn" data-go="home" aria-label="Назад на главную"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19 5 12l7-7"/><path d="M5 12h14"/></svg><span>Назад</span></button><h1>Настройки</h1></header>
+  <div class="b3-hero-space"><div class="b3-hero"><div class="b3-avatar-stand" id="b3-avatar-stand"></div><div class="b3-profile-copy"><div class="b3-identity-slot" id="b3-identity-slot"></div><button class="b3-change-avatar" type="button" data-b3-panel="avatar">Изменить аватар</button></div></div></div>
+  <h2 class="b3-section-label">Быстрые настройки</h2>
+  <div class="b3-tiles">
+    <button type="button" class="b3-tile" data-b3-panel="quarter"><span class="b3-tile-icon"><span class="pack-icon pack-icon--alternate" data-icon="quarter" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><strong>Выбрать четверть</strong><small id="b3-quarter-status">II четверть</small></button>
+    <button type="button" class="b3-tile" data-b3-panel="theme"><span class="b3-tile-icon"><span class="pack-icon pack-icon--alternate" data-icon="theme" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/></svg></span><strong>Тема</strong><small id="b3-theme-status">Тёмная</small></button>
+    <button type="button" class="b3-tile" data-b3-panel="accent"><span class="b3-tile-icon"><span class="pack-icon pack-icon--alternate" data-icon="accent" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="9" r="1"/><circle cx="15" cy="8" r="1"/><circle cx="16" cy="14" r="1"/><path d="M8 17h2"/></svg></span><strong>Акцентные цвета</strong><small id="b3-accent-status">Фиолетовый</small></button>
+    <button type="button" class="b3-tile" data-b3-panel="icons"><span class="b3-tile-icon"><span class="pack-icon pack-icon--alternate" data-icon="icons" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></span><strong>Вариант иконок</strong><small id="b3-icons-status">Классика</small></button>
+  </div>
+  <h2 class="b3-section-label">Дополнительно</h2>
+  <div class="b3-extra">
+    <button type="button" data-b3-panel="birthday"><span class="pack-icon" data-icon="birthday" aria-hidden="true"></span>День рождения <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+    <button type="button" data-b3-panel="account">Аккаунт и данные <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+  </div>
+ </div>
+ <div id="b3-panel-overlay" class="b3-overlay" role="presentation" hidden><div class="b3-dialog" role="dialog" aria-modal="true" aria-labelledby="b3-panel-title"><div class="b3-dialog-header"><h2 id="b3-panel-title">Настройка</h2><button type="button" id="b3-panel-close" aria-label="Закрыть настройки"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div><div id="b3-panel-host"></div></div></div>
+ <header class="profile-header"><button class="btn secondary profile-back" data-go="home">← На главную</button><h1 class="section-title">Настройки и профиль</h1><p>Твой профиль и учебные результаты</p></header>
+ <article class="card profile-card"><div class="profile-identity"><div class="profile-avatar" id="profile-avatar-display" aria-hidden="true">★</div><div><h2 id="profile-name">Гость</h2><p id="profile-account">Войди на главной, чтобы подключить профиль.</p></div></div><p id="profile-school" class="muted" hidden></p></article>
+ <article class="card profile-card" id="profile-personalization" hidden>
+  <h2>Моё оформление</h2><p>Выбирай, как выглядит твой Левели.</p>
+  <div class="personal-group"><h3>Аватар</h3><div class="personal-choice-grid" id="personal-avatar-options" role="group" aria-label="Выбрать аватар"></div><div class="avatar-upload-row"><button type="button" class="btn secondary" id="profile-upload-avatar">Выбрать свою картинку</button><button type="button" class="btn secondary" id="profile-remove-avatar" hidden>Убрать картинку</button></div><input id="profile-avatar-file" type="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif" hidden></div>
+  <div class="personal-group"><h3>Тема</h3><div class="personal-theme-grid" id="personal-theme-options" role="group" aria-label="Тема оформления"></div></div>
+  <div class="personal-group"><h3>Акцентный цвет</h3><div class="personal-color-grid" id="personal-accent-options" role="group" aria-label="Акцентный цвет"></div></div>
+  <div class="personal-group"><h3>Значки</h3><div class="personal-theme-grid" id="personal-pack-options" role="group" aria-label="Тематические значки"></div></div>
+ </article>
+ <article class="card profile-card" id="profile-birthday-card" hidden>
+  <h2>День рождения</h2><p>Укажи дату рождения, если хочешь получать поздравление. Её можно удалить в любой момент.</p>
+  <label class="birthday-label" for="profile-birthday">Дата рождения</label><input type="date" id="profile-birthday" min="2000-01-01" max="2030-12-31"><p class="birthday-note" id="profile-age"></p><p id="profile-save-status" role="status" aria-live="polite"></p>
+ </article>
+ <article class="card profile-card"><h2>Учебный период</h2><p>Выбери четверть для просмотра оценок, графиков и прогнозов.</p><div class="profile-period"><div id="school-period-buttons" class="choice-buttons"></div><p id="school-period-notice" class="period-notice" role="status" aria-live="polite" hidden></p><select id="school-period" hidden><option value="all">Все оценки</option></select><button type="button" id="school-current-period" class="btn secondary">Вернуться к текущей четверти</button></div></article>
+ <article class="card profile-card profile-account-actions" id="profile-actions" hidden><h2>Аккаунт и данные</h2><p>Оценки обновляются автоматически.</p><div class="profile-actions"><button class="btn secondary" id="school-refresh">Проверить обновления</button><button class="btn secondary profile-logout" id="school-logout">Выйти из аккаунта</button></div></article>
+</section>
+</main></div>
+<script>
+/* B3 UI shell: pre-existing preference controls, period selector and account logic are reused verbatim. */
+(()=>{
+ const profile=document.querySelector('[data-page="profile"]');
+ const hero=document.getElementById('b3-avatar-stand');
+ const identity=document.querySelector('.profile-identity');
+ const info=identity.querySelector('div:last-child');
+ const identitySlot=document.getElementById('b3-identity-slot');
+ hero.append(document.getElementById('profile-avatar-display'));
+ identitySlot.append(info);
+ const overlay=document.getElementById('b3-panel-overlay'),host=document.getElementById('b3-panel-host'),dialog=overlay.querySelector('.b3-dialog'),heading=document.getElementById('b3-panel-title');
+ const cards={
+  avatar:document.getElementById('profile-personalization'),theme:document.getElementById('profile-personalization'),
+  accent:document.getElementById('profile-personalization'),icons:document.getElementById('profile-personalization'),
+  quarter:document.querySelector('.profile-period').closest('.profile-card'),
+  birthday:document.getElementById('profile-birthday-card'),account:document.getElementById('profile-actions')
+ };
+ const titles={avatar:'Выбрать аватар',theme:'Тема',accent:'Акцентные цвета',icons:'Вариант иконок',quarter:'Выбрать четверть',birthday:'День рождения',account:'Аккаунт и данные'};
+ let previous=null,active=null,lastTrigger=null;
+ const updateQuarter=()=>{const value=document.getElementById('school-period').value;const q=Number(value.split('-')[1]);document.getElementById('b3-quarter-status').textContent=(['','I','II','III','IV'][q]||'—')+' четверть'};
+ const observer=new MutationObserver(updateQuarter);observer.observe(document.getElementById('school-period'),{attributes:true,childList:true,subtree:true});document.getElementById('school-period').addEventListener('change',updateQuarter);
+ const open=(key,trigger)=>{
+  if(!cards[key]||cards[key].hidden)return;
+  lastTrigger=trigger;previous=cards[key].parentElement;active=cards[key];heading.textContent=titles[key];dialog.dataset.section=key;
+  host.replaceChildren(active);overlay.hidden=false;document.body.classList.add('b3-dialog-open');document.getElementById('b3-panel-close').focus();
+ };
+ const close=()=>{
+  if(active&&previous)previous.append(active);
+  active=null;previous=null;overlay.hidden=true;document.body.classList.remove('b3-dialog-open');
+  lastTrigger?.focus();lastTrigger=null;updateQuarter();
+ };
+ profile.querySelectorAll('[data-b3-panel]').forEach(btn=>btn.addEventListener('click',()=>open(btn.dataset.b3Panel,btn)));
+ document.getElementById('b3-panel-close').addEventListener('click',close);
+ overlay.addEventListener('click',e=>{if(e.target===overlay)close()});
+ document.addEventListener('keydown',e=>{
+  if(overlay.hidden)return;
+  if(e.key==='Escape'){e.preventDefault();close();return}
+  if(e.key!=='Tab')return;
+  const items=[...overlay.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(el=>el.getClientRects().length>0);
+  if(!items.length)return;
+  const first=items[0],last=items.at(-1);
+  if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}
+  else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
+ });
+ document.addEventListener('click',e=>{if(e.target.closest('[data-go="home"]')&&!overlay.hidden)close()});
+ updateQuarter();
+ window.LeveliB3={open:key=>open(key,profile.querySelector('[data-b3-panel="'+key+'"]')),close};
+})();
+</script>
+<script src="./school-model.js"></script><script>
 'use strict';
 const pages=[...document.querySelectorAll('[data-page]')];function navigate(page){if(page!=='profile')page='home';for(const p of pages)p.hidden=p.dataset.page!==page;window.scrollTo(0,0);history.replaceState(null,'','#'+page)}document.addEventListener('click',e=>{const target=e.target.closest('[data-go]');if(target)navigate(target.dataset.go)});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
+document.addEventListener('click',e=>{const btn=e.target.closest('[data-help]');if(!btn)return;const target=document.getElementById(btn.dataset.help);if(!target)return;target.hidden=!target.hidden;btn.setAttribute('aria-expanded',String(!target.hidden))});
 addEventListener('hashchange',()=>navigate(location.hash.slice(1)));navigate(location.hash.slice(1)||'home');
-</script><script type="module">
+</script>
+<script>
+/* Local-first, UID-scoped preferences. No personal data sent to analytics or public URLs. */
+window.LeveliAppearance=(()=>{
+ const darkAccents={
+  violet:{main:'#a882ff',soft:'#e2cdff',dim:'#514071',border:'#b48cf3',line:'#d1adff',glow:'#ab7aff',track:'#55416e'},
+  pink:{main:'#f18bc9',soft:'#ffd3ed',dim:'#804567',border:'#f18bc9',line:'#ffd0eb',glow:'#f18bc9',track:'#70435e'},
+  blue:{main:'#68adff',soft:'#c8e4ff',dim:'#32537d',border:'#68adff',line:'#bedbff',glow:'#68adff',track:'#3b5375'},
+  yellow:{main:'#f4c75f',soft:'#ffe6a3',dim:'#76602c',border:'#f4c75f',line:'#ffe7a1',glow:'#f4c75f',track:'#69582f'},
+  mint:{main:'#69d9bd',soft:'#bdf9e7',dim:'#286b5c',border:'#69d9bd',line:'#bcf9e9',glow:'#69d9bd',track:'#365f55'}
+ };
+ const lightAccents={
+  violet:{main:'#713bc4',soft:'#54288f',dim:'#e9d9ff',border:'#9969d3',line:'#753bc4',glow:'#ab7aff',track:'#dbc4f7'},
+  pink:{main:'#a82b78',soft:'#841f5b',dim:'#ffdaef',border:'#cd6aa5',line:'#af337e',glow:'#f18bc9',track:'#f4badc'},
+  blue:{main:'#1759b6',soft:'#16488b',dim:'#d6e8ff',border:'#6198df',line:'#2167bc',glow:'#68adff',track:'#b6d5fa'},
+  yellow:{main:'#835600',soft:'#694600',dim:'#ffebaf',border:'#b88a2b',line:'#906000',glow:'#f4c75f',track:'#f1d68c'},
+  mint:{main:'#08765f',soft:'#075a4b',dim:'#c7f5e6',border:'#46a990',line:'#137e67',glow:'#69d9bd',track:'#a5e5d4'}
+ };
+ const colorScheme=window.matchMedia('(prefers-color-scheme: light)');
+ // Two approved portraits; map old avatar 0 to the child's name until a new choice is saved.
+ const avatars=[['Полина','./avatars/leveli-polina-3d.webp'],['Матвей','./avatars/leveli-matvey-3d.webp']];
+ function avatarImage(index=profile.avatar){
+  const node=document.createElement('img');node.className='avatar-illustration leveli-3d-avatar';
+  node.src=avatars[index]?.[1]||avatars[0][1];node.alt='';node.setAttribute('aria-hidden','true');
+  node.onerror=()=>{const fallback=document.createElement('span');fallback.className='avatar-illustration prototype-avatar';fallback.setAttribute('aria-hidden','true');node.replaceWith(fallback)};
+  return node
+ }
+ const packs=[['classic','Классика'],['cats','Котики'],['sports','Спорт']];
+ const defaults={theme:'dark',accent:'violet',avatar:0,avatarRevision:0,customAvatar:'',pack:'classic',birthday:''};
+ let uid=null,profile={...defaults},defaultAvatar=0,uploadVersion=0;
+ const safe=x=>typeof x==='string'&&/^[-\w]{1,150}$/.test(x)?x:null;
+ function read(id){try{const p=JSON.parse(localStorage.getItem('leveli-personal-v1-'+id)||'{}');return {...defaults,...p}}catch{return {...defaults}}}
+ function valid(p){return {theme:['dark','light','system'].includes(p.theme)?p.theme:'dark',accent:Object.hasOwn(darkAccents,p.accent)?p.accent:'violet',avatar:p.avatar==='custom'||(Number.isInteger(p.avatar)&&p.avatar>=0&&p.avatar<avatars.length)?p.avatar:0,avatarRevision:p.avatarRevision===2?2:0,customAvatar:typeof p.customAvatar==='string'&&p.customAvatar.length<120000&&/^data:image\/(webp|png|jpeg);base64,/.test(p.customAvatar)?p.customAvatar:'',pack:packs.some(a=>a[0]===p.pack)?p.pack:'classic',birthday:/^\d{4}-\d{2}-\d{2}$/.test(p.birthday||'')?p.birthday:''}}
+ function age(){if(!profile.birthday)return null;const b=new Date(profile.birthday+'T12:00:00');const now=new Date();if(!Number.isFinite(b.getTime())||b>now)return null;let n=now.getFullYear()-b.getFullYear();if(now.getMonth()<b.getMonth()||(now.getMonth()===b.getMonth()&&now.getDate()<b.getDate()))n--;return n>=0&&n<=120?n:null}
+ function paint(){
+  const theme=profile.theme==='system'?(colorScheme.matches?'light':'dark'):profile.theme;
+  document.documentElement.dataset.leveliTheme=theme;
+  document.documentElement.dataset.leveliPack=profile.pack;
+  const c=(theme==='light'?lightAccents:darkAccents)[profile.accent],s=document.documentElement.style;
+  for(const [key,val] of Object.entries({accent:c.main,'accent-soft':c.soft,'accent-dim':c.dim,'accent-border':c.border,'accent-track':c.track,'accent-line':c.line,'accent-glow':c.glow}))s.setProperty('--leveli-'+key,val);
+  const avatarDisplay=document.querySelector('#profile-avatar-display');avatarDisplay.replaceChildren();if(profile.avatar==='custom'&&profile.customAvatar){const img=document.createElement('img');img.src=profile.customAvatar;img.alt='';img.className='profile-avatar-custom';avatarDisplay.append(img)}else if(avatars[profile.avatar])avatarDisplay.append(avatarImage());else avatarDisplay.textContent='★';avatarDisplay.dataset.avatarIndex=String(profile.avatar);document.querySelector('#profile-remove-avatar').hidden=!profile.customAvatar;
+  document.querySelector('#home-birthday-greeting').hidden=true;
+  const b=profile.birthday?new Date(profile.birthday+'T12:00:00'):null,now=new Date();
+  if(uid&&b&&Number.isFinite(b.getTime())&&b.getMonth()===now.getMonth()&&b.getDate()===now.getDate()){
+   const note=document.querySelector('#home-birthday-greeting');note.textContent='С днём рождения! Желаем тебе отличного года!';note.hidden=false;
+  }
+  const ageLabel=document.querySelector('#profile-age'),n=age();ageLabel.textContent=n===null?'Дата рождения необязательна.':('Возраст: '+n);
+  const date=document.querySelector('#profile-birthday');if(date.value!==profile.birthday)date.value=profile.birthday;
+  document.getElementById('b3-theme-status').textContent={dark:'Тёмная',light:'Светлая',system:'Системная'}[profile.theme];
+  document.getElementById('b3-accent-status').textContent={violet:'Фиолетовый',pink:'Розовый',blue:'Синий',yellow:'Жёлтый',mint:'Мятный'}[profile.accent];
+  document.getElementById('b3-icons-status').textContent=packs.find(([key])=>key===profile.pack)[1];
+  if(uid){
+   const active=document.activeElement,group=active?.closest('.personal-group [role="group"]');
+   const index=group?[...group.children].indexOf(active):-1;
+   drawControls();
+   if(index>=0)group.children[index]?.focus({preventScroll:true});
+  }
+ }
+ function button(label,selected,action,extra,style){
+  const b=document.createElement('button');b.type='button';b.className='personal-option'+(extra?' '+extra:'');b.textContent=label;b.setAttribute('aria-pressed',String(selected));if(style)b.style.cssText=style;b.onclick=action;return b
+ }
+ function drawControls(){
+  const av=document.querySelector('#personal-avatar-options');av.replaceChildren();
+  // One shared gallery, interleaved for variety. Saved avatar indices never change.
+  for(const i of [0,1]){
+   const label=avatars[i][0];
+   const b=button('',profile.avatar===i,()=>set({avatar:i,avatarRevision:2}),'personal-avatar-option');
+   b.title=label;b.setAttribute('aria-label',label);b.dataset.avatarIndex=String(i);
+   b.append(avatarImage(i));av.append(b)
+  }if(profile.customAvatar){const b=button('',profile.avatar==='custom',()=>set({avatar:'custom'}),'personal-avatar-option');b.setAttribute('aria-label','Моя картинка');const img=document.createElement('img');img.src=profile.customAvatar;img.alt='';img.className='personal-avatar-custom';b.append(img);av.append(b)}
+  const themeBox=document.querySelector('#personal-theme-options');themeBox.replaceChildren();for(const [k,t] of [['light','☀ Светлая'],['dark','☾ Тёмная'],['system','◐ Системная']])themeBox.append(button(t,profile.theme===k,()=>set({theme:k})));
+  const colorBox=document.querySelector('#personal-accent-options');colorBox.replaceChildren();for(const [k,title] of [['violet','Фиолетовый'],['pink','Розовый'],['blue','Синий'],['yellow','Жёлтый'],['mint','Мятный']]){const b=button(title,profile.accent===k,()=>set({accent:k}));const swatch=document.createElement('span');swatch.className='personal-color-swatch';swatch.style.background=(document.documentElement.dataset.leveliTheme==='light'?lightAccents:darkAccents)[k].main;b.prepend(swatch);colorBox.append(b)}
+  const packBox=document.querySelector('#personal-pack-options');packBox.replaceChildren();for(const [k,title] of packs){
+   const choice=button(title,profile.pack===k,()=>set({pack:k}));
+   const preview=document.createElement('span');preview.className='pack-icon pack-icon-preview';
+   preview.dataset.preview=k;preview.setAttribute('aria-hidden','true');choice.prepend(preview);packBox.append(choice);
+  }
+ }
+ function set(v){
+  if(!uid)return;
+  const next=valid({...profile,...v});
+  try{localStorage.setItem('leveli-personal-v1-'+uid,JSON.stringify(next))}
+  catch(e){document.querySelector('#profile-save-status').textContent='Не удалось сохранить настройки на этом устройстве.';return}
+  profile=next;
+  document.querySelector('#profile-save-status').textContent='Сохранено на этом устройстве';
+  paint();
+ }
+ function suggestAvatar(name){
+  if(!uid||!name)return;
+  defaultAvatar=/матвей/i.test(name)?1:0;
+  if(profile.avatar!=='custom'&&profile.avatarRevision!==2&&profile.avatar!==defaultAvatar){
+   profile.avatar=defaultAvatar;paint();
+  }
+ }
+ function activate(id){uploadVersion++;uid=safe(id);defaultAvatar=0;profile=uid?valid(read(uid)):{...defaults};document.querySelector('.b3-change-avatar').hidden=!uid;document.querySelector('#profile-personalization').hidden=!uid;document.querySelector('#profile-birthday-card').hidden=!uid;document.querySelector('#profile-save-status').textContent='';paint()}
+ document.querySelector('#profile-upload-avatar').addEventListener('click',()=>{if(uid)document.querySelector('#profile-avatar-file').click()});
+ document.querySelector('#profile-remove-avatar').addEventListener('click',()=>{uploadVersion++;set({customAvatar:'',avatar:defaultAvatar,avatarRevision:0})});
+ document.querySelector('#profile-avatar-file').addEventListener('change',async e=>{
+  const file=e.target.files?.[0];e.target.value='';if(!uid||!file)return;const version=++uploadVersion;
+  const status=document.querySelector('#profile-save-status');
+  if(file.size>5000000||!/^image\/(png|jpeg|webp|heic|heif)$/.test(file.type)){status.textContent='Выбери картинку PNG, JPG или WebP размером до 5 МБ.';return}
+  let url='';
+  try{
+   url=URL.createObjectURL(file);const img=new Image();img.src=url;await img.decode();if(version!==uploadVersion)return;
+   const side=Math.min(img.naturalWidth,img.naturalHeight);if(!side)throw Error('empty');
+   const canvas=document.createElement('canvas');canvas.width=256;canvas.height=256;
+   const ctx=canvas.getContext('2d');if(!ctx)throw Error('canvas');
+   ctx.drawImage(img,(img.naturalWidth-side)/2,(img.naturalHeight-side)/2,side,side,0,0,256,256);
+   const data=canvas.toDataURL('image/webp',.72);if(data.length>110000){status.textContent='Картинка слишком большая. Попробуй другую.';return}
+   set({customAvatar:data,avatar:'custom'});
+  }catch(e){if(version===uploadVersion)status.textContent='Не удалось открыть картинку. Попробуй PNG или JPG.'}finally{if(url)URL.revokeObjectURL(url)}
+ });
+ document.querySelector('#profile-birthday').addEventListener('change',e=>{const value=e.target.value;if(value&&new Date(value+'T12:00:00')>new Date()){document.querySelector('#profile-save-status').textContent='Дата рождения не может быть в будущем';return}set({birthday:value})});
+ colorScheme.addEventListener('change',()=>{if(profile.theme==='system')paint()});
+ paint();
+ return {activate,suggestAvatar,get:()=>({...profile}),avatars};
+})();
+</script>
+<script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js';
 import {getAuth, setPersistence, browserLocalPersistence, onAuthStateChanged, signInWithEmailAndPassword, signOut} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js';
 import {getFirestore, doc, getDocFromServer} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js';
@@ -130,32 +925,29 @@ const firebaseConfig={apiKey:"AIzaSyCs3gfUXcrlTJLZqxXQ0cgXpfuqNBkNIsU",authDomai
 const app=initializeApp(firebaseConfig,'leveli-school');
 const auth=getAuth(app), db=getFirestore(app);window.leveliFirebase={auth,db,onAuthStateChanged,doc,getDocFromServer};window.dispatchEvent(new Event('leveliFirebaseReady'));
 const login=document.getElementById('school-login'), results=document.getElementById('school-results'), error=document.getElementById('school-error'), status=document.getElementById('school-status'), subjects=document.getElementById('school-subjects');
-let firestoreProfileName='';function updateIdentity(user,grades){const email=user?.email||'';const known=firestoreProfileName;document.getElementById('home-greeting').textContent=known?'Привет, '+known+'!':'Привет!';document.getElementById('profile-name').textContent=user?(known||'Ученик'):'Гость';document.getElementById('profile-account').textContent=user?'Аккаунт: '+email:'Войди на главной, чтобы подключить профиль.';document.getElementById('profile-actions').hidden=!user;document.getElementById('profile-school').textContent=user?'Школьных записей: '+(grades?.length??'загружаются…'):'';window.dispatchEvent(new CustomEvent('leveliIdentity',{detail:{uid:user?.uid||null}}));document.title='Левели · '+(known||'Мои оценки')}
+let firestoreProfileName='';function updateIdentity(user,grades){const email=user?.email||'';const known=firestoreProfileName;document.getElementById('home-greeting').textContent=known?'Привет, '+known+'!':'Привет!';document.getElementById('profile-name').textContent=user?(known||'Ученик'):'Гость';if(user&&known)window.LeveliAppearance.suggestAvatar(known);document.getElementById('profile-account').textContent=user?'Аккаунт подключён':'Войди на главной, чтобы подключить профиль.';document.getElementById('profile-actions').hidden=!user;document.getElementById('profile-school').textContent='';window.dispatchEvent(new CustomEvent('leveliIdentity',{detail:{uid:user?.uid||null}}));document.title='Левели · '+(known||'Мои оценки')}
 function showError(e){error.textContent=e?.code==='auth/invalid-credential'?'Неверная почта или пароль.':e?.code==='permission-denied'?'Нет доступа к оценкам этой учётной записи.':e?.message||'Не удалось загрузить оценки.'}
 const S=window.LeveliSchool;
 const isMark=v=>S.score(v)!==null;
 const isFinal=g=>!!S.officialKind(g);
-let cachedGrades=[],loadGeneration=0;
-const freshness=document.getElementById('school-sync-freshness');
-function renderFreshness(data){
- const sync=data?.sync;
- const raw=sync?.lastDiarySuccessAt;
- const value=typeof raw==='string'?new Date(raw):null;
- const valid=value&&!Number.isNaN(value.getTime())&&value.getTime()<=Date.now()+5*60*1000;
- const failedRetry=Number(sync?.failedRetryCount);
- const isFailed=Number.isInteger(failedRetry)&&failedRetry>=1;
- freshness.dataset.state=isFailed?'failed':valid?'ok':'unknown';
- freshness.textContent=(valid?'Дневник проверен: '+value.toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'Когда проверялся дневник — неизвестно')+(isFailed?' · повторная попытка обновления не удалась':'');
-}
-let forecastFilter=null;function clearSchool(){cachedGrades=[];subjects.replaceChildren();for(const id of ['school-analytics','school-trend','school-subject-detail','school-period-buttons','school-filter-buttons','school-forecast-legend','school-good-list','school-attention-list'])document.getElementById(id).replaceChildren();document.getElementById('school-donut').replaceChildren();document.getElementById('school-subject-detail').hidden=true;document.getElementById('school-overview').hidden=false;periodSelect.replaceChildren();subjectFilter.value='all';forecastFilter=null;renderFreshness(null);status.textContent='';document.getElementById('school-overall').textContent='—';document.getElementById('school-trend-change').textContent='';}
+let cachedGrades=[],loadGeneration=0;let schoolDataMeta=null;let retryHandle=null;
+let forecastFilter=null;function clearSchool(){document.querySelector('[data-page="home"]').classList.remove('subject-detail-active');cachedGrades=[];subjects.replaceChildren();for(const id of ['school-analytics','school-trend','school-subject-detail','school-period-buttons','school-filter-buttons','school-forecast-legend','school-good-list','school-attention-list'])document.getElementById(id).replaceChildren();document.getElementById('school-donut').replaceChildren();document.getElementById('school-subject-detail').hidden=true;document.getElementById('school-overview').hidden=false;periodSelect.replaceChildren();subjectFilter.value='all';forecastFilter=null;status.textContent='';document.getElementById('school-grades-donut').replaceChildren();document.getElementById('school-grades-legend').replaceChildren();document.getElementById('school-grades-total').textContent='0';schoolDataMeta=null;document.getElementById('school-freshness').textContent='';document.getElementById('school-overall').textContent='—';document.getElementById('school-trend-change').textContent='';}
 const periodSelect=document.getElementById('school-period');
 const subjectFilter=document.getElementById('school-filter'),analytics=document.getElementById('school-analytics');
 const gradeDate=S.date,periodOf=S.period;
 function workCategory(g){const t=String([g.workType,g.type,g.description,g.title].filter(Boolean).join(' ')).toLowerCase();if(/контрольн|проверочн|\bкр\b/.test(t))return 'control';if(/самостоятельн|\bср\b/.test(t))return 'self';if(/тест|test/.test(t))return 'test';return 'other'}
 function mean(items){return S.mean(items)}
 function formatMean(n){return n===null?'—':n.toFixed(2).replace('.',',')}
+function pluralRu(n,one,few,many){const k=Math.abs(n)%100,last=k%10;return n+' '+(k>=11&&k<=14?many:last===1?one:last>=2&&last<=4?few:many)}
 
-function svgEl(tag,attrs){const el=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v] of Object.entries(attrs||{}))el.setAttribute(k,String(v));return el}
+function svgEl(tag,attrs){
+ const el=document.createElementNS('http://www.w3.org/2000/svg',tag);
+ for(const [key,value] of Object.entries(attrs||{})){
+  if(typeof value==='string'&&value.startsWith('var('))el.style.setProperty(key,value);
+  else el.setAttribute(key,String(value));
+ }
+ return el;
+}
 function quarterBounds(period){const [year,q]=String(period||'').split('-').map(Number);if(!Number.isFinite(year)||q<1||q>4)return null;
 if(year===2026){const dates=[
 [[2026,8,1],[2026,9,26]], // first term confirmed through Oct 25
@@ -167,75 +959,378 @@ return [
 q===1?new Date(year,8,1):q===2?new Date(year,10,1):q===3?new Date(year+1,0,1):new Date(year+1,3,1),
 q===1?new Date(year,10,1):q===2?new Date(year+1,0,1):q===3?new Date(year+1,3,1):new Date(year+1,6,1)
 ]}
-function renderInsights(groups,rows){
-const trend=document.getElementById('school-trend');trend.replaceChildren();
-const bounds=quarterBounds(periodSelect.value);
-if(!bounds){trend.textContent='Период не выбран.';return}
-const [start,end]=bounds;
-const grades=rows.filter(g=>isMark(g.value)&&!isFinal(g)&&periodOf(g)===periodSelect.value).map(g=>({subject:String(g.subject||g.subjectName||'').trim(),value:Number(g.value??g.grade),weight:S.weight(g),date:gradeDate(g)})).filter(g=>g.subject&&g.date).sort((a,b)=>a.date-b.date);
-const days=new Map();for(const g of grades){const key=[g.date.getFullYear(),String(g.date.getMonth()+1).padStart(2,'0'),String(g.date.getDate()).padStart(2,'0')].join('-');if(!days.has(key))days.set(key,[]);days.get(key).push(g)}
-const points=[],bySubject=new Map();
-for(const [key,items] of days){for(const g of items){if(!bySubject.has(g.subject))bySubject.set(g.subject,[]);bySubject.get(g.subject).push(g)}
-const avgs=[...bySubject.values()].map(values=>S.mean(values));
-points.push({date:items[0].date,value:avgs.reduce((x,y)=>x+y,0)/avgs.length})}
-const w=320,h=140,left=22,right=12,top=15,bottom=23;
-const svg=svgEl('svg',{viewBox:'0 0 320 140',role:'img','aria-label':points.length?'Изменение среднего балла с начала четверти до последней оценки':'Нет данных для графика'});
-svg.style.width='100%';svg.style.display='block';
-for(const v of [2,3,4,5]){const y=top+(5-v)/3*(h-top-bottom);svg.append(svgEl('line',{x1:left,x2:w-right,y1:y,y2:y,stroke:'#e9e1f4','stroke-dasharray':'3 5'}));const label=svgEl('text',{x:4,y:y+4,'font-size':10,fill:'#9283aa'});label.textContent=String(v);svg.append(label)}
-if(points.length){
- const total=end-start,coords=points.map(p=>[left+Math.max(0,Math.min(1,(p.date-start)/total))*(w-left-right),top+(5-p.value)/3*(h-top-bottom)]);
- if(coords.length>1){svg.append(svgEl('polyline',{points:coords.map(p=>p.join(',')).join(' '),fill:'none',stroke:'#845be0','stroke-width':3.5,'stroke-linecap':'round','stroke-linejoin':'round'}))}
- for(const [i,p] of coords.entries()){const c=svgEl('circle',{cx:p[0],cy:p[1],r:i===coords.length-1?4.5:3,fill:'#845be0',stroke:'#fff','stroke-width':1.5});const title=svgEl('title');title.textContent=points[i].date.toLocaleDateString('ru-RU')+': '+formatMean(points[i].value);c.append(title);svg.append(c)}
+function renderInsights(groups,rows,baseline){
+ const trend=document.getElementById('school-trend');trend.replaceChildren();
+ const bounds=quarterBounds(periodSelect.value);
+ if(!bounds){trend.textContent='Период не выбран.';return}
+ const [start,end]=bounds;
+ const grades=rows.filter(g=>isMark(g.value)&&!isFinal(g)&&periodOf(g)===periodSelect.value)
+  .map(g=>({subject:String(g.subject||g.subjectName||'').trim(),value:Number(g.value??g.grade),weight:S.weight(g),date:gradeDate(g)}))
+  .filter(g=>g.subject&&g.date).sort((a,b)=>a.date-b.date);
+ const days=new Map();
+ for(const g of grades){const key=[g.date.getFullYear(),String(g.date.getMonth()+1).padStart(2,'0'),String(g.date.getDate()).padStart(2,'0')].join('-');if(!days.has(key))days.set(key,[]);days.get(key).push(g)}
+ const points=[],bySubject=new Map();
+ for(const [key,items] of days){
+  for(const g of items){if(!bySubject.has(g.subject))bySubject.set(g.subject,[]);bySubject.get(g.subject).push(g)}
+  const avgs=[...bySubject.values()].map(v=>S.mean(v));
+  points.push({date:items[0].date,value:avgs.reduce((x,y)=>x+y,0)/avgs.length});
+ }
+ const trendCard=document.querySelector('.trend-card');trendCard.classList.toggle('trend-short',points.length<2);
+ if(points.length<2){
+  const msg=document.createElement('div');msg.className='trend-sparse';
+  const value=document.createElement('strong');value.textContent=points.length?formatMean(points[0].value):'—';
+  const label=document.createElement('span');label.textContent=points.length?'Пока только одна дата с оценками. Динамика появится после новых оценок.':'Пока нет датированных оценок для построения динамики.';
+  msg.append(value,label);trend.append(msg);document.getElementById('school-trend-change').textContent='';return;
+ }
+ const width=340,height=176,left=34,right=19,top=16,bottom=33;
+ const svg=svgEl('svg',{viewBox:'0 0 '+width+' '+height,role:'img','aria-label':'Накопительный средний балл за четверть'});
+ svg.style.width='100%';svg.style.display='block';
+ const defs=svgEl('defs');const glow=svgEl('filter',{id:'leveli-line-glow',x:'-40%',y:'-100%',width:'180%',height:'300%'});glow.append(svgEl('feGaussianBlur',{stdDeviation:5}));defs.append(glow);
+ const grad=svgEl('linearGradient',{id:'leveli-trend-area',x1:0,x2:0,y1:0,y2:1});grad.append(svgEl('stop',{offset:'0%','stop-color':'var(--leveli-accent-glow)','stop-opacity':'.32'}),svgEl('stop',{offset:'100%','stop-color':'var(--leveli-accent-glow)','stop-opacity':'0'}));defs.append(grad);svg.append(defs);
+ for(const v of [2,3,4,5]){const y=top+(5-v)/3*(height-top-bottom);svg.append(svgEl('line',{x1:left,x2:width-right,y1:y,y2:y,stroke:'var(--ds-chart-grid)','stroke-dasharray':'3 5'}));const t=svgEl('text',{x:5,y:y+4,'font-size':10,fill:'var(--ds-text-secondary)'});t.textContent=v+',0';svg.append(t)}
+ if(points.length){
+  const total=end-start||1,coords=points.map(p=>[left+Math.max(0,Math.min(1,(p.date-start)/total))*(width-left-right),top+(5-p.value)/3*(height-top-bottom)]);
+  if(coords.length>1){
+   const path='M '+coords.map(p=>p.join(' ')).join(' L ');
+   svg.append(svgEl('path',{d:path+' L '+coords.at(-1)[0]+' '+(height-bottom)+' L '+coords[0][0]+' '+(height-bottom)+' Z',fill:'url(#leveli-trend-area)'}));
+   svg.append(svgEl('polyline',{points:coords.map(p=>p.join(',')).join(' '),fill:'none',stroke:'var(--leveli-accent-glow)','stroke-width':13,opacity:'.55',filter:'url(#leveli-line-glow)','stroke-linecap':'round','stroke-linejoin':'round'}));
+   svg.append(svgEl('polyline',{points:coords.map(p=>p.join(',')).join(' '),fill:'none',stroke:'var(--leveli-accent-line)','stroke-width':3,'stroke-linecap':'round','stroke-linejoin':'round'}));
+  }
+  for(const [i,[x,y]] of coords.entries())svg.append(svgEl('circle',{cx:x,cy:y,r:i===coords.length-1?4.5:2.5,fill:'var(--leveli-accent-soft)'}));
+  const [x,y]=coords.at(-1),tagX=Math.max(33,Math.min(x-37,width-85)),tagY=Math.max(1,y-36);
+  svg.append(svgEl('rect',{x:tagX,y:tagY,width:72,height:25,rx:9,fill:'var(--leveli-accent-dim)',stroke:'var(--leveli-accent)'}));
+  const score=svgEl('text',{x:tagX+36,y:tagY+17,'text-anchor':'middle','font-size':14,'font-weight':800,fill:'var(--leveli-accent-ink)'});score.textContent=formatMean(baseline);svg.append(score);
+ }else{const t=svgEl('text',{x:width/2,y:height/2,'text-anchor':'middle',fill:'var(--ds-text-secondary)','font-size':12});t.textContent='Пока нет оценок с датами';svg.append(t)}
+ trend.append(svg);
+ const axis=document.createElement('div');axis.className='trend-axis';const from=document.createElement('span'),to=document.createElement('span');
+ from.textContent=start.toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
+ const last=new Date(end);last.setDate(last.getDate()-1);to.textContent=last.toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
+ axis.append(from,to);trend.append(axis);
+ const change=document.getElementById('school-trend-change');change.textContent='';
+ // Save actual daily observations rather than synthesizing yesterday from today's revised diary.
+ const uid=auth.currentUser?.uid;
+ if(uid&&periodSelect.value===currentSchoolPeriod()&&baseline!==null){
+  const now=new Date(),today=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');
+  const yesterday=new Date(now);yesterday.setDate(yesterday.getDate()-1);
+  const prev=[yesterday.getFullYear(),String(yesterday.getMonth()+1).padStart(2,'0'),String(yesterday.getDate()).padStart(2,'0')].join('-');
+  const storeKey='leveli-daily-average-'+uid+'-'+periodSelect.value;
+  try{
+   const history=JSON.parse(localStorage.getItem(storeKey)||'{}');
+   const previous=history[prev];
+   if(Number.isFinite(previous)){const diff=baseline-previous;change.textContent=(diff>0?'+':'')+formatMean(diff);change.className='trend-change '+(diff>=.005?'positive':diff<=-.005?'negative':'neutral')}
+   history[today]=baseline;
+   for(const key of Object.keys(history))if(key<prev)delete history[key];
+   localStorage.setItem(storeKey,JSON.stringify(history));
+  }catch(e){console.warn('Не удалось сохранить ежедневный средний балл',e)}
+ }
 }
-trend.append(svg);
-const axis=document.createElement('div');axis.className='trend-axis';const startLabel=document.createElement('span'),endLabel=document.createElement('span');startLabel.textContent=start.toLocaleDateString('ru-RU',{day:'numeric',month:'short'});const last=new Date(end);last.setDate(last.getDate()-1);endLabel.textContent=last.toLocaleDateString('ru-RU',{day:'numeric',month:'short'});axis.append(startLabel,endLabel);trend.append(axis);
-const change=document.getElementById('school-trend-change');change.textContent='';if(points.length>1){const delta=points.at(-1).value-points[0].value;change.textContent=(delta>0?'+':'')+formatMean(delta);change.style.color=delta<0?'#b57435':'#3f946a'}
-const note=document.createElement('p');note.className='trend-note';note.textContent=points.length<2?'Для графика нужны оценки хотя бы за два дня.':'Линия показывает фактические результаты до '+points.at(-1).date.toLocaleDateString('ru-RU')+'.';trend.append(note);
-}
-function renderForecastChart(rows,baseline){
- const colors={'5':'#39af7d','4':'#8b70e4','3':'#e6af59','2':'#d98d99','none':'#d9d0eb'};
- const labels={'5':'Пятёрки','4':'Четвёрки','3':'Тройки','2':'Двойки','none':'Нет прогноза'};
- const categories=['5','4','3','2','none'];
- const counts=new Map(categories.map(k=>[k,0]));
- for(const x of rows){const k=x.stats.official!==null?String(x.stats.official):x.stats.forecast!==null?String(x.stats.forecast):'none';counts.set(k,(counts.get(k)||0)+1)}
- const svg=document.getElementById('school-donut'),legend=document.getElementById('school-forecast-legend');svg.replaceChildren();legend.replaceChildren();
- const total=rows.length,c=2*Math.PI*72;svg.append(svgEl('circle',{cx:100,cy:100,r:72,fill:'none',stroke:'#eee9f7','stroke-width':23}));
+function renderDonut(svgId,legendId,rows,valueId,value,mode){
+ // Grade segments are semantic and invariant. The track and selected category reflect the child's accent.
+ const colors={'5':'#6ee6ae','4':'#a68bff','3':'#f6c078','2':'#f47e9c','none':'#8f8ba6'};
+ const categories=['5','4','3','2','none'],counts=new Map(categories.map(k=>[k,0]));
+ for(const row of rows){const key=mode==='subjects'?(row.stats.official!==null?String(row.stats.official):row.stats.forecast!==null?String(row.stats.forecast):'none'):String(row.value);if(counts.has(key))counts.set(key,counts.get(key)+1)}
+ const svg=document.getElementById(svgId),legend=document.getElementById(legendId);svg.replaceChildren();legend.replaceChildren();
+ const total=rows.length,circumference=2*Math.PI*72;
+ svg.append(svgEl('circle',{cx:100,cy:100,r:72,fill:'none',stroke:'var(--leveli-accent-track)','stroke-width':23,'data-accent-track':'true'}));
  let offset=0;
- for(const key of categories){const n=counts.get(key)||0;if(n&&total){const arc=svgEl('circle',{cx:100,cy:100,r:72,fill:'none',stroke:colors[key],'stroke-width':23,'stroke-dasharray':Math.max(0,c*n/total-3)+' '+c,'stroke-dashoffset':-offset,'transform':'rotate(-90 100 100)','stroke-linecap':'butt',role:'button',tabindex:0,'aria-label':labels[key]+': '+n+' предметов'});arc.style.cursor='pointer';arc.addEventListener('click',()=>{forecastFilter=forecastFilter===key?null:key;renderGrades()});arc.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();arc.dispatchEvent(new Event('click'))}});svg.append(arc);offset+=c*n/total}
- const button=document.createElement('button');button.type='button';button.setAttribute('aria-pressed',String(forecastFilter===key));button.setAttribute('aria-label',labels[key]+': '+n+' предметов');const dot=document.createElement('span');dot.className='legend-dot';dot.style.background=colors[key];const text=document.createElement('span');text.className='legend-label';text.textContent=labels[key];const count=document.createElement('span');count.className='legend-count';count.textContent=n;button.append(dot,text,count);button.onclick=()=>{forecastFilter=forecastFilter===key?null:key;renderGrades()};legend.append(button)}
- document.getElementById('school-overall').textContent=formatMean(baseline);
- svg.setAttribute('aria-label',total+' предметов. '+categories.map(k=>labels[k]+': '+counts.get(k)).join(', '));
- return counts;
+ for(const key of categories){
+  const n=counts.get(key)||0;if(!n)continue;
+  const arc=svgEl('circle',{cx:100,cy:100,r:72,fill:'none',stroke:colors[key],'stroke-width':23,'stroke-dasharray':Math.max(0,circumference*n/total-2)+' '+circumference,'stroke-dashoffset':-offset,'transform':'rotate(-90 100 100)'});
+  if(mode==='subjects'){arc.setAttribute('role','button');arc.setAttribute('tabindex','0');arc.style.cursor='pointer';const activate=()=>{forecastFilter=forecastFilter===key?null:key;renderGrades()};arc.addEventListener('click',activate);arc.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activate()}})}
+  svg.append(arc);
+  // Accent outline around the selected forecast category, without changing its grade color.
+  if(mode==='subjects'&&forecastFilter===key){svg.append(svgEl('circle',{cx:100,cy:100,r:86,fill:'none',stroke:'var(--leveli-accent)','stroke-width':3,'stroke-dasharray':Math.max(0,circumference*n/total*86/72-2)+' '+(2*Math.PI*86),'stroke-dashoffset':-offset*86/72,'transform':'rotate(-90 100 100)','data-accent-selection':'true'}))}
+  offset+=circumference*n/total;
+  const button=document.createElement(mode==='subjects'?'button':'div');
+  button.className='legend-item';if(mode==='subjects'){button.type='button';button.setAttribute('aria-pressed',String(forecastFilter===key));button.onclick=()=>{forecastFilter=forecastFilter===key?null:key;renderGrades()}}
+  const l=document.createElement('span');l.className='legend-label';const dot=document.createElement('span');dot.className='legend-dot';dot.style.background=colors[key];l.append(dot,document.createTextNode(key==='none'?'Без прогноза':'Оценка '+key));
+  const count=document.createElement('strong');count.className='legend-count';count.textContent=String(n);
+  button.append(l,count);legend.append(button);
+ }
+ document.getElementById(valueId).textContent=String(value);
+ svg.setAttribute('aria-label',(mode==='subjects'?'Распределение предметов':'Распределение оценок')+': '+rows.length);
+}
+function renderForecastChart(rows,baseline,regular){
+ renderDonut('school-donut','school-forecast-legend',rows,'school-overall',formatMean(baseline),'subjects');
+ renderDonut('school-grades-donut','school-grades-legend',regular,'school-grades-total',regular.length,'grades');
+}
+function explainGradeTrend(stats){
+ if(stats.difference===null)return;
+ let dialog=document.getElementById('leveli-trend-dialog');
+ if(!dialog){dialog=document.createElement('dialog');dialog.id='leveli-trend-dialog';dialog.className='leveli-trend-dialog';document.body.append(dialog)}
+ dialog.replaceChildren();
+ const header=document.createElement('h2');header.id='leveli-trend-dialog-title';dialog.setAttribute('aria-labelledby',header.id);header.textContent='Как рассчитана динамика';
+ const lead=document.createElement('p');lead.textContent=(stats.recentGrades.length===1?'Сравниваем последнюю оценку со средним предыдущих.':'Сравниваем три последние оценки с тремя предшествующими.')+' Учитываем веса, если они указаны.';
+ const textGroup=(title,grades,avg)=>{
+  const section=document.createElement('div');section.className='trend-explain-group';
+  const label=document.createElement('strong');label.textContent=title;
+  const values=document.createElement('p');values.textContent=grades.map(g=>String(g.value)+(S.weight(g)!==1?' (вес '+S.weight(g)+')':'')).join(' · ');
+  const result=document.createElement('p');result.textContent='Среднее: '+formatMean(avg);
+  section.append(label,values,result);return section
+ };
+ const result=document.createElement('p');result.className='trend-explain-result';result.textContent='Изменение: '+formatMean(stats.recentAverage)+' − '+formatMean(stats.previousAverage)+' = '+(stats.difference>0?'+':'')+formatMean(stats.difference);
+ const note=document.createElement('p');note.textContent='Стрелка меняется при изменении не менее 0,50 балла. Порог проверяется до округления.';
+ const close=document.createElement('button');close.type='button';close.className='btn secondary';close.textContent='Понятно';close.onclick=()=>dialog.close();
+ dialog.append(header,lead,textGroup('Предыдущие оценки',stats.previousGrades,stats.previousAverage),textGroup('Последние оценки',stats.recentGrades,stats.recentAverage),result,note,close);
+ dialog.showModal();close.focus();
 }
 function renderOrientations(all,strong,attention){
+ const container=document.querySelector('.orient-grid'),heading=document.querySelector('.orient-heading'),goodPanel=document.querySelector('.orient-good'),attentionPanel=document.querySelector('.orient-attention');
+ const hasAny=strong.length+attention.length>0;container.hidden=!hasAny;heading.hidden=false;
+ document.getElementById('school-orient-empty').hidden=hasAny;
+ goodPanel.hidden=strong.length===0;attentionPanel.hidden=attention.length===0;
+ container.classList.toggle('orient-single',strong.length===0||attention.length===0);
  const good=document.getElementById('school-good-list'),weak=document.getElementById('school-attention-list');good.replaceChildren();weak.replaceChildren();
- function add(container,list,empty){if(!list.length){const p=document.createElement('p');p.className='orient-empty';p.textContent=empty;container.append(p);return}
- for(const item of list.slice(0,3)){const btn=document.createElement('button');btn.type='button';btn.className='orient-link';const name=document.createElement('span'),score=document.createElement('small');name.textContent=item.name;score.textContent='Средний '+formatMean(item.avg);btn.append(name,score);btn.onclick=()=>{openSubject(item.name,item.grades);window.scrollTo(0,0)};container.append(btn)}}
- add(good,strong.filter(x=>!attention.includes(x)).sort((a,b)=>b.avg-a.avg),'Пока нет предметов в этой группе.');
- add(weak,attention.sort((a,b)=>a.avg-b.avg),'Пока нет предметов для внимания.');
+ function paint(container,items){
+  if(!items.length)return
+  for(const item of items.slice(0,3)){
+   const btn=document.createElement('button');btn.type='button';btn.className='orient-link';
+   const label=document.createElement('span');label.className='orient-link__name';label.textContent=item.name;
+   const metrics=document.createElement('span');metrics.className='orient-link__metrics';
+   const avg=document.createElement('strong');avg.textContent=formatMean(item.avg);metrics.append(avg);
+   if(item.stats.difference!==null){const d=item.stats.difference;const delta=document.createElement('small');delta.className='grade-delta '+(d>=.5?'up':d<=-.5?'down':'flat');delta.textContent=(d>=.5?'↗ ':d<=-.5?'↘ ':'– ')+(d>0?'+':'')+formatMean(d);delta.title='Нажми, чтобы узнать, как рассчитана динамика';metrics.append(delta)}
+   btn.append(label,metrics);btn.onclick=e=>{if(e.target.closest('.grade-delta')&&item.stats.difference!==null){explainGradeTrend(item.stats);return}openSubject(item.name,item.grades);window.scrollTo(0,0)};container.append(btn);
+  }
+ }
+ paint(good,strong);paint(weak,attention);
 }
-function renderGrades(){const detail=document.getElementById('school-subject-detail');detail.hidden=true;document.getElementById('school-overview').hidden=false;subjects.replaceChildren();const chosen=periodSelect.value;
-const rows=cachedGrades.filter(g=>periodOf(g)===chosen);
-const groups=new Map();
-for(const g of rows){const name=String(g.subject||g.subjectName||'').trim();if(!name)continue;if(!groups.has(name))groups.set(name,{regular:[],final:[]});const value=String(g.value??'').trim();if(!isMark(value))continue;groups.get(name)[isFinal(g)?'final':'regular'].push({value:Number(value),weight:S.weight(g),officialWeight:g.weight??g.gradeWeight??g.coefficient??null,date:gradeDate(g),type:String(g.workType||g.type||g.description||'').trim(),category:workCategory(g),officialKind:S.officialKind(g)})}
-const all=[...groups].map(([name,g])=>({name,grades:g,avg:mean(g.regular),count:g.regular.length,stats:S.summary(g.regular,g.final.filter(v=>v.officialKind==='За четверть'))}));
-const eligible=all.filter(x=>x.avg!==null),baseline=eligible.length?eligible.reduce((n,x)=>n+x.avg,0)/eligible.length:null;
-const strong=all.filter(x=>x.count>=3&&x.avg>=baseline+0.3);
-const attention=all.filter(x=>x.count>=3&&(x.avg<=baseline-0.3||x.stats.deteriorating));
-renderForecastChart(all,baseline);renderInsights(groups,rows);renderOrientations(all,strong,attention);
-document.getElementById('school-quarter-label').textContent=periodSelect.selectedOptions[0]?.textContent||'Текущая четверть';
-document.getElementById('school-subject-count').textContent=all.length+' предметов';
-analytics.textContent=forecastFilter?'Показаны предметы: '+({'5':'пятёрки','4':'четвёрки','3':'тройки','2':'двойки','none':'без прогноза'}[forecastFilter]):'Нажми на оценку в диаграмме, чтобы увидеть соответствующие предметы.';
-status.textContent=all.length?'Оценок в четверти: '+all.reduce((n,x)=>n+x.grades.regular.length+x.grades.final.length,0):'Пока нет предметов за выбранный период.';
-for(const item of all.sort((a,b)=>a.name.localeCompare(b.name,'ru'))){const {name,grades,stats}=item;const key=stats.official!==null?String(stats.official):stats.forecast!==null?String(stats.forecast):'none';if(forecastFilter&&forecastFilter!==key)continue;
-const btn=document.createElement('button');btn.type='button';btn.className='subject-row';const main=document.createElement('span');main.className='subject-row__main';const nameEl=document.createElement('span');nameEl.className='subject-row__name';nameEl.textContent=name;const meta=document.createElement('span');meta.className='subject-row__meta';meta.textContent=stats.official!==null?'Официальная оценка: '+stats.official:stats.forecast!==null?'Прогноз за четверть: '+stats.forecast:'Пока нет прогноза';main.append(nameEl,meta);if(stats.deteriorating){const hint=document.createElement('span');hint.className='subject-row__meta attention';hint.textContent='Последние оценки ниже среднего';main.append(hint)}
-const value=document.createElement('span');value.className='subject-row__value';const avg=document.createElement('span');avg.className='subject-row__average';avg.textContent=formatMean(stats.average);const label=document.createElement('span');label.className='subject-row__label';label.textContent='Средний балл';value.append(avg,label);btn.append(main,value);btn.setAttribute('aria-label',name+'. Средний балл '+formatMean(stats.average)+'. '+meta.textContent+'. Открыть предмет');btn.onclick=()=>{openSubject(name,grades);window.scrollTo(0,0)};subjects.append(btn)}
-if(!subjects.children.length&&forecastFilter){const p=document.createElement('p');p.className='muted';p.textContent='Нет предметов в этой категории.';subjects.append(p)}
+function renderGrades(){
+ const detail=document.getElementById('school-subject-detail');detail.hidden=true;
+ document.querySelector('[data-page="home"]').classList.remove('subject-detail-active');
+ document.getElementById('school-overview').hidden=false;subjects.replaceChildren();
+ const chosen=periodSelect.value,rows=cachedGrades.filter(g=>periodOf(g)===chosen);
+ const groups=new Map();
+ const sourceSubjects=schoolDataMeta?.subjects;
+ if(Array.isArray(sourceSubjects))for(const entry of sourceSubjects){const name=String(typeof entry==='string'?entry:(entry?.name??entry?.subject??'')).trim();if(name&&!groups.has(name))groups.set(name,{regular:[],final:[]})}
+ for(const g of rows){const name=String(g.subject||g.subjectName||'').trim();if(!name)continue;
+  if(!groups.has(name))groups.set(name,{regular:[],final:[]});
+  if(!isMark(g.value))continue;
+  groups.get(name)[isFinal(g)?'final':'regular'].push({value:Number(g.value),weight:S.weight(g),officialWeight:g.weight??g.gradeWeight??g.coefficient??null,date:gradeDate(g),type:String(g.workType||g.type||g.description||'').trim(),category:workCategory(g),officialKind:S.officialKind(g)});
+ }
+ const all=[...groups].map(([name,g])=>({name,grades:g,avg:mean(g.regular),count:g.regular.length,stats:S.summary(g.regular,g.final)}));
+ const eligible=all.filter(x=>x.avg!==null),baseline=eligible.length?eligible.reduce((n,x)=>n+x.avg,0)/eligible.length:null;
+ const possible=all.filter(x=>x.stats.official===null&&x.stats.forecast!==null);
+ const attention=possible.filter(x=>x.stats.forecast<=3||x.stats.deteriorating).sort((a,b)=>{
+  const priority=x=>x.stats.forecast===2?0:x.stats.forecast===3?1:2;
+  return priority(a)-priority(b)||a.avg-b.avg
+ });
+ const strong=possible.filter(x=>x.stats.forecast===5&&!x.stats.deteriorating).sort((a,b)=>b.avg-a.avg);
+ const available=all.filter(x=>x.count>0||x.stats.official!==null);
+ const current=chosen===currentSchoolPeriod(),empty=available.length===0;
+ for(const id of ['school-donut','school-forecast-legend','school-grades-donut','school-grades-legend','school-trend'])document.getElementById(id).replaceChildren();
+ document.getElementById('school-header-period').textContent=({1:'I',2:'II',3:'III',4:'IV'}[Number(chosen.split('-')[1])]||'')+' четверть · '+chosen.slice(0,4)+'/'+(Number(chosen.slice(0,4))+1)+' учебный год';
+ document.getElementById('school-subject-count').textContent=pluralRu(all.length,'предмет','предмета','предметов');
+ if(empty){
+  const msg=current?'Новая четверть началась!':'За эту четверть пока нет оценок.';
+  document.getElementById('school-overall').textContent='—';
+  document.getElementById('school-grades-total').textContent='0';
+  document.getElementById('school-trend-change').textContent='';
+  document.getElementById('school-analytics').textContent=msg;
+  document.getElementById('school-trend').textContent=msg;
+  renderOrientations(all,[],[]);
+ }else{
+  renderForecastChart(available,baseline,rows.filter(g=>isMark(g.value)&&!isFinal(g)));renderInsights(groups,rows,baseline);renderOrientations(all,strong,attention);
+  document.getElementById('school-analytics').textContent='';
+ }
+ status.textContent=empty?'':('Оценок в четверти: '+all.reduce((n,x)=>n+x.count,0));
+ for(const item of all.sort((a,b)=>a.name.localeCompare(b.name,'ru'))){
+  const {name,grades,stats,count}=item;
+  const key=stats.official!==null?String(stats.official):stats.forecast!==null?String(stats.forecast):'none';
+  if(forecastFilter&&forecastFilter!==key)continue;
+  const btn=document.createElement('button');btn.type='button';btn.className='subject-row';
+  const main=document.createElement('span');main.className='subject-row__main';
+  const nameEl=document.createElement('span');nameEl.className='subject-row__name';nameEl.textContent=name;
+  const meta=document.createElement('span');meta.className='subject-row__meta';
+  meta.textContent=pluralRu(count,'оценка','оценки','оценок');
+  main.append(nameEl,meta);
+  const average=document.createElement('span');average.className='subject-row__number';
+  const avg=document.createElement('strong');avg.textContent=formatMean(stats.average);const avgLabel=document.createElement('small');avgLabel.textContent='средний';average.append(avg,avgLabel);
+  const grade=document.createElement('span');grade.className='subject-row__grade';
+  const score=document.createElement('strong');score.textContent=stats.official!==null?stats.official:stats.forecast??'—';if(stats.official!==null)score.className='official-box';
+  const gradeLabel=document.createElement('small');gradeLabel.textContent=stats.official!==null?'итог':'прогноз';grade.append(score,gradeLabel);
+  const dynamics=document.createElement('span');dynamics.className='subject-row__dynamics';
+  const delta=document.createElement('span');delta.className='grade-delta '+(stats.difference===null?'flat':stats.difference>=.5?'up':stats.difference<=-.5?'down':'flat');
+  const d=stats.difference;delta.textContent=d===null?'—':(d>=.5?'↗ ':d<=-.5?'↘ ':'– ')+(d>0?'+':'')+formatMean(d);
+  const dLabel=document.createElement('small');dLabel.textContent='динамика';dynamics.append(delta,dLabel);
+  btn.append(main,average,grade,dynamics);if(stats.difference!==null)delta.title='Нажми, чтобы узнать, как рассчитана динамика';btn.onclick=e=>{if(e.target.closest('.grade-delta')&&stats.difference!==null){explainGradeTrend(stats);return}openSubject(name,grades);window.scrollTo(0,0)};
+  subjects.append(btn);
+ }
+ if(!subjects.children.length){const p=document.createElement('p');p.className='school-empty';p.textContent=forecastFilter?'Нет предметов в этой категории.':'Предметы пока не загружены.';subjects.append(p)}
 }
-function openSubject(name,grades){const main=document.getElementById('school-overview'),detail=document.getElementById('school-subject-detail');main.hidden=true;detail.hidden=false;detail.replaceChildren();const back=document.createElement('button');back.className='btn secondary';back.textContent='← Назад';back.onclick=()=>{detail.hidden=true;main.hidden=false};const title=document.createElement('h2');title.textContent=name;const info=document.createElement('p');const stats=S.summary(grades.regular,grades.final.filter(g=>g.officialKind==='За четверть'));info.textContent='Средний: '+formatMean(stats.average)+(stats.official!==null?' · Итог: '+stats.official:stats.forecast!==null?' · Прогноз: '+stats.forecast:' · Недостаточно оценок');detail.append(back,title,info);if(stats.deteriorating){const warning=document.createElement('p');warning.className='warning';warning.textContent='Последние 3 оценки: '+formatMean(stats.recentAverage)+'. Это ниже среднего четверти минимум на 0,50.';detail.append(warning)}for(const final of grades.final){const row=document.createElement('p');row.textContent=final.officialKind+': '+final.value+' · официально';detail.append(row)}const heading=document.createElement('h3');heading.textContent='Динамика оценок';detail.append(heading);const dated=grades.regular.filter(g=>g.date).sort((a,b)=>a.date-b.date);if(dated.length>1){const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 320 115');svg.style.width='100%';const line=document.createElementNS('http://www.w3.org/2000/svg','polyline');line.setAttribute('points',dated.map((g,i)=>(18+i*284/(dated.length-1))+','+(98-(Number(g.value)-2)*26)).join(' '));line.setAttribute('fill','none');line.setAttribute('stroke','#8061e5');line.setAttribute('stroke-width','3');svg.append(line);detail.append(svg)}const h=document.createElement('h3');h.textContent='История оценок';const controls=document.createElement('div'),list=document.createElement('div');controls.style.cssText='display:flex;gap:8px;margin:12px 0';detail.append(h,controls,list);let mode='all';function draw(){controls.replaceChildren();list.replaceChildren();for(const [key,label] of [['all','Все'],['checks','Проверочные']]){const btn=document.createElement('button');btn.textContent=label;btn.style.cssText='padding:9px 12px;border:1px solid #ddd;border-radius:10px;background:'+(mode===key?'#e6d9fb':'white');btn.onclick=()=>{mode=key;draw()};controls.append(btn)}const marks=grades.regular.filter(g=>mode==='all'||g.category!=='other').sort((a,b)=>(b.date?.getTime()||0)-(a.date?.getTime()||0));for(const g of marks){const p=document.createElement('p');p.textContent=g.value+(g.date?' · '+g.date.toLocaleDateString('ru-RU'):'')+(g.type?' · '+g.type:'');list.append(p)}if(!marks.length)list.textContent='Нет оценок этого типа.'}draw()}
-function renderChoiceButtons(select,containerId){const container=document.getElementById(containerId);container.replaceChildren();for(const option of select.options){const b=document.createElement('button');b.type='button';b.textContent=option.textContent;b.setAttribute('aria-pressed',String(select.value===option.value));b.style.cssText='border:1px solid #d7cbe5;border-radius:12px;padding:9px 12px;font:inherit;font-size:12px;font-weight:700;color:#45365c;background:'+(select.value===option.value?'#e6d9fb':'#fff');b.addEventListener('click',()=>{select.value=option.value;renderGrades()});container.append(b)}}
+function packIcon(role){
+ const icon=document.createElement('span');
+ icon.className='pack-icon';icon.dataset.icon=role;icon.setAttribute('aria-hidden','true');
+ return icon;
+}
+function openSubject(name,grades){
+ const main=document.getElementById('school-overview'),detail=document.getElementById('school-subject-detail');
+ main.hidden=true;detail.hidden=false;detail.replaceChildren();
+ document.querySelector('[data-page="home"]').classList.add('subject-detail-active');
+ const head=document.createElement('div');head.className='detail-header';
+ const back=document.createElement('button');back.type='button';back.className='detail-back leveli-back-btn';back.setAttribute('aria-label','Назад к предметам');back.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19 5 12l7-7"/><path d="M5 12h14"/></svg><span>Назад</span>';back.onclick=()=>{
+  document.querySelector('[data-page="home"]').classList.remove('subject-detail-active');
+  detail.hidden=true;main.hidden=false;renderGrades();window.scrollTo(0,0)
+ };
+ const title=document.createElement('h2');title.className='detail-title';title.textContent=name;title.prepend(packIcon('book'));
+ const quarter=document.createElement('span');quarter.className='detail-period';
+ quarter.textContent=({1:'I',2:'II',3:'III',4:'IV'}[Number(periodSelect.value.split('-')[1])]||'')+' четверть';
+ const firstRow=document.createElement('div');firstRow.className='detail-header-main';firstRow.append(back,title);head.append(firstRow,quarter);detail.append(head);
+ const stats=S.summary(grades.regular,grades.final);
+ const hero=document.createElement('section');hero.className='detail-hero';
+ const heroLabel=document.createElement('span');heroLabel.className='detail-hero-label';
+ heroLabel.textContent=stats.official!==null?'Официальная оценка за четверть':'Прогноз за четверть';
+ const heroScore=document.createElement('strong');heroScore.className='detail-hero-score';
+ heroScore.textContent=stats.official??stats.forecast??'—';
+ const heroHint=document.createElement('span');heroHint.className='detail-hero-hint';
+ heroHint.textContent=stats.official!==null?'Итог выставлен школой':stats.forecast!==null?'Ожидаемый результат':'Пока недостаточно оценок';
+ const trend=document.createElement(stats.difference===null?'span':'button');trend.className='detail-trend-pill';
+ if(stats.difference===null){trend.textContent='Динамика пока неизвестна'}
+ else{
+  trend.type='button';trend.setAttribute('aria-label','Объяснение динамики оценок');
+  const symbol=stats.difference>=.5?'↗ ':stats.difference<=-.5?'↘ ':'– ';
+  trend.textContent=symbol+(stats.difference>0?'+':'')+formatMean(stats.difference)+' · Как посчитано?';
+  trend.classList.add(stats.difference>=.5?'up':stats.difference<=-.5?'down':'flat');
+  trend.onclick=()=>explainGradeTrend(stats);
+ }
+ hero.append(heroLabel,heroScore,heroHint,trend);detail.append(hero);
+ const kpis=document.createElement('div');kpis.className='detail-kpi';
+ for(const [label,value] of [['Средний балл',formatMean(stats.average)],['Получено оценок',String(grades.regular.length)]]){
+  const cell=document.createElement('div'),num=document.createElement('strong'),text=document.createElement('span');
+  num.textContent=value;text.textContent=label;cell.append(text,num);kpis.append(cell);
+ }
+ detail.append(kpis);
+ if(!grades.regular.length){
+  const empty=document.createElement('p');empty.className='school-empty';
+  empty.textContent='Пока нет оценок за эту четверть';detail.append(empty);
+ }
+ const goal=document.createElement('div');goal.className='detail-goal';
+ const goalLabel=document.createElement('div');goalLabel.className='detail-goal-label';
+ goalLabel.textContent=stats.official!==null?'ИТОГ ЧЕТВЕРТИ':'ТВОЯ ЦЕЛЬ';
+ const goalMain=document.createElement('div');goalMain.className='detail-goal-main';
+ const goalNote=document.createElement('div');goalNote.className='detail-goal-note';
+ if(stats.official!==null){
+  goal.classList.add('complete');goalMain.textContent='Четвертная оценка выставлена — '+stats.official;
+ }else if(grades.regular.length<3){
+  const left=3-grades.regular.length;
+  goalMain.textContent=left===3?'Для прогноза нужны 3 оценки':'Для прогноза '+(left===1?'нужна ещё 1 оценка':'нужно ещё '+left+' оценки');
+ }else if(stats.forecast===5){
+  goalMain.textContent='Отличный результат!';goalNote.textContent='Сейчас прогноз — 5. Продолжай в том же духе.';
+ }else{
+  const n=S.fivesNeeded(grades.regular);
+  goalMain.textContent=n===null?'Недостаточно данных для расчёта цели':n>10?'Для следующей оценки потребуется значительное улучшение результатов':'Ещё '+n+' '+(n===1?'пятёрка':n<5?'пятёрки':'пятёрок')+' до прогноза '+(stats.forecast+1);
+  if(n!==null&&n<=10)goalNote.textContent='Если следующие оценки будут пятёрками с обычным весом (1). Это расчётный сценарий, не гарантия.';
+ }
+ goal.append(goalLabel,goalMain,goalNote);detail.append(goal);
+ const chartTitle=document.createElement('h3');chartTitle.textContent='Динамика';chartTitle.prepend(packIcon("trend"));detail.append(chartTitle);
+ const chartControls=document.createElement('div');chartControls.className='detail-toggle';detail.append(chartControls);
+ const chartHost=document.createElement('div');chartHost.className='detail-chart-scroll';detail.append(chartHost);
+ const dated=grades.regular.map((g,i)=>({...g,originalIndex:i})).filter(g=>g.date instanceof Date&&!Number.isNaN(g.date.getTime())).sort((a,b)=>a.date-b.date||a.originalIndex-b.originalIndex);
+ let chartMode='average';
+ function drawChart(){
+  chartControls.replaceChildren();chartHost.replaceChildren();
+  for(const [mode,label] of [['average','Средний балл'],['marks','Оценки']]){
+   const b=document.createElement('button');b.type='button';b.textContent=label;b.setAttribute('aria-pressed',String(chartMode===mode));b.onclick=()=>{chartMode=mode;drawChart()};chartControls.append(b);
+  }
+  if(!dated.length){chartHost.textContent='Нет оценок с указанными датами.';detail.querySelector('.detail-chart-caption')?.remove();return}
+  // The marks view shows only the most recent bars fitting the phone: no swipe needed.
+  const capacity=Math.max(3,Math.floor((chartHost.clientWidth-32)/36));
+  const plotted=chartMode==='marks'?dated.slice(-capacity):dated;
+  // Keep the full cumulative-average series within the visible card.
+  // The bars already show only the most recent marks that fit.
+  const width=Math.max(1,chartHost.clientWidth-16),height=185,baseY=151;
+  const svg=svgEl('svg',{viewBox:'0 0 '+width+' '+height,width,height,role:'img','aria-label':chartMode==='average'?'Накопительный средний балл':'Оценки по порядку'});
+  const defs=svgEl('defs');
+  const glow=svgEl('filter',{id:'leveli-subject-line-glow',x:'-50%',y:'-100%',width:'200%',height:'300%'});
+  glow.append(svgEl('feGaussianBlur',{stdDeviation:5}));defs.append(glow);
+  const barGlow=svgEl('filter',{id:'leveli-subject-bar-glow',x:'-90%',y:'-40%',width:'280%',height:'190%'});
+  barGlow.append(svgEl('feGaussianBlur',{stdDeviation:5}));defs.append(barGlow);
+  const area=svgEl('linearGradient',{id:'leveli-subject-area',x1:0,y1:0,x2:0,y2:1});
+  area.append(svgEl('stop',{offset:'0%','stop-color':'var(--leveli-accent-glow)','stop-opacity':'.29'}),svgEl('stop',{offset:'100%','stop-color':'var(--leveli-accent-glow)','stop-opacity':'0'}));defs.append(area);
+  const colors={5:['#8af0b7','#26634e'],4:['#c8a3ff','#513389'],3:['#f6c078','#925125'],2:['#ffa5b8','#73384d']};
+  for(const [value,stops] of Object.entries(colors)){
+   const gradient=svgEl('linearGradient',{id:'leveli-subject-grade-'+value,x1:0,x2:0,y1:0,y2:1});
+   gradient.append(svgEl('stop',{offset:'0%','stop-color':stops[0]}),svgEl('stop',{offset:'100%','stop-color':stops[1]}));defs.append(gradient);
+  }
+  svg.append(defs);
+  const y=value=>125-(value-2)*32;
+  for(let v=2;v<=5;v++){
+   const level=y(v);
+   svg.append(svgEl('line',{x1:23,x2:width-10,y1:level,y2:level,stroke:'var(--ds-chart-grid)','stroke-dasharray':'3 5'}));
+   const axis=svgEl('text',{x:6,y:level+4,'font-size':10,fill:'var(--ds-text-secondary)'});axis.textContent=v;svg.append(axis);
+  }
+  if(chartMode==='average'){
+   const coords=dated.map((g,i)=>[35+i*(width-55)/Math.max(1,dated.length-1),y(S.mean(dated.slice(0,i+1)))]);
+   if(coords.length>1){
+    const points=coords.map(p=>p.join(',')).join(' ');
+    const areaPath='M '+coords.map(p=>p.join(' ')).join(' L ')+' L '+coords.at(-1)[0]+' '+baseY+' L '+coords[0][0]+' '+baseY+' Z';
+    svg.append(svgEl('path',{d:areaPath,fill:'url(#leveli-subject-area)'}));
+    svg.append(svgEl('polyline',{points,fill:'none',stroke:'var(--leveli-accent-glow)','stroke-width':12,opacity:'.55',filter:'url(#leveli-subject-line-glow)','stroke-linecap':'round','stroke-linejoin':'round'}));
+    svg.append(svgEl('polyline',{points,fill:'none',stroke:'var(--leveli-accent-line)','stroke-width':3,'stroke-linecap':'round','stroke-linejoin':'round'}));
+   }
+   coords.forEach(([x,cy],i)=>svg.append(svgEl('circle',{cx:x,cy,r:i===coords.length-1?4.5:2.5,fill:'var(--leveli-accent-soft)'})));
+  }else plotted.forEach((g,i)=>{
+   const step=(width-65)/Math.max(1,plotted.length-1);
+   const x=25+i*step,top=y(g.value),barHeight=baseY-top,glowColor=colors[g.value]?.[0]||'#c8a3ff';
+   svg.append(svgEl('rect',{x:x-2,y:top+2,width:22,height:barHeight-2,rx:5,fill:glowColor,opacity:'.38',filter:'url(#leveli-subject-bar-glow)'}));
+   svg.append(svgEl('rect',{x,y:top,width:18,height:barHeight,rx:5,fill:'url(#leveli-subject-grade-'+g.value+')'}));
+   svg.append(svgEl('line',{x1:x+4,x2:x+14,y1:top+2,y2:top+2,stroke:glowColor,'stroke-width':2.5,'stroke-linecap':'round'}));
+   const label=svgEl('text',{x:x+9,y:top-7,'text-anchor':'middle',fill:'var(--ds-text-primary)','font-size':12,'font-weight':800});
+   label.textContent=String(g.value);svg.append(label);
+  });
+  for(const i of [...new Set([0,Math.floor((plotted.length-1)/2),plotted.length-1])]){
+   const x=chartMode==='average'?35+i*(width-55)/Math.max(1,plotted.length-1):34+i*(width-65)/Math.max(1,plotted.length-1);
+   const caption=svgEl('text',{x,y:177,'text-anchor':i===0?'start':i===plotted.length-1?'end':'middle',fill:'var(--ds-text-secondary)','font-size':10});
+   caption.textContent=plotted[i].date.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'});svg.append(caption);
+  }
+  chartHost.style.setProperty('--subject-chart-ratio',String(width/height));
+  chartHost.append(svg);
+  const existing=detail.querySelector('.detail-chart-caption');if(existing)existing.remove();
+  if(chartMode==='marks'){
+   const tip=document.createElement('p');tip.className='detail-chart-caption';
+   tip.textContent=dated.length>plotted.length?'Показаны последние '+plotted.length+' из '+dated.length+' оценок. Все оценки — в истории ниже.':'Показаны все '+plotted.length+' оценок. Подробности — в истории ниже.';
+   chartHost.after(tip);
+  }
+ }
+ drawChart();
+ const historyTitle=document.createElement('h3');historyTitle.textContent='История оценок';historyTitle.prepend(packIcon("history"));detail.append(historyTitle);
+ const controls=document.createElement('div');controls.className='detail-toggle';
+ const list=document.createElement('div');detail.append(controls,list);
+ let mode='all',visible=10;
+ function drawHistory(){
+  controls.replaceChildren();list.replaceChildren();
+  for(const [key,label] of [['all','Все'],['checks','Контрольные']]){
+   const b=document.createElement('button');b.type='button';b.textContent=label;b.setAttribute('aria-pressed',String(mode===key));b.onclick=()=>{mode=key;visible=10;drawHistory()};controls.append(b)
+  }
+  const marks=grades.regular.map((g,i)=>({...g,i})).filter(g=>mode==='all'||g.category==='control'||g.category==='self').sort((a,b)=>(b.date?.getTime()||0)-(a.date?.getTime()||0)||a.i-b.i);
+  for(const g of marks.slice(0,visible)){
+   const row=document.createElement('div');row.className='grade-entry';
+   const meta=document.createElement('span');meta.textContent=(g.date?g.date.toLocaleDateString('ru-RU'):'Дата не указана')+(g.type?' · '+g.type:'');
+   const grade=document.createElement('span');grade.className='grade-entry__grade';
+   const rawWeight=g.officialWeight;
+   if(rawWeight!==null&&rawWeight!==undefined&&String(rawWeight).trim()!==''&&Number.isFinite(Number(rawWeight))&&Number(rawWeight)>0){
+    const weight=document.createElement('span');weight.className='grade-entry__weight';
+    weight.textContent='Вес ×'+rawWeight;weight.title='Официальный вес работы из дневника';
+    grade.append(weight);
+   }
+   const value=document.createElement('strong');value.className='grade-entry__value';value.textContent=g.value;
+   grade.append(value);row.append(meta,grade);list.append(row);
+  }
+  if(!marks.length){const p=document.createElement('p');p.textContent='Нет оценок этого типа.';list.append(p)}
+  if(marks.length>visible){const more=document.createElement('button');more.type='button';more.className='btn secondary';more.textContent='Показать ещё';more.onclick=()=>{visible+=10;drawHistory()};list.append(more)}
+ }
+ drawHistory();
+}
+const periodNotice=document.getElementById('school-period-notice');
+function setPeriodNotice(message){periodNotice.textContent=message;periodNotice.hidden=!message}
+function selectSchoolPeriod(value){
+ if(value>currentSchoolPeriod()){
+  const quarter=Number(value.split('-')[1]);setPeriodNotice(quarter+' четверть ещё не наступила. Пока можно посмотреть текущую или предыдущие четверти.');return false;
+ }
+ periodSelect.value=value;forecastFilter=null;setPeriodNotice('');refreshChoiceButtons();renderGrades();return true;
+}
+function renderChoiceButtons(select,containerId){const container=document.getElementById(containerId);container.replaceChildren();for(const option of select.options){const b=document.createElement('button');b.type='button';const future=option.value>currentSchoolPeriod();b.textContent=option.textContent+(future?' · скоро':'');b.setAttribute('aria-pressed',String(select.value===option.value));b.setAttribute('data-future',String(future));b.addEventListener('click',()=>selectSchoolPeriod(option.value));container.append(b)}}
 function refreshChoiceButtons(){renderChoiceButtons(periodSelect,'school-period-buttons')}
-periodSelect.addEventListener('change',()=>{forecastFilter=null;refreshChoiceButtons();renderGrades()});document.getElementById('school-current-period').addEventListener('click',()=>{periodSelect.value=currentSchoolPeriod();forecastFilter=null;refreshChoiceButtons();renderGrades()});
+periodSelect.addEventListener('change',()=>selectSchoolPeriod(periodSelect.value));document.getElementById('school-current-period').addEventListener('click',()=>selectSchoolPeriod(currentSchoolPeriod()));
 async function loadProfile(user){firestoreProfileName='';if(!user){updateIdentity(null);return}try{const snap=await getDocFromServer(doc(db,'profiles',user.uid));if(snap.exists()){const profile=snap.data();const value=[profile.name,profile.firstName,profile.displayName,profile.childName].find(v=>typeof v==='string'&&v.trim());if(auth.currentUser?.uid===user.uid)firestoreProfileName=value?.trim()||''}}catch(e){console.warn('Профиль Firestore недоступен:',e.code||e.message)}if(auth.currentUser?.uid===user.uid)updateIdentity(user,cachedGrades)}
 function gradeCacheDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open('leveli-school-cache',1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('grades'))req.result.createObjectStore('grades')};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
 async function readGradeCache(uid){const db=await gradeCacheDB();try{return await new Promise((resolve,reject)=>{const tx=db.transaction('grades','readonly'),req=tx.objectStore('grades').get(uid);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error)})}finally{db.close()}}
@@ -248,14 +1343,94 @@ if(key<=20270404)return '2026-3';
 return '2026-4'}
 const m=now.getMonth()+1;const q=m>=9&&m<=10?1:m>=11?2:m<=3?3:4;return year+'-'+q}
 function applySchoolData(data){if(data.schemaVersion!==1||data.source!=='petersburgedu'||!Array.isArray(data.grades))throw Error('Неизвестный формат школьных данных.');
-cachedGrades=data.grades.filter(g=>g&&typeof g==='object').map(g=>({...g,value:S.mark(g)}));renderFreshness(data);updateIdentity(auth.currentUser,cachedGrades);
+schoolDataMeta=data;cachedGrades=data.grades.filter(g=>g&&typeof g==='object').map(g=>({...g,value:S.mark(g)}));updateIdentity(auth.currentUser,cachedGrades);
 const selected=periodSelect.value;const nowPeriod=currentSchoolPeriod();const schoolYear=Number(nowPeriod.slice(0,4));const years=[...new Set([schoolYear,...cachedGrades.map(periodOf).filter(Boolean).map(p=>Number(p.slice(0,4)))])].sort((a,b)=>b-a);
 periodSelect.replaceChildren(...years.flatMap(year=>[1,2,3,4].map(q=>new Option(q+' четверть'+(year===schoolYear?'':' · '+year+'/'+(year+1)),year+'-'+q))));
-periodSelect.value=[...periodSelect.options].some(o=>o.value===selected)?selected:nowPeriod;refreshChoiceButtons();renderGrades()}
+periodSelect.value=[...periodSelect.options].some(o=>o.value===selected)&&selected<=nowPeriod?selected:nowPeriod;refreshChoiceButtons();
+ // A background Firebase refresh must never close the subject the child is reading.
+ if(document.getElementById('school-subject-detail').hidden)renderGrades()}
 
-async function load(){const user=auth.currentUser;if(!user)return;const uid=user.uid,generation=++loadGeneration;const active=()=>auth.currentUser?.uid===uid&&generation===loadGeneration;error.textContent='';let cached=null;try{cached=await readGradeCache(uid);if(!active())return;if(cached?.data){applySchoolData(cached.data);status.textContent+=' · проверяем оценки…'}else{status.textContent='Загрузка оценок…';subjects.replaceChildren()}}catch(e){cached=null;console.warn('Локальный кэш недоступен',e)}try{const snap=await getDocFromServer(doc(db,'schoolGrades',uid));if(!active())return;if(!snap.exists()){if(!cached){clearSchool();status.textContent='Оценки пока не загружены.'}return}const data=snap.data();if(data.schemaVersion!==1||data.source!=='petersburgedu'||!Array.isArray(data.grades))throw Error('Неизвестный формат школьных данных.');if(!cached||JSON.stringify(cached.data)!==JSON.stringify(data))applySchoolData(data);else renderFreshness(data);try{await writeGradeCache(uid,{data,savedAt:Date.now()})}catch(e){console.warn('Не удалось сохранить оценки локально',e)}if(active())status.textContent='Предметов: '+subjects.children.length}catch(e){if(!active())return;if(cached){error.textContent='Показаны сохранённые оценки.'}else{status.textContent='Не удалось загрузить оценки.';showError(e)}}}
+// The Mac uploader publishes the completed collection timestamp as syncedAt.
+// Missing/old status must never be shown as a confirmed success.
+// Child-facing status describes the age of the grades, not the Mac's retry machinery.
+// A failed background attempt leaves the previously collected grades intact.
+function showDiarySyncTime(data,fromCache=false){
+ const fresh=document.getElementById('school-freshness');
+ const info=data?.syncStatus;
+ const rawState=typeof info==='string'?info:(info?.state??info?.status??'');
+ const state=String(rawState).toLowerCase();
+ const last=data?.lastSuccessfulSyncAt??data?.lastSyncAt??data?.syncedAt;
+ const value=last&&typeof last==='object'&&typeof last.toDate==='function'?last.toDate():last;
+ const parsed=(typeof value==='string'||typeof value==='number'||value instanceof Date)?new Date(value):null;
+ const age=parsed?Date.now()-parsed.getTime():Infinity;
+ const valid=Number.isFinite(age)&&age>=-5*60*1000;
+ let label='',symbol='',kind='unknown';
+ if(valid){
+  const dateLabel=parsed.toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  label='Оценки по состоянию на '+dateLabel;
+  if(age>=0&&age<24*60*60*1000&&!fromCache){
+   symbol='✓';kind='ok';
+  }else{
+   symbol='◷';kind='unknown';
+  }
+ }else{
+  label=fromCache?'Сохранённые оценки':'Время обновления оценок неизвестно';
+  symbol='◷';kind='unknown';
+ }
+ // Preserve failure/retry information in Firebase and console, without alarming children.
+ if(state==='failed'||state==='error')console.info('Leveli: фоновое обновление оценок не удалось; показана последняя успешная копия.');
+ fresh.dataset.state=kind;
+ fresh.replaceChildren();
+ const mark=document.createElement('span');mark.className='sync-symbol';mark.setAttribute('aria-hidden','true');mark.textContent=symbol;
+ const copy=document.createElement('span');copy.className='sync-copy';copy.textContent=label;
+ fresh.append(mark,copy);
+}
+function readFirebaseWithDeadline(uid,timeoutMs=20000){
+ let timer;
+ return Promise.race([
+  getDocFromServer(doc(db,'schoolGrades',uid)),
+  new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('Превышено время ожидания Firebase')),timeoutMs)})
+ ]).finally(()=>clearTimeout(timer));
+}
+async function load(){
+ const user=auth.currentUser;if(!user)return;
+ const uid=user.uid,generation=++loadGeneration;
+ const active=()=>auth.currentUser?.uid===uid&&generation===loadGeneration;
+ error.textContent='';
+ let cached=null;
+ try{
+  cached=await readGradeCache(uid);if(!active())return;
+  if(cached?.data){
+   applySchoolData(cached.data);showDiarySyncTime(cached.data,true);
+   status.textContent='Сохранённые оценки · проверяем Firebase…';
+  }else{status.textContent='Загрузка оценок…';subjects.replaceChildren()}
+ }catch(e){cached=null;console.warn('Локальный кэш недоступен',e)}
+ try{
+  const snap=await readFirebaseWithDeadline(uid);if(!active())return;
+  if(!snap.exists()){
+   if(!cached){clearSchool();status.textContent='Оценки пока не загружены.'}
+   else status.textContent='Сохранённые оценки · документ Firebase пока недоступен';
+   return;
+  }
+  const data=snap.data();
+  if(data.schemaVersion!==1||data.source!=='petersburgedu'||!Array.isArray(data.grades))throw Error('Неизвестный формат школьных данных.');
+  // Status-only writes must not recreate the subject view or reset the chart/history.
+  if(!cached||JSON.stringify(cached.data.grades)!==JSON.stringify(data.grades)||JSON.stringify(cached.data.subjects)!==JSON.stringify(data.subjects))applySchoolData(data);
+  try{await writeGradeCache(uid,{data,savedAt:Date.now()})}catch(e){console.warn('Не удалось сохранить оценки локально',e)}
+  if(active()){showDiarySyncTime(data);status.textContent='Предметов: '+subjects.children.length+' · проверено в Firebase'}
+ }catch(e){
+  if(!active())return;
+  if(cached){
+   status.textContent='Сохранённые оценки · Firebase временно недоступен';
+   showDiarySyncTime(cached.data,true);
+  }else{status.textContent='Не удалось загрузить оценки. Повторяем автоматически.';showError(e)}
+  if(!retryHandle)retryHandle=setTimeout(()=>{retryHandle=null;if(active()&&!document.hidden)load()},15000);
+ }
+}
 document.getElementById('school-form').addEventListener('submit',async e=>{e.preventDefault();error.textContent='';try{await setPersistence(auth,browserLocalPersistence);await signInWithEmailAndPassword(auth,document.getElementById('school-email').value.trim(),document.getElementById('school-password').value);document.getElementById('school-password').value=''}catch(err){showError(err)}});
-document.getElementById('school-refresh').addEventListener('click',load);window.addEventListener('online',load);
+document.getElementById('school-refresh').addEventListener('click',load);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&auth.currentUser)load()});window.addEventListener('online',load);
+// Sync status updates may arrive independently of grade uploads.
+setInterval(()=>{if(!document.hidden&&auth.currentUser)load()},60000);
 document.getElementById('school-logout').addEventListener('click',()=>signOut(auth).catch(showError));
-onAuthStateChanged(auth,user=>{++loadGeneration;firestoreProfileName='';clearSchool();login.hidden=!!user;results.hidden=!user;error.textContent='';updateIdentity(user);if(user){loadProfile(user);load()}else {clearSchool()}},showError);
+onAuthStateChanged(auth,user=>{window.LeveliAppearance.activate(user?.uid||null);if(retryHandle){clearTimeout(retryHandle);retryHandle=null}++loadGeneration;firestoreProfileName='';clearSchool();login.hidden=!!user;results.hidden=!user;error.textContent='';updateIdentity(user);if(user){loadProfile(user);load()}else {clearSchool()}},showError);
 </script></body></html>
