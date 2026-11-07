@@ -450,6 +450,26 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await page.locator('html').getAttribute('data-leveli-pack'),null);
  assert.equal(await page.locator('#profile-avatar-display img.profile-avatar-custom').count(),1);
  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('leveli-personal-v1-A')).pack),undefined);
+ // Each home help button occupies a fixed right-hand track, even on narrow phones.
+ for(const width of [320,360,390,430]){
+  await page.setViewportSize({width,height:844});
+  const headers=await page.locator('.forecast-card .card-heading,.trend-card .card-heading,.orient-heading').evaluateAll(items=>items.map(header=>{
+   const help=header.querySelector('.help-btn'),title=header.querySelector('h2');
+   const h=header.getBoundingClientRect(),b=help.getBoundingClientRect(),t=title.getBoundingClientRect();
+   return {headingTop:h.top,headingRight:h.right,helpTop:b.top,helpRight:b.right,helpLeft:b.left,helpWidth:b.width,helpHeight:b.height,titleRight:t.right,columns:getComputedStyle(header).gridTemplateColumns,aria:help.getAttribute('aria-label')};
+  }));
+  assert.equal(headers.length,3,'three help actions exist at '+width+'px');
+  for(const [i,h] of headers.entries()){
+   assert.ok(Math.abs(h.helpTop-h.headingTop)<=1,'help '+i+' stays at top at '+width+'px');
+   assert.ok(Math.abs(h.helpRight-h.headingRight)<=1,'help '+i+' stays right-aligned at '+width+'px');
+   assert.ok(h.titleRight<=h.helpLeft+1,'help '+i+' never overlaps title at '+width+'px');
+   assert.ok(h.helpWidth>=44&&h.helpHeight>=44,'help '+i+' retains accessible hit area at '+width+'px');
+   assert.ok(h.aria,'help '+i+' keeps accessible label at '+width+'px');
+   assert.notEqual(h.columns,'none','help '+i+' uses header grid at '+width+'px');
+  }
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'no horizontal overflow at '+width+'px');
+ }
+ await page.setViewportSize({width:390,height:844});
  await page.screenshot({path:'outputs/leveli-home.png',fullPage:true});
  // Compare the same synthetic quarter on mobile and desktop.
  const marks=(subject,values,weights=[])=>values.map((value,i)=>({
