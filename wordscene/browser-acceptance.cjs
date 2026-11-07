@@ -38,7 +38,7 @@ async function run(name, browserType, contextOptions) {
   }));
   assert.ok(resources.cardCount > 100,'dictionary not loaded: '+JSON.stringify(resources));
   assert.ok(resources.topics > 1,'topics not loaded: '+JSON.stringify(resources));
-  assert.ok(resources.scriptSrcs.every(x=>!x.includes('/wordscene/')),'legacy scripts remain');
+  assert.ok(resources.scriptSrcs.every(x=>!x.includes('/wordscene-17-lab/')),'legacy scripts remain');
 
   // New brand icon assets must decode in desktop and iPhone-like browser viewports.
   if(await page.locator('link[rel="apple-touch-icon"]').count()){
