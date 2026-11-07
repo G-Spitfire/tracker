@@ -86,16 +86,36 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   assert.match(response.headers()['content-type']||'',/webp/);
  }
  await page.waitForFunction(()=>document.querySelector('#profile-avatar-display img')?.naturalHeight>=500);
- const layout=await page.evaluate(()=>{
-  const card=document.querySelector('.b3-hero').getBoundingClientRect();
-  const image=document.querySelector('.b3-avatar-stand .avatar-illustration').getBoundingClientRect();
-  const name=document.querySelector('#profile-name').getBoundingClientRect();
-  return {cardTop:card.top,imageTop:image.top,imageHeight:image.height,avatarRight:image.right,nameLeft:name.left};
- });
- const overshoot=(layout.cardTop-layout.imageTop)/layout.imageHeight;
- assert.ok(overshoot>=.05&&overshoot<=.12,'character should overlap by 5–10%, with small rounding tolerance');
- assert.ok(layout.avatarRight<=layout.nameLeft+14,'portrait must not cover profile text');
- assert.equal(await page.locator('.b3-avatar-stand').evaluate(el=>getComputedStyle(el,'::after').content),'none','no U-shaped decorative frame');
+ // The enlarged portrait rests at the lower edge, but rises above the top.
+ for(const width of [320,360,390,430]){
+  await page.setViewportSize({width,height:844});
+  const layout=await page.evaluate(()=>{
+   const card=document.querySelector('.b3-hero').getBoundingClientRect();
+   const stand=document.querySelector('.b3-avatar-stand').getBoundingClientRect();
+   const image=document.querySelector('.b3-avatar-stand .avatar-illustration').getBoundingClientRect();
+   const copy=document.querySelector('.b3-profile-copy').getBoundingClientRect();
+   const name=document.querySelector('#profile-name').getBoundingClientRect();
+   const button=document.querySelector('.b3-change-avatar').getBoundingClientRect();
+   const frame=getComputedStyle(document.querySelector('.b3-hero'),'::after');
+   const imageStyle=getComputedStyle(document.querySelector('.b3-avatar-stand .avatar-illustration'));
+   return {cardTop:card.top,cardBottom:card.bottom,standTop:stand.top,standBottom:stand.bottom,
+    imageTop:image.top,imageBottom:image.bottom,avatarRight:image.right,copyLeft:copy.left,
+    nameLeft:name.left,buttonLeft:button.left,frameContent:frame.content,
+    frameBorder:frame.borderBottomStyle,frameZ:frame.zIndex,
+    imageMask:imageStyle.maskImage,bodyWidth:document.documentElement.scrollWidth,viewport:innerWidth};
+  });
+  assert.ok(layout.standTop<layout.cardTop-18,'portrait rises above card at '+width);
+  assert.ok(Math.abs(layout.standBottom-layout.cardBottom)<=2,'portrait rests at lower border at '+width);
+  assert.ok(layout.imageBottom<=layout.cardBottom+2,'portrait stays above lower border at '+width);
+  assert.ok(layout.avatarRight<=layout.copyLeft+2,'portrait stays clear of profile copy at '+width);
+  assert.ok(layout.nameLeft>=layout.copyLeft-1&&layout.buttonLeft>=layout.copyLeft-1,'text and button stay in right track at '+width);
+  assert.equal(layout.frameContent,'""','front border overlay is present at '+width);
+  assert.equal(layout.frameBorder,'solid','lower border is rendered at '+width);
+  assert.equal(layout.frameZ,'3','lower border renders above portrait at '+width);
+  assert.equal(layout.imageMask,'none','portrait bottom must not fade out');
+  assert.ok(layout.bodyWidth<=layout.viewport+1,'no horizontal overflow at '+width);
+ }
+ await page.setViewportSize({width:390,height:844});
  await page.locator('#b3-panel-close').click();
  await page.screenshot({path:'outputs/leveli-polina-settings.png',fullPage:true});
  await page.locator('[data-b3-panel="birthday"]').click();
