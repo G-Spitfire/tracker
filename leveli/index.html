@@ -1350,7 +1350,7 @@ periodSelect.value=[...periodSelect.options].some(o=>o.value===selected)&&select
  // A background Firebase refresh must never close the subject the child is reading.
  if(document.getElementById('school-subject-detail').hidden)renderGrades()}
 
-// syncStatus (string or {state, retryCount}) is written by the Mac uploader.
+// The Mac uploader publishes the completed collection timestamp as syncedAt.
 // Missing/old status must never be shown as a confirmed success.
 // Child-facing status describes the age of the grades, not the Mac's retry machinery.
 // A failed background attempt leaves the previously collected grades intact.
@@ -1362,8 +1362,8 @@ function showDiarySyncTime(data,fromCache=false){
  const last=data?.lastSuccessfulSyncAt??data?.lastSyncAt??data?.syncedAt;
  const value=last&&typeof last==='object'&&typeof last.toDate==='function'?last.toDate():last;
  const parsed=(typeof value==='string'||typeof value==='number'||value instanceof Date)?new Date(value):null;
- const valid=parsed&&!Number.isNaN(parsed.getTime());
- const age=valid?Date.now()-parsed.getTime():Infinity;
+ const age=parsed?Date.now()-parsed.getTime():Infinity;
+ const valid=Number.isFinite(age)&&age>=-5*60*1000;
  let label='',symbol='',kind='unknown';
  if(valid){
   const dateLabel=parsed.toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
