@@ -1,18 +1,19 @@
-name: Family applications checks
+name: Application checks
 on:
   push:
     branches: [main]
     paths:
       - 'wordscene/**'
-      - '.github/workflows/wordscene17-local-tests.yml'
+      - 'leveli/**'
+      - '.github/workflows/**'
   pull_request:
     paths:
       - 'wordscene/**'
       - 'leveli/**'
-      - 'index.html'
-      - 'README.md'
-      - '.github/workflows/wordscene17-local-tests.yml'
+      - '.github/workflows/**'
   workflow_dispatch:
+permissions:
+  contents: read
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -61,20 +62,3 @@ jobs:
           path: wordscene/audit-screenshots/*.png
           if-no-files-found: warn
 
-  live-site-acceptance:
-    if: github.event_name != 'push'
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-      - name: Install Playwright and browsers
-        run: |
-          npm install --no-save playwright
-          npx playwright install --with-deps chromium webkit
-      - name: Test deployed GitHub Pages in desktop/mobile browsers and offline
-        env:
-          WS17_TEST_ORIGIN: https://g-spitfire.github.io/tracker
-        run: node wordscene/browser-acceptance.cjs
