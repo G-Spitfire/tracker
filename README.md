@@ -8,7 +8,7 @@
 | --- | --- | --- | --- |
 | Левели | Школьные оценки и успеваемость | [Открыть](https://g-spitfire.github.io/tracker/leveli/) | [README](leveli/README.md) |
 | Форма | Трекер тренировок | [Открыть](https://g-spitfire.github.io/tracker/forma/) | [README](forma/README.md) |
-| WordScene | Изучение английских слов | [Открыть](https://g-spitfire.github.io/tracker/wordscene-17-lab/) | [README](wordscene-17-lab/README.md) |
+| WordScene | Изучение английских слов | [Открыть](https://g-spitfire.github.io/tracker/wordscene/) | [README](wordscene/README.md) |
 | Покер с нуля | Интерактивная инструкция | [Открыть](https://g-spitfire.github.io/tracker/poker/) | [README](poker/README.md) |
 
 ## Данные и разработка
@@ -20,4 +20,4 @@
 
 ## WordScene
 
-Актуальная версия — [WordScene 17.0](wordscene-17-lab/README.md), единственная спецификация — [SPEC.md](wordscene-17-lab/SPEC.md). WordScene 16.17 выведена из эксплуатации, старый каталог `wordscene/` доступен только в истории Git. Новый адрес не меняется; сохранения на устройствах не очищаются и не переносятся. Firebase «Левели» используется для школьных оценок; старая интеграция WordScene удалена из интерфейса «Левели». Архивные данные и серверные правила не изменялись.
+Актуальная версия — [WordScene 17.0](wordscene/README.md), единственная спецификация — [SPEC.md](wordscene/SPEC.md). WordScene 16.17 выведена из эксплуатации, старая версия 16.17 доступна только в истории Git. Постоянный адрес WordScene: `/tracker/wordscene/`. При переходе со старого `/tracker/wordscene-17-lab/` история и прогресс не переносятся: пользователи начинают заново. Firebase «Левели» используется для школьных оценок; старая интеграция WordScene удалена из интерфейса «Левели». Архивные данные и серверные правила не изменялись.
