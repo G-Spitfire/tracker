@@ -74,20 +74,20 @@ function subjectTrend(regular){
   return da===null||db===null?a.index-b.index:da-db||a.index-b.index;
  });
  const n=items.length;
- if(n<2)return {difference:null,recentAverage:null,previousAverage:null};
+ if(n<2)return {difference:null,recentAverage:null,previousAverage:null,recentGrades:[],previousGrades:[]};
  // For 2–5 grades compare the last individual grade against all earlier grades.
  // For 6+ grades compare weighted averages of two adjacent 3-grade blocks.
  const recent=n<6?items.slice(-1):items.slice(-3);
  const previous=n<6?items.slice(0,-1):items.slice(-6,-3);
  const recentAverage=mean(recent),previousAverage=mean(previous);
- return {difference:recentAverage-previousAverage,recentAverage,previousAverage};
+ return {difference:recentAverage-previousAverage,recentAverage,previousAverage,recentGrades:recent,previousGrades:previous};
 }
 function summary(regular,final=[]){
  const average=mean(regular);
- const {difference,recentAverage,previousAverage}=subjectTrend(regular);
+ const {difference,recentAverage,previousAverage,recentGrades,previousGrades}=subjectTrend(regular);
  const official=final.filter(g=>g.officialKind==='За четверть'||officialKind(g)==='За четверть')
   .slice().sort((a,b)=>(a.date?.getTime()||0)-(b.date?.getTime()||0)).at(-1)?.value??null;
- return {average,forecast:regular.length>=3?forecast(average):null,official,recentAverage,previousAverage,difference,
+ return {average,forecast:regular.length>=3?forecast(average):null,official,recentAverage,previousAverage,difference,recentGrades,previousGrades,
   deteriorating:difference!==null&&difference<=-0.5};
 }
 // Assume future marks of 5 have weight 1. Calculation is only a scenario.
