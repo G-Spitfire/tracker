@@ -67,18 +67,20 @@ function mean(items){
 function forecast(value){return value===null||!Number.isFinite(value)?null:value>=4.6?5:value>=3.6?4:value>=2.6?3:2}
 function normalize(rows){return rows.filter(g=>g&&typeof g==='object').map(g=>({...g,value:mark(g)})).filter(g=>g.value!==null)}
 function subjectTrend(regular){
- const dated=regular.map((g,index)=>({...g,index})).filter(g=>g.date instanceof Date&&!Number.isNaN(g.date.getTime())).sort((a,b)=>a.date-b.date||a.index-b.index);
- // If a mark has no date, preserve its source order as an explicit fallback.
- const items=dated.length===regular.length?dated:regular.map((g,index)=>({...g,index})).sort((a,b)=>{
-  const da=a.date instanceof Date?a.date.getTime():null,db=b.date instanceof Date?b.date.getTime():null;
+ // A stable sort follows the school-work date; missing dates retain source order.
+ const items=regular.map((g,index)=>({...g,index})).sort((a,b)=>{
+  const da=a.date instanceof Date&&!Number.isNaN(a.date.getTime())?a.date.getTime():null;
+  const db=b.date instanceof Date&&!Number.isNaN(b.date.getTime())?b.date.getTime():null;
   return da===null||db===null?a.index-b.index:da-db||a.index-b.index;
  });
  const n=items.length;
- if(n<3)return {difference:null,recentAverage:null,previousAverage:null};
- // Compare the weighted last three marks to the weighted full-quarter mean.
- const recentAverage=mean(items.slice(-3)),previousAverage=mean(items);
- const difference=recentAverage-previousAverage;
- return {difference,recentAverage,previousAverage};
+ if(n<2)return {difference:null,recentAverage:null,previousAverage:null};
+ // For 2–5 grades compare the last individual grade against all earlier grades.
+ // For 6+ grades compare weighted averages of two adjacent 3-grade blocks.
+ const recent=n<6?items.slice(-1):items.slice(-3);
+ const previous=n<6?items.slice(0,-1):items.slice(-6,-3);
+ const recentAverage=mean(recent),previousAverage=mean(previous);
+ return {difference:recentAverage-previousAverage,recentAverage,previousAverage};
 }
 function summary(regular,final=[]){
  const average=mean(regular);
@@ -86,7 +88,7 @@ function summary(regular,final=[]){
  const official=final.filter(g=>g.officialKind==='За четверть'||officialKind(g)==='За четверть')
   .slice().sort((a,b)=>(a.date?.getTime()||0)-(b.date?.getTime()||0)).at(-1)?.value??null;
  return {average,forecast:regular.length>=3?forecast(average):null,official,recentAverage,previousAverage,difference,
-  deteriorating:difference!==null&&difference<=-0.5+1e-10};
+  deteriorating:difference!==null&&difference<=-0.5};
 }
 // Assume future marks of 5 have weight 1. Calculation is only a scenario.
 function fivesNeeded(regular){
