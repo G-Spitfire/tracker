@@ -110,6 +110,7 @@ body{background:#0e0c21;color:#f6f0ff}
 .forecast-legend{display:grid;align-content:start;width:100%;margin-top:2px}
 .forecast-legend .legend-item{width:100%;display:flex;align-items:center;justify-content:space-between;border:1px solid transparent;background:transparent;color:#ded2f1;font:600 10px Manrope,system-ui,sans-serif;padding:4px 2px;border-radius:7px;text-align:left;min-height:36px;gap:2px}
 .forecast-legend button.legend-item{cursor:pointer}
+.double-donut:has(.forecast-legend > :nth-child(4)) .legend-item{min-height:28px;padding-block:2px}
 .forecast-legend button[aria-pressed=true]{background:#44345e;border-color:#6e558f}
 .forecast-legend .legend-label{display:flex;align-items:center;gap:5px;min-width:0}
 .forecast-legend .legend-dot{width:7px;height:7px}
@@ -154,6 +155,10 @@ body{background:#0e0c21;color:#f6f0ff}
 .subject-row__grade{width:43px}
 .subject-row__grade strong{font-size:23px;color:var(--leveli-accent-soft);font-weight:800;line-height:1.15}
 .subject-row__grade .official-box{font-size:19px;color:var(--leveli-accent-ink);background:var(--leveli-accent-dim);border:1px solid var(--leveli-accent-border);padding:2px 8px;border-radius:7px}
+.subject-row__grade strong[data-grade="2"]{--grade-ink:var(--ds-status-bad)}
+.subject-row__grade strong[data-grade="3"]{--grade-ink:var(--ds-grade-three)}
+.subject-row__grade strong:is([data-grade="2"],[data-grade="3"]){color:var(--grade-ink)}
+.subject-row__grade .official-box:is([data-grade="2"],[data-grade="3"]){border-color:var(--grade-ink);background:color-mix(in srgb,var(--grade-ink) 13%,transparent)}
 .subject-row__dynamics{width:54px;align-items:flex-end}
 .subject-row small{font-size:9px;color:#9688b0;font-weight:600}
 .subjects-card{padding:14px}
@@ -475,12 +480,12 @@ body{background:#0e0c21;color:#f6f0ff}
  --ds-line-normal:1.5;--ds-line-heading:1.3;
  --ds-radius-card:20px;--ds-radius-inner:15px;--ds-radius-control:12px;
  --ds-hit:44px;--ds-button-height:48px;
- --ds-chart-grid:#594c70;--ds-status-good:#78e7ae;--ds-status-bad:#ff8fa1;
+ --ds-chart-grid:#594c70;--ds-status-good:#78e7ae;--ds-status-bad:#ff8fa1;--ds-grade-three:#f6c078;
  --ds-text-primary:#f6f0ff;--ds-text-secondary:#baadcf;
  --ds-card-surface:#1c1735;--ds-border:#453360;
 }
 :root[data-leveli-theme="light"]{
- --ds-chart-grid:#b9adc8;--ds-status-good:#216746;--ds-status-bad:#a82e4f;
+ --ds-chart-grid:#b9adc8;--ds-status-good:#216746;--ds-status-bad:#a82e4f;--ds-grade-three:#85501d;
  --ds-text-primary:#302448;--ds-text-secondary:#665677;
  --ds-card-surface:#fff;--ds-border:#e4dbef;
 }
@@ -1139,7 +1144,7 @@ function renderGrades(){
   const average=document.createElement('span');average.className='subject-row__number';
   const avg=document.createElement('strong');avg.textContent=formatMean(stats.average);const avgLabel=document.createElement('small');avgLabel.textContent='средний';average.append(avg,avgLabel);
   const grade=document.createElement('span');grade.className='subject-row__grade';
-  const score=document.createElement('strong');score.textContent=stats.official!==null?stats.official:stats.forecast??'—';if(stats.official!==null)score.className='official-box';
+  const score=document.createElement('strong');score.textContent=stats.official??stats.forecast??'—';score.dataset.grade=score.textContent;if(stats.official!==null)score.className='official-box';
   const gradeLabel=document.createElement('small');gradeLabel.textContent=stats.official!==null?'итог':'прогноз';grade.append(score,gradeLabel);
   const dynamics=document.createElement('span');dynamics.className='subject-row__dynamics';
   const {tone,text}=gradeTrendDisplay(stats.difference);

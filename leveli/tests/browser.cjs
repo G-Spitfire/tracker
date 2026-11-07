@@ -505,6 +505,37 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   assert.equal(await detail.locator('.detail-goal').evaluate(el=>getComputedStyle(el).backgroundColor),await page.locator('.settings-button').evaluate(el=>getComputedStyle(el).backgroundColor));
   await detail.locator('.detail-back').click();
  }
+ const lowSubjects=[
+  ...marks('Физика',[4,4,4]),
+  ...marks('Биология',[5,5,5]),
+  ...marks('Химия',[3,3,3]),
+  ...marks('Геометрия',[2,2,2]),
+  {...official,subject:'Геометрия',value:2}
+ ];
+ await refresh(lowSubjects);
+ await row('Биология').waitFor();
+ for(const width of [320,390]){
+  await page.setViewportSize({width,height:844});
+  const legends=await page.locator('.forecast-legend').evaluateAll(legends=>legends.map(legend=>[...legend.children].map(item=>({
+   label:item.querySelector('.legend-label').textContent,
+   height:item.getBoundingClientRect().height
+  }))));
+  for(const legend of legends){
+   assert.equal(legend.length,4);
+   assert.ok(legend.every(item=>/^Оценка [2-5]$/.test(item.label)&&item.height>=28&&item.height<=30));
+  }
+  const score=name=>row(name).locator('.subject-row__grade strong');
+  const color=locator=>locator.evaluate(el=>getComputedStyle(el).color);
+  assert.equal(await score('Геометрия').getAttribute('class'),'official-box');
+  assert.equal(await score('Химия').getAttribute('class'),null);
+  assert.equal(await color(score('Геометрия')),'rgb(255, 143, 161)');
+  assert.equal(await color(score('Химия')),'rgb(246, 192, 120)');
+  assert.notEqual(await color(score('Физика')),await color(score('Химия')));
+ }
+ await page.getByRole('button',{name:'Оценка 2, предметов: 1'}).click();
+ assert.equal(await page.locator('.subject-row').count(),1);
+ assert.match(await page.locator('.subject-row').textContent(),/Геометрия/);
+ await page.getByRole('button',{name:'Оценка 2, предметов: 1'}).click();
  await page.setViewportSize({width:390,height:844});
  await page.getByRole('button',{name:'Профиль и настройки'}).click();
  await page.getByRole('button',{name:'Изменить аватар'}).click();
