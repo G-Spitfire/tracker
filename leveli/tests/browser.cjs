@@ -47,6 +47,9 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   window.__switchUser('A');
  });await page.waitForFunction(()=>document.querySelector('#school-period').options.length>=4);
  assert.equal(await page.locator('#home-greeting').innerText(),'Привет, Полина!');
+ assert.deepEqual(await page.locator('#school-overview > article h2').allTextContents(),[
+  'Моя успеваемость','Как у меня дела?','Все предметы'
+ ]);
  const freshness=page.locator('#school-freshness');
  await page.waitForFunction(()=>document.querySelector('#school-freshness').dataset.state==='ok');
  assert.match(await freshness.innerText(),/Оценки по состоянию на/);
@@ -219,6 +222,12 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.getByRole('button',{name:'Оценка 5, предметов: 1'}).click();
  await page.locator('#school-subjects .subject-row').filter({hasText:'Математика'}).click();
  assert.equal(await page.locator('#school-subject-detail .detail-hero-score').innerText(),'4');
+ const forecast=page.locator('#school-subject-detail .detail-hero');
+ assert.ok(await forecast.evaluate(el=>{
+  const label=el.querySelector('.detail-hero-label').getBoundingClientRect();
+  const score=el.querySelector('.detail-hero-score').getBoundingClientRect();
+  return score.left>=label.right&&score.top<label.bottom&&el.getBoundingClientRect().height<130;
+ }), 'quarter forecast is compact with its grade on the right');
  assert.equal(await page.locator('#school-subject-detail .detail-back').innerText(),'Назад');
  assert.equal(await page.locator('#school-subject-detail .detail-period').count(),1);
  const headers=await page.evaluate(()=>{
@@ -239,7 +248,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   assert.match(await page.locator('#leveli-trend-dialog').innerText(),/Предыдущие оценки[\s\S]*Последние оценки[\s\S]*Изменение/);
   await page.getByRole('button',{name:'Понятно'}).click();
   assert.equal(await page.locator('#leveli-trend-dialog').isVisible(),false);
- assert.equal(await page.locator('#school-subject-detail .detail-kpi').innerText(), 'Средний балл\n4,50\nПолучено оценок\n6');
+ assert.equal(await page.locator('#school-subject-detail .detail-kpi').count(),0);
  assert.equal(await page.locator('.school-header').isVisible(),false);
  await page.evaluate(()=>document.getElementById('school-refresh').click());
  await page.waitForTimeout(350);
@@ -542,7 +551,10 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   await row('Геометрия').click();
   assert.equal(await detail.locator('.detail-trend-pill').textContent(),'−0,50 · Как посчитано?');
   assert.equal(await detail.locator('.detail-goal').isVisible(),true);
-  assert.equal(await detail.locator('.detail-goal').evaluate(el=>getComputedStyle(el).backgroundColor),await page.locator('.settings-button').evaluate(el=>getComputedStyle(el).backgroundColor));
+  assert.equal(await detail.locator('.detail-goal').evaluate(el=>getComputedStyle(el).backgroundColor),await detail.locator('.detail-goal').evaluate(el=>{
+   const probe=document.createElement('span');probe.style.backgroundColor='var(--ds-surface-inner)';
+   el.append(probe);const color=getComputedStyle(probe).backgroundColor;probe.remove();return color;
+  }));
   await detail.locator('.detail-back').click();
  }
  const lowSubjects=[
