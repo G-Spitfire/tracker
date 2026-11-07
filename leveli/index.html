@@ -322,7 +322,6 @@ body{background:#0e0c21;color:#f6f0ff}
 .personal-avatar-option{font-size:28px;min-height:59px;padding:4px}
 .avatar-illustration{display:block;width:100%;max-width:58px;aspect-ratio:1;background-image:url('./avatars/prototype-girl.svg');background-repeat:no-repeat;background-size:500% 200%;border-radius:11px;background-color:#34254c}
 .profile-avatar .avatar-illustration{width:100%;max-width:none;border-radius:15px}
-.personal-avatar-option[aria-pressed="true"] .avatar-illustration{outline:2px solid var(--leveli-accent-soft);outline-offset:1px}
 @media(max-width:360px){.personal-avatar-option{min-height:52px;padding:3px}.avatar-illustration{border-radius:8px}}
 .personal-color-swatch{width:27px;height:27px;border-radius:10px;border:1px solid #ffffff50}
 
@@ -627,7 +626,10 @@ body{background:#0e0c21;color:#f6f0ff}
 :root .b3-settings .b3-tile .b3-tile-icon{width:39px;height:39px;min-width:0;grid-column:1;grid-row:1 / span 2}
 @media(max-width:360px){:root .b3-settings .b3-tile .b3-tile-icon{width:32px;height:32px}}
 /* Gallery previews preserve the whole silhouette. */
-.personal-avatar-option .avatar-illustration.leveli-3d-avatar{display:block;width:100%;height:100%;max-width:none;aspect-ratio:1;object-fit:contain;background:none;border:0;border-radius:0}
+@media(min-width:380px){.b3-dialog #personal-avatar-options{grid-template-columns:repeat(4,minmax(0,1fr))}}
+#personal-avatar-options h4{grid-column:1 / -1;margin:5px 0 1px;color:var(--ds-text-primary);font-size:13px}
+#personal-avatar-options .personal-avatar-option{justify-content:flex-start;gap:4px;padding:4px 3px;font-size:11px;line-height:1.25}
+.personal-avatar-option .avatar-illustration.leveli-3d-avatar{display:block;width:100%;height:62px;max-width:none;object-fit:contain;background:none;border:0;border-radius:0}
 
 /* Grade trend explanation for keyboard and touch input. */
 .leveli-trend-dialog{width:min(92vw,420px);max-height:85vh;overflow:auto;margin:auto;border:1px solid var(--leveli-accent-border,#a882ff);border-radius:18px;padding:22px;background:#211b33;color:#f5f0ff;box-shadow:0 18px 50px #0008}
@@ -694,7 +696,7 @@ body{background:#0e0c21;color:#f6f0ff}
  <article class="card profile-card"><div class="profile-identity"><div class="profile-avatar" id="profile-avatar-display" aria-hidden="true">★</div><div><h2 id="profile-name">Гость</h2><p id="profile-account">Войди на главной, чтобы подключить профиль.</p></div></div><p id="profile-school" class="muted" hidden></p></article>
  <article class="card profile-card" id="profile-personalization" hidden>
   <h2>Моё оформление</h2><p>Выбирай, как выглядит твой Левели.</p>
-  <div class="personal-group"><h3>Аватар</h3><div class="personal-choice-grid" id="personal-avatar-options" role="group" aria-label="Выбрать аватар"></div><div class="avatar-upload-row"><button type="button" class="btn secondary" id="profile-upload-avatar">Выбрать свою картинку</button><button type="button" class="btn secondary" id="profile-remove-avatar" hidden>Убрать картинку</button></div><input id="profile-avatar-file" type="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif" hidden></div>
+  <div class="personal-group"><div class="personal-choice-grid" id="personal-avatar-options" role="group" aria-label="Выбрать аватар"></div><div class="avatar-upload-row"><button type="button" class="btn secondary" id="profile-upload-avatar">Выбрать свою картинку</button><button type="button" class="btn secondary" id="profile-remove-avatar" hidden>Убрать картинку</button></div><input id="profile-avatar-file" type="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif" hidden></div>
   <div class="personal-group"><h3>Тема</h3><div class="personal-theme-grid" id="personal-theme-options" role="group" aria-label="Тема оформления"></div></div>
   <div class="personal-group"><h3>Акцентный цвет</h3><div class="personal-color-grid" id="personal-accent-options" role="group" aria-label="Акцентный цвет"></div></div>
  </article>
@@ -781,8 +783,21 @@ window.LeveliAppearance=(()=>{
   mint:{main:'#08765f',soft:'#075a4b',dim:'#c7f5e6',border:'#46a990',line:'#137e67',glow:'#69d9bd',track:'#a5e5d4'}
  };
  const colorScheme=window.matchMedia('(prefers-color-scheme: light)');
- // Two approved portraits; map old avatar 0 to the child's name until a new choice is saved.
- const avatars=[['Полина','./avatars/leveli-polina-3d.webp'],['Матвей','./avatars/leveli-matvey-3d.webp']];
+ // Persisted indices are append-only. The two original portraits remain the defaults.
+ const avatars=[
+  ['Полина','./avatars/leveli-polina-3d.webp','Классика'],
+  ['Матвей','./avatars/leveli-matvey-3d.webp','Классика'],
+  ['Полина','./avatars/polina-cat.webp','Котёнок'],
+  ['Полина','./avatars/polina-hamster.webp','Хомяк'],
+  ['Полина','./avatars/polina-headphones.webp','Наушники'],
+  ['Полина','./avatars/polina-phone.webp','Телефон'],
+  ['Матвей','./avatars/matvey-laptop.webp','Ноутбук'],
+  ['Матвей','./avatars/matvey-phone.webp','Телефон'],
+  ['Матвей','./avatars/matvey-headphones.webp','Наушники'],
+  ['Матвей','./avatars/matvey-video.webp','Короткие видео'],
+  ['Матвей','./avatars/matvey-football.webp','Футбол'],
+  ['Матвей','./avatars/matvey-city-game.webp','Город']
+ ];
  function avatarImage(index=profile.avatar){
   const node=document.createElement('img');node.className='avatar-illustration leveli-3d-avatar';
   node.src=avatars[index]?.[1]||avatars[0][1];node.alt='';node.setAttribute('aria-hidden','true');
@@ -822,13 +837,20 @@ window.LeveliAppearance=(()=>{
  }
  function drawControls(){
   const av=document.querySelector('#personal-avatar-options');av.replaceChildren();
-  // One shared gallery, interleaved for variety. Saved avatar indices never change.
-  for(const i of [0,1]){
-   const label=avatars[i][0];
-   const b=button('',profile.avatar===i,()=>set({avatar:i,avatarRevision:2}),'personal-avatar-option');
-   b.title=label;b.setAttribute('aria-label',label);b.dataset.avatarIndex=String(i);
-   b.append(avatarImage(i));av.append(b)
-  }if(profile.customAvatar){const b=button('',profile.avatar==='custom',()=>set({avatar:'custom'}),'personal-avatar-option');b.setAttribute('aria-label','Моя картинка');const img=document.createElement('img');img.src=profile.customAvatar;img.alt='';img.className='personal-avatar-custom';b.append(img);av.append(b)}
+  for(const person of ['Полина','Матвей']){
+   const heading=document.createElement('h4');heading.textContent=person;av.append(heading);
+   avatars.forEach(([owner, , label],i)=>{
+    if(owner!==person)return;
+    const b=button(label,profile.avatar===i,()=>set({avatar:i,avatarRevision:2}),'personal-avatar-option');
+    b.setAttribute('aria-label',i<2?person:person+' — '+label);b.dataset.avatarIndex=String(i);
+    const img=avatarImage(i);img.loading='lazy';b.prepend(img);av.append(b);
+   });
+  }
+  if(profile.customAvatar){
+   const heading=document.createElement('h4');heading.textContent='Своя картинка';av.append(heading);
+   const b=button('Моя картинка',profile.avatar==='custom',()=>set({avatar:'custom'}),'personal-avatar-option');
+   const img=document.createElement('img');img.src=profile.customAvatar;img.alt='';img.className='personal-avatar-custom';b.prepend(img);av.append(b);
+  }
   const themeBox=document.querySelector('#personal-theme-options');themeBox.replaceChildren();themeBox.closest('.personal-group').hidden=true;
   const colorBox=document.querySelector('#personal-accent-options');colorBox.replaceChildren();for(const [k,title] of [['violet','Фиолетовый'],['pink','Розовый'],['blue','Синий'],['yellow','Жёлтый'],['mint','Мятный']]){const b=button(title,profile.accent===k,()=>set({accent:k}));const swatch=document.createElement('span');swatch.className='personal-color-swatch';swatch.style.background=(document.documentElement.dataset.leveliTheme==='light'?lightAccents:darkAccents)[k].main;b.prepend(swatch);colorBox.append(b)}
  }

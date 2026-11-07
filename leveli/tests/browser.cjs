@@ -71,7 +71,15 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await page.locator('#profile-avatar-display').getAttribute('data-avatar-index'),'0');
  assert.equal(await page.locator('#profile-avatar-display .avatar-illustration').count(),1);
 
- assert.equal(await page.locator('#personal-avatar-options .personal-avatar-option').count(),2);
+ assert.equal(await page.locator('#personal-avatar-options .personal-avatar-option').count(),12);
+ assert.deepEqual(await page.locator('#personal-avatar-options h4').allTextContents(),['Полина','Матвей']);
+ await page.locator('#personal-avatar-options img').evaluateAll(images=>Promise.all(images.map(img=>{img.loading='eager';return img.decode()})));
+ assert.equal(await page.locator('#personal-avatar-options img').count(),12);
+ for(const width of [320,390]){
+  await page.setViewportSize({width,height:844});
+  assert.ok(await page.locator('.b3-dialog').evaluate(el=>el.scrollWidth<=el.clientWidth+1));
+ }
+ await page.screenshot({path:'outputs/leveli-avatar-gallery.png',fullPage:true});
  for(const name of ['polina','matvey']){
   const response=await page.request.get((process.env.TEST_BASE_URL||'http://127.0.0.1:8765')+'/leveli/avatars/leveli-'+name+'-3d.webp');
   assert.equal(response.status(),200);
@@ -175,9 +183,8 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.setViewportSize({width:390,height:844});
  const iconBorders=await page.locator('.school-header .settings-button,.help-btn').evaluateAll(buttons=>buttons.map(b=>getComputedStyle(b).borderTopWidth));
  assert.ok(iconBorders.every(width=>width==='0px'),'standalone icon controls have no outer border');
- await orientHelp.focus();
- await page.keyboard.press('Shift+Tab');
  await page.keyboard.press('Tab');
+ await orientHelp.focus();
  assert.ok(await orientHelp.evaluate(el=>document.activeElement===el));
  assert.notEqual(await orientHelp.evaluate(el=>getComputedStyle(el).outlineStyle),'none','keyboard focus remains visible');
  await orientHelp.click();
@@ -528,6 +535,19 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.getByRole('button',{name:'Оценка 2, предметов: 1'}).click();
  assert.equal(await page.locator('.subject-row').count(),1);
  assert.match(await page.locator('.subject-row').textContent(),/Геометрия/);
+ await page.getByRole('button',{name:'Оценка 2, предметов: 1'}).click();
+ await page.setViewportSize({width:390,height:844});
+ await page.getByRole('button',{name:'Профиль и настройки'}).click();
+ await page.getByRole('button',{name:'Изменить аватар'}).click();
+ const football=page.getByRole('button',{name:'Матвей — Футбол'});
+ await football.press('Enter');
+ assert.equal(await football.getAttribute('aria-pressed'),'true');
+ assert.ok(await football.evaluate(el=>document.activeElement===el));
+ assert.match(await page.locator('#profile-avatar-display img').getAttribute('src'),/matvey-football\.webp$/);
+ await page.reload();
+ await page.waitForFunction(()=>document.querySelector('#profile-avatar-display img')?.src.endsWith('matvey-football.webp'));
+ await page.evaluate(()=>window.__switchUser('B'));
+ await page.waitForFunction(()=>document.querySelector('#profile-avatar-display img')?.src.endsWith('leveli-polina-3d.webp'));
  assert.deepEqual(errors,[]);fs.writeFileSync('work/browser-result.json',JSON.stringify({passed:true,checks:['one school home','profile navigation','exact school forecast','official final','decline warning','A/B isolation','offline cached grades','logout clear'],errors},null,2));
  await browser.close();console.log('Browser integration: PASS');
 })().catch(e=>{console.error(e);process.exit(1)});
