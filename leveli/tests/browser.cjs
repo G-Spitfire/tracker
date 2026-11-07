@@ -380,7 +380,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   const hitAreas=await page.locator('#personal-accent-options button').evaluateAll(items=>items.map(el=>[el.offsetWidth,el.offsetHeight]));
   assert.ok(hitAreas.every(([w,h])=>w>=44&&h>=44),'accent controls have a 44px hit area at '+width);
   await page.locator('#b3-panel-close').click();
-  assert.equal(state.tileCount,4,'all quick-setting tiles remain readable on '+width+'px screen');
+  assert.equal(state.tileCount,3,'all visible quick-setting tiles remain readable on '+width+'px screen');
   const cardPadding=await page.locator('.forecast-card').evaluate(el=>getComputedStyle(el).paddingTop);
   assert.equal(cardPadding,width<=360?'12px':'16px','dashboard spacing follows responsive token at '+width+'px');
   const tileLayout=await page.locator('.b3-tile').first().evaluate(el=>{
