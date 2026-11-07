@@ -6,7 +6,9 @@ const storeMock=`export const getFirestore=()=>({});export const doc=(db,...part
 fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
 (async()=>{
  const browser=await (process.env.BROWSER_ENGINE==='webkit'?webkit:chromium).launch({headless:true,...(process.env.BROWSER_BINARY?{executablePath:process.env.BROWSER_BINARY}:{})});
- const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'allow',reducedMotion:'reduce'});
+ const context=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'});
+ // Keep Firebase module requests under the test routes, including after reload.
+ await context.addInitScript(()=>{if(navigator.serviceWorker)navigator.serviceWorker.register=async()=>{}});
  await context.addInitScript(({fixtures})=>{window.__fixtures=fixtures;window.__auth={currentUser:JSON.parse(sessionStorage.getItem('test-user')||'null')};window.__listeners=[];window.__switchUser=uid=>{window.__auth.currentUser=uid?{uid,email:uid==='A'?'a@example.test':'b@example.test'}:null;sessionStorage.setItem('test-user',JSON.stringify(window.__auth.currentUser));for(const fn of window.__listeners)fn(window.__auth.currentUser)}},{fixtures});
  await context.route('https://www.gstatic.com/firebasejs/**',route=>{const url=route.request().url();route.fulfill({contentType:'text/javascript',body:url.endsWith('firebase-app.js')?'export const initializeApp=(c,n)=>({name:n})':url.endsWith('firebase-auth.js')?authMock:storeMock})});
  await context.route('https://fonts.googleapis.com/**',route=>route.abort());await context.route('https://fonts.gstatic.com/**',route=>route.abort());
