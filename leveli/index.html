@@ -75,7 +75,6 @@ section[hidden],[hidden]{display:none!important}
 .detail-kpi{display:grid;}
 .detail-kpi>div{border-radius:14px}
 .detail-kpi strong{display:block;}
-.detail-goal{margin:12px 0;}
 .detail-chart-scroll{overscroll-behavior-x:contain}
 .detail-chart-scroll svg{display:block;}
 .grade-entry{display:flex;justify-content:space-between;border-bottom:1px solid #eee8f9;font-size:13px}
@@ -121,13 +120,11 @@ body{background:#0e0c21;color:#f6f0ff}
 @media(min-width:390px){.donut-panel{padding:10px}.forecast-legend .legend-item{font-size:11px}}
 #school-status,#school-freshness{font-size:11px;margin:9px 5px;color:var(--ds-text-secondary)}
 #school-freshness[data-state=error]{color:var(--ds-status-bad)}
-#school-freshness[data-state=ok]{color:var(--ds-status-good)}
-#school-freshness[data-state=waiting],#school-freshness[data-state=unknown]{color:var(--ds-text-secondary)}
 #school-freshness{display:flex;align-items:center;gap:8px;line-height:1.45}
 #school-freshness .sync-symbol{font-size:16px;font-weight:800;flex:0 0 19px;text-align:center}
 #school-freshness .sync-copy{flex:1;min-width:0}
 .trend-card{background:#1c1735}
-.trend-change{font-size:15px;color:#c6bbd9;font-variant-numeric:tabular-nums}
+.trend-change{font-size:12px;color:var(--ds-text-secondary);font-variant-numeric:tabular-nums}
 .trend-change.positive{color:var(--ds-status-good)}.trend-change.negative{color:var(--ds-status-bad)}
 .trend-axis{color:var(--ds-text-secondary)}
 .orient-heading{display:flex;justify-content:space-between;align-items:center;margin:22px 2px 10px}
@@ -164,7 +161,7 @@ body{background:#0e0c21;color:#f6f0ff}
 .btn.secondary{background:#302747;border-color:#574275;color:#e4d4ff}
 #school-form input{color:var(--ds-text-primary);background:var(--ds-surface-inner);border-color:var(--ds-border)}
 .profile-period{border-top-color:#44365e}
-.choice-buttons button{background:#302747;color:#e3d8f4;border-color:#55446f}.detail-kpi strong,.grade-entry__value{color:#c5a8ff}.detail-goal{background:#19392f;color:#a5e8c5}
+.choice-buttons button{background:#302747;color:#e3d8f4;border-color:#55446f}.detail-kpi strong,.grade-entry__value{color:#c5a8ff}
 .detail-toggle button{background:var(--ds-surface-inner);color:var(--ds-text-primary);border-color:var(--ds-border)}
 .school-empty{color:var(--ds-text-secondary)}
 @media(max-width:360px){.content{padding:12px 10px 24px}.card{padding:12px}.donut-panel{padding:6px}.orient-panel{padding:10px 7px}.subject-row{padding:10px 7px;gap:4px}.subject-row__number{width:43px}.subject-row__grade{width:38px}.subject-row__dynamics{width:51px}}
@@ -179,7 +176,6 @@ body{background:#0e0c21;color:#f6f0ff}
 .detail-kpi strong{font-size:clamp(20px,6vw,27px);line-height:1.2;overflow-wrap:anywhere;color:#e2cdff;font-variant-numeric:tabular-nums}
 .detail-kpi span{display:block;margin-top:7px;font-size:11px;line-height:1.4;color:#b7a7d1}
 #school-subject-detail>.grade-delta{display:block;white-space:normal;font-size:12px;line-height:1.6;margin:12px 2px}
-.detail-goal{padding:15px;border:1px solid #37624c;border-radius:15px;font-size:12px;line-height:1.65}
 #school-subject-detail h3{font-size:16px;line-height:1.35;color:#f4eaff;margin:23px 0 9px}
 .detail-toggle{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 13px}
 .detail-toggle button{min-width:0;min-height:42px;padding:10px 8px;border-radius:11px;line-height:1.35;font-size:12px;white-space:normal}
@@ -248,13 +244,11 @@ body{background:#0e0c21;color:#f6f0ff}
 #school-subject-detail .detail-kpi>div{background:#29223f;border:1px solid #403250}
 #school-subject-detail .detail-kpi strong{font-size:26px;color:#f3eaff;margin-top:5px}
 #school-subject-detail .detail-kpi span{font-size:11px;color:#bfb1d4}
-#school-subject-detail .detail-goal{margin:12px 0 0;background:#18382e;border:1px solid #396c50;border-radius:17px;padding:16px 15px}
-#school-subject-detail .detail-goal.complete{background:#292341;border-color:#5f4984}
-#school-subject-detail .detail-goal-label{font-size:11px;font-weight:800;color:#a3e7be;letter-spacing:.03em}
-#school-subject-detail .detail-goal.complete .detail-goal-label{color:#d4bcff}
-#school-subject-detail .detail-goal-main{font-size:18px;font-weight:800;color:#e1ffed;line-height:1.4;margin:6px 0}
-#school-subject-detail .detail-goal.complete .detail-goal-main{color:#f0e3ff}
-#school-subject-detail .detail-goal-note{font-size:11px;color:#a8d5bb;line-height:1.55}
+#school-subject-detail .detail-goal{margin:12px 0 0;background:var(--ds-surface-inner);border:1px solid var(--ds-border);border-radius:17px;padding:16px 15px;font-size:12px;line-height:1.65}
+#school-subject-detail .detail-goal-label{font-size:11px;font-weight:800;color:var(--ds-text-secondary);letter-spacing:.03em}
+#school-subject-detail .detail-goal-main{font-size:18px;font-weight:800;color:var(--ds-text-primary);line-height:1.4;margin:6px 0}
+#school-subject-detail .detail-goal.achieved .detail-goal-main{color:var(--ds-status-good)}
+#school-subject-detail .detail-goal-note{font-size:11px;color:var(--ds-text-secondary);line-height:1.55}
 #school-subject-detail .detail-chart-scroll{background:#1c1735}
 #school-subject-detail .detail-toggle button{border-radius:10px}
 @media(max-width:360px){#school-subject-detail .detail-hero-score{font-size:62px}#school-subject-detail .detail-goal-main{font-size:16px}}
@@ -350,12 +344,9 @@ body{background:#0e0c21;color:#f6f0ff}
 :root .header-period{border:1px solid var(--leveli-accent-border);background:var(--leveli-accent-dim);color:var(--leveli-accent-ink)}
 :root .forecast-center{border-color:var(--leveli-accent-border)}
 :root .forecast-legend button[aria-pressed="true"]{background:var(--leveli-accent-dim);border-color:var(--leveli-accent-border)}
-:root .detail-period,:root #school-subject-detail .detail-goal.complete{
+:root .detail-period{
  border-color:var(--leveli-accent-border);
 }
-:root #school-subject-detail .detail-goal.complete{background:var(--leveli-accent-dim)}
-:root #school-subject-detail .detail-goal.complete .detail-goal-label{color:var(--leveli-accent-soft)}
-:root #school-subject-detail .detail-goal.complete .detail-goal-main{color:var(--leveli-accent-ink)}
 :root #school-subject-detail .detail-hero{
  border-color:var(--leveli-accent-border);
  box-shadow:0 0 24px -15px var(--leveli-accent-glow);
@@ -428,7 +419,7 @@ body{background:#0e0c21;color:#f6f0ff}
 .b3-dialog .profile-card[hidden]{display:none!important}
 .b3-dialog .profile-card h2{display:none}
 .b3-dialog .personal-group{display:none}
-.b3-dialog[data-section="avatar"] .personal-group:has(#personal-avatar-options),.b3-dialog[data-section="theme"] .personal-group:has(#personal-theme-options),.b3-dialog[data-section="accent"] .personal-group:has(#personal-accent-options),.b3-dialog[data-section="icons"] .personal-group:has(#personal-pack-options){display:block}
+.b3-dialog[data-section="avatar"] .personal-group:has(#personal-avatar-options),.b3-dialog[data-section="theme"] .personal-group:has(#personal-theme-options),.b3-dialog[data-section="accent"] .personal-group:has(#personal-accent-options){display:block}
 .b3-dialog .personal-option{min-height:48px}
 .b3-dialog #profile-personalization{margin-top:0}
 .b3-settings button:focus-visible,.b3-dialog button:focus-visible{outline:3px solid var(--leveli-accent);outline-offset:2px}
@@ -591,9 +582,8 @@ body{background:#0e0c21;color:#f6f0ff}
  --ds-surface-chart:#f3eefb;
 }
 :root .forecast-card,:root .trend-card,:root .subjects-card{
- background:var(--ds-card-surface) linear-gradient(150deg,color-mix(in srgb,var(--leveli-accent-dim) 48%,transparent),transparent 48%);
- border-color:color-mix(in srgb,var(--leveli-accent-border) 48%,var(--ds-border));
- box-shadow:0 10px 26px -23px var(--leveli-accent-glow);
+ background:var(--ds-card-surface) linear-gradient(150deg,color-mix(in srgb,var(--leveli-accent-dim) 24%,transparent),transparent 48%);
+ border-color:var(--ds-border);
  padding:var(--ds-space-4);
 }
 :root .donut-panel{background:var(--ds-surface-inner) linear-gradient(150deg,color-mix(in srgb,var(--leveli-accent-dim) 40%,transparent),transparent 65%);padding:var(--ds-space-2)}
@@ -646,48 +636,6 @@ body{background:#0e0c21;color:#f6f0ff}
 .leveli-trend-dialog .trend-explain-result{font-weight:800}
 .leveli-trend-dialog button{min-height:44px;margin-top:10px}
 .detail-trend-pill:is(button){border:1px solid currentColor;cursor:pointer;min-height:44px}
-/* Icon slots share geometry and use the active ink across packs. */
-.settings-button svg{width:24px;height:24px}
-.pack-icon{display:inline-block;width:20px;height:20px;flex:none;vertical-align:middle;margin-inline-end:7px;background:var(--leveli-accent-soft);-webkit-mask:var(--icon-image) center/contain no-repeat;mask:var(--icon-image) center/contain no-repeat}
-.settings-button .pack-icon,.b3-tile-icon .pack-icon{width:24px;height:24px;margin:0;color:inherit;background:currentColor}
-:root:not([data-leveli-pack="classic"]) :is(.settings-button,.b3-tile-icon)>svg{display:none}
-:root[data-leveli-pack="classic"] .pack-icon--alternate{display:none}
-.pack-icon-preview{display:block;margin:0 auto 3px}
-.b3-extra button[data-b3-panel="birthday"]{justify-content:flex-start;gap:8px}
-.b3-extra button[data-b3-panel="birthday"] svg{margin-inline-start:auto}
-.b3-extra button .pack-icon{margin-inline-end:0}
-:root[data-leveli-pack="classic"] [data-icon="forecast"]{--icon-image:url("./icons/classic/forecast.svg")}
-:root[data-leveli-pack="classic"] [data-icon="trend"]{--icon-image:url("./icons/classic/trend.svg")}
-:root[data-leveli-pack="classic"] [data-icon="book"]{--icon-image:url("./icons/classic/book.svg")}
-:root[data-leveli-pack="classic"] [data-icon="goals"]{--icon-image:url("./icons/classic/goals.svg")}
-:root[data-leveli-pack="classic"] [data-icon="history"]{--icon-image:url("./icons/classic/history.svg")}
-:root[data-leveli-pack="classic"] [data-icon="birthday"]{--icon-image:url("./icons/classic/birthday.svg")}
-:root[data-leveli-pack="cats"] [data-icon="forecast"]{--icon-image:url("./icons/cats/chart.svg")}
-:root[data-leveli-pack="cats"] [data-icon="trend"]{--icon-image:url("./icons/cats/feather.svg")}
-:root[data-leveli-pack="cats"] [data-icon="book"]{--icon-image:url("./icons/cats/book.svg")}
-:root[data-leveli-pack="cats"] [data-icon="goals"]{--icon-image:url("./icons/cats/paw.svg")}
-:root[data-leveli-pack="cats"] [data-icon="history"]{--icon-image:url("./icons/cats/music.svg")}
-:root[data-leveli-pack="cats"] [data-icon="quarter"]{--icon-image:url("./icons/cats/calendar.svg")}
-:root[data-leveli-pack="cats"] [data-icon="theme"]{--icon-image:url("./icons/cats/cat.svg")}
-:root[data-leveli-pack="cats"] [data-icon="accent"]{--icon-image:url("./icons/cats/palette.svg")}
-:root[data-leveli-pack="cats"] [data-icon="icons"]{--icon-image:url("./icons/cats/paw.svg")}
-:root[data-leveli-pack="cats"] [data-icon="settings"]{--icon-image:url("./icons/cats/settings.svg")}
-:root[data-leveli-pack="cats"] [data-icon="birthday"]{--icon-image:url("./icons/cats/heart.svg")}
-:root[data-leveli-pack="sports"] [data-icon="forecast"]{--icon-image:url("./icons/sports/chart.svg")}
-:root[data-leveli-pack="sports"] [data-icon="trend"]{--icon-image:url("./icons/sports/bolt.svg")}
-:root[data-leveli-pack="sports"] [data-icon="book"]{--icon-image:url("./icons/sports/book.svg")}
-:root[data-leveli-pack="sports"] [data-icon="goals"]{--icon-image:url("./icons/sports/target.svg")}
-:root[data-leveli-pack="sports"] [data-icon="history"]{--icon-image:url("./icons/sports/flag.svg")}
-:root[data-leveli-pack="sports"] [data-icon="quarter"]{--icon-image:url("./icons/sports/calendar.svg")}
-:root[data-leveli-pack="sports"] [data-icon="theme"]{--icon-image:url("./icons/sports/bolt.svg")}
-:root[data-leveli-pack="sports"] [data-icon="accent"]{--icon-image:url("./icons/sports/flag.svg")}
-:root[data-leveli-pack="sports"] [data-icon="icons"]{--icon-image:url("./icons/sports/soccer.svg")}
-:root[data-leveli-pack="sports"] [data-icon="settings"]{--icon-image:url("./icons/sports/settings.svg")}
-:root[data-leveli-pack="sports"] [data-icon="birthday"]{--icon-image:url("./icons/sports/trophy.svg")}
-.pack-icon[data-preview="classic"]{--icon-image:url("./icons/classic/goals.svg")}
-.pack-icon[data-preview="cats"]{--icon-image:url("./icons/cats/paw.svg")}
-.pack-icon[data-preview="sports"]{--icon-image:url("./icons/sports/soccer.svg")}
-
 /* UI batch: neutral header actions and consistent contextual help. */
 :root .school-header .settings-button{min-width:52px;min-height:52px;padding:12px;color:var(--ds-text-primary);background:var(--ds-surface-inner);border:1px solid var(--ds-border)}
 :root .school-header .settings-button svg{width:27px;height:27px}
@@ -695,28 +643,14 @@ body{background:#0e0c21;color:#f6f0ff}
 :root .forecast-card .card-heading,:root .trend-card .card-heading,:root .orient-heading{position:relative}
 :root .forecast-card .card-heading,:root .trend-card .card-heading{padding-right:49px}
 :root .forecast-card .help-btn,:root .trend-card .help-btn,:root .orient-heading .help-btn{position:absolute;right:0;top:0}
+:root .trend-card .card-heading{flex-wrap:wrap;gap:4px 12px}
 :root .trend-card .heading-with-help{display:flex;flex-wrap:wrap;align-items:center;gap:5px 9px}
 :root .trend-card .header-period{margin:0;padding:3px 0;border:0;background:none;color:var(--ds-text-secondary);font-size:12px}
-:root .pack-preview-strip{display:flex;gap:9px;justify-content:center;align-items:center;width:100%;margin-top:8px}
-:root .pack-preview-strip .pack-icon{margin:0;width:22px;height:22px;background:var(--ds-text-primary)}
 :root .b3-tile[hidden],:root .personal-group[hidden]{display:none!important}
 :root #school-subject-detail .detail-chart-caption{min-height:38px}
 
-/* Preview each icon set independently of the currently selected pack. */
-.pack-preview-strip [data-pack-preview="classic"][data-icon="forecast"]{--icon-image:url("./icons/classic/forecast.svg")}
-.pack-preview-strip [data-pack-preview="classic"][data-icon="trend"]{--icon-image:url("./icons/classic/trend.svg")}
-.pack-preview-strip [data-pack-preview="classic"][data-icon="goals"]{--icon-image:url("./icons/classic/goals.svg")}
-.pack-preview-strip [data-pack-preview="classic"][data-icon="book"]{--icon-image:url("./icons/classic/book.svg")}
-.pack-preview-strip [data-pack-preview="cats"][data-icon="forecast"]{--icon-image:url("./icons/cats/chart.svg")}
-.pack-preview-strip [data-pack-preview="cats"][data-icon="trend"]{--icon-image:url("./icons/cats/feather.svg")}
-.pack-preview-strip [data-pack-preview="cats"][data-icon="goals"]{--icon-image:url("./icons/cats/paw.svg")}
-.pack-preview-strip [data-pack-preview="cats"][data-icon="book"]{--icon-image:url("./icons/cats/book.svg")}
-.pack-preview-strip [data-pack-preview="sports"][data-icon="forecast"]{--icon-image:url("./icons/sports/chart.svg")}
-.pack-preview-strip [data-pack-preview="sports"][data-icon="trend"]{--icon-image:url("./icons/sports/bolt.svg")}
-.pack-preview-strip [data-pack-preview="sports"][data-icon="goals"]{--icon-image:url("./icons/sports/target.svg")}
-.pack-preview-strip [data-pack-preview="sports"][data-icon="book"]{--icon-image:url("./icons/sports/book.svg")}
 </style></head><body><div class="app"><main class="content" id="main">
-<section data-page="home"><header class="school-header"><div><div class="eyebrow brand-lockup"><img src="./brand/mark.svg" alt="" width="30" height="30" aria-hidden="true"><span>Левели</span></div><h1 id="home-greeting">Привет!</h1><p id="home-birthday-greeting" class="home-birthday-greeting" hidden></p><p>Мои оценки и успеваемость</p></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><span class="pack-icon pack-icon--alternate" data-icon="settings" aria-hidden="true"></span><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
+<section data-page="home"><header class="school-header"><div><div class="eyebrow brand-lockup"><img src="./brand/mark.svg" alt="" width="30" height="30" aria-hidden="true"><span>Левели</span></div><h1 id="home-greeting">Привет!</h1><p id="home-birthday-greeting" class="home-birthday-greeting" hidden></p><p>Мои оценки и успеваемость</p></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
 <article class="card" id="school-login"><h2>Войди, чтобы увидеть оценки</h2><p>Оценки загружаются из электронного дневника.</p><form id="school-form"><label>Почта<input id="school-email" type="email" autocomplete="username" required></label><label>Пароль<input id="school-password" type="password" autocomplete="current-password" required></label><button class="btn" type="submit">Войти</button></form></article>
 <div id="school-results" hidden><div id="school-subject-detail" class="card" hidden></div><div id="school-overview">
 <article class="card forecast-card">
@@ -729,10 +663,10 @@ body{background:#0e0c21;color:#f6f0ff}
  <div id="school-analytics" class="muted" hidden></div></article>
 <article class="card trend-card">
  <div class="card-heading"><div class="heading-with-help"><h2>Моя успеваемость</h2><span class="header-period" id="school-header-period">2 четверть</span><button class="help-btn" type="button" data-help="school-trend-help" aria-label="Как считается успеваемость?" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4"/><path d="M12 17h.01"/></svg></button></div><span id="school-trend-change" class="trend-change"></span></div>
- <div id="school-trend-help" class="inline-help" hidden>Светящаяся линия показывает накопительный средний балл за выбранную четверть. Изменение справа — разница с сохранённым средним на конец предыдущего дня. Если вчерашних данных нет, изменение не показывается.</div>
+ <div id="school-trend-help" class="inline-help" hidden>Светящаяся линия показывает накопительный средний балл за выбранную четверть. Подпись «Ко вчерашнему среднему» сравнивает общий средний балл с последним сохранённым значением за вчера. Если вчерашних данных нет, изменение не показывается.</div>
  <div id="school-trend"></div></article>
 <div class="orient-heading"><h2>Мои ориентиры</h2><button class="help-btn" type="button" data-help="school-orient-help" aria-label="Что означает динамика?" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4"/><path d="M12 17h.01"/></svg></button></div><div id="school-orient-help" class="inline-help" hidden>Динамика показывает изменение оценок за выбранную четверть. При 0–1 оценке её нет; при 2–5 сравниваем последнюю оценку со взвешенным средним предыдущих; при 6 и более — среднее последних трёх со средним трёх перед ними. Официальные веса учитываются, отсутствующий вес при расчёте равен 1. Изменение от +0,50 или до −0,50 включительно выделяется стрелкой; порог проверяем до округления. Нажми на показатель динамики, чтобы увидеть расчёт.</div>
-<div id="school-orient-empty" class="orient-sparse" hidden>Пока недостаточно данных для рекомендаций по предметам. Они появятся, когда сформируется прогноз.</div>
+<div id="school-orient-empty" class="orient-sparse" hidden></div>
 <div class="orient-grid"><article class="orient-panel orient-good"><div class="orient-title">Молодец</div><div id="school-good-list"></div></article><article class="orient-panel orient-attention"><div class="orient-title">Подтянуть</div><div id="school-attention-list"></div></article></div>
 <article class="card subjects-card"><div class="card-heading"><h2>Все предметы</h2><span id="school-subject-count" class="muted"></span></div>
 <div id="school-filter-buttons" hidden></div><select id="school-filter" hidden><option value="all">Все предметы</option><option value="strong">Сильные</option><option value="attention">Требуют внимания</option></select><div id="school-subjects"></div></article><p id="school-status" class="muted">Загрузка…</p><p id="school-freshness" aria-live="polite"></p></div></div><p id="school-error" role="alert" class="muted"></p></section>
@@ -742,10 +676,9 @@ body{background:#0e0c21;color:#f6f0ff}
   <div class="b3-hero-space"><div class="b3-hero"><div class="b3-avatar-stand" id="b3-avatar-stand"></div><div class="b3-profile-copy"><div class="b3-identity-slot" id="b3-identity-slot"></div><button class="b3-change-avatar" type="button" data-b3-panel="avatar">Изменить аватар</button></div></div></div>
   <h2 class="b3-section-label">Быстрые настройки</h2>
   <div class="b3-tiles">
-    <button type="button" class="b3-tile" data-b3-panel="quarter"><span class="b3-tile-icon"><span class="pack-icon pack-icon--alternate" data-icon="quarter" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><strong>Выбрать четверть</strong><small id="b3-quarter-status">II четверть</small></button>
-    <button type="button" class="b3-tile" data-b3-panel="theme" hidden><span class="b3-tile-icon"><span class="pack-icon pack-icon--alternate" data-icon="theme" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/></svg></span><strong>Тема</strong><small id="b3-theme-status">Тёмная</small></button>
-    <button type="button" class="b3-tile" data-b3-panel="accent"><span class="b3-tile-icon"><span class="pack-icon pack-icon--alternate" data-icon="accent" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="9" r="1"/><circle cx="15" cy="8" r="1"/><circle cx="16" cy="14" r="1"/><path d="M8 17h2"/></svg></span><strong>Акцентные цвета</strong><small id="b3-accent-status">Фиолетовый</small></button>
-    <button type="button" class="b3-tile" data-b3-panel="icons"><span class="b3-tile-icon"><span class="pack-icon pack-icon--alternate" data-icon="icons" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></span><strong>Вариант иконок</strong><small id="b3-icons-status">Классика</small></button>
+    <button type="button" class="b3-tile" data-b3-panel="quarter"><span class="b3-tile-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><strong>Выбрать четверть</strong><small id="b3-quarter-status">II четверть</small></button>
+    <button type="button" class="b3-tile" data-b3-panel="theme" hidden><span class="b3-tile-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/></svg></span><strong>Тема</strong><small id="b3-theme-status">Тёмная</small></button>
+    <button type="button" class="b3-tile" data-b3-panel="accent"><span class="b3-tile-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="9" r="1"/><circle cx="15" cy="8" r="1"/><circle cx="16" cy="14" r="1"/><path d="M8 17h2"/></svg></span><strong>Акцентные цвета</strong><small id="b3-accent-status">Фиолетовый</small></button>
   </div>
   <h2 class="b3-section-label">Дополнительно</h2>
   <div class="b3-extra">
@@ -761,7 +694,6 @@ body{background:#0e0c21;color:#f6f0ff}
   <div class="personal-group"><h3>Аватар</h3><div class="personal-choice-grid" id="personal-avatar-options" role="group" aria-label="Выбрать аватар"></div><div class="avatar-upload-row"><button type="button" class="btn secondary" id="profile-upload-avatar">Выбрать свою картинку</button><button type="button" class="btn secondary" id="profile-remove-avatar" hidden>Убрать картинку</button></div><input id="profile-avatar-file" type="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif" hidden></div>
   <div class="personal-group"><h3>Тема</h3><div class="personal-theme-grid" id="personal-theme-options" role="group" aria-label="Тема оформления"></div></div>
   <div class="personal-group"><h3>Акцентный цвет</h3><div class="personal-color-grid" id="personal-accent-options" role="group" aria-label="Акцентный цвет"></div></div>
-  <div class="personal-group"><h3>Значки</h3><div class="personal-theme-grid" id="personal-pack-options" role="group" aria-label="Тематические значки"></div></div>
  </article>
  <article class="card profile-card" id="profile-birthday-card" hidden>
   <h2>День рождения</h2><p>Укажи дату рождения, если хочешь получать поздравление. Её можно удалить в любой момент.</p>
@@ -784,11 +716,11 @@ body{background:#0e0c21;color:#f6f0ff}
  const overlay=document.getElementById('b3-panel-overlay'),host=document.getElementById('b3-panel-host'),dialog=overlay.querySelector('.b3-dialog'),heading=document.getElementById('b3-panel-title');
  const cards={
   avatar:document.getElementById('profile-personalization'),theme:document.getElementById('profile-personalization'),
-  accent:document.getElementById('profile-personalization'),icons:document.getElementById('profile-personalization'),
+  accent:document.getElementById('profile-personalization'),
   quarter:document.querySelector('.profile-period').closest('.profile-card'),
   birthday:document.getElementById('profile-birthday-card'),account:document.getElementById('profile-actions')
  };
- const titles={avatar:'Выбрать аватар',theme:'Тема',accent:'Акцентные цвета',icons:'Вариант иконок',quarter:'Выбрать четверть',birthday:'День рождения',account:'Аккаунт и данные'};
+ const titles={avatar:'Выбрать аватар',theme:'Тема',accent:'Акцентные цвета',quarter:'Выбрать четверть',birthday:'День рождения',account:'Аккаунт и данные'};
  let previous=null,active=null,lastTrigger=null;
  const updateQuarter=()=>{const value=document.getElementById('school-period').value;const q=Number(value.split('-')[1]);document.getElementById('b3-quarter-status').textContent=(['','I','II','III','IV'][q]||'—')+' четверть'};
  const observer=new MutationObserver(updateQuarter);observer.observe(document.getElementById('school-period'),{attributes:true,childList:true,subtree:true});document.getElementById('school-period').addEventListener('change',updateQuarter);
@@ -854,17 +786,15 @@ window.LeveliAppearance=(()=>{
   node.onerror=()=>{const fallback=document.createElement('span');fallback.className='avatar-illustration prototype-avatar';fallback.setAttribute('aria-hidden','true');node.replaceWith(fallback)};
   return node
  }
- const packs=[['classic','Вариант 1'],['cats','Вариант 2'],['sports','Вариант 3']];
- const defaults={theme:'dark',accent:'violet',avatar:0,avatarRevision:0,customAvatar:'',pack:'classic',birthday:''};
+ const defaults={theme:'dark',accent:'violet',avatar:0,avatarRevision:0,customAvatar:'',birthday:''};
  let uid=null,profile={...defaults},defaultAvatar=0,uploadVersion=0;
  const safe=x=>typeof x==='string'&&/^[-\w]{1,150}$/.test(x)?x:null;
  function read(id){try{const p=JSON.parse(localStorage.getItem('leveli-personal-v1-'+id)||'{}');return {...defaults,...p}}catch{return {...defaults}}}
- function valid(p){return {theme:['dark','light','system'].includes(p.theme)?p.theme:'dark',accent:Object.hasOwn(darkAccents,p.accent)?p.accent:'violet',avatar:p.avatar==='custom'||(Number.isInteger(p.avatar)&&p.avatar>=0&&p.avatar<avatars.length)?p.avatar:0,avatarRevision:p.avatarRevision===2?2:0,customAvatar:typeof p.customAvatar==='string'&&p.customAvatar.length<120000&&/^data:image\/(webp|png|jpeg);base64,/.test(p.customAvatar)?p.customAvatar:'',pack:packs.some(a=>a[0]===p.pack)?p.pack:'classic',birthday:/^\d{4}-\d{2}-\d{2}$/.test(p.birthday||'')?p.birthday:''}}
+ function valid(p){return {theme:['dark','light','system'].includes(p.theme)?p.theme:'dark',accent:Object.hasOwn(darkAccents,p.accent)?p.accent:'violet',avatar:p.avatar==='custom'||(Number.isInteger(p.avatar)&&p.avatar>=0&&p.avatar<avatars.length)?p.avatar:0,avatarRevision:p.avatarRevision===2?2:0,customAvatar:typeof p.customAvatar==='string'&&p.customAvatar.length<120000&&/^data:image\/(webp|png|jpeg);base64,/.test(p.customAvatar)?p.customAvatar:'',birthday:/^\d{4}-\d{2}-\d{2}$/.test(p.birthday||'')?p.birthday:''}}
  function age(){if(!profile.birthday)return null;const b=new Date(profile.birthday+'T12:00:00');const now=new Date();if(!Number.isFinite(b.getTime())||b>now)return null;let n=now.getFullYear()-b.getFullYear();if(now.getMonth()<b.getMonth()||(now.getMonth()===b.getMonth()&&now.getDate()<b.getDate()))n--;return n>=0&&n<=120?n:null}
  function paint(){
   const theme='dark'; // Сохранённое предпочтение остаётся, но не применяется.
   document.documentElement.dataset.leveliTheme=theme;
-  document.documentElement.dataset.leveliPack=profile.pack;
   const c=(theme==='light'?lightAccents:darkAccents)[profile.accent],s=document.documentElement.style;
   for(const [key,val] of Object.entries({accent:c.main,'accent-soft':c.soft,'accent-dim':c.dim,'accent-border':c.border,'accent-track':c.track,'accent-line':c.line,'accent-glow':c.glow}))s.setProperty('--leveli-'+key,val);
   const avatarDisplay=document.querySelector('#profile-avatar-display');avatarDisplay.replaceChildren();if(profile.avatar==='custom'&&profile.customAvatar){const img=document.createElement('img');img.src=profile.customAvatar;img.alt='';img.className='profile-avatar-custom';avatarDisplay.append(img)}else if(avatars[profile.avatar])avatarDisplay.append(avatarImage());else avatarDisplay.textContent='★';avatarDisplay.dataset.avatarIndex=String(profile.avatar);document.querySelector('#profile-remove-avatar').hidden=!profile.customAvatar;
@@ -877,7 +807,6 @@ window.LeveliAppearance=(()=>{
   const date=document.querySelector('#profile-birthday');if(date.value!==profile.birthday)date.value=profile.birthday;
   document.getElementById('b3-theme-status').textContent='Тёмная';
   document.getElementById('b3-accent-status').textContent={violet:'Фиолетовый',pink:'Розовый',blue:'Синий',yellow:'Жёлтый',mint:'Мятный'}[profile.accent];
-  document.getElementById('b3-icons-status').textContent=packs.find(([key])=>key===profile.pack)[1];
   if(uid){
    const active=document.activeElement,group=active?.closest('.personal-group [role="group"]');
    const index=group?[...group.children].indexOf(active):-1;
@@ -899,11 +828,6 @@ window.LeveliAppearance=(()=>{
   }if(profile.customAvatar){const b=button('',profile.avatar==='custom',()=>set({avatar:'custom'}),'personal-avatar-option');b.setAttribute('aria-label','Моя картинка');const img=document.createElement('img');img.src=profile.customAvatar;img.alt='';img.className='personal-avatar-custom';b.append(img);av.append(b)}
   const themeBox=document.querySelector('#personal-theme-options');themeBox.replaceChildren();themeBox.closest('.personal-group').hidden=true;
   const colorBox=document.querySelector('#personal-accent-options');colorBox.replaceChildren();for(const [k,title] of [['violet','Фиолетовый'],['pink','Розовый'],['blue','Синий'],['yellow','Жёлтый'],['mint','Мятный']]){const b=button(title,profile.accent===k,()=>set({accent:k}));const swatch=document.createElement('span');swatch.className='personal-color-swatch';swatch.style.background=(document.documentElement.dataset.leveliTheme==='light'?lightAccents:darkAccents)[k].main;b.prepend(swatch);colorBox.append(b)}
-  const packBox=document.querySelector('#personal-pack-options');packBox.replaceChildren();for(const [k,title] of packs){
-   const choice=button(title,profile.pack===k,()=>set({pack:k}));
-   const preview=document.createElement('span');preview.className='pack-preview-strip';
-   preview.setAttribute('aria-hidden','true');for(const role of ['forecast','trend','goals','book']){const icon=document.createElement('span');icon.className='pack-icon';icon.dataset.icon=role;icon.dataset.packPreview=k;preview.append(icon)}choice.append(preview);packBox.append(choice);
-  }
  }
  function set(v){
   if(!uid)return;
@@ -966,6 +890,17 @@ const gradeDate=S.date,periodOf=S.period;
 function workCategory(g){const t=String([g.workType,g.type,g.description,g.title].filter(Boolean).join(' ')).toLowerCase();if(/контрольн|проверочн|\bкр\b/.test(t))return 'control';if(/самостоятельн|\bср\b/.test(t))return 'self';if(/тест|test/.test(t))return 'test';return 'other'}
 function mean(items){return S.mean(items)}
 function formatMean(n){return n===null?'—':n.toFixed(2).replace('.',',')}
+function formatChange(value){
+ const magnitude=formatMean(Math.abs(value));
+ if(magnitude==='0,00')return magnitude;
+ return (value<0?'−':'+')+magnitude;
+}
+function gradeTrendDisplay(value){
+ if(value===null)return {tone:'flat',text:'—'};
+ const tone=value>=.5?'up':value<=-.5?'down':'flat';
+ const arrow={up:'↗ ',down:'↘ ',flat:''}[tone];
+ return {tone,text:arrow+formatChange(value)};
+}
 function pluralRu(n,one,few,many){const k=Math.abs(n)%100,last=k%10;return n+' '+(k>=11&&k<=14?many:last===1?one:last>=2&&last<=4?few:many)}
 
 function svgEl(tag,attrs){
@@ -1013,15 +948,15 @@ function renderInsights(groups,rows,baseline){
  const width=340,height=176,left=34,right=19,top=16,bottom=33;
  const svg=svgEl('svg',{viewBox:'0 0 '+width+' '+height,role:'img','aria-label':'Накопительный средний балл за четверть'});
  svg.style.width='100%';svg.style.display='block';
- const defs=svgEl('defs');const glow=svgEl('filter',{id:'leveli-line-glow',x:'-40%',y:'-100%',width:'180%',height:'300%'});glow.append(svgEl('feGaussianBlur',{stdDeviation:5}));defs.append(glow);
- const grad=svgEl('linearGradient',{id:'leveli-trend-area',x1:0,x2:0,y1:0,y2:1});grad.append(svgEl('stop',{offset:'0%','stop-color':'var(--leveli-accent-glow)','stop-opacity':'.32'}),svgEl('stop',{offset:'100%','stop-color':'var(--leveli-accent-glow)','stop-opacity':'0'}));defs.append(grad);svg.append(defs);
+ const defs=svgEl('defs');const glow=svgEl('filter',{id:'leveli-line-glow',x:'-40%',y:'-100%',width:'180%',height:'300%'});glow.append(svgEl('feGaussianBlur',{stdDeviation:3}));defs.append(glow);
+ const grad=svgEl('linearGradient',{id:'leveli-trend-area',x1:0,x2:0,y1:0,y2:1});grad.append(svgEl('stop',{offset:'0%','stop-color':'var(--leveli-accent-glow)','stop-opacity':'.20'}),svgEl('stop',{offset:'100%','stop-color':'var(--leveli-accent-glow)','stop-opacity':'0'}));defs.append(grad);svg.append(defs);
  for(const v of [2,3,4,5]){const y=top+(5-v)/3*(height-top-bottom);svg.append(svgEl('line',{x1:left,x2:width-right,y1:y,y2:y,stroke:'var(--ds-chart-grid)','stroke-dasharray':'3 5'}));const t=svgEl('text',{x:5,y:y+4,'font-size':10,fill:'var(--ds-text-secondary)'});t.textContent=v+',0';svg.append(t)}
  if(points.length){
   const total=end-start||1,coords=points.map(p=>[left+Math.max(0,Math.min(1,(p.date-start)/total))*(width-left-right),top+(5-p.value)/3*(height-top-bottom)]);
   if(coords.length>1){
    const path='M '+coords.map(p=>p.join(' ')).join(' L ');
    svg.append(svgEl('path',{d:path+' L '+coords.at(-1)[0]+' '+(height-bottom)+' L '+coords[0][0]+' '+(height-bottom)+' Z',fill:'url(#leveli-trend-area)'}));
-   svg.append(svgEl('polyline',{points:coords.map(p=>p.join(',')).join(' '),fill:'none',stroke:'var(--leveli-accent-glow)','stroke-width':13,opacity:'.55',filter:'url(#leveli-line-glow)','stroke-linecap':'round','stroke-linejoin':'round'}));
+   svg.append(svgEl('polyline',{points:coords.map(p=>p.join(',')).join(' '),fill:'none',stroke:'var(--leveli-accent-glow)','stroke-width':8,opacity:'.30',filter:'url(#leveli-line-glow)','stroke-linecap':'round','stroke-linejoin':'round'}));
    svg.append(svgEl('polyline',{points:coords.map(p=>p.join(',')).join(' '),fill:'none',stroke:'var(--leveli-accent-line)','stroke-width':3,'stroke-linecap':'round','stroke-linejoin':'round'}));
   }
   for(const [i,[x,y]] of coords.entries())svg.append(svgEl('circle',{cx:x,cy:y,r:i===coords.length-1?4.5:2.5,fill:'var(--leveli-accent-soft)'}));
@@ -1045,7 +980,7 @@ function renderInsights(groups,rows,baseline){
   try{
    const history=JSON.parse(localStorage.getItem(storeKey)||'{}');
    const previous=history[prev];
-   if(Number.isFinite(previous)){const diff=baseline-previous;change.textContent=(diff>0?'+':'')+formatMean(diff);change.className='trend-change '+(diff>=.005?'positive':diff<=-.005?'negative':'neutral')}
+   if(Number.isFinite(previous)){const diff=baseline-previous;change.textContent='Ко вчерашнему среднему '+formatChange(diff);change.className='trend-change '+(diff>=.005?'positive':diff<=-.005?'negative':'neutral')}
    history[today]=baseline;
    for(const key of Object.keys(history))if(key<prev)delete history[key];
    localStorage.setItem(storeKey,JSON.stringify(history));
@@ -1096,7 +1031,7 @@ function explainGradeTrend(stats){
   const result=document.createElement('p');result.textContent='Среднее: '+formatMean(avg);
   section.append(label,values,result);return section
  };
- const result=document.createElement('p');result.className='trend-explain-result';result.textContent='Изменение: '+formatMean(stats.recentAverage)+' − '+formatMean(stats.previousAverage)+' = '+(stats.difference>0?'+':'')+formatMean(stats.difference);
+ const result=document.createElement('p');result.className='trend-explain-result';result.textContent='Изменение: '+formatMean(stats.recentAverage)+' − '+formatMean(stats.previousAverage)+' = '+formatChange(stats.difference);
  const note=document.createElement('p');note.textContent='Стрелка меняется при изменении не менее 0,50 балла. Порог проверяется до округления.';
  const close=document.createElement('button');close.type='button';close.className='btn secondary';close.textContent='Понятно';close.onclick=()=>dialog.close();
  dialog.append(header,lead,textGroup('Предыдущие оценки',stats.previousGrades,stats.previousAverage),textGroup('Последние оценки',stats.recentGrades,stats.recentAverage),result,note,close);
@@ -1105,7 +1040,17 @@ function explainGradeTrend(stats){
 function renderOrientations(all,strong,attention){
  const container=document.querySelector('.orient-grid'),heading=document.querySelector('.orient-heading'),goodPanel=document.querySelector('.orient-good'),attentionPanel=document.querySelector('.orient-attention');
  const hasAny=strong.length+attention.length>0;container.hidden=!hasAny;heading.hidden=false;
- document.getElementById('school-orient-empty').hidden=hasAny;
+ const empty=document.getElementById('school-orient-empty');
+ empty.hidden=hasAny;
+ if(!hasAny){
+  const hasOfficial=all.some(item=>item.stats.official!==null);
+  const hasOpen=all.some(item=>item.stats.official===null);
+  const hasForecast=all.some(item=>item.stats.official===null&&item.stats.forecast!==null);
+  if(hasOfficial&&!hasOpen)empty.textContent='Четвертные итоги выставлены. Ориентиры для завершённых предметов не показываются.';
+  else if(hasForecast)empty.textContent='Сейчас нет предметов, которые попадают в ориентиры.';
+  else if(hasOfficial)empty.textContent='По части предметов уже выставлены итоги. Для ориентиров по остальным пока нет прогноза.';
+  else empty.textContent='Ориентиры появятся, когда по предметам сформируется прогноз.';
+ }
  goodPanel.hidden=strong.length===0;attentionPanel.hidden=attention.length===0;
  container.classList.toggle('orient-single',strong.length===0||attention.length===0);
  const good=document.getElementById('school-good-list'),weak=document.getElementById('school-attention-list');good.replaceChildren();weak.replaceChildren();
@@ -1116,7 +1061,7 @@ function renderOrientations(all,strong,attention){
    const label=document.createElement('span');label.className='orient-link__name';label.textContent=item.name;
    const metrics=document.createElement('span');metrics.className='orient-link__metrics';
    const avg=document.createElement('strong');avg.textContent=formatMean(item.avg);metrics.append(avg);
-   if(item.stats.difference!==null){const d=item.stats.difference;const delta=document.createElement('small');delta.className='grade-delta '+(d>=.5?'up':d<=-.5?'down':'flat');delta.textContent=(d>=.5?'↗ ':d<=-.5?'↘ ':'– ')+(d>0?'+':'')+formatMean(d);delta.title='Нажми, чтобы узнать, как рассчитана динамика';metrics.append(delta)}
+   if(item.stats.difference!==null){const {tone,text}=gradeTrendDisplay(item.stats.difference);const delta=document.createElement('small');delta.className='grade-delta '+tone;delta.textContent=text;delta.title='Нажми, чтобы узнать, как рассчитана динамика';metrics.append(delta)}
    btn.append(label,metrics);btn.onclick=e=>{if(e.target.closest('.grade-delta')&&item.stats.difference!==null){explainGradeTrend(item.stats);return}openSubject(item.name,item.grades);window.scrollTo(0,0)};container.append(btn);
   }
  }
@@ -1177,18 +1122,13 @@ function renderGrades(){
   const score=document.createElement('strong');score.textContent=stats.official!==null?stats.official:stats.forecast??'—';if(stats.official!==null)score.className='official-box';
   const gradeLabel=document.createElement('small');gradeLabel.textContent=stats.official!==null?'итог':'прогноз';grade.append(score,gradeLabel);
   const dynamics=document.createElement('span');dynamics.className='subject-row__dynamics';
-  const delta=document.createElement('span');delta.className='grade-delta '+(stats.difference===null?'flat':stats.difference>=.5?'up':stats.difference<=-.5?'down':'flat');
-  const d=stats.difference;delta.textContent=d===null?'—':(d>=.5?'↗ ':d<=-.5?'↘ ':'– ')+(d>0?'+':'')+formatMean(d);
+  const {tone,text}=gradeTrendDisplay(stats.difference);
+  const delta=document.createElement('span');delta.className='grade-delta '+tone;delta.textContent=text;
   const dLabel=document.createElement('small');dLabel.textContent='динамика';dynamics.append(delta,dLabel);
   btn.append(main,average,grade,dynamics);if(stats.difference!==null)delta.title='Нажми, чтобы узнать, как рассчитана динамика';btn.onclick=e=>{if(e.target.closest('.grade-delta')&&stats.difference!==null){explainGradeTrend(stats);return}openSubject(name,grades);window.scrollTo(0,0)};
   subjects.append(btn);
  }
  if(!subjects.children.length){const p=document.createElement('p');p.className='school-empty';p.textContent=forecastFilter?'Нет предметов в этой категории.':'Предметы пока не загружены.';subjects.append(p)}
-}
-function packIcon(role){
- const icon=document.createElement('span');
- icon.className='pack-icon';icon.dataset.icon=role;icon.setAttribute('aria-hidden','true');
- return icon;
 }
 function openSubject(name,grades){
  const main=document.getElementById('school-overview'),detail=document.getElementById('school-subject-detail');
@@ -1215,9 +1155,9 @@ function openSubject(name,grades){
  if(stats.difference===null){trend.textContent='Динамика пока неизвестна'}
  else{
   trend.type='button';trend.setAttribute('aria-label','Объяснение динамики оценок');
-  const symbol=stats.difference>=.5?'↗ ':stats.difference<=-.5?'↘ ':'– ';
-  trend.textContent=symbol+(stats.difference>0?'+':'')+formatMean(stats.difference)+' · Как посчитано?';
-  trend.classList.add(stats.difference>=.5?'up':stats.difference<=-.5?'down':'flat');
+  const {tone,text}=gradeTrendDisplay(stats.difference);
+  trend.textContent=text+' · Как посчитано?';
+  trend.classList.add(tone);
   trend.onclick=()=>explainGradeTrend(stats);
  }
  hero.append(heroLabel,heroScore,heroHint,trend);detail.append(hero);
@@ -1231,24 +1171,25 @@ function openSubject(name,grades){
   const empty=document.createElement('p');empty.className='school-empty';
   empty.textContent='Пока нет оценок за эту четверть';detail.append(empty);
  }
- const goal=document.createElement('div');goal.className='detail-goal';
- const goalLabel=document.createElement('div');goalLabel.className='detail-goal-label';
- goalLabel.textContent=stats.official!==null?'ИТОГ ЧЕТВЕРТИ':'ТВОЯ ЦЕЛЬ';
- const goalMain=document.createElement('div');goalMain.className='detail-goal-main';
- const goalNote=document.createElement('div');goalNote.className='detail-goal-note';
- if(stats.official!==null){
-  goal.classList.add('complete');goalMain.textContent='Четвертная оценка выставлена — '+stats.official;
- }else if(grades.regular.length<3){
-  const left=3-grades.regular.length;
-  goalMain.textContent=left===3?'Для прогноза нужны 3 оценки':'Для прогноза '+(left===1?'нужна ещё 1 оценка':'нужно ещё '+left+' оценки');
- }else if(stats.forecast===5){
-  goalMain.textContent='Отличный результат!';goalNote.textContent='Сейчас прогноз — 5. Продолжай в том же духе.';
- }else{
-  const n=S.fivesNeeded(grades.regular);
-  goalMain.textContent=n===null?'Недостаточно данных для расчёта цели':n>10?'Для следующей оценки потребуется значительное улучшение результатов':'Ещё '+n+' '+(n===1?'пятёрка':n<5?'пятёрки':'пятёрок')+' до прогноза '+(stats.forecast+1);
-  if(n!==null&&n<=10)goalNote.textContent='Если следующие оценки будут пятёрками с обычным весом (1). Это расчётный сценарий, не гарантия.';
+ if(stats.official===null){
+  const goal=document.createElement('div');goal.className='detail-goal';
+  const goalLabel=document.createElement('div');goalLabel.className='detail-goal-label';
+  goalLabel.textContent='ТВОЯ ЦЕЛЬ';
+  const goalMain=document.createElement('div');goalMain.className='detail-goal-main';
+  const goalNote=document.createElement('div');goalNote.className='detail-goal-note';
+  if(grades.regular.length<3){
+   const left=3-grades.regular.length;
+   goalMain.textContent=left===3?'Для прогноза нужны 3 оценки':'Для прогноза '+(left===1?'нужна ещё 1 оценка':'нужно ещё '+left+' оценки');
+  }else if(stats.forecast===5){
+   goal.classList.add('achieved');
+   goalMain.textContent='Отличный результат!';goalNote.textContent='Сейчас прогноз — 5. Продолжай в том же духе.';
+  }else{
+   const n=S.fivesNeeded(grades.regular);
+   goalMain.textContent=n===null?'Недостаточно данных для расчёта цели':n>10?'Для следующей оценки потребуется значительное улучшение результатов':'Ещё '+n+' '+(n===1?'пятёрка':n<5?'пятёрки':'пятёрок')+' до прогноза '+(stats.forecast+1);
+   if(n!==null&&n<=10)goalNote.textContent='Если следующие оценки будут пятёрками с обычным весом (1). Это расчётный сценарий, не гарантия.';
+  }
+  goal.append(goalLabel,goalMain,goalNote);detail.append(goal);
  }
- goal.append(goalLabel,goalMain,goalNote);detail.append(goal);
  const chartTitle=document.createElement('h3');chartTitle.textContent='Динамика';detail.append(chartTitle);
  const chartControls=document.createElement('div');chartControls.className='detail-toggle';detail.append(chartControls);
  const chartHost=document.createElement('div');chartHost.className='detail-chart-scroll';detail.append(chartHost);
@@ -1268,11 +1209,11 @@ function openSubject(name,grades){
   const svg=svgEl('svg',{viewBox:'0 0 '+width+' '+height,width,height,role:'img','aria-label':chartMode==='average'?'Накопительный средний балл':'Оценки по порядку'});
   const defs=svgEl('defs');
   const glow=svgEl('filter',{id:'leveli-subject-line-glow',x:'-50%',y:'-100%',width:'200%',height:'300%'});
-  glow.append(svgEl('feGaussianBlur',{stdDeviation:5}));defs.append(glow);
+  glow.append(svgEl('feGaussianBlur',{stdDeviation:3}));defs.append(glow);
   const barGlow=svgEl('filter',{id:'leveli-subject-bar-glow',x:'-90%',y:'-40%',width:'280%',height:'190%'});
-  barGlow.append(svgEl('feGaussianBlur',{stdDeviation:5}));defs.append(barGlow);
+  barGlow.append(svgEl('feGaussianBlur',{stdDeviation:3}));defs.append(barGlow);
   const area=svgEl('linearGradient',{id:'leveli-subject-area',x1:0,y1:0,x2:0,y2:1});
-  area.append(svgEl('stop',{offset:'0%','stop-color':'var(--leveli-accent-glow)','stop-opacity':'.29'}),svgEl('stop',{offset:'100%','stop-color':'var(--leveli-accent-glow)','stop-opacity':'0'}));defs.append(area);
+  area.append(svgEl('stop',{offset:'0%','stop-color':'var(--leveli-accent-glow)','stop-opacity':'.18'}),svgEl('stop',{offset:'100%','stop-color':'var(--leveli-accent-glow)','stop-opacity':'0'}));defs.append(area);
   const colors={5:['#8af0b7','#26634e'],4:['#c8a3ff','#513389'],3:['#f6c078','#925125'],2:['#ffa5b8','#73384d']};
   for(const [value,stops] of Object.entries(colors)){
    const gradient=svgEl('linearGradient',{id:'leveli-subject-grade-'+value,x1:0,x2:0,y1:0,y2:1});
@@ -1291,7 +1232,7 @@ function openSubject(name,grades){
     const points=coords.map(p=>p.join(',')).join(' ');
     const areaPath='M '+coords.map(p=>p.join(' ')).join(' L ')+' L '+coords.at(-1)[0]+' '+baseY+' L '+coords[0][0]+' '+baseY+' Z';
     svg.append(svgEl('path',{d:areaPath,fill:'url(#leveli-subject-area)'}));
-    svg.append(svgEl('polyline',{points,fill:'none',stroke:'var(--leveli-accent-glow)','stroke-width':12,opacity:'.55',filter:'url(#leveli-subject-line-glow)','stroke-linecap':'round','stroke-linejoin':'round'}));
+    svg.append(svgEl('polyline',{points,fill:'none',stroke:'var(--leveli-accent-glow)','stroke-width':8,opacity:'.30',filter:'url(#leveli-subject-line-glow)','stroke-linecap':'round','stroke-linejoin':'round'}));
     svg.append(svgEl('polyline',{points,fill:'none',stroke:'var(--leveli-accent-line)','stroke-width':3,'stroke-linecap':'round','stroke-linejoin':'round'}));
    }
    coords.forEach(([x,cy],i)=>svg.append(svgEl('circle',{cx:x,cy,r:i===coords.length-1?4.5:2.5,fill:'var(--leveli-accent-soft)'})));
@@ -1299,7 +1240,7 @@ function openSubject(name,grades){
   }else plotted.forEach((g,i)=>{
    const step=(width-65)/Math.max(1,plotted.length-1);
    const x=25+i*step,top=y(g.value),barHeight=baseY-top,glowColor=colors[g.value]?.[0]||'#c8a3ff';
-   svg.append(svgEl('rect',{x:x-2,y:top+2,width:22,height:barHeight-2,rx:5,fill:glowColor,opacity:'.38',filter:'url(#leveli-subject-bar-glow)'}));
+   svg.append(svgEl('rect',{x:x-2,y:top+2,width:22,height:barHeight-2,rx:5,fill:glowColor,opacity:'.22',filter:'url(#leveli-subject-bar-glow)'}));
    svg.append(svgEl('rect',{x,y:top,width:18,height:barHeight,rx:5,fill:'url(#leveli-subject-grade-'+g.value+')'}));
    svg.append(svgEl('line',{x1:x+4,x2:x+14,y1:top+2,y2:top+2,stroke:glowColor,'stroke-width':2.5,'stroke-linecap':'round'}));
    const label=svgEl('text',{x:x+9,y:top-7,'text-anchor':'middle',fill:'var(--ds-text-primary)','font-size':12,'font-weight':800});
