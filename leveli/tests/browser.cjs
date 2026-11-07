@@ -198,7 +198,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.ok((await page.locator('#school-subject-detail .detail-chart-scroll rect[filter="url(#leveli-subject-bar-glow)"]').count())<=6);
  await page.getByRole('button',{name:'Средний балл',exact:true}).click();
  assert.equal(await page.locator('#school-subject-detail .detail-chart-scroll polyline[filter="url(#leveli-subject-line-glow)"]').count(),1);
- assert.equal(await page.locator('#school-subject-detail .detail-chart-scroll text[font-weight="800"]').last().innerText(),'4,50','average label at last chart point');
+ assert.equal(await page.locator('#school-subject-detail .detail-chart-scroll text[font-weight="800"]').last().textContent(),'4,50','average label at last chart point');
  assert.equal(await page.locator('#school-subject-detail .detail-toggle').first().locator('button').count(),2,'chart mode controls stay mounted');
  const fit=await page.locator('#school-subject-detail .detail-chart-scroll').evaluate(el=>{
    const svg=el.querySelector('svg');
