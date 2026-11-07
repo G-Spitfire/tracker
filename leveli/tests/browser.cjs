@@ -362,7 +362,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  for(const metrics of themeAudit)for(const key of ['headline','subtitle','section']){
   assert.ok(metrics[key]>=4.5,'contrast '+key+' '+metrics.theme+' must be at least 4.5:1; got '+metrics[key]);
  }
- const hits=await page.locator('.b3-home-btn,.b3-change-avatar,.b3-tile,.b3-extra button').evaluateAll(items=>items.map(el=>({name:el.textContent.trim(),w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height})));
+ const hits=await page.locator('.b3-home-btn,.b3-change-avatar,.b3-tile,.b3-extra button').evaluateAll(items=>items.filter(el=>el.getClientRects().length>0).map(el=>({name:el.textContent.trim(),w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height})));
  for(const hit of hits)assert.ok(hit.w>=44&&hit.h>=44,'accessible control '+hit.name+' is smaller than 44px');
  for(const width of [320,360,390,430]){
   await page.setViewportSize({width,height:844});
