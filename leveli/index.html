@@ -104,11 +104,11 @@ body{background:#0e0c21;color:#f6f0ff}
 .double-donut{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px;margin-top:13px}
 .donut-panel{background:#25203d;border-radius:15px;padding:9px;display:flex;flex-direction:column;align-items:center;min-width:0}
 .donut-title{font-weight:750;font-size:12px;color:var(--ds-text-primary)}
-.donut-panel .forecast-chart{width:100%;max-width:170px;margin:3px auto}
+.donut-panel .forecast-chart{width:100%;max-width:138px;margin:0 auto}
 .donut-panel .forecast-center strong{font-size:clamp(23px,6vw,32px);color:var(--ds-text-primary)}
 .donut-panel .forecast-center span{font-size:9px;color:var(--ds-text-secondary)}
-.forecast-legend{display:grid;gap:1px;width:100%;margin-top:2px}
-.forecast-legend .legend-item{width:100%;display:flex;align-items:center;justify-content:space-between;border:1px solid transparent;background:transparent;color:#ded2f1;font:600 10px Manrope,system-ui,sans-serif;padding:4px 2px;border-radius:7px;text-align:left;min-height:23px}
+.forecast-legend{display:grid;align-content:start;width:100%;margin-top:2px}
+.forecast-legend .legend-item{width:100%;display:flex;align-items:center;justify-content:space-between;border:1px solid transparent;background:transparent;color:#ded2f1;font:600 10px Manrope,system-ui,sans-serif;padding:4px 2px;border-radius:7px;text-align:left;min-height:36px;gap:2px}
 .forecast-legend button.legend-item{cursor:pointer}
 .forecast-legend button[aria-pressed=true]{background:#44345e;border-color:#6e558f}
 .forecast-legend .legend-label{display:flex;align-items:center;gap:5px;min-width:0}
@@ -368,7 +368,6 @@ body{background:#0e0c21;color:#f6f0ff}
 :root .help-btn{width:44px;height:44px;min-width:44px;min-height:44px;display:grid;place-items:center}
 :root .btn{min-height:46px}
 :root .btn:not(.secondary){min-height:48px}
-:root .forecast-legend button{min-height:44px}
 :root .orient-link{min-height:44px}
 :root .card{border-radius:var(--ds-radius-card)}
 :root .donut-panel{border-radius:var(--ds-radius-inner)}
@@ -384,7 +383,6 @@ body{background:#0e0c21;color:#f6f0ff}
 :root[data-leveli-theme="light"] .trend-sparse{background:#f4eefa}
 :root[data-leveli-theme="light"] .trend-sparse strong{color:var(--leveli-accent-soft)}
 :root[data-leveli-theme="light"] .trend-sparse span{color:#665678}
-@media(max-width:360px){:root .help-btn{width:44px;height:44px}:root .forecast-legend button{min-height:44px}}
 
 /* Leveli B3: game-inspired settings. Old form controls and IDs stay intact inside the dialog. */
 [data-page="profile"]{position:relative}
@@ -443,7 +441,6 @@ body{background:#0e0c21;color:#f6f0ff}
 :root .b3-settings .b3-tile{border-radius:var(--ds-radius-card)}
 :root #school-current-period,:root #profile-remove-avatar,:root #profile-upload-avatar,:root .profile-actions .btn{min-height:var(--ds-hit)}
 :root .detail-toggle button,:root #school-period-buttons button{min-height:var(--ds-hit)}
-:root .forecast-legend button.legend-item{min-height:var(--ds-hit)}
 :root .b3-dialog .personal-option{min-height:var(--ds-control-height)}
 :root .b3-dialog .personal-avatar-option{min-height:64px}
 :root .b3-dialog .avatar-upload-row button{min-height:var(--ds-hit)}
@@ -637,12 +634,13 @@ body{background:#0e0c21;color:#f6f0ff}
 .leveli-trend-dialog button{min-height:44px;margin-top:10px}
 .detail-trend-pill:is(button){border:1px solid currentColor;cursor:pointer;min-height:44px}
 /* UI batch: neutral header actions and consistent contextual help. */
-:root .school-header .settings-button{min-width:52px;min-height:52px;padding:12px;color:var(--ds-text-primary);background:var(--ds-surface-inner);border:1px solid var(--ds-border)}
+:root .school-header .settings-button{min-width:52px;min-height:52px;padding:12px;color:var(--ds-text-primary);background:var(--ds-surface-inner);border:0}
 :root .school-header .settings-button svg{width:27px;height:27px}
-:root .help-btn{background:transparent;color:var(--ds-text-secondary);border:1px solid var(--ds-border)}
-:root .forecast-card .card-heading,:root .trend-card .card-heading,:root .orient-heading{position:relative}
-:root .forecast-card .card-heading,:root .trend-card .card-heading{padding-right:49px}
-:root .forecast-card .help-btn,:root .trend-card .help-btn,:root .orient-heading .help-btn{position:absolute;right:0;top:0}
+:root .help-btn{background:transparent;color:var(--ds-text-secondary);border:0}
+:root .trend-card .card-heading{position:relative}
+:root .trend-card .card-heading{padding-right:49px}
+:root .forecast-card .double-donut{margin-top:4px}
+:root .trend-card .help-btn{position:absolute;right:0;top:0}
 :root .trend-card .card-heading{flex-wrap:wrap;gap:4px 12px}
 :root .trend-card .heading-with-help{display:flex;flex-wrap:wrap;align-items:center;gap:5px 9px}
 :root .trend-card .header-period{margin:0;padding:3px 0;border:0;background:none;color:var(--ds-text-secondary);font-size:12px}
@@ -1005,7 +1003,7 @@ function renderDonut(svgId,legendId,rows,valueId,value,mode){
   if(mode==='subjects'&&forecastFilter===key){svg.append(svgEl('circle',{cx:100,cy:100,r:86,fill:'none',stroke:'var(--leveli-accent)','stroke-width':3,'stroke-dasharray':Math.max(0,circumference*n/total*86/72-2)+' '+(2*Math.PI*86),'stroke-dashoffset':-offset*86/72,'transform':'rotate(-90 100 100)','data-accent-selection':'true'}))}
   offset+=circumference*n/total;
   const button=document.createElement(mode==='subjects'?'button':'div');
-  button.className='legend-item';if(mode==='subjects'){button.type='button';button.setAttribute('aria-pressed',String(forecastFilter===key));button.onclick=()=>{forecastFilter=forecastFilter===key?null:key;renderGrades()}}
+  button.className='legend-item';if(mode==='subjects'){button.type='button';button.setAttribute('aria-label',(key==='none'?'Без прогноза':'Оценка '+key)+', предметов: '+n);button.setAttribute('aria-pressed',String(forecastFilter===key));button.onclick=()=>{forecastFilter=forecastFilter===key?null:key;renderGrades()}}
   const l=document.createElement('span');l.className='legend-label';const dot=document.createElement('span');dot.className='legend-dot';dot.style.background=colors[key];l.append(dot,document.createTextNode(key==='none'?'Без прогноза':'Оценка '+key));
   const count=document.createElement('strong');count.className='legend-count';count.textContent=String(n);
   button.append(l,count);legend.append(button);
