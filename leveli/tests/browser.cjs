@@ -19,7 +19,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.goto((process.env.TEST_BASE_URL||'http://127.0.0.1:8765')+'/leveli/');await page.waitForFunction(()=>window.leveliFirebase);
  assert.equal(await page.locator('[data-tab]').count(),0);
  assert.equal(await page.locator('[data-page="home"]').isVisible(),true);
- const orientationHelp=await page.locator('#school-orient-help').textContent();
+ const orientationHelp=await page.locator('#school-guide').textContent();
  assert.match(orientationHelp,/0–1 оценке/,'help must state when trend is unavailable');
  assert.match(orientationHelp,/2–5/,'help must describe short-window trend');
  assert.match(orientationHelp,/6 и более/,'help must describe three-grade windows');
@@ -48,8 +48,32 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  });await page.waitForFunction(()=>document.querySelector('#school-period').options.length>=4);
  assert.equal(await page.locator('#home-greeting').innerText(),'Привет, Полина!');
  assert.deepEqual(await page.locator('#school-overview > article h2').allTextContents(),[
-  'Моя успеваемость','Как у меня дела?','Все предметы'
+  'Моя успеваемость','Как у меня дела?'
  ]);
+ // A fixed bottom tab bar with separate Subjects and placeholder Outcomes screens.
+ const nav=page.locator('.leveli-bottom-nav');
+ const navButton=tab=>nav.locator('[data-go="'+tab+'"]');
+ for(const width of [320,360,390,430]){
+  await page.setViewportSize({width,height:844});
+  const rect=await nav.evaluate(el=>{const r=el.getBoundingClientRect();return {bottom:r.bottom,width:r.width,scroll:document.documentElement.scrollWidth,viewport:innerWidth}});
+  assert.ok(Math.abs(rect.bottom-844)<=1,'navigation pinned to bottom at '+width);
+  assert.equal(rect.width,width,'navigation width at '+width);
+  assert.ok(rect.scroll<=rect.viewport+1,'no horizontal overflow at '+width);
+  for(const button of await nav.locator('button').all()){const b=await button.boundingBox();assert.ok(b.width>=44&&b.height>=44,'tab hit area at '+width)}
+ }
+ await page.setViewportSize({width:390,height:844});
+ assert.equal(await navButton('home').getAttribute('aria-current'),'page');
+ assert.equal(await page.locator('[data-page="home"] .subjects-card').count(),0);
+ await navButton('subjects').click();
+ assert.equal(await page.locator('[data-page="subjects"]').isVisible(),true);
+ assert.equal(await navButton('subjects').getAttribute('aria-current'),'page');
+ await navButton('outcomes').click();
+ assert.equal(await page.locator('#outcomes-title').innerText(),'Итоги');
+ assert.match(await page.locator('.outcomes-placeholder').innerText(),/недель и четвертей/);
+ assert.equal(await page.locator('.subjects-card').isVisible(),false);
+ await page.goBack();
+ assert.equal(await page.locator('[data-page="subjects"]').isVisible(),true);
+ await navButton('home').click();
  const freshness=page.locator('#school-freshness');
  await page.waitForFunction(()=>document.querySelector('#school-freshness').dataset.state==='ok');
  assert.match(await freshness.innerText(),/Оценки по состоянию на/);
@@ -75,10 +99,10 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await page.locator('#profile-avatar-display').getAttribute('data-avatar-index'),'2');
  assert.equal(await page.locator('#profile-avatar-display .avatar-illustration').count(),1);
 
- assert.equal(await page.locator('#personal-avatar-options .personal-avatar-option').count(),30);
- assert.deepEqual(await page.locator('#personal-avatar-options h4').allTextContents(),['Полина','Матвей']);
+ assert.equal(await page.locator('#personal-avatar-options .personal-avatar-option').count(),15);
+ assert.deepEqual(await page.locator('#personal-avatar-options h4').allTextContents(),['Полина']);
  await page.locator('#personal-avatar-options img').evaluateAll(images=>Promise.all(images.map(img=>{img.loading='eager';return img.decode()})));
- assert.equal(await page.locator('#personal-avatar-options img').count(),30);
+ assert.equal(await page.locator('#personal-avatar-options img').count(),15);
  for(const width of [320,390]){
   await page.setViewportSize({width,height:844});
   assert.ok(await page.locator('.b3-dialog').evaluate(el=>el.scrollWidth<=el.clientWidth+1));
@@ -172,6 +196,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.locator('.b3-home-btn').click();
  await page.waitForFunction(()=>document.querySelector('#school-subjects').textContent.includes('Математика'));
  assert.equal(await page.locator('#school-overall').innerText(),'4,25');
+ await navButton('subjects').click();
  const mathRow=page.locator('#school-subjects .subject-row').filter({hasText:'Математика'});
  assert.match(await mathRow.innerText(),/Математика[\s\S]*6 оценок[\s\S]*4,50[\s\S]*4[\s\S]*прогноз/);
  assert.equal(await mathRow.locator('.subject-row__grade strong').innerText(),'4');
@@ -184,17 +209,14 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await russianRow.locator('.official-box').innerText(),'5');
  assert.equal(await russianRow.locator('.grade-delta').textContent(),'—');
  assert.equal(await mathRow.locator('.grade-delta').textContent(),'↘ −1,00');
+ await navButton('home').click();
  assert.equal(await page.locator('.double-donut .donut-panel').count(),2);
  assert.equal(await page.locator('.donut-unit').first().innerText(),'Количество предметов');
  assert.equal(await page.locator('.donut-unit').last().innerText(),'Количество оценок');
  assert.equal(await page.locator('#school-donut circle[role="button"]').count(),0);
- const orientHelp=page.getByRole('button',{name:'Что означает динамика?'});
+ const guide=page.getByRole('button',{name:'Как читать оценки'});
  for(const width of [320,390,430]){
   await page.setViewportSize({width,height:844});
-  const help=await orientHelp.boundingBox();
-  const cards=await page.locator('.orient-grid').boundingBox();
-  assert.ok(help.y+help.height<=cards.y,'orientation help must clear the cards at '+width+'px');
-  assert.ok(help.width>=44&&help.height>=44,'orientation help keeps a 44px hit area');
   const rows=await page.locator('#school-forecast-legend button').evaluateAll(buttons=>buttons.map(b=>{
    const box=b.getBoundingClientRect();return {label:b.querySelector('.legend-label').textContent,x:box.x,y:box.y,w:box.width,h:box.height,overflow:b.scrollWidth>b.clientWidth+1};
   }));
@@ -204,21 +226,18 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   assert.ok(rows.every(row=>row.h>=36&&row.w>=44&&!row.overflow),'grade filters remain readable and tappable');
  }
  await page.setViewportSize({width:390,height:844});
- const iconBorders=await page.locator('.school-header .settings-button,.help-btn').evaluateAll(buttons=>buttons.map(b=>getComputedStyle(b).borderTopWidth));
- assert.ok(iconBorders.every(width=>width==='0px'),'standalone icon controls have no outer border');
- await page.keyboard.press('Tab');
- await orientHelp.focus();
- assert.ok(await orientHelp.evaluate(el=>document.activeElement===el));
- assert.notEqual(await orientHelp.evaluate(el=>getComputedStyle(el).outlineStyle),'none','keyboard focus remains visible');
- await orientHelp.click();
- assert.equal(await page.locator('#school-orient-help').isVisible(),true);
- await orientHelp.click();
- assert.equal(await page.locator('#school-orient-help').isVisible(),false);
+ await guide.press('Enter');
+ assert.equal(await page.locator('#school-guide').isVisible(),true);
+ await page.keyboard.press('Escape');
+ assert.equal(await page.locator('#school-guide').isVisible(),false);
+ assert.ok(await guide.evaluate(el=>document.activeElement===el));
  await page.getByRole('button',{name:/^Оценка 5\s*1$/}).click();
  assert.equal(await page.locator('#school-donut circle[data-accent-selection="true"]').count(),1);
  assert.equal(await page.locator('#school-donut circle[data-accent-selection="true"]').evaluate(el=>el.style.stroke),'var(--leveli-accent)');
  assert.equal(await page.locator('#school-subjects .subject-row').count(),1);
  assert.match(await page.locator('#school-subjects').innerText(),/Русский язык/);
+ assert.equal(await page.locator('[data-page="subjects"]').isVisible(),true);
+ await navButton('home').click();
  await page.getByRole('button',{name:/^Оценка 5\s*1$/}).click();
  await page.locator('#school-subjects .subject-row').filter({hasText:'Математика'}).click();
  assert.equal(await page.locator('#school-subject-detail .detail-hero-score').innerText(),'4');
@@ -278,14 +297,15 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.getByRole('button',{name:'Контрольные'}).click();
  assert.match(await page.locator('#school-subject-detail').innerText(),/Нет оценок этого типа/);
  await page.getByRole('button',{name:'Назад к предметам'}).click();
- assert.equal(await page.locator('.school-header').isVisible(),true);
+ assert.equal(await page.locator('[data-page="subjects"]').isVisible(),true);
  await page.locator('#school-subjects .subject-row').filter({hasText:'Русский язык'}).click();
  assert.equal(await page.locator('#school-subject-detail .detail-hero-score').innerText(),'5');
  assert.equal(await page.locator('#school-subject-detail .detail-goal').count(),0);
  assert.equal(await page.locator('#school-subject-detail .grade-entry__weight').count(),1);
  assert.equal(await page.locator('#school-subject-detail .grade-entry__weight').innerText(),'Вес ×2');
  await page.getByRole('button',{name:'Назад к предметам'}).click();
- await page.screenshot({path:'outputs/leveli-school.png',fullPage:true});
+ await page.screenshot({path:'outputs/leveli-subjects.png',fullPage:true});
+ await navButton('home').click();
  await page.evaluate(()=>window.__switchUser('B'));await page.waitForFunction(()=>document.querySelector('#school-period').options.length>=4);
  assert.equal(await page.locator('#home-greeting').innerText(),'Привет, Матвей!');
  const unknownFreshness=freshness.getByText('Время обновления оценок неизвестно',{exact:true});
@@ -319,10 +339,10 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.getByRole('button',{name:'Синий'}).click();
  await page.locator('#b3-panel-close').click();
  await page.locator('[data-b3-panel="avatar"]').first().click();
- await page.getByRole('button',{name:'Полина — Котёнок',exact:true}).click();
- assert.equal(await page.locator('#profile-avatar-display').getAttribute('data-avatar-index'),'2');
+ await page.getByRole('button',{name:'Матвей — Футбол',exact:true}).click();
+ assert.equal(await page.locator('#profile-avatar-display').getAttribute('data-avatar-index'),'10');
  assert.equal(await page.locator('#profile-avatar-display .avatar-illustration').count(),1);
- assert.equal(await page.locator('#personal-avatar-options [data-avatar-index="2"][aria-pressed="true"]').count(),1);
+ assert.equal(await page.locator('#personal-avatar-options [data-avatar-index="10"][aria-pressed="true"]').count(),1);
  await page.locator('#b3-panel-close').click();
  await page.locator('.b3-home-btn').click();
 
@@ -358,9 +378,9 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  }));
  assert.equal(iconStyle.width,'24px');assert.equal(iconStyle.height,'24px');
  assert.equal(await page.locator('.b3-home-btn svg').count(),1,'Back navigation uses consistent SVG icon');
- assert.equal(await page.locator('.help-btn svg').count(),3,'all help actions use SVG icons');
+ assert.equal(await page.locator('.help-btn,[data-help],#profile-gender').count(),0);
  assert.equal(await page.locator('.b3-extra button svg').count(),2,'settings detail actions use SVG chevrons');
- for(const selector of ['.help-btn svg','.b3-extra button svg']){
+ for(const selector of ['.b3-extra button svg']){
   const geometry=await page.locator(selector).first().evaluate(el=>{
    const st=getComputedStyle(el);return {w:st.width,h:st.height,stroke:st.strokeWidth}
   });
@@ -479,24 +499,15 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await page.locator('html').getAttribute('data-leveli-pack'),null);
  assert.equal(await page.locator('#profile-avatar-display img.profile-avatar-custom').count(),1);
  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('leveli-personal-v1-A')).pack),undefined);
- // Each home help button occupies a fixed right-hand track, even on narrow phones.
  for(const width of [320,360,390,430]){
   await page.setViewportSize({width,height:844});
-  const headers=await page.locator('.forecast-card .card-heading,.trend-card .card-heading,.orient-heading').evaluateAll(items=>items.map(header=>{
-   const help=header.querySelector('.help-btn'),title=header.querySelector('h2');
-   const h=header.getBoundingClientRect(),b=help.getBoundingClientRect(),t=title.getBoundingClientRect();
-   return {headingTop:h.top,headingRight:h.right,helpTop:b.top,helpRight:b.right,helpLeft:b.left,helpWidth:b.width,helpHeight:b.height,titleRight:t.right,columns:getComputedStyle(header).gridTemplateColumns,aria:help.getAttribute('aria-label')};
-  }));
-  assert.equal(headers.length,3,'three help actions exist at '+width+'px');
-  for(const [i,h] of headers.entries()){
-   assert.ok(Math.abs(h.helpTop-h.headingTop)<=1,'help '+i+' stays at top at '+width+'px');
-   assert.ok(Math.abs(h.helpRight-h.headingRight)<=1,'help '+i+' stays right-aligned at '+width+'px');
-   assert.ok(h.titleRight<=h.helpLeft+1,'help '+i+' never overlaps title at '+width+'px');
-   assert.ok(h.helpWidth>=44&&h.helpHeight>=44,'help '+i+' retains accessible hit area at '+width+'px');
-   assert.ok(h.aria,'help '+i+' keeps accessible label at '+width+'px');
-   assert.notEqual(h.columns,'none','help '+i+' uses header grid at '+width+'px');
-  }
-  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'no horizontal overflow at '+width+'px');
+  const hit=await guide.boundingBox();
+  assert.ok(hit.width>=44&&hit.height>=44);
+  await guide.press('Enter');
+  assert.ok(await page.locator('#school-guide').evaluate(el=>el.scrollWidth<=el.clientWidth+1));
+  await page.getByRole('button',{name:'Понятно',exact:true}).click();
+  assert.equal(await page.locator('#school-guide').isVisible(),false);
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  }
  await page.setViewportSize({width:390,height:844});
  await page.screenshot({path:'outputs/leveli-home.png',fullPage:true});
@@ -528,11 +539,13 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   assert.equal(await page.locator('.forecast-card .card-heading h2 svg,.trend-card .card-heading h2 svg,.orient-heading h2 svg').count(),0);
   assert.equal(await page.locator('#leveli-line-glow feGaussianBlur').getAttribute('stdDeviation'),'3');
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  await navButton('subjects').click();
   await row('Физика').click();
   assert.equal(await detail.locator('.detail-hero-label').textContent(),'Официальная оценка за четверть');
   assert.equal(await detail.locator('.detail-goal').count(),0);
   assert.equal(await detail.locator('.detail-trend-pill').textContent(),'0,00 · Как посчитано?');
   await detail.locator('.detail-back').click();
+  await navButton('home').click();
   await refresh([...physics,official,...marks('Геометрия',[4])]);
   await empty.filter({hasText:'По части предметов уже выставлены итоги'}).waitFor();
   await refresh([
@@ -541,6 +554,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
    ...marks('Химия',[5,4,4],[1,999,1])
   ]);
   await empty.filter({hasText:'Сейчас нет предметов'}).waitFor();
+  await navButton('subjects').click();
   const small=row('Геометрия').locator('.grade-delta');
   assert.equal(await small.textContent(),'−0,50');
   assert.match(await small.getAttribute('class'),/\bflat\b/);
@@ -556,6 +570,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
    el.append(probe);const color=getComputedStyle(probe).backgroundColor;probe.remove();return color;
   }));
   await detail.locator('.detail-back').click();
+  await navButton('home').click();
  }
  const lowSubjects=[
   ...marks('Физика',[4,4,4]),
@@ -565,7 +580,9 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   {...official,subject:'Геометрия',value:2}
  ];
  await refresh(lowSubjects);
+ await navButton('subjects').click();
  await row('Биология').waitFor();
+ await navButton('home').click();
  for(const width of [320,390]){
   await page.setViewportSize({width,height:844});
   const legends=await page.locator('.forecast-legend').evaluateAll(legends=>legends.map(legend=>[...legend.children].map(item=>({
@@ -585,21 +602,24 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   assert.notEqual(await color(score('Физика')),await color(score('Химия')));
  }
  await page.getByRole('button',{name:/^Оценка 2\s*1$/}).click();
+ assert.equal(await page.locator('[data-page="subjects"]').isVisible(),true);
  assert.equal(await page.locator('.subject-row').count(),1);
  assert.match(await page.locator('.subject-row').textContent(),/Геометрия/);
+ await navButton('home').click();
  await page.getByRole('button',{name:/^Оценка 2\s*1$/}).click();
+ await navButton('home').click();
  await page.setViewportSize({width:390,height:844});
  await page.getByRole('button',{name:'Профиль и настройки'}).click();
  await page.getByRole('button',{name:/^(Выбрать|Изменить) аватар$/}).click();
- const football=page.getByRole('button',{name:'Матвей — Футбол'});
- await football.press('Enter');
- assert.equal(await football.getAttribute('aria-pressed'),'true');
- assert.ok(await football.evaluate(el=>document.activeElement===el));
- assert.match(await page.locator('#profile-avatar-display img').getAttribute('src'),/matvey-football\.webp$/);
+ const dance=page.getByRole('button',{name:'Полина — Танцы'});
+ await dance.press('Enter');
+ assert.equal(await dance.getAttribute('aria-pressed'),'true');
+ assert.ok(await dance.evaluate(el=>document.activeElement===el));
+ assert.match(await page.locator('#profile-avatar-display img').getAttribute('src'),/polina-dance\.webp$/);
  await page.reload();
- await page.waitForFunction(()=>document.querySelector('#profile-avatar-display img')?.src.endsWith('matvey-football.webp'));
+ await page.waitForFunction(()=>document.querySelector('#profile-avatar-display img')?.src.endsWith('polina-dance.webp'));
  await page.evaluate(()=>window.__switchUser('B'));
- await page.waitForFunction(()=>document.querySelector('#profile-avatar-display img')?.src.endsWith('polina-cat.webp'));
+ await page.waitForFunction(()=>document.querySelector('#profile-avatar-display img')?.src.endsWith('matvey-football.webp'));
  assert.deepEqual(errors,[]);fs.writeFileSync('work/browser-result.json',JSON.stringify({passed:true,checks:['one school home','profile navigation','exact school forecast','official final','decline warning','A/B isolation','offline cached grades','logout clear'],errors},null,2));
  await browser.close();console.log('Browser integration: PASS');
 })().catch(e=>{console.error(e);process.exit(1)});

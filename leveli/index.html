@@ -95,9 +95,7 @@ body{background:#0e0c21;color:#f6f0ff}
 .card h2,.orient-heading h2{color:#fff;font-size:18px}
 .card p,.muted{color:#aa9cc8}
 .forecast-card{padding:15px}
-.help-btn{height:28px;width:28px;flex:none;border-radius:50%;background:var(--leveli-accent-dim);color:var(--leveli-accent-ink);border:0;font-size:15px;font-weight:800;cursor:pointer}
-.inline-help{background:var(--ds-surface-inner);color:var(--ds-text-primary);font-size:12px;line-height:1.65;border-radius:11px;padding:12px;margin:10px 0}
-.heading-with-help{display:flex;align-items:center;gap:8px}
+.heading-with-period{display:flex;align-items:center;gap:8px}
 .double-donut{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px;margin-top:13px}
 .donut-panel{background:#25203d;border-radius:15px;padding:9px;display:flex;flex-direction:column;align-items:center;min-width:0}
 .donut-title{font-weight:750;font-size:12px;color:var(--ds-text-primary)}
@@ -283,7 +281,7 @@ body{background:#0e0c21;color:#f6f0ff}
 :root[data-leveli-theme="light"] #school-subject-detail h3{color:#302448}
 :root[data-leveli-theme="light"] .profile-actions .profile-logout{color:#5c426e}
 :root[data-leveli-theme="light"] .btn.secondary,:root[data-leveli-theme="light"] .profile-back,:root[data-leveli-theme="light"] .detail-toggle button,:root[data-leveli-theme="light"] #school-period-buttons button{background:var(--ds-surface-inner);color:var(--ds-text-primary);border-color:var(--ds-border)}
-:root .school-header .settings-button,:root .help-btn{color:var(--leveli-accent-soft)}
+:root .school-header .settings-button{color:var(--leveli-accent-soft)}
 :root .btn:not(.secondary),:root #school-period-buttons button[aria-pressed="true"],:root .detail-toggle button[aria-pressed="true"]{background:var(--leveli-accent-dim);border-color:var(--leveli-accent-border);color:var(--leveli-accent-ink)}
 :root .subject-row__average{color:var(--leveli-accent-soft)}
 :root .profile-header .profile-back{margin-bottom:12px}
@@ -312,7 +310,7 @@ body{background:#0e0c21;color:#f6f0ff}
 .personal-color-swatch{width:27px;height:27px;border-radius:10px;border:1px solid #ffffff50}
 
 .birthday-label{display:block;font-size:12px;font-weight:700;margin:12px 0 7px}
-:is(#profile-birthday,#profile-gender){font:600 14px Manrope,system-ui;width:100%;min-height:44px;border:1px solid var(--leveli-accent-border);border-radius:12px;padding:9px 12px;color:inherit;background:var(--ds-surface-inner)}
+#profile-birthday{font:600 14px Manrope,system-ui;width:100%;min-height:44px;border:1px solid var(--leveli-accent-border);border-radius:12px;padding:9px 12px;color:inherit;background:var(--ds-surface-inner)}
 
 .birthday-note,#profile-save-status{font-size:12px;margin:9px 0 0;color:var(--leveli-accent-soft)}
 :root[data-leveli-theme="light"] .birthday-note,:root[data-leveli-theme="light"] #profile-save-status{color:var(--leveli-accent-soft)}
@@ -324,13 +322,13 @@ body{background:#0e0c21;color:#f6f0ff}
  --leveli-accent-track:#55416e;--leveli-accent-line:#d1adff;--leveli-accent-glow:#ab7aff;
  --leveli-accent-ink:#fff;
 }
-:root .btn:not(.secondary),:root .settings-button,:root .help-btn,:root .detail-toggle button,:root #school-period-buttons button,:root .personal-option{transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease}
-:root .settings-button:focus-visible,:root .btn:focus-visible,:root .help-btn:focus-visible,
+:root .btn:not(.secondary),:root .settings-button,:root .detail-toggle button,:root #school-period-buttons button,:root .personal-option{transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease}
+:root .settings-button:focus-visible,:root .btn:focus-visible,
 :root .subject-row:focus-visible,:root .orient-link:focus-visible,
 :root .forecast-legend button:focus-visible,:root .detail-toggle button:focus-visible,
 :root #school-period-buttons button:focus-visible{outline:3px solid var(--leveli-accent);outline-offset:3px}
 :root .btn.secondary:not(.profile-logout){border-color:var(--leveli-accent-border);color:var(--leveli-accent-soft)}
-:root .settings-button,:root .help-btn{border-color:var(--leveli-accent-border)}
+:root .settings-button{border-color:var(--leveli-accent-border)}
 :root .header-period{border:1px solid var(--leveli-accent-border);background:var(--leveli-accent-dim);color:var(--leveli-accent-ink)}
 :root .forecast-center{border-color:var(--leveli-accent-border)}
 :root .forecast-legend button[aria-pressed="true"]{background:var(--leveli-accent-dim);border-color:var(--leveli-accent-border)}
@@ -349,13 +347,12 @@ body{background:#0e0c21;color:#f6f0ff}
 :root[data-leveli-theme="light"] .btn.secondary:not(.profile-logout){color:#3b2b50}
 :root[data-leveli-theme="light"] .forecast-center{color:#302448}
 @media(prefers-reduced-motion:reduce){
- :root .btn,:root .settings-button,:root .help-btn,:root .detail-toggle button,:root #school-period-buttons button,:root .personal-option{transition:none!important}
+ :root .btn,:root .settings-button,:root .detail-toggle button,:root #school-period-buttons button,:root .personal-option{transition:none!important}
 }
 
 /* DS v1: functional icons use 20/24px artwork and independently accessible 44px hit targets. */
 /* Shared DS variables are defined in the unified component contract below. */
 :root .settings-button{width:48px;height:48px;padding:0;display:grid;place-items:center;flex:none;position:relative}
-:root .help-btn{width:44px;height:44px;min-width:44px;min-height:44px;display:grid;place-items:center}
 :root .btn{min-height:46px}
 :root .btn:not(.secondary){min-height:48px}
 :root .orient-link{min-height:44px}
@@ -553,7 +550,6 @@ body{background:#0e0c21;color:#f6f0ff}
 
 /* Final CSS/icon audit: shared controls use consistent, scalable SVG geometry.
    Historical color rules are retained only where they encode chart/grade semantics. */
-:root .help-btn svg{width:20px;height:20px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 :root .b3-extra button svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;color:var(--ds-text-secondary)}
 :root[data-leveli-theme="light"] .b3-extra button svg{color:#746489}
 
@@ -634,48 +630,68 @@ body{background:#0e0c21;color:#f6f0ff}
 .leveli-trend-dialog .trend-explain-result{font-weight:800}
 .leveli-trend-dialog button{min-height:44px;margin-top:10px}
 .detail-trend-pill:is(button){border:1px solid currentColor;cursor:pointer;min-height:44px}
-/* UI batch: neutral header actions and consistent contextual help. */
+/* Neutral header actions and one guide for the dashboard. */
 :root .school-header .settings-button{min-width:52px;min-height:52px;padding:12px;color:var(--ds-text-primary);background:transparent;border:0}
 :root .school-header .settings-button svg{width:27px;height:27px}
-:root .help-btn{background:transparent;color:var(--ds-text-secondary);border:0}
-/* Keep every contextual help button in a dedicated right-hand track on narrow screens. */
-:root .forecast-card .card-heading,:root .trend-card .card-heading,:root .orient-heading{
- display:grid;grid-template-columns:minmax(0,1fr) 44px;column-gap:8px;align-items:start;
-}
-:root .forecast-card .card-heading>.help-btn,:root .trend-card .card-heading>.help-btn,:root .orient-heading>.help-btn{
- position:static;grid-column:2;grid-row:1;justify-self:end;align-self:start;
- width:44px;height:44px;min-width:44px;min-height:44px;
-}
-:root .forecast-card .card-heading>h2,:root .orient-heading>h2{grid-column:1;grid-row:1;min-width:0}
+.school-guide-button{min-height:44px;margin:0 0 12px}
+#school-guide h3{font-size:15px;margin:12px 0 4px}
+#school-guide p{font-size:14px}
 :root .forecast-card .double-donut{margin-top:4px}
-:root .trend-card .heading-with-help{grid-column:1;grid-row:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:5px 9px}
+:root .trend-card .heading-with-period{grid-column:1;grid-row:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:5px 9px}
 :root .trend-card .trend-change{grid-column:1;grid-row:2;min-width:0}
 :root .trend-card .trend-change:empty{display:none}
 :root .trend-card .header-period{margin:0;padding:3px 0;border:0;background:none;color:var(--ds-text-secondary);font-size:12px}
 :root .b3-tile[hidden],:root .personal-group[hidden]{display:none!important}
 :root #school-subject-detail .detail-chart-caption:empty{display:none}
 
+/* Pinned navigation: iPhone safe-area and content clearance. */
+:root .content{padding-bottom:calc(86px + env(safe-area-inset-bottom,0px))}
+.leveli-bottom-nav{position:fixed;z-index:20;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,540px);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:7px 12px max(8px,env(safe-area-inset-bottom,0px));background:var(--ds-card-surface);border-top:1px solid var(--ds-border);box-shadow:0 -10px 26px #0002}
+.leveli-bottom-nav[hidden]{display:none!important}
+.leveli-bottom-nav button{min-width:0;min-height:56px;border:0;border-radius:12px;background:transparent;color:var(--ds-text-secondary);font:700 11px Manrope,system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer}
+.leveli-bottom-nav button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.leveli-bottom-nav button[aria-current="page"]{background:var(--leveli-accent-dim);color:var(--leveli-accent-ink)}
+.leveli-bottom-nav button:focus-visible{outline:3px solid var(--leveli-accent-border);outline-offset:2px}
+.section-screen-header{padding:4px 0 8px}
+.section-screen-header h1{margin:0;color:var(--ds-text-primary);font-size:var(--ds-font-screen);line-height:var(--ds-line-heading)}
+[data-page="subjects"] .subjects-card{margin-top:12px}
+.outcomes-placeholder{min-height:140px;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px}
+.outcomes-placeholder p{margin:0;color:var(--ds-text-secondary);font-size:14px;line-height:1.5}
+[data-page="subjects"].subject-detail-active #subjects-overview{display:none}
+[data-page="subjects"].subject-detail-active #school-subject-detail{margin-top:0}
+body:has([data-page="profile"]:not([hidden])) .content{padding-bottom:0}
 </style></head><body><div class="app"><main class="content" id="main">
 <section data-page="home"><header class="school-header"><div><div class="eyebrow brand-lockup"><img src="./brand/mark.svg" alt="" width="30" height="30" aria-hidden="true"><span>Leveli</span></div><h1 id="home-greeting">Привет!</h1><p id="home-birthday-greeting" class="home-birthday-greeting" hidden></p><p>Мои оценки и успеваемость</p></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
 <article class="card" id="school-login"><h2>Войди, чтобы увидеть оценки</h2><p>Оценки загружаются из электронного дневника.</p><form id="school-form"><label>Почта<input id="school-email" type="email" autocomplete="username" required></label><label>Пароль<input id="school-password" type="password" autocomplete="current-password" required></label><button class="btn" type="submit">Войти</button></form></article>
-<div id="school-results" hidden><div id="school-subject-detail" class="card" hidden></div><div id="school-overview">
+<div id="school-results" hidden><div id="school-overview">
+<button class="btn secondary school-guide-button" type="button" id="school-guide-open" aria-haspopup="dialog">Как читать оценки</button>
+<dialog class="leveli-trend-dialog" id="school-guide" aria-labelledby="school-guide-title">
+ <h2 id="school-guide-title" tabindex="-1" autofocus>Как читать оценки</h2>
+ <section><h3>Успеваемость</h3><p>Линия показывает, как менялся средний балл за четверть. «Ко вчерашнему среднему» появляется, если есть сохранённое значение за вчера.</p></section>
+ <section><h3>Диаграммы</h3><p>Слева — прогнозы и четвертные итоги по предметам. Выбери оценку, чтобы открыть отфильтрованный список. Справа — обычные оценки за четверть.</p></section>
+ <section><h3>Ориентиры</h3><p>При 0–1 оценке динамики нет. При 2–5 сравниваем последнюю оценку с предыдущими, при 6 и более — две группы по три оценки. Учитываем веса. Стрелка появляется при разнице от 0,50 балла. Нажми на динамику, чтобы увидеть расчёт.</p></section>
+ <form method="dialog"><button class="btn secondary" type="submit">Понятно</button></form>
+</dialog>
 <article class="card trend-card">
- <div class="card-heading"><div class="heading-with-help"><h2>Моя успеваемость</h2><span class="header-period" id="school-header-period">2 четверть</span></div><button class="help-btn" type="button" data-help="school-trend-help" aria-label="Как считается успеваемость?" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4"/><path d="M12 17h.01"/></svg></button><span id="school-trend-change" class="trend-change"></span></div>
- <div id="school-trend-help" class="inline-help" hidden>Светящаяся линия показывает накопительный средний балл за выбранную четверть. Подпись «Ко вчерашнему среднему» сравнивает общий средний балл с последним сохранённым значением за вчера. Если вчерашних данных нет, изменение не показывается.</div>
+ <div class="card-heading"><div class="heading-with-period"><h2>Моя успеваемость</h2><span class="header-period" id="school-header-period">2 четверть</span></div><span id="school-trend-change" class="trend-change"></span></div>
+
  <div id="school-trend"></div></article>
 <article class="card forecast-card">
- <div class="card-heading"><h2>Как у меня дела?</h2><button class="help-btn" type="button" data-help="school-chart-help" aria-label="Как считаются диаграммы?" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4"/><path d="M12 17h.01"/></svg></button></div>
- <div id="school-chart-help" class="inline-help" hidden>Слева — распределение предметов по прогнозу или выставленной четвертной оценке. Средний балл в центре — среднее по предметам с оценками. Справа — количество обычных полученных оценок за четверть по значениям 5, 4, 3 и 2; итоговые четвертные не включаются. Нажатие на категорию слева фильтрует список предметов.</div>
+ <div class="card-heading"><h2>Как у меня дела?</h2></div>
+
  <div class="double-donut">
   <div class="donut-panel"><div class="donut-title">По предметам</div><div class="forecast-chart"><svg id="school-donut" viewBox="0 0 200 200" role="img" aria-label="Распределение предметов"></svg><div class="forecast-center"><strong id="school-overall">—</strong><span>Средний балл</span></div></div><div id="school-forecast-legend" class="forecast-legend" aria-label="Количество предметов по оценкам"></div><div class="donut-unit">Количество предметов</div></div>
   <div class="donut-panel"><div class="donut-title">По оценкам</div><div class="forecast-chart"><svg id="school-grades-donut" viewBox="0 0 200 200" role="img" aria-label="Распределение полученных оценок"></svg><div class="forecast-center"><strong id="school-grades-total">0</strong><span>Всего оценок</span></div></div><div id="school-grades-legend" class="forecast-legend" aria-label="Количество фактически полученных оценок"></div><div class="donut-unit">Количество оценок</div></div>
  </div>
  <div id="school-analytics" class="muted" hidden></div></article>
-<div class="orient-heading"><h2>Мои ориентиры</h2><button class="help-btn" type="button" data-help="school-orient-help" aria-label="Что означает динамика?" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4"/><path d="M12 17h.01"/></svg></button></div><div id="school-orient-help" class="inline-help" hidden>Динамика показывает изменение оценок за выбранную четверть. При 0–1 оценке её нет; при 2–5 сравниваем последнюю оценку со взвешенным средним предыдущих; при 6 и более — среднее последних трёх со средним трёх перед ними. Официальные веса учитываются, отсутствующий вес при расчёте равен 1. Изменение от +0,50 или до −0,50 включительно выделяется стрелкой; порог проверяем до округления. Нажми на показатель динамики, чтобы увидеть расчёт.</div>
+<div class="orient-heading"><h2>Мои ориентиры</h2></div>
 <div id="school-orient-empty" class="orient-sparse" hidden></div>
 <div class="orient-grid"><article class="orient-panel orient-good"><div class="orient-title">Молодец</div><div id="school-good-list"></div></article><article class="orient-panel orient-attention"><div class="orient-title">Подтянуть</div><div id="school-attention-list"></div></article></div>
+<p id="school-status" class="muted">Загрузка…</p><p id="school-freshness" aria-live="polite"></p></div></div><p id="school-error" role="alert" class="muted"></p></section>
+<section data-page="subjects" hidden aria-labelledby="subjects-title"><div id="school-subject-detail" class="card" hidden></div><div id="subjects-overview"><header class="section-screen-header"><h1 id="subjects-title" tabindex="-1">Предметы</h1></header>
 <article class="card subjects-card"><div class="card-heading"><h2>Все предметы</h2><span id="school-subject-count" class="muted"></span></div>
-<div id="school-filter-buttons" hidden></div><select id="school-filter" hidden><option value="all">Все предметы</option><option value="strong">Сильные</option><option value="attention">Требуют внимания</option></select><div id="school-subjects"></div></article><p id="school-status" class="muted">Загрузка…</p><p id="school-freshness" aria-live="polite"></p></div></div><p id="school-error" role="alert" class="muted"></p></section>
+<div id="school-filter-buttons" hidden></div><select id="school-filter" hidden><option value="all">Все предметы</option><option value="strong">Сильные</option><option value="attention">Требуют внимания</option></select><div id="school-subjects"></div></article></div></section>
+<section data-page="outcomes" hidden aria-labelledby="outcomes-title"><header class="section-screen-header"><h1 id="outcomes-title">Итоги</h1></header><article class="card outcomes-placeholder"><p>Здесь появятся результаты твоих недель и четвертей.</p></article></section>
 <section data-page="profile" hidden>
  <div class="b3-settings" id="b3-settings">
   <header class="b3-header"><button type="button" class="b3-home-btn leveli-back-btn" data-go="home" aria-label="Назад на главную"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19 5 12l7-7"/><path d="M5 12h14"/></svg><span>Назад</span></button><h1>Настройки</h1></header>
@@ -688,7 +704,7 @@ body{background:#0e0c21;color:#f6f0ff}
   </div>
   <h2 class="b3-section-label">Дополнительно</h2>
   <div class="b3-extra">
-    <button type="button" data-b3-panel="birthday">День рождения и профиль <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+    <button type="button" data-b3-panel="birthday">День рождения <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
     <button type="button" data-b3-panel="account">Аккаунт и данные <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
   </div>
  </div>
@@ -704,14 +720,16 @@ body{background:#0e0c21;color:#f6f0ff}
  <article class="card profile-card" id="profile-birthday-card" hidden>
   <h2>День рождения</h2><p>Укажи дату рождения, если хочешь получать поздравление. Её можно удалить в любой момент.</p>
   <label class="birthday-label" for="profile-birthday">Дата рождения</label><input type="date" id="profile-birthday" min="2000-01-01" max="2030-12-31"><p class="birthday-note" id="profile-age"></p>
-  <label class="birthday-label" for="profile-gender">Мальчик или девочка</label>
-  <select id="profile-gender"><option value="">Не указано</option><option value="boy">Мальчик</option><option value="girl">Девочка</option></select>
   <p id="profile-save-status" role="status" aria-live="polite"></p>
  </article>
  <article class="card profile-card"><h2>Учебный период</h2><p>Выбери четверть для просмотра оценок, графиков и прогнозов.</p><div class="profile-period"><div id="school-period-buttons" class="choice-buttons"></div><p id="school-period-notice" class="period-notice" role="status" aria-live="polite" hidden></p><select id="school-period" hidden><option value="all">Все оценки</option></select><button type="button" id="school-current-period" class="btn secondary">Вернуться к текущей четверти</button></div></article>
  <article class="card profile-card profile-account-actions" id="profile-actions" hidden><h2>Аккаунт и данные</h2><p>Оценки обновляются автоматически.</p><div class="profile-actions"><button class="btn secondary" id="school-refresh">Проверить обновления</button><button class="btn secondary profile-logout" id="school-logout">Выйти из аккаунта</button></div></article>
 </section>
-</main></div>
+</main><nav class="leveli-bottom-nav" aria-label="Основная навигация" hidden>
+<button type="button" data-go="home" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3z"/><path d="M9 20v-7h6v7"/></svg><span>Главная</span></button>
+<button type="button" data-go="subjects"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6c-3-2-7-2-10-1v14c3-1 7-1 10 1 3-2 7-2 10-1V5c-3-1-7-1-10 1z"/><path d="M12 6v14"/></svg><span>Предметы</span></button>
+<button type="button" data-go="outcomes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V13m6 7V9m6 11V4m4 16H2"/></svg><span>Итоги</span></button>
+</nav></div>
 <script>
 /* B3 UI shell: pre-existing preference controls, period selector and account logic are reused verbatim. */
 (()=>{
@@ -729,7 +747,7 @@ body{background:#0e0c21;color:#f6f0ff}
   quarter:document.querySelector('.profile-period').closest('.profile-card'),
   birthday:document.getElementById('profile-birthday-card'),account:document.getElementById('profile-actions')
  };
- const titles={avatar:'Выбрать аватар',theme:'Тема',accent:'Акцентные цвета',quarter:'Выбрать четверть',birthday:'День рождения и профиль',account:'Аккаунт и данные'};
+ const titles={avatar:'Выбрать аватар',theme:'Тема',accent:'Акцентные цвета',quarter:'Выбрать четверть',birthday:'День рождения',account:'Аккаунт и данные'};
  let previous=null,active=null,lastTrigger=null;
  const updateQuarter=()=>{const value=document.getElementById('school-period').value;const q=Number(value.split('-')[1]);document.getElementById('b3-quarter-status').textContent=(['','I','II','III','IV'][q]||'—')+' четверть'};
  const observer=new MutationObserver(updateQuarter);observer.observe(document.getElementById('school-period'),{attributes:true,childList:true,subtree:true});document.getElementById('school-period').addEventListener('change',updateQuarter);
@@ -763,11 +781,34 @@ body{background:#0e0c21;color:#f6f0ff}
 </script>
 <script src="./school-model.js"></script><script>
 'use strict';
-const pages=[...document.querySelectorAll('[data-page]')];function navigate(page){if(page!=='profile')page='home';for(const p of pages)p.hidden=p.dataset.page!==page;window.scrollTo(0,0);history.replaceState(null,'','#'+page)}document.addEventListener('click',e=>{const target=e.target.closest('[data-go]');if(target)navigate(target.dataset.go)});
+const pages=[...document.querySelectorAll('[data-page]')],tabBar=document.querySelector('.leveli-bottom-nav');
+let lastMainTab='home',currentView='home';
+function navigate(page,{replace=false,fromHistory=false}={}){
+ if(!['home','subjects','outcomes','profile','subject'].includes(page))page='home';
+ if(page!=='home')document.getElementById('school-guide').close();
+ const previous=currentView;
+ if(page!=='profile'&&page!=='subject')lastMainTab=page;
+ currentView=page;
+ const visible=page==='subject'?'subjects':page;
+ for(const p of pages)p.hidden=p.dataset.page!==visible;
+ tabBar.hidden=page==='profile'||!document.getElementById('school-login').hidden;
+ for(const button of tabBar.querySelectorAll('button')){
+  if(button.dataset.go===visible)button.setAttribute('aria-current','page');
+  else button.removeAttribute('aria-current');
+ }
+ if(previous==='subject'&&page!=='subject')window.dispatchEvent(new Event('leveli-close-subject'));
+ if(!fromHistory){
+  if(replace)history.replaceState({leveliPage:page},'','#'+page);
+  else if(location.hash!=='#'+page)history.pushState({leveliPage:page},'','#'+page);
+ }
+ window.scrollTo(0,0);
+}
+window.LeveliNavigation={navigate,openSubject:()=>navigate('subject'),closeSubject:()=>navigate('subjects',{replace:true})};
+document.addEventListener('click',e=>{const target=e.target.closest('[data-go]');if(target)navigate(target.dataset.go==='home'&&currentView==='profile'?lastMainTab:target.dataset.go)});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
-document.addEventListener('click',e=>{const btn=e.target.closest('[data-help]');if(!btn)return;const target=document.getElementById(btn.dataset.help);if(!target)return;target.hidden=!target.hidden;btn.setAttribute('aria-expanded',String(!target.hidden))});
-addEventListener('hashchange',()=>navigate(location.hash.slice(1)));navigate(location.hash.slice(1)||'home');
+document.getElementById('school-guide-open').addEventListener('click',()=>document.getElementById('school-guide').showModal());
+addEventListener('popstate',()=>navigate(location.hash.slice(1)==='subject'?'subjects':location.hash.slice(1),{fromHistory:true}));navigate(location.hash.slice(1)==='subject'?'subjects':location.hash.slice(1)||'home',{replace:true});
 </script>
 <script>
 /* Local-first, UID-scoped preferences. No personal data sent to analytics or public URLs. */
@@ -829,15 +870,14 @@ window.LeveliAppearance=(()=>{
   node.onerror=()=>{const fallback=document.createElement('span');fallback.className='avatar-illustration prototype-avatar';fallback.setAttribute('aria-hidden','true');node.replaceWith(fallback)};
   return node
  }
- const avatarGroups={girl:'Полина',boy:'Матвей'};
- const defaults={gender:'',theme:'dark',accent:'violet',avatar:0,avatarRevision:0,customAvatar:'',birthday:''};
- let uid=null,profile={...defaults},uploadVersion=0;
+ const avatarGroups=['Полина','Матвей'];
+ const defaults={theme:'dark',accent:'violet',avatar:0,avatarRevision:0,customAvatar:'',birthday:''};
+ let uid=null,avatarGroup=null,profile={...defaults},uploadVersion=0;
  const safe=x=>typeof x==='string'&&/^[-\w]{1,150}$/.test(x)?x:null;
  function read(id){try{const p=JSON.parse(localStorage.getItem('leveli-personal-v1-'+id)||'{}');return {...defaults,...p}}catch{return {...defaults}}}
  function valid(p){
-  const gender=Object.hasOwn(avatarGroups,p.gender)?p.gender:'';
   const avatar=Number.isInteger(p.avatar)?avatars[p.avatar]:null;
-  return {gender,theme:['dark','light','system'].includes(p.theme)?p.theme:'dark',accent:Object.hasOwn(darkAccents,p.accent)?p.accent:'violet',avatar:p.avatar==='custom'||(avatar&&(!gender||avatar[0]===avatarGroups[gender]))?p.avatar:0,avatarRevision:p.avatarRevision===2?2:0,customAvatar:typeof p.customAvatar==='string'&&p.customAvatar.length<120000&&/^data:image\/(webp|png|jpeg);base64,/.test(p.customAvatar)?p.customAvatar:'',birthday:/^\d{4}-\d{2}-\d{2}$/.test(p.birthday||'')?p.birthday:''}
+  return {theme:['dark','light','system'].includes(p.theme)?p.theme:'dark',accent:Object.hasOwn(darkAccents,p.accent)?p.accent:'violet',avatar:p.avatar==='custom'||(avatar&&(!avatarGroup||avatar[0]===avatarGroup))?p.avatar:0,avatarRevision:p.avatarRevision===2?2:0,customAvatar:typeof p.customAvatar==='string'&&p.customAvatar.length<120000&&/^data:image\/(webp|png|jpeg);base64,/.test(p.customAvatar)?p.customAvatar:'',birthday:/^\d{4}-\d{2}-\d{2}$/.test(p.birthday||'')?p.birthday:''}
  }
  function age(){if(!profile.birthday)return null;const b=new Date(profile.birthday+'T12:00:00');const now=new Date();if(!Number.isFinite(b.getTime())||b>now)return null;let n=now.getFullYear()-b.getFullYear();if(now.getMonth()<b.getMonth()||(now.getMonth()===b.getMonth()&&now.getDate()<b.getDate()))n--;return n>=0&&n<=120?n:null}
  function paint(){
@@ -849,7 +889,6 @@ window.LeveliAppearance=(()=>{
   const hasAvatar=avatarDisplay.childElementCount>0;
   avatarDisplay.closest('.b3-hero-space').classList.toggle('has-avatar',hasAvatar);
   document.querySelector('.b3-change-avatar').textContent=hasAvatar?'Изменить аватар':'Выбрать аватар';
-  document.querySelector('#profile-gender').value=profile.gender;
   avatarDisplay.dataset.avatarIndex=String(profile.avatar);document.querySelector('#profile-remove-avatar').hidden=!profile.customAvatar;
   document.querySelector('#home-birthday-greeting').hidden=true;
   const b=profile.birthday?new Date(profile.birthday+'T12:00:00'):null,now=new Date();
@@ -872,7 +911,7 @@ window.LeveliAppearance=(()=>{
  }
  function drawControls(){
   const av=document.querySelector('#personal-avatar-options');av.replaceChildren();
-  for(const person of profile.gender?[avatarGroups[profile.gender]]:Object.values(avatarGroups)){
+  for(const person of avatarGroup?[avatarGroup]:avatarGroups){
    const heading=document.createElement('h4');heading.textContent=person;av.append(heading);
    avatars.forEach((avatar,i)=>{
     if(avatar?.[0]!==person||i===11)return; // Keep the retired gallery option valid for existing selections.
@@ -899,7 +938,17 @@ window.LeveliAppearance=(()=>{
   document.querySelector('#profile-save-status').textContent='Сохранено на этом устройстве';
   paint();
  }
- function activate(id){uploadVersion++;uid=safe(id);profile=uid?valid(read(uid)):{...defaults};document.querySelector('.b3-change-avatar').hidden=!uid;document.querySelector('#profile-personalization').hidden=!uid;document.querySelector('#profile-birthday-card').hidden=!uid;document.querySelector('#profile-save-status').textContent='';paint()}
+ function setProfileName(id,name){
+  if(!uid||id!==uid)return;
+  const parts=name.toLowerCase().match(/[\p{L}]+/gu)||[];
+  const matches=avatarGroups.filter(person=>parts.includes(person.toLowerCase()));
+  const group=matches.length===1?matches[0]:null;
+  if(group===avatarGroup)return;
+  avatarGroup=group;
+  profile=valid(profile);
+  paint();
+ }
+ function activate(id){uploadVersion++;uid=safe(id);avatarGroup=null;profile=uid?valid(read(uid)):{...defaults};document.querySelector('.b3-change-avatar').hidden=!uid;document.querySelector('#profile-personalization').hidden=!uid;document.querySelector('#profile-birthday-card').hidden=!uid;document.querySelector('#profile-save-status').textContent='';paint()}
  document.querySelector('#profile-upload-avatar').addEventListener('click',()=>{if(uid)document.querySelector('#profile-avatar-file').click()});
  document.querySelector('#profile-remove-avatar').addEventListener('click',()=>{uploadVersion++;set({customAvatar:'',avatar:0,avatarRevision:0})});
  document.querySelector('#profile-avatar-file').addEventListener('change',async e=>{
@@ -917,11 +966,10 @@ window.LeveliAppearance=(()=>{
    set({customAvatar:data,avatar:'custom'});
   }catch(e){if(version===uploadVersion)status.textContent='Не удалось открыть картинку. Попробуй PNG или JPG.'}finally{if(url)URL.revokeObjectURL(url)}
  });
- document.querySelector('#profile-gender').addEventListener('change',e=>set({gender:e.target.value}));
  document.querySelector('#profile-birthday').addEventListener('change',e=>{const value=e.target.value;if(value&&new Date(value+'T12:00:00')>new Date()){document.querySelector('#profile-save-status').textContent='Дата рождения не может быть в будущем';return}set({birthday:value})});
  colorScheme.addEventListener('change',()=>{if(profile.theme==='system')paint()});
  paint();
- return {activate,get:()=>({...profile}),avatars};
+ return {activate,setProfileName,get:()=>({...profile}),avatars};
 })();
 </script>
 <script type="module">
@@ -932,13 +980,13 @@ const firebaseConfig={apiKey:"AIzaSyCs3gfUXcrlTJLZqxXQ0cgXpfuqNBkNIsU",authDomai
 const app=initializeApp(firebaseConfig,'leveli-school');
 const auth=getAuth(app), db=getFirestore(app);window.leveliFirebase={auth,db,onAuthStateChanged,doc,getDocFromServer};window.dispatchEvent(new Event('leveliFirebaseReady'));
 const login=document.getElementById('school-login'), results=document.getElementById('school-results'), error=document.getElementById('school-error'), status=document.getElementById('school-status'), subjects=document.getElementById('school-subjects');
-let firestoreProfileName='';function updateIdentity(user,grades){const email=user?.email||'';const known=firestoreProfileName;document.getElementById('home-greeting').textContent=known?'Привет, '+known+'!':'Привет!';document.getElementById('profile-name').textContent=user?(known||'Ученик'):'Гость';document.getElementById('profile-account').textContent=user?'Аккаунт подключён':'Войди на главной, чтобы подключить профиль.';document.getElementById('profile-actions').hidden=!user;document.getElementById('profile-school').textContent='';window.dispatchEvent(new CustomEvent('leveliIdentity',{detail:{uid:user?.uid||null}}));document.title='Левели · '+(known||'Мои оценки')}
+let firestoreProfileName='';function updateIdentity(user,grades){const email=user?.email||'';const known=firestoreProfileName;window.LeveliAppearance.setProfileName(user?.uid,known);document.getElementById('home-greeting').textContent=known?'Привет, '+known+'!':'Привет!';document.getElementById('profile-name').textContent=user?(known||'Ученик'):'Гость';document.getElementById('profile-account').textContent=user?'Аккаунт подключён':'Войди на главной, чтобы подключить профиль.';document.getElementById('profile-actions').hidden=!user;document.getElementById('profile-school').textContent='';window.dispatchEvent(new CustomEvent('leveliIdentity',{detail:{uid:user?.uid||null}}));document.title='Левели · '+(known||'Мои оценки')}
 function showError(e){error.textContent=e?.code==='auth/invalid-credential'?'Неверная почта или пароль.':e?.code==='permission-denied'?'Нет доступа к оценкам этой учётной записи.':e?.message||'Не удалось загрузить оценки.'}
 const S=window.LeveliSchool;
 const isMark=v=>S.score(v)!==null;
 const isFinal=g=>!!S.officialKind(g);
 let cachedGrades=[],loadGeneration=0;let schoolDataMeta=null;let retryHandle=null;
-let forecastFilter=null;function clearSchool(){document.querySelector('[data-page="home"]').classList.remove('subject-detail-active');cachedGrades=[];subjects.replaceChildren();for(const id of ['school-analytics','school-trend','school-subject-detail','school-period-buttons','school-filter-buttons','school-forecast-legend','school-good-list','school-attention-list'])document.getElementById(id).replaceChildren();document.getElementById('school-donut').replaceChildren();document.getElementById('school-subject-detail').hidden=true;document.getElementById('school-overview').hidden=false;periodSelect.replaceChildren();subjectFilter.value='all';forecastFilter=null;status.textContent='';document.getElementById('school-grades-donut').replaceChildren();document.getElementById('school-grades-legend').replaceChildren();document.getElementById('school-grades-total').textContent='0';schoolDataMeta=null;document.getElementById('school-freshness').textContent='';document.getElementById('school-overall').textContent='—';document.getElementById('school-trend-change').textContent='';}
+let forecastFilter=null;function clearSchool(){document.querySelector('[data-page="subjects"]').classList.remove('subject-detail-active');cachedGrades=[];subjects.replaceChildren();for(const id of ['school-analytics','school-trend','school-subject-detail','school-period-buttons','school-filter-buttons','school-forecast-legend','school-good-list','school-attention-list'])document.getElementById(id).replaceChildren();document.getElementById('school-donut').replaceChildren();document.getElementById('school-subject-detail').hidden=true;document.getElementById('school-overview').hidden=false;periodSelect.replaceChildren();subjectFilter.value='all';forecastFilter=null;status.textContent='';document.getElementById('school-grades-donut').replaceChildren();document.getElementById('school-grades-legend').replaceChildren();document.getElementById('school-grades-total').textContent='0';schoolDataMeta=null;document.getElementById('school-freshness').textContent='';document.getElementById('school-overall').textContent='—';document.getElementById('school-trend-change').textContent='';}
 const periodSelect=document.getElementById('school-period');
 const subjectFilter=document.getElementById('school-filter'),analytics=document.getElementById('school-analytics');
 const gradeDate=S.date,periodOf=S.period;
@@ -1054,7 +1102,7 @@ function renderDonut(svgId,legendId,rows,valueId,value,mode){
  for(const key of categories){
   const n=counts.get(key)||0;if(!n)continue;
   const arc=svgEl('circle',{cx:100,cy:100,r:72,fill:'none',stroke:colors[key],'stroke-width':23,'stroke-dasharray':Math.max(0,circumference*n/total-2)+' '+circumference,'stroke-dashoffset':-offset,'transform':'rotate(-90 100 100)'});
-  const toggleFilter=()=>{forecastFilter=forecastFilter===key?null:key;renderGrades()};
+  const toggleFilter=()=>{forecastFilter=forecastFilter===key?null:key;renderGrades();window.LeveliNavigation.navigate('subjects')};
   if(mode==='subjects'){arc.style.cursor='pointer';arc.addEventListener('click',toggleFilter)}
   svg.append(arc);
   // Accent outline around the selected forecast category, without changing its grade color.
@@ -1066,12 +1114,7 @@ function renderDonut(svgId,legendId,rows,valueId,value,mode){
   if(mode==='subjects'){
    button.type='button';
    button.setAttribute('aria-pressed',String(forecastFilter===key));
-   const index=legend.children.length;
-   button.onclick=()=>{
-    const focused=document.activeElement===button;
-    toggleFilter();
-    if(focused)legend.children[index]?.focus();
-   };
+   button.onclick=event=>{toggleFilter();if(event.detail===0)document.getElementById('subjects-title').focus()};
   }
   const l=document.createElement('span');l.className='legend-label';const dot=document.createElement('span');dot.className='legend-dot';dot.style.background=colors[key];l.append(dot,document.createTextNode(label));
   const count=document.createElement('strong');count.className='legend-count';count.textContent=String(n);
@@ -1136,8 +1179,8 @@ function renderOrientations(all,strong,attention){
 }
 function renderGrades(){
  const detail=document.getElementById('school-subject-detail');detail.hidden=true;
- document.querySelector('[data-page="home"]').classList.remove('subject-detail-active');
- document.getElementById('school-overview').hidden=false;subjects.replaceChildren();
+ document.querySelector('[data-page="subjects"]').classList.remove('subject-detail-active');
+ document.getElementById('subjects-overview').hidden=false;subjects.replaceChildren();
  const chosen=periodSelect.value,rows=cachedGrades.filter(g=>periodOf(g)===chosen);
  const groups=new Map();
  const sourceSubjects=schoolDataMeta?.subjects;
@@ -1197,14 +1240,15 @@ function renderGrades(){
  }
  if(!subjects.children.length){const p=document.createElement('p');p.className='school-empty';p.textContent=forecastFilter?'Нет предметов в этой категории.':'Предметы пока не загружены.';subjects.append(p)}
 }
+window.addEventListener('leveli-close-subject',()=>{document.querySelector('[data-page="subjects"]').classList.remove('subject-detail-active');document.getElementById('school-subject-detail').hidden=true;document.getElementById('subjects-overview').hidden=false});
 function openSubject(name,grades){
- const main=document.getElementById('school-overview'),detail=document.getElementById('school-subject-detail');
- main.hidden=true;detail.hidden=false;detail.replaceChildren();
- document.querySelector('[data-page="home"]').classList.add('subject-detail-active');
+ const main=document.getElementById('subjects-overview'),detail=document.getElementById('school-subject-detail');
+ main.hidden=true;detail.hidden=false;detail.replaceChildren();window.LeveliNavigation.openSubject();
+ document.querySelector('[data-page="subjects"]').classList.add('subject-detail-active');
  const head=document.createElement('div');head.className='detail-header';
  const back=document.createElement('button');back.type='button';back.className='detail-back leveli-back-btn';back.setAttribute('aria-label','Назад к предметам');back.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19 5 12l7-7"/><path d="M5 12h14"/></svg><span>Назад</span>';back.onclick=()=>{
-  document.querySelector('[data-page="home"]').classList.remove('subject-detail-active');
-  detail.hidden=true;main.hidden=false;renderGrades();window.scrollTo(0,0)
+  document.querySelector('[data-page="subjects"]').classList.remove('subject-detail-active');
+  detail.hidden=true;main.hidden=false;renderGrades();window.LeveliNavigation.closeSubject()
  };
  const title=document.createElement('h2');title.className='detail-title';title.textContent=name;
  const quarter=document.createElement('span');quarter.className='detail-period';
@@ -1457,5 +1501,5 @@ document.getElementById('school-refresh').addEventListener('click',load);documen
 // Sync status updates may arrive independently of grade uploads.
 setInterval(()=>{if(!document.hidden&&auth.currentUser)load()},60000);
 document.getElementById('school-logout').addEventListener('click',()=>signOut(auth).catch(showError));
-onAuthStateChanged(auth,user=>{window.LeveliAppearance.activate(user?.uid||null);if(retryHandle){clearTimeout(retryHandle);retryHandle=null}++loadGeneration;firestoreProfileName='';clearSchool();login.hidden=!!user;results.hidden=!user;error.textContent='';updateIdentity(user);if(user){loadProfile(user);load()}else {clearSchool()}},showError);
+onAuthStateChanged(auth,user=>{window.LeveliNavigation.navigate('home',{replace:true});window.LeveliAppearance.activate(user?.uid||null);if(retryHandle){clearTimeout(retryHandle);retryHandle=null}++loadGeneration;firestoreProfileName='';clearSchool();login.hidden=!!user;results.hidden=!user;document.querySelector('.leveli-bottom-nav').hidden=!user||!document.querySelector('[data-page="profile"]').hidden;error.textContent='';updateIdentity(user);if(user){loadProfile(user);load()}else {clearSchool()}},showError);
 </script></body></html>
