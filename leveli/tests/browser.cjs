@@ -80,8 +80,35 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await navButton('subjects').getAttribute('aria-current'),'page');
  await navButton('outcomes').click();
  assert.equal(await page.locator('#outcomes-title').innerText(),'Итоги');
- assert.match(await page.locator('.outcomes-placeholder').innerText(),/недель и четвертей/);
+ assert.match(await page.locator('#outcomes-weeks').innerText(),/недельные истории и архив/);
  assert.equal(await page.locator('.subjects-card').isVisible(),false);
+ assert.equal(await page.locator('#outcomes-tab-weeks').getAttribute('aria-pressed'),'true');
+ assert.equal(await page.locator('#outcomes-quarters').isVisible(),false);
+ await page.locator('#outcomes-tab-quarters').click();
+ assert.equal(await page.locator('#outcomes-tab-quarters').getAttribute('aria-pressed'),'true');
+ assert.equal(await page.locator('#outcomes-weeks').isVisible(),false);
+ assert.equal(await page.locator('#outcomes-quarter-title').innerText(),'Итоги I четверти');
+ assert.equal(await page.locator('#outcomes-quarter-year').innerText(),'2026/27');
+ assert.deepEqual(await page.locator('.outcomes-quarter-row .outcomes-subject-name').allTextContents(),['Русский язык'],'only explicit quarter marks, not tests or forecasts');
+ assert.deepEqual(await page.locator('.outcomes-quarter-row .outcomes-quarter-grade').allTextContents(),['5']);
+ assert.equal(await page.locator('#outcomes-quarter-buttons button:disabled').count(),3,'future and current quarters cannot be selected');
+ for(const width of [320,360,390,430]){
+  await page.setViewportSize({width,height:844});
+  const fit=await page.evaluate(()=>({
+   scroll:document.documentElement.scrollWidth,viewport:innerWidth,
+   tabHeights:[...document.querySelectorAll('.outcomes-switch button,.outcomes-quarter-buttons button')].map(b=>b.getBoundingClientRect().height),
+   menuBottom:document.querySelector('.leveli-bottom-nav').getBoundingClientRect().bottom
+  }));
+  assert.ok(fit.scroll<=fit.viewport+1,'outcomes fit at '+width);
+  assert.ok(fit.tabHeights.every(h=>h>=44),'outcomes touch targets at '+width);
+  assert.ok(Math.abs(fit.menuBottom-844)<=1,'bottom menu pinned at '+width);
+ }
+ await page.setViewportSize({width:390,height:844});
+ await page.screenshot({path:'outputs/leveli-outcomes-quarters.png',fullPage:true});
+ await page.locator('#outcomes-tab-weeks').click();
+ await page.screenshot({path:'outputs/leveli-outcomes-weeks.png',fullPage:true});
+ await page.locator('#outcomes-tab-quarters').click();
+ await page.goBack();
  await page.goBack();
  assert.equal(await page.locator('[data-page="subjects"]').isVisible(),true);
  await navButton('home').click();
@@ -319,6 +346,11 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await navButton('home').click();
  await page.evaluate(()=>window.__switchUser('B'));await page.waitForFunction(()=>document.querySelector('#school-period').options.length>=4);
  assert.equal(await page.locator('#home-greeting').innerText(),'Привет, Матвей!');
+ await navButton('outcomes').click();
+ await page.locator('#outcomes-tab-quarters').click();
+ assert.equal(await page.locator('.outcomes-quarter-row').count(),0,'switching accounts clears previous child quarter results');
+ assert.match(await page.locator('#outcomes-quarter-grades').innerText(),/Официальные оценки/);
+ await navButton('home').click();
  const unknownFreshness=freshness.getByText('Время обновления оценок неизвестно',{exact:true});
  await unknownFreshness.waitFor();
  assert.equal(await freshness.getAttribute('data-state'),'unknown');
@@ -501,7 +533,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await page.locator('[data-b3-panel="accent"]').evaluate(el=>document.activeElement===el),true);
  await page.setViewportSize({width:390,height:844});
  await page.locator('.b3-home-btn').click();
- await page.evaluate(()=>window.__switchUser(null));assert.equal(await page.locator('#school-results').isVisible(),false);assert.equal(await page.locator('#school-subjects').innerText(),'');
+ await page.evaluate(()=>window.__switchUser(null));assert.equal(await page.locator('.outcomes-quarter-row').count(),0,'logout clears quarter result');assert.equal(await page.locator('#school-results').isVisible(),false);assert.equal(await page.locator('#school-subjects').innerText(),'');
  assert.equal(await page.evaluate(()=>Object.keys(sessionStorage).some(key=>key.startsWith('cloud:'))),false);
  await page.evaluate(()=>window.__switchUser('A'));
  await page.evaluate(()=>sessionStorage.setItem('auth-delay','400'));
