@@ -651,10 +651,26 @@ body{background:#0e0c21;color:#f6f0ff}
 :root .b3-tile[hidden],:root .personal-group[hidden]{display:none!important}
 :root #school-subject-detail .detail-chart-caption:empty{display:none}
 
+/* Pinned navigation: iPhone safe-area and content clearance. */
+:root .content{padding-bottom:calc(86px + env(safe-area-inset-bottom,0px))}
+.leveli-bottom-nav{position:fixed;z-index:20;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,540px);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:7px 12px max(8px,env(safe-area-inset-bottom,0px));background:var(--ds-card-surface);border-top:1px solid var(--ds-border);box-shadow:0 -10px 26px #0002}
+.leveli-bottom-nav[hidden]{display:none!important}
+.leveli-bottom-nav button{min-width:0;min-height:56px;border:0;border-radius:12px;background:transparent;color:var(--ds-text-secondary);font:700 11px Manrope,system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer}
+.leveli-bottom-nav button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.leveli-bottom-nav button[aria-current="page"]{background:var(--leveli-accent-dim);color:var(--leveli-accent-ink)}
+.leveli-bottom-nav button:focus-visible{outline:3px solid var(--leveli-accent-border);outline-offset:2px}
+.section-screen-header{padding:4px 0 8px}
+.section-screen-header h1{margin:0;color:var(--ds-text-primary);font-size:var(--ds-font-screen);line-height:var(--ds-line-heading)}
+[data-page="subjects"] .subjects-card{margin-top:12px}
+.outcomes-placeholder{min-height:140px;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px}
+.outcomes-placeholder p{margin:0;color:var(--ds-text-secondary);font-size:14px;line-height:1.5}
+[data-page="subjects"].subject-detail-active #subjects-overview{display:none}
+[data-page="subjects"].subject-detail-active #school-subject-detail{margin-top:0}
+body:has([data-page="profile"]:not([hidden])) .content{padding-bottom:0}
 </style></head><body><div class="app"><main class="content" id="main">
 <section data-page="home"><header class="school-header"><div><div class="eyebrow brand-lockup"><img src="./brand/mark.svg" alt="" width="30" height="30" aria-hidden="true"><span>Leveli</span></div><h1 id="home-greeting">Привет!</h1><p id="home-birthday-greeting" class="home-birthday-greeting" hidden></p><p>Мои оценки и успеваемость</p></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
 <article class="card" id="school-login"><h2>Войди, чтобы увидеть оценки</h2><p>Оценки загружаются из электронного дневника.</p><form id="school-form"><label>Почта<input id="school-email" type="email" autocomplete="username" required></label><label>Пароль<input id="school-password" type="password" autocomplete="current-password" required></label><button class="btn" type="submit">Войти</button></form></article>
-<div id="school-results" hidden><div id="school-subject-detail" class="card" hidden></div><div id="school-overview">
+<div id="school-results" hidden><div id="school-overview">
 <article class="card trend-card">
  <div class="card-heading"><div class="heading-with-help"><h2>Моя успеваемость</h2><span class="header-period" id="school-header-period">2 четверть</span></div><button class="help-btn" type="button" data-help="school-trend-help" aria-label="Как считается успеваемость?" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4"/><path d="M12 17h.01"/></svg></button><span id="school-trend-change" class="trend-change"></span></div>
  <div id="school-trend-help" class="inline-help" hidden>Светящаяся линия показывает накопительный средний балл за выбранную четверть. Подпись «Ко вчерашнему среднему» сравнивает общий средний балл с последним сохранённым значением за вчера. Если вчерашних данных нет, изменение не показывается.</div>
@@ -670,8 +686,11 @@ body{background:#0e0c21;color:#f6f0ff}
 <div class="orient-heading"><h2>Мои ориентиры</h2><button class="help-btn" type="button" data-help="school-orient-help" aria-label="Что означает динамика?" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4"/><path d="M12 17h.01"/></svg></button></div><div id="school-orient-help" class="inline-help" hidden>Динамика показывает изменение оценок за выбранную четверть. При 0–1 оценке её нет; при 2–5 сравниваем последнюю оценку со взвешенным средним предыдущих; при 6 и более — среднее последних трёх со средним трёх перед ними. Официальные веса учитываются, отсутствующий вес при расчёте равен 1. Изменение от +0,50 или до −0,50 включительно выделяется стрелкой; порог проверяем до округления. Нажми на показатель динамики, чтобы увидеть расчёт.</div>
 <div id="school-orient-empty" class="orient-sparse" hidden></div>
 <div class="orient-grid"><article class="orient-panel orient-good"><div class="orient-title">Молодец</div><div id="school-good-list"></div></article><article class="orient-panel orient-attention"><div class="orient-title">Подтянуть</div><div id="school-attention-list"></div></article></div>
+<p id="school-status" class="muted">Загрузка…</p><p id="school-freshness" aria-live="polite"></p></div></div><p id="school-error" role="alert" class="muted"></p></section>
+<section data-page="subjects" hidden aria-labelledby="subjects-title"><div id="school-subject-detail" class="card" hidden></div><div id="subjects-overview"><header class="section-screen-header"><h1 id="subjects-title">Предметы</h1></header>
 <article class="card subjects-card"><div class="card-heading"><h2>Все предметы</h2><span id="school-subject-count" class="muted"></span></div>
-<div id="school-filter-buttons" hidden></div><select id="school-filter" hidden><option value="all">Все предметы</option><option value="strong">Сильные</option><option value="attention">Требуют внимания</option></select><div id="school-subjects"></div></article><p id="school-status" class="muted">Загрузка…</p><p id="school-freshness" aria-live="polite"></p></div></div><p id="school-error" role="alert" class="muted"></p></section>
+<div id="school-filter-buttons" hidden></div><select id="school-filter" hidden><option value="all">Все предметы</option><option value="strong">Сильные</option><option value="attention">Требуют внимания</option></select><div id="school-subjects"></div></article></div></section>
+<section data-page="outcomes" hidden aria-labelledby="outcomes-title"><header class="section-screen-header"><h1 id="outcomes-title">Итоги</h1></header><article class="card outcomes-placeholder"><p>Здесь появятся результаты твоих недель и четвертей.</p></article></section>
 <section data-page="profile" hidden>
  <div class="b3-settings" id="b3-settings">
   <header class="b3-header"><button type="button" class="b3-home-btn leveli-back-btn" data-go="home" aria-label="Назад на главную"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19 5 12l7-7"/><path d="M5 12h14"/></svg><span>Назад</span></button><h1>Настройки</h1></header>
@@ -704,7 +723,11 @@ body{background:#0e0c21;color:#f6f0ff}
  <article class="card profile-card"><h2>Учебный период</h2><p>Выбери четверть для просмотра оценок, графиков и прогнозов.</p><div class="profile-period"><div id="school-period-buttons" class="choice-buttons"></div><p id="school-period-notice" class="period-notice" role="status" aria-live="polite" hidden></p><select id="school-period" hidden><option value="all">Все оценки</option></select><button type="button" id="school-current-period" class="btn secondary">Вернуться к текущей четверти</button></div></article>
  <article class="card profile-card profile-account-actions" id="profile-actions" hidden><h2>Аккаунт и данные</h2><p>Оценки обновляются автоматически.</p><div class="profile-actions"><button class="btn secondary" id="school-refresh">Проверить обновления</button><button class="btn secondary profile-logout" id="school-logout">Выйти из аккаунта</button></div></article>
 </section>
-</main></div>
+</main><nav class="leveli-bottom-nav" aria-label="Основная навигация" hidden>
+<button type="button" data-go="home" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3z"/><path d="M9 20v-7h6v7"/></svg><span>Главная</span></button>
+<button type="button" data-go="subjects"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6c-3-2-7-2-10-1v14c3-1 7-1 10 1 3-2 7-2 10-1V5c-3-1-7-1-10 1z"/><path d="M12 6v14"/></svg><span>Предметы</span></button>
+<button type="button" data-go="outcomes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V13m6 7V9m6 11V4m4 16H2"/></svg><span>Итоги</span></button>
+</nav></div>
 <script>
 /* B3 UI shell: pre-existing preference controls, period selector and account logic are reused verbatim. */
 (()=>{
@@ -756,11 +779,33 @@ body{background:#0e0c21;color:#f6f0ff}
 </script>
 <script src="./school-model.js"></script><script>
 'use strict';
-const pages=[...document.querySelectorAll('[data-page]')];function navigate(page){if(page!=='profile')page='home';for(const p of pages)p.hidden=p.dataset.page!==page;window.scrollTo(0,0);history.replaceState(null,'','#'+page)}document.addEventListener('click',e=>{const target=e.target.closest('[data-go]');if(target)navigate(target.dataset.go)});
+const pages=[...document.querySelectorAll('[data-page]')],tabBar=document.querySelector('.leveli-bottom-nav');
+let lastMainTab='home',currentView='home';
+function navigate(page,{replace=false,fromHistory=false}={}){
+ if(!['home','subjects','outcomes','profile','subject'].includes(page))page='home';
+ const previous=currentView;
+ if(page!=='profile'&&page!=='subject')lastMainTab=page;
+ currentView=page;
+ const visible=page==='subject'?'subjects':page;
+ for(const p of pages)p.hidden=p.dataset.page!==visible;
+ tabBar.hidden=page==='profile'||!document.getElementById('school-login').hidden;
+ for(const button of tabBar.querySelectorAll('button')){
+  if(button.dataset.go===visible)button.setAttribute('aria-current','page');
+  else button.removeAttribute('aria-current');
+ }
+ if(previous==='subject'&&page!=='subject')window.dispatchEvent(new Event('leveli-close-subject'));
+ if(!fromHistory){
+  if(replace)history.replaceState({leveliPage:page},'','#'+page);
+  else if(location.hash!=='#'+page)history.pushState({leveliPage:page},'','#'+page);
+ }
+ window.scrollTo(0,0);
+}
+window.LeveliNavigation={navigate,openSubject:()=>navigate('subject'),closeSubject:()=>navigate('subjects',{replace:true})};
+document.addEventListener('click',e=>{const target=e.target.closest('[data-go]');if(target)navigate(target.dataset.go==='home'&&currentView==='profile'?lastMainTab:target.dataset.go)});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
 document.addEventListener('click',e=>{const btn=e.target.closest('[data-help]');if(!btn)return;const target=document.getElementById(btn.dataset.help);if(!target)return;target.hidden=!target.hidden;btn.setAttribute('aria-expanded',String(!target.hidden))});
-addEventListener('hashchange',()=>navigate(location.hash.slice(1)));navigate(location.hash.slice(1)||'home');
+addEventListener('popstate',()=>navigate(location.hash.slice(1)==='subject'?'subjects':location.hash.slice(1),{fromHistory:true}));navigate(location.hash.slice(1)==='subject'?'subjects':location.hash.slice(1)||'home',{replace:true});
 </script>
 <script>
 /* Local-first, UID-scoped preferences. No personal data sent to analytics or public URLs. */
@@ -905,7 +950,7 @@ const S=window.LeveliSchool;
 const isMark=v=>S.score(v)!==null;
 const isFinal=g=>!!S.officialKind(g);
 let cachedGrades=[],loadGeneration=0;let schoolDataMeta=null;let retryHandle=null;
-let forecastFilter=null;function clearSchool(){document.querySelector('[data-page="home"]').classList.remove('subject-detail-active');cachedGrades=[];subjects.replaceChildren();for(const id of ['school-analytics','school-trend','school-subject-detail','school-period-buttons','school-filter-buttons','school-forecast-legend','school-good-list','school-attention-list'])document.getElementById(id).replaceChildren();document.getElementById('school-donut').replaceChildren();document.getElementById('school-subject-detail').hidden=true;document.getElementById('school-overview').hidden=false;periodSelect.replaceChildren();subjectFilter.value='all';forecastFilter=null;status.textContent='';document.getElementById('school-grades-donut').replaceChildren();document.getElementById('school-grades-legend').replaceChildren();document.getElementById('school-grades-total').textContent='0';schoolDataMeta=null;document.getElementById('school-freshness').textContent='';document.getElementById('school-overall').textContent='—';document.getElementById('school-trend-change').textContent='';}
+let forecastFilter=null;function clearSchool(){document.querySelector('[data-page="subjects"]').classList.remove('subject-detail-active');cachedGrades=[];subjects.replaceChildren();for(const id of ['school-analytics','school-trend','school-subject-detail','school-period-buttons','school-filter-buttons','school-forecast-legend','school-good-list','school-attention-list'])document.getElementById(id).replaceChildren();document.getElementById('school-donut').replaceChildren();document.getElementById('school-subject-detail').hidden=true;document.getElementById('school-overview').hidden=false;periodSelect.replaceChildren();subjectFilter.value='all';forecastFilter=null;status.textContent='';document.getElementById('school-grades-donut').replaceChildren();document.getElementById('school-grades-legend').replaceChildren();document.getElementById('school-grades-total').textContent='0';schoolDataMeta=null;document.getElementById('school-freshness').textContent='';document.getElementById('school-overall').textContent='—';document.getElementById('school-trend-change').textContent='';}
 const periodSelect=document.getElementById('school-period');
 const subjectFilter=document.getElementById('school-filter'),analytics=document.getElementById('school-analytics');
 const gradeDate=S.date,periodOf=S.period;
@@ -1021,13 +1066,13 @@ function renderDonut(svgId,legendId,rows,valueId,value,mode){
  for(const key of categories){
   const n=counts.get(key)||0;if(!n)continue;
   const arc=svgEl('circle',{cx:100,cy:100,r:72,fill:'none',stroke:colors[key],'stroke-width':23,'stroke-dasharray':Math.max(0,circumference*n/total-2)+' '+circumference,'stroke-dashoffset':-offset,'transform':'rotate(-90 100 100)'});
-  if(mode==='subjects'){arc.setAttribute('role','button');arc.setAttribute('tabindex','0');arc.style.cursor='pointer';const activate=()=>{forecastFilter=forecastFilter===key?null:key;renderGrades()};arc.addEventListener('click',activate);arc.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activate()}})}
+  if(mode==='subjects'){arc.setAttribute('role','button');arc.setAttribute('tabindex','0');arc.style.cursor='pointer';const activate=()=>{forecastFilter=forecastFilter===key?null:key;renderGrades();window.LeveliNavigation.navigate('subjects')};arc.addEventListener('click',activate);arc.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activate()}})}
   svg.append(arc);
   // Accent outline around the selected forecast category, without changing its grade color.
   if(mode==='subjects'&&forecastFilter===key){svg.append(svgEl('circle',{cx:100,cy:100,r:86,fill:'none',stroke:'var(--leveli-accent)','stroke-width':3,'stroke-dasharray':Math.max(0,circumference*n/total*86/72-2)+' '+(2*Math.PI*86),'stroke-dashoffset':-offset*86/72,'transform':'rotate(-90 100 100)','data-accent-selection':'true'}))}
   offset+=circumference*n/total;
   const button=document.createElement(mode==='subjects'?'button':'div');
-  button.className='legend-item';if(mode==='subjects'){button.type='button';button.setAttribute('aria-label',(key==='none'?'Без прогноза':'Оценка '+key)+', предметов: '+n);button.setAttribute('aria-pressed',String(forecastFilter===key));button.onclick=()=>{forecastFilter=forecastFilter===key?null:key;renderGrades()}}
+  button.className='legend-item';if(mode==='subjects'){button.type='button';button.setAttribute('aria-label',(key==='none'?'Без прогноза':'Оценка '+key)+', предметов: '+n);button.setAttribute('aria-pressed',String(forecastFilter===key));button.onclick=()=>{forecastFilter=forecastFilter===key?null:key;renderGrades();window.LeveliNavigation.navigate('subjects')}}
   const l=document.createElement('span');l.className='legend-label';const dot=document.createElement('span');dot.className='legend-dot';dot.style.background=colors[key];l.append(dot,document.createTextNode(key==='none'?'Без прогноза':'Оценка '+key));
   const count=document.createElement('strong');count.className='legend-count';count.textContent=String(n);
   button.append(l,count);legend.append(button);
@@ -1091,8 +1136,8 @@ function renderOrientations(all,strong,attention){
 }
 function renderGrades(){
  const detail=document.getElementById('school-subject-detail');detail.hidden=true;
- document.querySelector('[data-page="home"]').classList.remove('subject-detail-active');
- document.getElementById('school-overview').hidden=false;subjects.replaceChildren();
+ document.querySelector('[data-page="subjects"]').classList.remove('subject-detail-active');
+ document.getElementById('subjects-overview').hidden=false;subjects.replaceChildren();
  const chosen=periodSelect.value,rows=cachedGrades.filter(g=>periodOf(g)===chosen);
  const groups=new Map();
  const sourceSubjects=schoolDataMeta?.subjects;
@@ -1152,14 +1197,15 @@ function renderGrades(){
  }
  if(!subjects.children.length){const p=document.createElement('p');p.className='school-empty';p.textContent=forecastFilter?'Нет предметов в этой категории.':'Предметы пока не загружены.';subjects.append(p)}
 }
+window.addEventListener('leveli-close-subject',()=>{document.querySelector('[data-page="subjects"]').classList.remove('subject-detail-active');document.getElementById('school-subject-detail').hidden=true;document.getElementById('subjects-overview').hidden=false});
 function openSubject(name,grades){
- const main=document.getElementById('school-overview'),detail=document.getElementById('school-subject-detail');
- main.hidden=true;detail.hidden=false;detail.replaceChildren();
- document.querySelector('[data-page="home"]').classList.add('subject-detail-active');
+ const main=document.getElementById('subjects-overview'),detail=document.getElementById('school-subject-detail');
+ main.hidden=true;detail.hidden=false;detail.replaceChildren();window.LeveliNavigation.openSubject();
+ document.querySelector('[data-page="subjects"]').classList.add('subject-detail-active');
  const head=document.createElement('div');head.className='detail-header';
  const back=document.createElement('button');back.type='button';back.className='detail-back leveli-back-btn';back.setAttribute('aria-label','Назад к предметам');back.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19 5 12l7-7"/><path d="M5 12h14"/></svg><span>Назад</span>';back.onclick=()=>{
-  document.querySelector('[data-page="home"]').classList.remove('subject-detail-active');
-  detail.hidden=true;main.hidden=false;renderGrades();window.scrollTo(0,0)
+  document.querySelector('[data-page="subjects"]').classList.remove('subject-detail-active');
+  detail.hidden=true;main.hidden=false;renderGrades();window.LeveliNavigation.closeSubject()
  };
  const title=document.createElement('h2');title.className='detail-title';title.textContent=name;
  const quarter=document.createElement('span');quarter.className='detail-period';
@@ -1412,5 +1458,5 @@ document.getElementById('school-refresh').addEventListener('click',load);documen
 // Sync status updates may arrive independently of grade uploads.
 setInterval(()=>{if(!document.hidden&&auth.currentUser)load()},60000);
 document.getElementById('school-logout').addEventListener('click',()=>signOut(auth).catch(showError));
-onAuthStateChanged(auth,user=>{window.LeveliAppearance.activate(user?.uid||null);if(retryHandle){clearTimeout(retryHandle);retryHandle=null}++loadGeneration;firestoreProfileName='';clearSchool();login.hidden=!!user;results.hidden=!user;error.textContent='';updateIdentity(user);if(user){loadProfile(user);load()}else {clearSchool()}},showError);
+onAuthStateChanged(auth,user=>{window.LeveliAppearance.activate(user?.uid||null);if(retryHandle){clearTimeout(retryHandle);retryHandle=null}++loadGeneration;firestoreProfileName='';clearSchool();login.hidden=!!user;results.hidden=!user;document.querySelector('.leveli-bottom-nav').hidden=!user||!document.querySelector('[data-page="profile"]').hidden;error.textContent='';updateIdentity(user);if(user){loadProfile(user);load()}else {clearSchool()}},showError);
 </script></body></html>
