@@ -598,7 +598,9 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   {...official,subject:'Геометрия',value:2}
  ];
  await refresh(lowSubjects);
+ await navButton('subjects').click();
  await row('Биология').waitFor();
+ await navButton('home').click();
  for(const width of [320,390]){
   await page.setViewportSize({width,height:844});
   const legends=await page.locator('.forecast-legend').evaluateAll(legends=>legends.map(legend=>[...legend.children].map(item=>({
