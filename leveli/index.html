@@ -660,9 +660,26 @@ body{background:#0e0c21;color:#f6f0ff}
 [data-page="subjects"].subject-detail-active #subjects-overview{display:none}
 [data-page="subjects"].subject-detail-active #school-subject-detail{margin-top:0}
 body:has([data-page="profile"]:not([hidden])) .content{padding-bottom:0}
-</style></head><body><div class="app"><main class="content" id="main">
+/* Display the real approved brand mark while Firebase restores its saved session. */
+.leveli-startup{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:24px;background:#0e0c21;color:#f7f3ff;text-align:center}
+.leveli-startup[hidden]{display:none!important}
+#school-login[hidden]{display:none!important}
+.leveli-startup-logo{width:96px;height:96px;display:block}
+.leveli-startup-title{margin:12px 0 0;font:800 clamp(31px,8vw,40px)/1.2 Manrope,system-ui,sans-serif;letter-spacing:-.035em}
+.leveli-startup-subtitle{margin:12px 0 0;color:#b9add1;font-size:14px;line-height:1.5}
+.leveli-startup-spinner{display:block;width:30px;height:30px;margin-top:42px;border:3px solid #40345d;border-top-color:#bc95ff;border-radius:50%;animation:leveli-startup-spin .85s linear infinite}
+@keyframes leveli-startup-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.leveli-startup-spinner{animation:none;border-top-color:#bc95ff;border-right-color:#bc95ff}}
+</style></head><body>
+<div id="leveli-startup" class="leveli-startup" role="status" aria-live="polite" aria-label="Leveli загружается">
+ <img class="leveli-startup-logo" src="./brand/mark.svg" width="96" height="96" alt="">
+ <div class="leveli-startup-title">Leveli</div>
+ <p class="leveli-startup-subtitle">Твои школьные результаты</p>
+ <span class="leveli-startup-spinner" aria-hidden="true"></span>
+</div>
+<div class="app"><main class="content" id="main">
 <section data-page="home"><header class="school-header"><div><div class="eyebrow brand-lockup"><img src="./brand/mark.svg" alt="" width="30" height="30" aria-hidden="true"><span>Leveli</span></div><h1 id="home-greeting">Привет!</h1><p id="home-birthday-greeting" class="home-birthday-greeting" hidden></p><p>Мои оценки и успеваемость</p></div><button class="settings-button" aria-label="Профиль и настройки" data-go="profile"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.8 2.8-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.04 1.56V21h-4v-.1A1.7 1.7 0 0 0 9 19.34a1.7 1.7 0 0 0-1.88.34l-.06.06-2.8-2.8.06-.06A1.7 1.7 0 0 0 4.66 15 1.7 1.7 0 0 0 3.1 14H3v-4h.1A1.7 1.7 0 0 0 4.66 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.8-2.8.06.06A1.7 1.7 0 0 0 9 4.66 1.7 1.7 0 0 0 10 3.1V3h4v.1A1.7 1.7 0 0 0 15 4.66a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.8 2.8-.06.06A1.7 1.7 0 0 0 19.34 9a1.7 1.7 0 0 0 1.56 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button></header>
-<article class="card" id="school-login"><h2>Войди, чтобы увидеть оценки</h2><p>Оценки загружаются из электронного дневника.</p><form id="school-form"><label>Почта<input id="school-email" type="email" autocomplete="username" required></label><label>Пароль<input id="school-password" type="password" autocomplete="current-password" required></label><button class="btn" type="submit">Войти</button></form></article>
+<article class="card" id="school-login" hidden><h2>Войди, чтобы увидеть оценки</h2><p>Оценки загружаются из электронного дневника.</p><form id="school-form"><label>Почта<input id="school-email" type="email" autocomplete="username" required></label><label>Пароль<input id="school-password" type="password" autocomplete="current-password" required></label><button class="btn" type="submit">Войти</button></form></article>
 <div id="school-results" hidden><div id="school-overview">
 <button class="btn secondary school-guide-button" type="button" id="school-guide-open" aria-haspopup="dialog">Как читать оценки</button>
 <dialog class="leveli-trend-dialog" id="school-guide" aria-labelledby="school-guide-title">
@@ -791,7 +808,7 @@ function navigate(page,{replace=false,fromHistory=false}={}){
  currentView=page;
  const visible=page==='subject'?'subjects':page;
  for(const p of pages)p.hidden=p.dataset.page!==visible;
- tabBar.hidden=page==='profile'||!document.getElementById('school-login').hidden;
+ tabBar.hidden=page==='profile'||document.documentElement.dataset.leveliAuthReady!=='true'||!document.getElementById('school-login').hidden;
  for(const button of tabBar.querySelectorAll('button')){
   if(button.dataset.go===visible)button.setAttribute('aria-current','page');
   else button.removeAttribute('aria-current');
@@ -1501,5 +1518,7 @@ document.getElementById('school-refresh').addEventListener('click',load);documen
 // Sync status updates may arrive independently of grade uploads.
 setInterval(()=>{if(!document.hidden&&auth.currentUser)load()},60000);
 document.getElementById('school-logout').addEventListener('click',()=>signOut(auth).catch(showError));
-onAuthStateChanged(auth,user=>{window.LeveliNavigation.navigate('home',{replace:true});window.LeveliAppearance.activate(user?.uid||null);if(retryHandle){clearTimeout(retryHandle);retryHandle=null}++loadGeneration;firestoreProfileName='';clearSchool();login.hidden=!!user;results.hidden=!user;document.querySelector('.leveli-bottom-nav').hidden=!user||!document.querySelector('[data-page="profile"]').hidden;error.textContent='';updateIdentity(user);if(user){loadProfile(user);load()}else {clearSchool()}},showError);
+const startup=document.getElementById('leveli-startup');
+function resolveStartup(){document.documentElement.dataset.leveliAuthReady='true';startup.hidden=true}
+onAuthStateChanged(auth,user=>{window.LeveliNavigation.navigate('home',{replace:true});window.LeveliAppearance.activate(user?.uid||null);if(retryHandle){clearTimeout(retryHandle);retryHandle=null}++loadGeneration;firestoreProfileName='';clearSchool();login.hidden=!!user;results.hidden=!user;error.textContent='';updateIdentity(user);document.querySelector('.leveli-bottom-nav').hidden=!user||!document.querySelector('[data-page="profile"]').hidden;resolveStartup();if(user){loadProfile(user);load()}else {clearSchool()}},err=>{login.hidden=false;results.hidden=true;document.querySelector('.leveli-bottom-nav').hidden=true;showError(err);resolveStartup()});
 </script></body></html>
