@@ -657,6 +657,29 @@ body{background:#0e0c21;color:#f6f0ff}
 [data-page="subjects"] .subjects-card{margin-top:12px}
 .outcomes-placeholder{min-height:140px;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px}
 .outcomes-placeholder p{margin:0;color:var(--ds-text-secondary);font-size:14px;line-height:1.5}
+.outcomes-switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;padding:4px;margin:9px 0 17px;border-radius:14px;background:var(--ds-surface-inner)}
+.outcomes-switch button{min-height:44px;padding:8px;border:0;border-radius:11px;background:transparent;color:var(--ds-text-secondary);font:700 14px Manrope,system-ui,sans-serif;cursor:pointer}
+.outcomes-switch button[aria-pressed="true"]{background:var(--leveli-accent-dim);color:var(--leveli-accent-ink)}
+.outcomes-switch button:focus-visible,.outcomes-quarter-buttons button:focus-visible{outline:3px solid var(--leveli-accent-border);outline-offset:2px}
+.outcomes-placeholder.outcomes-weeks-empty{display:flex;flex-direction:column;min-height:215px;gap:12px}
+.outcomes-empty-icon{display:grid;place-items:center;width:52px;height:52px;border-radius:16px;background:var(--leveli-accent-dim);color:var(--leveli-accent-ink);font-size:32px}
+.outcomes-weeks-empty h2{margin:0;color:var(--ds-text-primary);font-size:19px}
+.outcomes-quarter-buttons{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:14px}
+.outcomes-quarter-buttons button{min-width:0;min-height:44px;padding:7px 4px;border:1px solid var(--ds-border);border-radius:11px;background:var(--ds-surface-inner);color:var(--ds-text-secondary);font:700 12px Manrope,system-ui,sans-serif;cursor:pointer}
+.outcomes-quarter-buttons button[aria-pressed="true"]{background:var(--leveli-accent-dim);border-color:var(--leveli-accent-border);color:var(--leveli-accent-ink)}
+.outcomes-quarter-buttons button:disabled{opacity:.4;cursor:not-allowed}
+.outcomes-quarter-card{padding:17px 15px}
+.outcomes-quarter-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.outcomes-quarter-heading h2{margin:0;font-size:17px;color:var(--ds-text-primary)}
+.outcomes-quarter-heading span{color:var(--ds-text-secondary);font-size:12px}
+.outcomes-quarter-row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px;border-top:1px solid var(--ds-border);padding:9px 0}
+.outcomes-quarter-row .outcomes-subject-name{font-size:14px;min-width:0;overflow-wrap:anywhere;color:var(--ds-text-primary)}
+.outcomes-quarter-grade{flex:none;min-width:38px;padding:6px 9px;text-align:center;border-radius:10px;font-size:20px;font-weight:800;color:var(--ds-text-primary);background:var(--ds-surface-inner)}
+.outcomes-quarter-grade[data-grade="5"]{background:#204636;color:#abf0d0}
+.outcomes-quarter-grade[data-grade="4"]{background:#4a3925;color:#ffe0ad}
+.outcomes-quarter-grade[data-grade="3"]{background:#51351b;color:#ffcf91}
+.outcomes-quarter-grade[data-grade="2"]{background:#552537;color:#ff9eae}
+.outcomes-quarter-empty{color:var(--ds-text-secondary);text-align:center;font-size:14px;line-height:1.6;padding:30px 4px}
 [data-page="subjects"].subject-detail-active #subjects-overview{display:none}
 [data-page="subjects"].subject-detail-active #school-subject-detail{margin-top:0}
 body:has([data-page="profile"]:not([hidden])) .content{padding-bottom:0}
@@ -708,7 +731,27 @@ body:has([data-page="profile"]:not([hidden])) .content{padding-bottom:0}
 <section data-page="subjects" hidden aria-labelledby="subjects-title"><div id="school-subject-detail" class="card" hidden></div><div id="subjects-overview"><header class="section-screen-header"><h1 id="subjects-title" tabindex="-1">Предметы</h1></header>
 <article class="card subjects-card"><div class="card-heading"><h2>Все предметы</h2><span id="school-subject-count" class="muted"></span></div>
 <div id="school-filter-buttons" hidden></div><select id="school-filter" hidden><option value="all">Все предметы</option><option value="strong">Сильные</option><option value="attention">Требуют внимания</option></select><div id="school-subjects"></div></article></div></section>
-<section data-page="outcomes" hidden aria-labelledby="outcomes-title"><header class="section-screen-header"><h1 id="outcomes-title">Итоги</h1></header><article class="card outcomes-placeholder"><p>Здесь появятся результаты твоих недель и четвертей.</p></article></section>
+<section data-page="outcomes" hidden aria-labelledby="outcomes-title">
+ <header class="section-screen-header"><h1 id="outcomes-title">Итоги</h1></header>
+ <div class="outcomes-switch" role="group" aria-label="Вид итогов">
+  <button type="button" id="outcomes-tab-weeks" aria-pressed="true" aria-controls="outcomes-weeks">Недели</button>
+  <button type="button" id="outcomes-tab-quarters" aria-pressed="false" aria-controls="outcomes-quarters">Четверти</button>
+ </div>
+ <div id="outcomes-weeks">
+  <article class="card outcomes-placeholder outcomes-weeks-empty">
+   <span class="outcomes-empty-icon" aria-hidden="true">✦</span>
+   <h2>Моя неделя</h2>
+   <p>Здесь появятся твои недельные истории и архив выпусков.</p>
+  </article>
+ </div>
+ <div id="outcomes-quarters" hidden>
+  <div id="outcomes-quarter-buttons" class="outcomes-quarter-buttons" role="group" aria-label="Выбрать четверть"></div>
+  <article class="card outcomes-quarter-card">
+   <div class="outcomes-quarter-heading"><h2 id="outcomes-quarter-title">Итоги четверти</h2><span id="outcomes-quarter-year"></span></div>
+   <div id="outcomes-quarter-grades"></div>
+  </article>
+ </div>
+</section>
 <section data-page="profile" hidden>
  <div class="b3-settings" id="b3-settings">
   <header class="b3-header"><button type="button" class="b3-home-btn leveli-back-btn" data-go="home" aria-label="Назад на главную"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19 5 12l7-7"/><path d="M5 12h14"/></svg><span>Назад</span></button><h1>Настройки</h1></header>
@@ -1003,10 +1046,64 @@ const S=window.LeveliSchool;
 const isMark=v=>S.score(v)!==null;
 const isFinal=g=>!!S.officialKind(g);
 let cachedGrades=[],loadGeneration=0;let schoolDataMeta=null;let retryHandle=null;
-let forecastFilter=null;function clearSchool(){document.querySelector('[data-page="subjects"]').classList.remove('subject-detail-active');cachedGrades=[];subjects.replaceChildren();for(const id of ['school-analytics','school-trend','school-subject-detail','school-period-buttons','school-filter-buttons','school-forecast-legend','school-good-list','school-attention-list'])document.getElementById(id).replaceChildren();document.getElementById('school-donut').replaceChildren();document.getElementById('school-subject-detail').hidden=true;document.getElementById('school-overview').hidden=false;periodSelect.replaceChildren();subjectFilter.value='all';forecastFilter=null;status.textContent='';document.getElementById('school-grades-donut').replaceChildren();document.getElementById('school-grades-legend').replaceChildren();document.getElementById('school-grades-total').textContent='0';schoolDataMeta=null;document.getElementById('school-freshness').textContent='';document.getElementById('school-overall').textContent='—';document.getElementById('school-trend-change').textContent='';}
+let forecastFilter=null;function clearSchool(){document.querySelector('[data-page="subjects"]').classList.remove('subject-detail-active');cachedGrades=[];subjects.replaceChildren();for(const id of ['school-analytics','school-trend','school-subject-detail','school-period-buttons','school-filter-buttons','school-forecast-legend','school-good-list','school-attention-list'])document.getElementById(id).replaceChildren();document.getElementById('school-donut').replaceChildren();document.getElementById('school-subject-detail').hidden=true;document.getElementById('school-overview').hidden=false;periodSelect.replaceChildren();subjectFilter.value='all';forecastFilter=null;outcomesPeriod=null;renderQuarterOutcomes();status.textContent='';document.getElementById('school-grades-donut').replaceChildren();document.getElementById('school-grades-legend').replaceChildren();document.getElementById('school-grades-total').textContent='0';schoolDataMeta=null;document.getElementById('school-freshness').textContent='';document.getElementById('school-overall').textContent='—';document.getElementById('school-trend-change').textContent='';}
 const periodSelect=document.getElementById('school-period');
 const subjectFilter=document.getElementById('school-filter'),analytics=document.getElementById('school-analytics');
 const gradeDate=S.date,periodOf=S.period;
+// Outcomes display only explicit school quarter marks, never calculated forecasts.
+const outcomesWeeks=document.getElementById('outcomes-weeks'),outcomesQuarters=document.getElementById('outcomes-quarters');
+const outcomesQuarterButtons=document.getElementById('outcomes-quarter-buttons');
+let outcomesMode='weeks',outcomesPeriod=null;
+function setOutcomesMode(mode){
+ outcomesMode=mode==='quarters'?'quarters':'weeks';
+ outcomesWeeks.hidden=outcomesMode!=='weeks';
+ outcomesQuarters.hidden=outcomesMode!=='quarters';
+ document.getElementById('outcomes-tab-weeks').setAttribute('aria-pressed',String(outcomesMode==='weeks'));
+ document.getElementById('outcomes-tab-quarters').setAttribute('aria-pressed',String(outcomesMode==='quarters'));
+}
+document.getElementById('outcomes-tab-weeks').addEventListener('click',()=>setOutcomesMode('weeks'));
+document.getElementById('outcomes-tab-quarters').addEventListener('click',()=>setOutcomesMode('quarters'));
+function renderQuarterOutcomes(){
+ const current=currentSchoolPeriod(),year=Number(current.slice(0,4));
+ // Retain the familiar four-quarter selector. A school year is chosen from already observed periods.
+ const periods=[...new Set(cachedGrades.map(periodOf).filter(p=>p&&p<current))].sort().reverse();
+ const chosenYear=outcomesPeriod?Number(outcomesPeriod.slice(0,4)):(periods.length?Number(periods[0].slice(0,4)):year);
+ const first=chosenYear+'-1',last=chosenYear+'-4';
+ if(!outcomesPeriod||outcomesPeriod>=current||outcomesPeriod<first||outcomesPeriod>last)
+  outcomesPeriod=periods.find(p=>Number(p.slice(0,4))===chosenYear)||null;
+ outcomesQuarterButtons.replaceChildren();
+ for(let q=1;q<=4;q++){
+  const period=chosenYear+'-'+q,b=document.createElement('button');
+  b.type='button';b.textContent=q+' четв.';b.disabled=period>=current;
+  b.setAttribute('aria-pressed',String(outcomesPeriod===period));
+  b.addEventListener('click',()=>{outcomesPeriod=period;renderQuarterOutcomes()});
+  outcomesQuarterButtons.append(b);
+ }
+ const title=document.getElementById('outcomes-quarter-title'),yearLabel=document.getElementById('outcomes-quarter-year'),rows=document.getElementById('outcomes-quarter-grades');
+ title.textContent=outcomesPeriod?('Итоги '+({1:'I',2:'II',3:'III',4:'IV'}[Number(outcomesPeriod.split('-')[1])])+' четверти'):'Итоги четверти';
+ yearLabel.textContent=chosenYear+'/'+String(chosenYear+1).slice(-2);
+ rows.replaceChildren();
+ if(!outcomesPeriod){
+  const p=document.createElement('p');p.className='outcomes-quarter-empty';p.textContent='Завершённых четвертей пока нет.';rows.append(p);return;
+ }
+ const found=new Map();
+ for(const g of cachedGrades){
+  if(periodOf(g)!==outcomesPeriod||S.officialKind(g)!=='За четверть'||!isMark(g.value))continue;
+  const name=String(g.subject||g.subjectName||'').trim();if(!name)continue;
+  const time=gradeDate(g)?.getTime()??0;
+  if(!found.has(name)||time>=found.get(name).time)found.set(name,{value:g.value,time});
+ }
+ if(!found.size){
+  const p=document.createElement('p');p.className='outcomes-quarter-empty';p.textContent='Официальные оценки за эту четверть пока не получены из дневника.';rows.append(p);return;
+ }
+ for(const [name,{value}] of [...found].sort((a,b)=>a[0].localeCompare(b[0],'ru'))){
+  const row=document.createElement('div');row.className='outcomes-quarter-row';
+  const label=document.createElement('span');label.className='outcomes-subject-name';label.textContent=name;
+  const badge=document.createElement('strong');badge.className='outcomes-quarter-grade';badge.dataset.grade=String(value);badge.textContent=value;
+  row.append(label,badge);rows.append(row);
+ }
+}
+
 function workCategory(g){const t=String([g.workType,g.type,g.description,g.title].filter(Boolean).join(' ')).toLowerCase();if(/контрольн|проверочн|\bкр\b/.test(t))return 'control';if(/самостоятельн|\bср\b/.test(t))return 'self';if(/тест|test/.test(t))return 'test';return 'other'}
 function mean(items){return S.mean(items)}
 function formatMean(n){return n===null?'—':n.toFixed(2).replace('.',',')}
@@ -1432,7 +1529,7 @@ function applySchoolData(data){if(data.schemaVersion!==1||data.source!=='petersb
 schoolDataMeta=data;cachedGrades=data.grades.filter(g=>g&&typeof g==='object').map(g=>({...g,value:S.mark(g)}));updateIdentity(auth.currentUser,cachedGrades);
 const selected=periodSelect.value;const nowPeriod=currentSchoolPeriod();const schoolYear=Number(nowPeriod.slice(0,4));const years=[...new Set([schoolYear,...cachedGrades.map(periodOf).filter(Boolean).map(p=>Number(p.slice(0,4)))])].sort((a,b)=>b-a);
 periodSelect.replaceChildren(...years.flatMap(year=>[1,2,3,4].map(q=>new Option(q+' четверть'+(year===schoolYear?'':' · '+year+'/'+(year+1)),year+'-'+q))));
-periodSelect.value=[...periodSelect.options].some(o=>o.value===selected)&&selected<=nowPeriod?selected:nowPeriod;refreshChoiceButtons();
+periodSelect.value=[...periodSelect.options].some(o=>o.value===selected)&&selected<=nowPeriod?selected:nowPeriod;refreshChoiceButtons();renderQuarterOutcomes();
  // A background Firebase refresh must never close the subject the child is reading.
  if(document.getElementById('school-subject-detail').hidden)renderGrades()}
 
