@@ -109,7 +109,6 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.screenshot({path:'outputs/leveli-outcomes-weeks.png',fullPage:true});
  await page.locator('#outcomes-tab-quarters').click();
  await page.goBack();
- await page.goBack();
  assert.equal(await page.locator('[data-page="subjects"]').isVisible(),true);
  await navButton('home').click();
  const freshness=page.locator('#school-freshness');
