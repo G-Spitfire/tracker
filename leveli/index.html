@@ -882,6 +882,46 @@ body:has([data-page="profile"]:not([hidden])) .content{padding-bottom:0}
  window.LeveliB3={open:key=>open(key,profile.querySelector('[data-b3-panel="'+key+'"]')),close};
 })();
 </script>
+<script>
+/* Isolated visual story prototype: no auth, Firebase, cached grades or persistence. */
+(()=>{
+ const dialog=document.getElementById('story-demo');
+ const examples=[
+ {label:'МОЯ НЕДЕЛЯ',title:'Твоя неделя!',subtitle:'Пример сравнения двух недель',icon:'★',before:'8',after:'12',unit:'оценок',change:'+4 оценки',note:'Изменилось количество полученных оценок'},
+ {label:'ТВОИ ДОСТИЖЕНИЯ',title:'Пятёрок стало больше!',subtitle:'Пример сравнения двух недель',icon:'✦',before:'2',after:'5',unit:'пятёрок',change:'+3 пятёрки',note:'Больше отличных результатов'},
+ {label:'ТВОЙ ПРОГРЕСС',title:'Движение вперёд',subtitle:'Пример изменения накопительного среднего',icon:'↗',before:'4,10',after:'4,25',unit:'балл',change:'+0,15',note:'Недельную формулу ещё предстоит согласовать'},
+ {label:'ПО ПРЕДМЕТАМ',title:'Где ты вырос?',subtitle:'Пример сравнения по математике',icon:'✎',before:'4,20',after:'4,60',unit:'математика',change:'+0,40',note:'Покажем лишь сопоставимые результаты'},
+ {label:'ИТОГ НЕДЕЛИ',title:'Так держать!',subtitle:'Твои достижения за неделю',icon:'★',before:'',after:'',unit:'',change:'Продолжай в том же духе!',note:'Это демонстрация, не реальный итог'}
+ ];
+ const $=id=>document.getElementById(id);
+ let current=0;
+ for(let index=0;index<examples.length;index++){
+  const button=document.createElement('button');button.type='button';button.setAttribute('aria-label','Экран '+(index+1)+' из '+examples.length);
+  button.addEventListener('click',()=>show(index));$('story-progress').append(button);
+ }
+ function show(index){
+  current=Math.max(0,Math.min(examples.length-1,index));
+  const s=examples[current];
+  for(const [id,value] of Object.entries({'story-eyebrow':s.label,'story-demo-title':s.title,'story-subtitle':s.subtitle,'story-art':s.icon,'story-before':s.before,'story-after':s.after,'story-unit-before':s.unit,'story-unit-after':s.unit,'story-change':s.change,'story-demo-note':s.note}))$(id).textContent=value;
+  $('story-comparison').hidden=current===examples.length-1;
+  [...$('story-progress').children].forEach((button,index)=>{
+   if(index===current)button.setAttribute('aria-current','step');else button.removeAttribute('aria-current');
+   button.dataset.past=String(index<current);
+  });
+  $('story-prev').disabled=current===0;
+  $('story-next').textContent=current===examples.length-1?'Закрыть':'Дальше';
+  dialog.scrollTop=0;
+ }
+ $('story-demo-open').addEventListener('click',()=>{show(0);dialog.showModal();$('story-close').focus()});
+ $('story-close').addEventListener('click',()=>dialog.close());
+ $('story-prev').addEventListener('click',()=>show(current-1));
+ $('story-next').addEventListener('click',()=>current===examples.length-1?dialog.close():show(current+1));
+ dialog.addEventListener('keydown',event=>{
+  if(event.key==='ArrowRight'){event.preventDefault();show(current+1)}
+  else if(event.key==='ArrowLeft'){event.preventDefault();show(current-1)}
+ });
+})();
+</script>
 <script src="./school-model.js"></script><script>
 'use strict';
 const pages=[...document.querySelectorAll('[data-page]')],tabBar=document.querySelector('.leveli-bottom-nav');
