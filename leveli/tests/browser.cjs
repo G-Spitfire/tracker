@@ -107,6 +107,36 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.screenshot({path:'outputs/leveli-outcomes-quarters.png',fullPage:true});
  await page.locator('#outcomes-tab-weeks').click();
  await page.screenshot({path:'outputs/leveli-outcomes-weeks.png',fullPage:true});
+ // Five fullscreen slides are an explicitly labelled demo, never real weekly data.
+ await page.getByRole('button',{name:'Посмотреть демо сторис'}).click();
+ const story=page.locator('#story-demo');
+ assert.equal(await story.isVisible(),true);
+ assert.match(await story.locator('.story-top').innerText(),/ВЫМЫШЛЕННЫЕ ОЦЕНКИ/);
+ assert.equal(await page.locator('#story-progress button').count(),5);
+ assert.equal(await page.locator('#story-demo-title').innerText(),'Твоя неделя!');
+ assert.equal(await page.locator('#story-before').innerText(),'8');
+ await page.locator('#story-next').click();
+ assert.match(await page.locator('#story-demo-title').innerText(),/Пятёрок/);
+ await page.keyboard.press('ArrowRight');
+ assert.equal(await page.locator('#story-change').innerText(),'+0,15');
+ await page.locator('#story-prev').click();
+ assert.equal(await page.locator('#story-change').innerText(),'+3 пятёрки');
+ await page.locator('#story-progress button').last().click();
+ assert.equal(await page.locator('#story-comparison').isVisible(),false);
+ assert.equal(await page.locator('#story-next').innerText(),'Закрыть');
+ for(const width of [320,360,390,430]){
+  await page.setViewportSize({width,height:844});
+  const dimensions=await story.evaluate(el=>({width:el.getBoundingClientRect().width,scroll:el.scrollWidth,window:innerWidth,close:el.querySelector('#story-close').getBoundingClientRect().width}));
+  assert.equal(dimensions.width,width,'fullscreen demo on '+width);
+  assert.ok(dimensions.scroll<=width+1,'story does not overflow at '+width);
+  assert.ok(dimensions.close>=44,'close hit target at '+width);
+ }
+ await page.setViewportSize({width:390,height:844});
+ await page.screenshot({path:'outputs/leveli-story-demo.png'});
+ await page.keyboard.press('Escape');
+ assert.equal(await story.isVisible(),false,'Escape closes story dialog');
+ assert.equal(await page.locator('#outcomes-weeks').isVisible(),true);
+ assert.equal(await page.locator('#outcomes-quarter-grades .outcomes-quarter-row').count(),1,'demo did not change school grades');
  await page.locator('#outcomes-tab-quarters').click();
  await page.goBack();
  assert.equal(await page.locator('[data-page="subjects"]').isVisible(),true);
