@@ -1458,5 +1458,5 @@ document.getElementById('school-refresh').addEventListener('click',load);documen
 // Sync status updates may arrive independently of grade uploads.
 setInterval(()=>{if(!document.hidden&&auth.currentUser)load()},60000);
 document.getElementById('school-logout').addEventListener('click',()=>signOut(auth).catch(showError));
-onAuthStateChanged(auth,user=>{window.LeveliAppearance.activate(user?.uid||null);if(retryHandle){clearTimeout(retryHandle);retryHandle=null}++loadGeneration;firestoreProfileName='';clearSchool();login.hidden=!!user;results.hidden=!user;document.querySelector('.leveli-bottom-nav').hidden=!user||!document.querySelector('[data-page="profile"]').hidden;error.textContent='';updateIdentity(user);if(user){loadProfile(user);load()}else {clearSchool()}},showError);
+onAuthStateChanged(auth,user=>{window.LeveliNavigation.navigate('home',{replace:true});window.LeveliAppearance.activate(user?.uid||null);if(retryHandle){clearTimeout(retryHandle);retryHandle=null}++loadGeneration;firestoreProfileName='';clearSchool();login.hidden=!!user;results.hidden=!user;document.querySelector('.leveli-bottom-nav').hidden=!user||!document.querySelector('[data-page="profile"]').hidden;error.textContent='';updateIdentity(user);if(user){loadProfile(user);load()}else {clearSchool()}},showError);
 </script></body></html>
