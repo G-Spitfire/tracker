@@ -83,7 +83,7 @@ section[hidden],[hidden]{display:none!important}
 
 /* Approved Leveli dark dashboard (2026-11-06). Works for all three existing screens. */
 :root{color:#f6f0ff;background:#0e0c21;color-scheme:dark}
-body{background:#0e0c21;color:#f6f0ff}
+body{background:var(--ds-page-surface);color:#f6f0ff}
 .content{padding:18px 14px max(35px,env(safe-area-inset-bottom))}
 .school-header{align-items:center;margin:4px 2px 18px}
 .school-header h1{color:#fff;font-size:27px;margin:8px 0 3px}
@@ -258,7 +258,7 @@ body{background:#0e0c21;color:#f6f0ff}
 :root{--leveli-accent:#a882ff;--leveli-accent-soft:#e2cdff;--leveli-accent-dim:#514071;--leveli-accent-border:#b48cf3}
 :root:not([data-leveli-theme="light"]){color-scheme:dark}
 :root[data-leveli-theme="light"]{color-scheme:light;background:#f7f4fc;color:#302448}
-:root[data-leveli-theme="light"] body{background:#f7f4fc;color:#302448}
+:root[data-leveli-theme="light"] body{color:#302448}
 :root[data-leveli-theme="light"] .school-header h1,:root[data-leveli-theme="light"] .card h2,:root[data-leveli-theme="light"] .orient-heading h2,:root[data-leveli-theme="light"] .profile-header .section-title,:root[data-leveli-theme="light"] .subject-row__name{color:#27193d}
 :root[data-leveli-theme="light"] .card,:root[data-leveli-theme="light"] .profile-card{background:#fff;border-color:#e4dbef;color:#302448}
 :root[data-leveli-theme="light"] .school-header p,:root[data-leveli-theme="light"] .profile-header p,:root[data-leveli-theme="light"] .card p,:root[data-leveli-theme="light"] .muted{color:#746588}
@@ -465,12 +465,12 @@ body{background:#0e0c21;color:#f6f0ff}
  --ds-hit:44px;--ds-button-height:48px;
  --ds-chart-grid:#594c70;--ds-status-good:#78e7ae;--ds-status-bad:#ff8fa1;--ds-grade-three:#f6c078;
  --ds-text-primary:#f6f0ff;--ds-text-secondary:#baadcf;
- --ds-card-surface:#1c1735;--ds-border:#453360;
+ --ds-page-surface:#0e0c21;--ds-card-surface:#1c1735;--ds-border:#453360;
 }
 :root[data-leveli-theme="light"]{
  --ds-chart-grid:#b9adc8;--ds-status-good:#216746;--ds-status-bad:#a82e4f;--ds-grade-three:#85501d;
  --ds-text-primary:#302448;--ds-text-secondary:#665677;
- --ds-card-surface:#fff;--ds-border:#e4dbef;
+ --ds-page-surface:#f7f4fc;--ds-card-surface:#fff;--ds-border:#e4dbef;
 }
 :root .card:not(.detail-goal){border-radius:var(--ds-radius-card)}
 :root .subject-row,:root .b3-settings .b3-tile,:root .b3-extra{border-radius:var(--ds-radius-inner)}
@@ -657,6 +657,29 @@ body{background:#0e0c21;color:#f6f0ff}
 [data-page="subjects"] .subjects-card{margin-top:12px}
 .outcomes-placeholder{min-height:140px;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px}
 .outcomes-placeholder p{margin:0;color:var(--ds-text-secondary);font-size:14px;line-height:1.5}
+.outcomes-switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;padding:4px;margin:9px 0 17px;border-radius:14px;background:var(--ds-surface-inner)}
+.outcomes-switch button{min-height:44px;padding:8px;border:0;border-radius:11px;background:transparent;color:var(--ds-text-secondary);font:700 14px Manrope,system-ui,sans-serif;cursor:pointer}
+.outcomes-switch button[aria-pressed="true"]{background:var(--leveli-accent-dim);color:var(--leveli-accent-ink)}
+.outcomes-switch button:focus-visible,.outcomes-quarter-buttons button:focus-visible{outline:3px solid var(--leveli-accent-border);outline-offset:2px}
+.outcomes-placeholder.outcomes-weeks-empty{display:flex;flex-direction:column;min-height:215px;gap:12px}
+.outcomes-empty-icon{display:grid;place-items:center;width:52px;height:52px;border-radius:16px;background:var(--leveli-accent-dim);color:var(--leveli-accent-ink);font-size:32px}
+.outcomes-weeks-empty h2{margin:0;color:var(--ds-text-primary);font-size:19px}
+.outcomes-quarter-buttons{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:14px}
+.outcomes-quarter-buttons button{min-width:0;min-height:44px;padding:7px 4px;border:1px solid var(--ds-border);border-radius:11px;background:var(--ds-surface-inner);color:var(--ds-text-secondary);font:700 12px Manrope,system-ui,sans-serif;cursor:pointer}
+.outcomes-quarter-buttons button[aria-pressed="true"]{background:var(--leveli-accent-dim);border-color:var(--leveli-accent-border);color:var(--leveli-accent-ink)}
+.outcomes-quarter-buttons button:disabled{opacity:.4;cursor:not-allowed}
+.outcomes-quarter-card{padding:17px 15px}
+.outcomes-quarter-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.outcomes-quarter-heading h2{margin:0;font-size:17px;color:var(--ds-text-primary)}
+.outcomes-quarter-heading span{color:var(--ds-text-secondary);font-size:12px}
+.outcomes-quarter-row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px;border-top:1px solid var(--ds-border);padding:9px 0}
+.outcomes-quarter-row .outcomes-subject-name{font-size:14px;min-width:0;overflow-wrap:anywhere;color:var(--ds-text-primary)}
+.outcomes-quarter-grade{flex:none;min-width:38px;padding:6px 9px;text-align:center;border-radius:10px;font-size:20px;font-weight:800;color:var(--ds-text-primary);background:var(--ds-surface-inner)}
+.outcomes-quarter-grade[data-grade="5"]{background:#204636;color:#abf0d0}
+.outcomes-quarter-grade[data-grade="4"]{background:#4a3925;color:#ffe0ad}
+.outcomes-quarter-grade[data-grade="3"]{background:#51351b;color:#ffcf91}
+.outcomes-quarter-grade[data-grade="2"]{background:#552537;color:#ff9eae}
+.outcomes-quarter-empty{color:var(--ds-text-secondary);text-align:center;font-size:14px;line-height:1.6;padding:30px 4px}
 [data-page="subjects"].subject-detail-active #subjects-overview{display:none}
 [data-page="subjects"].subject-detail-active #school-subject-detail{margin-top:0}
 body:has([data-page="profile"]:not([hidden])) .content{padding-bottom:0}
@@ -670,6 +693,73 @@ body:has([data-page="profile"]:not([hidden])) .content{padding-bottom:0}
 .leveli-startup-spinner{display:block;width:30px;height:30px;margin-top:42px;border:3px solid #40345d;border-top-color:#bc95ff;border-radius:50%;animation:leveli-startup-spin .85s linear infinite}
 @keyframes leveli-startup-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.leveli-startup-spinner{animation:none;border-top-color:#bc95ff;border-right-color:#bc95ff}}
+/* Weekly archive and fullscreen stories. */
+#weekly-archive{display:grid;gap:12px}
+.weekly-quarter{padding:14px}
+.weekly-quarter h2{margin:0 0 8px;font-size:16px;color:var(--ds-text-primary)}
+.weekly-release{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;min-height:48px;padding:8px;border:0;border-top:1px solid var(--ds-border);background:transparent;color:var(--ds-text-primary);font:inherit;text-align:left;cursor:pointer}
+.weekly-release small{color:var(--ds-text-secondary);text-align:right}
+.weekly-release:focus-visible{outline:2px solid var(--leveli-accent-border)}
+.weekly-story{position:fixed;inset:0;margin:0;padding:0;border:0;max-width:none;max-height:none;width:100%;height:100%;height:100dvh;background:var(--ds-page-surface);color:var(--ds-text-primary);overflow:auto}
+.weekly-story[open]{display:flex;justify-content:center}
+.weekly-story::backdrop{background:var(--ds-page-surface)}
+.story-shell{width:min(100%,540px);min-height:100%;display:flex;flex-direction:column;gap:16px;padding:calc(12px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.story-top{display:flex;align-items:center;gap:8px}
+.story-top img{flex:none}
+.story-context{flex:1;display:grid;gap:2px;line-height:var(--ds-line-normal)}
+.story-context strong{font-size:var(--ds-font-body)}
+.story-context span{font-size:var(--ds-font-support);color:var(--ds-text-secondary)}
+.story-icon-button{width:var(--ds-hit);height:var(--ds-hit);padding:0;display:grid;place-items:center;border:1px solid var(--ds-border);border-radius:var(--ds-radius-control);background:var(--ds-surface-inner);color:var(--ds-text-primary);cursor:pointer}
+.story-icon-button svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.story-progress{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px;margin-block:-8px}
+.story-progress button{position:relative;height:var(--ds-hit);min-width:0;padding:0;border:0;background:transparent;cursor:pointer}
+.story-progress button::before{content:'';position:absolute;inset:20px 0;border-radius:4px;background:var(--ds-border)}
+.story-progress button[data-past="true"]::before{background:var(--leveli-accent-track)}
+.story-progress button[aria-current="step"]::before{background:var(--leveli-accent-border)}
+.story-head>span{color:var(--leveli-accent-soft);font-size:var(--ds-font-support);font-weight:800}
+.story-head h2{margin:4px 0 0;font-size:var(--ds-font-screen);line-height:var(--ds-line-heading);font-weight:800}
+.story-main{flex:1;display:flex;flex-direction:column;gap:12px;padding:16px;background:var(--ds-card-surface);border:1px solid var(--ds-border);border-radius:var(--ds-radius-card)}
+.story-comparison{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.story-comparison>div{min-width:0;display:grid;justify-items:start;gap:4px;padding:12px;border-radius:var(--ds-radius-inner);border:1px solid var(--ds-border);background:var(--ds-surface-inner)}
+.story-comparison .story-after{background:color-mix(in srgb,var(--leveli-accent-dim) 48%,var(--ds-surface-inner));border-color:var(--leveli-accent-border)}
+.story-comparison span,.story-comparison small{font-size:var(--ds-font-support);color:var(--ds-text-secondary)}
+.story-comparison strong{font-size:clamp(28px,9vw,40px);line-height:1.1;font-variant-numeric:tabular-nums}
+.story-comparison .story-meter{display:block;width:100%;height:6px;margin-top:4px;border-radius:6px;background:var(--ds-border);overflow:hidden}
+.story-meter i{display:block;height:100%;border-radius:inherit;background:var(--ds-text-secondary)}
+.story-after .story-meter i{background:var(--leveli-accent)}
+.weekly-story:is([data-layout="overview"],[data-layout="fives"]) .story-comparison{flex:1;grid-template-columns:minmax(0,1fr);grid-auto-rows:1fr;gap:12px}
+.weekly-story:is([data-layout="overview"],[data-layout="fives"]) .story-comparison>div{align-content:center;justify-items:center;gap:0;padding:8px}
+.weekly-story:is([data-layout="overview"],[data-layout="fives"]) .story-comparison strong{font-size:clamp(72px,13dvh,104px);font-weight:800;line-height:1}
+.weekly-story:is([data-layout="overview"],[data-layout="fives"]) .story-comparison :is(span,small){font-size:var(--ds-font-body)}
+.weekly-story:is([data-layout="overview"],[data-layout="fives"]) .story-after strong{color:var(--leveli-accent-soft)}
+.weekly-story[data-layout="overview"] .story-meter{width:min(72%,220px);margin-top:12px}
+.weekly-story[data-layout="overview"] .story-main:has(.story-comparison[hidden]) .story-result{flex:1;flex-direction:column;justify-content:center;text-align:center}
+.weekly-story[data-layout="overview"] .story-main:has(.story-comparison[hidden]) .story-result strong{font-size:clamp(28px,8vw,40px)}
+.story-quarter-chart{flex:1;display:flex;flex-direction:column;justify-content:center;margin:0;padding:12px;border-radius:var(--ds-radius-inner);background:var(--ds-surface-chart);border:1px solid var(--ds-border)}
+.story-quarter-chart figcaption{font-size:var(--ds-font-support);font-weight:700;color:var(--ds-text-primary)}
+.story-quarter-chart svg{display:block;width:100%;margin-top:4px}
+.story-chart-grid{stroke:var(--ds-chart-grid);stroke-dasharray:3 4}
+.story-chart-label{fill:var(--ds-text-secondary);font-size:11px}
+.story-chart-bar{fill:var(--leveli-accent-track)}
+.story-chart-bar:last-of-type{fill:var(--leveli-accent-line)}
+.story-chart-value{fill:var(--ds-text-primary);font-size:11px;font-weight:800}
+.story-result{display:flex;align-items:center;gap:8px;min-height:56px;padding:12px;border-radius:var(--ds-radius-inner);background:var(--ds-surface-inner)}
+.story-result strong{flex:none;font-size:24px;line-height:var(--ds-line-heading)}
+.weekly-story:is([data-layout="overview"],[data-layout="fives"]) .story-result strong{color:var(--leveli-accent-soft)}
+.story-result span{font-size:var(--ds-font-support);line-height:var(--ds-line-normal);color:var(--ds-text-secondary)}
+#story-change[data-tone="up"],.story-subject-delta[data-tone="up"]{color:var(--ds-status-good)}
+#story-change[data-tone="down"],.story-subject-delta[data-tone="down"]{color:var(--ds-status-bad)}
+.story-subjects{flex:1;list-style:none;margin:0;padding:0;display:grid;grid-auto-rows:1fr;gap:8px}
+.story-subjects li{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:8px;padding:16px;border-radius:var(--ds-radius-inner);background:var(--ds-surface-inner);font-size:var(--ds-font-body);overflow-wrap:anywhere}
+.story-subject-scores{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px}
+.story-subjects strong{font-size:clamp(28px,8vw,36px);line-height:1.15;font-variant-numeric:tabular-nums}
+.story-subject-delta{padding:4px 8px;border-radius:8px;background:var(--ds-card-surface);font-size:var(--ds-font-body);font-weight:800;font-variant-numeric:tabular-nums}
+.story-actions{display:flex;gap:8px}
+.story-actions button{min-height:var(--ds-button-height)}
+#story-prev:disabled{opacity:.4;cursor:default}
+#story-next{flex:1;margin:0;border-radius:var(--ds-radius-control);box-shadow:none}
+.weekly-story button:focus-visible{outline:3px solid var(--leveli-accent-border);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.weekly-story *{animation:none!important;transition:none!important}}
 </style></head><body>
 <div id="leveli-startup" class="leveli-startup" role="status" aria-live="polite" aria-label="Leveli загружается">
  <img class="leveli-startup-logo" src="./brand/mark.svg" width="96" height="96" alt="">
@@ -708,7 +798,28 @@ body:has([data-page="profile"]:not([hidden])) .content{padding-bottom:0}
 <section data-page="subjects" hidden aria-labelledby="subjects-title"><div id="school-subject-detail" class="card" hidden></div><div id="subjects-overview"><header class="section-screen-header"><h1 id="subjects-title" tabindex="-1">Предметы</h1></header>
 <article class="card subjects-card"><div class="card-heading"><h2>Все предметы</h2><span id="school-subject-count" class="muted"></span></div>
 <div id="school-filter-buttons" hidden></div><select id="school-filter" hidden><option value="all">Все предметы</option><option value="strong">Сильные</option><option value="attention">Требуют внимания</option></select><div id="school-subjects"></div></article></div></section>
-<section data-page="outcomes" hidden aria-labelledby="outcomes-title"><header class="section-screen-header"><h1 id="outcomes-title">Итоги</h1></header><article class="card outcomes-placeholder"><p>Здесь появятся результаты твоих недель и четвертей.</p></article></section>
+<section data-page="outcomes" hidden aria-labelledby="outcomes-title">
+ <header class="section-screen-header"><h1 id="outcomes-title">Итоги</h1></header>
+ <div class="outcomes-switch" role="group" aria-label="Вид итогов">
+  <button type="button" id="outcomes-tab-weeks" aria-pressed="true" aria-controls="outcomes-weeks">Недели</button>
+  <button type="button" id="outcomes-tab-quarters" aria-pressed="false" aria-controls="outcomes-quarters">Четверти</button>
+ </div>
+ <div id="outcomes-weeks">
+  <article class="card outcomes-placeholder outcomes-weeks-empty" id="weekly-empty">
+   <span class="outcomes-empty-icon" aria-hidden="true">✦</span>
+   <h2>Моя неделя</h2>
+   <p id="weekly-empty-message" role="status">Здесь появятся твои недельные истории.</p>
+  </article>
+  <div id="weekly-archive"></div>
+ </div>
+ <div id="outcomes-quarters" hidden>
+  <div id="outcomes-quarter-buttons" class="outcomes-quarter-buttons" role="group" aria-label="Выбрать четверть"></div>
+  <article class="card outcomes-quarter-card">
+   <div class="outcomes-quarter-heading"><h2 id="outcomes-quarter-title">Итоги четверти</h2><span id="outcomes-quarter-year"></span></div>
+   <div id="outcomes-quarter-grades"></div>
+  </article>
+ </div>
+</section>
 <section data-page="profile" hidden>
  <div class="b3-settings" id="b3-settings">
   <header class="b3-header"><button type="button" class="b3-home-btn leveli-back-btn" data-go="home" aria-label="Назад на главную"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19 5 12l7-7"/><path d="M5 12h14"/></svg><span>Назад</span></button><h1>Настройки</h1></header>
@@ -747,6 +858,24 @@ body:has([data-page="profile"]:not([hidden])) .content{padding-bottom:0}
 <button type="button" data-go="subjects"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6c-3-2-7-2-10-1v14c3-1 7-1 10 1 3-2 7-2 10-1V5c-3-1-7-1-10 1z"/><path d="M12 6v14"/></svg><span>Предметы</span></button>
 <button type="button" data-go="outcomes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V13m6 7V9m6 11V4m4 16H2"/></svg><span>Итоги</span></button>
 </nav></div>
+<dialog id="weekly-story" class="weekly-story" aria-labelledby="weekly-story-title" aria-describedby="weekly-story-note">
+ <div class="story-shell">
+  <header class="story-top">
+   <img src="./brand/mark.svg" width="30" height="30" alt="">
+   <div class="story-context"><strong>Недельные итоги</strong><span id="story-dates"></span></div>
+   <button type="button" id="story-close" class="story-icon-button" aria-label="Закрыть сторис"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m18 6-12 12M6 6l12 12"/></svg></button>
+  </header>
+  <div id="story-progress" class="story-progress" aria-label="Прогресс сторис"></div>
+  <div class="story-head"><span id="story-eyebrow"></span><h2 id="weekly-story-title"></h2></div>
+  <div class="story-main">
+   <div id="story-comparison" class="story-comparison"><div class="story-before"><span id="story-label-before">Неделя сравнения</span><strong id="story-before"></strong><small id="story-unit-before"></small><span class="story-meter" aria-hidden="true" hidden><i></i></span></div><div class="story-after"><span id="story-label-after">Эта неделя</span><strong id="story-after"></strong><small id="story-unit-after"></small><span class="story-meter" aria-hidden="true" hidden><i></i></span></div></div>
+   <figure id="story-quarter-chart" class="story-quarter-chart" hidden><figcaption>С начала четверти</figcaption></figure>
+   <ul id="story-subjects" class="story-subjects" hidden></ul>
+   <div class="story-result"><strong id="story-change"></strong><span id="weekly-story-note"></span></div>
+  </div>
+  <div class="story-actions"><button type="button" id="story-prev" class="story-icon-button" aria-label="Предыдущий экран"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><button type="button" id="story-next" class="btn">Дальше</button></div>
+ </div>
+</dialog>
 <script>
 /* B3 UI shell: pre-existing preference controls, period selector and account logic are reused verbatim. */
 (()=>{
@@ -795,6 +924,8 @@ body:has([data-page="profile"]:not([hidden])) .content{padding-bottom:0}
  updateQuarter();
  window.LeveliB3={open:key=>open(key,profile.querySelector('[data-b3-panel="'+key+'"]')),close};
 })();
+</script>
+<script>
 </script>
 <script src="./school-model.js"></script><script>
 'use strict';
@@ -1003,10 +1134,64 @@ const S=window.LeveliSchool;
 const isMark=v=>S.score(v)!==null;
 const isFinal=g=>!!S.officialKind(g);
 let cachedGrades=[],loadGeneration=0;let schoolDataMeta=null;let retryHandle=null;
-let forecastFilter=null;function clearSchool(){document.querySelector('[data-page="subjects"]').classList.remove('subject-detail-active');cachedGrades=[];subjects.replaceChildren();for(const id of ['school-analytics','school-trend','school-subject-detail','school-period-buttons','school-filter-buttons','school-forecast-legend','school-good-list','school-attention-list'])document.getElementById(id).replaceChildren();document.getElementById('school-donut').replaceChildren();document.getElementById('school-subject-detail').hidden=true;document.getElementById('school-overview').hidden=false;periodSelect.replaceChildren();subjectFilter.value='all';forecastFilter=null;status.textContent='';document.getElementById('school-grades-donut').replaceChildren();document.getElementById('school-grades-legend').replaceChildren();document.getElementById('school-grades-total').textContent='0';schoolDataMeta=null;document.getElementById('school-freshness').textContent='';document.getElementById('school-overall').textContent='—';document.getElementById('school-trend-change').textContent='';}
+let forecastFilter=null;function clearSchool(){document.querySelector('[data-page="subjects"]').classList.remove('subject-detail-active');cachedGrades=[];subjects.replaceChildren();for(const id of ['school-analytics','school-trend','school-subject-detail','school-period-buttons','school-filter-buttons','school-forecast-legend','school-good-list','school-attention-list'])document.getElementById(id).replaceChildren();document.getElementById('school-donut').replaceChildren();document.getElementById('school-subject-detail').hidden=true;document.getElementById('school-overview').hidden=false;periodSelect.replaceChildren();subjectFilter.value='all';forecastFilter=null;outcomesPeriod=null;renderQuarterOutcomes();status.textContent='';document.getElementById('school-grades-donut').replaceChildren();document.getElementById('school-grades-legend').replaceChildren();document.getElementById('school-grades-total').textContent='0';schoolDataMeta=null;document.getElementById('school-freshness').textContent='';document.getElementById('school-overall').textContent='—';document.getElementById('school-trend-change').textContent='';}
 const periodSelect=document.getElementById('school-period');
 const subjectFilter=document.getElementById('school-filter'),analytics=document.getElementById('school-analytics');
 const gradeDate=S.date,periodOf=S.period;
+// Outcomes display only explicit school quarter marks, never calculated forecasts.
+const outcomesWeeks=document.getElementById('outcomes-weeks'),outcomesQuarters=document.getElementById('outcomes-quarters');
+const outcomesQuarterButtons=document.getElementById('outcomes-quarter-buttons');
+let outcomesMode='weeks',outcomesPeriod=null;
+function setOutcomesMode(mode){
+ outcomesMode=mode==='quarters'?'quarters':'weeks';
+ outcomesWeeks.hidden=outcomesMode!=='weeks';
+ outcomesQuarters.hidden=outcomesMode!=='quarters';
+ document.getElementById('outcomes-tab-weeks').setAttribute('aria-pressed',String(outcomesMode==='weeks'));
+ document.getElementById('outcomes-tab-quarters').setAttribute('aria-pressed',String(outcomesMode==='quarters'));
+}
+document.getElementById('outcomes-tab-weeks').addEventListener('click',()=>setOutcomesMode('weeks'));
+document.getElementById('outcomes-tab-quarters').addEventListener('click',()=>setOutcomesMode('quarters'));
+function renderQuarterOutcomes(){
+ const current=currentSchoolPeriod(),year=Number(current.slice(0,4));
+ // Retain the familiar four-quarter selector. A school year is chosen from already observed periods.
+ const periods=[...new Set(cachedGrades.map(periodOf).filter(p=>p&&p<current))].sort().reverse();
+ const chosenYear=outcomesPeriod?Number(outcomesPeriod.slice(0,4)):(periods.length?Number(periods[0].slice(0,4)):year);
+ const first=chosenYear+'-1',last=chosenYear+'-4';
+ if(!outcomesPeriod||outcomesPeriod>=current||outcomesPeriod<first||outcomesPeriod>last)
+  outcomesPeriod=periods.find(p=>Number(p.slice(0,4))===chosenYear)||null;
+ outcomesQuarterButtons.replaceChildren();
+ for(let q=1;q<=4;q++){
+  const period=chosenYear+'-'+q,b=document.createElement('button');
+  b.type='button';b.textContent=q+' четв.';b.disabled=period>=current;
+  b.setAttribute('aria-pressed',String(outcomesPeriod===period));
+  b.addEventListener('click',()=>{outcomesPeriod=period;renderQuarterOutcomes()});
+  outcomesQuarterButtons.append(b);
+ }
+ const title=document.getElementById('outcomes-quarter-title'),yearLabel=document.getElementById('outcomes-quarter-year'),rows=document.getElementById('outcomes-quarter-grades');
+ title.textContent=outcomesPeriod?('Итоги '+({1:'I',2:'II',3:'III',4:'IV'}[Number(outcomesPeriod.split('-')[1])])+' четверти'):'Итоги четверти';
+ yearLabel.textContent=chosenYear+'/'+String(chosenYear+1).slice(-2);
+ rows.replaceChildren();
+ if(!outcomesPeriod){
+  const p=document.createElement('p');p.className='outcomes-quarter-empty';p.textContent='Завершённых четвертей пока нет.';rows.append(p);return;
+ }
+ const found=new Map();
+ for(const g of cachedGrades){
+  if(periodOf(g)!==outcomesPeriod||S.officialKind(g)!=='За четверть'||!isMark(g.value))continue;
+  const name=String(g.subject||g.subjectName||'').trim();if(!name)continue;
+  const time=gradeDate(g)?.getTime()??0;
+  if(!found.has(name)||time>=found.get(name).time)found.set(name,{value:g.value,time});
+ }
+ if(!found.size){
+  const p=document.createElement('p');p.className='outcomes-quarter-empty';p.textContent='Официальные оценки за эту четверть пока не получены из дневника.';rows.append(p);return;
+ }
+ for(const [name,{value}] of [...found].sort((a,b)=>a[0].localeCompare(b[0],'ru'))){
+  const row=document.createElement('div');row.className='outcomes-quarter-row';
+  const label=document.createElement('span');label.className='outcomes-subject-name';label.textContent=name;
+  const badge=document.createElement('strong');badge.className='outcomes-quarter-grade';badge.dataset.grade=String(value);badge.textContent=value;
+  row.append(label,badge);rows.append(row);
+ }
+}
+
 function workCategory(g){const t=String([g.workType,g.type,g.description,g.title].filter(Boolean).join(' ')).toLowerCase();if(/контрольн|проверочн|\bкр\b/.test(t))return 'control';if(/самостоятельн|\bср\b/.test(t))return 'self';if(/тест|test/.test(t))return 'test';return 'other'}
 function mean(items){return S.mean(items)}
 function formatMean(n){return n===null?'—':n.toFixed(2).replace('.',',')}
@@ -1022,6 +1207,211 @@ function gradeTrendDisplay(value){
  return {tone,text:arrow+formatChange(value)};
 }
 function pluralRu(n,one,few,many){const k=Math.abs(n)%100,last=k%10;return n+' '+(k>=11&&k<=14?many:last===1?one:last>=2&&last<=4?few:many)}
+
+const weeklyStories=(()=>{
+ const $=id=>document.getElementById(id);
+ const dialog=$('weekly-story'),archive=$('weekly-archive'),empty=$('weekly-empty');
+ const labels=['МОЯ НЕДЕЛЯ','ТВОИ ДОСТИЖЕНИЯ','ТВОЙ ПРОГРЕСС','ПО ПРЕДМЕТАМ'];
+ const dateFormat=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long'});
+ let uid=null,waiting=false,issues=[],progress={},current=0,slides=[],openedId=null,archiveTrigger=null;
+
+ function savedProgress(){
+  try{
+   const saved=JSON.parse(localStorage.getItem('leveli-weekly-v1-'+uid)||'{}');
+   return saved&&typeof saved==='object'&&!Array.isArray(saved)?saved:{};
+  }catch{return {}}
+ }
+ function remember(value){
+  const saved=savedProgress();
+  if(progress[openedId]==='done'||saved[openedId]==='done')value='done';
+  progress={...progress,...saved,[openedId]:value};
+  try{localStorage.setItem('leveli-weekly-v1-'+uid,JSON.stringify({...saved,[openedId]:value}))}catch{}
+ }
+ function weekLabel(week){
+  const [year,month,day]=week.split('-').map(Number);
+  return dateFormat.format(new Date(year,month-1,day))+' – '+dateFormat.format(new Date(year,month-1,day+6));
+ }
+ function focusRelease(id){
+  if(id)[...archive.querySelectorAll('button')].find(button=>button.dataset.issue===id)?.focus();
+ }
+ function renderArchive(){
+  const focused=archive.contains(document.activeElement)?document.activeElement.dataset.issue:null;
+  archive.replaceChildren();
+  empty.hidden=issues.length>0;
+  const groups=new Map();
+  for(const issue of [...issues].reverse()){
+   if(!groups.has(issue.quarter)){
+    const [year,quarter]=issue.quarter.split('-').map(Number);
+    const group=document.createElement('section'),heading=document.createElement('h2');
+    group.className='card weekly-quarter';
+    heading.textContent=quarter+' четверть · '+year+'/'+(year+1);
+    group.append(heading);archive.append(group);groups.set(issue.quarter,group);
+   }
+   const button=document.createElement('button'),date=document.createElement('span'),status=document.createElement('small');
+   button.type='button';button.className='weekly-release';button.dataset.issue=issue.id;
+   date.textContent=weekLabel(issue.week);
+   status.textContent=progress[issue.id]==='done'?'Просмотрено':Number.isInteger(progress[issue.id])?'Продолжить':'Новое';
+   button.append(date,status);
+   button.addEventListener('click',()=>open(issue,true));
+   groups.get(issue.quarter).append(button);
+  }
+  focusRelease(focused);
+ }
+ const countMarks=n=>pluralRu(n,'оценка','оценки','оценок');
+ const countFives=n=>pluralRu(n,'пятёрка','пятёрки','пятёрок');
+ const signed=n=>n>0?'+'+n:n<0?'−'+Math.abs(n):'0';
+ function makeSlides(issue){
+  const {totals,previous,subjects}=issue;
+  const averageDelta=previous?formatChange(totals.average-previous.average):null;
+  const fivesTitle=previous&&totals.fives>previous.fives?'Больше пятёрок!':'Твои пятёрки';
+  return [
+   {title:'Твоя неделя!',layout:'overview',before:previous?.count,after:totals.count,unit:countMarks,
+    result:previous?signed(totals.count-previous.count):countMarks(totals.count),note:previous?'К неделе сравнения':'Оценки за учебную неделю'},
+   {title:fivesTitle,before:previous?.fives,after:totals.fives,unit:countFives,largeCounts:true,
+    result:previous?signed(totals.fives-previous.fives):null,note:previous?'К неделе сравнения':''},
+   {title:'Твой средний балл',before:previous?formatMean(previous.average):null,after:formatMean(totals.average),unit:'балл',
+    chart:true,result:averageDelta??formatMean(totals.average),tone:averageDelta?.startsWith('+')?'up':averageDelta?.startsWith('−')?'down':'',note:'Накопительный средний за четверть'},
+   {title:'Твои предметы',subjects,note:'Только предметы с оценками за неделю'}
+  ];
+ }
+ const buttons=labels.map((_,index)=>{
+  const button=document.createElement('button');button.type='button';
+  button.setAttribute('aria-label','Экран '+(index+1)+' из '+labels.length);
+  button.addEventListener('click',()=>show(index));$('story-progress').append(button);
+  return button;
+ });
+ function renderQuarterChart(issue){
+  const chart=$('story-quarter-chart');
+  const weeks=issues.filter(item=>item.quarter===issue.quarter&&item.week<=issue.week);
+  const shortDate=week=>week.slice(5).split('-').reverse().join('.');
+  const description=weeks.map(({week,totals})=>shortDate(week)+' — '+formatMean(totals.average)).join('; ');
+  const svg=svgEl('svg',{viewBox:'0 0 320 198',role:'img','aria-label':'Накопительный средний по неделям: '+description});
+  const baseline=174,scale=30,left=24,right=316;
+  for(const value of [0,2.5,5]){
+   const y=baseline-value*scale;
+   svg.append(svgEl('line',{x1:left,y1:y,x2:right,y2:y,class:'story-chart-grid'}));
+   const label=svgEl('text',{x:0,y:y+4,class:'story-chart-label'});
+   label.textContent=String(value).replace('.',',');svg.append(label);
+  }
+  const step=(right-left)/weeks.length,width=Math.min(40,step*.64);
+  weeks.forEach(({week,totals},index)=>{
+   const x=left+step*(index+.5),height=totals.average*scale,y=baseline-height;
+   const bar=svgEl('rect',{x:x-width/2,y,width,height,rx:Math.min(5,width/2),class:'story-chart-bar'});
+   const title=svgEl('title',{});
+   title.textContent=weekLabel(week)+' · '+formatMean(totals.average);bar.append(title);svg.append(bar);
+   if(weeks.length<=6||index===0||index===weeks.length-1){
+    const value=svgEl('text',{x,y:y-5,'text-anchor':'middle',class:'story-chart-value'});
+    value.textContent=formatMean(totals.average);svg.append(value);
+    const date=svgEl('text',{x,y:192,'text-anchor':'middle',class:'story-chart-label'});
+    date.textContent=shortDate(week);svg.append(date);
+   }
+  });
+  chart.querySelector('svg')?.remove();
+  chart.append(svg);
+ }
+ function show(index){
+  const next=Math.max(0,Math.min(labels.length-1,index));
+  if(dialog.open&&current===next)return;
+  current=next;
+  const slide=slides[current];
+  const compare=slide.before!=null;
+  $('story-eyebrow').textContent=labels[current];
+  $('weekly-story-title').textContent=slide.title;
+  dialog.dataset.layout=slide.largeCounts?'fives':slide.layout??'';
+  $('story-comparison').hidden=!compare&&!slide.largeCounts;
+  $('story-label-before').parentElement.hidden=!compare;
+  $('story-before').textContent=slide.before??'';
+  $('story-after').textContent=slide.after??'';
+  const unit=value=>typeof slide.unit==='function'?slide.unit(value).slice(String(value).length+1):slide.unit??'';
+  $('story-unit-before').textContent=compare?unit(slide.before):'';
+  $('story-unit-after').textContent=compare||slide.largeCounts?unit(slide.after):'';
+  const showMeters=compare&&!slide.largeCounts&&typeof slide.after==='number';
+  const max=showMeters?Math.max(1,slide.before,slide.after):1;
+  $('story-comparison').querySelectorAll('.story-meter').forEach((meter,i)=>{
+   meter.hidden=!showMeters;
+   if(showMeters)meter.firstElementChild.style.width=(i===0?slide.before:slide.after)/max*100+'%';
+  });
+  $('story-quarter-chart').hidden=!slide.chart;
+  $('story-change').textContent=slide.result??'';
+  $('story-change').hidden=!slide.result;
+  $('story-change').dataset.tone=slide.tone??'';
+  $('weekly-story-note').textContent=slide.note??'';
+  $('weekly-story-note').parentElement.hidden=!slide.note&&!slide.result;
+  const subjects=$('story-subjects');subjects.replaceChildren();subjects.hidden=!slide.subjects;
+  for(const subject of slide.subjects||[]){
+   const row=document.createElement('li'),name=document.createElement('span'),value=document.createElement('strong');
+   name.textContent=subject.name;
+   const scores=document.createElement('div');scores.className='story-subject-scores';
+   value.textContent=subject.before===null?formatMean(subject.after):
+    formatMean(subject.before)+' → '+formatMean(subject.after);
+   scores.append(value);
+   if(subject.delta!==null){
+    const delta=document.createElement('span'),change=formatChange(subject.delta);
+    delta.className='story-subject-delta';delta.textContent=change;
+    delta.dataset.tone=change.startsWith('+')?'up':change.startsWith('−')?'down':'flat';
+    scores.append(delta);
+   }
+   row.append(name,scores);subjects.append(row);
+  }
+  buttons.forEach((button,i)=>{
+   if(i===current)button.setAttribute('aria-current','step');else button.removeAttribute('aria-current');
+   button.dataset.past=String(i<current);
+  });
+  $('story-prev').disabled=current===0;
+  $('story-next').textContent=current===labels.length-1?'Закрыть':'Дальше';
+  dialog.scrollTop=0;
+  remember(current);
+ }
+ function open(issue,fromArchive=false){
+  if(dialog.open)return;
+  openedId=issue.id;archiveTrigger=fromArchive?issue.id:null;
+  progress={...progress,...savedProgress()};
+  slides=makeSlides(issue);
+  renderQuarterChart(issue);
+  $('story-dates').textContent=weekLabel(issue.week);
+  const step=progress[issue.id];
+  show(Number.isInteger(step)&&step>=0?Math.min(step,labels.length-1):0);
+  dialog.showModal();$('story-close').focus();
+ }
+ $('story-close').addEventListener('click',()=>dialog.close());
+ $('story-prev').addEventListener('click',()=>show(current-1));
+ $('story-next').addEventListener('click',()=>{
+  if(current<labels.length-1){show(current+1);return}
+  remember('done');dialog.close();
+ });
+ dialog.addEventListener('keydown',event=>{
+  if(event.key==='ArrowRight'||event.key==='ArrowLeft'){
+   event.preventDefault();show(current+(event.key==='ArrowRight'?1:-1));
+  }
+ });
+ dialog.addEventListener('close',()=>{
+  if(dialog.open)return;
+  const trigger=archiveTrigger;archiveTrigger=null;openedId=null;
+  renderArchive();
+  focusRelease(trigger);
+ });
+ return {
+  reset(nextUid){
+   archiveTrigger=null;openedId=null;dialog.close();uid=nextUid;waiting=!!uid;
+   issues=[];progress=uid?savedProgress():{};
+   $('weekly-empty-message').textContent=uid?'Загружаем оценки…':'Здесь появятся твои недельные истории.';
+   renderArchive();
+  },
+  unavailable(){
+   $('weekly-empty-message').textContent='Недельные истории появятся, когда загрузятся оценки.';
+  },
+  update(rows){
+   issues=S.weeklyIssues(rows);
+   progress={...progress,...savedProgress()};
+   $('weekly-empty-message').textContent='За завершённые недели пока нет оценок.';
+   renderArchive();
+   if(!waiting)return;
+   waiting=false;
+   const latest=issues.at(-1);
+   if(latest&&progress[latest.id]!=='done')open(latest);
+  }
+ };
+})();
 
 function svgEl(tag,attrs){
  const el=document.createElementNS('http://www.w3.org/2000/svg',tag);
@@ -1055,8 +1445,7 @@ function renderInsights(groups,rows,baseline){
  const points=[],bySubject=new Map();
  for(const [key,items] of days){
   for(const g of items){if(!bySubject.has(g.subject))bySubject.set(g.subject,[]);bySubject.get(g.subject).push(g)}
-  const avgs=[...bySubject.values()].map(v=>S.mean(v));
-  points.push({date:items[0].date,value:avgs.reduce((x,y)=>x+y,0)/avgs.length});
+  points.push({date:items[0].date,value:S.meanOfSubjects(bySubject.values())});
  }
  const trendCard=document.querySelector('.trend-card');trendCard.classList.toggle('trend-short',points.length<2);
  if(points.length<2){
@@ -1432,7 +1821,7 @@ function applySchoolData(data){if(data.schemaVersion!==1||data.source!=='petersb
 schoolDataMeta=data;cachedGrades=data.grades.filter(g=>g&&typeof g==='object').map(g=>({...g,value:S.mark(g)}));updateIdentity(auth.currentUser,cachedGrades);
 const selected=periodSelect.value;const nowPeriod=currentSchoolPeriod();const schoolYear=Number(nowPeriod.slice(0,4));const years=[...new Set([schoolYear,...cachedGrades.map(periodOf).filter(Boolean).map(p=>Number(p.slice(0,4)))])].sort((a,b)=>b-a);
 periodSelect.replaceChildren(...years.flatMap(year=>[1,2,3,4].map(q=>new Option(q+' четверть'+(year===schoolYear?'':' · '+year+'/'+(year+1)),year+'-'+q))));
-periodSelect.value=[...periodSelect.options].some(o=>o.value===selected)&&selected<=nowPeriod?selected:nowPeriod;refreshChoiceButtons();
+periodSelect.value=[...periodSelect.options].some(o=>o.value===selected)&&selected<=nowPeriod?selected:nowPeriod;refreshChoiceButtons();renderQuarterOutcomes();
  // A background Firebase refresh must never close the subject the child is reading.
  if(document.getElementById('school-subject-detail').hidden)renderGrades()}
 
@@ -1494,6 +1883,7 @@ async function load(){
  try{
   const snap=await readFirebaseWithDeadline(uid);if(!active())return;
   if(!snap.exists()){
+   weeklyStories.unavailable();
    if(!cached){clearSchool();status.textContent='Оценки пока не загружены.'}
    else status.textContent='Сохранённые оценки · документ Firebase пока недоступен';
    return;
@@ -1502,10 +1892,12 @@ async function load(){
   if(data.schemaVersion!==1||data.source!=='petersburgedu'||!Array.isArray(data.grades))throw Error('Неизвестный формат школьных данных.');
   // Status-only writes must not recreate the subject view or reset the chart/history.
   if(!cached||JSON.stringify(cached.data.grades)!==JSON.stringify(data.grades)||JSON.stringify(cached.data.subjects)!==JSON.stringify(data.subjects))applySchoolData(data);
+  weeklyStories.update(data.grades);
   try{await writeGradeCache(uid,{data,savedAt:Date.now()})}catch(e){console.warn('Не удалось сохранить оценки локально',e)}
   if(active()){showDiarySyncTime(data);status.textContent='Предметов: '+subjects.children.length+' · проверено в Firebase'}
  }catch(e){
   if(!active())return;
+  weeklyStories.unavailable();
   if(cached){
    status.textContent='Сохранённые оценки · Firebase временно недоступен';
    showDiarySyncTime(cached.data,true);
@@ -1520,5 +1912,5 @@ setInterval(()=>{if(!document.hidden&&auth.currentUser)load()},60000);
 document.getElementById('school-logout').addEventListener('click',()=>signOut(auth).catch(showError));
 const startup=document.getElementById('leveli-startup');
 function resolveStartup(){document.documentElement.dataset.leveliAuthReady='true';startup.hidden=true}
-onAuthStateChanged(auth,user=>{window.LeveliNavigation.navigate('home',{replace:true});window.LeveliAppearance.activate(user?.uid||null);if(retryHandle){clearTimeout(retryHandle);retryHandle=null}++loadGeneration;firestoreProfileName='';clearSchool();login.hidden=!!user;results.hidden=!user;error.textContent='';updateIdentity(user);document.querySelector('.leveli-bottom-nav').hidden=!user||!document.querySelector('[data-page="profile"]').hidden;resolveStartup();if(user){loadProfile(user);load()}else {clearSchool()}},err=>{login.hidden=false;results.hidden=true;document.querySelector('.leveli-bottom-nav').hidden=true;showError(err);resolveStartup()});
+onAuthStateChanged(auth,user=>{window.LeveliNavigation.navigate('home',{replace:true});window.LeveliAppearance.activate(user?.uid||null);if(retryHandle){clearTimeout(retryHandle);retryHandle=null}++loadGeneration;firestoreProfileName='';weeklyStories.reset(user?.uid??null);clearSchool();login.hidden=!!user;results.hidden=!user;error.textContent='';updateIdentity(user);document.querySelector('.leveli-bottom-nav').hidden=!user||!document.querySelector('[data-page="profile"]').hidden;resolveStartup();if(user){loadProfile(user);load()}else {clearSchool()}},err=>{++loadGeneration;weeklyStories.reset(null);login.hidden=false;results.hidden=true;document.querySelector('.leveli-bottom-nav').hidden=true;showError(err);resolveStartup()});
 </script></body></html>
