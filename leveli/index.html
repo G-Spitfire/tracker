@@ -747,6 +747,8 @@ body:has([data-page="profile"]:not([hidden])) .content{padding-bottom:0}
 .story-result strong{flex:none;font-size:24px;line-height:var(--ds-line-heading)}
 .weekly-story:is([data-layout="overview"],[data-layout="fives"]) .story-result strong{color:var(--leveli-accent-soft)}
 .story-result span{font-size:var(--ds-font-support);line-height:var(--ds-line-normal);color:var(--ds-text-secondary)}
+.weekly-story[data-layout="summary"] .story-result{flex:1;flex-direction:column;justify-content:center;text-align:center;padding:16px}
+.weekly-story[data-layout="summary"] .story-result :is(strong,span){max-inline-size:100%;overflow-wrap:anywhere}
 #story-change[data-tone="up"],.story-subject-delta[data-tone="up"]{color:var(--ds-status-good)}
 #story-change[data-tone="down"],.story-subject-delta[data-tone="down"]{color:var(--ds-status-bad)}
 .story-subjects{flex:1;list-style:none;margin:0;padding:0;display:grid;grid-auto-rows:1fr;gap:8px}
@@ -1278,9 +1280,9 @@ const weeklyStories=(()=>{
     result:previous?signed(totals.count-previous.count):countMarks(totals.count),note:previous?'Разница в количестве оценок':'Оценки за учебную неделю'},
    {title:fivesTitle,before:previous?.fives,after:totals.fives,unit:countFives,largeCounts:true,
     result:previous?signed(fivesDiff):null,note:previous?'Разница в количестве пятёрок':''},
-   {title:'Как меняется средний балл?',before:previous?formatMean(previous.average):null,after:formatMean(totals.average),unit:'балл',
+   {title:'Твой средний балл',before:previous?formatMean(previous.average):null,after:formatMean(totals.average),unit:'балл',
     chart:true,result:averageDelta??formatMean(totals.average),tone:averageDelta?.startsWith('+')?'up':averageDelta?.startsWith('−')?'down':'',note:'Накопительный средний за четверть'},
-   {title:'Что изменилось по предметам?',subjects,note:'Предметы с новыми оценками за неделю'},
+   {title:'Твои предметы',subjects,note:'Предметы с новыми оценками за неделю'},
    {title:'Главное за неделю',layout:'summary',result:summary.result,note:summary.note}
   ];
  }
