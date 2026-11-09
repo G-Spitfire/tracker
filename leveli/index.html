@@ -1196,7 +1196,7 @@ function setOutcomesMode(mode){
 document.getElementById('outcomes-tab-weeks').addEventListener('click',()=>setOutcomesMode('weeks'));
 document.getElementById('outcomes-tab-quarters').addEventListener('click',()=>setOutcomesMode('quarters'));
 function renderQuarterOutcomes(){
- const current=currentSchoolPeriod(),year=Number(current.slice(0,4));
+ const current=currentSchoolPeriod(),year=Number((periodSelect.value||current).split('-')[0]);
  const yearLabel=document.getElementById('outcomes-quarter-year'),title=document.getElementById('outcomes-quarter-title'),rows=document.getElementById('outcomes-quarter-grades');
  const selector=document.getElementById('outcomes-quarter-buttons');selector.hidden=true;
  title.textContent='Итоги учебного года';yearLabel.textContent=year+'/'+String(year+1).slice(-2);rows.replaceChildren();
@@ -1209,7 +1209,7 @@ function renderQuarterOutcomes(){
   subjects.add(name);
   if(!isMark(g.value)||!kind)continue;
   const q=Number(period.split('-')[1]);
-  const column=kind==='За четверть'&&q>=1&&q<=4?q-1:/год/i.test(String(kind))?4:null;
+  const column=kind==='За четверть'&&q>=1&&q<=4?q-1:kind==='За год'?4:null;
   if(column===null)continue;
   const key=name+'|'+column,time=gradeDate(g)?.getTime()??0;
   if(!official.has(key)||time>=official.get(key).time)official.set(key,{value:g.value,time});
@@ -1677,8 +1677,8 @@ function renderGrades(){
  for(const item of sorted){
   const {name,grades,stats}=item;
   const key=stats.official!==null?String(stats.official):stats.forecast!==null?String(stats.forecast):'none';
-  if(forecastFilter&&forecastFilter!==key)continue;
-  if(gradeValueFilter&&!grades.regular.some(g=>String(g.value)===gradeValueFilter))continue;
+  if(activeTab==='forecast'&&forecastFilter&&forecastFilter!==key)continue;
+  if(activeTab==='grades'&&gradeValueFilter&&!grades.regular.some(g=>String(g.value)===gradeValueFilter))continue;
   const entry=document.createElement('div');entry.className='subject-entry';
   if(activeTab==='finals'){
    const line=document.createElement('div');line.className='subject-entry-head';
@@ -1712,11 +1712,11 @@ function renderGrades(){
      const day=mark.date instanceof Date&&!Number.isNaN(mark.date.getTime())?new Date(mark.date.getFullYear(),mark.date.getMonth(),mark.date.getDate()).getTime():null;
      if(day===today||day===today-86400000)chip.classList.add('is-recent');
      chip.setAttribute('aria-label','Оценка '+mark.value+(mark.type?', '+mark.type:'')+(day?', '+mark.date.toLocaleDateString('ru-RU'):''));
-     chip.onclick=()=>{const old=entry.querySelector('.subject-mark-detail');if(old)old.remove();const info=document.createElement('div');info.className='subject-mark-detail';info.textContent=[mark.type||'Тип работы не указан',mark.date instanceof Date&&!Number.isNaN(mark.date.getTime())?mark.date.toLocaleDateString('ru-RU'):'Дата не указана',Number(mark.officialWeight)>0?'Вес ×'+mark.officialWeight:'Вес не указан'].join(' · ');entry.append(info)};
+     chip.onclick=()=>{const old=entry.querySelector('.subject-mark-selected');if(old)old.remove();const info=document.createElement('div');info.className='subject-mark-detail subject-mark-selected';info.textContent=[mark.type||'Тип работы не указан',mark.date instanceof Date&&!Number.isNaN(mark.date.getTime())?mark.date.toLocaleDateString('ru-RU'):'Дата не указана',Number(mark.officialWeight)>0?'Вес ×'+mark.officialWeight:'Вес не указан'].join(' · ');entry.append(info)};
      marks.append(chip)}
    };
    paint(false);entry.append(marks);
-   button.onclick=e=>{if(e.target.closest('.grade-delta')&&stats.difference!==null){explainGradeTrend(stats);return}const expanded=details.hidden;details.hidden=!expanded;button.setAttribute('aria-expanded',String(expanded));arrow.textContent=expanded?'⌃':'⌄';paint(expanded);entry.querySelector('.subject-mark-detail')?.remove()};
+   button.onclick=e=>{if(e.target.closest('.grade-delta')&&stats.difference!==null){explainGradeTrend(stats);return}const expanded=details.hidden;details.hidden=!expanded;button.setAttribute('aria-expanded',String(expanded));arrow.textContent=expanded?'⌃':'⌄';paint(expanded);entry.querySelector('.subject-mark-selected')?.remove()};
    const hint=document.createElement('div');hint.className='subject-mark-detail';hint.textContent='Все оценки — от ранних к поздним';details.append(hint);
   }else{
    const hint=document.createElement('div');hint.className='subject-mark-detail';hint.textContent=stats.forecast===null?'Недостаточно данных для прогноза.':'Прогноз рассчитан по текущим оценкам.';details.append(hint);
