@@ -1205,10 +1205,11 @@ function renderQuarterOutcomes(){
  if(Array.isArray(meta))for(const entry of meta){const name=String(typeof entry==='string'?entry:(entry?.name??entry?.subject??'')).trim();if(name)subjects.add(name)}
  for(const g of cachedGrades){
   const name=String(g.subject||g.subjectName||'').trim(),period=periodOf(g),kind=S.officialKind(g);
-  if(!name||!period||Number(period.split('-')[0])!==year)continue;
+  const gradeYear=kind==='За год'?S.academicYear(g,gradeDate(g)):Number(period?.split('-')[0]);
+  if(!name||gradeYear!==year)continue;
   subjects.add(name);
   if(!isMark(g.value)||!kind)continue;
-  const q=Number(period.split('-')[1]);
+  const q=Number(period?.split('-')[1]);
   const column=kind==='За четверть'&&q>=1&&q<=4?q-1:kind==='За год'?4:null;
   if(column===null)continue;
   const key=name+'|'+column,time=gradeDate(g)?.getTime()??0;
@@ -1555,7 +1556,7 @@ function renderDonut(svgId,legendId,rows,valueId,value,mode){
  for(const key of categories){
   const n=counts.get(key)||0;if(!n)continue;
   const arc=svgEl('circle',{cx:100,cy:100,r:72,fill:'none',stroke:colors[key],'stroke-width':23,'stroke-dasharray':Math.max(0,circumference*n/total-2)+' '+circumference,'stroke-dashoffset':-offset,'transform':'rotate(-90 100 100)'});
-  const toggleFilter=()=>{if(mode==='grades'){gradeValueFilter=gradeValueFilter===key?null:key;forecastFilter=null}else{forecastFilter=forecastFilter===key?null:key;gradeValueFilter=null}renderGrades();window.LeveliNavigation.navigate('subjects')};
+  const toggleFilter=()=>{window.leveliSubjectTab=mode==='grades'?'grades':'forecast';if(mode==='grades'){gradeValueFilter=gradeValueFilter===key?null:key;forecastFilter=null}else{forecastFilter=forecastFilter===key?null:key;gradeValueFilter=null}renderGrades();window.LeveliNavigation.navigate('subjects')};
   arc.style.cursor='pointer';arc.addEventListener('click',toggleFilter);
   svg.append(arc);
   // Accent outline around the selected forecast category, without changing its grade color.
@@ -1899,7 +1900,7 @@ return '2026-4'}
 const m=now.getMonth()+1;const q=m>=9&&m<=10?1:m>=11?2:m<=3?3:4;return year+'-'+q}
 function applySchoolData(data){if(data.schemaVersion!==1||data.source!=='petersburgedu'||!Array.isArray(data.grades))throw Error('Неизвестный формат школьных данных.');
 schoolDataMeta=data;cachedGrades=data.grades.filter(g=>g&&typeof g==='object').map(g=>({...g,value:S.mark(g)}));updateIdentity(auth.currentUser,cachedGrades);
-const selected=periodSelect.value;const nowPeriod=currentSchoolPeriod();const schoolYear=Number(nowPeriod.slice(0,4));const years=[...new Set([schoolYear,...cachedGrades.map(periodOf).filter(Boolean).map(p=>Number(p.slice(0,4)))])].sort((a,b)=>b-a);
+const selected=periodSelect.value;const nowPeriod=currentSchoolPeriod();const schoolYear=Number(nowPeriod.slice(0,4));const years=[...new Set([schoolYear,...cachedGrades.map(g=>S.officialKind(g)==='За год'?S.academicYear(g,gradeDate(g)):Number(periodOf(g)?.slice(0,4))).filter(Number.isFinite)])].sort((a,b)=>b-a);
 periodSelect.replaceChildren(...years.flatMap(year=>[1,2,3,4].map(q=>new Option(q+' четверть'+(year===schoolYear?'':' · '+year+'/'+(year+1)),year+'-'+q))));
 periodSelect.value=[...periodSelect.options].some(o=>o.value===selected)&&selected<=nowPeriod?selected:nowPeriod;refreshChoiceButtons();renderQuarterOutcomes();
  // A background Firebase refresh must never close the subject the child is reading.
