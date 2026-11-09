@@ -101,6 +101,57 @@ function fivesNeeded(regular){
  for(let n=1;n<=100000;n++)if((sum+5*n)/(total+n)+1e-12>=threshold)return n;
  return null;
 }
-const api={score,mark,officialKind,date,period,academicYear,weight,mean,forecast,normalize,subjectTrend,summary,fivesNeeded};
+// Each subject contributes equally, while its own average uses the mark weights.
+function meanOfSubjects(groups){
+ const averages=[...groups].map(mean);
+ return averages.length?averages.reduce((sum,value)=>sum+value,0)/averages.length:null;
+}
+function monday(d){
+ return new Date(d.getFullYear(),d.getMonth(),d.getDate()-((d.getDay()+6)%7),12);
+}
+function dateKey(d){
+ return [d.getFullYear(),d.getMonth()+1,d.getDate()].map(n=>String(n).padStart(2,'0')).join('-');
+}
+function selectWeeklySubjects(subjects){
+ const magnitude=s=>Math.abs(s.delta??0);
+ const ranked=subjects.sort((a,b)=>magnitude(b)-magnitude(a)||a.name.localeCompare(b.name,'ru'));
+ const up=ranked.find(s=>s.delta>0),down=ranked.find(s=>s.delta<0);
+ if(!up||!down)return ranked.slice(0,3);
+ return [up,down,...ranked.filter(s=>s!==up&&s!==down).slice(0,1)];
+}
+function weeklyIssues(rows,now=new Date()){
+ const currentMonday=monday(now);
+ const buckets=new Map();
+ for(const g of normalize(rows)){
+  const when=date(g),quarter=period(g),name=String(g.subject||g.subjectName||'').trim();
+  if(!when||!quarter||!name||officialKind(g))continue;
+  const start=monday(when);
+  if(start>=currentMonday)continue;
+  const week=dateKey(start),id=quarter+':'+week;
+  if(!buckets.has(id))buckets.set(id,{id,quarter,week,rows:[]});
+  buckets.get(id).rows.push({...g,name});
+ }
+ const quarters=new Map();
+ const releases=[];
+ for(const {id,quarter,week,rows} of [...buckets.values()].sort((a,b)=>a.week.localeCompare(b.week)||a.quarter.localeCompare(b.quarter))){
+  if(!quarters.has(quarter))quarters.set(quarter,{bySubject:new Map(),previous:null});
+  const state=quarters.get(quarter);
+  const active=new Set(rows.map(g=>g.name));
+  const before=new Map([...active].map(name=>[name,mean(state.bySubject.get(name)||[])]));
+  for(const g of rows){
+   if(!state.bySubject.has(g.name))state.bySubject.set(g.name,[]);
+   state.bySubject.get(g.name).push(g);
+  }
+  const totals={count:rows.length,fives:rows.filter(g=>g.value===5).length,average:meanOfSubjects(state.bySubject.values())};
+  const subjects=selectWeeklySubjects([...active].map(name=>{
+   const after=mean(state.bySubject.get(name)),prior=before.get(name);
+   return {name,before:prior,after,delta:prior===null?null:after-prior};
+  }));
+  releases.push({id,quarter,week,totals,previous:state.previous,subjects});
+  state.previous=totals;
+ }
+ return releases;
+}
+const api={score,mark,officialKind,date,period,academicYear,weight,mean,forecast,normalize,subjectTrend,summary,fivesNeeded,meanOfSubjects,weeklyIssues};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.LeveliSchool=api;
 })(typeof globalThis!=='undefined'?globalThis:this);
