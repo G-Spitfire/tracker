@@ -128,3 +128,44 @@ test('marks older than the last six affect total average but not trend',()=>{
  assert.ok(Math.abs(full.difference-recent.difference)<1e-10);
  assert.notEqual(full.average,recent.average);
 });
+
+test('weekly issues skip empty weeks, compare within each quarter and update after a correction',()=>{
+ const grade=(date,value,subject='Математика',extra={})=>({date,value,subject,...extra});
+ const grades=[
+  grade('2026-10-04',3,'Математика',{weight:2}),
+  grade('2026-10-04',5,'Русский язык'),
+  grade('2026-10-12',5),
+  grade('2026-10-15',2,'Русский язык'),
+  grade('2026-10-15',5,'История'),
+  grade('2026-10-15',5,'Русский язык',{type:'Четвертная'}),
+  grade('2026-11-05',4),
+ ];
+ const {weeklyIssues}=require('../school-model.js');
+ assert.equal(typeof weeklyIssues,'function');
+ const sunday=weeklyIssues(grades,new Date(2026,10,8,23,59));
+ assert.equal(sunday.length,2);
+ const [first,second]=sunday;
+ assert.equal(first.id,'2026-1:2026-09-28');
+ assert.equal(first.previous,null);
+ assert.equal(second.id,'2026-1:2026-10-12');
+ assert.deepEqual(second.previous,first.totals);
+ assert.equal(second.totals.count,3);
+ assert.equal(second.totals.fives,2);
+ assert.ok(Math.abs(second.totals.average-(11/3+3.5+5)/3)<1e-10);
+ assert.deepEqual(second.subjects.map(x=>[x.name,x.before]),[['Математика',3],['Русский язык',5],['История',null]]);
+ const monday=weeklyIssues(grades,new Date(2026,10,9));
+ assert.equal(monday.at(-1).previous,null);
+ assert.equal(monday.at(-1).id,'2026-2:2026-11-02');
+ const corrected=weeklyIssues(grades.filter(g=>g.date!=='2026-10-04'),new Date(2026,10,9));
+ assert.equal(corrected[0].id,second.id);
+ assert.equal(corrected[0].previous,null);
+});
+
+test('a calendar week crossing quarters yields two separate releases',()=>{
+ const {weeklyIssues}=require('../school-model.js');
+ const rows=[{date:'2026-10-22',quarter:1},{date:'2026-10-24',quarter:2}]
+  .map(g=>({...g,subject:'История',value:5}));
+ const issues=weeklyIssues(rows,new Date(2026,9,26));
+ assert.deepEqual(issues.map(issue=>issue.id),['2026-1:2026-10-19','2026-2:2026-10-19']);
+ assert.ok(issues.every(issue=>issue.previous===null));
+});
