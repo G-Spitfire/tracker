@@ -793,6 +793,16 @@ body:has([data-page="profile"]:not([hidden])) .content{padding-bottom:0}
 .subject-mark small{font-size:9px;color:var(--ds-text-secondary);font-weight:600}
 .subject-mark-detail{margin-top:9px;padding:10px;border-radius:9px;background:var(--ds-surface-inner);font-size:12px;color:var(--ds-text-secondary)}
 .subject-final-empty{font-size:12px;color:var(--ds-text-secondary)}
+
+.outcomes-year-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:12px}
+.outcomes-year-table th,.outcomes-year-table td{padding:10px 3px;border-bottom:1px solid rgba(210,190,255,.14);text-align:center;color:var(--ds-text-primary)}
+.outcomes-year-table th:first-child{width:43%;text-align:left;overflow-wrap:anywhere}
+.outcomes-year-table thead th{font-size:11px;color:var(--ds-text-secondary)}
+.outcomes-year-table thead th.is-current{color:var(--leveli-accent-ink)}
+.outcomes-year-table td[data-grade="5"]{color:#74e3ad;font-weight:800}
+.outcomes-year-table td[data-grade="4"]{color:#f6d66b;font-weight:800}
+.outcomes-year-table td[data-grade="3"]{color:#f3a052;font-weight:800}
+.outcomes-year-table td[data-grade="2"]{color:#f17679;font-weight:800}
 </style></head><body>
 <div id="leveli-startup" class="leveli-startup" role="status" aria-live="polite" aria-label="Leveli загружается">
  <img class="leveli-startup-logo" src="./brand/mark.svg" width="96" height="96" alt="">
@@ -1187,45 +1197,36 @@ document.getElementById('outcomes-tab-weeks').addEventListener('click',()=>setOu
 document.getElementById('outcomes-tab-quarters').addEventListener('click',()=>setOutcomesMode('quarters'));
 function renderQuarterOutcomes(){
  const current=currentSchoolPeriod(),year=Number(current.slice(0,4));
- // Retain the familiar four-quarter selector. A school year is chosen from already observed periods.
- const periods=[...new Set(cachedGrades.map(periodOf).filter(p=>p&&p<current))].sort().reverse();
- const chosenYear=outcomesPeriod?Number(outcomesPeriod.slice(0,4)):(periods.length?Number(periods[0].slice(0,4)):year);
- const first=chosenYear+'-1',last=chosenYear+'-4';
- if(!outcomesPeriod||outcomesPeriod>=current||outcomesPeriod<first||outcomesPeriod>last)
-  outcomesPeriod=periods.find(p=>Number(p.slice(0,4))===chosenYear)||null;
- outcomesQuarterButtons.replaceChildren();
- for(let q=1;q<=4;q++){
-  const period=chosenYear+'-'+q,b=document.createElement('button');
-  b.type='button';b.textContent=q+' четв.';b.disabled=period>=current;
-  b.setAttribute('aria-pressed',String(outcomesPeriod===period));
-  b.addEventListener('click',()=>{outcomesPeriod=period;renderQuarterOutcomes()});
-  outcomesQuarterButtons.append(b);
- }
- const title=document.getElementById('outcomes-quarter-title'),yearLabel=document.getElementById('outcomes-quarter-year'),rows=document.getElementById('outcomes-quarter-grades');
- title.textContent=outcomesPeriod?('Итоги '+({1:'I',2:'II',3:'III',4:'IV'}[Number(outcomesPeriod.split('-')[1])])+' четверти'):'Итоги четверти';
- yearLabel.textContent=chosenYear+'/'+String(chosenYear+1).slice(-2);
- rows.replaceChildren();
- if(!outcomesPeriod){
-  const p=document.createElement('p');p.className='outcomes-quarter-empty';p.textContent='Завершённых четвертей пока нет.';rows.append(p);return;
- }
- const found=new Map();
+ const yearLabel=document.getElementById('outcomes-quarter-year'),title=document.getElementById('outcomes-quarter-title'),rows=document.getElementById('outcomes-quarter-grades');
+ const selector=document.getElementById('outcomes-quarter-buttons');selector.hidden=true;
+ title.textContent='Итоги учебного года';yearLabel.textContent=year+'/'+String(year+1).slice(-2);rows.replaceChildren();
+ const subjects=new Set(),official=new Map();
+ const meta=schoolDataMeta?.subjects;
+ if(Array.isArray(meta))for(const entry of meta){const name=String(typeof entry==='string'?entry:(entry?.name??entry?.subject??'')).trim();if(name)subjects.add(name)}
  for(const g of cachedGrades){
-  if(periodOf(g)!==outcomesPeriod||S.officialKind(g)!=='За четверть'||!isMark(g.value))continue;
-  const name=String(g.subject||g.subjectName||'').trim();if(!name)continue;
-  const time=gradeDate(g)?.getTime()??0;
-  if(!found.has(name)||time>=found.get(name).time)found.set(name,{value:g.value,time});
+  const name=String(g.subject||g.subjectName||'').trim(),period=periodOf(g),kind=S.officialKind(g);
+  if(!name||!period||Number(period.split('-')[0])!==year)continue;
+  subjects.add(name);
+  if(!isMark(g.value)||!kind)continue;
+  const q=Number(period.split('-')[1]);
+  const column=kind==='За четверть'&&q>=1&&q<=4?q-1:/год/i.test(String(kind))?4:null;
+  if(column===null)continue;
+  const key=name+'|'+column,time=gradeDate(g)?.getTime()??0;
+  if(!official.has(key)||time>=official.get(key).time)official.set(key,{value:g.value,time});
  }
- if(!found.size){
-  const p=document.createElement('p');p.className='outcomes-quarter-empty';p.textContent='Официальные оценки за эту четверть пока не получены из дневника.';rows.append(p);return;
+ if(!subjects.size){const p=document.createElement('p');p.className='outcomes-quarter-empty';p.textContent='Предметы пока не загружены.';rows.append(p);return}
+ const table=document.createElement('table');table.className='outcomes-year-table';
+ const head=document.createElement('thead'),hr=document.createElement('tr');
+ for(const label of ['Предмет','I','II','III','IV','Год']){const cell=document.createElement('th');cell.scope='col';cell.textContent=label;if(label===String(['I','II','III','IV'][Number(current.split('-')[1])-1]))cell.classList.add('is-current');hr.append(cell)}
+ head.append(hr);table.append(head);
+ const body=document.createElement('tbody');
+ for(const name of [...subjects].sort((a,b)=>a.localeCompare(b,'ru'))){
+  const tr=document.createElement('tr'),label=document.createElement('th');label.scope='row';label.textContent=name;tr.append(label);
+  for(let i=0;i<5;i++){const td=document.createElement('td'),mark=official.get(name+'|'+i);td.textContent=mark?String(mark.value):'—';if(mark)td.dataset.grade=String(mark.value);tr.append(td)}
+  body.append(tr);
  }
- for(const [name,{value}] of [...found].sort((a,b)=>a[0].localeCompare(b[0],'ru'))){
-  const row=document.createElement('div');row.className='outcomes-quarter-row';
-  const label=document.createElement('span');label.className='outcomes-subject-name';label.textContent=name;
-  const badge=document.createElement('strong');badge.className='outcomes-quarter-grade';badge.dataset.grade=String(value);badge.textContent=value;
-  row.append(label,badge);rows.append(row);
- }
+ table.append(body);rows.append(table);
 }
-
 function workCategory(g){const t=String([g.workType,g.type,g.description,g.title].filter(Boolean).join(' ')).toLowerCase();if(/контрольн|проверочн|\bкр\b/.test(t))return 'control';if(/самостоятельн|\bср\b/.test(t))return 'self';if(/тест|test/.test(t))return 'test';return 'other'}
 function mean(items){return S.mean(items)}
 function formatMean(n){return n===null?'—':n.toFixed(2).replace('.',',')}
