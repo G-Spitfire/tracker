@@ -1326,7 +1326,7 @@ const weeklyStories=(()=>{
   const slide=slides[current];
   const compare=slide.before!=null;
   $('story-eyebrow').textContent=labels[current];
-  $('story-label-before').textContent=openedIssue?.previous?weekLabel(openedIssue.previous.week):'';
+  $('story-label-before').textContent=openedIssue?.previous?weekLabel(issues.filter(item=>item.quarter===openedIssue.quarter&&item.week<openedIssue.week).at(-1)?.week??openedIssue.week):'';
   $('story-label-after').textContent=openedIssue?weekLabel(openedIssue.week):'';
   $('weekly-story-title').textContent=slide.title;
   dialog.dataset.layout=slide.largeCounts?'fives':slide.layout??'';
