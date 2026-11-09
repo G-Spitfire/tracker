@@ -139,6 +139,11 @@ body{background:var(--ds-page-surface);color:#f6f0ff}
 .grade-delta{font-size:10px;white-space:nowrap}
 .grade-delta.up{color:var(--ds-status-good)}.grade-delta.down{color:var(--ds-status-bad)}.grade-delta.flat{color:var(--ds-text-secondary)}
 #school-subjects{gap:8px}
+.subject-row__recent{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.subject-row__mark{display:inline-flex;min-width:22px;height:23px;padding:0 5px;align-items:center;justify-content:center;border:1px solid var(--ds-border);border-radius:6px;font-size:11px;font-weight:800;color:var(--ds-text-primary)}
+.subject-row__mark[data-grade="3"]{color:var(--ds-grade-three)}
+.subject-row__mark[data-grade="2"]{color:var(--ds-status-bad)}
+.subject-row__mark.is-recent{border-color:var(--leveli-accent);background:var(--leveli-accent-dim)}
 .subject-row{padding:11px 9px;background:color-mix(in srgb,var(--leveli-accent-dim) 24%,var(--ds-surface-inner));border:1px solid var(--ds-border);box-shadow:none;min-height:67px;display:flex;gap:6px;align-items:center}
 .subject-row:hover{background:var(--leveli-accent-dim)}
 .subject-row__main{min-width:0;flex:1;gap:4px}
@@ -1137,7 +1142,7 @@ const S=window.LeveliSchool;
 const isMark=v=>S.score(v)!==null;
 const isFinal=g=>!!S.officialKind(g);
 let cachedGrades=[],loadGeneration=0;let schoolDataMeta=null;let retryHandle=null;
-let forecastFilter=null;function clearSchool(){document.querySelector('[data-page="subjects"]').classList.remove('subject-detail-active');cachedGrades=[];subjects.replaceChildren();for(const id of ['school-analytics','school-trend','school-subject-detail','school-period-buttons','school-filter-buttons','school-forecast-legend','school-good-list','school-attention-list'])document.getElementById(id).replaceChildren();document.getElementById('school-donut').replaceChildren();document.getElementById('school-subject-detail').hidden=true;document.getElementById('school-overview').hidden=false;periodSelect.replaceChildren();subjectFilter.value='all';forecastFilter=null;outcomesPeriod=null;renderQuarterOutcomes();status.textContent='';document.getElementById('school-grades-donut').replaceChildren();document.getElementById('school-grades-legend').replaceChildren();document.getElementById('school-grades-total').textContent='0';schoolDataMeta=null;document.getElementById('school-freshness').textContent='';document.getElementById('school-overall').textContent='—';document.getElementById('school-trend-change').textContent='';}
+let forecastFilter=null,gradeValueFilter=null;function clearSchool(){document.querySelector('[data-page="subjects"]').classList.remove('subject-detail-active');cachedGrades=[];subjects.replaceChildren();for(const id of ['school-analytics','school-trend','school-subject-detail','school-period-buttons','school-filter-buttons','school-forecast-legend','school-good-list','school-attention-list'])document.getElementById(id).replaceChildren();document.getElementById('school-donut').replaceChildren();document.getElementById('school-subject-detail').hidden=true;document.getElementById('school-overview').hidden=false;periodSelect.replaceChildren();subjectFilter.value='all';forecastFilter=null;gradeValueFilter=null;outcomesPeriod=null;renderQuarterOutcomes();status.textContent='';document.getElementById('school-grades-donut').replaceChildren();document.getElementById('school-grades-legend').replaceChildren();document.getElementById('school-grades-total').textContent='0';schoolDataMeta=null;document.getElementById('school-freshness').textContent='';document.getElementById('school-overall').textContent='—';document.getElementById('school-trend-change').textContent='';}
 const periodSelect=document.getElementById('school-period');
 const subjectFilter=document.getElementById('school-filter'),analytics=document.getElementById('school-analytics');
 const gradeDate=S.date,periodOf=S.period;
@@ -1523,18 +1528,18 @@ function renderDonut(svgId,legendId,rows,valueId,value,mode){
  for(const key of categories){
   const n=counts.get(key)||0;if(!n)continue;
   const arc=svgEl('circle',{cx:100,cy:100,r:72,fill:'none',stroke:colors[key],'stroke-width':23,'stroke-dasharray':Math.max(0,circumference*n/total-2)+' '+circumference,'stroke-dashoffset':-offset,'transform':'rotate(-90 100 100)'});
-  const toggleFilter=()=>{forecastFilter=forecastFilter===key?null:key;renderGrades();window.LeveliNavigation.navigate('subjects')};
-  if(mode==='subjects'){arc.style.cursor='pointer';arc.addEventListener('click',toggleFilter)}
+  const toggleFilter=()=>{if(mode==='grades'){gradeValueFilter=gradeValueFilter===key?null:key;forecastFilter=null}else{forecastFilter=forecastFilter===key?null:key;gradeValueFilter=null}renderGrades();window.LeveliNavigation.navigate('subjects')};
+  arc.style.cursor='pointer';arc.addEventListener('click',toggleFilter);
   svg.append(arc);
   // Accent outline around the selected forecast category, without changing its grade color.
   if(mode==='subjects'&&forecastFilter===key){svg.append(svgEl('circle',{cx:100,cy:100,r:86,fill:'none',stroke:'var(--leveli-accent)','stroke-width':3,'stroke-dasharray':Math.max(0,circumference*n/total*86/72-2)+' '+(2*Math.PI*86),'stroke-dashoffset':-offset*86/72,'transform':'rotate(-90 100 100)','data-accent-selection':'true'}))}
   offset+=circumference*n/total;
-  const button=document.createElement(mode==='subjects'?'button':'div');
+  const button=document.createElement('button');
   const label=key==='none'?'Без прогноза':'Оценка '+key;
   button.className='legend-item';
-  if(mode==='subjects'){
+  {
    button.type='button';
-   button.setAttribute('aria-pressed',String(forecastFilter===key));
+   button.setAttribute('aria-pressed',String((mode==='subjects'?forecastFilter:gradeValueFilter)===key));
    button.onclick=event=>{toggleFilter();if(event.detail===0)document.getElementById('subjects-title').focus()};
   }
   const l=document.createElement('span');l.className='legend-label';const dot=document.createElement('span');dot.className='legend-dot';dot.style.background=colors[key];l.append(dot,document.createTextNode(label));
@@ -1641,12 +1646,20 @@ function renderGrades(){
   const {name,grades,stats,count}=item;
   const key=stats.official!==null?String(stats.official):stats.forecast!==null?String(stats.forecast):'none';
   if(forecastFilter&&forecastFilter!==key)continue;
+  if(gradeValueFilter&&!grades.regular.some(g=>String(g.value)===gradeValueFilter))continue;
   const btn=document.createElement('button');btn.type='button';btn.className='subject-row';
   const main=document.createElement('span');main.className='subject-row__main';
   const nameEl=document.createElement('span');nameEl.className='subject-row__name';nameEl.textContent=name;
   const meta=document.createElement('span');meta.className='subject-row__meta';
   meta.textContent=pluralRu(count,'оценка','оценки','оценок');
   main.append(nameEl,meta);
+  const recent=[...grades.regular].sort((a,b)=>(b.date?.getTime?.()||0)-(a.date?.getTime?.()||0)).slice(0,3);
+  if(recent.length){const marks=document.createElement('span');marks.className='subject-row__recent';marks.setAttribute('aria-label','Последние оценки');
+   const now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
+   for(const mark of recent){const chip=document.createElement('span');chip.className='subject-row__mark';chip.dataset.grade=String(mark.value);chip.textContent=String(mark.value);
+    const day=mark.date instanceof Date&&!Number.isNaN(mark.date.getTime())?new Date(mark.date.getFullYear(),mark.date.getMonth(),mark.date.getDate()).getTime():null;
+    if(day===today||day===today-86400000){chip.classList.add('is-recent');chip.title=day===today?'Сегодня':'Вчера';chip.setAttribute('aria-label',String(mark.value)+', '+chip.title)}
+    marks.append(chip)}main.append(marks)}
   const average=document.createElement('span');average.className='subject-row__number';
   const avg=document.createElement('strong');avg.textContent=formatMean(stats.average);const avgLabel=document.createElement('small');avgLabel.textContent='средний';average.append(avg,avgLabel);
   const grade=document.createElement('span');grade.className='subject-row__grade';
@@ -1659,7 +1672,7 @@ function renderGrades(){
   btn.append(main,average,grade,dynamics);if(stats.difference!==null)delta.title='Нажми, чтобы узнать, как рассчитана динамика';btn.onclick=e=>{if(e.target.closest('.grade-delta')&&stats.difference!==null){explainGradeTrend(stats);return}openSubject(name,grades);window.scrollTo(0,0)};
   subjects.append(btn);
  }
- if(!subjects.children.length){const p=document.createElement('p');p.className='school-empty';p.textContent=forecastFilter?'Нет предметов в этой категории.':'Предметы пока не загружены.';subjects.append(p)}
+ if(!subjects.children.length){const p=document.createElement('p');p.className='school-empty';p.textContent=forecastFilter||gradeValueFilter?'Нет предметов в этой категории.':'Предметы пока не загружены.';subjects.append(p)}
 }
 window.addEventListener('leveli-close-subject',()=>{document.querySelector('[data-page="subjects"]').classList.remove('subject-detail-active');document.getElementById('school-subject-detail').hidden=true;document.getElementById('subjects-overview').hidden=false});
 function openSubject(name,grades){
