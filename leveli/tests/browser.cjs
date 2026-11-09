@@ -384,7 +384,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  const guide=page.getByRole('button',{name:'Как читать оценки'});
  for(const width of [320,390,430]){
   await page.setViewportSize({width,height:844});
-  const rows=await page.locator('#school-forecast-legend button').evaluateAll(buttons=>buttons.map(b=>{
+  const rows=await page.locator('#school-forecast-legend .legend-item').evaluateAll(buttons=>buttons.map(b=>{
    const box=b.getBoundingClientRect();return {label:b.querySelector('.legend-label').textContent,x:box.x,y:box.y,w:box.width,h:box.height,overflow:b.scrollWidth>b.clientWidth+1};
   }));
   assert.deepEqual(rows.map(row=>row.label),['Оценка 5','Оценка 4']);
@@ -398,14 +398,13 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.keyboard.press('Escape');
  assert.equal(await page.locator('#school-guide').isVisible(),false);
  assert.ok(await guide.evaluate(el=>document.activeElement===el));
- await page.getByRole('button',{name:/^Оценка 5\s*1$/}).click();
- assert.equal(await page.locator('#school-donut circle[data-accent-selection="true"]').count(),1);
- assert.equal(await page.locator('#school-donut circle[data-accent-selection="true"]').evaluate(el=>el.style.stroke),'var(--leveli-accent)');
- assert.equal(await page.locator('#school-subjects .subject-entry').count(),1);
- assert.match(await page.locator('#school-subjects').innerText(),/Русский язык/);
- assert.equal(await page.locator('[data-page="subjects"]').isVisible(),true);
- await navButton('home').click();
- await page.getByRole('button',{name:/^Оценка 5\s*1$/}).click();
+ assert.equal(await page.locator('#school-forecast-legend button,#school-grades-legend button').count(),0);
+ assert.equal(await page.locator('#school-donut circle[data-accent-selection="true"]').count(),0);
+ await page.locator('#school-donut circle').last().click();
+ assert.equal(await page.locator('[data-page="home"]').isVisible(),true);
+ await page.locator('#school-forecast-legend .legend-item').first().click();
+ assert.equal(await page.locator('[data-page="home"]').isVisible(),true);
+ await navButton('subjects').click();
  await mathRow.locator('.subject-expand').click();
  assert.equal(await mathRow.locator('.subject-expand').getAttribute('aria-expanded'),'true');
  assert.match(await mathRow.locator('.subject-mark-detail').innerText(),/Прогноз 4 по среднему 4,50/);
