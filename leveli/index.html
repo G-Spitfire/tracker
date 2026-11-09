@@ -1719,7 +1719,7 @@ function renderGrades(){
    button.onclick=e=>{if(e.target.closest('.grade-delta')&&stats.difference!==null){explainGradeTrend(stats);return}const expanded=details.hidden;details.hidden=!expanded;button.setAttribute('aria-expanded',String(expanded));arrow.textContent=expanded?'⌃':'⌄';paint(expanded);entry.querySelector('.subject-mark-selected')?.remove()};
    const hint=document.createElement('div');hint.className='subject-mark-detail';hint.textContent='Все оценки — от ранних к поздним';details.append(hint);
   }else{
-   const hint=document.createElement('div');hint.className='subject-mark-detail';hint.textContent=stats.forecast===null?'Недостаточно данных для прогноза.':'Прогноз рассчитан по текущим оценкам.';details.append(hint);
+   const hint=document.createElement('div');hint.className='subject-mark-detail';hint.textContent=stats.forecast===null?'Для прогноза нужны минимум три обычные оценки.':`Прогноз ${stats.forecast} по среднему ${formatMean(stats.average)} (${grades.regular.length} оценок с учётом их веса). Пороги существующей формулы: 5 — от 4,60; 4 — от 3,60; 3 — от 2,60; иначе 2. ${stats.difference===null?'Для динамики недостаточно оценок.':`Динамика ${gradeTrendDisplay(stats.difference).text}: ${grades.regular.length<6?'последняя оценка против среднего предыдущих':'последние три оценки против предыдущих трёх'}; разница взвешенных средних ${formatChange(stats.difference)}.`}`;details.append(hint);
    button.onclick=e=>{if(e.target.closest('.grade-delta')&&stats.difference!==null){explainGradeTrend(stats);return}details.hidden=!details.hidden;button.setAttribute('aria-expanded',String(!details.hidden));arrow.textContent=details.hidden?'⌄':'⌃'};
   }
   entry.append(details);subjects.append(entry);
