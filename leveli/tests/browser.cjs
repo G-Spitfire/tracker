@@ -400,7 +400,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.ok(await guide.evaluate(el=>document.activeElement===el));
  assert.equal(await page.locator('#school-forecast-legend button,#school-grades-legend button').count(),0);
  assert.equal(await page.locator('#school-donut circle[data-accent-selection="true"]').count(),0);
- await page.locator('#school-donut circle').last().click();
+ await page.locator('#school-donut').click({position:{x:100,y:28}});
  assert.equal(await page.locator('[data-page="home"]').isVisible(),true);
  await page.locator('#school-forecast-legend .legend-item').first().click();
  assert.equal(await page.locator('[data-page="home"]').isVisible(),true);
