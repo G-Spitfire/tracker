@@ -718,6 +718,7 @@ body:has([data-page="profile"]:not([hidden])) .content{padding-bottom:0}
 .story-progress button[aria-current="step"]::before{background:var(--leveli-accent-border)}
 .story-head>span{color:var(--leveli-accent-soft);font-size:var(--ds-font-support);font-weight:800}
 .story-head h2{margin:4px 0 0;font-size:var(--ds-font-screen);line-height:var(--ds-line-heading);font-weight:800}
+@media(max-width:360px){.story-head h2{min-block-size:2lh}}
 .story-main{flex:1;display:flex;flex-direction:column;gap:12px;padding:16px;background:var(--ds-card-surface);border:1px solid var(--ds-border);border-radius:var(--ds-radius-card)}
 .story-comparison{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .story-comparison>div{min-width:0;display:grid;justify-items:start;gap:4px;padding:12px;border-radius:var(--ds-radius-inner);border:1px solid var(--ds-border);background:var(--ds-surface-inner)}
@@ -747,6 +748,8 @@ body:has([data-page="profile"]:not([hidden])) .content{padding-bottom:0}
 .story-result strong{flex:none;font-size:24px;line-height:var(--ds-line-heading)}
 .weekly-story:is([data-layout="overview"],[data-layout="fives"]) .story-result strong{color:var(--leveli-accent-soft)}
 .story-result span{font-size:var(--ds-font-support);line-height:var(--ds-line-normal);color:var(--ds-text-secondary)}
+.weekly-story[data-layout="summary"] .story-result{flex:1;flex-direction:column;justify-content:center;text-align:center;padding:16px}
+.weekly-story[data-layout="summary"] .story-result :is(strong,span){max-inline-size:100%;overflow-wrap:anywhere}
 #story-change[data-tone="up"],.story-subject-delta[data-tone="up"]{color:var(--ds-status-good)}
 #story-change[data-tone="down"],.story-subject-delta[data-tone="down"]{color:var(--ds-status-bad)}
 .story-subjects{flex:1;list-style:none;margin:0;padding:0;display:grid;grid-auto-rows:1fr;gap:8px}
@@ -868,7 +871,7 @@ body:has([data-page="profile"]:not([hidden])) .content{padding-bottom:0}
   <div id="story-progress" class="story-progress" aria-label="Прогресс сторис"></div>
   <div class="story-head"><span id="story-eyebrow"></span><h2 id="weekly-story-title"></h2></div>
   <div class="story-main">
-   <div id="story-comparison" class="story-comparison"><div class="story-before"><span id="story-label-before">Неделя сравнения</span><strong id="story-before"></strong><small id="story-unit-before"></small><span class="story-meter" aria-hidden="true" hidden><i></i></span></div><div class="story-after"><span id="story-label-after">Эта неделя</span><strong id="story-after"></strong><small id="story-unit-after"></small><span class="story-meter" aria-hidden="true" hidden><i></i></span></div></div>
+   <div id="story-comparison" class="story-comparison"><div class="story-before"><span id="story-label-before"></span><strong id="story-before"></strong><small id="story-unit-before"></small><span class="story-meter" aria-hidden="true" hidden><i></i></span></div><div class="story-after"><span id="story-label-after"></span><strong id="story-after"></strong><small id="story-unit-after"></small><span class="story-meter" aria-hidden="true" hidden><i></i></span></div></div>
    <figure id="story-quarter-chart" class="story-quarter-chart" hidden><figcaption>С начала четверти</figcaption></figure>
    <ul id="story-subjects" class="story-subjects" hidden></ul>
    <div class="story-result"><strong id="story-change"></strong><span id="weekly-story-note"></span></div>
@@ -1211,9 +1214,9 @@ function pluralRu(n,one,few,many){const k=Math.abs(n)%100,last=k%10;return n+' '
 const weeklyStories=(()=>{
  const $=id=>document.getElementById(id);
  const dialog=$('weekly-story'),archive=$('weekly-archive'),empty=$('weekly-empty');
- const labels=['МОЯ НЕДЕЛЯ','ТВОИ ДОСТИЖЕНИЯ','ТВОЙ ПРОГРЕСС','ПО ПРЕДМЕТАМ'];
+ const labels=['ОБЗОР НЕДЕЛИ','ПЯТЁРКИ','СРЕДНИЙ БАЛЛ','ПРЕДМЕТЫ','ИТОГ НЕДЕЛИ'];
  const dateFormat=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long'});
- let uid=null,waiting=false,issues=[],progress={},current=0,slides=[],openedId=null,archiveTrigger=null;
+ let uid=null,waiting=false,issues=[],progress={},current=0,slides=[],openedId=null,openedIssue=null,archiveTrigger=null;
 
  function savedProgress(){
   try{
@@ -1262,16 +1265,26 @@ const weeklyStories=(()=>{
  const signed=n=>n>0?'+'+n:n<0?'−'+Math.abs(n):'0';
  function makeSlides(issue){
   const {totals,previous,subjects}=issue;
-  const averageDelta=previous?formatChange(totals.average-previous.average):null;
-  const fivesTitle=previous&&totals.fives>previous.fives?'Больше пятёрок!':'Твои пятёрки';
+  const averageChange=previous?totals.average-previous.average:null;
+  const averageDelta=averageChange===null?null:formatChange(averageChange);
+  const fivesDiff=previous?totals.fives-previous.fives:null;
+  const fivesTitle=fivesDiff>0?'Больше пятёрок!':fivesDiff===0?'Сколько пятёрок?':'Сколько пятёрок?';
+  const summary=averageChange===null
+   ?{result:'Первые результаты четверти!',note:'Начало положено. Впереди новые достижения.'}
+   :averageChange>0.005
+    ?{result:'Отличный прогресс!',note:'Средний балл за четверть вырос.'}
+    :averageChange< -0.005
+     ?{result:'Есть над чем поработать',note:'Средний балл за четверть снизился. Всё получится!'}
+     :{result:'Держишь уровень!',note:'Средний балл за четверть почти не изменился.'};
   return [
-   {title:'Твоя неделя!',layout:'overview',before:previous?.count,after:totals.count,unit:countMarks,
-    result:previous?signed(totals.count-previous.count):countMarks(totals.count),note:previous?'К неделе сравнения':'Оценки за учебную неделю'},
+   {title:'Неделя в цифрах',layout:'overview',before:previous?.count,after:totals.count,unit:countMarks,
+    result:previous?signed(totals.count-previous.count):countMarks(totals.count),note:previous?'Разница в количестве оценок':'Оценки за учебную неделю'},
    {title:fivesTitle,before:previous?.fives,after:totals.fives,unit:countFives,largeCounts:true,
-    result:previous?signed(totals.fives-previous.fives):null,note:previous?'К неделе сравнения':''},
+    result:previous?signed(fivesDiff):null,note:previous?'Разница в количестве пятёрок':''},
    {title:'Твой средний балл',before:previous?formatMean(previous.average):null,after:formatMean(totals.average),unit:'балл',
     chart:true,result:averageDelta??formatMean(totals.average),tone:averageDelta?.startsWith('+')?'up':averageDelta?.startsWith('−')?'down':'',note:'Накопительный средний за четверть'},
-   {title:'Твои предметы',subjects,note:'Только предметы с оценками за неделю'}
+   {title:'Твои предметы',subjects,note:'Предметы с новыми оценками за неделю'},
+   {title:'Главное за неделю',layout:'summary',result:summary.result,note:summary.note}
   ];
  }
  const buttons=labels.map((_,index)=>{
@@ -1316,6 +1329,8 @@ const weeklyStories=(()=>{
   const slide=slides[current];
   const compare=slide.before!=null;
   $('story-eyebrow').textContent=labels[current];
+  $('story-label-before').textContent=openedIssue?.previous?weekLabel(issues.filter(item=>item.quarter===openedIssue.quarter&&item.week<openedIssue.week).at(-1)?.week??openedIssue.week):'';
+  $('story-label-after').textContent=openedIssue?weekLabel(openedIssue.week):'';
   $('weekly-story-title').textContent=slide.title;
   dialog.dataset.layout=slide.largeCounts?'fives':slide.layout??'';
   $('story-comparison').hidden=!compare&&!slide.largeCounts;
@@ -1364,7 +1379,7 @@ const weeklyStories=(()=>{
  }
  function open(issue,fromArchive=false){
   if(dialog.open)return;
-  openedId=issue.id;archiveTrigger=fromArchive?issue.id:null;
+  openedId=issue.id;openedIssue=issue;archiveTrigger=fromArchive?issue.id:null;
   progress={...progress,...savedProgress()};
   slides=makeSlides(issue);
   renderQuarterChart(issue);
@@ -1386,13 +1401,13 @@ const weeklyStories=(()=>{
  });
  dialog.addEventListener('close',()=>{
   if(dialog.open)return;
-  const trigger=archiveTrigger;archiveTrigger=null;openedId=null;
+  const trigger=archiveTrigger;archiveTrigger=null;openedId=null;openedIssue=null;
   renderArchive();
   focusRelease(trigger);
  });
  return {
   reset(nextUid){
-   archiveTrigger=null;openedId=null;dialog.close();uid=nextUid;waiting=!!uid;
+   archiveTrigger=null;openedId=null;openedIssue=null;dialog.close();uid=nextUid;waiting=!!uid;
    issues=[];progress=uid?savedProgress():{};
    $('weekly-empty-message').textContent=uid?'Загружаем оценки…':'Здесь появятся твои недельные истории.';
    renderArchive();

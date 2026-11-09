@@ -88,14 +88,14 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await page.locator('#story-before').innerText(),'2');
  assert.equal(await page.locator('#story-after').innerText(),'5');
  await page.locator('#story-next').click();
- assert.equal(await page.locator('#weekly-story-title').innerText(),'Твои пятёрки');
+ assert.equal(await page.locator('#weekly-story-title').innerText(),'Сколько пятёрок?');
  assert.equal(await page.locator('#story-before').innerText(),'2');
  assert.equal(await page.locator('#story-after').innerText(),'1');
  assert.equal(await page.locator('#story-change').innerText(),'−1');
  assert.ok(await page.locator('#story-after').evaluate(el=>parseFloat(getComputedStyle(el).fontSize)>=72));
  assert.deepEqual(await cardFrame(),overviewFrame,'count slides share the same card frame');
- assert.equal(await page.locator('#story-label-before').innerText(),'Неделя сравнения');
- assert.equal(await page.locator('#story-label-after').innerText(),'Эта неделя');
+ assert.equal(await page.locator('#story-label-before').innerText(),'5 октября – 11 октября');
+ assert.equal(await page.locator('#story-label-after').innerText(),'12 октября – 18 октября');
  await assertFullHeight();
  await page.setViewportSize({width:320,height:844});
  const narrowFivesFrame=await cardFrame();
@@ -106,11 +106,11 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.keyboard.press('Escape');
  await page.reload();
  await story.waitFor();
- assert.equal(await page.locator('#story-progress [aria-current="step"]').getAttribute('aria-label'),'Экран 2 из 4');
+ assert.equal(await page.locator('#story-progress [aria-current="step"]').getAttribute('aria-label'),'Экран 2 из 5');
  await page.evaluate(()=>localStorage.setItem('leveli-weekly-v1-A',JSON.stringify({'2026-1:2026-10-12':4})));
  await page.reload();
  await story.waitFor();
- assert.equal(await page.locator('#weekly-story-title').innerText(),'Твои предметы','legacy fifth step resumes at the fourth');
+ assert.equal(await page.locator('#weekly-story-title').innerText(),'Главное за неделю','saved fifth step resumes at the summary');
  assert.equal(await page.locator('#story-next').innerText(),'Закрыть');
  await page.locator('#story-next').click();
  assert.equal(await page.locator('#home-greeting').innerText(),'Привет, Полина!');
@@ -167,7 +167,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  // Open an archived issue and inspect its four slides.
  await page.locator('#outcomes-weeks .weekly-release').first().click();
  assert.equal(await story.isVisible(),true);
- assert.equal(await page.locator('#story-progress button').count(),4);
+ assert.equal(await page.locator('#story-progress button').count(),5);
  assert.equal(await page.locator('#story-before').innerText(),'2');
  await page.locator('#story-next').click();
  assert.equal(await page.locator('#story-after').innerText(),'1');
@@ -181,9 +181,9 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await assertFullHeight();
  await page.locator('#story-prev').click();
  assert.equal(await page.locator('#story-after').innerText(),'1');
- await page.locator('#story-progress button').last().click();
+ await page.locator('#story-progress button').nth(3).click();
  assert.equal(await page.locator('#story-comparison').isVisible(),false);
- assert.equal(await page.locator('#story-next').innerText(),'Закрыть');
+ assert.equal(await page.locator('#story-next').innerText(),'Дальше');
  assert.match(await page.locator('#story-subjects').innerText(),/Математика[\s\S]*5,00.*4,50/);
  const subjectScore=page.locator('#story-subjects li').first();
  assert.ok(await subjectScore.locator('strong').evaluate(el=>parseFloat(getComputedStyle(el).fontSize)>=28));
@@ -192,11 +192,23 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await assertFullHeight();
  for(const width of [320,360,390,430]){
   await page.setViewportSize({width,height:844});
-  const dimensions=await story.evaluate(el=>({width:el.getBoundingClientRect().width,scroll:el.scrollWidth,window:innerWidth,close:el.querySelector('#story-close').getBoundingClientRect().width,progress:el.querySelector('#story-progress button').getBoundingClientRect().height}));
-  assert.equal(dimensions.width,width,'fullscreen demo on '+width);
-  assert.ok(dimensions.scroll<=width+1,'story does not overflow at '+width);
-  assert.ok(dimensions.close>=44&&dimensions.progress>=44,'story hit targets at '+width);
+  await page.locator('#story-progress button').nth(0).click();
+  const frame=await cardFrame();
+  for(const step of [2,3,4]){
+   await page.locator('#story-progress button').nth(step).click();
+   assert.deepEqual(await cardFrame(),frame,'story card aligns at '+width+' on step '+(step+1));
+   const dimensions=await story.evaluate(el=>({
+    width:el.getBoundingClientRect().width,scroll:el.scrollWidth,window:innerWidth,
+    close:el.querySelector('#story-close').getBoundingClientRect().width,
+    progress:el.querySelector('#story-progress button').getBoundingClientRect().height
+   }));
+   assert.equal(dimensions.width,width,'fullscreen story at '+width);
+   assert.ok(dimensions.scroll<=width+1,'story fits at '+width+' on step '+(step+1));
+   assert.ok(dimensions.close>=44&&dimensions.progress>=44,'story hit targets at '+width);
+  }
  }
+ assert.equal(await page.locator('#story-next').innerText(),'Закрыть');
+ assert.equal(await page.locator('#story-change').innerText(),'Есть над чем поработать');
  await page.setViewportSize({width:390,height:844});
  await page.screenshot({path:'outputs/leveli-weekly-story.png'});
  await page.keyboard.press('Escape');
