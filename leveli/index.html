@@ -1217,7 +1217,7 @@ function renderQuarterOutcomes(){
  if(!subjects.size){const p=document.createElement('p');p.className='outcomes-quarter-empty';p.textContent='Предметы пока не загружены.';rows.append(p);return}
  const table=document.createElement('table');table.className='outcomes-year-table';
  const head=document.createElement('thead'),hr=document.createElement('tr');
- for(const label of ['Предмет','I','II','III','IV','Год']){const cell=document.createElement('th');cell.scope='col';cell.textContent=label;if(label===String(['I','II','III','IV'][Number(current.split('-')[1])-1]))cell.classList.add('is-current');hr.append(cell)}
+ for(const label of ['Предмет','I','II','III','IV','Год']){const cell=document.createElement('th');cell.scope='col';cell.textContent=label;if(year===Number(current.split('-')[0])&&label===String(['I','II','III','IV'][Number(current.split('-')[1])-1]))cell.classList.add('is-current');hr.append(cell)}
  head.append(hr);table.append(head);
  const body=document.createElement('tbody');
  for(const name of [...subjects].sort((a,b)=>a.localeCompare(b,'ru'))){
@@ -1881,7 +1881,7 @@ function selectSchoolPeriod(value){
  if(value>currentSchoolPeriod()){
   const quarter=Number(value.split('-')[1]);setPeriodNotice(quarter+' четверть ещё не наступила. Пока можно посмотреть текущую или предыдущие четверти.');return false;
  }
- periodSelect.value=value;forecastFilter=null;setPeriodNotice('');refreshChoiceButtons();renderGrades();return true;
+ periodSelect.value=value;forecastFilter=null;gradeValueFilter=null;setPeriodNotice('');refreshChoiceButtons();renderQuarterOutcomes();renderGrades();return true;
 }
 function renderChoiceButtons(select,containerId){const container=document.getElementById(containerId);container.replaceChildren();for(const option of select.options){const b=document.createElement('button');b.type='button';const future=option.value>currentSchoolPeriod();b.textContent=option.textContent+(future?' · скоро':'');b.setAttribute('aria-pressed',String(select.value===option.value));b.setAttribute('data-future',String(future));b.addEventListener('click',()=>selectSchoolPeriod(option.value));container.append(b)}}
 function refreshChoiceButtons(){renderChoiceButtons(periodSelect,'school-period-buttons')}
