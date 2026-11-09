@@ -1263,7 +1263,7 @@ const weeklyStories=(()=>{
  function makeSlides(issue){
   const {totals,previous,subjects}=issue;
   const averageDelta=previous?formatChange(totals.average-previous.average):null;
-  const fivesTitle=previous&&totals.fives>previous.fives?'Пятёрок стало больше!':'Твои пятёрки за неделю';
+  const fivesTitle=previous&&totals.fives>previous.fives?'Больше пятёрок!':'Твои пятёрки';
   return [
    {title:'Твоя неделя!',layout:'overview',before:previous?.count,after:totals.count,unit:countMarks,
     result:previous?signed(totals.count-previous.count):countMarks(totals.count),note:previous?'К неделе сравнения':'Оценки за учебную неделю'},
