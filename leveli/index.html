@@ -104,7 +104,7 @@ body{background:var(--ds-page-surface);color:#f6f0ff}
 .donut-panel .forecast-center span{font-size:9px;color:var(--ds-text-secondary)}
 .forecast-legend{display:grid;align-content:start;width:100%;margin-top:2px}
 .forecast-legend .legend-item{width:100%;display:flex;align-items:center;justify-content:space-between;border:1px solid transparent;background:transparent;color:#ded2f1;font:600 10px Manrope,system-ui,sans-serif;padding:4px 2px;border-radius:7px;text-align:left;min-height:36px;gap:2px}
-.forecast-legend button.legend-item{cursor:pointer}
+
 .double-donut:has(.forecast-legend > :nth-child(4)) .legend-item{min-height:28px;padding-block:2px}
 .forecast-legend button[aria-pressed=true]{background:#44345e;border-color:#6e558f}
 .forecast-legend .legend-label{display:flex;align-items:center;gap:5px;min-width:0}
@@ -1569,23 +1569,13 @@ function renderDonut(svgId,legendId,rows,valueId,value,mode){
  for(const key of categories){
   const n=counts.get(key)||0;if(!n)continue;
   const arc=svgEl('circle',{cx:100,cy:100,r:72,fill:'none',stroke:colors[key],'stroke-width':23,'stroke-dasharray':Math.max(0,circumference*n/total-2)+' '+circumference,'stroke-dashoffset':-offset,'transform':'rotate(-90 100 100)'});
-  const toggleFilter=()=>{window.leveliSubjectTab=mode==='grades'?'grades':'forecast';if(mode==='grades'){gradeValueFilter=gradeValueFilter===key?null:key;forecastFilter=null}else{forecastFilter=forecastFilter===key?null:key;gradeValueFilter=null}renderGrades();window.LeveliNavigation.navigate('subjects')};
-  arc.style.cursor='pointer';arc.addEventListener('click',toggleFilter);
   svg.append(arc);
-  // Accent outline around the selected forecast category, without changing its grade color.
-  if(mode==='subjects'&&forecastFilter===key){svg.append(svgEl('circle',{cx:100,cy:100,r:86,fill:'none',stroke:'var(--leveli-accent)','stroke-width':3,'stroke-dasharray':Math.max(0,circumference*n/total*86/72-2)+' '+(2*Math.PI*86),'stroke-dashoffset':-offset*86/72,'transform':'rotate(-90 100 100)','data-accent-selection':'true'}))}
   offset+=circumference*n/total;
-  const button=document.createElement('button');
+  const item=document.createElement('div');item.className='legend-item';
   const label=key==='none'?'Без прогноза':'Оценка '+key;
-  button.className='legend-item';
-  {
-   button.type='button';
-   button.setAttribute('aria-pressed',String((mode==='subjects'?forecastFilter:gradeValueFilter)===key));
-   button.onclick=event=>{toggleFilter();if(event.detail===0)document.getElementById('subjects-title').focus()};
-  }
   const l=document.createElement('span');l.className='legend-label';const dot=document.createElement('span');dot.className='legend-dot';dot.style.background=colors[key];l.append(dot,document.createTextNode(label));
   const count=document.createElement('strong');count.className='legend-count';count.textContent=String(n);
-  button.append(l,count);legend.append(button);
+  item.append(l,count);legend.append(item);
  }
  document.getElementById(valueId).textContent=String(value);
  svg.setAttribute('aria-label',(mode==='subjects'?'Распределение предметов':'Распределение оценок')+': '+rows.length);
