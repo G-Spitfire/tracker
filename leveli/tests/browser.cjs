@@ -726,13 +726,9 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
   assert.notEqual(await color(score('Физика')),await color(score('Химия')));
   await navButton('home').click();
  }
- await page.getByRole('button',{name:/^Оценка 2\s*1$/}).click();
- assert.equal(await page.locator('[data-page="subjects"]').isVisible(),true);
- assert.equal(await page.locator('.subject-entry').count(),1);
- assert.match(await page.locator('.subject-entry').textContent(),/Геометрия/);
- await navButton('home').click();
- await page.getByRole('button',{name:/^Оценка 2\s*1$/}).click();
- await navButton('home').click();
+ assert.equal(await page.locator('#school-forecast-legend button,#school-grades-legend button').count(),0);
+ await page.locator('#school-forecast-legend .legend-item').last().click();
+ assert.equal(await page.locator('[data-page="home"]').isVisible(),true);
  await page.setViewportSize({width:390,height:844});
  await page.getByRole('button',{name:'Профиль и настройки'}).click();
  await page.getByRole('button',{name:/^(Выбрать|Изменить) аватар$/}).click();
