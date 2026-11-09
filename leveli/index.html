@@ -1276,7 +1276,7 @@ const weeklyStories=(()=>{
      ?{result:'Есть над чем поработать',note:'Средний балл за четверть снизился. Всё получится!'}
      :{result:'Держишь уровень!',note:'Средний балл за четверть почти не изменился.'};
   return [
-   {title:'Твоя неделя в цифрах',layout:'overview',before:previous?.count,after:totals.count,unit:countMarks,
+   {title:'Неделя в цифрах',layout:'overview',before:previous?.count,after:totals.count,unit:countMarks,
     result:previous?signed(totals.count-previous.count):countMarks(totals.count),note:previous?'Разница в количестве оценок':'Оценки за учебную неделю'},
    {title:fivesTitle,before:previous?.fives,after:totals.fives,unit:countFives,largeCounts:true,
     result:previous?signed(fivesDiff):null,note:previous?'Разница в количестве пятёрок':''},
