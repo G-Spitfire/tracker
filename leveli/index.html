@@ -1253,7 +1253,9 @@ function gradeTrendDisplay(value){
  if(value===null)return {tone:'flat',text:'—'};
  const tone=value>=.5?'up':value<=-.5?'down':'flat';
  const arrow={up:'↗ ',down:'↘ ',flat:''}[tone];
- return {tone,text:arrow+formatChange(value)};
+ const rounded=Math.abs(value).toFixed(1).replace('.',',');
+ const number=rounded==='0,0'?'0,0':(value<0?'−':'+')+rounded;
+ return {tone,text:arrow+number};
 }
 function pluralRu(n,one,few,many){const k=Math.abs(n)%100,last=k%10;return n+' '+(k>=11&&k<=14?many:last===1?one:last>=2&&last<=4?few:many)}
 
@@ -1709,7 +1711,7 @@ function renderGrades(){
   const metrics=document.createElement('span');metrics.className='subject-entry-metrics';
   const metric=(value,label)=>{const box=document.createElement('span');box.className='subject-entry-metric';const val=document.createElement('span');val.textContent=value;const small=document.createElement('small');small.textContent=label;box.append(val,small);metrics.append(box);return val};
   metric(formatMean(stats.average),'средний');
-  const {tone,text}=gradeTrendDisplay(stats.difference);const trend=metric(text,'динамика');trend.className='grade-delta '+tone;
+  const {tone,text}=gradeTrendDisplay(stats.difference);const trend=metric(text,'');trend.className='grade-delta '+tone;trend.setAttribute('aria-label','Динамика '+text);
   if(activeTab==='forecast'){const prediction=metric(stats.forecast??'—','прогноз');prediction.classList.add('subject-forecast');if(stats.forecast!==null)prediction.dataset.grade=String(stats.forecast)}
   const arrow=document.createElement('span');arrow.textContent='⌄';arrow.setAttribute('aria-hidden','true');
   header.append(title,metrics,arrow);button.append(header);entry.append(button);
