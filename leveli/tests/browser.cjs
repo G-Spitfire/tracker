@@ -741,6 +741,7 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  await page.waitForFunction(()=>document.querySelector('#profile-avatar-display img')?.src.endsWith('polina-dance.webp'));
  await page.evaluate(()=>window.__switchUser('B'));
  await page.waitForFunction(()=>document.querySelector('#profile-avatar-display img')?.src.endsWith('matvey-football.webp'));
+ await require('./homework-browser.cjs')(page);
  assert.deepEqual(errors,[]);fs.writeFileSync('work/browser-result.json',JSON.stringify({passed:true,checks:['one school home','profile navigation','exact school forecast','official final','decline warning','A/B isolation','offline cached grades','logout clear'],errors},null,2));
  await browser.close();console.log('Browser integration: PASS');
 })().catch(e=>{console.error(e);process.exit(1)});
