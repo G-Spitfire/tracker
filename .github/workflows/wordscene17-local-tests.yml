@@ -8,7 +8,6 @@ on:
   pull_request:
     paths:
       - 'wordscene/**'
-      - 'leveli/**'
       - 'index.html'
       - 'README.md'
       - '.github/workflows/wordscene17-local-tests.yml'
@@ -27,10 +26,8 @@ jobs:
           node --check wordscene/engine.js
           node --check wordscene/accounts.js
           node --check wordscene/sw.js
-          node --check leveli/school-model.js
-          node --check leveli/sw.js
-      - name: WordScene and Leveli unit tests
-        run: node --test wordscene/*.test.cjs leveli/tests/*.test.cjs
+      - name: WordScene unit tests
+        run: node --test wordscene/*.test.cjs
 
   browser-acceptance:
     runs-on: ubuntu-latest
@@ -47,7 +44,7 @@ jobs:
       - name: Install matching Playwright package
         run: |
           npm install --no-save playwright@1.64.1
-      - name: Test WordScene and Leveli desktop/mobile browser flows
+      - name: Test WordScene desktop/mobile browser flows
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/wordscene-http.log 2>&1 &
           for i in $(seq 1 40); do
@@ -55,7 +52,6 @@ jobs:
             sleep 1
           done
           node wordscene/browser-acceptance.cjs
-          node leveli/tests/browser.cjs
       - name: Save mobile browser screenshots
         if: always()
         uses: actions/upload-artifact@v4
