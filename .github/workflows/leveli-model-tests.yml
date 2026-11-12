@@ -23,13 +23,16 @@ jobs:
       - run: node --test leveli/tests/school-model.test.cjs leveli/tests/retirement.test.cjs
   browser:
     runs-on: ubuntu-latest
+    # Browsers and OS libraries are preinstalled; no runtime apt/DNS dependency.
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
+      options: --ipc=host
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install --no-save playwright
-      - run: npx playwright install --with-deps chromium
+      - run: npm install --no-save playwright@1.64.1
       - name: Run Leveli browser acceptance with synthetic data
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/leveli-server.log 2>&1 &

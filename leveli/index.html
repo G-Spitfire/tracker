@@ -651,7 +651,7 @@ body{background:var(--ds-page-surface);color:#f6f0ff}
 
 /* Pinned navigation: iPhone safe-area and content clearance. */
 :root .content{padding-bottom:calc(86px + env(safe-area-inset-bottom,0px))}
-.leveli-bottom-nav{position:fixed;z-index:20;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,540px);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:7px 12px max(8px,env(safe-area-inset-bottom,0px));background:var(--ds-card-surface);border-top:1px solid var(--ds-border);box-shadow:0 -10px 26px #0002}
+.leveli-bottom-nav{position:fixed;z-index:20;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,540px);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:7px 12px max(8px,env(safe-area-inset-bottom,0px));background:var(--ds-card-surface);border-top:1px solid var(--ds-border);box-shadow:0 -10px 26px #0002}
 .leveli-bottom-nav[hidden]{display:none!important}
 .leveli-bottom-nav button{min-width:0;min-height:56px;border:0;border-radius:12px;background:transparent;color:var(--ds-text-secondary);font:700 11px Manrope,system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer}
 .leveli-bottom-nav button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -816,7 +816,14 @@ body:has([data-page="profile"]:not([hidden])) .content{padding-bottom:0}
 .outcomes-year-table td[data-grade="4"]{color:#f6d66b;font-weight:800}
 .outcomes-year-table td[data-grade="3"]{color:#f3a052;font-weight:800}
 .outcomes-year-table td[data-grade="2"]{color:#f17679;font-weight:800}
-</style></head><body>
+</style><style>
+.homework-calendar{display:flex;align-items:center;gap:8px;min-height:44px;margin-bottom:12px;color:var(--ds-text-secondary)}
+.homework-calendar input{min-height:44px;background:var(--ds-surface-inner);color:var(--ds-text-primary);border:1px solid var(--leveli-accent-border);border-radius:var(--ds-radius-button,12px);padding:0 12px;font:inherit}
+.homework-row{display:flex;gap:12px;align-items:flex-start}.homework-row input{width:24px;height:24px;margin:10px;accent-color:var(--leveli-accent)}
+.homework-row details{flex:1;min-width:0}.homework-row summary{cursor:pointer;min-height:44px;overflow-wrap:anywhere;color:var(--ds-text-primary)}
+.homework-row summary strong{font-size:12px;font-weight:800}.homework-row summary span{display:block;color:var(--ds-text-secondary);font-size:14px}.homework-row p{white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ds-text-secondary)}
+.homework-row:has(input:checked) summary{opacity:.65}
+</style><script defer src="homework.js"></script></head><body>
 <div id="leveli-startup" class="leveli-startup" role="status" aria-live="polite" aria-label="Leveli загружается">
  <img class="leveli-startup-logo" src="./brand/mark.svg" width="96" height="96" alt="">
  <div class="leveli-startup-title">Leveli</div>
@@ -851,10 +858,14 @@ body:has([data-page="profile"]:not([hidden])) .content{padding-bottom:0}
 <div id="school-orient-empty" class="orient-sparse" hidden></div>
 <div class="orient-grid"><article class="orient-panel orient-good"><div class="orient-title">Молодец</div><div id="school-good-list"></div></article><article class="orient-panel orient-attention"><div class="orient-title">Подтянуть</div><div id="school-attention-list"></div></article></div>
 <p id="school-status" class="muted">Загрузка…</p><p id="school-freshness" aria-live="polite"></p></div></div><p id="school-error" role="alert" class="muted"></p></section>
-<section data-page="subjects" hidden aria-labelledby="subjects-title"><div id="school-subject-detail" class="card" hidden></div><div id="subjects-overview"><header class="section-screen-header"><h1 id="subjects-title" tabindex="-1">Предметы</h1></header>
+<section data-page="subjects" hidden aria-labelledby="subjects-title"><div id="school-subject-detail" class="card" hidden></div><div id="subjects-overview"><header class="section-screen-header"><h1 id="subjects-title" tabindex="-1">Оценки</h1></header>
 <div class="subjects-tabs" role="group" aria-label="Раздел предметов"><button type="button" data-subject-tab="grades" aria-pressed="true">Оценки</button><button type="button" data-subject-tab="forecast" aria-pressed="false">Прогноз</button><button type="button" data-subject-tab="finals" aria-pressed="false">Итоги</button></div>
 <article class="card subjects-card"><div class="card-heading"><h2>Все предметы</h2><span id="school-subject-count" class="muted"></span></div>
 <div id="school-filter-buttons" hidden></div><select id="school-filter" hidden><option value="all">Все предметы</option><option value="strong">Сильные</option><option value="attention">Требуют внимания</option></select><div id="school-subjects"></div></article></div></section>
+<section data-page="homework" hidden aria-labelledby="homework-title"><header class="section-screen-header"><h1 id="homework-title" tabindex="-1">Домашка</h1></header>
+<div class="subjects-tabs" id="homework-filters" role="group" aria-label="Дата заданий"><button type="button" data-homework-filter="today" aria-pressed="true">Сегодня</button><button type="button" data-homework-filter="tomorrow" aria-pressed="false">Завтра</button><button type="button" data-homework-filter="all" aria-pressed="false">Всё</button></div>
+<label class="homework-calendar" aria-label="Выбрать дату"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 2v4m8-4v4M3 10h18M4 4h16v17H4z"/></svg><input id="homework-date" type="date" aria-label="Конкретная дата заданий"></label>
+<article class="card"><p id="homework-status" role="status"></p><div id="homework-list"></div></article></section>
 <section data-page="outcomes" hidden aria-labelledby="outcomes-title">
  <header class="section-screen-header"><h1 id="outcomes-title">Итоги</h1></header>
  <div class="outcomes-switch" role="group" aria-label="Вид итогов">
@@ -912,7 +923,8 @@ body:has([data-page="profile"]:not([hidden])) .content{padding-bottom:0}
 </section>
 </main><nav class="leveli-bottom-nav" aria-label="Основная навигация" hidden>
 <button type="button" data-go="home" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3z"/><path d="M9 20v-7h6v7"/></svg><span>Главная</span></button>
-<button type="button" data-go="subjects"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6c-3-2-7-2-10-1v14c3-1 7-1 10 1 3-2 7-2 10-1V5c-3-1-7-1-10 1z"/><path d="M12 6v14"/></svg><span>Предметы</span></button>
+<button type="button" data-go="subjects"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6c-3-2-7-2-10-1v14c3-1 7-1 10 1 3-2 7-2 10-1V5c-3-1-7-1-10 1z"/><path d="M12 6v14"/></svg><span>Оценки</span></button>
+<button type="button" data-go="homework"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM8 9h8M8 13h8M8 17h5"/></svg><span>Домашка</span></button>
 <button type="button" data-go="outcomes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V13m6 7V9m6 11V4m4 16H2"/></svg><span>Итоги</span></button>
 </nav></div>
 <dialog id="weekly-story" class="weekly-story" aria-labelledby="weekly-story-title" aria-describedby="weekly-story-note">
@@ -989,7 +1001,7 @@ body:has([data-page="profile"]:not([hidden])) .content{padding-bottom:0}
 const pages=[...document.querySelectorAll('[data-page]')],tabBar=document.querySelector('.leveli-bottom-nav');
 let lastMainTab='home',currentView='home';
 function navigate(page,{replace=false,fromHistory=false}={}){
- if(!['home','subjects','outcomes','profile','subject'].includes(page))page='home';
+ if(!['home','subjects','homework','outcomes','profile','subject'].includes(page))page='home';
  if(page!=='home')document.getElementById('school-guide').close();
  const previous=currentView;
  if(page!=='profile'&&page!=='subject')lastMainTab=page;
