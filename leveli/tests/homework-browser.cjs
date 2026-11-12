@@ -28,9 +28,8 @@ module.exports=async function(page){
  await page.locator('[data-homework-filter="tomorrow"]').click();assert.equal(await rows.locator('input').isChecked(),true);
  await page.locator('[data-homework-filter="all"]').click();assert.equal(await rows.count(),2);assert.match(await status.innerText(),/2 из 2/);
  assert.equal(await page.locator('#homework-list h2').count(),2);
- await page.locator('#homework-date').fill('2026-11-09');assert.equal(await rows.count(),0);
- await page.locator('#homework-date').fill('');assert.equal(await rows.count(),1);
- assert.equal(await page.locator('[data-homework-filter="today"]').getAttribute('aria-pressed'),'true');
+ assert.equal(await page.locator('[data-page="homework"] input[type="date"]').count(),0);
+ await page.locator('[data-homework-filter="today"]').click();
  await update({status:'stale',items});assert.match(await status.innerText(),/устарели/);assert.equal(await rows.count(),1);
  await rows.locator('input').check();assert.match(await status.innerText(),/устарели.*1 из 1/);
  await page.locator('[data-homework-filter="all"]').click();

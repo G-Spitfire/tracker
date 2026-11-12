@@ -5,7 +5,7 @@ const testTime=new Date(2026,10,7,12).getTime();
 fixtures.A.grades.push({id:'annual',subject:'Русский язык',value:'5',date:'2027-06-02',type:'Годовая'});
 fixtures.A.syncedAt=new Date(testTime-3600000).toISOString();
 const authMock=`export const getAuth=()=>window.__auth;export const browserLocalPersistence={};export const setPersistence=async()=>{};export function onAuthStateChanged(a,fn){window.__listeners.push(fn);setTimeout(()=>fn(a.currentUser),Number(sessionStorage.getItem('auth-delay')||0));return ()=>{}}export async function signInWithEmailAndPassword(a,email){window.__switchUser(email.startsWith('b')?'B':'A')}export async function signOut(){window.__switchUser(null)}`;
-const storeMock=`export class FieldPath{constructor(...parts){this.parts=parts}};export async function updateDoc(){throw Error("not configured")};export function onSnapshot(ref,options,fn){queueMicrotask(()=>fn({exists:()=>false}));return ()=>{}};export const getFirestore=()=>({});export const doc=(db,...parts)=>parts;export const serverTimestamp=()=>0;export const runTransaction=async(db,fn)=>fn({get:async path=>({exists:()=>!!JSON.parse(sessionStorage.getItem('cloud:'+path.join('/'))||'null'),data:()=>JSON.parse(sessionStorage.getItem('cloud:'+path.join('/')))}),set:(path,value)=>sessionStorage.setItem('cloud:'+path.join('/'),JSON.stringify(value))});export async function getDocFromServer(path){if(window.__offline)throw Error('offline');const [kind,uid]=path;if(kind==='profiles')return {exists:()=>true,data:()=>({name:uid==='A'?'Полина':'Матвей'})};if(kind==='schoolGrades')return {exists:()=>true,data:()=>window.__fixtures[uid]};const value=JSON.parse(sessionStorage.getItem('cloud:'+path.join('/'))||'null');return {exists:()=>!!value,data:()=>value};}export const getDoc=getDocFromServer;`;
+const storeMock=`export class FieldPath{constructor(...parts){this.parts=parts}};export async function updateDoc(){throw Error("not configured")};export function onSnapshot(ref,options,fn){queueMicrotask(()=>fn({exists:()=>false}));return ()=>{}};export const getFirestore=()=>({});export const doc=(db,...parts)=>parts;export const serverTimestamp=()=>0;export const runTransaction=async(db,fn)=>fn({get:async path=>({exists:()=>!!JSON.parse(sessionStorage.getItem('cloud:'+path.join('/'))||'null'),data:()=>JSON.parse(sessionStorage.getItem('cloud:'+path.join('/')))}),set:(path,value)=>sessionStorage.setItem('cloud:'+path.join('/'),JSON.stringify(value))});export async function getDocFromServer(path){if(window.__offline)throw Error('offline');const [kind,uid]=path;if(kind==='profiles'&&window.__profileOffline)throw Error('offline');if(kind==='profiles')return {exists:()=>true,data:()=>({name:uid==='A'?'Полина':'Матвей'})};if(kind==='schoolGrades')return {exists:()=>true,data:()=>window.__fixtures[uid]};const value=JSON.parse(sessionStorage.getItem('cloud:'+path.join('/'))||'null');return {exists:()=>!!value,data:()=>value};}export const getDoc=getDocFromServer;`;
 fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
 (async()=>{
  const browser=await (process.env.BROWSER_ENGINE==='webkit'?webkit:chromium).launch({headless:true,...(process.env.BROWSER_BINARY?{executablePath:process.env.BROWSER_BINARY}:{})});
@@ -626,6 +626,25 @@ fs.mkdirSync('outputs',{recursive:true});fs.mkdirSync('work',{recursive:true});
  assert.equal(await page.locator('#leveli-startup').isVisible(),false);
  assert.equal(await page.locator('#school-results').isVisible(),true);
  await page.evaluate(()=>sessionStorage.removeItem('auth-delay'));
+ // A failed initial profile read must recover on refresh for either account.
+ for(const uid of ['A','B']){
+  await page.evaluate(uid=>{window.__profileOffline=true;window.__switchUser(uid)},uid);
+  await page.waitForFunction(()=>document.querySelector('#school-status').textContent.includes('проверено'));
+  await page.evaluate(()=>{window.__profileOffline=false;document.getElementById('school-refresh').click()});
+  await page.waitForFunction(name=>document.querySelector('#home-greeting').textContent==='Привет, '+name+'!',uid==='A'?'Полина':'Матвей',{timeout:3000});
+  // Cached grades still produce the archive on offline session restoration.
+  await page.evaluate(()=>{window.__offline=true;window.__switchUser(null)});
+  await page.evaluate(uid=>window.__switchUser(uid),uid);
+  await page.waitForFunction(()=>document.querySelector('#school-status').textContent.includes('Сохранённые оценки'));
+  await page.waitForFunction(()=>document.querySelectorAll('#weekly-archive .weekly-release').length>0,null,{timeout:3000});
+  assert.equal(await page.locator('#weekly-story').isVisible(),false,'cached archive never autoplays');
+  assert.equal(await page.locator('#home-greeting').innerText(),'Привет, '+(uid==='A'?'Полина':'Матвей')+'!','offline profile cache is UID scoped');
+  await page.evaluate(()=>{window.__offline=false;document.getElementById('school-refresh').click()});
+  await page.waitForFunction(()=>document.querySelector('#school-status').textContent.includes('проверено'));
+  if(await page.locator('#weekly-story').isVisible())await page.locator('#story-close').click();
+ }
+ await page.evaluate(()=>window.__switchUser('A'));
+ await page.waitForFunction(()=>document.querySelector('#home-greeting').textContent==='Привет, Полина!');
  assert.equal(await page.locator('html').getAttribute('data-leveli-theme'),'dark');
  assert.equal(await page.locator('html').getAttribute('data-leveli-pack'),null);
  assert.equal(await page.locator('#profile-avatar-display img.profile-avatar-custom').count(),1);
