@@ -74,13 +74,21 @@ def prepare_docs(snapshot, config, links, now=None):
             subject, text = row.get('subject_name'), row.get('task_name')
             if not isinstance(subject, str) or not subject.strip() or len(subject) > 200:
                 raise ValueError('invalid_subject')
-            # The school API also returns attachment-only tasks with a null title.
-            # Keep the lesson (and its progress ID); never alter source files.
+            # Keep attachment-only work, but do not turn absence markers into tasks.
             files = row.get('files')
-            if text is None and isinstance(files, list) and files:
-                text = 'Задание во вложении'
-            if not isinstance(text, str) or not text.strip() or len(text) > 20000:
+            if text is not None and not isinstance(text, str):
                 raise ValueError('invalid_text')
+            if files is not None and not isinstance(files, list):
+                raise ValueError('invalid_text')
+            if isinstance(text, str) and len(text) > 20000:
+                raise ValueError('invalid_text')
+            normalized = re.sub(r'^(?:домашнее задание|д\s*/\s*з|дз)\s*[:—–-]?\s*', '', (text or '').strip().lower())
+            normalized = normalized.rstrip('.!').strip()
+            if normalized in ('', 'не задано', 'нет', 'не задали', 'отсутствует'):
+                if files:
+                    text = 'Задание во вложении'
+                else:
+                    continue
             # Date is the lesson date, NOT a guessed due date. No child/teacher IDs,
             # tokens, HTML, attachment URLs, or unrelated school data go to cloud.
             if key in items and (items[key]['date'] != day or items[key]['subject'] != subject):

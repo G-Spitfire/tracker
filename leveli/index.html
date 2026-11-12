@@ -817,8 +817,6 @@ body:has([data-page="profile"]:not([hidden])) .content{padding-bottom:0}
 .outcomes-year-table td[data-grade="3"]{color:#f3a052;font-weight:800}
 .outcomes-year-table td[data-grade="2"]{color:#f17679;font-weight:800}
 </style><style>
-.homework-calendar{display:flex;align-items:center;gap:8px;min-height:44px;margin-bottom:12px;color:var(--ds-text-secondary)}
-.homework-calendar input{min-height:44px;background:var(--ds-surface-inner);color:var(--ds-text-primary);border:1px solid var(--leveli-accent-border);border-radius:var(--ds-radius-button,12px);padding:0 12px;font:inherit}
 .homework-row{display:flex;gap:12px;align-items:flex-start}.homework-row input{width:24px;height:24px;margin:10px;accent-color:var(--leveli-accent)}
 .homework-row details{flex:1;min-width:0}.homework-row summary{cursor:pointer;min-height:44px;overflow-wrap:anywhere;color:var(--ds-text-primary)}
 .homework-row summary strong{font-size:12px;font-weight:800}.homework-row summary span{display:block;color:var(--ds-text-secondary);font-size:14px}.homework-row p{white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ds-text-secondary)}
@@ -863,9 +861,8 @@ body:has([data-page="profile"]:not([hidden])) .content{padding-bottom:0}
 <article class="card subjects-card"><div class="card-heading"><h2>Все предметы</h2><span id="school-subject-count" class="muted"></span></div>
 <div id="school-filter-buttons" hidden></div><select id="school-filter" hidden><option value="all">Все предметы</option><option value="strong">Сильные</option><option value="attention">Требуют внимания</option></select><div id="school-subjects"></div></article></div></section>
 <section data-page="homework" hidden aria-labelledby="homework-title"><header class="section-screen-header"><h1 id="homework-title" tabindex="-1">Домашка</h1></header>
-<div class="subjects-tabs" id="homework-filters" role="group" aria-label="Дата заданий"><button type="button" data-homework-filter="today" aria-pressed="true">Сегодня</button><button type="button" data-homework-filter="tomorrow" aria-pressed="false">Завтра</button><button type="button" data-homework-filter="all" aria-pressed="false">Всё</button></div>
-<label class="homework-calendar" aria-label="Выбрать дату"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 2v4m8-4v4M3 10h18M4 4h16v17H4z"/></svg><input id="homework-date" type="date" aria-label="Конкретная дата заданий"></label>
-<article class="card"><p id="homework-status" role="status"></p><div id="homework-list"></div></article></section>
+<div class="subjects-tabs" id="homework-filters" role="group" aria-label="Дата урока"><button type="button" data-homework-filter="today" aria-pressed="true">Сегодня</button><button type="button" data-homework-filter="tomorrow" aria-pressed="false">Завтра</button><button type="button" data-homework-filter="all" aria-pressed="false">Всё</button></div>
+<article class="card"><p id="homework-status" role="status"></p><p class="muted">Даты — даты уроков, не сроки сдачи. «Всё» — эта неделя и дальше.</p><div id="homework-list"></div></article></section>
 <section data-page="outcomes" hidden aria-labelledby="outcomes-title">
  <header class="section-screen-header"><h1 id="outcomes-title">Итоги</h1></header>
  <div class="outcomes-switch" role="group" aria-label="Вид итогов">
@@ -1475,12 +1472,12 @@ const weeklyStories=(()=>{
   unavailable(){
    $('weekly-empty-message').textContent='Недельные истории появятся, когда загрузятся оценки.';
   },
-  update(rows){
+  update(rows,{autoplay=true}={}){
    issues=S.weeklyIssues(rows);
    progress={...progress,...savedProgress()};
    $('weekly-empty-message').textContent='За завершённые недели пока нет оценок.';
    renderArchive();
-   if(!waiting)return;
+   if(!autoplay||!waiting)return;
    waiting=false;
    const latest=issues.at(-1);
    if(latest&&progress[latest.id]!=='done')open(latest);
@@ -1904,7 +1901,24 @@ function selectSchoolPeriod(value){
 function renderChoiceButtons(select,containerId){const container=document.getElementById(containerId);container.replaceChildren();for(const option of select.options){const b=document.createElement('button');b.type='button';const future=option.value>currentSchoolPeriod();b.textContent=option.textContent+(future?' · скоро':'');b.setAttribute('aria-pressed',String(select.value===option.value));b.setAttribute('data-future',String(future));b.addEventListener('click',()=>selectSchoolPeriod(option.value));container.append(b)}}
 function refreshChoiceButtons(){renderChoiceButtons(periodSelect,'school-period-buttons')}
 periodSelect.addEventListener('change',()=>selectSchoolPeriod(periodSelect.value));document.getElementById('school-current-period').addEventListener('click',()=>selectSchoolPeriod(currentSchoolPeriod()));
-async function loadProfile(user){firestoreProfileName='';if(!user){updateIdentity(null);return}try{const snap=await getDocFromServer(doc(db,'profiles',user.uid));if(snap.exists()){const profile=snap.data();const value=[profile.name,profile.firstName,profile.displayName,profile.childName].find(v=>typeof v==='string'&&v.trim());if(auth.currentUser?.uid===user.uid)firestoreProfileName=value?.trim()||''}}catch(e){console.warn('Профиль Firestore недоступен:',e.code||e.message)}if(auth.currentUser?.uid===user.uid)updateIdentity(user,cachedGrades)}
+let profileRequest=0;
+async function loadProfile(user){
+ const request=++profileRequest;
+ if(!user){firestoreProfileName='';updateIdentity(null);return}
+ const key='leveli-profile-name-v1-'+user.uid;
+ // Only a successful profiles/{uid} read can populate this account-scoped fallback.
+ if(!firestoreProfileName){try{const saved=JSON.parse(localStorage.getItem(key)||'null');if(typeof saved==='string')firestoreProfileName=saved}catch{}}
+ updateIdentity(user,cachedGrades);
+ try{
+  const snap=await getDocFromServer(doc(db,'profiles',user.uid));
+  if(auth.currentUser?.uid!==user.uid||request!==profileRequest)return;
+  const profile=snap.exists()?snap.data():{};
+  const value=[profile.name,profile.firstName,profile.displayName,profile.childName].find(v=>typeof v==='string'&&v.trim());
+  firestoreProfileName=value?.trim()||'';
+  try{if(firestoreProfileName)localStorage.setItem(key,JSON.stringify(firestoreProfileName));else localStorage.removeItem(key)}catch{}
+ }catch(e){console.warn('Профиль Firestore недоступен:',e.code||e.message)}
+ if(auth.currentUser?.uid===user.uid&&request===profileRequest)updateIdentity(user,cachedGrades);
+}
 function gradeCacheDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open('leveli-school-cache',1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('grades'))req.result.createObjectStore('grades')};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
 async function readGradeCache(uid){const db=await gradeCacheDB();try{return await new Promise((resolve,reject)=>{const tx=db.transaction('grades','readonly'),req=tx.objectStore('grades').get(uid);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error)})}finally{db.close()}}
 async function writeGradeCache(uid,value){const db=await gradeCacheDB();try{await new Promise((resolve,reject)=>{const tx=db.transaction('grades','readwrite');tx.objectStore('grades').put(value,uid);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}finally{db.close()}}
@@ -1967,6 +1981,7 @@ function readFirebaseWithDeadline(uid,timeoutMs=20000){
 }
 async function load(){
  const user=auth.currentUser;if(!user)return;
+ loadProfile(user);
  const uid=user.uid,generation=++loadGeneration;
  const active=()=>auth.currentUser?.uid===uid&&generation===loadGeneration;
  error.textContent='';
@@ -1974,14 +1989,14 @@ async function load(){
  try{
   cached=await readGradeCache(uid);if(!active())return;
   if(cached?.data){
-   applySchoolData(cached.data);showDiarySyncTime(cached.data,true);
+   applySchoolData(cached.data);weeklyStories.update(cached.data.grades,{autoplay:false});showDiarySyncTime(cached.data,true);
    status.textContent='Сохранённые оценки · проверяем Firebase…';
   }else{status.textContent='Загрузка оценок…';subjects.replaceChildren()}
  }catch(e){cached=null;console.warn('Локальный кэш недоступен',e)}
  try{
   const snap=await readFirebaseWithDeadline(uid);if(!active())return;
   if(!snap.exists()){
-   weeklyStories.unavailable();
+   if(!cached)weeklyStories.unavailable();
    if(!cached){clearSchool();status.textContent='Оценки пока не загружены.'}
    else status.textContent='Сохранённые оценки · документ Firebase пока недоступен';
    return;
@@ -1995,7 +2010,7 @@ async function load(){
   if(active()){showDiarySyncTime(data);status.textContent='Предметов: '+subjects.children.length+' · проверено в Firebase'}
  }catch(e){
   if(!active())return;
-  weeklyStories.unavailable();
+  if(!cached)weeklyStories.unavailable();
   if(cached){
    status.textContent='Сохранённые оценки · Firebase временно недоступен';
    showDiarySyncTime(cached.data,true);
@@ -2010,5 +2025,5 @@ setInterval(()=>{if(!document.hidden&&auth.currentUser)load()},60000);
 document.getElementById('school-logout').addEventListener('click',()=>signOut(auth).catch(showError));
 const startup=document.getElementById('leveli-startup');
 function resolveStartup(){document.documentElement.dataset.leveliAuthReady='true';startup.hidden=true}
-onAuthStateChanged(auth,user=>{window.LeveliNavigation.navigate('home',{replace:true});window.LeveliAppearance.activate(user?.uid||null);if(retryHandle){clearTimeout(retryHandle);retryHandle=null}++loadGeneration;firestoreProfileName='';weeklyStories.reset(user?.uid??null);clearSchool();login.hidden=!!user;results.hidden=!user;error.textContent='';updateIdentity(user);document.querySelector('.leveli-bottom-nav').hidden=!user||!document.querySelector('[data-page="profile"]').hidden;resolveStartup();if(user){loadProfile(user);load()}else {clearSchool()}},err=>{++loadGeneration;weeklyStories.reset(null);login.hidden=false;results.hidden=true;document.querySelector('.leveli-bottom-nav').hidden=true;showError(err);resolveStartup()});
+onAuthStateChanged(auth,user=>{window.LeveliNavigation.navigate('home',{replace:true});window.LeveliAppearance.activate(user?.uid||null);if(retryHandle){clearTimeout(retryHandle);retryHandle=null}++loadGeneration;firestoreProfileName='';weeklyStories.reset(user?.uid??null);clearSchool();login.hidden=!!user;results.hidden=!user;error.textContent='';updateIdentity(user);document.querySelector('.leveli-bottom-nav').hidden=!user||!document.querySelector('[data-page="profile"]').hidden;resolveStartup();if(user){load()}else {clearSchool()}},err=>{++loadGeneration;weeklyStories.reset(null);login.hidden=false;results.hidden=true;document.querySelector('.leveli-bottom-nav').hidden=true;showError(err);resolveStartup()});
 </script></body></html>

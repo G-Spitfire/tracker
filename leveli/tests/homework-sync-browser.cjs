@@ -2,6 +2,11 @@
 const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs');
 const taskA='a'.repeat(64),taskB='b'.repeat(64);
 const school={schemaVersion:1,syncedAt:'2026-11-12T12:00:00+03:00',items:{[taskA]:{date:'2026-11-12',subject:'Математика',text:'Синтетическое задание <script>alert(1)</script>'},[taskB]:{date:'2026-11-13',subject:'Русский язык',text:'Задание на завтра'}},progress:{}};
+// Historic rows remain in cloud; view filtering must not delete their checks.
+const historic='c'.repeat(64),attachment='e'.repeat(64);
+school.items[historic]={date:'2026-09-01',subject:'Архив',text:'Старое задание'};school.progress[historic]=true;
+// A normalized uploader omits absent homework before it reaches the cloud.
+school.items[attachment]={date:'2026-11-13',subject:'Вложение',text:'Задание во вложении'};school.progress[attachment]=true;
 const cloud={A:structuredClone(school),B:{...structuredClone(school),items:{[taskB]:{date:'2026-11-12',subject:'История',text:'Другой аккаунт'}}}};
 const auth=`export const getAuth=()=>window.__auth;export const browserLocalPersistence={};export const setPersistence=async()=>{};
 export function onAuthStateChanged(a,fn){window.__authListeners.push(fn);queueMicrotask(()=>fn(a.currentUser));return ()=>{}};
@@ -50,9 +55,9 @@ export async function getDocFromServer(ref){if(ref[0]==='profiles')return {exist
   assert.equal(await check(a).isChecked(),false);await a.locator('.leveli-bottom-nav [data-go="homework"]').click();await check(a).check();assert.equal(cloud.A.progress[taskA],false);
   await a.evaluate(()=>window.__switchUser('A'));await a.waitForFunction(()=>document.querySelector('#homework-list').textContent.includes('Математика'));
   assert.equal(await check(a).isChecked(),false);await a.locator('.leveli-bottom-nav [data-go="homework"]').click();
-  await a.locator('[data-homework-filter="tomorrow"]').click();assert.match(await a.locator('#homework-list').innerText(),/Русский/);
-  await a.locator('[data-homework-filter="all"]').click();assert.equal(await a.locator('.homework-row').count(),2);
-  await a.locator('#homework-date').fill('2026-11-14');assert.match(await a.locator('#homework-status').innerText(),/заданий нет/);
+  await a.locator('[data-homework-filter="tomorrow"]').click();assert.match(await a.locator('#homework-list').innerText(),/Русский/);assert.match(await a.locator('#homework-list').innerText(),/Вложение/);
+  await a.locator('[data-homework-filter="all"]').click();assert.equal(await a.locator('.homework-row').count(),3);assert.equal(cloud.A.progress[historic],true);assert.equal(cloud.A.progress[attachment],true);assert.doesNotMatch(await a.locator('#homework-list').innerText(),/Архив|Нет домашки/);
+  assert.equal(await a.locator('#homework-date').count(),0);
   await a.locator('[data-homework-filter="all"]').click();
   await a.evaluate(()=>window.__failHomework(Error('offline')));assert.match(await a.locator('#homework-status').innerText(),/устарели/);
   fs.mkdirSync('outputs',{recursive:true});

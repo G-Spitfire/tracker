@@ -76,13 +76,33 @@ class UploadTests(unittest.TestCase):
         row.update(id='123:edited-attachment', files=[{'file_name': 'replacement.pdf', 'uuid': 'replacement'}])
         self.assertEqual(list(self.prepare(s)['synthetic_B']['items']), [original_key])
 
-    def test_null_title_without_attachments_and_malformed_titles_still_fail(self):
-        for text, files in [(None, []), (None, None), (None, 'invalid'), (123, [{}]), ('', [{}]), ('   ', [{}])]:
+    def test_malformed_titles_and_file_types_still_fail(self):
+        for text, files in [(None, 'invalid'), (123, [{}])]:
             with self.subTest(text=text, files=files):
                 s = snapshot()
                 s['students']['matvey']['homework'][0].update(task_name=text, files=files)
                 with self.assertRaisesRegex(ValueError, 'invalid_text'):
                     self.prepare(s)
+
+    def test_absence_markers_skip_but_attachments_keep_identity(self):
+        for text in ['не задано', 'Домашнее задание: не задано.', 'Д/З: нет', '  ', '', None]:
+            with self.subTest(text=text):
+                s = snapshot()
+                for child in s['students'].values():
+                    child['homework'][0].update(task_name=text, files=[])
+                before = copy.deepcopy(s)
+                self.assertTrue(all(not d['items'] for d in self.prepare(s).values()))
+                self.assertEqual(s, before)
+                for child in s['students'].values():
+                    child['homework'][0]['files'] = [{'uuid': 'private'}]
+                for doc in self.prepare(s).values():
+                    self.assertEqual(next(iter(doc['items'].values()))['text'], 'Задание во вложении')
+                    self.assertNotIn('private', str(doc))
+        s = snapshot()
+        row = s['students']['polina']['homework'][0]
+        row['files'] = []
+        s['students']['polina']['homework'].append({**row, 'id': '123:none', 'task_name': 'не задано'})
+        self.assertEqual(next(iter(self.prepare(s)['synthetic_A']['items'].values()))['text'], 'Страница 10')
 
     def test_empty_successful_source_clears_tasks(self):
         s = snapshot(); s['students']['polina']['homework'] = []

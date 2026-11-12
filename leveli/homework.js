@@ -2,13 +2,14 @@
 (function(root){
 'use strict';
 const day=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-function select(items,filter,date,now=new Date()){
+function select(items,filter,now=new Date()){
  const next=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1);
- const target=filter==='today'?day(now):filter==='tomorrow'?day(next):date;
- return items.filter(x=>filter==='all'||x.date===target).slice().sort((a,b)=>a.date.localeCompare(b.date)||(a.order??Infinity)-(b.order??Infinity));
+ const target=filter==='tomorrow'?day(next):day(now);
+ const monday=new Date(now.getFullYear(),now.getMonth(),now.getDate()-(now.getDay()+6)%7);
+ return items.filter(x=>(filter==='all'?x.date>=day(monday):x.date===target)).slice().sort((a,b)=>a.date.localeCompare(b.date)||(a.order??Infinity)-(b.order??Infinity));
 }
 function mount(doc,onChange){
- let filter='today',date='',saveError='',epoch=0,revision=0,state={status:'disconnected',items:[]};
+ let filter='today',saveError='',epoch=0,revision=0,state={status:'disconnected',items:[]};
  const status=doc.getElementById('homework-status'),list=doc.getElementById('homework-list');
  if(!status)return;
  const messages={disconnected:'Задания пока не подключены к Leveli. Синхронизация домашних заданий ещё не настроена.',loading:'Загружаем задания…',error:'Не удалось загрузить задания.',stale:'Данные устарели. Показана сохранённая копия.'};
@@ -16,7 +17,7 @@ function mount(doc,onChange){
  list.replaceChildren();
  doc.querySelectorAll('[data-homework-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.homeworkFilter===filter)));
  if(!['ready','stale'].includes(state.status)){status.textContent=messages[state.status]||messages.disconnected;return;}
- const rows=select(state.items,filter,date);
+ const rows=select(state.items,filter);
  status.textContent=(saveError|| (state.pending?'Галочки ещё сохраняются. ':''))+(messages[state.status]||'')+' '+(rows.length?`${rows.filter(x=>x.done).length} из ${rows.length} выполнено`:'На выбранную дату заданий нет.');
  let previous='';
  for(const item of rows){
@@ -37,8 +38,7 @@ function mount(doc,onChange){
  summary.append(name,text);details.append(summary,body);row.append(check,details);list.append(row);
  }
  }
- doc.querySelectorAll('[data-homework-filter]').forEach(b=>b.onclick=()=>{filter=b.dataset.homeworkFilter;doc.getElementById('homework-date').value='';render();});
- doc.getElementById('homework-date').onchange=e=>{date=e.target.value;filter=date?'date':'today';render();};
+ doc.querySelectorAll('[data-homework-filter]').forEach(b=>b.onclick=()=>{filter=b.dataset.homeworkFilter;render();});
  render();
  return {setState(next){if(next.owner!==state.owner){saveError='';++epoch}++revision;state={...next,items:(next.items||[]).map(item=>({...item}))};render();}};
 }
