@@ -28,3 +28,9 @@ test('missing source is disconnected; errors never masquerade as empty homework'
  f.fail();assert.equal(f.states.at(-1).status,'error');f.login('B');f.emit(data);f.fail();
  assert.equal(f.states.at(-1).status,'stale');
 });
+test('CommonJS view import never starts a second browser transport',()=>{
+ const source=require('node:fs').readFileSync(require.resolve('../homework.js'),'utf8');
+ const context={module:{exports:{}},window:{document:{getElementById(){throw Error('unexpected automatic mount')}}}};
+ require('node:vm').runInNewContext(source,context);
+ assert.equal(typeof context.module.exports.mount,'function');
+});

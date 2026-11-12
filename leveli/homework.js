@@ -74,7 +74,7 @@ function connect(api,view){
  };
 }
 if(typeof module==='object')module.exports={day,select,mount,connect};
-if(root.document){
+else if(root.document){
  let connection;const view=mount(root.document,(id,done)=>connection.save(id,done));
  const start=()=>{connection=connect(root.leveliFirebase,view);root.addEventListener('online',()=>connection.refresh())};
  if(root.leveliFirebase)start();else root.addEventListener('leveliFirebaseReady',start,{once:true});
