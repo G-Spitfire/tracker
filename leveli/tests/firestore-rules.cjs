@@ -43,3 +43,22 @@ test('real backup transport round-trips encoded nested arrays under candidate ru
  await cloud.write(progress,0);const remote=await cloud.read();assert.deepEqual(remote.payload,progress);assert.equal(remote.revision,1);
  await assert.rejects(()=>cloud.write(progress,0),/conflict/);await cloud.write(progress,1);assert.equal((await cloud.read()).revision,2);
 });
+test('homework permits only own boolean progress on known tasks',async()=>{
+ const school={schemaVersion:1,source:'petersburgedu',syncedAt:'2026-11-12T12:00:00+00:00',rangeFrom:'2026-11-01',rangeTo:'2026-11-26',items:{taskA:{date:'2026-11-13',subject:'Тест',text:'Тестовое задание'},taskB:{date:'2026-11-14',subject:'Тест',text:'Задание 2'}}};
+ await env.withSecurityRulesDisabled(async ctx=>{for(const uid of ['A','B'])await setDoc(doc(ctx.firestore(),'schoolHomework',uid),school)});
+ const own=doc(db('A'),'schoolHomework','A');
+ await assertSucceeds(getDoc(own));await assertSucceeds(updateDoc(own,{'progress.taskA':true}));
+ await assertSucceeds(updateDoc(own,{'progress.taskB':true}));
+ assert.deepEqual((await getDoc(own)).data().progress,{taskA:true,taskB:true});
+ // Repeated ingestion replaces items only; both checkbox fields survive.
+ await env.withSecurityRulesDisabled(ctx=>setDoc(doc(ctx.firestore(),'schoolHomework','A'),{...school,items:{taskA:{...school.items.taskA,text:'Обновлено'}}},{mergeFields:Object.keys(school)}));
+ assert.deepEqual((await getDoc(own)).data().progress,{taskA:true,taskB:true});
+ await assertSucceeds(updateDoc(own,{'progress.taskA':false}));
+ await assertFails(updateDoc(own,{'progress.taskB':false})); // no longer in source
+ for(const data of [{'progress.unknown':true},{'progress.taskA':'yes'},{'progress.taskA':{done:true}},{items:{}},{source:'evil'},{extra:true},{progress:{}},{progress:{taskA:true,taskB:9}}])await assertFails(updateDoc(own,data));
+ for(const uid of ['B',null]){
+  const other=doc(db(uid),'schoolHomework','A');await assertFails(getDoc(other));await assertFails(updateDoc(other,{'progress.taskA':true}));
+ }
+ await assertFails(getDocs(collection(db('A'),'schoolHomework')));
+ await assertFails(setDoc(doc(db('C'),'schoolHomework','C'),school));await assertFails(deleteDoc(own));
+});

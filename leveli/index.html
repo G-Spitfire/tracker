@@ -1192,10 +1192,10 @@ window.LeveliAppearance=(()=>{
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js';
 import {getAuth, setPersistence, browserLocalPersistence, onAuthStateChanged, signInWithEmailAndPassword, signOut} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js';
-import {getFirestore, doc, getDocFromServer} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js';
+import {getFirestore, doc, getDocFromServer, onSnapshot, updateDoc, FieldPath} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js';
 const firebaseConfig={apiKey:"AIzaSyCs3gfUXcrlTJLZqxXQ0cgXpfuqNBkNIsU",authDomain:"family-school-grades.firebaseapp.com",projectId:"family-school-grades",storageBucket:"family-school-grades.firebasestorage.app",messagingSenderId:"1005917864241",appId:"1:1005917864241:web:4192a263b8ad39fdb3f010"};
 const app=initializeApp(firebaseConfig,'leveli-school');
-const auth=getAuth(app), db=getFirestore(app);window.leveliFirebase={auth,db,onAuthStateChanged,doc,getDocFromServer};window.dispatchEvent(new Event('leveliFirebaseReady'));
+const auth=getAuth(app), db=getFirestore(app);window.leveliFirebase={auth,db,onAuthStateChanged,doc,getDocFromServer,onSnapshot,updateDoc,FieldPath};window.dispatchEvent(new Event('leveliFirebaseReady'));
 const login=document.getElementById('school-login'), results=document.getElementById('school-results'), error=document.getElementById('school-error'), status=document.getElementById('school-status'), subjects=document.getElementById('school-subjects');
 let firestoreProfileName='';function updateIdentity(user,grades){const email=user?.email||'';const known=firestoreProfileName;window.LeveliAppearance.setProfileName(user?.uid,known);document.getElementById('home-greeting').textContent=known?'Привет, '+known+'!':'Привет!';document.getElementById('profile-name').textContent=user?(known||'Ученик'):'Гость';document.getElementById('profile-account').textContent=user?'Аккаунт подключён':'Войди на главной, чтобы подключить профиль.';document.getElementById('profile-actions').hidden=!user;document.getElementById('profile-school').textContent='';window.dispatchEvent(new CustomEvent('leveliIdentity',{detail:{uid:user?.uid||null}}));document.title='Левели · '+(known||'Мои оценки')}
 function showError(e){error.textContent=e?.code==='auth/invalid-credential'?'Неверная почта или пароль.':e?.code==='permission-denied'?'Нет доступа к оценкам этой учётной записи.':e?.message||'Не удалось загрузить оценки.'}
