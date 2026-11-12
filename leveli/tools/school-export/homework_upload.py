@@ -74,6 +74,11 @@ def prepare_docs(snapshot, config, links, now=None):
             subject, text = row.get('subject_name'), row.get('task_name')
             if not isinstance(subject, str) or not subject.strip() or len(subject) > 200:
                 raise ValueError('invalid_subject')
+            # The school API also returns attachment-only tasks with a null title.
+            # Keep the lesson (and its progress ID); never alter source files.
+            files = row.get('files')
+            if text is None and isinstance(files, list) and files:
+                text = 'Задание во вложении'
             if not isinstance(text, str) or not text.strip() or len(text) > 20000:
                 raise ValueError('invalid_text')
             # Date is the lesson date, NOT a guessed due date. No child/teacher IDs,

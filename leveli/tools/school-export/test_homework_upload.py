@@ -61,6 +61,29 @@ class UploadTests(unittest.TestCase):
         self.assertIn('Исправленное задание', updated[key]['text'])
         s['students']['polina']['homework'].reverse()
         self.assertEqual(updated, self.prepare(s)['synthetic_A']['items'])
+    def test_null_title_with_attachments_keeps_lesson_and_source_unchanged(self):
+        s = snapshot()
+        original_key = next(iter(self.prepare(s)['synthetic_B']['items']))
+        row = s['students']['matvey']['homework'][0]
+        row.update(task_name=None, files=[{'file_name': 'worksheet.pdf', 'file_type': 'pdf', 'uuid': 'synthetic-private-file'}])
+        before = copy.deepcopy(s)
+        doc = self.prepare(s)['synthetic_B']
+        self.assertEqual(list(doc['items']), [original_key])
+        self.assertTrue(doc['items'][original_key]['text'].strip())
+        self.assertIn('вложении', doc['items'][original_key]['text'])
+        self.assertEqual(s, before)
+        self.assertNotIn('synthetic-private-file', str(doc))
+        row.update(id='123:edited-attachment', files=[{'file_name': 'replacement.pdf', 'uuid': 'replacement'}])
+        self.assertEqual(list(self.prepare(s)['synthetic_B']['items']), [original_key])
+
+    def test_null_title_without_attachments_and_malformed_titles_still_fail(self):
+        for text, files in [(None, []), (None, None), (None, 'invalid'), (123, [{}]), ('', [{}]), ('   ', [{}])]:
+            with self.subTest(text=text, files=files):
+                s = snapshot()
+                s['students']['matvey']['homework'][0].update(task_name=text, files=files)
+                with self.assertRaisesRegex(ValueError, 'invalid_text'):
+                    self.prepare(s)
+
     def test_empty_successful_source_clears_tasks(self):
         s = snapshot(); s['students']['polina']['homework'] = []
         self.assertEqual(self.prepare(s)['synthetic_A']['items'], {})
