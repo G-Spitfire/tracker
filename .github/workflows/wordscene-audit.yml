@@ -6,7 +6,7 @@ on:
       - '.github/workflows/wordscene-audit.yml'
   push:
     branches:
-      - 'wordscene/audit-approved-batch-1'
+      - main
     paths:
       - 'wordscene/**'
       - '.github/workflows/wordscene-audit.yml'
