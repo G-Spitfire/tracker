@@ -11,6 +11,26 @@ service cloud.firestore {
       allow get: if owner(uid);
       allow list, write: if false;
     }
+    // schoolHomework/{uid}: Admin-owned schemaVersion/source/range/syncedAt/items.
+    // items is a map keyed by SHA-256 task ID; progress is an optional map of
+    // task ID -> bool. Browsers may change only progress on current tasks.
+    match /schoolHomework/{uid} {
+      function validHomeworkProgress() {
+        let d = request.resource.data;
+        let previous = resource.data.get('progress', {});
+        return d.keys().hasAll(['schemaVersion', 'source', 'rangeFrom', 'rangeTo', 'syncedAt', 'items', 'progress'])
+          && d.keys().hasOnly(['schemaVersion', 'source', 'rangeFrom', 'rangeTo', 'syncedAt', 'items', 'progress'])
+          && d.schemaVersion == 1 && d.items is map
+          && d.progress is map && d.progress.size() <= 2000
+          && d.progress.values().hasOnly([true, false])
+          && d.diff(resource.data).affectedKeys().hasOnly(['progress'])
+          && d.progress.diff(previous).removedKeys().size() == 0
+          && d.progress.diff(previous).affectedKeys().hasOnly(resource.data.items.keys());
+      }
+      allow get: if owner(uid);
+      allow list, create, delete: if false;
+      allow update: if owner(uid) && validHomeworkProgress();
+    }
     match /profiles/{uid} {
       allow get: if owner(uid);
       allow list, write: if false;

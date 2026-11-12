@@ -1,0 +1,82 @@
+# Домашние задания: существующий collector → Firebase → Leveli
+
+Статус: подготовлено для draft PR. Рабочий Firebase, launchd, школьные данные и
+установленные скрипты не изменялись. Нельзя запускать `--push`, `--install` или
+живой сбор без отдельного разрешения пользователя.
+
+Исходники `unified_school.py`, `school_export.py` и их синтетические тесты
+перенесены без изменений из локальной ветки `feature/leveli-unified-local`, commit
+`7b630ca`. Их ещё нет в main. `unified_runner.py` отличается только отключённым по
+умолчанию флагом `--upload-homework`, его передачей worker/launchd и копированием
+нового загрузчика при установке. Само расписание и проверка VPN сохранены.
+Прежние `sync_then_upload.py` и `firebase_upload.py` (оценки) не меняются.
+
+## Контракт
+
+`homework_upload.py` читает `LeveliUnifiedSchool/data/latest-good.json` и использует
+существующие `SpbSchoolGradesProbe/collector-config.json`, `firebase-links.json`,
+ADC и `google-cloud-firestore`. Обе привязки детей, свежесть каждого источника
+уроков (48 ч), даты, дубликаты и размер проверяются до сетевой записи.
+Полные уроки обоих детей позволяют загрузку даже при ошибке другого источника
+(например, проходной). Ошибка уроков одного ребёнка запрещает обе загрузки из worker.
+
+В `schoolHomework/{uid}` находятся только `schemaVersion`, `source`, `rangeFrom`,
+`rangeTo`, `syncedAt`, `items` и `progress`. Школьные идентификаторы, имена детей,
+вложения, проходы и оценки не копируются. Одна домашка на урок, несколько частей
+объединяются; ключ — хеш стабильного ID урока, не текста. Отметки не теряются при
+редактировании текста. Дата — дата урока, а не выдуманный срок сдачи.
+
+Транзакция читает оба документа перед записью, сохраняет отметки актуальных
+уроков и удаляет отметки только исчезнувших из полной выборки заданий. При
+одновременной галочке Firestore повторяет транзакцию. Старая выгрузка отклоняется.
+Размер ограничен 2000 исходных частей домашки и 700 КБ школьного документа,
+оставляя место для отметок и служебных полей Firestore. Превышение даёт ошибку,
+данные не обрезаются.
+
+## Проверки без школьной сети и рабочего Firebase
+
+```sh
+node --test leveli/tests/*.test.cjs
+python3 -m unittest discover -s leveli/tools/school-export -p 'test*.py'
+python3 -m http.server 8765 --bind 127.0.0.1
+# В другом терминале, с установленным Playwright:
+node leveli/tests/browser.cjs
+node leveli/tests/homework-sync-browser.cjs
+```
+
+Эмулятор (Java 21, firebase-tools 15.35.0, firebase 13.2.0,
+@firebase/rules-unit-testing 6.0.0, google-cloud-firestore 2.34.1):
+
+```sh
+firebase emulators:exec --only firestore --project demo-leveli-release-check --config firebase.emulator.json 'node --test --test-skip-pattern=real.backup.transport leveli/tests/firestore-rules.cjs'
+firebase emulators:exec --only firestore --project demo-leveli-release-check --config firebase.emulator.json 'python3 leveli/tests/homework-emulator.py'
+```
+
+Единственный исключённый исторический тест `real backup transport` уже в main
+импортирует удалённый `cloud-firestore.js`; соседние тесты прав, оценок и профилей
+выполняются. Python-проверка настоящего SDK отказывается запускаться без локального
+эмулятора и всегда использует demo-проект и анонимные тестовые credentials.
+
+## Активация после отдельного разрешения (не выполнена)
+
+1. Сравнить `firestore.rules` с реально развёрнутыми правилами: репозиторий называет
+   их candidate, поэтому этот файл нельзя без проверки целиком применить в облаке.
+   Согласовать и применить только добавление `schoolHomework`.
+2. Сохранить копии действующих четырёх файлов runtime и plist. Обновить их из этой
+   папки. У существующего Python-окружения уже должна быть библиотека
+   `google-cloud-firestore`, используемая загрузчиком оценок; не создавать новые
+   credentials и не менять существующие Firebase UID.
+3. Проверить `homework_upload.py --validate` с текущей `latest-good.json`.
+   Это только чтение локальных файлов, без Firebase. Если данные устарели, ждать
+   обычного разрешённого успешного сбора; не загружать старые или частичные данные.
+4. Включить `--upload-homework` в существующем runner. Если текущий launchd использует
+   `--auto-vpn`, сохранить этот флаг при повторной установке:
+   `unified_runner.py --install --auto-vpn --upload-homework` из существующего venv.
+   Проверить прежний state-dir и прочие действующие аргументы перед установкой.
+   Новое расписание не нужно. Установка не была выполнена в этой задаче.
+5. После следующего разрешённого сбора проверить домашку на двух устройствах.
+   Деплой сайта — только по отдельному разрешению.
+
+Откат: убрать `--upload-homework` из действующего runner/plist либо восстановить
+сохранённые файлы и plist. Это не удаляет облачные документы или галочки; загрузка
+оценок продолжит работать прежним способом.
