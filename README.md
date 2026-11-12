@@ -1,21 +1,12 @@
 # Семейные приложения
 
-Самостоятельные HTML-приложения, опубликованные на GitHub Pages. У каждого приложения своя папка и точка входа `index.html`.
+В репозитории находятся два самостоятельных приложения на GitHub Pages:
 
-[Открыть каталог приложений](https://g-spitfire.github.io/tracker/)
-
-| Приложение | Назначение | Адрес | Документация |
+| Приложение | Назначение | Открыть | Документация |
 | --- | --- | --- | --- |
-| Левели | Школьные оценки и успеваемость | [Открыть](https://g-spitfire.github.io/tracker/leveli/) | [README](leveli/README.md) |
-| Форма | Трекер тренировок | [Открыть](https://g-spitfire.github.io/tracker/forma/) | [README](forma/README.md) |
-| WordScene | Изучение английских слов | [Открыть](https://g-spitfire.github.io/tracker/wordscene/) | [README](wordscene/README.md) |
+| Форма | Трекер тренировок | [Форма](https://g-spitfire.github.io/tracker/forma/) | [README](forma/README.md) |
+| WordScene | Изучение английских слов | [WordScene](https://g-spitfire.github.io/tracker/wordscene/) | [README](wordscene/README.md) |
 
-## Данные и разработка
+[Каталог приложений](https://g-spitfire.github.io/tracker/)
 
-- Приложения независимы; их данные и возможности описаны в README внутри соответствующих папок.
-
-Сборка не требуется: GitHub Pages отдаёт статические HTML, CSS, JavaScript и ресурсы.
-
-## WordScene
-
-Актуальная версия — [WordScene 17.0](wordscene/README.md), единственная спецификация — [SPEC.md](wordscene/SPEC.md). Постоянный адрес WordScene: `/tracker/wordscene/`. Firebase «Левели» используется для школьных оценок; старая интеграция WordScene удалена из интерфейса «Левели».
+Оба приложения публикуются как статические сайты, без сборки. Подробности реализации и хранения данных — в README соответствующих папок.
