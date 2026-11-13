@@ -25,3 +25,14 @@ body{min-height:100dvh;background:radial-gradient(ellipse at 8% 3%,#ffe2dc 0,tra
 .toast{background:#79505a}
 @media(max-height:700px){.app{padding-top:calc(7px + env(safe-area-inset-top))}.head{margin-bottom:6px}.hero{padding:13px 17px 12px}.ring{width:min(55vw,204px);height:min(55vw,204px);margin:10px auto}.ring .bigtime{font-size:37px}.hero .primary{min-height:52px}.card{margin:10px 0}.head h1{font-size:24px}}
 @media(max-width:350px){.app{padding-left:12px;padding-right:12px}.ring{width:190px;height:190px}.ring .bigtime{font-size:35px}}
+
+/* Illustration placements: assets are added separately after visual approval. */
+.hero{position:relative;overflow:hidden}
+.hero .ring{position:relative}
+.hero .ring-inner{position:relative;z-index:1}
+.hero .ring::after{content:"";position:absolute;z-index:2;right:-14px;bottom:-15px;width:76px;height:68px;background:url("./art/bunny-heart.png") center/contain no-repeat;pointer-events:none}
+.page>h2{color:#775057}
+#page-history>.card{position:relative;overflow:hidden}
+#page-history>.card::after{content:"";display:block;width:116px;height:90px;margin:10px auto 0;background:url("./art/girl-seaside.png") center/contain no-repeat}
+#page-awards::before{content:"";display:block;width:112px;height:92px;margin:0 auto 8px;background:url("./art/bunnies-hug.png") center/contain no-repeat}
+@media(max-height:700px){.hero .ring::after{width:65px;height:58px;right:-10px;bottom:-11px}}
