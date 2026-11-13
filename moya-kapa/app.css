@@ -2,3 +2,26 @@
 
 /* v2.1 simplified layout */
 .app{padding-bottom:40px}.head{margin-bottom:12px}.header-link,.back{background:transparent;border:0;color:#147b67;font-weight:700;font-size:24px}.back{font-size:15px;padding:10px 0}.hero{padding:25px 20px}.ring{--progress:0%;width:min(72vw,270px);height:min(72vw,270px);border-radius:50%;background:conic-gradient(#18a081 var(--progress),#e8f1ec 0);margin:20px auto;display:grid;place-items:center}.ring-inner{width:87%;height:87%;border-radius:50%;background:white;display:flex;flex-direction:column;align-items:center;justify-content:center}.ring .bigtime{font-size:43px;letter-spacing:-2px;margin:0 0 5px}.remaining{font-size:13px;color:#14876d;margin-top:12px;font-weight:650}.hero .primary{margin:8px 0 14px}.session{border-bottom:1px solid #edf1ee;padding:10px 0;font-size:14px}.session:last-child{border:0}.night-buttons{grid-template-columns:repeat(2,1fr)}.home-links{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:15px 0}.link-card{background:#fff;border:1px solid #e6eee9;border-radius:18px;text-align:left;padding:17px 12px;color:#245747;font-size:22px;display:flex;align-items:center;gap:10px}.link-card span{font-size:16px;font-weight:750}.link-card small{display:block;font-size:11px;color:#667f77;font-weight:400;margin-top:5px}.awards-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.award{min-height:165px;border:1px solid #e6eee9;background:white;border-radius:20px;padding:15px;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:9px}.award.locked{opacity:.45}.award-icon{font-size:36px}.award strong{font-size:15px}.award small{font-size:12px;color:#667f77}.calendar{margin-bottom:18px}
+
+/* v2.2 — warm, compact and accessible */
+:root{color:#573f42;background:#fff4ef}
+body{min-height:100dvh;background:radial-gradient(ellipse at 8% 3%,#ffe2dc 0,transparent 46%),radial-gradient(ellipse at 92% 34%,#fff1cf 0,transparent 43%),#fff6f1}
+.app{max-width:520px;padding:calc(12px + env(safe-area-inset-top)) 16px calc(30px + env(safe-area-inset-bottom))}
+.head{padding:0 3px;margin-bottom:10px}.head h1{font-size:25px;color:#6b464c;letter-spacing:-.9px}.header-link,.back{color:#c96970}
+.card,.link-card,.award{border:1px solid #ffffffd9;background:#ffffffd9;box-shadow:0 12px 32px #ae65611a;backdrop-filter:blur(8px)}
+.card{border-radius:25px;margin:12px 0;padding:18px}.hero{padding:17px 19px 15px}
+.eyebrow{color:#a56e73;font-size:13px;letter-spacing:.2px}
+.ring{width:min(62vw,236px);height:min(62vw,236px);margin:13px auto 12px;background:conic-gradient(#f15d67 var(--progress),#f9d9d6 0);box-shadow:0 0 0 8px #fff6f4}
+.ring-inner{width:84%;height:84%;background:#fffaf8}
+.ring .bigtime{font-size:41px;color:#654449;font-weight:800;letter-spacing:-1.8px}
+.muted{color:#a48383}.remaining{color:#d65d68;font-size:12px;margin-top:9px}
+.primary{background:#f0656e;border-radius:17px;min-height:54px;padding:13px 12px;font-size:17px;box-shadow:0 7px 15px #ef72743b}
+.primary.running{background:#b77b8d}.hero .primary{margin:6px 0 9px}
+.sectiontitle{font-size:17px;color:#694b50}.session{border-color:#f7e5e1;color:#765b5d}
+.link-card{border-radius:18px;padding:13px 11px;color:#b76572}.link-card span{color:#6f4e53;font-size:14px}.link-card small{color:#a88a8b;font-size:11px}
+.home-links{gap:10px;margin:11px 0}.calday{background:#fff1ed;color:#76545a}.calday.done{background:#ffb5aa}.calday.partial{background:#ffe1c4}.calday.selected{border-color:#f0656e}.calendar-head button{background:#ffede8;color:#aa5c66}
+.subtle{background:#fff1ed;border-color:#f5d7d2;color:#935c63}.night-buttons .selected{background:#ed6a73;border-color:#ed6a73}
+.award{background:#fffaf8;border-radius:20px;border-color:#fff;min-height:158px}.award.locked{opacity:.55}.award small{color:#a88a8b}
+.toast{background:#79505a}
+@media(max-height:700px){.app{padding-top:calc(7px + env(safe-area-inset-top))}.head{margin-bottom:6px}.hero{padding:13px 17px 12px}.ring{width:min(55vw,204px);height:min(55vw,204px);margin:10px auto}.ring .bigtime{font-size:37px}.hero .primary{min-height:52px}.card{margin:10px 0}.head h1{font-size:24px}}
+@media(max-width:350px){.app{padding-left:12px;padding-right:12px}.ring{width:190px;height:190px}.ring .bigtime{font-size:35px}}
