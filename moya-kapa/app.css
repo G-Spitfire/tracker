@@ -36,3 +36,5 @@ body{min-height:100dvh;background:radial-gradient(ellipse at 8% 3%,#ffe2dc 0,tra
 #page-history>.card::after{content:"";display:block;width:116px;height:90px;margin:10px auto 0;background:url("./art/girl-seaside.png") center/contain no-repeat}
 #page-awards::before{content:"";display:block;width:112px;height:92px;margin:0 auto 8px;background:url("./art/bunnies-hug.png") center/contain no-repeat}
 @media(max-height:700px){.hero .ring::after{width:65px;height:58px;right:-10px;bottom:-11px}}
+
+.build-label{text-align:center;color:#ad898a;font-size:11px;padding:8px 0 4px;letter-spacing:.2px}
