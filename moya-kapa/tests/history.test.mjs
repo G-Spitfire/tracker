@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {totalForDate} from '../core.js';
+const load=()=>import('../initial-history.js');
+test('fills only November 11–13 with requested totals',async()=>{const {historyAdditions}=await load();const rows=historyAdditions([]);assert.deepEqual(rows.map(s=>[s.date,s.seconds]),[['2026-11-11',600],['2026-11-12',900],['2026-11-13',1200]]);assert.equal(totalForDate(rows,'2026-11-14'),0)});
+test('reopening does not duplicate minutes or remove existing sessions',async()=>{const {historyAdditions}=await load();const existing=[{id:'old',type:'manual',date:'2026-11-12',seconds:300}];const rows=historyAdditions(existing);const combined=[...existing,...rows];assert.equal(totalForDate(combined,'2026-11-12'),900);assert.deepEqual(historyAdditions(combined),[]);assert.equal(existing[0].seconds,300)});
+test('keeps time already above requested amount and other days untouched',async()=>{const {historyAdditions}=await load();const old=[{id:'old',type:'manual',date:'2026-11-11',seconds:800},{id:'future',type:'manual',date:'2026-11-14',seconds:90}];const rows=historyAdditions(old);assert.equal(rows.some(s=>s.date==='2026-11-11'),false);assert.equal(totalForDate([...old,...rows],'2026-11-14'),90)});
