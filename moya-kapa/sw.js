@@ -1,6 +1,6 @@
 // PWA update fix: network-first navigation and versioned offline assets.
-const CACHE='moya-kapa-v2-1-update-20261113';
-const ASSETS=['./','./index.html','./app.css','./app.js','./core.js','./db.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'];
+const CACHE='moya-kapa-v2-2-0-20261113';
+const ASSETS=['./','./index.html','./app.css','./app.js','./appearance.js','./icons.js','./core.js','./db.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
