@@ -8,7 +8,7 @@ const START='2026-11-14',NIGHT='2026-11-24',MAX=120;
 let sessions=[],nights=[],active=null,selected=localKey(Date.now()),view=new Date(),busy=false;view.setDate(1);
 const day=k=>{const [y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)};
 const addDays=(k,n)=>{const d=day(k);d.setDate(d.getDate()+n);return localKey(d.getTime())};
-const goalFor=k=>k<START?null:Math.min(MAX,30+10*Math.round((day(k)-day(START))/86400000));
+const goalFor=k=>({'2026-11-11':10,'2026-11-12':20,'2026-11-13':20}[k]??(k<START?null:Math.min(MAX,30+10*Math.round((day(k)-day(START))/86400000))));
 const nightFor=k=>nights.find(n=>n.date===k)?.status||'';
 const seconds=k=>totalForDate(sessions,k,Date.now(),active);
 const fmt=s=>{s=Math.max(0,Math.floor(s));return String(Math.floor(s/3600)).padStart(2,'0')+':'+String(Math.floor(s%3600/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
