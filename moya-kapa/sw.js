@@ -7,12 +7,18 @@ self.addEventListener('install',event=>{
 self.addEventListener('activate',event=>{
   event.waitUntil((async()=>{
     const keys=await caches.keys();
-    await Promise.all(keys.filter(key=>key.startsWith('moya-kapa-')&&key!==CACHE).map(key=>caches.delete(key)));
+    const previous=keys.filter(key=>key.startsWith('moya-kapa-')&&key!==CACHE);
+    await Promise.all(previous.map(key=>caches.delete(key)));
     await self.clients.claim();
     // Existing installed iOS PWA may still be displaying the old cached document.
     // Ask controlled windows to refresh once when this worker takes over.
     const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});
-    for(const client of clients)client.postMessage({type:'PWA_UPDATED',version:CACHE});
+    for(const client of clients){
+      client.postMessage({type:'PWA_UPDATED',version:CACHE});
+      if(previous.length && client.url.startsWith(self.registration.scope)){
+        try{await client.navigate(client.url);}catch{/* iOS may defer navigation until reopened */}
+      }
+    }
   })());
 });
 self.addEventListener('fetch',event=>{
