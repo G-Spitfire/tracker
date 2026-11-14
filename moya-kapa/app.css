@@ -27,3 +27,14 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}html{-webkit-text
 @media(max-height:700px){.hero{padding:14px 16px}.ring{width:204px;height:204px;margin:10px auto}.hero .primary{min-height:56px;padding:15px 10px}.card{padding:16px}.hero #timerHint{font-size:12px}}
 @media(max-width:350px){.head h1{font-size:26px}.ring{width:194px;height:194px}.link-card{gap:5px;padding:10px 7px}.link-card span{font-size:14px}.appearance-panel{padding:12px}.swatch small{font-size:10px}}
 .graph-nav button,.night-pill{min-width:44px;min-height:44px}.ring-inner{width:80%;height:80%}
+
+/* Readable secondary text and status colors in every palette. */
+:root{--muted:#62586f;--night-yes:#176c50;--night-no:#a43d50}
+:root[data-palette=peach]{--muted:#71594c}
+:root[data-palette=mint]{--muted:#50695d}
+:root[data-palette=berry]{--muted:#745666}
+:root[data-theme=dark]{--muted:#c7c0d1;--night-yes:#83d9b6;--night-no:#f69aac}
+.award.locked{opacity:1;border-style:dashed}.award.locked .award-icon{color:var(--muted)}
+.graph-plan{stroke:var(--accent);stroke-width:1.5;stroke-dasharray:3 2}.legend-plan{border-color:var(--accent);border-style:dashed}
+.graph-night-yes{fill:var(--night-yes)}.graph-night-no{fill:var(--night-no)}
+.graph-nav button:disabled{opacity:1;color:var(--muted);background:transparent;border:1px dashed var(--border)}
