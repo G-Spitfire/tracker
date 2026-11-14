@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+test('unchanged markup keeps existing focused controls',async()=>{const {setMarkup}=await import('../ui.js');let writes=0,value='<button>13</button>';const element={get innerHTML(){return value},set innerHTML(v){writes++;value=v}};setMarkup(element,value);assert.equal(writes,0);setMarkup(element,'<button>14</button>');assert.equal(writes,1);setMarkup(element,'<button>14</button>');assert.equal(writes,1)});
