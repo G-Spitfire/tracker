@@ -11,7 +11,7 @@ const addDays=(k,n)=>{const d=day(k);d.setDate(d.getDate()+n);return localKey(d.
 const goalFor=k=>({'2026-11-11':10,'2026-11-12':20,'2026-11-13':20}[k]??(k<START?null:Math.min(MAX,30+10*Math.round((day(k)-day(START))/86400000))));
 const nightFor=k=>nights.find(n=>n.date===k)?.status||'';
 const seconds=k=>totalForDate(sessions,k,Date.now(),active);
-const fmt=s=>{s=Math.max(0,Math.floor(s));return String(Math.floor(s/3600)).padStart(2,'0')+':'+String(Math.floor(s%3600/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+const fmt=s=>{s=Math.max(0,Math.floor(s));const h=Math.floor(s/3600),m=String(Math.floor(s%3600/60)).padStart(2,'0'),sec=String(s%60).padStart(2,'0');return h?h+':'+m+':'+sec:m+':'+sec};
 const toast=s=>{const t=$('toast');t.textContent=s;t.hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.hidden=true,3000)};
 async function refresh(){sessions=await all('sessions');nights=await all('nights');const a=await get('meta','active');active=a?.start?{start:a.start}:null;render();}
 async function init(){if(!(await get('meta','migration'))){let old=null;try{old=JSON.parse(localStorage.getItem('moya-kapa-v1')||'null')}catch{}const converted=legacyConvert(old);for(const s of converted.sessions)await put('sessions',s);for(const n of converted.nights)await put('nights',n);if(converted.active)await put('meta',{key:'active',start:converted.active.start});await put('meta',{key:'migration',done:true});}await fillInitialHistory();await refresh();}
