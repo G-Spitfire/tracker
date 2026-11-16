@@ -1193,6 +1193,25 @@ html:has(.ws-dict-page),body:has(.ws-dict-page){background:#fdf7ed}
  .ws-dict-detail-card{padding:11px}
 }
 
+/* Five-word introduction prototype; shared selection/recall rules stay below. */
+.ws-intro-main{overflow:auto!important;overscroll-behavior:contain;padding:3px 5px 8px}
+.ws-intro-sheet{position:relative;isolation:isolate;flex:none;text-align:center;background:#faf5e9;border:1px solid #e1d4bd;border-radius:4px 10px 10px 4px;padding:14px 16px;box-shadow:0 4px 12px #6350391b}
+.ws-intro-word{margin:0;color:#1b2b43;font-size:clamp(2rem,1.6rem + 2vw,2.75rem);line-height:1.1;letter-spacing:-.04em;overflow-wrap:anywhere}
+.ws-intro-word:focus-visible{outline:2px solid #087bfa;outline-offset:3px}
+.ws-intro-pronunciation{display:flex;align-items:center;justify-content:center;gap:12px;margin:5px 0}
+.ws-intro-translation{margin:5px 0 0;font-size:1.5rem;font-weight:700;line-height:1.2;color:#1b2b43;overflow-wrap:anywhere}
+.ws-intro-dream{flex:none;display:flex;flex-direction:column;align-items:center;gap:6px;background:#f2edf7;border:1px solid #e2d8eb;border-radius:17px;padding:12px}
+.ws-intro-label{margin:0;color:#715a8a;font-size:.625rem;letter-spacing:.06em;font-weight:800}
+.ws-intro-cue{font-size:1.5rem;line-height:1.2;color:#584273;overflow-wrap:anywhere;max-width:100%}
+.ws-intro-art{width:min(100%,240px);aspect-ratio:4/3;flex:none}
+.ws-intro-art svg{display:block;width:100%;height:100%}
+.ws-intro-scene{margin:0;color:#4d4561;font-size:.875rem;line-height:1.4;text-align:center;max-width:32rem;overflow-wrap:anywhere}
+@media(max-height:720px){
+ .ws-intro-sheet{padding:10px 14px}
+ .ws-intro-dream{padding:10px;gap:5px}
+ .ws-intro-art{width:176px;max-width:100%}
+}
+
 /* Natural paper flip-sheet: approved shared layout for automatic selection, learning and recall. */
 .ws-paper-page{
  --ws-paper-cream:#faf5e9;--ws-paper-ink:#1b2b43;

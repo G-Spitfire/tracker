@@ -391,18 +391,36 @@ function cardActions(){
  return session.mode==='practice'?btn('Закончить тренировку','stopPractice','quiet'):btn('Отменить занятие','cancel','quiet');
 }
 function visual(w){if(window.WS17_illustration){try{return window.WS17_illustration(w.en)}catch(e){}}if(w.props&&C?.render){try{return C.render(w)}catch(e){}}return '<div class="simple-art">'+h(w.cue||w.en)+'</div>'}
+// Prototype copy is presentation-only: keep the original dictionary scenes intact.
+const introScenes={
+ mug:'Маг взмахивает палочкой и вызывает искристый фонтан из огромной кружки.',
+ fist:'Огромный кулак раскалывает фисташку, и скорлупа разлетается в стороны.',
+ moss:'Мост целиком покрылся толстым слоем яркого мягкого зелёного мха.',
+ fence:'Гигантский фен дует на забор, изгибая его деревянные доски.',
+ puddle:'Ты падал прямо в огромную лужу, поднимая высокие брызги.'
+};
+function introduction(w){
+ return '<section class="ws-intro-sheet" aria-label="Знакомство со словом"><div class="ws-paper-grain" aria-hidden="true"></div>'+
+  '<h2 class="ws-intro-word" tabindex="-1" lang="en">'+h(w.en)+'</h2><div class="ws-intro-pronunciation"><span class="ws-paper-ipa">'+h(w.ipa)+'</span>'+
+  '<button class="ws-paper-sound" data-action="say:'+h(w.en)+'" aria-label="Послушать '+h(w.en)+'">'+pickerIcon('volume')+'</button></div>'+
+  '<p class="ws-intro-translation">'+h(w.ru)+'</p></section>'+
+  '<section class="ws-intro-dream" aria-label="Ассоциация для запоминания"><p class="ws-intro-label">СОЗВУЧИЕ · АССОЦИАЦИЯ</p>'+
+  '<strong class="ws-intro-cue">'+h(w.cue)+'</strong><div class="ws-intro-art">'+window.WS17_illustration(w.en,{svg:true})+'</div>'+
+  '<p class="ws-intro-scene">'+h(introScenes[w.en])+'</p></section>';
+}
 function learn(focusWord=false){
  if(!session)return home();view='learn';const w=byId[session.ids[session.learnIndex]];
  const position=session.learnIndex+1,total=session.ids.length,progress=Math.round(100*position/total);
  const back=!!session.paperLearnFace;
+ const intro=Object.hasOwn(introScenes,w.en);
  shell('','', '<main class="ws-paper-page ws-paper-learn"><div class="ws-paper-header"><div><h1>Запоминание</h1><small>Изучаем новые слова</small></div><span class="ws-paper-count">'+position+' из '+total+'</span></div>'+
   '<div class="ws-paper-track" role="progressbar" aria-label="Прогресс запоминания" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+position+'"><span style="width:'+progress+'%"></span></div>'+
-  '<div class="ws-paper-main">'+paperSheet(w,true,back)+paperDream(w,'learn',true,false)+'</div>'+
-  '<div class="ws-paper-bottom"><p class="ws-paper-instruction">Изучи обе стороны и представь образ</p>'+
+  '<div class="ws-paper-main'+(intro?' ws-intro-main':'')+'">'+(intro?introduction(w):paperSheet(w,true,back)+paperDream(w,'learn',true,false))+'</div>'+
+  '<div class="ws-paper-bottom"><p class="ws-paper-instruction">'+(intro?'Послушай, повтори слово и представь образ':'Изучи обе стороны и представь образ')+'</p>'+
   '<div class="ws-paper-decisions">'+btn(position===total?'Начать проверку':'Дальше','learnNext','ws-paper-positive ws-paper-full')+'</div>'+
   '<div class="ws-paper-minors">'+cardActions()+'</div></div></main>');
  wirePaperFlip(()=>{session.paperLearnFace=!session.paperLearnFace;if(!store())return home();if(!paperFlipInPlace(session.paperLearnFace))learn()});
- if(focusWord){window.scrollTo?.(0,0);root.querySelector?.('[data-flip-card]')?.focus?.({preventScroll:true})}
+ if(focusWord){window.scrollTo?.(0,0);root.querySelector?.(intro?'.ws-intro-word':'[data-flip-card]')?.focus?.({preventScroll:true})}
 }
 function recall(){
  if(!session)return home();view='recall';const item=session.items[session.index];if(!item)return completed();
