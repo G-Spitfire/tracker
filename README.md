@@ -1,11 +1,12 @@
-# Семейные приложения
+# Приложения
 
-В репозитории находятся два самостоятельных приложения на GitHub Pages:
+В репозитории находятся три самостоятельных приложения на GitHub Pages:
 
 | Приложение | Назначение | Открыть | Документация |
 | --- | --- | --- | --- |
 | Форма | Трекер тренировок | [Форма](https://g-spitfire.github.io/tracker/forma/) | [README](forma/README.md) |
 | WordScene | Изучение английских слов | [WordScene](https://g-spitfire.github.io/tracker/wordscene/) | [README](wordscene/README.md) |
+| Школьный планировщик «Аспект» | Расписание школы | [Аспект](https://g-spitfire.github.io/tracker/school-aspect/) | [README](school-aspect/README.md) |
 
 [Каталог приложений](https://g-spitfire.github.io/tracker/)
 
