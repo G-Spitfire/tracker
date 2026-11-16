@@ -40,10 +40,10 @@ test('upstream media licensing and attribution preserved',()=>{
   assert.ok(fs.existsSync(path.join(root,name)),name+' missing');
 });
 
-test('service worker activation removes v19 and v20 caches but preserves unrelated apps',async()=>{
+test('service worker activation removes old caches including v45 but preserves current and unrelated apps',async()=>{
  const listeners={};
  const removed=[];
- const oldKeys=['wordscene-17-lab-cache-v19','wordscene-17-lab-cache-v20','wordscene-17-lab-cache-v21','wordscene-17-lab-cache-v22','wordscene-cache-v16','unrelated'];
+ const oldKeys=['wordscene-17-lab-cache-v19','wordscene-17-lab-cache-v20','wordscene-17-lab-cache-v21','wordscene-17-lab-cache-v22','wordscene-17-lab-cache-v45','wordscene-17-lab-cache-v46','wordscene-cache-v16','unrelated'];
  const context={
   self:{addEventListener:(type,cb)=>{listeners[type]=cb},clients:{claim:async()=>{}}},
   caches:{keys:async()=>oldKeys,delete:async(key)=>{removed.push(key);return true}},
@@ -55,6 +55,6 @@ test('service worker activation removes v19 and v20 caches but preserves unrelat
  let pending;
  listeners.activate({waitUntil:p=>{pending=p}});
  await pending;
- assert.deepEqual(removed.sort(),['wordscene-17-lab-cache-v19','wordscene-17-lab-cache-v20','wordscene-17-lab-cache-v21','wordscene-17-lab-cache-v22']);
+ assert.deepEqual(removed.sort(),['wordscene-17-lab-cache-v19','wordscene-17-lab-cache-v20','wordscene-17-lab-cache-v21','wordscene-17-lab-cache-v22','wordscene-17-lab-cache-v45']);
 });
 
