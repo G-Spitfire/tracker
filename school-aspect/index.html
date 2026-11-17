@@ -199,7 +199,7 @@ const unresolved=()=>resources().filter(x=>absentTeachers(x).length&&!resolution
 function commit(fn){let d=day();store[date]={edits:{...d.edits},absences:{...d.absences},events:[...d.events],extras:[...(d.extras||[])],resolutions:{...(d.resolutions||{})},initialized:true};fn(store[date]);store[date].extras=store[date].extras.map(attachRefs);store[date].events=store[date].events.map(attachRefs);for(const [id,edit] of Object.entries(store[date].edits))store[date].edits[id]=attachRefs(edit);try{localStorage.setItem('school_real_week_v14',JSON.stringify(store))}catch(e){alert('Браузер не разрешил сохранить изменения: '+e.message)}render()}
 
 const CFGKEY='school_week_config_v12';let cfg={hours:{},home:{},customLists:{}};try{cfg={...cfg,...JSON.parse(localStorage.getItem(CFGKEY)||'{}')}}catch(e){};for(const t of cfg.customLists?.teachers||[])if(!teachers.includes(t))teachers.push(t);for(const t of cfg.deletedTeachers||[]){let i=teachers.indexOf(t);if(i>=0)teachers.splice(i,1)}for(const r of cfg.customLists?.rooms||[])if(!rooms.includes(r))rooms.push(r);
-const workHours=t=>{let wd=new Date(date+'T12:00:00').getDay();return cfg.hours?.[t]&&Object.prototype.hasOwnProperty.call(cfg.hours[t],wd)?cfg.hours[t][wd]:['09:00','18:00']};
+const workHours=t=>{let wd=new Date(date+'T12:00:00').getDay();return cfg.hours?.[t]&&Object.prototype.hasOwnProperty.call(cfg.hours[t],wd)?cfg.hours[t][wd]:(wd===0||wd===6?null:['09:00','18:00'])};
 const overtime=x=>teachersOf(x).filter(t=>{let h=workHours(t);return !h||x.start<min(h[0])||x.end>min(h[1])});
 syncRefNames('teacher',teachers);syncRefNames('room',rooms);if(!cfg.courtyardRoomArchived){archiveRef('room','ДВОР / ПРОГУЛКА',true);cfg.courtyardRoomArchived=true;localStorage.setItem(CFGKEY,JSON.stringify(cfg))}const saveCfg=()=>localStorage.setItem(CFGKEY,JSON.stringify(cfg));function applySavedRenames(){for(const type of ['teachers','rooms'])for(const [old,next] of Object.entries(cfg.renames?.[type]||{})){const key=type==='teachers'?'teacher':'room';for(const collection of [weekly,snapshot16,weeklySchedule,store]){const visit=o=>{if(!o||typeof o!=='object')return;if(Array.isArray(o)){o.forEach(visit);return}for(const [k,v] of Object.entries(o)){if(k===key&&v===old)o[k]=next;else if(k==='teachers'&&type==='teachers'&&Array.isArray(v))o[k]=v.map(t=>t===old?next:t);else if(v&&typeof v==='object')visit(v)}};visit(collection)}}}applySavedRenames();base=baseForDate(date);
 let colorCategories=JSON.parse(localStorage.getItem('school_colors_v12')||'null')||[{id:'breaks',name:'Перерывы',color:'#ffe79b',items:['BREAK','BREAKFAST','LUNCH','SNACK TIME','DINNER']},{id:'study',name:'Учебные занятия',color:'#cfe3f8',items:['МАТЕМАТИКА','РУССКИЙ ЯЗЫК','ENGLISH','ГРАМОТА']},{id:'events',name:'Мероприятия и выезды',color:'#ccebd9',items:[],event:true},{id:'other',name:'Другие занятия',color:'#e7edf5',items:[]}];
@@ -436,7 +436,7 @@ if(settingsPage==='data'){$('clear-all-data').onclick=()=>{if(!confirm('Удал
   const data=JSON.parse(await f.text());
   if(!object(data)||![2,20].includes(data.version)||!object(data.store)||!object(data.cfg))throw Error('Неверная структура резервной копии');
   for(const [dateKey,d] of Object.entries(data.store)){
-   if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(dateKey)||!object(d)||!object(d.edits||{})||!object(d.absences||{})||!Array.isArray(d.events||[])||!Array.isArray(d.extras||[]))throw Error('Повреждены данные расписания: '+dateKey);
+   if(!/^\d{4}-\d{2}-\d{2}$/.test(dateKey)||!object(d)||!object(d.edits||{})||!object(d.absences||{})||!Array.isArray(d.events||[])||!Array.isArray(d.extras||[]))throw Error('Повреждены данные расписания: '+dateKey);
    for(const lesson of [...(d.events||[]),...(d.extras||[])])if(!validLesson(lesson))throw Error('Некорректное занятие: '+dateKey);
   }
   if(data.cfg.hours!==undefined&&!object(data.cfg.hours))throw Error('Некорректный график преподавателей');
@@ -451,9 +451,10 @@ if(settingsPage==='data'){$('clear-all-data').onclick=()=>{if(!confirm('Удал
   const nextRefs=data.directoryRefs||{};
   const nextColors=data.colorCategories||colorCategories;
   const nextWeekly=data.weeklySchedule||{};
+  const nextSubjects=data.subjects||nextDirectory.subjects.map(x=>x.name);
   const keys={
    'school_real_week_v14':data.store,[CFGKEY]:data.cfg,[WEEKLY_EDIT_KEY]:nextWeekly,
-   'school_colors_v12':nextColors,[DIRECTORY_KEY]:nextDirectory,[DIRECTORY_REF_KEY]:nextRefs
+   'school_colors_v12':nextColors,[DIRECTORY_KEY]:nextDirectory,[DIRECTORY_REF_KEY]:nextRefs,[SUBJECT_KEY]:nextSubjects
   };
   const previous=Object.fromEntries(Object.keys(keys).map(k=>[k,localStorage.getItem(k)]));
   try{
@@ -465,8 +466,8 @@ if(settingsPage==='data'){$('clear-all-data').onclick=()=>{if(!confirm('Удал
   }
   store=data.store;cfg=data.cfg;weeklySchedule=nextWeekly;colorCategories=nextColors;
   directory=nextDirectory;directoryRefs=nextRefs;
-  subjects.splice(0,subjects.length,...(data.subjects||nextDirectory.subjects.map(x=>x.name)));
-  base=baseForDate(date);draft=null;selected=null;render();
+  subjects.splice(0,subjects.length,...nextSubjects);
+  base=baseForDate(date);draft=null;selected=null;location.reload();
  }catch(err){alert('Не удалось восстановить копию: '+err.message)}
  e.target.value='';
 }}}
@@ -556,7 +557,8 @@ function pdfEsc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':
 function pdfTime(t){return String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0')}
 function buildPrintDocument(){
  const current=resources(), edits=day().edits||{}, cancelled=base.filter(x=>edits[x.id]?.cancelled).map(x=>({...x,...edits[x.id],cancelled:true}));
- const entries=[...current,...cancelled];
+ const cancelledExtras=(day().extras||[]).filter(x=>x.cancelled).map(attachRefs);
+ const entries=[...current,...cancelled,...cancelledExtras];
  const startTimes=[...new Set(entries.map(x=>x.start))].sort((a,b)=>a-b);
  const bad=conflictIds();
  const title=new Date(date+'T12:00:00').toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
