@@ -804,6 +804,7 @@ let chosen=null,showArchived=false,searchText='',adding=false,editing=false,menu
 cfg.teacherRoles=cfg.teacherRoles||{};cfg.teacherSavedHours=cfg.teacherSavedHours||{};cfg.teacherNames=cfg.teacherNames||{};
 const nameParts=t=>cfg.teacherNames[t]||{last:'',first:t,middle:''};
 const fullName=p=>[p.last,p.first,p.middle].map(x=>x.trim()).filter(Boolean).join(' ');
+const teacherFullName=t=>cfg.teacherNames?.[t]?fullName(cfg.teacherNames[t]):t;
 const dayNames=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const dayValue=(t,d)=>cfg.hours?.[t]&&Object.prototype.hasOwnProperty.call(cfg.hours[t],d)?cfg.hours[t][d]:(d===0||d===6?null:['09:00','18:00']);
 const teacherUsage=name=>{
@@ -828,12 +829,12 @@ function draw(){
  const panel=$('teacher-panel');if(!panel)return;$('panel-back').hidden=!!chosen;
  if(!chosen){
  const all=teachers.filter(t=>t!=='Не назначен'&&(showArchived||!directoryRefArchived('teacher',t))).sort((a,b)=>a.localeCompare(b,'ru'));
- const filtered=all.filter(t=>t.toLocaleLowerCase('ru').includes(searchText.toLocaleLowerCase('ru')));
+ const filtered=all.filter(t=>teacherFullName(t).toLocaleLowerCase('ru').includes(searchText.toLocaleLowerCase('ru')));
  panel.innerHTML='<div class="teacher-head"><h2>Преподаватели</h2><button class=" btn-primary btn-compact" id="teacher-add-toggle">+ Добавить</button></div>'+
  (adding?'<div class="teacher-add-box"><label>Фамилия<input id="teacher-new-last" placeholder="Фамилия"></label><label>Имя<input id="teacher-new" placeholder="Имя" required></label><label>Отчество<input id="teacher-new-middle" placeholder="Отчество"></label><div class="teacher-actions"><button id="teacher-add-cancel" class="btn-secondary btn-standard">Отмена</button><button class=" btn-primary btn-standard" id="teacher-add">Создать</button></div></div>':'')+
  '<input id="teacher-search" placeholder="Поиск преподавателя" value="'+esc(searchText)+'">'+
  '<div class="teacher-filter"><span>'+teachers.filter(t=>t!=='Не назначен'&&!directoryRefArchived('teacher',t)).length+' активных</span><label><input id="teacher-show-archive" type="checkbox" '+(showArchived?'checked':'')+'> Показать архив</label></div>'+
- '<div class="teacher-list">'+(filtered.length?filtered.map(t=>'<button class="teacher-list-item btn-list" data-teacher-open="'+esc(t)+'"><span><strong>'+esc(t)+'</strong>'+((directoryRefArchived('teacher',t)||cfg.teacherRoles[t])?'<small>'+(directoryRefArchived('teacher',t)?'В архиве':esc(cfg.teacherRoles[t]))+'</small>':'')+'</span><span>›</span></button>').join(''):'<div class="teacher-empty">Преподаватели не найдены</div>')+'</div>';
+ '<div class="teacher-list">'+(filtered.length?filtered.map(t=>'<button class="teacher-list-item btn-list" data-teacher-open="'+esc(t)+'"><span><strong>'+esc(teacherFullName(t))+'</strong>'+((directoryRefArchived('teacher',t)||cfg.teacherRoles[t])?'<small>'+(directoryRefArchived('teacher',t)?'В архиве':esc(cfg.teacherRoles[t]))+'</small>':'')+'</span><span>›</span></button>').join(''):'<div class="teacher-empty">Преподаватели не найдены</div>')+'</div>';
  $('teacher-add-toggle').onclick=()=>{adding=!adding;draw();if(adding)$('teacher-new')?.focus()};
  if($('teacher-add-cancel'))$('teacher-add-cancel').onclick=()=>{adding=false;draw()};
  if($('teacher-add'))$('teacher-add').onclick=()=>{const parts={last:$('teacher-new-last').value.trim(),first:$('teacher-new').value.trim(),middle:$('teacher-new-middle').value.trim()};const n=fullName(parts);if(!parts.first||teachers.some(t=>t.toLocaleLowerCase('ru')===n.toLocaleLowerCase('ru')))return alert('Введите уникальное имя преподавателя');teachers.push(n);cfg.teacherNames[n]=parts;archiveRef('teacher',n,false);cfg.customLists=cfg.customLists||{};cfg.customLists.teachers=teachers.filter(t=>t!=='Не назначен');saveCfg();chosen=n;adding=false;draw()};
@@ -844,7 +845,7 @@ function draw(){
  }
  const t=chosen,archived=directoryRefArchived('teacher',t);
  let h='<button id="teacher-list-back" class="panel-back btn-ghost btn-standard">‹ К преподавателям</button>';
- h+='<div class="teacher-identity"><h2>'+esc(t)+'</h2>'+(cfg.teacherRoles[t]?'<div class="teacher-role">'+esc(cfg.teacherRoles[t])+'</div>':'')+''+(archived?'<span class="teacher-archived">В архиве</span>':'')+'</div>';
+ h+='<div class="teacher-identity"><h2>'+esc(teacherFullName(t))+'</h2>'+(cfg.teacherRoles[t]?'<div class="teacher-role">'+esc(cfg.teacherRoles[t])+'</div>':'')+''+(archived?'<span class="teacher-archived">В архиве</span>':'')+'</div>';
  if(editing)h+='<div class="teacher-add-box"><label>Фамилия<input id="teacher-edit-last" value="'+esc(nameParts(t).last)+'"></label><label>Имя<input id="teacher-edit-name" value="'+esc(nameParts(t).first)+'" required></label><label>Отчество<input id="teacher-edit-middle" value="'+esc(nameParts(t).middle)+'"></label><label>Должность<input id="teacher-edit-role" value="'+esc(cfg.teacherRoles[t]||'')+'" placeholder="Например, преподаватель английского"></label><div class="teacher-actions"><button id="teacher-edit-cancel" class="btn-secondary btn-standard">Отмена</button><button class=" btn-primary btn-standard" id="teacher-edit-save">Сохранить</button></div></div>';
  if(!editing)h+='<div class="directory-card-actions"><button id="teacher-edit" class="btn-secondary btn-standard">'+uiIcon('edit')+' Изменить</button><button id="teacher-archive" class="btn-secondary btn-standard">'+(archived?'↩ Восстановить':uiIcon('archive')+' В архив')+'</button></div>';
  if(archived&&!editing)h+='<div class="teacher-permanent-delete"><button id="teacher-delete-forever" class="btn-danger btn-standard">Удалить навсегда</button></div>';
@@ -872,8 +873,9 @@ function draw(){
  if($('teacher-edit-cancel'))$('teacher-edit-cancel').onclick=()=>{editing=false;draw()};
  if($('teacher-edit-save'))$('teacher-edit-save').onclick=()=>{
  const parts={last:$('teacher-edit-last').value.trim(),first:$('teacher-edit-name').value.trim(),middle:$('teacher-edit-middle').value.trim()};const next=fullName(parts),role=$('teacher-edit-role').value.trim();
- if(!parts.first||teachers.some(x=>x!==t&&x.toLocaleLowerCase('ru')===next.toLocaleLowerCase('ru')))return alert('Введите уникальное имя преподавателя');
- if(next!==t){
+ if(!parts.first)return alert('Заполните поле «Имя»');
+ const collision=teachers.some(x=>x!==t&&x.toLocaleLowerCase('ru')===next.toLocaleLowerCase('ru'));
+ if(next!==t&&!collision){
  renameRef('teacher',t,next);renameStoredResource('teacher',t,next);cfg.renames=cfg.renames||{teachers:{},rooms:{}};cfg.renames.teachers=cfg.renames.teachers||{};cfg.renames.teachers[t]=next;
  for(const d of Object.values(store))if(d.absences?.[t]){d.absences[next]=d.absences[t];delete d.absences[t]}
  if(cfg.hours?.[t]){cfg.hours[next]=cfg.hours[t];delete cfg.hours[t]}
