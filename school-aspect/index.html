@@ -508,6 +508,7 @@ button[class*="btn-"]:active:not(:disabled){filter:brightness(.96)}
 .right.aspect-form-editor .event-actions{gap:7px}
 .right.aspect-form-editor .tiny{font-size:11px;line-height:1.35}
 .right .teacher-permanent-delete{margin:0 0 14px}.right .teacher-permanent-delete button{width:100%;min-height:32px;font-size:12px;font-weight:500;padding:6px 10px}
+.right .teacher-add-box label{display:block;margin:8px 0 4px;font-size:11px;font-weight:500}.right .teacher-add-box label input{display:block;width:100%;margin-top:4px}.right .teacher-add-box{margin:8px 0 12px}
 </style></head><body><div id="pdf-overlay" class="pdf-overlay" role="dialog" aria-modal="true" aria-label="Предпросмотр расписания"><div class="pdf-dialog"><div class="pdf-bar"><strong id="pdf-heading">Предпросмотр расписания</strong><span id="pdf-warning" class="warn"></span><button id="pdf-print" class=" btn-primary btn-standard">Печать / Сохранить PDF</button><button id="pdf-close" class="btn-secondary btn-standard">Закрыть</button></div><iframe id="pdf-frame" class="pdf-frame" title="Печатное расписание"></iframe></div></div><dialog id="unsaved-draft-dialog" aria-labelledby="unsaved-draft-title" aria-describedby="unsaved-draft-copy"><h2 id="unsaved-draft-title">Есть несохранённые изменения</h2><p id="unsaved-draft-copy">Если перейти, изменения в этом занятии не сохранятся.</p><div class="buttons"><button type="button" id="unsaved-stay" class="btn-secondary btn-standard">Остаться</button><button type="button" id="unsaved-discard" class=" btn-danger btn-standard">Перейти без сохранения</button></div></dialog><dialog id="reset-confirm-dialog" aria-labelledby="reset-confirm-title" aria-describedby="reset-confirm-copy"><h2 id="reset-confirm-title">Сбросить день?</h2><p id="reset-confirm-copy">Будут удалены изменения, мероприятия и отсутствия только на выбранную дату.</p><div class="buttons"><button type="button" id="reset-cancel" class="btn-secondary btn-standard">Отмена</button><button type="button" id="reset-confirm-ok" class=" btn-danger btn-standard">Сбросить день</button></div></dialog><div class="app"><div class="top"><div class="brand" aria-label="Школа · Аспект"><span class="school-logo" aria-hidden="true"><svg viewBox="0 0 100 100" width="30" height="30" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="47" fill="#e60023"/><path d="M23 44 79 23 85 38 33 57 33 63 82 77 77 84 23 68Z" fill="white"/><path d="M36 58 70 46 Q77 55 73 69Z" fill="white"/><path d="M27 72 77 88M29 78 69 91" fill="none" stroke="white" stroke-width="3"/></svg></span><span class="school-name">ASPECT<small>EDUCATIONAL CENTRE</small></span></div><h2 id="title">Расписание</h2><div class="top-actions"><div class="top-group date-group"><button id="today" class="btn-secondary btn-compact">Сегодня</button><button id="tomorrow" class="btn-secondary btn-compact">Завтра</button><button id="copy-day" title="Скопировать занятия из последнего заполненного такого же дня недели" class="btn-secondary btn-compact">Скопировать расписание</button><label class="date-picker"><span id="date-label" aria-hidden="true"></span><span aria-hidden="true">▾</span><input type="date" id="date" aria-label="Выбрать дату расписания"></label></div><details class="add-menu"><summary class="btn-primary btn-compact">+ Добавить</summary><div class="add-menu-items"><button id="new-lesson-button" class="btn-list">Урок</button><button id="new-routine-button" class="btn-list">Режимный момент / перемена</button><button id="event-button" class="btn-list">Мероприятие</button></div></details><button id="absence-button" class="btn-secondary btn-compact">Отсутствия <span id="absence-count"></span></button><button id="settings-button" aria-controls="editor" class="btn-secondary btn-compact">Настройки</button><div class="header-schedule-tools"><div class="issue-strip"><button id="issues-conflicts" class="btn-filter btn-compact">Проблемы: 0</button><button id="issues-absence" hidden class="btn-filter btn-compact">Требуют решения: 0</button><button id="issues-rooms" hidden class="btn-filter btn-compact">Без кабинета: 0</button></div></div></div></div><div class="workspace"><aside class="right" id="editor"></aside><div class="left"><div class="scroll"><div class="board" id="board"></div></div></div></div></div><script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id),names=['1А класс','1Б класс','2 класс','3 класс','4 класс','Preschool'],colors=['#dceafe','#dceafe','#dff4e7','#f0e5fb','#fff0dc','#fce5ee'];
@@ -595,6 +596,7 @@ const lessons=()=>[...base.map(x=>({...x,...(day().edits[x.id]||{})})),...(day()
 const events=()=> (day().events||[]).map(attachRefs);
 const absent=t=>t!=='Не назначен'&&!!(day().absences||{})[t];
 const isRoutine=x=>x.kind!=='event'&&(directoryItem(x.name)?.type==='routine'||/^(WELCOME|BREAK|BREAKFAST|LUNCH|SNACK TIME|DINNER|CIRCL|ПРОГУЛКА|ЗАРЯДКА|FREE TIME|SNACK|1 BREAKFAST|2 BREAKFAST)$/i.test(String(x.name||'').trim()));const needsRoom=x=>x.kind!=='event'&&!isRoutine(x);const overlap=(a,b)=>a.start<b.end&&b.start<a.end;
+const teacherGridLabel=key=>{const p=cfg.teacherNames?.[key];if(!p)return key;const first=(p.first||'').trim(),last=(p.last||'').trim(),middle=(p.middle||'').trim();return last&&first?first+' '+last[0].toUpperCase()+'.':first&&middle?first[0].toUpperCase()+'.'+middle[0].toUpperCase()+'.':first||key};
 const teachersOf=x=>x.kind==='event'?x.teachers:(x.teachers||[x.teacher]).filter(t=>t&&t!=='Не назначен');
 const classesOf=x=>x.kind==='event'?x.classes:[x.cls];
 const isSharedLocation=r=>/СТОЛОВ|ДВОР|ПРОГУЛК/i.test(r||'');
@@ -799,7 +801,9 @@ drawDirectory();
 document.querySelectorAll('[data-teacher-delete]').forEach(b=>b.onclick=()=>{let n=b.dataset.teacherDelete;if(!confirm('Удалить «'+n+'»? Назначения будут сняты, занятия сохранятся.'))return;const visit=o=>{if(!o||typeof o!=='object')return;if(Array.isArray(o)){o.forEach(visit);return}for(const [k,v] of Object.entries(o)){if(k==='teacher'&&(v===n||o.teacherId===directoryRef('teacher',n))){o[k]='Не назначен';delete o.teacherId}else if(k==='teachers'&&Array.isArray(v)){const ids=o.teacherIds||[];o.teacherIds=ids.filter((id,i)=>v[i]!==n&&id!==directoryRef('teacher',n));o[k]=v.filter((t,i)=>t!==n&&ids[i]!==directoryRef('teacher',n))}else if(v&&typeof v==='object')visit(v)}};[weekly,snapshot16,weeklySchedule,store].forEach(visit);for(const d of Object.values(store)){if(d.absences)delete d.absences[n];d.resolutions={}}if(cfg.hours)delete cfg.hours[n];archiveRef('teacher',n,true);teachers.splice(teachers.indexOf(n),1);cfg.customLists=cfg.customLists||{};cfg.customLists.teachers=teachers.filter(t=>t!=='Не назначен');cfg.deletedTeachers=[...new Set([...(cfg.deletedTeachers||[]),n])];saveCfg();localStorage.setItem(WEEKLY_EDIT_KEY,JSON.stringify(weeklySchedule));localStorage.setItem('school_real_week_v14',JSON.stringify(store));base=baseForDate(date);settingsEditor();board()});
 if(settingsPage==='hours'){
 let chosen=null,showArchived=false,searchText='',adding=false,editing=false,menuOpen=false;
-cfg.teacherRoles=cfg.teacherRoles||{};cfg.teacherSavedHours=cfg.teacherSavedHours||{};
+cfg.teacherRoles=cfg.teacherRoles||{};cfg.teacherSavedHours=cfg.teacherSavedHours||{};cfg.teacherNames=cfg.teacherNames||{};
+const nameParts=t=>cfg.teacherNames[t]||{last:'',first:t,middle:''};
+const fullName=p=>[p.last,p.first,p.middle].map(x=>x.trim()).filter(Boolean).join(' ');
 const dayNames=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const dayValue=(t,d)=>cfg.hours?.[t]&&Object.prototype.hasOwnProperty.call(cfg.hours[t],d)?cfg.hours[t][d]:(d===0||d===6?null:['09:00','18:00']);
 const teacherUsage=name=>{
@@ -826,13 +830,13 @@ function draw(){
  const all=teachers.filter(t=>t!=='Не назначен'&&(showArchived||!directoryRefArchived('teacher',t))).sort((a,b)=>a.localeCompare(b,'ru'));
  const filtered=all.filter(t=>t.toLocaleLowerCase('ru').includes(searchText.toLocaleLowerCase('ru')));
  panel.innerHTML='<div class="teacher-head"><h2>Преподаватели</h2><button class=" btn-primary btn-compact" id="teacher-add-toggle">+ Добавить</button></div>'+
- (adding?'<div class="teacher-add-box"><input id="teacher-new" placeholder="Имя и фамилия"><div class="teacher-actions"><button id="teacher-add-cancel" class="btn-secondary btn-standard">Отмена</button><button class=" btn-primary btn-standard" id="teacher-add">Создать</button></div></div>':'')+
+ (adding?'<div class="teacher-add-box"><label>Фамилия<input id="teacher-new-last" placeholder="Фамилия"></label><label>Имя<input id="teacher-new" placeholder="Имя" required></label><label>Отчество<input id="teacher-new-middle" placeholder="Отчество"></label><div class="teacher-actions"><button id="teacher-add-cancel" class="btn-secondary btn-standard">Отмена</button><button class=" btn-primary btn-standard" id="teacher-add">Создать</button></div></div>':'')+
  '<input id="teacher-search" placeholder="Поиск преподавателя" value="'+esc(searchText)+'">'+
  '<div class="teacher-filter"><span>'+teachers.filter(t=>t!=='Не назначен'&&!directoryRefArchived('teacher',t)).length+' активных</span><label><input id="teacher-show-archive" type="checkbox" '+(showArchived?'checked':'')+'> Показать архив</label></div>'+
  '<div class="teacher-list">'+(filtered.length?filtered.map(t=>'<button class="teacher-list-item btn-list" data-teacher-open="'+esc(t)+'"><span><strong>'+esc(t)+'</strong>'+((directoryRefArchived('teacher',t)||cfg.teacherRoles[t])?'<small>'+(directoryRefArchived('teacher',t)?'В архиве':esc(cfg.teacherRoles[t]))+'</small>':'')+'</span><span>›</span></button>').join(''):'<div class="teacher-empty">Преподаватели не найдены</div>')+'</div>';
  $('teacher-add-toggle').onclick=()=>{adding=!adding;draw();if(adding)$('teacher-new')?.focus()};
  if($('teacher-add-cancel'))$('teacher-add-cancel').onclick=()=>{adding=false;draw()};
- if($('teacher-add'))$('teacher-add').onclick=()=>{const n=$('teacher-new').value.trim();if(!n||teachers.some(t=>t.toLocaleLowerCase('ru')===n.toLocaleLowerCase('ru')))return alert('Введите уникальное имя');teachers.push(n);archiveRef('teacher',n,false);cfg.customLists=cfg.customLists||{};cfg.customLists.teachers=teachers.filter(t=>t!=='Не назначен');saveCfg();chosen=n;adding=false;draw()};
+ if($('teacher-add'))$('teacher-add').onclick=()=>{const parts={last:$('teacher-new-last').value.trim(),first:$('teacher-new').value.trim(),middle:$('teacher-new-middle').value.trim()};const n=fullName(parts);if(!parts.first||teachers.some(t=>t.toLocaleLowerCase('ru')===n.toLocaleLowerCase('ru')))return alert('Введите уникальное имя преподавателя');teachers.push(n);cfg.teacherNames[n]=parts;archiveRef('teacher',n,false);cfg.customLists=cfg.customLists||{};cfg.customLists.teachers=teachers.filter(t=>t!=='Не назначен');saveCfg();chosen=n;adding=false;draw()};
  $('teacher-search').oninput=e=>{const pos=e.target.selectionStart;searchText=e.target.value;draw();const el=$('teacher-search');el.focus();el.setSelectionRange(pos,pos)};
  $('teacher-show-archive').onchange=e=>{showArchived=e.target.checked;draw()};
  panel.querySelectorAll('[data-teacher-open]').forEach(el=>el.onclick=()=>{chosen=el.dataset.teacherOpen;editing=false;menuOpen=false;draw()});
@@ -841,7 +845,7 @@ function draw(){
  const t=chosen,archived=directoryRefArchived('teacher',t);
  let h='<button id="teacher-list-back" class="panel-back btn-ghost btn-standard">‹ К преподавателям</button>';
  h+='<div class="teacher-identity"><h2>'+esc(t)+'</h2>'+(cfg.teacherRoles[t]?'<div class="teacher-role">'+esc(cfg.teacherRoles[t])+'</div>':'')+''+(archived?'<span class="teacher-archived">В архиве</span>':'')+'</div>';
- if(editing)h+='<div class="teacher-add-box"><label>Имя и фамилия<input id="teacher-edit-name" value="'+esc(t)+'"></label><label>Должность<input id="teacher-edit-role" value="'+esc(cfg.teacherRoles[t]||'')+'" placeholder="Например, преподаватель английского"></label><div class="teacher-actions"><button id="teacher-edit-cancel" class="btn-secondary btn-standard">Отмена</button><button class=" btn-primary btn-standard" id="teacher-edit-save">Сохранить</button></div></div>';
+ if(editing)h+='<div class="teacher-add-box"><label>Фамилия<input id="teacher-edit-last" value="'+esc(nameParts(t).last)+'"></label><label>Имя<input id="teacher-edit-name" value="'+esc(nameParts(t).first)+'" required></label><label>Отчество<input id="teacher-edit-middle" value="'+esc(nameParts(t).middle)+'"></label><label>Должность<input id="teacher-edit-role" value="'+esc(cfg.teacherRoles[t]||'')+'" placeholder="Например, преподаватель английского"></label><div class="teacher-actions"><button id="teacher-edit-cancel" class="btn-secondary btn-standard">Отмена</button><button class=" btn-primary btn-standard" id="teacher-edit-save">Сохранить</button></div></div>';
  if(!editing)h+='<div class="directory-card-actions"><button id="teacher-edit" class="btn-secondary btn-standard">'+uiIcon('edit')+' Изменить</button><button id="teacher-archive" class="btn-secondary btn-standard">'+(archived?'↩ Восстановить':uiIcon('archive')+' В архив')+'</button></div>';
  if(archived&&!editing)h+='<div class="teacher-permanent-delete"><button id="teacher-delete-forever" class="btn-danger btn-standard">Удалить навсегда</button></div>';
  h+='<div class="teacher-schedule-title"><strong>Рабочий график</strong><span>Начало — конец</span></div><div class="teacher-schedule">';
@@ -860,24 +864,24 @@ function draw(){
   cfg.customLists=cfg.customLists||{};
   cfg.customLists.teachers=teachers.filter(n=>n!=='Не назначен');
   cfg.deletedTeachers=[...new Set([...(cfg.deletedTeachers||[]),t])];
-  delete cfg.hours?.[t];delete cfg.teacherSavedHours[t];delete cfg.teacherRoles[t];
+  delete cfg.hours?.[t];delete cfg.teacherSavedHours[t];delete cfg.teacherRoles[t];delete cfg.teacherNames[t];
   if(cfg.renames?.teachers)delete cfg.renames.teachers[t];
   if(directoryRefs.teacher)directoryRefs.teacher=directoryRefs.teacher.filter(x=>x.id!==id);
   saveRefs();saveCfg();chosen=null;editing=false;draw();board();
  };
  if($('teacher-edit-cancel'))$('teacher-edit-cancel').onclick=()=>{editing=false;draw()};
  if($('teacher-edit-save'))$('teacher-edit-save').onclick=()=>{
- const next=$('teacher-edit-name').value.trim(),role=$('teacher-edit-role').value.trim();
- if(!next||teachers.some(x=>x!==t&&x.toLocaleLowerCase('ru')===next.toLocaleLowerCase('ru')))return alert('Введите уникальное имя');
+ const parts={last:$('teacher-edit-last').value.trim(),first:$('teacher-edit-name').value.trim(),middle:$('teacher-edit-middle').value.trim()};const next=fullName(parts),role=$('teacher-edit-role').value.trim();
+ if(!parts.first||teachers.some(x=>x!==t&&x.toLocaleLowerCase('ru')===next.toLocaleLowerCase('ru')))return alert('Введите уникальное имя преподавателя');
  if(next!==t){
  renameRef('teacher',t,next);renameStoredResource('teacher',t,next);cfg.renames=cfg.renames||{teachers:{},rooms:{}};cfg.renames.teachers=cfg.renames.teachers||{};cfg.renames.teachers[t]=next;
  for(const d of Object.values(store))if(d.absences?.[t]){d.absences[next]=d.absences[t];delete d.absences[t]}
  if(cfg.hours?.[t]){cfg.hours[next]=cfg.hours[t];delete cfg.hours[t]}
  if(cfg.teacherSavedHours[t]){cfg.teacherSavedHours[next]=cfg.teacherSavedHours[t];delete cfg.teacherSavedHours[t]}
- delete cfg.teacherRoles[t];teachers[teachers.indexOf(t)]=next;cfg.customLists=cfg.customLists||{};cfg.customLists.teachers=teachers.filter(x=>x!=='Не назначен');
+ delete cfg.teacherRoles[t];delete cfg.teacherNames[t];teachers[teachers.indexOf(t)]=next;cfg.customLists=cfg.customLists||{};cfg.customLists.teachers=teachers.filter(x=>x!=='Не назначен');
  localStorage.setItem('school_real_week_v14',JSON.stringify(store));chosen=next;
  }
- cfg.teacherRoles[chosen]=role;saveCfg();editing=false;draw();board()
+ cfg.teacherNames[chosen]=parts;cfg.teacherRoles[chosen]=role;saveCfg();editing=false;draw();board()
  };
  panel.querySelectorAll('[data-active]').forEach(el=>el.onchange=()=>{
  const d=Number(el.dataset.active),old=dayValue(t,d);
@@ -961,7 +965,7 @@ function board(){
    const splitRoom=split&&height>=69;
    const splitTwoLine=split&&height>=62;
    const splitMeta=split&&height>=78;
-   const teacherLabel=isEvent?(x.teachers||[]).join(', '):(x.teachers||[x.teacher]).filter(Boolean).join(' + ');
+   const teacherLabel=isEvent?(x.teachers||[]).map(teacherGridLabel).join(', '):(x.teachers||[x.teacher]).filter(Boolean).map(teacherGridLabel).join(' + ');
    const details=[names[i],label,fmt(x.start)+'–'+fmt(x.end),teacherLabel||'Преподаватель не назначен',x.room||'Кабинет не назначен',...issues(x,x.id),...(isAbsent?['Отсутствуют: '+absentTeachers(x).join(', ')+(teachersOf(x).filter(t=>!absent(t)).length?' · остаются: '+teachersOf(x).filter(t=>!absent(t)).join(', '):'')]:[]),...(over?['За пределами рабочего графика']:[]),...(noTeacher?['Не назначен преподаватель']:[]),...(missingRoom?['Не указан кабинет']:[])].filter(Boolean).join(' | ');
    const cls=['lesson','colorized',short?'short':medium?'medium':'long',isEvent?'event':changed?'changed':'',normalRoutine?'routine':'',split?'split '+(x.group==='b'?'side-b':'side-a')+(splitTwoLine?' split-wrap':'')+(splitMeta?' split-meta':''):'',conflict?'conflict':'',isAbsent?'absent-lesson':'',missingRoom?'missing-room':'',noTeacher?'missing-teacher':'',over?'overtime':'',(conflict||isAbsent||missingRoom||noTeacher)?'has-mark':'',String(selected)===String(x.id)?'selected':''].filter(Boolean).join(' ');
    if(issueFilter&&!(issueFilter==='all-issues'&&(conflict||isAbsent||missingRoom||noTeacher||over)||issueFilter==='conflicts'&&conflict||issueFilter==='absence'&&isAbsent||issueFilter==='rooms'&&missingRoom))return;const mark=(conflict||isAbsent||noTeacher)?'!':missingRoom?'·':'';
