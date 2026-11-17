@@ -144,6 +144,20 @@ const resolveRef=(type,id,fallback)=>{const list=type==='subject'?directory.subj
 const saveRefs=()=>localStorage.setItem(DIRECTORY_REF_KEY,JSON.stringify(directoryRefs));const directoryRefArchived=(type,name)=>!!(directoryRefs[type]||[]).find(x=>x.name===name)?.archived;
 const syncRefNames=(type,names)=>{const list=directoryRefs[type]||=[];for(const name of names)if(name&&name!=='Не назначен'&&!list.some(x=>x.name===name))list.push({id:makeRef(type,name),name,archived:false});saveRefs()};
 const renameRef=(type,old,next)=>{let id=directoryRef(type,old),entry=(directoryRefs[type]||[]).find(x=>x.id===id);if(entry)entry.name=next;saveRefs()};
+const renameStoredResource=(type,oldName,newName)=>{
+ const visit=value=>{
+  if(!value||typeof value!=='object')return;
+  if(Array.isArray(value)){value.forEach(visit);return}
+  if(type==='teacher'){
+   if(value.teacher===oldName)value.teacher=newName;
+   if(Array.isArray(value.teachers))value.teachers=value.teachers.map(t=>t===oldName?newName:t);
+  }else if(type==='room'&&value.room===oldName)value.room=newName;
+  for(const [key,v] of Object.entries(value))if(v&&typeof v==='object'&&key!=='teachers')visit(v);
+ };
+ [weekly,snapshot16,weeklySchedule,store].forEach(visit);
+ localStorage.setItem(WEEKLY_EDIT_KEY,JSON.stringify(weeklySchedule));
+ localStorage.setItem('school_real_week_v14',JSON.stringify(store));
+};
 const archiveRef=(type,name,archived)=>{let id=directoryRef(type,name),entry=(directoryRefs[type]||[]).find(x=>x.id===id);if(entry)entry.archived=archived;saveRefs()};
 
 const attachRefs=x=>{if(!x||typeof x!=='object')return x;const y={...x};if(y.kind!=='event'){if(!y.subjectId)y.subjectId=directoryRef('subject',y.name);else if(directoryItem(y.name)&&directoryItem(y.name).id!==y.subjectId)y.subjectId=directoryRef('subject',y.name);y.name=resolveRef('subject',y.subjectId,y.name)}if(y.teacher&&y.teacher!=='Не назначен'){if(!y.teacherId)y.teacherId=directoryRef('teacher',y.teacher);else if((directoryRefs.teacher||[]).some(t=>t.name===y.teacher&&t.id!==y.teacherId))y.teacherId=directoryRef('teacher',y.teacher);y.teacher=resolveRef('teacher',y.teacherId,y.teacher)}if(Array.isArray(y.teachers)){y.teacherIds=y.teachers.map((t,i)=>y.teacherIds?.[i]&&!(directoryRefs.teacher||[]).some(v=>v.name===t&&v.id!==y.teacherIds[i])?y.teacherIds[i]:directoryRef('teacher',t));y.teachers=y.teachers.map((t,i)=>resolveRef('teacher',y.teacherIds[i],t))}if(y.room&&y.room!=='Не назначен'){if(!y.roomId)y.roomId=directoryRef('room',y.room);else if((directoryRefs.room||[]).some(t=>t.name===y.room&&t.id!==y.roomId))y.roomId=directoryRef('room',y.room);y.room=resolveRef('room',y.roomId,y.room)}return y};
@@ -303,7 +317,7 @@ if($('dir-color'))$('dir-color').onchange=ev=>{x.color=ev.target.value;saveDirec
 if($('dir-edit-cancel'))$('dir-edit-cancel').onclick=()=>{editing=false;drawDirectory()};
 if($('dir-edit-save'))$('dir-edit-save').onclick=()=>{
 const next=$('dir-edit-name').value.trim(),old=x.name;if(!next||entries().some(y=>y.id!==selected&&y.name.toLocaleLowerCase('ru')===next.toLocaleLowerCase('ru'))||(!roomMode&&next!==old&&directoryItem(next)))return alert('Название уже используется');
-if(next!==old){if(roomMode){const visit=o=>{if(!o||typeof o!=='object')return;if(Array.isArray(o)){o.forEach(visit);return}for(const [k,v] of Object.entries(o)){if(k==='room'&&v===old)o[k]=next;else if(v&&typeof v==='object')visit(v)}};[weekly,snapshot16,weeklySchedule,store].forEach(visit);for(const [k,v] of Object.entries(cfg.home||{}))if(v===old)cfg.home[k]=next;renameRef('room',old,next);rooms[rooms.indexOf(old)]=next;cfg.customLists=cfg.customLists||{};cfg.customLists.rooms=rooms.filter(v=>v!=='Не назначен');cfg.renames=cfg.renames||{teachers:{},rooms:{}};cfg.renames.rooms=cfg.renames.rooms||{};for(const [k,v] of Object.entries(cfg.renames.rooms))if(v===old)cfg.renames.rooms[k]=next;cfg.renames.rooms[old]=next;saveCfg();localStorage.setItem(WEEKLY_EDIT_KEY,JSON.stringify(weeklySchedule));localStorage.setItem('school_real_week_v14',JSON.stringify(store));base=baseForDate(date);selected=next}else{renameSubject(old,next);const i=subjects.indexOf(old);if(i>=0)subjects[i]=next;x.name=next;saveDirectory()}}
+if(next!==old){if(roomMode){renameStoredResource('room',old,next);for(const [k,v] of Object.entries(cfg.home||{}))if(v===old)cfg.home[k]=next;renameRef('room',old,next);rooms[rooms.indexOf(old)]=next;cfg.customLists=cfg.customLists||{};cfg.customLists.rooms=rooms.filter(v=>v!=='Не назначен');cfg.renames=cfg.renames||{teachers:{},rooms:{}};cfg.renames.rooms=cfg.renames.rooms||{};for(const [k,v] of Object.entries(cfg.renames.rooms))if(v===old)cfg.renames.rooms[k]=next;cfg.renames.rooms[old]=next;saveCfg();localStorage.setItem(WEEKLY_EDIT_KEY,JSON.stringify(weeklySchedule));localStorage.setItem('school_real_week_v14',JSON.stringify(store));base=baseForDate(date);selected=next}else{renameSubject(old,next);const i=subjects.indexOf(old);if(i>=0)subjects[i]=next;x.name=next;saveDirectory()}}
 editing=false;drawDirectory();board()
 };
 }
@@ -351,7 +365,7 @@ function draw(){
  const next=$('teacher-edit-name').value.trim(),role=$('teacher-edit-role').value.trim();
  if(!next||teachers.some(x=>x!==t&&x.toLocaleLowerCase('ru')===next.toLocaleLowerCase('ru')))return alert('Введите уникальное имя');
  if(next!==t){
- renameRef('teacher',t,next);cfg.renames=cfg.renames||{teachers:{},rooms:{}};cfg.renames.teachers=cfg.renames.teachers||{};cfg.renames.teachers[t]=next;
+ renameRef('teacher',t,next);renameStoredResource('teacher',t,next);cfg.renames=cfg.renames||{teachers:{},rooms:{}};cfg.renames.teachers=cfg.renames.teachers||{};cfg.renames.teachers[t]=next;
  for(const d of Object.values(store))if(d.absences?.[t]){d.absences[next]=d.absences[t];delete d.absences[t]}
  if(cfg.hours?.[t]){cfg.hours[next]=cfg.hours[t];delete cfg.hours[t]}
  if(cfg.teacherSavedHours[t]){cfg.teacherSavedHours[next]=cfg.teacherSavedHours[t];delete cfg.teacherSavedHours[t]}
