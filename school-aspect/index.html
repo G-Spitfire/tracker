@@ -403,6 +403,21 @@ button[class*="btn-"]:active:not(:disabled){filter:brightness(.96)}
 .lesson.split:not(.split-meta) .card-meta{display:none}
 .lesson.split.split-meta .card-meta{gap:4px}
 .lesson.split.split-meta .card-meta .card-location{min-width:0}
+
+.archive-modal-shade{position:fixed;inset:0;background:rgba(20,31,49,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px}
+.archive-modal{width:min(520px,100%);max-height:min(85vh,720px);overflow:auto;background:#fff;border-radius:14px;box-shadow:0 20px 70px #18263c35;padding:20px;color:#24374f}
+.archive-modal header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.archive-modal h2{font-size:18px;margin:0}
+.archive-modal p{font-size:13px;line-height:1.5;color:#52657e}
+.archive-modal .archive-close{border:0;background:transparent;font-size:24px;padding:0 6px}
+.archive-field{display:flex;flex-direction:column;gap:6px;margin:14px 0;font-size:12px;font-weight:600}
+.archive-field select{width:100%;min-height:36px;padding:7px 9px;border:1px solid #cbd6e6;border-radius:7px;background:white;color:#24374f;font-size:13px}
+.archive-item{border-bottom:1px solid #e7eaf0;padding-bottom:10px}
+.archive-item span{font-weight:500;line-height:1.4}
+.archive-modal footer{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
+.archive-modal .archive-submit{background:#245cc5;color:#fff;border-color:#245cc5}
+.archive-modal .archive-error{color:#b42318}
+.archive-modal [hidden]{display:none!important}
 </style></head><body><div id="pdf-overlay" class="pdf-overlay" role="dialog" aria-modal="true" aria-label="Предпросмотр расписания"><div class="pdf-dialog"><div class="pdf-bar"><strong id="pdf-heading">Предпросмотр расписания</strong><span id="pdf-warning" class="warn"></span><button id="pdf-print" class=" btn-primary btn-standard">Печать / Сохранить PDF</button><button id="pdf-close" class="btn-secondary btn-standard">Закрыть</button></div><iframe id="pdf-frame" class="pdf-frame" title="Печатное расписание"></iframe></div></div><dialog id="unsaved-draft-dialog" aria-labelledby="unsaved-draft-title" aria-describedby="unsaved-draft-copy"><h2 id="unsaved-draft-title">Есть несохранённые изменения</h2><p id="unsaved-draft-copy">Если перейти, изменения в этом занятии не сохранятся.</p><div class="buttons"><button type="button" id="unsaved-stay" class="btn-secondary btn-standard">Остаться</button><button type="button" id="unsaved-discard" class=" btn-danger btn-standard">Перейти без сохранения</button></div></dialog><dialog id="reset-confirm-dialog" aria-labelledby="reset-confirm-title" aria-describedby="reset-confirm-copy"><h2 id="reset-confirm-title">Сбросить день?</h2><p id="reset-confirm-copy">Будут удалены изменения, мероприятия и отсутствия только на выбранную дату.</p><div class="buttons"><button type="button" id="reset-cancel" class="btn-secondary btn-standard">Отмена</button><button type="button" id="reset-confirm-ok" class=" btn-danger btn-standard">Сбросить день</button></div></dialog><div class="app"><div class="top"><div class="brand" aria-label="Школа · Аспект"><span class="school-logo" aria-hidden="true"><svg viewBox="0 0 100 100" width="30" height="30" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="47" fill="#e60023"/><path d="M23 44 79 23 85 38 33 57 33 63 82 77 77 84 23 68Z" fill="white"/><path d="M36 58 70 46 Q77 55 73 69Z" fill="white"/><path d="M27 72 77 88M29 78 69 91" fill="none" stroke="white" stroke-width="3"/></svg></span><span class="school-name">ASPECT<small>EDUCATIONAL CENTRE</small></span></div><h2 id="title">Расписание</h2><div class="top-actions"><div class="top-group date-group"><button id="today" class="btn-secondary btn-compact">Сегодня</button><button id="tomorrow" class="btn-secondary btn-compact">Завтра</button><button id="copy-day" title="Скопировать занятия из последнего заполненного такого же дня недели" class="btn-secondary btn-compact">Скопировать расписание</button><label class="date-picker"><span id="date-label" aria-hidden="true"></span><span aria-hidden="true">▾</span><input type="date" id="date" aria-label="Выбрать дату расписания"></label></div><details class="add-menu"><summary class="btn-primary btn-compact">+ Добавить</summary><div class="add-menu-items"><button id="new-lesson-button" class="btn-list">Урок</button><button id="new-routine-button" class="btn-list">Режимный момент / перемена</button><button id="event-button" class="btn-list">Мероприятие</button></div></details><button id="absence-button" class="btn-secondary btn-compact">Отсутствия <span id="absence-count"></span></button><button id="settings-button" aria-controls="editor" class="btn-secondary btn-compact">Настройки</button><div class="header-schedule-tools"><div class="issue-strip"><button id="issues-conflicts" class="btn-filter btn-compact">Проблемы: 0</button><button id="issues-absence" hidden class="btn-filter btn-compact">Требуют решения: 0</button><button id="issues-rooms" hidden class="btn-filter btn-compact">Без кабинета: 0</button></div></div></div></div><div class="workspace"><aside class="right" id="editor"></aside><div class="left"><div class="scroll"><div class="board" id="board"></div></div></div></div></div><script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id),names=['1А класс','1Б класс','2 класс','3 класс','4 класс','Preschool'],colors=['#dceafe','#dceafe','#dff4e7','#f0e5fb','#fff0dc','#fce5ee'];
@@ -516,7 +531,29 @@ const categoryFor=x=>{if(x.kind==='event')return {color:directory.colors.event};
 const tintColor=h=>{let v=String(h||'#dfe8f4').replace('#',''),r=parseInt(v.slice(0,2),16),g=parseInt(v.slice(2,4),16),b=parseInt(v.slice(4,6),16);return 'rgb('+Math.round(r*.18+255*.82)+','+Math.round(g*.18+255*.82)+','+Math.round(b*.18+255*.82)+')'};
 let settingsPage='home',settingsSection='settings';
 let showArchivedRooms=false,showArchivedSubjects=false,showArchivedRoutines=false;
-function reassignFutureResource(type,oldName){
+function chooseTeacherArchiveReplacements(oldName,items,validNames){
+ return new Promise(resolve=>{
+  const shade=document.createElement('div');shade.className='archive-modal-shade';
+  const options='<option value="">Выберите преподавателя</option>'+validNames.map(n=>'<option value="'+esc(n)+'">'+esc(n)+'</option>').join('');
+  shade.innerHTML='<section class="archive-modal" role="dialog" aria-modal="true" aria-labelledby="archive-modal-title"><header><h2 id="archive-modal-title">Архивировать преподавателя</h2><button type="button" class="archive-close" aria-label="Закрыть">×</button></header><p><strong>'+esc(oldName)+'</strong> ведёт '+items.length+' будущих занятий. Выберите замену перед архивированием. Прошедшие занятия сохранятся.</p><label class="archive-field">Способ замены<select id="archive-mode"><option value="all">Один преподаватель для всех занятий</option><option value="each">Отдельно для каждого занятия</option></select></label><div id="archive-all"><label class="archive-field">Преподаватель на замену<select id="archive-bulk">'+options+'</select></label></div><div id="archive-each" hidden></div><p id="archive-error" class="archive-error" role="alert" hidden>Выберите замену для каждого занятия.</p><footer><button type="button" class="archive-cancel">Отмена</button><button type="button" class="archive-submit">Продолжить</button></footer></section>';
+  document.body.appendChild(shade);
+  const $m=q=>shade.querySelector(q),done=v=>{shade.remove();resolve(v)};
+  $m('.archive-close').onclick=()=>done(null);$m('.archive-cancel').onclick=()=>done(null);
+  shade.addEventListener('click',e=>{if(e.target===shade)done(null)});
+  const each=$m('#archive-each');
+  each.innerHTML=items.map((item,i)=>'<label class="archive-field archive-item"><span>'+esc(item.key+' · '+(names[item.lesson.cls]||item.lesson.cls)+' · '+item.lesson.name+' · '+fmt(item.lesson.start)+'–'+fmt(item.lesson.end))+'</span><select data-archive-index="'+i+'">'+options+'</select></label>').join('');
+  $m('#archive-mode').onchange=()=>{const individual=$m('#archive-mode').value==='each';$m('#archive-all').hidden=individual;each.hidden=!individual;$m('#archive-error').hidden=true};
+  shade.addEventListener('change',()=>{$m('#archive-error').hidden=true});
+  $m('.archive-submit').onclick=()=>{
+   const individual=$m('#archive-mode').value==='each';
+   const values=individual?[...each.querySelectorAll('select')].map(el=>el.value):items.map(()=>$m('#archive-bulk').value);
+   if(values.some(v=>!v)){ $m('#archive-error').hidden=false;return }
+   done(items.map((item,i)=>({...item,name:values[i]})));
+  };
+  $m('#archive-mode').focus();
+ });
+}
+async function reassignFutureResource(type,oldName){
  const today=iso(new Date()),items=[];
  for(const [key,d] of Object.entries(store)){
   if(key<today||!d||typeof d!=='object')continue;
@@ -528,23 +565,17 @@ function reassignFutureResource(type,oldName){
   for(const x of d.extras||[])if(!x.cancelled&&x[type]===oldName)items.push({key,id:String(x.id),lesson:x,extra:true});
  }
  if(!items.length)return true;
- const label=type==='teacher'?'преподавателя':'кабинета';
- if(!confirm('Найдено '+items.length+' будущих занятий с '+label+' «'+oldName+'». Назначить замену? Если оставить пустым, занятие сохранится без '+label+'.'))return false;
- const replacements=[];
  const validNames=type==='teacher'?teachers.filter(t=>t!==oldName&&!directoryRefArchived('teacher',t)):rooms.filter(t=>t!==oldName&&!directoryRefArchived('room',t));
- let bulk=prompt('Введите одну замену для всех занятий или оставьте поле пустым для выбора по каждому занятию. Доступно: '+validNames.join(', '),'');
- if(bulk===null)return false;
- bulk=bulk.trim();
- if(bulk&&!validNames.includes(bulk)){alert('Замена отсутствует в активном справочнике.');return false}
- for(const item of items){
-  let name=bulk;
-  if(!bulk){
-   const answer=prompt(item.key+' · '+names[item.lesson.cls]+' · '+item.lesson.name+' ('+fmt(item.lesson.start)+'). Введите замену из активного справочника; пусто — без назначения. Доступно: '+validNames.join(', '),'');
-   if(answer===null)return false;
-   name=answer.trim();
-   if(name&&!validNames.includes(name)){alert('Замена отсутствует в активном справочнике. Изменения отменены.');return false}
-  }
-  replacements.push({...item,name:name||'Не назначен'});
+ let replacements;
+ if(type==='teacher'){
+  if(!validNames.length){alert('Нет действующих преподавателей для замены. Добавьте преподавателя перед архивированием.');return false}
+  replacements=await chooseTeacherArchiveReplacements(oldName,items,validNames);
+  if(!replacements)return false;
+ }else{
+  if(!confirm('Найдено '+items.length+' будущих занятий с кабинетом «'+oldName+'». Назначить замену?'))return false;
+  const bulk=prompt('Введите замену из активного справочника: '+validNames.join(', '),'');
+  if(bulk===null||!validNames.includes(bulk.trim())){alert('Выберите действующий кабинет.');return false}
+  replacements=items.map(item=>({...item,name:bulk.trim()}));
  }
  const planned=new Map();
  for(const item of replacements){
@@ -664,7 +695,7 @@ if(!editing)h+='<div class="directory-card-actions"><button id="dir-edit" class=
 p.innerHTML=h;
 $('dir-back').onclick=()=>{selected=null;editing=false;menu=false;drawDirectory()};
 if($('dir-edit'))$('dir-edit').onclick=()=>{editing=true;menu=false;drawDirectory()};
-if($('dir-archive'))$('dir-archive').onclick=()=>{if(!x.archived){if(!confirm('Архивировать «'+x.name+'»? Прошедшие занятия сохранятся.'))return;if(!roomMode&&!archiveSubjectFuture(x))return}if(roomMode){if(!x.archived&&!reassignFutureResource('room',x.name))return;archiveRef('room',x.name,!x.archived)}else{x.archived=!x.archived;saveDirectory()}menu=false;drawDirectory();board()};
+if($('dir-archive'))$('dir-archive').onclick=async()=>{if(!x.archived){if(!confirm('Архивировать «'+x.name+'»? Прошедшие занятия сохранятся.'))return;if(!roomMode&&!archiveSubjectFuture(x))return}if(roomMode){if(!x.archived&&!reassignFutureResource('room',x.name))return;archiveRef('room',x.name,!x.archived)}else{x.archived=!x.archived;saveDirectory()}menu=false;drawDirectory();board()};
 if($('dir-color'))$('dir-color').onchange=ev=>{x.color=ev.target.value;saveDirectory();board()};
 if($('dir-edit-cancel'))$('dir-edit-cancel').onclick=()=>{editing=false;drawDirectory()};
 if($('dir-edit-save'))$('dir-edit-save').onclick=()=>{
@@ -711,7 +742,7 @@ function draw(){
  panel.innerHTML=h;
  $('teacher-list-back').onclick=listView;
  if($('teacher-edit'))$('teacher-edit').onclick=()=>{editing=true;menuOpen=false;draw()};
- if($('teacher-archive'))$('teacher-archive').onclick=()=>{if(!archived){if(!confirm('Архивировать «'+t+'»? Исторические занятия сохранятся.'))return;if(!reassignFutureResource('teacher',t))return}archiveRef('teacher',t,!archived);menuOpen=false;draw();board()};
+ if($('teacher-archive'))$('teacher-archive').onclick=async()=>{if(!archived){if(!confirm('Архивировать «'+t+'»? Исторические занятия сохранятся.'))return;if(!await reassignFutureResource('teacher',t))return}archiveRef('teacher',t,!archived);menuOpen=false;draw();board()};
  if($('teacher-edit-cancel'))$('teacher-edit-cancel').onclick=()=>{editing=false;draw()};
  if($('teacher-edit-save'))$('teacher-edit-save').onclick=()=>{
  const next=$('teacher-edit-name').value.trim(),role=$('teacher-edit-role').value.trim();
