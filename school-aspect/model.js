@@ -282,6 +282,7 @@
       exportBackup() { checkFresh(); return JSON.stringify({format:'aspect-backup', version:1, document:clone(document)}, null, 2); },
       restoreBackup(text) { const next = parseBackup(text); persist(next, false); },
       replace(next) { persist(clone(validate(next)), false); },
+      applySchedule(next) { persist(clone(validate(next)), true); },
       document: () => clone(document),
       invalidate() { stale = true; undo = null; }
     };

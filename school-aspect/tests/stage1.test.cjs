@@ -145,4 +145,4 @@ test('UI replacement A→B→C updates all names and IDs after reload', () => {
 test('fresh storage keeps distinct default activity colors',()=>{
  const c=M.openStorage(memory()).document().catalogs.types;assert.equal(new Set(c.map(x=>x.color)).size,3);
 });
-module.exports = {passed};
+module.exports = {passed,boot};
