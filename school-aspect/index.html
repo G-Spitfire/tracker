@@ -188,6 +188,29 @@ const categoryFor=x=>{if(x.kind==='event')return {color:(directory.eventTypes||[
 const tintColor=h=>{let v=String(h||'#dfe8f4').replace('#',''),r=parseInt(v.slice(0,2),16),g=parseInt(v.slice(2,4),16),b=parseInt(v.slice(4,6),16);return 'rgb('+Math.round(r*.18+255*.82)+','+Math.round(g*.18+255*.82)+','+Math.round(b*.18+255*.82)+')'};
 let settingsPage='home',settingsSection='settings';
 let showArchivedRooms=false,showArchivedSubjects=false,showArchivedRoutines=false;
+function archiveSubjectFuture(subject){
+ const today=iso(new Date()),affected=[];
+ for(const [key,d] of Object.entries(store)){
+  if(key<today||!d||typeof d!=='object')continue;
+  const baseLessons=baseForDate(key);
+  const matches=v=>v&&(v.name===subject.name||v.subjectId===subject.id);
+  const removed=(d.extras||[]).filter(matches);
+  const baseIds=baseLessons.filter(v=>matches({...v,...(d.edits?.[v.id]||{})})).map(v=>String(v.id));
+  if(removed.length||baseIds.length)affected.push({key,removed,baseIds});
+ }
+ const count=affected.reduce((n,v)=>n+v.removed.length+v.baseIds.length,0);
+ if(count&&!confirm('Предмет «'+subject.name+'»: будут удалены '+count+' будущих занятий. Прошедшие занятия сохранятся. Продолжить?'))return false;
+ const before=JSON.stringify(store);
+ for(const {key,baseIds} of affected){
+  const d=store[key];
+  d.extras=(d.extras||[]).filter(v=>!((v.name===subject.name)||(v.subjectId===subject.id)));
+  d.edits=d.edits||{};
+  for(const id of baseIds)d.edits[id]={...(d.edits[id]||{}),cancelled:true,cancelReason:'Предмет архивирован: '+subject.name};
+ }
+ try{localStorage.setItem('school_real_week_v14',JSON.stringify(store))}
+ catch(e){store=JSON.parse(before);alert('Не удалось сохранить расписание: '+e.message);return false}
+ return true;
+}
 function settingsEditor(){let h='';if(settingsSection!=='teachers'&&settingsSection!=='directories')h+='<h2>'+(settingsSection==='directories'?'Справочники':'Настройки')+'</h2>';if(settingsPage!=='home'&&settingsSection!=='teachers'&&settingsSection!=='directories')h+='<button id="settings-back" class="settings-back">‹ К разделам</button>';if(settingsPage==='home'){const sections=settingsSection==='directories'?[['subjects','▤','Предметы','Редактирование справочника'],['routines','◷','Режимные моменты','Перерывы, питание, прогулки'],['resources','⌂','Кабинеты','Добавление, переименование и архив']]:settingsSection==='teachers'?[['hours','♙','Преподаватели','Карточки и графики']]:[['rooms','⌂','Классы','Основные кабинеты'],['display','◷','Расписание','Время на сетке'],['data','▤','Данные','Резервные копии']];h+='<div class="settings-menu-clean">'+sections.map(([id,ic,name,sub])=>'<button class="settings-item" data-page="'+id+'"><span class="settings-icon">'+ic+'</span><span class="settings-label"><b>'+name+'</b><small>'+sub+'</small></span><span class="settings-chevron">›</span></button>').join('')+'</div>'}
 else if(['subjects','routines','resources'].includes(settingsPage)){h+='<div id="directory-panel"></div>'}
 else if(settingsPage==='colors'){h+='<h3>Цвета по категориям</h3><p class="tiny">Введите названия предметов через запятую. Категория окрашивает все подходящие уроки; отдельный урок можно перекрасить в редакторе.</p>';colorCategories.forEach((c,i)=>{h+='<div class="box"><div class="pair"><label>Категория<input data-cat-name="'+i+'" value="'+esc(c.name)+'"></label><label>Цвет<input data-cat-color="'+i+'" type="color" value="'+esc(c.color)+'"></label></div><label>Предметы и слова<input data-cat-items="'+i+'" value="'+esc((c.items||[]).join(', '))+'" placeholder="Математика, русский, английский"></label><label><input data-cat-event="'+i+'" type="checkbox" style="width:auto" '+(c.event?'checked':'')+'>Цвет по умолчанию для мероприятий</label><button data-cat-delete="'+i+'">Удалить категорию</button></div>'});h+='<button id="add-color-category">+ Новая категория</button>'}
@@ -235,7 +258,7 @@ if(!editing)h+='<div class="directory-card-actions"><button id="dir-edit">✎ И
 p.innerHTML=h;
 $('dir-back').onclick=()=>{selected=null;editing=false;menu=false;drawDirectory()};
 if($('dir-edit'))$('dir-edit').onclick=()=>{editing=true;menu=false;drawDirectory()};
-if($('dir-archive'))$('dir-archive').onclick=()=>{if(!x.archived&&!confirm('Архивировать «'+x.name+'»? Существующие занятия сохранятся.'))return;if(roomMode)archiveRef('room',x.name,!x.archived);else{x.archived=!x.archived;saveDirectory()}menu=false;drawDirectory();board()};
+if($('dir-archive'))$('dir-archive').onclick=()=>{if(!x.archived){if(!confirm('Архивировать «'+x.name+'»? Прошедшие занятия сохранятся.'))return;if(!roomMode&&!archiveSubjectFuture(x))return}if(roomMode)archiveRef('room',x.name,!x.archived);else{x.archived=!x.archived;saveDirectory()}menu=false;drawDirectory();board()};
 if($('dir-color'))$('dir-color').onchange=ev=>{x.color=ev.target.value;saveDirectory();board()};
 if($('dir-edit-cancel'))$('dir-edit-cancel').onclick=()=>{editing=false;drawDirectory()};
 if($('dir-edit-save'))$('dir-edit-save').onclick=()=>{
