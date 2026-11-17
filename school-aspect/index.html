@@ -159,7 +159,7 @@ const day=()=>store[date]||{edits:{},absences:{},events:[],extras:[]};
 const lessonsForDate=d=>{const v=store[d]||{edits:{},extras:[]};return [...baseForDate(d).map(x=>({...x,...(v.edits?.[x.id]||{})})),...(v.extras||[])].filter(x=>!x.cancelled)};
 const filledDate=d=>!!store[d]?.initialized||lessonsForDate(d).length>0;
 const previousFilled=()=>{const d=new Date(date+'T12:00:00');for(let n=1;n<=730;n++){d.setDate(d.getDate()-7);const key=iso(d);if(filledDate(key))return key}return null};
-function copyPreviousDay(){const source=previousFilled();if(!source)return alert('Не найден ранее заполненный день с таким же днём недели.');if(filledDate(date)&&!confirm('Текущий день уже заполнен. Заменить его расписание? Мероприятия и отсутствия сохранятся.'))return;const copied=lessonsForDate(source).map((x,i)=>({...x,id:'ex-copy-'+date+'-'+i,recurring:false}));commit(d=>{d.edits={};d.extras=copied;d.initialized=true});base=baseForDate(date);draft=null;selected=copied[0]?.id||null;mode='lesson';render()}
+function copyPreviousDay(){const source=previousFilled();if(!source)return alert('Не найден ранее заполненный день с таким же днём недели.');if(filledDate(date)&&!confirm('Текущий день уже заполнен. Заменить его расписание? Мероприятия и отсутствия сохранятся.'))return;const copied=lessonsForDate(source).map((x,i)=>({...x,id:'ex-copy-'+date+'-'+i,recurring:false}));commit(d=>{d.edits={};d.extras=copied;d.initialized=true});base=baseForDate(date);draft=null;selected=null;mode='lesson';render()}
 
 const lessons=()=>[...base.map(x=>({...x,...(day().edits[x.id]||{})})),...(day().extras||[])].filter(x=>!x.cancelled).map(attachRefs);
 const events=()=> (day().events||[]).map(attachRefs);
