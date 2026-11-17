@@ -650,7 +650,7 @@ if(!localStorage.getItem(TEACHER_ID_MIGRATION)){
   [weekly,snapshot16,weeklySchedule,store].forEach(migrateItem);
   localStorage.setItem('school_real_week_v14',JSON.stringify(store));
   localStorage.setItem(WEEKLY_EDIT_KEY,JSON.stringify(weeklySchedule));
-  saveCfg();saveRefs();
+  localStorage.setItem(CFGKEY,JSON.stringify(cfg));saveRefs();
   localStorage.setItem(TEACHER_ID_MIGRATION,'done');
  }catch(e){console.error('Teacher ID migration failed',e)}
 }
