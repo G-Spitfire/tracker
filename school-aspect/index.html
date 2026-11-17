@@ -640,7 +640,7 @@ const unresolved=()=>resources().filter(x=>absentTeachers(x).length&&!resolution
 function commit(fn){let d=day();store[date]={edits:{...d.edits},absences:{...d.absences},events:[...d.events],extras:[...(d.extras||[])],resolutions:{...(d.resolutions||{})},initialized:true};fn(store[date]);store[date].extras=store[date].extras.map(attachRefs);store[date].events=store[date].events.map(attachRefs);for(const [id,edit] of Object.entries(store[date].edits))store[date].edits[id]=attachRefs(edit);try{localStorage.setItem('school_real_week_v14',JSON.stringify(store))}catch(e){alert('Браузер не разрешил сохранить изменения: '+e.message)}render()}
 
 const CFGKEY='school_week_config_v12';let cfg={hours:{},home:{},customLists:{}};try{cfg={...cfg,...JSON.parse(localStorage.getItem(CFGKEY)||'{}')}}catch(e){};for(const t of cfg.customLists?.teachers||[])if(!teachers.includes(t))teachers.push(t);for(const t of cfg.deletedTeachers||[]){let i=teachers.indexOf(t);if(i>=0)teachers.splice(i,1)}for(const r of cfg.customLists?.rooms||[])if(!rooms.includes(r))rooms.push(r);
-const workHours=t=>{let wd=new Date(date+'T12:00:00').getDay();return cfg.hours?.[t]&&Object.prototype.hasOwnProperty.call(cfg.hours[t],wd)?cfg.hours[t][wd]:(wd===0||wd===6?null:['09:00','18:00'])};
+const workHours=t=>{let wd=new Date(date+'T12:00:00').getDay(),h=cfg.hours?.[directoryRef('teacher',t)]||cfg.hours?.[t];return h&&Object.prototype.hasOwnProperty.call(h,wd)?h[wd]:(wd===0||wd===6?null:['09:00','18:00'])};
 const overtime=x=>teachersOf(x).filter(t=>{let h=workHours(t);return !h||x.start<min(h[0])||x.end>min(h[1])});
 syncRefNames('teacher',teachers);syncRefNames('room',rooms);if(!cfg.courtyardRoomArchived){archiveRef('room','ДВОР / ПРОГУЛКА',true);cfg.courtyardRoomArchived=true;localStorage.setItem(CFGKEY,JSON.stringify(cfg))}const saveCfg=()=>localStorage.setItem(CFGKEY,JSON.stringify(cfg));function applySavedRenames(){for(const type of ['teachers','rooms'])for(const [old,next] of Object.entries(cfg.renames?.[type]||{})){const key=type==='teachers'?'teacher':'room';for(const collection of [weekly,snapshot16,weeklySchedule,store]){const visit=o=>{if(!o||typeof o!=='object')return;if(Array.isArray(o)){o.forEach(visit);return}for(const [k,v] of Object.entries(o)){if(k===key&&v===old)o[k]=next;else if(k==='teachers'&&type==='teachers'&&Array.isArray(v))o[k]=v.map(t=>t===old?next:t);else if(v&&typeof v==='object')visit(v)}};visit(collection)}}}applySavedRenames();base=baseForDate(date);
 let colorCategories=JSON.parse(localStorage.getItem('school_colors_v12')||'null')||[{id:'breaks',name:'Перерывы',color:'#ffe79b',items:['BREAK','BREAKFAST','LUNCH','SNACK TIME','DINNER']},{id:'study',name:'Учебные занятия',color:'#cfe3f8',items:['МАТЕМАТИКА','РУССКИЙ ЯЗЫК','ENGLISH','ГРАМОТА']},{id:'events',name:'Мероприятия и выезды',color:'#ccebd9',items:[],event:true},{id:'other',name:'Другие занятия',color:'#e7edf5',items:[]}];
@@ -831,7 +831,7 @@ const nameParts=t=>cfg.teacherNames[directoryRef('teacher',t)]||cfg.teacherNames
 const fullName=p=>[p.last,p.first,p.middle].map(x=>x.trim()).filter(Boolean).join(' ');
 const teacherFullName=t=>cfg.teacherNames?.[directoryRef('teacher',t)]?fullName(cfg.teacherNames[directoryRef('teacher',t)]):cfg.teacherNames?.[t]?fullName(cfg.teacherNames[t]):t;
 const dayNames=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
-const dayValue=(t,d)=>cfg.hours?.[t]&&Object.prototype.hasOwnProperty.call(cfg.hours[t],d)?cfg.hours[t][d]:(d===0||d===6?null:['09:00','18:00']);
+const dayValue=(t,d)=>{const h=cfg.hours?.[directoryRef('teacher',t)]||cfg.hours?.[t];return h&&Object.prototype.hasOwnProperty.call(h,d)?h[d]:(d===0||d===6?null:['09:00','18:00'])};
 const teacherUsage=name=>{
  const id=directoryRef('teacher',name),found={past:0,future:0};
  const seen=new Set(),today=iso(new Date());
@@ -841,7 +841,7 @@ const teacherUsage=name=>{
   if(Array.isArray(value)){value.forEach(v=>scan(v,key,day));return}
   const assigned=value.teacher===name||value.teacherId===id||(Array.isArray(value.teachers)&&value.teachers.includes(name))||(Array.isArray(value.teacherIds)&&value.teacherIds.includes(id));
   if(assigned){found[day&&day>=today?'future':'past']++}
-  if(value.absences&&Object.prototype.hasOwnProperty.call(value.absences,name))found[day&&day>=today?'future':'past']++;
+  if(value.absences&&(Object.prototype.hasOwnProperty.call(value.absences,name)||Object.prototype.hasOwnProperty.call(value.absences,id)))found[day&&day>=today?'future':'past']++;
   for(const [k,v] of Object.entries(value))if(v&&typeof v==='object')scan(v,k,day);
  };
  // Weekly templates and original snapshots count as dependencies, regardless of date.
@@ -890,7 +890,7 @@ function draw(){
   cfg.customLists=cfg.customLists||{};
   cfg.customLists.teachers=teachers.filter(n=>n!=='Не назначен');
   cfg.deletedTeachers=[...new Set([...(cfg.deletedTeachers||[]),t])];
-  delete cfg.hours?.[t];delete cfg.teacherSavedHours[t];delete cfg.teacherRoles[t];delete cfg.teacherNames[t];delete cfg.teacherNames[id];
+  delete cfg.hours?.[t];delete cfg.hours?.[id];delete cfg.teacherSavedHours[t];delete cfg.teacherSavedHours[id];delete cfg.teacherRoles[t];delete cfg.teacherNames[t];delete cfg.teacherNames[id];
   if(cfg.renames?.teachers)delete cfg.renames.teachers[t];
   if(directoryRefs.teacher)directoryRefs.teacher=directoryRefs.teacher.filter(x=>x.id!==id);
   saveRefs();saveCfg();chosen=null;editing=false;draw();board();
@@ -903,8 +903,8 @@ function draw(){
  if(next!==t&&!collision){
  renameRef('teacher',t,next);renameStoredResource('teacher',t,next);cfg.renames=cfg.renames||{teachers:{},rooms:{}};cfg.renames.teachers=cfg.renames.teachers||{};cfg.renames.teachers[t]=next;
  for(const d of Object.values(store))if(d.absences?.[t]){d.absences[next]=d.absences[t];delete d.absences[t]}
- if(cfg.hours?.[t]){cfg.hours[next]=cfg.hours[t];delete cfg.hours[t]}
- if(cfg.teacherSavedHours[t]){cfg.teacherSavedHours[next]=cfg.teacherSavedHours[t];delete cfg.teacherSavedHours[t]}
+ if(cfg.hours?.[t]){cfg.hours[directoryRef('teacher',next)]=cfg.hours[t];delete cfg.hours[t]}
+ if(cfg.teacherSavedHours?.[t]){cfg.teacherSavedHours[directoryRef('teacher',next)]=cfg.teacherSavedHours[t];delete cfg.teacherSavedHours[t]}
  delete cfg.teacherRoles[t];delete cfg.teacherNames[t];teachers[teachers.indexOf(t)]=next;cfg.customLists=cfg.customLists||{};cfg.customLists.teachers=teachers.filter(x=>x!=='Не назначен');
  localStorage.setItem('school_real_week_v14',JSON.stringify(store));chosen=next;
  }
@@ -912,15 +912,15 @@ function draw(){
  };
  panel.querySelectorAll('[data-active]').forEach(el=>el.onchange=()=>{
  const d=Number(el.dataset.active),old=dayValue(t,d);
- cfg.hours=cfg.hours||{};cfg.hours[t]=cfg.hours[t]||{};cfg.teacherSavedHours[t]=cfg.teacherSavedHours[t]||{};
- if(el.checked)cfg.hours[t][d]=cfg.teacherSavedHours[t][d]||['09:00','18:00'];
- else{if(old)cfg.teacherSavedHours[t][d]=old;cfg.hours[t][d]=null}
+ cfg.hours=cfg.hours||{};const id=directoryRef('teacher',t);cfg.hours[id]=cfg.hours[id]||cfg.hours[t]||{};cfg.teacherSavedHours[id]=cfg.teacherSavedHours[id]||cfg.teacherSavedHours[t]||{};
+ if(el.checked)cfg.hours[id][d]=cfg.teacherSavedHours[id][d]||['09:00','18:00'];
+ else{if(old)cfg.teacherSavedHours[id][d]=old;cfg.hours[id][d]=null}
  saveCfg();draw();board()
  });
  panel.querySelectorAll('[data-wd]').forEach(el=>el.onchange=()=>{
  const d=Number(el.dataset.wd),a=panel.querySelector('[data-wd="'+d+'"][data-part="0"]'),b=panel.querySelector('[data-wd="'+d+'"][data-part="1"]');
  if(!a.value||!b.value||a.value>=b.value){alert('Время окончания должно быть позже начала');draw();return}
- cfg.hours=cfg.hours||{};cfg.hours[t]=cfg.hours[t]||{};cfg.hours[t][d]=[a.value,b.value];cfg.teacherSavedHours[t]=cfg.teacherSavedHours[t]||{};cfg.teacherSavedHours[t][d]=[a.value,b.value];saveCfg();board()
+ cfg.hours=cfg.hours||{};const id=directoryRef('teacher',t);cfg.hours[id]=cfg.hours[id]||cfg.hours[t]||{};cfg.hours[id][d]=[a.value,b.value];cfg.teacherSavedHours[id]=cfg.teacherSavedHours[id]||cfg.teacherSavedHours[t]||{};cfg.teacherSavedHours[id][d]=[a.value,b.value];saveCfg();board()
  })
 }
 draw();
@@ -1043,15 +1043,15 @@ $('event-back').onclick=async()=>{if(!await confirmDiscardDraft())return;draft=n
 function absenceEditor(){
  const list=day().absences||{},pending=unresolved();
  let h='<h2>Отсутствия преподавателей</h2><div class="sub">На выбранную дату · уроки и мероприятия остаются в сетке, пока координатор не примет решение.</div><label>Преподаватель</label><select id="abs-teacher"><option value="" selected disabled>Выберите преподавателя</option>'+teachers.filter(t=>t!=='Не назначен'&&!directoryRefArchived('teacher',t)).map(t=>'<option>'+esc(t)+'</option>').join('')+'</select><label>Причина</label><select id="abs-reason"><option>Болезнь</option><option>Отпуск</option><option>Личные обстоятельства</option><option>Другое</option></select><div class="buttons"><button id="abs-add" class=" btn-primary btn-standard">Отметить отсутствие</button></div><h3>Отсутствуют</h3>';
- Object.entries(list).forEach(([t,r])=>h+='<div class="absence-row">'+esc(t)+' · '+esc(r)+' <button class="btn-secondary btn-compact" data-remove="'+esc(t)+'">Вернулся</button></div>');
+ Object.entries(list).filter(([t])=>t.startsWith('teacher-')||!Object.prototype.hasOwnProperty.call(list,directoryRef('teacher',t))).forEach(([t,r])=>h+='<div class="absence-row">'+esc(resolveRef('teacher',t,t))+' · '+esc(r)+' <button class="btn-secondary btn-compact" data-remove="'+esc(t)+'">Вернулся</button></div>');
  if(!Object.keys(list).length)h+='<p class="empty-note">Отсутствий нет</p>';h+='<h3>Занятия, требующие решения ('+pending.length+')</h3>';if(!pending.length)h+='<p class="empty-note">Нет занятий, требующих решения</p>';
  pending.forEach(x=>{const missing=absentTeachers(x),remaining=teachersOf(x).filter(t=>!absent(t)),isEvent=x.kind==='event';
  h+='<div class="box warn"><b>'+esc(isEvent?'Мероприятие · '+x.name:names[x.cls]+' · '+x.name)+'</b><div class="tiny">'+fmt(x.start)+'–'+fmt(x.end)+(isEvent?' · '+(x.classes||[]).map(i=>names[i]).join(', '):'')+'</div><div class="tiny">Отсутствуют: '+esc(missing.join(', '))+'</div>'+(remaining.length?'<div class="tiny">Остаются: '+esc(remaining.join(', '))+'</div>':'')+'<div class="buttons"><button class="btn-secondary btn-standard" data-replace="'+esc(x.id)+'">Назначить замену</button>'+(isEvent&&remaining.length?'<button class="btn-secondary btn-standard" data-keep="'+esc(x.id)+'">Оставить '+(remaining.length===1?'одного':'оставшихся')+'</button>':'')+'</div></div>';
  });
  h+='<div class="buttons"><button id="abs-back" class="btn-ghost btn-standard">К расписанию</button></div>';
  $('editor').innerHTML=h;
- $('abs-add').onclick=()=>{const t=$('abs-teacher').value;if(!t||t==='Не назначен'||directoryRefArchived('teacher',t))return;$('abs-teacher').value='';commit(d=>d.absences[t]=$('abs-reason').value)};
- document.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>commit(d=>delete d.absences[b.dataset.remove]));
+ $('abs-add').onclick=()=>{const t=$('abs-teacher').value;if(!t||t==='Не назначен'||directoryRefArchived('teacher',t))return;$('abs-teacher').value='';commit(d=>{const id=directoryRef('teacher',t);d.absences[id]=$('abs-reason').value;delete d.absences[t]})};
+ document.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>commit(d=>{const id=directoryRef('teacher',b.dataset.remove);delete d.absences[b.dataset.remove];if(id)delete d.absences[id];const name=resolveRef('teacher',b.dataset.remove,null);if(name)delete d.absences[name]}));
  document.querySelectorAll('[data-replace]').forEach(b=>b.onclick=()=>{selected=b.dataset.replace;mode=events().some(e=>String(e.id)===String(selected))?'event':'lesson';draft=null;render()});
  document.querySelectorAll('[data-keep]').forEach(b=>b.onclick=()=>{const x=events().find(e=>String(e.id)===b.dataset.keep);if(!x)return;commit(d=>d.resolutions[x.id]={signature:JSON.stringify({teachers:teachersOf(x),absent:absentTeachers(x)})})});
  $('abs-back').onclick=()=>{mode='lesson';render()};
