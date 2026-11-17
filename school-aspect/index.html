@@ -557,10 +557,10 @@ const directoryItem=name=>directory.subjects.find(x=>x.id===name||x.name===name)
 const DIRECTORY_REF_KEY='school_directory_refs_v20';
 let directoryRefs={};try{directoryRefs=JSON.parse(localStorage.getItem(DIRECTORY_REF_KEY)||'{}')||{}}catch(e){}
 const makeRef=(prefix,name)=>prefix+'-'+Array.from(String(name)).map(c=>c.codePointAt(0).toString(36)).join('-');
-const directoryRef=(type,name)=>{if(!name||name==='Не назначен')return null;const list=type==='subject'?directory.subjects:(directoryRefs[type]||[]);let x=list.find(v=>v.name===name||v.id===name);if(!x&&type!=='subject'){x={id:makeRef(type,name),name,archived:false};(directoryRefs[type]||=[]).push(x);localStorage.setItem(DIRECTORY_REF_KEY,JSON.stringify(directoryRefs))}return x?.id||null};
+const directoryRef=(type,name)=>{if(!name||name==='Не назначен')return null;const list=type==='subject'?directory.subjects:(directoryRefs[type]||[]);let x=list.find(v=>v.name===name||v.id===name);if(!x&&type!=='subject'){x={id:type==='teacher'?'teacher-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10):makeRef(type,name),name,archived:false};(directoryRefs[type]||=[]).push(x);localStorage.setItem(DIRECTORY_REF_KEY,JSON.stringify(directoryRefs))}return x?.id||null};
 const resolveRef=(type,id,fallback)=>{const list=type==='subject'?directory.subjects:(directoryRefs[type]||[]);return list.find(v=>v.id===id)?.name||fallback};
 const saveRefs=()=>localStorage.setItem(DIRECTORY_REF_KEY,JSON.stringify(directoryRefs));const directoryRefArchived=(type,name)=>!!(directoryRefs[type]||[]).find(x=>x.name===name)?.archived;
-const syncRefNames=(type,names)=>{const list=directoryRefs[type]||=[];for(const name of names)if(name&&name!=='Не назначен'&&!list.some(x=>x.name===name))list.push({id:makeRef(type,name),name,archived:false});saveRefs()};
+const syncRefNames=(type,names)=>{const list=directoryRefs[type]||=[];for(const name of names)if(name&&name!=='Не назначен'&&!list.some(x=>x.name===name))list.push({id:type==='teacher'?'teacher-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10):makeRef(type,name),name,archived:false});saveRefs()};
 const renameRef=(type,old,next)=>{let id=directoryRef(type,old),entry=(directoryRefs[type]||[]).find(x=>x.id===id);if(entry)entry.name=next;saveRefs()};
 const renameStoredResource=(type,oldName,newName)=>{
  const visit=value=>{
@@ -578,7 +578,7 @@ const renameStoredResource=(type,oldName,newName)=>{
 };
 const archiveRef=(type,name,archived)=>{let id=directoryRef(type,name),entry=(directoryRefs[type]||[]).find(x=>x.id===id);if(entry)entry.archived=archived;saveRefs()};
 
-const attachRefs=x=>{if(!x||typeof x!=='object')return x;const y={...x};if(y.kind!=='event'){if(!y.subjectId)y.subjectId=directoryRef('subject',y.name);else if(directoryItem(y.name)&&directoryItem(y.name).id!==y.subjectId)y.subjectId=directoryRef('subject',y.name);y.name=resolveRef('subject',y.subjectId,y.name)}if(y.teacher&&y.teacher!=='Не назначен'){if(!y.teacherId)y.teacherId=directoryRef('teacher',y.teacher);else if((directoryRefs.teacher||[]).some(t=>t.name===y.teacher&&t.id!==y.teacherId))y.teacherId=directoryRef('teacher',y.teacher);y.teacher=resolveRef('teacher',y.teacherId,y.teacher)}if(Array.isArray(y.teachers)){y.teacherIds=y.teachers.map((t,i)=>y.teacherIds?.[i]&&!(directoryRefs.teacher||[]).some(v=>v.name===t&&v.id!==y.teacherIds[i])?y.teacherIds[i]:directoryRef('teacher',t));y.teachers=y.teachers.map((t,i)=>resolveRef('teacher',y.teacherIds[i],t))}if(y.room&&y.room!=='Не назначен'){if(!y.roomId)y.roomId=directoryRef('room',y.room);else if((directoryRefs.room||[]).some(t=>t.name===y.room&&t.id!==y.roomId))y.roomId=directoryRef('room',y.room);y.room=resolveRef('room',y.roomId,y.room)}return y};
+const attachRefs=x=>{if(!x||typeof x!=='object')return x;const y={...x};if(y.kind!=='event'){if(!y.subjectId)y.subjectId=directoryRef('subject',y.name);else if(directoryItem(y.name)&&directoryItem(y.name).id!==y.subjectId)y.subjectId=directoryRef('subject',y.name);y.name=resolveRef('subject',y.subjectId,y.name)}if(y.teacher&&y.teacher!=='Не назначен'){if(!y.teacherId||!(directoryRefs.teacher||[]).some(t=>t.id===y.teacherId))y.teacherId=directoryRef('teacher',y.teacher);y.teacher=resolveRef('teacher',y.teacherId,y.teacher)}if(Array.isArray(y.teachers)){y.teacherIds=y.teachers.map((t,i)=>y.teacherIds?.[i]&&(directoryRefs.teacher||[]).some(v=>v.id===y.teacherIds[i])?y.teacherIds[i]:directoryRef('teacher',t));y.teachers=y.teachers.map((t,i)=>resolveRef('teacher',y.teacherIds[i],t))}if(y.room&&y.room!=='Не назначен'){if(!y.roomId)y.roomId=directoryRef('room',y.room);else if((directoryRefs.room||[]).some(t=>t.name===y.room&&t.id!==y.roomId))y.roomId=directoryRef('room',y.room);y.room=resolveRef('room',y.roomId,y.room)}return y};
 
 const directoryColor=name=>{let x=directoryItem(name);return x?.color||directory.colors[x?.type||'subject']};
 const directorySync=()=>{for(const name of subjects)if(!directoryItem(name))directory.subjects.push({id:'subject-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),name,archived:false,color:null,type:ROUTINE_NAMES.includes(name.toUpperCase())?'routine':'subject'});saveDirectory()};
@@ -586,6 +586,31 @@ directorySync();const weekly={};const snapshot16=[];const WEEKLY_EDIT_KEY='schoo
 const fmt=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'),min=s=>{let [h,m]=s.split(':').map(Number);return h*60+m},iso=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-'),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let collapsed=false,issueFilter='';const today=new Date();let date=iso(today),selected=null,mode='lesson',draft=null,draftBaseline=null,newLessonType='subject',resolveDraftDecision=null,store={};let base=baseForDate(date);selected=null;
 try{store=JSON.parse(localStorage.getItem('school_real_week_v14')||'{}')}catch(e){};
+const TEACHER_ID_MIGRATION='aspect_teacher_id_migration_v1';
+if(!localStorage.getItem(TEACHER_ID_MIGRATION)){
+ try{
+  const backup={createdAt:new Date().toISOString(),cfg:localStorage.getItem(CFGKEY),refs:localStorage.getItem(DIRECTORY_REF_KEY),store:localStorage.getItem('school_real_week_v14'),weekly:localStorage.getItem(WEEKLY_EDIT_KEY)};
+  localStorage.setItem('aspect_teacher_id_backup_v1',JSON.stringify(backup));
+  cfg.teacherNames=cfg.teacherNames||{};
+  for(const t of teachers.filter(t=>t!=='Не назначен')){
+   const id=directoryRef('teacher',t);
+   if(cfg.teacherNames[t]&&!cfg.teacherNames[id])cfg.teacherNames[id]=cfg.teacherNames[t];
+  }
+  const migrateItem=x=>{
+   if(!x||typeof x!=='object')return;
+   if(Array.isArray(x)){x.forEach(migrateItem);return}
+   if(x.teacher&&x.teacher!=='Не назначен'&&!x.teacherId)x.teacherId=directoryRef('teacher',x.teacher);
+   if(Array.isArray(x.teachers)&&!Array.isArray(x.teacherIds))x.teacherIds=x.teachers.map(t=>directoryRef('teacher',t));
+   if(x.absences){for(const [name,value] of Object.entries(x.absences)){if(name.startsWith('teacher-'))continue;const id=directoryRef('teacher',name);if(id&&!Object.prototype.hasOwnProperty.call(x.absences,id))x.absences[id]=value}}
+   for(const [k,v] of Object.entries(x))if(v&&typeof v==='object'&&k!=='absences')migrateItem(v);
+  };
+  [weekly,snapshot16,weeklySchedule,store].forEach(migrateItem);
+  localStorage.setItem('school_real_week_v14',JSON.stringify(store));
+  localStorage.setItem(WEEKLY_EDIT_KEY,JSON.stringify(weeklySchedule));
+  saveCfg();saveRefs();
+  localStorage.setItem(TEACHER_ID_MIGRATION,'done');
+ }catch(e){console.error('Teacher ID migration failed',e)}
+}
 const day=()=>store[date]||{edits:{},absences:{},events:[],extras:[]};
 const lessonsForDate=d=>{const v=store[d]||{edits:{},extras:[]};return [...baseForDate(d).map(x=>({...x,...(v.edits?.[x.id]||{})})),...(v.extras||[])].filter(x=>!x.cancelled&&!x.deleted)};
 const filledDate=d=>!!store[d]?.initialized||lessonsForDate(d).length>0;
@@ -594,15 +619,15 @@ async function copyPreviousDay(){const source=previousFilled();if(!source)return
 
 const lessons=()=>[...base.map(x=>({...x,...(day().edits[x.id]||{})})),...(day().extras||[])].filter(x=>!x.cancelled&&!x.deleted).map(attachRefs);
 const events=()=> (day().events||[]).map(attachRefs);
-const absent=t=>t!=='Не назначен'&&!!(day().absences||{})[t];
+const absent=t=>t!=='Не назначен'&&!!((day().absences||{})[directoryRef('teacher',t)]||(day().absences||{})[t]);
 const isRoutine=x=>x.kind!=='event'&&(directoryItem(x.name)?.type==='routine'||/^(WELCOME|BREAK|BREAKFAST|LUNCH|SNACK TIME|DINNER|CIRCL|ПРОГУЛКА|ЗАРЯДКА|FREE TIME|SNACK|1 BREAKFAST|2 BREAKFAST)$/i.test(String(x.name||'').trim()));const needsRoom=x=>x.kind!=='event'&&!isRoutine(x);const overlap=(a,b)=>a.start<b.end&&b.start<a.end;
-const teacherGridLabel=key=>{const p=cfg.teacherNames?.[key];if(!p)return key;const first=(p.first||'').trim(),last=(p.last||'').trim(),middle=(p.middle||'').trim();return last&&first?first+' '+last[0].toUpperCase()+'.':first&&middle?first[0].toUpperCase()+'.'+middle[0].toUpperCase()+'.':first||key};
+const teacherGridLabel=key=>{const p=cfg.teacherNames?.[directoryRef('teacher',key)]||cfg.teacherNames?.[key];if(!p)return key;const first=(p.first||'').trim(),last=(p.last||'').trim(),middle=(p.middle||'').trim();return last&&first?first+' '+last[0].toUpperCase()+'.':first&&middle?first[0].toUpperCase()+'.'+middle[0].toUpperCase()+'.':first||key};
 const teachersOf=x=>x.kind==='event'?x.teachers:(x.teachers||[x.teacher]).filter(t=>t&&t!=='Не назначен');
 const classesOf=x=>x.kind==='event'?x.classes:[x.cls];
 const isSharedLocation=r=>/СТОЛОВ|ДВОР|ПРОГУЛК/i.test(r||'');
 const roomsConflict=(a,b)=>a.room&&b.room&&a.room===b.room&&a.room!=='Не назначен'&&!isSharedLocation(a.room);
 const classCollision=(a,b)=>a.kind==='event'||b.kind==='event'||!a.group||!b.group||a.group==='all'||b.group==='all'||a.group===b.group;
-const shared=(a,b)=>{const sameClasses=classesOf(a).filter(c=>classesOf(b).includes(c)&&classCollision(a,b));const sameTeachers=teachersOf(a).filter(t=>teachersOf(b).includes(t)&&t!=='Не назначен');const sameRoom=roomsConflict(a,b);return {sameClasses,sameTeachers,sameRoom}};
+const shared=(a,b)=>{const sameClasses=classesOf(a).filter(c=>classesOf(b).includes(c)&&classCollision(a,b));const sameTeachers=teachersOf(a).filter(t=>t!=='Не назначен'&&teachersOf(b).some(u=>directoryRef('teacher',t)===directoryRef('teacher',u)));const sameRoom=roomsConflict(a,b);return {sameClasses,sameTeachers,sameRoom}};
 const resources=()=>[...lessons(),...events()];
 const missingTeacher=x=>x.kind!=='event'&&!isRoutine(x)&&teachersOf(x).length===0;
 const urgentProblemIds=()=>new Set([...conflictIds(),...resources().filter(x=>missingTeacher(x)||(absentTeachers(x).length&&!resolutionValid(x))||overtime(x).length).map(x=>String(x.id))]);
@@ -802,9 +827,9 @@ document.querySelectorAll('[data-teacher-delete]').forEach(b=>b.onclick=()=>{let
 if(settingsPage==='hours'){
 let chosen=null,showArchived=false,searchText='',adding=false,editing=false,menuOpen=false;
 cfg.teacherRoles=cfg.teacherRoles||{};cfg.teacherSavedHours=cfg.teacherSavedHours||{};cfg.teacherNames=cfg.teacherNames||{};
-const nameParts=t=>cfg.teacherNames[t]||{last:'',first:t,middle:''};
+const nameParts=t=>cfg.teacherNames[directoryRef('teacher',t)]||cfg.teacherNames[t]||{last:'',first:t,middle:''};
 const fullName=p=>[p.last,p.first,p.middle].map(x=>x.trim()).filter(Boolean).join(' ');
-const teacherFullName=t=>cfg.teacherNames?.[t]?fullName(cfg.teacherNames[t]):t;
+const teacherFullName=t=>cfg.teacherNames?.[directoryRef('teacher',t)]?fullName(cfg.teacherNames[directoryRef('teacher',t)]):cfg.teacherNames?.[t]?fullName(cfg.teacherNames[t]):t;
 const dayNames=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const dayValue=(t,d)=>cfg.hours?.[t]&&Object.prototype.hasOwnProperty.call(cfg.hours[t],d)?cfg.hours[t][d]:(d===0||d===6?null:['09:00','18:00']);
 const teacherUsage=name=>{
@@ -837,7 +862,7 @@ function draw(){
  '<div class="teacher-list">'+(filtered.length?filtered.map(t=>'<button class="teacher-list-item btn-list" data-teacher-open="'+esc(t)+'"><span><strong>'+esc(teacherFullName(t))+'</strong>'+((directoryRefArchived('teacher',t)||cfg.teacherRoles[t])?'<small>'+(directoryRefArchived('teacher',t)?'В архиве':esc(cfg.teacherRoles[t]))+'</small>':'')+'</span><span>›</span></button>').join(''):'<div class="teacher-empty">Преподаватели не найдены</div>')+'</div>';
  $('teacher-add-toggle').onclick=()=>{adding=!adding;draw();if(adding)$('teacher-new')?.focus()};
  if($('teacher-add-cancel'))$('teacher-add-cancel').onclick=()=>{adding=false;draw()};
- if($('teacher-add'))$('teacher-add').onclick=()=>{const parts={last:$('teacher-new-last').value.trim(),first:$('teacher-new').value.trim(),middle:$('teacher-new-middle').value.trim()};const n=fullName(parts);if(!parts.first||teachers.some(t=>t.toLocaleLowerCase('ru')===n.toLocaleLowerCase('ru')))return alert('Введите уникальное имя преподавателя');teachers.push(n);cfg.teacherNames[n]=parts;archiveRef('teacher',n,false);cfg.customLists=cfg.customLists||{};cfg.customLists.teachers=teachers.filter(t=>t!=='Не назначен');saveCfg();chosen=n;adding=false;draw()};
+ if($('teacher-add'))$('teacher-add').onclick=()=>{const parts={last:$('teacher-new-last').value.trim(),first:$('teacher-new').value.trim(),middle:$('teacher-new-middle').value.trim()};const n=fullName(parts);if(!parts.first||teachers.some(t=>t.toLocaleLowerCase('ru')===n.toLocaleLowerCase('ru')))return alert('Введите уникальное имя преподавателя');teachers.push(n);cfg.teacherNames[directoryRef('teacher',n)]=parts;archiveRef('teacher',n,false);cfg.customLists=cfg.customLists||{};cfg.customLists.teachers=teachers.filter(t=>t!=='Не назначен');saveCfg();chosen=n;adding=false;draw()};
  $('teacher-search').oninput=e=>{const pos=e.target.selectionStart;searchText=e.target.value;draw();const el=$('teacher-search');el.focus();el.setSelectionRange(pos,pos)};
  $('teacher-show-archive').onchange=e=>{showArchived=e.target.checked;draw()};
  panel.querySelectorAll('[data-teacher-open]').forEach(el=>el.onclick=()=>{chosen=el.dataset.teacherOpen;editing=false;menuOpen=false;draw()});
@@ -865,7 +890,7 @@ function draw(){
   cfg.customLists=cfg.customLists||{};
   cfg.customLists.teachers=teachers.filter(n=>n!=='Не назначен');
   cfg.deletedTeachers=[...new Set([...(cfg.deletedTeachers||[]),t])];
-  delete cfg.hours?.[t];delete cfg.teacherSavedHours[t];delete cfg.teacherRoles[t];delete cfg.teacherNames[t];
+  delete cfg.hours?.[t];delete cfg.teacherSavedHours[t];delete cfg.teacherRoles[t];delete cfg.teacherNames[t];delete cfg.teacherNames[id];
   if(cfg.renames?.teachers)delete cfg.renames.teachers[t];
   if(directoryRefs.teacher)directoryRefs.teacher=directoryRefs.teacher.filter(x=>x.id!==id);
   saveRefs();saveCfg();chosen=null;editing=false;draw();board();
@@ -883,7 +908,7 @@ function draw(){
  delete cfg.teacherRoles[t];delete cfg.teacherNames[t];teachers[teachers.indexOf(t)]=next;cfg.customLists=cfg.customLists||{};cfg.customLists.teachers=teachers.filter(x=>x!=='Не назначен');
  localStorage.setItem('school_real_week_v14',JSON.stringify(store));chosen=next;
  }
- cfg.teacherNames[chosen]=parts;cfg.teacherRoles[chosen]=role;saveCfg();editing=false;draw();board()
+ cfg.teacherNames[directoryRef('teacher',chosen)]=parts;cfg.teacherRoles[chosen]=role;saveCfg();editing=false;draw();board()
  };
  panel.querySelectorAll('[data-active]').forEach(el=>el.onchange=()=>{
  const d=Number(el.dataset.active),old=dayValue(t,d);
