@@ -160,9 +160,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .right .settings-label b{font-size:13px}.right .settings-label small{font-size:11px;line-height:1.35}
 .right .advanced-fields{padding:10px;margin:14px 0}
 .right .advanced-fields summary{font-size:12px}
-.right .dir-default-color{margin:12px 0;padding:9px 10px;background:#f7f9fc;border:1px solid #e2e8f0;border-radius:8px;font-size:12px}
+.right .dir-default-color{margin:8px 0;padding:0;background:transparent;border:0;font-size:12px;min-height:32px}
 .right .dir-swatch{width:18px;height:18px;border-radius:5px;flex:none}
-.panel-back{display:inline-flex;align-items:center;gap:5px;margin-bottom:14px;background:transparent;border-color:transparent;color:#63748b}
+.right .panel-back{display:inline-flex;align-items:center;gap:5px;margin:0 0 10px;padding:2px 0;min-height:24px;border:0;border-radius:0;background:transparent;color:#63748b;font-size:12px}.right .panel-back[hidden]{display:none!important}.right .teacher-identity{margin:4px 0 14px}
 .ui-icon{width:16px;height:16px;vertical-align:-3px;flex:none}
 .right .empty-note{color:#728095;font-size:12px;line-height:1.45;margin:6px 0 14px}
 .right .notice.error{font-size:12px;padding:10px}
@@ -344,13 +344,13 @@ function archiveSubjectFuture(subject){
 }
 const uiIcon=kind=>{const paths={subjects:'M4 3h16v18H4z M7 7h10 M7 11h10 M7 15h7',routines:'M12 8v4l3 2 M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0',resources:'M3 21V7h18v14 M7 7V3h10v4 M8 11h2 M14 11h2 M8 15h2 M14 15h2',rooms:'M3 11l9-8 9 8 M5 10v11h14V10 M10 21v-7h4v7',display:'M3 4h18v14H3z M8 22h8 M12 18v4',data:'M4 4h16v16H4z M8 4v6h8V4 M8 20v-6h8v6',edit:'M4 20l4-1L20 7l-3-3L5 16z M14 7l3 3',archive:'M3 4h18v5H3z M5 9v12h14V9 M9 13h6',hours:'M12 8v4l3 2 M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0'};return '<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+(paths[kind]||paths.subjects)+'"/></svg>'};
 let lessonValidationId=null;
-function settingsEditor(){let h='';if(settingsPage==='home'&&settingsSection==='directories')h+='<h2>Справочники</h2>';if(settingsSection!=='teachers'&&settingsSection!=='directories')h+='<h2>'+(settingsSection==='directories'?'Справочники':'Настройки')+'</h2>';if(settingsPage==='home'){const sections=settingsSection==='directories'?[['subjects','▤','Предметы','Редактирование справочника'],['routines','◷','Режимные моменты','Перерывы, питание, прогулки'],['resources','⌂','Кабинеты','Добавление, переименование и архив']]:settingsSection==='teachers'?[['hours','♙','Преподаватели','Карточки и графики']]:[['rooms','⌂','Классы','Основные кабинеты'],['display','◷','Расписание','Время на сетке'],['data','▤','Данные','Резервные копии']];h+='<div class="settings-menu-clean">'+sections.map(([id,ic,name,sub])=>'<button class="settings-item" data-page="'+id+'"><span class="settings-icon">'+uiIcon(id)+'</span><span class="settings-label"><b>'+name+'</b><small>'+sub+'</small></span><span class="settings-chevron">›</span></button>').join('')+'</div>'}
+function settingsEditor(){let h='';if(settingsPage==='home'&&settingsSection==='directories')h+='<h2>Справочники</h2>';if(settingsPage==='home'&&settingsSection!=='teachers'&&settingsSection!=='directories')h+='<h2>'+(settingsSection==='directories'?'Справочники':'Настройки')+'</h2>';if(settingsPage==='home'){const sections=settingsSection==='directories'?[['subjects','▤','Предметы','Редактирование справочника'],['routines','◷','Режимные моменты','Перерывы, питание, прогулки'],['resources','⌂','Кабинеты','Добавление, переименование и архив']]:settingsSection==='teachers'?[['hours','♙','Преподаватели','Карточки и графики']]:[['rooms','⌂','Классы','Основные кабинеты'],['display','◷','Расписание','Время на сетке'],['data','▤','Данные','Резервные копии']];h+='<div class="settings-menu-clean">'+sections.map(([id,ic,name,sub])=>'<button class="settings-item" data-page="'+id+'"><span class="settings-icon">'+uiIcon(id)+'</span><span class="settings-label"><b>'+name+'</b><small>'+sub+'</small></span><span class="settings-chevron">›</span></button>').join('')+'</div>'}
 else if(['subjects','routines','resources'].includes(settingsPage)){h+='<div id="directory-panel"></div>'}
-else if(settingsPage==='colors'){h+='<h3>Цвета по категориям</h3><p class="tiny">Введите названия предметов через запятую. Категория окрашивает все подходящие уроки; отдельный урок можно перекрасить в редакторе.</p>';colorCategories.forEach((c,i)=>{h+='<div class="box"><div class="pair"><label>Категория<input data-cat-name="'+i+'" value="'+esc(c.name)+'"></label><label>Цвет<input data-cat-color="'+i+'" type="color" value="'+esc(c.color)+'"></label></div><label>Предметы и слова<input data-cat-items="'+i+'" value="'+esc((c.items||[]).join(', '))+'" placeholder="Математика, русский, английский"></label><label><input data-cat-event="'+i+'" type="checkbox" style="width:auto" '+(c.event?'checked':'')+'>Цвет по умолчанию для мероприятий</label><button data-cat-delete="'+i+'">Удалить категорию</button></div>'});h+='<button id="add-color-category">+ Новая категория</button>'}
-else if(settingsPage==='display'){h+='<h3>Отображение расписания</h3><div class="pair"><label>Начало<input id="display-start" type="time" value="'+(cfg.display?.start||'08:00')+'"></label><label>Конец<input id="display-end" type="time" value="'+(cfg.display?.end||'19:00')+'"></label></div>'}
-else if(settingsPage==='rooms'){h+='<h3>Основные кабинеты групп</h3>';names.forEach((n,i)=>h+='<label>'+esc(n)+'</label><select data-home="'+i+'">'+rooms.filter(r=>!directoryRefArchived('room',r)||cfg.home?.[i]===r).map(r=>'<option value="'+esc(r)+'" '+(cfg.home?.[i]===r?'selected':'')+'>'+esc(r)+'</option>').join('')+'</select>')}
+else if(settingsPage==='colors'){h+='<h2>Цвета по категориям</h2><p class="tiny">Введите названия предметов через запятую. Категория окрашивает все подходящие уроки; отдельный урок можно перекрасить в редакторе.</p>';colorCategories.forEach((c,i)=>{h+='<div class="box"><div class="pair"><label>Категория<input data-cat-name="'+i+'" value="'+esc(c.name)+'"></label><label>Цвет<input data-cat-color="'+i+'" type="color" value="'+esc(c.color)+'"></label></div><label>Предметы и слова<input data-cat-items="'+i+'" value="'+esc((c.items||[]).join(', '))+'" placeholder="Математика, русский, английский"></label><label><input data-cat-event="'+i+'" type="checkbox" style="width:auto" '+(c.event?'checked':'')+'>Цвет по умолчанию для мероприятий</label><button data-cat-delete="'+i+'">Удалить категорию</button></div>'});h+='<button id="add-color-category">+ Новая категория</button>'}
+else if(settingsPage==='display'){h+='<h2>Отображение расписания</h2><div class="pair"><label>Начало<input id="display-start" type="time" value="'+(cfg.display?.start||'08:00')+'"></label><label>Конец<input id="display-end" type="time" value="'+(cfg.display?.end||'19:00')+'"></label></div>'}
+else if(settingsPage==='rooms'){h+='<h2>Кабинеты классов</h2>';names.forEach((n,i)=>h+='<label>'+esc(n)+'</label><select data-home="'+i+'">'+rooms.filter(r=>!directoryRefArchived('room',r)||cfg.home?.[i]===r).map(r=>'<option value="'+esc(r)+'" '+(cfg.home?.[i]===r?'selected':'')+'>'+esc(r)+'</option>').join('')+'</select>')}
 else if(settingsPage==='hours'){h+='<div id="teacher-panel"></div>'}
-else if(settingsPage==='data'){h+='<h3>Резервная копия</h3><p class="tiny">Копия включает расписание, настройки и цвета.</p><div class="buttons"><button id="backup-export">Скачать копию</button><input id="backup-file" type="file" accept="application/json,.json"></div><h3>Полная очистка</h3><button id="clear-all-data">Очистить все данные</button>'}
+else if(settingsPage==='data'){h+='<h2>Резервная копия</h2><p class="tiny">Копия включает расписание, настройки и цвета.</p><div class="buttons"><button id="backup-export">Скачать копию</button><input id="backup-file" type="file" accept="application/json,.json"></div><h3>Полная очистка</h3><button id="clear-all-data">Очистить все данные</button>'}
 const backLabel=settingsSection==='directories'&&settingsPage!=='home'?'К справочникам':settingsSection==='settings'&&settingsPage!=='home'?'К настройкам':'К расписанию';h='<button id="panel-back" class="panel-back">‹ '+backLabel+'</button>'+h;$('editor').innerHTML=h;$('panel-back').onclick=()=>{if(settingsPage!=='home'&&settingsSection!=='teachers'){settingsPage='home';settingsEditor()}else{mode='lesson';selected=null;draft=null;render()}};document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{settingsPage=b.dataset.page;settingsEditor()});if($('settings-back'))$('settings-back').onclick=()=>{settingsPage='home';settingsEditor()};
 if($('display-start'))['display-start','display-end'].forEach(id=>$(id).onchange=()=>{const start=$('display-start').value,end=$('display-end').value;if(min(start)>=min(end))return alert('Начало должно быть раньше окончания');cfg.display={start,end};saveCfg();board()});
 document.querySelectorAll('[data-home]').forEach(el=>el.onchange=()=>{cfg.home[el.dataset.home]=el.value;saveCfg()});
@@ -365,7 +365,7 @@ const get=()=>entries().find(x=>x.id===selected);
 const renameSubject=(old,next)=>{const visit=o=>{if(!o||typeof o!=='object')return;if(Array.isArray(o)){o.forEach(visit);return}for(const [k,v] of Object.entries(o)){if(k==='name'&&v===old&&('cls' in o))o[k]=next;else if(v&&typeof v==='object')visit(v)}};[weekly,snapshot16,weeklySchedule,store].forEach(visit);localStorage.setItem(WEEKLY_EDIT_KEY,JSON.stringify(weeklySchedule));localStorage.setItem('school_real_week_v14',JSON.stringify(store));base=baseForDate(date)};
 function drawDirectory(){
 const p=$('directory-panel');if(!p)return;
-if(selected!==null&&!get())selected=null;
+if(selected!==null&&!get())selected=null;$('panel-back').hidden=selected!==null;
 if(selected===null){
 const list=entries().filter(x=>(showArchive||!x.archived)&&x.name.toLocaleLowerCase('ru').includes(search.toLocaleLowerCase('ru'))).sort((a,b)=>a.name.localeCompare(b.name,'ru'));
 p.innerHTML='<div class="teacher-head"><h2>'+heading+'</h2><button class="primary" id="dir-add-toggle">+ Добавить</button></div>'+
@@ -383,7 +383,7 @@ if($('dir-default-color'))$('dir-default-color').onchange=ev=>{directory.colors[
 p.querySelectorAll('[data-dir-open]').forEach(el=>el.onclick=()=>{selected=el.dataset.dirOpen;editing=false;menu=false;drawDirectory()});
 return;
 }
-const x=get();let h='<div class="teacher-head"><button id="dir-back">‹ '+(roomMode?'К кабинетам':type==='routine'?'К режимным моментам':'К предметам')+'</button></div>';
+const x=get();let h='<button id="dir-back" class="panel-back">‹ '+(roomMode?'К кабинетам':type==='routine'?'К режимным моментам':'К предметам')+'</button>';
 h+='<div class="teacher-identity"><h2>'+esc(x.name)+'</h2>'+(x.archived?'<span class="teacher-archived">В архиве</span>':'')+'</div>';
 if(!roomMode)h+='<div class="dir-color-row"><span>Цвет</span><input type="color" id="dir-color" title="Выбрать любой цвет" value="'+esc(x.color||directory.colors[type])+'"></div>';
 if(editing)h+='<div class="teacher-add-box"><label>Название<input id="dir-edit-name" value="'+esc(x.name)+'"></label><div class="teacher-actions"><button id="dir-edit-cancel">Отмена</button><button class="primary" id="dir-edit-save">Сохранить</button></div></div>';
@@ -410,7 +410,7 @@ const dayNames=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const dayValue=(t,d)=>cfg.hours?.[t]&&Object.prototype.hasOwnProperty.call(cfg.hours[t],d)?cfg.hours[t][d]:(d===0||d===6?null:['09:00','18:00']);
 const listView=()=>{chosen=null;draw()};
 function draw(){
- const panel=$('teacher-panel');if(!panel)return;
+ const panel=$('teacher-panel');if(!panel)return;$('panel-back').hidden=!!chosen;
  if(!chosen){
  const all=teachers.filter(t=>t!=='Не назначен'&&(showArchived||!directoryRefArchived('teacher',t))).sort((a,b)=>a.localeCompare(b,'ru'));
  const filtered=all.filter(t=>t.toLocaleLowerCase('ru').includes(searchText.toLocaleLowerCase('ru')));
@@ -428,7 +428,7 @@ function draw(){
  return;
  }
  const t=chosen,archived=directoryRefArchived('teacher',t);
- let h='<div class="teacher-head"><button id="teacher-list-back">‹ К преподавателям</button></div>';
+ let h='<button id="teacher-list-back" class="panel-back">‹ К преподавателям</button>';
  h+='<div class="teacher-identity"><h2>'+esc(t)+'</h2>'+(cfg.teacherRoles[t]?'<div class="teacher-role">'+esc(cfg.teacherRoles[t])+'</div>':'')+''+(archived?'<span class="teacher-archived">В архиве</span>':'')+'</div>';
  if(editing)h+='<div class="teacher-add-box"><label>Имя и фамилия<input id="teacher-edit-name" value="'+esc(t)+'"></label><label>Должность<input id="teacher-edit-role" value="'+esc(cfg.teacherRoles[t]||'')+'" placeholder="Например, преподаватель английского"></label><div class="teacher-actions"><button id="teacher-edit-cancel">Отмена</button><button class="primary" id="teacher-edit-save">Сохранить</button></div></div>';
  if(!editing)h+='<div class="directory-card-actions"><button id="teacher-edit">'+uiIcon('edit')+' Изменить</button><button id="teacher-archive">'+(archived?'↩ Восстановить':uiIcon('archive')+' В архив')+'</button></div>';
