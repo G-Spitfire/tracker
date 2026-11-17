@@ -776,14 +776,17 @@ async function reassignFutureResource(type,oldName){
   const shown=unique.slice(0,18).join('\\n');
   if(!confirm('Обнаружены конфликты после переназначения ('+unique.length+'):\\n'+shown+(unique.length>18?'\\n... и ещё '+(unique.length-18):'')+'\\n\\nСохранить изменения несмотря на предупреждения?'))return false;
  }
- const previous=JSON.stringify(store);
+ const nextStore={...store};
  for(const item of replacements){
-  const d=store[item.key];
+  const current=nextStore[item.key];
+  const d=nextStore[item.key]===store[item.key]?{...current,extras:[...(current.extras||[])],edits:{...(current.edits||{})}}:current;
+  nextStore[item.key]=d;
   if(item.extra)d.extras=d.extras.map(x=>String(x.id)===item.id?replaceAssignment(x,item.name):x);
   else d.edits[item.id]=replaceAssignment({...item.lesson,...(d.edits?.[item.id]||{})},item.name);
  }
- try{localStorage.setItem('school_real_week_v14',JSON.stringify(store))}
- catch(e){store=JSON.parse(previous);alert('Не удалось сохранить назначения: '+e.message);return false}
+ try{localStorage.setItem('school_real_week_v14',JSON.stringify(nextStore))}
+ catch(e){alert('Не удалось сохранить назначения: '+e.message);return false}
+ store=nextStore;
  return true;
 }
 function archiveSubjectFuture(subject){
