@@ -18,7 +18,7 @@ const replacement={staffId:'a',replacementId:'b',start:'2026-11-23',end:'2026-11
 const find=doc=>S.findAssignments(doc,replacement);
 const rowKey=(date,id)=>JSON.stringify([date,id]);
 test('absence on one day, optional blank reason, exact unchanged assignments',()=>{
- const r=S.setAbsence(base,{...period,end:period.start}).document;assert.equal(r.days[period.start].absences.a,'');assert.deepEqual(r.days[period.start].entries,base.days[period.start].entries);assert.ok(!('a'in r.days['2026-11-24'].absences));
+ const seed=structuredClone(base);seed.days[period.start].metadata.resolutions={"ex-first":{signature:'legacy'}};const r=S.setAbsence(seed,{...period,end:period.start}).document;assert.ok(!r.days[period.start].metadata.resolutions['ex-first']);assert.equal(r.days[period.start].absences.a,'');assert.deepEqual(r.days[period.start].entries,base.days[period.start].entries);assert.ok(!('a'in r.days['2026-11-24'].absences));
 });
 test('period expands inclusively and list collapses consecutive same-reason dates',()=>{
  const d=S.setAbsence(base,period).document;assert.equal(S.listAbsences(d).length,1);assert.deepEqual(S.listAbsences(d)[0],{...period,key:JSON.stringify(['a',period.start,period.end,''])});assert.ok('a'in d.days['2026-11-24'].absences);
