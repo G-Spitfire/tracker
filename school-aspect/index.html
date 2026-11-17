@@ -232,6 +232,40 @@ function reassignFutureResource(type,oldName){
   }
   replacements.push({...item,name:name||'Не назначен'});
  }
+ const planned=new Map();
+ for(const item of replacements){
+  const key=item.key+'|'+item.id+'|'+(item.extra?'extra':'base');
+  planned.set(key,{...item.lesson,[type]:item.name});
+ }
+ const warnings=[];
+ const timeLabel=x=>fmt(x.start)+'–'+fmt(x.end);
+ for(const item of replacements){
+  const updated=planned.get(item.key+'|'+item.id+'|'+(item.extra?'extra':'base'));
+  if(item.name==='Не назначен')continue;
+  const d=store[item.key]||{};
+  const dayLessons=[
+   ...baseForDate(item.key).map(b=>({...b,...(d.edits?.[b.id]||{}),_origin:'base'})),
+   ...(d.extras||[]).map(x=>({...x,_origin:'extra'}))
+  ].filter(x=>!x.cancelled).map(x=>planned.get(item.key+'|'+String(x.id)+'|'+x._origin)||x);
+  const dayEvents=(d.events||[]).filter(x=>!x.cancelled);
+  for(const other of [...dayLessons,...dayEvents]){
+   if(other===updated||String(other.id)===item.id&&other.kind!=='event')continue;
+   if(!overlap(updated,other))continue;
+   const same=shared(updated,other);
+   const affected=type==='teacher'?same.sameTeachers.includes(item.name):same.sameRoom;
+   if(affected)warnings.push(item.key+' '+timeLabel(updated)+' · '+(names[updated.cls]||updated.cls)+' / '+updated.name+' — '+(other.kind==='event'?'мероприятие ': (names[other.cls]||other.cls)+' / ')+other.name+' ('+item.name+')');
+  }
+  if(type==='teacher'){
+   const wd=new Date(item.key+'T12:00:00').getDay();
+   const hours=cfg.hours?.[item.name]&&Object.prototype.hasOwnProperty.call(cfg.hours[item.name],wd)?cfg.hours[item.name][wd]:['09:00','18:00'];
+   if(!hours||updated.start<min(hours[0])||updated.end>min(hours[1]))warnings.push(item.key+' '+timeLabel(updated)+' · '+item.name+': вне рабочего времени');
+  }
+ }
+ if(warnings.length){
+  const unique=[...new Set(warnings)];
+  const shown=unique.slice(0,18).join('\\n');
+  if(!confirm('Обнаружены конфликты после переназначения ('+unique.length+'):\\n'+shown+(unique.length>18?'\\n... и ещё '+(unique.length-18):'')+'\\n\\nСохранить изменения несмотря на предупреждения?'))return false;
+ }
  const previous=JSON.stringify(store);
  for(const item of replacements){
   const d=store[item.key];
