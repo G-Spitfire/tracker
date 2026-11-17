@@ -124,10 +124,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .workspace.panel-collapsed{grid-template-columns:minmax(0,1fr)!important}.workspace.panel-collapsed .right{display:none!important}.workspace.panel-collapsed .board{min-width:940px}
 
 /* Fixed left editor; timetable always visible on the right. */
-.workspace,.workspace.panel-collapsed{grid-template-columns:320px minmax(0,1fr)!important}
+.workspace,.workspace.panel-collapsed{grid-template-columns:280px minmax(0,1fr)!important}
 .workspace .right,.workspace.panel-collapsed .right{display:block!important;grid-column:1;grid-row:1;min-width:0;border-left:0;border-right:1px solid #dce3ed;overflow:auto;padding:16px!important}
 .workspace .left{grid-column:2;grid-row:1;min-width:0}
-@media(max-width:850px){.workspace,.workspace.panel-collapsed{grid-template-columns:290px minmax(0,1fr)!important}}
+@media(max-width:850px){.workspace,.workspace.panel-collapsed{grid-template-columns:280px minmax(0,1fr)!important}}
  #unsaved-draft-dialog{width:min(440px,calc(100vw - 32px));padding:22px;border:1px solid #d6dfeb;border-radius:14px;color:#19283c;box-shadow:0 24px 70px #0c203650}#unsaved-draft-dialog::backdrop{background:rgba(13,29,48,.62)}#unsaved-draft-dialog h2{margin:0 0 10px;font-size:20px}#unsaved-draft-dialog p{margin:0 0 20px;color:#52647c;line-height:1.5}#unsaved-draft-dialog .buttons{display:flex;justify-content:flex-end;gap:8px}
 /* Consistent panel controls and spacing */
 .right{font-size:13px;line-height:1.4}
