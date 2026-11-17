@@ -366,7 +366,7 @@ $('event-back').onclick=()=>{draft=null;mode='lesson';selected=base[0]?.id||null
  const linkedBase=Object.entries(day().edits||{}).filter(([id,v])=>v.cancelled&&v.cancelReason===reason);
  const linkedExtra=(day().extras||[]).filter(v=>v.cancelled&&v.cancelReason===reason);
  const linkedCount=linkedBase.length+linkedExtra.length;
- const choice=prompt('Удалить мероприятие «'+x.name+'»?'+(linkedCount?'\\nСвязанных отменённых уроков: '+linkedCount:'')+'\\n1 — Удалить и восстановить связанные уроки\\n2 — Удалить, оставить уроки отменёнными\\n3 — Не удалять','3');
+ const choice=prompt('Удалить мероприятие «'+x.name+'»?'+(linkedCount?'\nСвязанных отменённых уроков: '+linkedCount:'')+'\n1 — Удалить и восстановить связанные уроки\n2 — Удалить, оставить уроки отменёнными\n3 — Не удалять','3');
  if(choice!=='1'&&choice!=='2')return;
  commit(d=>{
   d.events=d.events.filter(e=>String(e.id)!==String(x.id));
