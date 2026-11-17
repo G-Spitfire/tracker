@@ -58,7 +58,7 @@ test('deleting one record leaves other dates and entries intact', () => {
   const store=read(), dates=Object.keys(store);store[dates[0]].extras=[];save(store);storage=M.openStorage(native);assert.equal(read()[dates[0]].extras.length,0);assert.equal(read()[dates[1]].extras.length,1);
 });
 test('failed storage write changes neither disk nor memory', () => {
-  const before=native.getItem(M.KEY), doc=storage.document();native.fail=true;assert.throws(()=>save({}),/Quota/);native.fail=false;
+  const before=native.getItem(M.KEY), doc=storage.document();native.fail=true;assert.throws(()=>save({}),/не сохранены/);native.fail=false;
   assert.equal(native.getItem(M.KEY),before);assert.deepEqual(storage.document(),doc);
 });
 test('invalid group, date, interval and duplicate IDs are rejected atomically', () => {

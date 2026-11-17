@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Аспект · этап 1 · модель v1</title><style>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Аспект · этап 2</title><style>
 *{box-sizing:border-box}body{margin:0;background:#f3f5f9;color:#19283c;font:13px system-ui,-apple-system,Segoe UI,sans-serif}button,input,select{font:inherit}button{cursor:pointer;border:1px solid #d6dfeb;background:white;border-radius:8px;padding:9px 12px;color:#24374f}button:hover{background:#edf3fc}button:disabled{opacity:.45;cursor:not-allowed}.app{height:100vh;min-height:620px;display:flex;flex-direction:column}.top{background:#fff;border-bottom:1px solid #dae2ed;display:flex;align-items:center;gap:9px;padding:12px 20px;flex-wrap:wrap}.brand{font-weight:800;font-size:18px;margin-right:auto}.muted{color:#728095}.tag{border-radius:99px;padding:5px 10px;background:#eef2f7;color:#4e6078}.workspace{display:grid;grid-template-columns:minmax(0,1fr) 350px;flex:1;min-height:0}.left{min-width:0;display:flex;flex-direction:column;padding:16px;gap:10px}.heading{display:flex;justify-content:space-between;align-items:center;gap:10px}.heading h2{font-size:17px;margin:0}.scroll{overflow:auto;flex:1;background:white;border:1px solid #dce3ed;border-radius:12px}.board{display:grid;grid-template-columns:65px repeat(6,minmax(135px,1fr));min-width:890px}.head{position:sticky;top:0;z-index:4;padding:12px 6px;text-align:center;font-weight:750;border-bottom:1px solid #dce3ed;border-right:1px solid #e4eaf2}.time{border-bottom:1px dashed #e0e6ef;border-right:1px solid #e0e6ef;text-align:center;padding:5px 2px;color:#77869a;height:42px}.cell{height:42px;border-bottom:1px dashed #e0e6ef;border-right:1px solid #e0e6ef;position:relative}.lesson{position:absolute;z-index:1;left:4px;right:4px;border:1px solid #b6cbed;border-left:4px solid #5b8fdb;background:#edf4ff;border-radius:7px;padding:3px 5px;text-align:left;overflow:hidden;display:flex;flex-direction:column;gap:1px;min-height:23px}.lesson strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lesson small{font-size:10px;color:#52657e}.lesson.changed{background:#fff2d9;border-color:#f0c878;border-left-color:#d99420}.lesson.conflict{background:#ffe7e4;border-color:#df766c;border-left-color:#cb423a}.lesson.selected{outline:2px solid #1e60c5;z-index:3}.right{background:white;border-left:1px solid #dce3ed;overflow:auto;padding:20px}.right h2{font-size:18px;margin:0 0 4px}.right label{display:block;font-size:12px;font-weight:650;margin:14px 0 5px}.right select,.right input{width:100%;padding:10px;border:1px solid #d6dfeb;border-radius:8px;background:white;color:#19283c}.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}.notice{background:#f4f6fa;border-radius:9px;padding:12px;margin:15px 0;line-height:1.55}.error{color:#b72f2b}.ok{color:#167345}.buttons{display:flex;gap:7px;flex-wrap:wrap;margin-top:15px}.buttons button{flex:1}.legend{display:flex;gap:16px;color:#718095;font-size:12px}.dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px}.slots{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}.slots button{padding:7px 3px;font-size:11px}.slots .busy{color:#bb3f37;background:#fff1f0}.slots .free{color:#147344;background:#eff9f1}.slots .picked{outline:2px solid #2863c5}.bottom{display:flex;justify-content:space-between;align-items:center;gap:10px}.summary{background:#fff;border:1px solid #e0e6ee;padding:9px 12px;border-radius:9px}.small{font-size:11px}.sub{font-size:12px;color:#6d7c90}.absent-lesson{background:#fff1d9!important;border-left-color:#d97706!important}.absence-panel{background:#fff8e9;border:1px solid #f0d7a4;border-radius:10px;padding:11px;margin:10px 0}.absence-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #e7eaf0}.absence-row:last-child{border:0}.absence-row button{padding:5px 9px}.hidden{display:none!important}@media(max-width:850px){.workspace{grid-template-columns:minmax(0,1fr) 290px}.right{padding:12px}.left{padding:10px}}
 
 .lesson.split{width:calc(50% - 5px);right:auto}.lesson.split.side-b{left:calc(50% + 1px)}.lesson.split.side-a{left:4px}.lesson.split strong{font-size:10px}.lesson.split small{font-size:9px}.event{background:#e7f5f0!important;border-color:#79bca4!important;border-left-color:#168565!important}.event.conflict{background:#ffe7e4!important;border-color:#df766c!important}.multi{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:7px 0}.multi label{display:flex;gap:6px;align-items:center;margin:0;font-weight:500}.multi input{width:auto}.tiny{font-size:11px;color:#66758a}.box{padding:10px;border:1px solid #dae2ed;border-radius:8px;margin:9px 0}.box.warn{border-color:#e6a18f;background:#fff6f3}.event-card{border-bottom:1px solid #e1e6ee;padding:8px 0}.event-card:last-child{border:0}.right textarea{width:100%;padding:9px;border:1px solid #d6dfeb;border-radius:8px;resize:vertical}.right .multi label{font-size:12px}.wide{width:100%}.right h3{font-size:14px;margin:16px 0 7px}
@@ -552,9 +552,9 @@ button[class*="btn-"]:active:not(:disabled){filter:brightness(.96)}
 .right .absence-pending-actions{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
 .right .absence-pending-actions button{font-size:11px;min-height:30px}
 .right .absence-back{margin-top:16px;font-size:11px;min-height:30px}
-</style></head><body><div id="pdf-overlay" class="pdf-overlay" role="dialog" aria-modal="true" aria-label="Предпросмотр расписания"><div class="pdf-dialog"><div class="pdf-bar"><strong id="pdf-heading">Предпросмотр расписания</strong><span id="pdf-warning" class="warn"></span><button id="pdf-print" class=" btn-primary btn-standard">Печать / Сохранить PDF</button><button id="pdf-close" class="btn-secondary btn-standard">Закрыть</button></div><iframe id="pdf-frame" class="pdf-frame" title="Печатное расписание"></iframe></div></div><dialog id="unsaved-draft-dialog" aria-labelledby="unsaved-draft-title" aria-describedby="unsaved-draft-copy"><h2 id="unsaved-draft-title">Есть несохранённые изменения</h2><p id="unsaved-draft-copy">Если перейти, изменения в этом занятии не сохранятся.</p><div class="buttons"><button type="button" id="unsaved-stay" class="btn-secondary btn-standard">Остаться</button><button type="button" id="unsaved-discard" class=" btn-danger btn-standard">Перейти без сохранения</button></div></dialog><dialog id="reset-confirm-dialog" aria-labelledby="reset-confirm-title" aria-describedby="reset-confirm-copy"><h2 id="reset-confirm-title">Сбросить день?</h2><p id="reset-confirm-copy">Будут удалены изменения, мероприятия и отсутствия только на выбранную дату.</p><div class="buttons"><button type="button" id="reset-cancel" class="btn-secondary btn-standard">Отмена</button><button type="button" id="reset-confirm-ok" class=" btn-danger btn-standard">Сбросить день</button></div></dialog><div class="app"><div class="top"><div class="brand" aria-label="Школа · Аспект"><span class="school-logo" aria-hidden="true"><svg viewBox="0 0 100 100" width="30" height="30" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="47" fill="#e60023"/><path d="M23 44 79 23 85 38 33 57 33 63 82 77 77 84 23 68Z" fill="white"/><path d="M36 58 70 46 Q77 55 73 69Z" fill="white"/><path d="M27 72 77 88M29 78 69 91" fill="none" stroke="white" stroke-width="3"/></svg></span><span class="school-name">ASPECT<small>EDUCATIONAL CENTRE</small></span></div><h2 id="title">Расписание</h2><div class="top-actions"><div class="top-group date-group"><button id="today" class="btn-secondary btn-compact">Сегодня</button><button id="tomorrow" class="btn-secondary btn-compact">Завтра</button><button id="copy-day" title="Скопировать занятия из последнего заполненного такого же дня недели" class="btn-secondary btn-compact">Копировать день</button><button id="copy-week" class="btn-secondary btn-compact" title="Копировать неделю с выбранной даты-источника">Копировать неделю</button><label class="date-picker"><span id="date-label" aria-hidden="true"></span><span aria-hidden="true">▾</span><input type="date" id="date" aria-label="Выбрать дату расписания"></label></div><details class="add-menu"><summary class="btn-primary btn-compact">+ Добавить</summary><div class="add-menu-items"><button id="new-lesson-button" class="btn-list">Урок</button><button id="new-routine-button" class="btn-list">Режимный момент / перемена</button><button id="event-button" class="btn-list">Мероприятие</button></div></details><button id="absence-button" class="btn-secondary btn-compact">Отсутствия <span id="absence-count"></span></button><button id="settings-button" aria-controls="editor" class="btn-secondary btn-compact">Настройки</button><div class="header-schedule-tools"><div class="issue-strip"><button id="issues-conflicts" class="btn-filter btn-compact">Проблемы: 0</button><button id="issues-absence" hidden class="btn-filter btn-compact">Требуют решения: 0</button><button id="issues-rooms" hidden class="btn-filter btn-compact">Без кабинета: 0</button></div></div></div></div><div class="workspace"><aside class="right" id="editor"></aside><div class="left"><div class="scroll"><div class="board" id="board"></div></div></div></div></div><script src="model.js"></script><script>
+</style></head><body><div id="pdf-overlay" class="pdf-overlay" role="dialog" aria-modal="true" aria-label="Предпросмотр расписания"><div class="pdf-dialog"><div class="pdf-bar"><strong id="pdf-heading">Предпросмотр расписания</strong><span id="pdf-warning" class="warn"></span><button id="pdf-print" class=" btn-primary btn-standard">Печать / Сохранить PDF</button><button id="pdf-close" class="btn-secondary btn-standard">Закрыть</button></div><iframe id="pdf-frame" class="pdf-frame" title="Печатное расписание"></iframe></div></div><dialog id="unsaved-draft-dialog" aria-labelledby="unsaved-draft-title" aria-describedby="unsaved-draft-copy"><h2 id="unsaved-draft-title">Есть несохранённые изменения</h2><p id="unsaved-draft-copy">Если перейти, изменения в этом занятии не сохранятся.</p><div class="buttons"><button type="button" id="unsaved-stay" class="btn-secondary btn-standard">Остаться</button><button type="button" id="unsaved-discard" class=" btn-danger btn-standard">Перейти без сохранения</button></div></dialog><dialog id="reset-confirm-dialog" aria-labelledby="reset-confirm-title" aria-describedby="reset-confirm-copy"><h2 id="reset-confirm-title">Сбросить день?</h2><p id="reset-confirm-copy">Будут удалены изменения, мероприятия и отсутствия только на выбранную дату.</p><div class="buttons"><button type="button" id="reset-cancel" class="btn-secondary btn-standard">Отмена</button><button type="button" id="reset-confirm-ok" class=" btn-danger btn-standard">Сбросить день</button></div></dialog><div class="app"><div class="top"><div class="brand" aria-label="Школа · Аспект"><span class="school-logo" aria-hidden="true"><svg viewBox="0 0 100 100" width="30" height="30" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="47" fill="#e60023"/><path d="M23 44 79 23 85 38 33 57 33 63 82 77 77 84 23 68Z" fill="white"/><path d="M36 58 70 46 Q77 55 73 69Z" fill="white"/><path d="M27 72 77 88M29 78 69 91" fill="none" stroke="white" stroke-width="3"/></svg></span><span class="school-name">ASPECT<small>EDUCATIONAL CENTRE</small></span></div><h2 id="title">Расписание</h2><div class="top-actions"><div class="top-group date-group"><button id="today" class="btn-secondary btn-compact">Сегодня</button><button id="tomorrow" class="btn-secondary btn-compact">Завтра</button><button id="copy-day" title="Скопировать занятия из последнего заполненного такого же дня недели" class="btn-secondary btn-compact">Копировать день</button><button id="copy-week" class="btn-secondary btn-compact" title="Копировать неделю с выбранной даты-источника">Копировать неделю</button><label class="date-picker"><span id="date-label" aria-hidden="true"></span><span aria-hidden="true">▾</span><input type="date" id="date" aria-label="Выбрать дату расписания"></label></div><details class="add-menu"><summary class="btn-primary btn-compact">+ Добавить</summary><div class="add-menu-items"><button id="new-lesson-button" class="btn-list">Урок</button><button id="new-routine-button" class="btn-list">Режимный момент / перемена</button><button id="event-button" class="btn-list">Мероприятие</button></div></details><button id="absence-button" class="btn-secondary btn-compact">Отсутствия <span id="absence-count"></span></button><button id="undo-button" title="Отмена последнего изменения расписания до перезагрузки">Отменить</button><button id="settings-button" aria-controls="editor" class="btn-secondary btn-compact">Настройки</button><div class="header-schedule-tools"><div class="issue-strip"><button id="issues-conflicts" class="btn-filter btn-compact">Проблемы: 0</button><button id="issues-absence" hidden class="btn-filter btn-compact">Требуют решения: 0</button><button id="issues-rooms" hidden class="btn-filter btn-compact">Без кабинета: 0</button></div></div></div></div><div id="storage-status" role="status" style="padding:5px 12px;background:#fff4d9" hidden></div><div class="workspace"><aside class="right" id="editor"></aside><div class="left"><div class="scroll"><div class="board" id="board"></div></div></div></div></div><script src="model.js"></script><script>
 (()=>{'use strict';
-const localStorage=AspectModel.openStorage(window.localStorage);
+let localStorage;try{localStorage=AspectModel.openStorage(window.localStorage,{guarded:!!document.addEventListener})}catch(e){alert('Не удалось открыть данные Аспект: '+e.message);return}
 const $=id=>document.getElementById(id),names=localStorage.document().catalogs.groups.map(g=>g.name),colors=['#dceafe','#dceafe','#dff4e7','#f0e5fb','#fff0dc','#fce5ee'];
 /* One-time casing migration: keep directory IDs and schedule links intact. */
 const CASE_MIGRATION_KEY='school_directory_case_v1';
@@ -1013,49 +1013,24 @@ function draw(){
 }
 draw();
 }
-if(settingsPage==='data'){$('clear-all-data').onclick=()=>{if(!confirm('Удалить все расписания и настройки?'))return;if(!confirm('Подтвердите необратимую очистку. Сначала рекомендуется скачать резервную копию.'))return;['school_real_week_v14',CFGKEY,WEEKLY_EDIT_KEY,'school_colors_v12',DIRECTORY_KEY,DIRECTORY_REF_KEY,SUBJECT_KEY].forEach(k=>localStorage.removeItem(k));location.reload()};$('backup-export').onclick=()=>{const blob=new Blob([JSON.stringify({version:20,store,cfg,weeklySchedule,colorCategories,directory,directoryRefs,subjects},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='school-planner-backup-'+date+'.json';a.click();localStorage.setItem('aspect_last_backup_v1',new Date().toISOString());const status=$('backup-status');if(status)status.textContent='Последняя скачанная копия: '+new Date().toLocaleDateString('ru-RU');setTimeout(()=>URL.revokeObjectURL(a.href),1000)};$('backup-file').onchange=async e=>{
- const f=e.target.files?.[0];if(!f)return;
- const object=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
- const validLesson=x=>object(x)&&typeof x.id!=='undefined'&&Number.isFinite(x.start)&&Number.isFinite(x.end)&&x.start<x.end;
- try{
-  const data=JSON.parse(await f.text());
-  if(!object(data)||![2,20].includes(data.version)||!object(data.store)||!object(data.cfg))throw Error('Неверная структура резервной копии');
-  for(const [dateKey,d] of Object.entries(data.store)){
-   if(!/^\d{4}-\d{2}-\d{2}$/.test(dateKey)||!object(d)||!object(d.edits||{})||!object(d.absences||{})||!Array.isArray(d.events||[])||!Array.isArray(d.extras||[]))throw Error('Повреждены данные расписания: '+dateKey);
-   for(const lesson of [...(d.events||[]),...(d.extras||[])])if(!validLesson(lesson))throw Error('Некорректное занятие: '+dateKey);
-  }
-  if(data.cfg.hours!==undefined&&!object(data.cfg.hours))throw Error('Некорректный график преподавателей');
-  if(data.cfg.home!==undefined&&!object(data.cfg.home))throw Error('Некорректные кабинеты классов');
-  if(data.weeklySchedule!==undefined&&!object(data.weeklySchedule))throw Error('Некорректное недельное расписание');
-  if(data.colorCategories!==undefined&&!Array.isArray(data.colorCategories))throw Error('Некорректные категории цветов');
-  if(data.directory!==undefined&&(!object(data.directory)||!Array.isArray(data.directory.subjects)||data.directory.subjects.some(x=>!object(x)||typeof x.name!=='string')))throw Error('Некорректный справочник предметов');
-  if(data.directoryRefs!==undefined&&!object(data.directoryRefs))throw Error('Некорректные связи справочников');
-  if(data.subjects!==undefined&&(!Array.isArray(data.subjects)||data.subjects.some(x=>typeof x!=='string')))throw Error('Некорректный список предметов');
-  if(!confirm('Заменить текущие данные резервной копией?'))return;
-  const nextDirectory=data.directory||directory;
-  const nextRefs=data.directoryRefs||{};
-  const nextColors=data.colorCategories||colorCategories;
-  const nextWeekly=data.weeklySchedule||{};
-  const nextSubjects=data.subjects||nextDirectory.subjects.map(x=>x.name);
-  const keys={
-   'school_real_week_v14':data.store,[CFGKEY]:data.cfg,[WEEKLY_EDIT_KEY]:nextWeekly,
-   'school_colors_v12':nextColors,[DIRECTORY_KEY]:nextDirectory,[DIRECTORY_REF_KEY]:nextRefs,[SUBJECT_KEY]:nextSubjects
-  };
-  const previous=Object.fromEntries(Object.keys(keys).map(k=>[k,localStorage.getItem(k)]));
+if(settingsPage==='data'){
+ $('clear-all-data').onclick=()=>{
+  if(!confirm('Очистить все расписания, справочники и настройки? Сначала скачайте резервную копию.'))return;
+  localStorage.replace(AspectModel.encode({}));location.reload();
+ };
+ $('backup-export').onclick=()=>{
+  try{const text=localStorage.exportBackup(),blob=new Blob([text],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='aspect-backup-'+date+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);$('backup-status').textContent='Резервная копия скачана';}catch(e){alert(e.message)}
+ };
+ $('backup-file').onchange=async e=>{
+  const file=e.target.files?.[0];if(!file)return;
   try{
-   for(const [key,value] of Object.entries(keys))localStorage.setItem(key,JSON.stringify(value));
-  }catch(writeError){
-   let rollbackFailed=false;
-   for(const [key,value] of Object.entries(previous))try{if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value)}catch(_){rollbackFailed=true}
-   throw Error('Не удалось записать данные'+(rollbackFailed?'; восстановление прежних данных тоже завершилось с ошибкой':'')+': '+writeError.message);
-  }
-  store=data.store;cfg=data.cfg;weeklySchedule=nextWeekly;colorCategories=nextColors;
-  directory=nextDirectory;directoryRefs=nextRefs;
-  subjects.splice(0,subjects.length,...nextSubjects);
-  base=baseForDate(date);draft=null;selected=null;location.reload();
- }catch(err){alert('Не удалось восстановить копию: '+err.message)}
- e.target.value='';
-}}}
+   const text=await file.text();AspectModel.parseBackup(text);
+   if(!confirm('Восстановить резервную копию? Все текущие данные будут заменены.'))return;
+   localStorage.restoreBackup(text);location.reload();
+  }catch(err){alert('Копия не восстановлена: '+err.message)}finally{e.target.value=''}
+ };
+}}
+
 function board(){
  const all=resources(),bad=conflictIds(),begin=min(cfg.display?.start||'08:00'),end=min(cfg.display?.end||'19:00'),px=Math.max(.75,((document.querySelector('.scroll')?.clientHeight||850)-26)/(end-begin));
  let h='<div class="head time-heading" style="background:#f0f3f8" aria-label="Временная шкала"></div>';
@@ -1244,7 +1219,7 @@ $('unsaved-draft-dialog').addEventListener('cancel',e=>{e.preventDefault();finis
 async function confirmDiscardDraft(){
  if(!draft)return true;
  const saved=mode==='event'?events().find(x=>String(x.id)===String(selected)):lessons().find(x=>String(x.id)===String(selected));
- const fields=mode==='event'?['name','start','end','room','classes','teachers','cancelIds']:['name','teacher','room','start','end','group','cls','colorCategory','notes'];
+ const fields=mode==='event'?['name','start','end','room','classes','teachers','cancelIds']:['teachers','name','teacher','room','start','end','group','cls','colorCategory','notes'];
  if(saved&&fields.every(k=>JSON.stringify(draft[k]??null)===JSON.stringify(saved[k]??null)))return true;
  if(!saved&&mode==='new-lesson'&&draftBaseline&&fields.every(k=>JSON.stringify(draft[k]??null)===JSON.stringify(draftBaseline[k]??null)))return true;
  const dialog=$('unsaved-draft-dialog');
@@ -1258,6 +1233,53 @@ function render(){const bad=conflictIds(),pending=unresolved(),missing=lessons()
 
 $('date').onclick=()=>{try{$('date').showPicker?.()}catch(_){}};$('copy-day').onclick=copyPreviousDay;$('copy-week').onclick=copyPreviousWeek;[['issues-conflicts','all-issues'],['issues-absence','absence'],['issues-rooms','rooms']].forEach(([id,filter])=>$(id).onclick=()=>{issueFilter=issueFilter===filter?'':filter;if(filter==='absence'&&issueFilter){mode='absences';collapsed=false}render()});$('date').onchange=async e=>{if(!e.target.value)return;const nextDate=e.target.value;if(!await confirmDiscardDraft()){e.target.value=date;return}date=nextDate;base=baseForDate(date);draft=null;selected=null;mode='lesson';collapsed=false;render()};$('today').onclick=async()=>{if(!await confirmDiscardDraft())return;date=iso(new Date());base=baseForDate(date);draft=null;selected=null;mode='lesson';collapsed=false;render()};$('tomorrow').onclick=async()=>{if(!await confirmDiscardDraft())return;let d=new Date();d.setDate(d.getDate()+1);date=iso(d);base=baseForDate(date);draft=null;selected=null;mode='lesson';collapsed=false;render()};$('settings-button').onclick=()=>openSettings('settings','home');$('absence-button').onclick=async()=>{if(!await confirmDiscardDraft())return;mode=mode==='absences'?'lesson':'absences';selected=null;collapsed=false;draft=null;render()};$('new-lesson-button').onclick=async()=>{if(!await confirmDiscardDraft())return;document.querySelector('.add-menu').open=false;collapsed=false;mode='new-lesson';newLessonType='subject';selected=null;draft={id:AspectModel.id('ex'),cls:0,name:'',teacher:'Не назначен',room:cfg.home?.[0]||'Не назначен',start:540,end:580,group:'all'};draftBaseline={...draft};render()};$('new-routine-button').onclick=async()=>{if(!await confirmDiscardDraft())return;document.querySelector('.add-menu').open=false;collapsed=false;mode='new-lesson';newLessonType='routine';selected=null;draft={id:AspectModel.id('ex'),cls:0,name:directory.subjects.find(x=>x.type==='routine'&&!x.archived)?.name||'BREAK',teacher:'Не назначен',room:cfg.home?.[0]||'Не назначен',start:540,end:555,group:'all'};draftBaseline={...draft};render()};
 $('event-button').onclick=async()=>{if(!await confirmDiscardDraft())return;document.querySelector('.add-menu').open=false;collapsed=false;mode='event';selected=null;draft=null;render()};let resetInProgress=false;$('reset-cancel').onclick=()=>$('reset-confirm-dialog').close();$('reset-confirm-dialog').addEventListener('cancel',e=>{e.preventDefault();$('reset-confirm-dialog').close()});$('reset-confirm-ok').onclick=()=>{if(resetInProgress)return;resetInProgress=true;$('reset-confirm-dialog').close();delete store[date];try{localStorage.setItem('school_real_week_v14',JSON.stringify(store))}catch(e){}mode='lesson';selected=null;draft=null;collapsed=false;render();resetInProgress=false};render();
+
+function hydrateDocument(){
+ const snapshot=AspectModel.decode(localStorage.document());
+ store=snapshot[AspectModel.STORE]||{};
+ cfg={hours:{},home:{},customLists:{},...(snapshot[CFGKEY]||{})};
+ directory=snapshot[DIRECTORY_KEY];directoryRefs=snapshot[DIRECTORY_REF_KEY];
+ weeklySchedule=snapshot[WEEKLY_EDIT_KEY]||{};colorCategories=snapshot['school_colors_v12']||[];
+ subjects.splice(0,subjects.length,...(snapshot[SUBJECT_KEY]||directory.subjects.map(x=>x.name)));
+ teachers.splice(0,teachers.length,'Не назначен',...directoryRefs.teacher.map(x=>x.name));
+ rooms.splice(0,rooms.length,'Не назначен',...directoryRefs.room.map(x=>x.name));
+ names.splice(0,names.length,...localStorage.document().catalogs.groups.map(x=>x.name));
+ base=baseForDate(date);
+}
+function storageStatus(text){const el=$('storage-status');if(!el)return;el.hidden=!text;el.textContent=text||''}
+function updateUndo(){const el=$('undo-button');if(el){el.disabled=!localStorage.canUndo();el.title=localStorage.canUndo()?'Отменить последнее изменение расписания':'Отмена недоступна: нет изменения в текущем сеансе или данные обновились';}}
+$('undo-button').onclick=()=>{
+ try{localStorage.undo();hydrateDocument();draft=null;selected=null;mode='lesson';render();updateUndo();storageStatus('Последнее изменение расписания отменено.');}
+ catch(e){alert(e.message);updateUndo()}
+};
+if(document.addEventListener){
+ // Capture only property handlers used by this application. This keeps composite
+ // operations atomic without changing each editor's internal synchronous helpers.
+ for(const type of ['click','change'])document.addEventListener(type,event=>{
+  const bypass=['backup-export','backup-file','clear-all-data','undo-button'];
+  const path=event.composedPath();
+  for(const target of path){
+   if(!target||!target['on'+type]||bypass.includes(target.id)||target.closest?.('dialog,.archive-modal-shade'))continue;
+   const handler=target['on'+type];if(handler.aspectAtomic)continue;
+   const wrapped=function(e){
+    const before={draft:draft?structuredClone(draft):null,selected,mode,date};
+    const fail=err=>{hydrateDocument();draft=before.draft;selected=before.selected;mode=before.mode;date=before.date;base=baseForDate(date);render();updateUndo();storageStatus(err.message);};
+    try{const result=localStorage.atomic(()=>handler.call(this,e));if(result?.then)return result.then(()=>updateUndo(),fail);updateUndo();return result}catch(err){fail(err)}
+   };wrapped.aspectAtomic=true;target['on'+type]=wrapped;
+  }
+ },true);
+ window.addEventListener('storage',e=>{if(e.key===AspectModel.KEY){localStorage.invalidate();updateUndo();storageStatus('Данные изменились в другой вкладке. Обновите страницу. Сохранение заблокировано.');}});
+ updateUndo();
+ // A single writer tab avoids check/write races between localStorage operations.
+ // Other tabs can inspect/export their snapshot but cannot change shared data.
+ if(navigator.locks?.request){navigator.locks.request('aspect-document-writer',{ifAvailable:true},lock=>{
+  try{localStorage.activate(!!lock);updateUndo();storageStatus(lock?'':'Эта вкладка доступна для просмотра. Закройте другую вкладку Аспект и обновите страницу для редактирования.');}
+  catch(e){storageStatus(e.message)}
+  return lock?new Promise(()=>{}):undefined;
+ }).catch(e=>storageStatus('Сохранение недоступно: '+e.message));}
+ else{localStorage.activate(false);storageStatus('Браузер не поддерживает безопасную запись из нескольких вкладок. Откройте приложение в современном браузере.');}
+}
+
 })();
 </script></body></html>
 

@@ -129,22 +129,29 @@
       }), colors: Object.fromEntries(c.types.map(t => [t.id.replace(/^type-/, ''), t.color]))}};
   }
   function validate(document) {
+    const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+    if (!object(document) || !object(document.settings) || !object(document.directoryMetadata)) throw Error('Повреждена структура документа.');
+    const safe = value => { if (!value || typeof value !== 'object') return; for (const [key, item] of Object.entries(value)) { if (['__proto__','constructor','prototype'].includes(key)) throw Error('Недопустимое поле документа.'); safe(item); } };
+    safe(document);
+
     if (!document || document.schemaVersion !== 1 || !document.catalogs ||
         !document.days || typeof document.days !== 'object' || Array.isArray(document.days))
       throw Error('Неподдерживаемая модель данных Аспект');
     const c = document.catalogs;
     for (const kind of ['groups', 'staff', 'rooms', 'types', 'activities']) {
-      if (!Array.isArray(c[kind])) throw Error('Нет справочника: ' + kind);
+      if (!Array.isArray(c[kind]) || c[kind].some(v => !object(v) || typeof v.name !== 'string' || !v.name.trim())) throw Error('Нет справочника: ' + kind);
       const ids = c[kind].map(v => v.id);
       if (ids.some(v => typeof v !== 'string' || !v) || new Set(ids).size !== ids.length)
         throw Error('Некорректные ID справочника: ' + kind);
     }
+    if (!c.groups.length) throw Error('Нет учебных групп.');
     const has = (kind, id) => c[kind].some(v => v.id === id);
     for (const activity of c.activities) if (!has('types', activity.typeId)) throw Error('Неизвестный тип активности');
     for (const [date, day] of Object.entries(document.days)) {
-      if (!validDate(date) || !Array.isArray(day.entries)) throw Error('Некорректный день');
+      if (!validDate(date) || !object(day) || !Array.isArray(day.entries) || !object(day.absences) || !object(day.metadata)) throw Error('Некорректный день');
       const seen = new Set();
       for (const e of day.entries) {
+        if (!object(e) || !object(e.details) || typeof e.event !== 'boolean' || !['all','a','b'].includes(e.subgroup) || (e.title !== null && typeof e.title !== 'string')) throw Error('Некорректная структура записи.');
         if (typeof e.id !== 'string' || !e.id || seen.has(e.id)) throw Error('Некорректный ID записи');
         seen.add(e.id);
         if (!has('types', e.typeId) || (e.activityId && !has('activities', e.activityId)) ||
@@ -156,46 +163,136 @@
         if (!e.groupIds.length || !Number.isInteger(e.start) || !Number.isInteger(e.end) ||
             e.start < 0 || e.end > 1440 || e.start >= e.end) throw Error('Некорректная запись');
       }
-      for (const staffId of Object.keys(day.absences || {})) if (!has('staff', staffId)) throw Error('Неизвестный отсутствующий');
+      for (const [staffId, reason] of Object.entries(day.absences || {})) if (typeof reason !== 'string' || !has('staff', staffId)) throw Error('Неизвестный отсутствующий');
+    }
+    const cfg = document.settings['school_week_config_v12'];
+    if (cfg !== undefined) {
+      if (!object(cfg)) throw Error('Повреждены настройки.');
+      for (const field of ['hours','home','teacherNames','customLists']) if (cfg[field] !== undefined && !object(cfg[field])) throw Error('Повреждены настройки: ' + field);
+      const clock = value => typeof value === 'string' && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value);
+      if (cfg.display && (!object(cfg.display) || !clock(cfg.display.start) || !clock(cfg.display.end) || cfg.display.start >= cfg.display.end)) throw Error('Некорректный диапазон доски.');
+      for (const [key, hours] of Object.entries(cfg.hours || {})) {
+        if (!c.staff.some(v => v.id === key || v.name === key) || !object(hours)) throw Error('Некорректный график сотрудника.');
+        for (const [weekday, range] of Object.entries(hours)) if (!/^[0-6]$/.test(weekday) || (range !== null && (!Array.isArray(range) || range.length !== 2 || !range.every(clock) || range[0] >= range[1]))) throw Error('Некорректное рабочее время.');
+      }
+    }
+    for (const [key, value] of Object.entries(document.settings)) {
+      if (!KEYS.includes(key) || [STORE,REFS,DIRECTORY].includes(key)) throw Error('Неизвестный раздел настроек.');
+      if (key === 'school_subjects_v19' && (!Array.isArray(value) || value.some(v=>typeof v !== 'string'))) throw Error('Повреждён список названий.');
+      if (key === 'school_colors_v12' && !Array.isArray(value)) throw Error('Повреждена палитра.');
+      if (key === 'school_week_schedule_v14' && !object(value)) throw Error('Повреждён шаблон недели.');
     }
     return document;
   }
-  function openStorage(native) {
-    let document;
-    const saved = native.getItem(KEY);
-    if (saved !== null) document = validate(JSON.parse(saved));
+  const ENTRY_FIELDS=['id','typeId','activityId','title','groupIds','staffIds','roomId','start','end','subgroup','event','details'];
+  function serialize(document){
+    const data=clone(document);
+    for(const day of Object.values(data.days))day.entries=day.entries.map(entry=>ENTRY_FIELDS.map(key=>entry[key]));
+    return JSON.stringify({storageVersion:1,data});
+  }
+  function deserialize(raw){
+    const value=JSON.parse(raw);
+    if(value.storageVersion!==undefined){
+      if(value.storageVersion!==1||!value.data?.days)throw Error('Неподдерживаемая версия хранилища.');
+      for(const day of Object.values(value.data.days)){
+        if(!Array.isArray(day.entries))throw Error('Повреждены записи хранилища.');
+        day.entries=day.entries.map(row=>{if(!Array.isArray(row)||row.length!==ENTRY_FIELDS.length)throw Error('Повреждена запись хранилища.');return Object.fromEntries(ENTRY_FIELDS.map((key,i)=>[key,row[i]]))});
+      }
+      return validate(value.data);
+    }
+    return validate(value); // Existing stage 1 document.
+  }
+  function openStorage(native, options = {}) {
+    let raw = native.getItem(KEY), document, undo = null, pending = null;
+    let booting = !!options.guarded, writable = !options.guarded, stale = false;
+    if (raw !== null) document = deserialize(raw);
     else {
       const snapshot = {};
-      for (const key of KEYS) { const raw = native.getItem(key); if (raw !== null) snapshot[key] = JSON.parse(raw); }
+      for (const key of KEYS) { const value = native.getItem(key); if (value !== null) snapshot[key] = JSON.parse(value); }
       document = validate(encode(snapshot));
-      native.setItem(KEY, JSON.stringify(document));
-      // Old keys remain untouched as a migration fallback; after this point they are not read.
+      if (!booting) { raw = serialize(document); native.setItem(KEY, raw); }
+    }
+    const problem = message => { const e = Error(message); e.name = 'AspectStorageError'; return e; };
+    function check() {
+      if (!writable || stale) throw problem('Сохранение недоступно в этой вкладке. Закройте другую вкладку приложения и обновите страницу.');
+      if (native.getItem(KEY) !== raw) { stale = true; undo = null; throw problem('Данные изменились в другой вкладке. Обновите страницу перед сохранением.'); }
+    }
+    function persist(next, recordUndo = false) {
+      validate(next);
+      if (booting) { document = next; return; }
+      check();
+      const serialized = serialize(next);
+      if (serialized === raw) return;
+      try { native.setItem(KEY, serialized); }
+      catch (e) { throw problem('Изменения не сохранены. Хранилище недоступно или переполнено. Прежние данные сохранены. Скачайте резервную копию.'); }
+      if (recordUndo) undo = {document, expected: serialized};
+      else undo = null; // Never undo over an intervening catalog/settings/restore operation.
+      document = next; raw = serialized;
     }
     function write(snapshot) {
-      const next = validate(encode(snapshot, document));
-      native.setItem(KEY, JSON.stringify(next));
-      document = next; // Only publish the new in-memory state after storage succeeds.
+      if (pending) { pending.snapshot = snapshot; return; }
+      persist(validate(encode(snapshot, document)));
+    }
+    function snapshot() { return pending ? pending.snapshot : decode(document); }
+    function finish(transaction) {
+      if (transaction.error) throw transaction.error;
+      const next = validate(encode(transaction.snapshot, document));
+      const changedSchedule = JSON.stringify(next.days) !== JSON.stringify(document.days);
+      if (JSON.stringify(next) !== JSON.stringify(document)) persist(next, changedSchedule);
     }
     return {
       getItem(key) {
         if (!KEYS.includes(key)) return native.getItem(key);
-        const snapshot = decode(document);
-        return key in snapshot ? JSON.stringify(snapshot[key]) : null;
+        const value = snapshot(); return key in value ? JSON.stringify(value[key]) : null;
       },
       setItem(key, value) {
         if (!KEYS.includes(key)) return native.setItem(key, value);
-        const snapshot = decode(document);
-        snapshot[key] = JSON.parse(value);
-        write(snapshot);
+        try { const next = clone(snapshot()); next[key] = JSON.parse(value); write(next); }
+        catch (e) { if (pending) pending.error = e; throw e; }
       },
       removeItem(key) {
         if (!KEYS.includes(key)) return native.removeItem(key);
-        const snapshot = decode(document);
-        delete snapshot[key];
-        write(snapshot);
+        const next = clone(snapshot()); delete next[key]; write(next);
       },
-      document: () => clone(document)
+      atomic(action) {
+        if (pending) return action();
+        const transaction = {snapshot: decode(document), error: null}; pending = transaction;
+        const abort = e => { pending = null; throw e; };
+        const done = value => { pending = null; finish(transaction); return value; };
+        try {
+          const value = action();
+          return value && typeof value.then === 'function' ? value.then(done, abort) : done(value);
+        } catch (e) { return abort(e); }
+      },
+      activate(allowed) {
+        const initialized = document;
+        booting = false; writable = allowed;
+        if (allowed) persist(initialized);
+        else if (raw !== null) document = deserialize(raw);
+      },
+      inTransaction: () => !!pending,
+      canWrite: () => writable && !stale,
+      canUndo: () => !!undo && writable && !stale && native.getItem(KEY) === raw,
+      undo() {
+        check();
+        if (!undo || undo.expected !== raw) throw problem('Отмена недоступна. После перезагрузки или другой операции отменить изменение нельзя.');
+        const previous = undo.document;
+        persist(previous, false);
+      },
+      exportBackup() { checkFresh(); return JSON.stringify({format:'aspect-backup', version:1, document:clone(document)}, null, 2); },
+      restoreBackup(text) { const next = parseBackup(text); persist(next, false); },
+      replace(next) { persist(clone(validate(next)), false); },
+      document: () => clone(document),
+      invalidate() { stale = true; undo = null; }
     };
+    function checkFresh() { if (native.getItem(KEY) !== raw) throw problem('Данные изменились в другой вкладке. Обновите страницу перед экспортом.'); }
   }
-  return {KEY, KEYS, STORE, REFS, DIRECTORY, GROUP_NAMES, id, assignments, encode, decode, validate, openStorage};
+  function parseBackup(text) {
+    let value;
+    try { value = JSON.parse(text); } catch (_) { throw Error('Файл не является корректным JSON.'); }
+    if (!value || value.format !== 'aspect-backup' || value.version !== 1)
+      throw Error('Неподдерживаемый формат резервной копии. Нужна копия Аспект версии 1.');
+    return clone(validate(value.document));
+  }
+  return {KEY, KEYS, STORE, REFS, DIRECTORY, GROUP_NAMES, id, assignments, encode, decode, validate, openStorage, parseBackup, serialize, deserialize};
 });
