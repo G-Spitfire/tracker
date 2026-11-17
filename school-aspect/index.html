@@ -188,6 +188,46 @@ const categoryFor=x=>{if(x.kind==='event')return {color:(directory.eventTypes||[
 const tintColor=h=>{let v=String(h||'#dfe8f4').replace('#',''),r=parseInt(v.slice(0,2),16),g=parseInt(v.slice(2,4),16),b=parseInt(v.slice(4,6),16);return 'rgb('+Math.round(r*.18+255*.82)+','+Math.round(g*.18+255*.82)+','+Math.round(b*.18+255*.82)+')'};
 let settingsPage='home',settingsSection='settings';
 let showArchivedRooms=false,showArchivedSubjects=false,showArchivedRoutines=false;
+function reassignFutureResource(type,oldName){
+ const today=iso(new Date()),items=[];
+ for(const [key,d] of Object.entries(store)){
+  if(key<today||!d||typeof d!=='object')continue;
+  const original=baseForDate(key);
+  for(const baseLesson of original){
+   const x={...baseLesson,...(d.edits?.[baseLesson.id]||{})};
+   if(!x.cancelled&&x[type]===oldName)items.push({key,id:String(baseLesson.id),lesson:x,extra:false});
+  }
+  for(const x of d.extras||[])if(!x.cancelled&&x[type]===oldName)items.push({key,id:String(x.id),lesson:x,extra:true});
+ }
+ if(!items.length)return true;
+ const label=type==='teacher'?'преподавателя':'кабинета';
+ if(!confirm('Найдено '+items.length+' будущих занятий с '+label+' «'+oldName+'». Назначить замену? Если оставить пустым, занятие сохранится без '+label+'.'))return false;
+ const replacements=[];
+ const validNames=type==='teacher'?teachers.filter(t=>t!==oldName&&!directoryRefArchived('teacher',t)):rooms.filter(t=>t!==oldName&&!directoryRefArchived('room',t));
+ let bulk=prompt('Введите одну замену для всех занятий или оставьте поле пустым для выбора по каждому занятию. Доступно: '+validNames.join(', '),'');
+ if(bulk===null)return false;
+ bulk=bulk.trim();
+ if(bulk&&!validNames.includes(bulk)){alert('Замена отсутствует в активном справочнике.');return false}
+ for(const item of items){
+  let name=bulk;
+  if(!bulk){
+   const answer=prompt(item.key+' · '+names[item.lesson.cls]+' · '+item.lesson.name+' ('+fmt(item.lesson.start)+'). Введите замену из активного справочника; пусто — без назначения. Доступно: '+validNames.join(', '),'');
+   if(answer===null)return false;
+   name=answer.trim();
+   if(name&&!validNames.includes(name)){alert('Замена отсутствует в активном справочнике. Изменения отменены.');return false}
+  }
+  replacements.push({...item,name:name||'Не назначен'});
+ }
+ const previous=JSON.stringify(store);
+ for(const item of replacements){
+  const d=store[item.key];
+  if(item.extra)d.extras=d.extras.map(x=>String(x.id)===item.id?{...x,[type]:item.name,[type+'Id']:item.name==='Не назначен'?null:directoryRef(type,item.name)}:x);
+  else d.edits[item.id]={...(d.edits?.[item.id]||{}),[type]:item.name,[type+'Id']:item.name==='Не назначен'?null:directoryRef(type,item.name)};
+ }
+ try{localStorage.setItem('school_real_week_v14',JSON.stringify(store))}
+ catch(e){store=JSON.parse(previous);alert('Не удалось сохранить назначения: '+e.message);return false}
+ return true;
+}
 function archiveSubjectFuture(subject){
  const today=iso(new Date()),affected=[];
  for(const [key,d] of Object.entries(store)){
@@ -258,7 +298,7 @@ if(!editing)h+='<div class="directory-card-actions"><button id="dir-edit">✎ И
 p.innerHTML=h;
 $('dir-back').onclick=()=>{selected=null;editing=false;menu=false;drawDirectory()};
 if($('dir-edit'))$('dir-edit').onclick=()=>{editing=true;menu=false;drawDirectory()};
-if($('dir-archive'))$('dir-archive').onclick=()=>{if(!x.archived){if(!confirm('Архивировать «'+x.name+'»? Прошедшие занятия сохранятся.'))return;if(!roomMode&&!archiveSubjectFuture(x))return}if(roomMode)archiveRef('room',x.name,!x.archived);else{x.archived=!x.archived;saveDirectory()}menu=false;drawDirectory();board()};
+if($('dir-archive'))$('dir-archive').onclick=()=>{if(!x.archived){if(!confirm('Архивировать «'+x.name+'»? Прошедшие занятия сохранятся.'))return;if(!roomMode&&!archiveSubjectFuture(x))return}if(roomMode){if(!x.archived&&!reassignFutureResource('room',x.name))return;archiveRef('room',x.name,!x.archived)}else{x.archived=!x.archived;saveDirectory()}menu=false;drawDirectory();board()};
 if($('dir-color'))$('dir-color').onchange=ev=>{x.color=ev.target.value;saveDirectory();board()};
 if($('dir-edit-cancel'))$('dir-edit-cancel').onclick=()=>{editing=false;drawDirectory()};
 if($('dir-edit-save'))$('dir-edit-save').onclick=()=>{
@@ -305,7 +345,7 @@ function draw(){
  panel.innerHTML=h;
  $('teacher-list-back').onclick=listView;
  if($('teacher-edit'))$('teacher-edit').onclick=()=>{editing=true;menuOpen=false;draw()};
- if($('teacher-archive'))$('teacher-archive').onclick=()=>{if(!archived&&!confirm('Архивировать «'+t+'»? Существующие занятия сохранятся.'))return;archiveRef('teacher',t,!archived);menuOpen=false;draw();board()};
+ if($('teacher-archive'))$('teacher-archive').onclick=()=>{if(!archived){if(!confirm('Архивировать «'+t+'»? Исторические занятия сохранятся.'))return;if(!reassignFutureResource('teacher',t))return}archiveRef('teacher',t,!archived);menuOpen=false;draw();board()};
  if($('teacher-edit-cancel'))$('teacher-edit-cancel').onclick=()=>{editing=false;draw()};
  if($('teacher-edit-save'))$('teacher-edit-save').onclick=()=>{
  const next=$('teacher-edit-name').value.trim(),role=$('teacher-edit-role').value.trim();
