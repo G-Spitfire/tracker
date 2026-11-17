@@ -85,7 +85,7 @@ function boot(native) {
   const ctx=vm.createContext({console,Date,JSON,Set,Map,AspectModel:M,structuredClone,window:{localStorage:native},document:{getElementById:node,querySelector:node,querySelectorAll:s=>selectors.get(s)||[],documentElement:node('root'),body:node('body')},alert:x=>alerts.push(x),confirm:()=>true,prompt:()=>prompts.shift()??null,Blob,URL,setTimeout,clearTimeout,location:{reload(){}}});
   let html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
   let code=html.match(/<script>\s*([\s\S]*)<\/script>/)[1];
-  code=code.replace(/\}\)\(\);\s*$/,`globalThis.qa={get:()=>({date,mode,draft,selected,store}),set:s=>{if('date'in s){date=s.date;base=baseForDate(date)}if('draft'in s)draft=s.draft;if('selected'in s)selected=s.selected;if('mode'in s)mode=s.mode},lessons,events,commit,editorLesson,eventEditor,shared,conflictIds,attachRefs,render};})();`);
+  code=code.replace(/\}\)\(\);\s*$/,`globalThis.qa={get:()=>({date,mode,draft,selected,store}),set:s=>{if('date'in s){date=s.date;base=baseForDate(date)}if('draft'in s)draft=s.draft;if('selected'in s)selected=s.selected;if('mode'in s)mode=s.mode},lessons,events,commit,editorLesson,eventEditor,shared,conflictIds,unresolved,attachRefs,render};})();`);
   vm.runInContext(code,ctx);return {q:ctx.qa,node,selectors,alerts,prompts};
 }
 const uiNative=memory(initial({}));let ui=boot(uiNative);

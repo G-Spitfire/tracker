@@ -32,6 +32,6 @@ test('failed write has no partial week; read-only tab cannot copy',()=>{const be
 test('saved result reopens with its full shared event and absences',()=>{s.applySchedule(result().document);const reopened=M.openStorage(native).document();assert.equal(reopened.days[opt.target].entries.length,4);assert.deepEqual(reopened.days[opt.target].absences,base.days[opt.target].absences)});
 test('same source/target is rejected and invalid options do not change storage',()=>{assert.throws(()=>C.preview(base,{...opt,target:opt.source}));assert.throws(()=>C.preview(base,{...opt,source:'2026-02-30'}))});
 test('standard conflict and absence warnings include copied entries',()=>{
- const {boot}=require('./stage1.test.cjs');const doc=result('merge').document;doc.days[opt.target].absences[anna]='';const data=memory();data.setItem(M.KEY,M.serialize(doc));const ui=boot(data);ui.q.set({date:opt.target});assert.ok(ui.q.conflictIds().size>0);assert.equal(ui.q.get().store[opt.target].absences[anna],'');
+ const {boot}=require('./stage1.test.cjs');const doc=result('merge').document;doc.days[opt.target].absences[anna]='';const data=memory();data.setItem(M.KEY,M.serialize(doc));const ui=boot(data);ui.q.set({date:opt.target});assert.ok(ui.q.conflictIds().size>0);assert.equal(ui.q.get().store[opt.target].absences[anna],'');assert.equal(ui.q.unresolved().length,4);
 });
 module.exports={passed};
