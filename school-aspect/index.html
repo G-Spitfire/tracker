@@ -856,7 +856,7 @@ if(!editing)h+='<div class="directory-card-actions"><button id="dir-edit" class=
 p.innerHTML=h;
 $('dir-back').onclick=()=>{selected=null;editing=false;menu=false;drawDirectory()};
 if($('dir-edit'))$('dir-edit').onclick=()=>{editing=true;menu=false;drawDirectory()};
-if($('dir-archive'))$('dir-archive').onclick=async()=>{if(!x.archived){if(!confirm('Архивировать «'+x.name+'»? Прошедшие занятия сохранятся.'))return;if(!roomMode&&!archiveSubjectFuture(x))return}if(roomMode){if(!x.archived&&!reassignFutureResource('room',x.name))return;archiveRef('room',x.name,!x.archived)}else{x.archived=!x.archived;saveDirectory()}menu=false;drawDirectory();board()};
+if($('dir-archive'))$('dir-archive').onclick=async()=>{if(!x.archived){if(!confirm('Архивировать «'+x.name+'»? Прошедшие занятия сохранятся.'))return;if(!roomMode&&!archiveSubjectFuture(x))return}if(roomMode){if(!x.archived&&!await reassignFutureResource('room',x.name))return;archiveRef('room',x.name,!x.archived)}else{x.archived=!x.archived;saveDirectory()}menu=false;drawDirectory();board()};
 if($('dir-color'))$('dir-color').onchange=ev=>{x.color=ev.target.value;saveDirectory();board()};
 if($('dir-edit-cancel'))$('dir-edit-cancel').onclick=()=>{editing=false;drawDirectory()};
 if($('dir-edit-save'))$('dir-edit-save').onclick=()=>{
