@@ -519,6 +519,39 @@ button[class*="btn-"]:active:not(:disabled){filter:brightness(.96)}
 .right .settings-menu-clean .settings-label b{font-size:13px;font-weight:600;color:#253650;line-height:1.25}
 .right .settings-menu-clean .settings-label small{font-size:11px;font-weight:400;color:#77869a;line-height:1.3}
 .right .settings-menu-clean .settings-chevron{font-size:16px;color:#9aa8b9}
+
+/* Absence coordinator: compact overview and contextual form */
+.right .absence-screen{font-size:12px;line-height:1.4}
+.right .absence-heading{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:12px}
+.right .absence-heading h2{font-size:16px;font-weight:600;line-height:1.25;margin:0}
+.right .absence-heading span{font-size:11px;color:#718198;white-space:nowrap}
+.right .absence-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-bottom:12px}
+.right .absence-summary>div{display:flex;flex-direction:column;align-items:center;gap:3px;background:#f4f7fb;border-radius:7px;padding:9px 3px;min-width:0}
+.right .absence-summary b{font-size:19px;font-weight:600;line-height:1}
+.right .absence-summary span{font-size:9px;color:#65758d;text-align:center;line-height:1.25}
+.right .absence-add-toggle{width:100%;min-height:34px;font-size:12px;font-weight:600;padding:6px 9px}
+.right .absence-screen [hidden]{display:none!important}
+.right .absence-form{border:1px solid #dce5f0;border-radius:8px;padding:10px;margin:10px 0}
+.right .absence-form label{display:block;font-size:11px;font-weight:500;margin:7px 0 4px}
+.right .absence-form select{width:100%;height:32px;min-height:32px;font-size:12px}
+.right .absence-form-actions{display:flex;justify-content:flex-end;gap:6px;margin-top:10px}
+.right .absence-form-actions button{min-height:30px;font-size:12px}
+.right .absence-section{margin-top:16px;padding-top:12px;border-top:1px solid #e4eaf2}
+.right .absence-section-heading{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:8px}
+.right .absence-section-heading h3{font-size:13px;font-weight:600;line-height:1.3;margin:0}
+.right .absence-section-heading span{font-size:11px;color:#748399}
+.right .absence-empty{font-size:11px;color:#78869a;padding:6px 0}
+.right .absence-person{display:flex;align-items:center;gap:7px;padding:8px 0;border-bottom:1px solid #edf1f6}
+.right .absence-person-info{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}
+.right .absence-person-info b{font-size:12px;font-weight:600;overflow-wrap:anywhere}
+.right .absence-person-info span{font-size:11px;color:#718198}
+.right .absence-person button{flex:none;font-size:11px;min-height:30px;padding:5px 7px}
+.right .absence-pending{display:flex;flex-direction:column;gap:3px;padding:9px;margin:7px 0;background:#fffaf3;border:1px solid #f0dfc5;border-radius:7px}
+.right .absence-pending b{font-size:12px;font-weight:600}
+.right .absence-pending span{font-size:11px;color:#66758a}
+.right .absence-pending-actions{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.right .absence-pending-actions button{font-size:11px;min-height:30px}
+.right .absence-back{margin-top:16px;font-size:11px;min-height:30px}
 </style></head><body><div id="pdf-overlay" class="pdf-overlay" role="dialog" aria-modal="true" aria-label="Предпросмотр расписания"><div class="pdf-dialog"><div class="pdf-bar"><strong id="pdf-heading">Предпросмотр расписания</strong><span id="pdf-warning" class="warn"></span><button id="pdf-print" class=" btn-primary btn-standard">Печать / Сохранить PDF</button><button id="pdf-close" class="btn-secondary btn-standard">Закрыть</button></div><iframe id="pdf-frame" class="pdf-frame" title="Печатное расписание"></iframe></div></div><dialog id="unsaved-draft-dialog" aria-labelledby="unsaved-draft-title" aria-describedby="unsaved-draft-copy"><h2 id="unsaved-draft-title">Есть несохранённые изменения</h2><p id="unsaved-draft-copy">Если перейти, изменения в этом занятии не сохранятся.</p><div class="buttons"><button type="button" id="unsaved-stay" class="btn-secondary btn-standard">Остаться</button><button type="button" id="unsaved-discard" class=" btn-danger btn-standard">Перейти без сохранения</button></div></dialog><dialog id="reset-confirm-dialog" aria-labelledby="reset-confirm-title" aria-describedby="reset-confirm-copy"><h2 id="reset-confirm-title">Сбросить день?</h2><p id="reset-confirm-copy">Будут удалены изменения, мероприятия и отсутствия только на выбранную дату.</p><div class="buttons"><button type="button" id="reset-cancel" class="btn-secondary btn-standard">Отмена</button><button type="button" id="reset-confirm-ok" class=" btn-danger btn-standard">Сбросить день</button></div></dialog><div class="app"><div class="top"><div class="brand" aria-label="Школа · Аспект"><span class="school-logo" aria-hidden="true"><svg viewBox="0 0 100 100" width="30" height="30" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="47" fill="#e60023"/><path d="M23 44 79 23 85 38 33 57 33 63 82 77 77 84 23 68Z" fill="white"/><path d="M36 58 70 46 Q77 55 73 69Z" fill="white"/><path d="M27 72 77 88M29 78 69 91" fill="none" stroke="white" stroke-width="3"/></svg></span><span class="school-name">ASPECT<small>EDUCATIONAL CENTRE</small></span></div><h2 id="title">Расписание</h2><div class="top-actions"><div class="top-group date-group"><button id="today" class="btn-secondary btn-compact">Сегодня</button><button id="tomorrow" class="btn-secondary btn-compact">Завтра</button><button id="copy-day" title="Скопировать занятия из последнего заполненного такого же дня недели" class="btn-secondary btn-compact">Скопировать расписание</button><label class="date-picker"><span id="date-label" aria-hidden="true"></span><span aria-hidden="true">▾</span><input type="date" id="date" aria-label="Выбрать дату расписания"></label></div><details class="add-menu"><summary class="btn-primary btn-compact">+ Добавить</summary><div class="add-menu-items"><button id="new-lesson-button" class="btn-list">Урок</button><button id="new-routine-button" class="btn-list">Режимный момент / перемена</button><button id="event-button" class="btn-list">Мероприятие</button></div></details><button id="absence-button" class="btn-secondary btn-compact">Отсутствия <span id="absence-count"></span></button><button id="settings-button" aria-controls="editor" class="btn-secondary btn-compact">Настройки</button><div class="header-schedule-tools"><div class="issue-strip"><button id="issues-conflicts" class="btn-filter btn-compact">Проблемы: 0</button><button id="issues-absence" hidden class="btn-filter btn-compact">Требуют решения: 0</button><button id="issues-rooms" hidden class="btn-filter btn-compact">Без кабинета: 0</button></div></div></div></div><div class="workspace"><aside class="right" id="editor"></aside><div class="left"><div class="scroll"><div class="board" id="board"></div></div></div></div></div><script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id),names=['1А класс','1Б класс','2 класс','3 класс','4 класс','Preschool'],colors=['#dceafe','#dceafe','#dff4e7','#f0e5fb','#fff0dc','#fce5ee'];
@@ -1051,17 +1084,37 @@ $('event-back').onclick=async()=>{if(!await confirmDiscardDraft())return;draft=n
 };
 }
 function absenceEditor(){
- const list=day().absences||{},pending=unresolved();
- let h='<h2>Отсутствия преподавателей</h2><div class="sub">На выбранную дату · уроки и мероприятия остаются в сетке, пока координатор не примет решение.</div><label>Преподаватель</label><select id="abs-teacher"><option value="" selected disabled>Выберите преподавателя</option>'+teachers.filter(t=>t!=='Не назначен'&&!directoryRefArchived('teacher',t)).map(t=>'<option>'+esc(t)+'</option>').join('')+'</select><label>Причина</label><select id="abs-reason"><option>Болезнь</option><option>Отпуск</option><option>Личные обстоятельства</option><option>Другое</option></select><div class="buttons"><button id="abs-add" class=" btn-primary btn-standard">Отметить отсутствие</button></div><h3>Отсутствуют</h3>';
- Object.entries(list).filter(([t])=>t.startsWith('teacher-')||!Object.prototype.hasOwnProperty.call(list,directoryRef('teacher',t))).forEach(([t,r])=>h+='<div class="absence-row">'+esc(resolveRef('teacher',t,t))+' · '+esc(r)+' <button class="btn-secondary btn-compact" data-remove="'+esc(t)+'">Вернулся</button></div>');
- if(!Object.keys(list).length)h+='<p class="empty-note">Отсутствий нет</p>';h+='<h3>Занятия, требующие решения ('+pending.length+')</h3>';if(!pending.length)h+='<p class="empty-note">Нет занятий, требующих решения</p>';
- pending.forEach(x=>{const missing=absentTeachers(x),remaining=teachersOf(x).filter(t=>!absent(t)),isEvent=x.kind==='event';
- h+='<div class="box warn"><b>'+esc(isEvent?'Мероприятие · '+x.name:names[x.cls]+' · '+x.name)+'</b><div class="tiny">'+fmt(x.start)+'–'+fmt(x.end)+(isEvent?' · '+(x.classes||[]).map(i=>names[i]).join(', '):'')+'</div><div class="tiny">Отсутствуют: '+esc(missing.join(', '))+'</div>'+(remaining.length?'<div class="tiny">Остаются: '+esc(remaining.join(', '))+'</div>':'')+'<div class="buttons"><button class="btn-secondary btn-standard" data-replace="'+esc(x.id)+'">Назначить замену</button>'+(isEvent&&remaining.length?'<button class="btn-secondary btn-standard" data-keep="'+esc(x.id)+'">Оставить '+(remaining.length===1?'одного':'оставшихся')+'</button>':'')+'</div></div>';
+ const raw=day().absences||{},pending=unresolved(),absentMap=new Map();
+ Object.entries(raw).forEach(([key,reason])=>{
+  const ref=(directoryRefs.teacher||[]).find(v=>v.id===key||v.name===key);
+  const id=ref?.id||key,name=ref?.name||key;
+  if(!absentMap.has(id)||key===id)absentMap.set(id,{id,name,reason});
  });
- h+='<div class="buttons"><button id="abs-back" class="btn-ghost btn-standard">К расписанию</button></div>';
+ const absentList=[...absentMap.values()];
+ const affected=resources().filter(x=>absentTeachers(x).length);
+ const displayDate=new Date(date+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
+ let h='<div class="absence-screen"><div class="absence-heading"><h2>Отсутствия</h2><span>'+esc(displayDate)+'</span></div>';
+ h+='<div class="absence-summary"><div><b>'+absentList.length+'</b><span>Отсутствуют</span></div><div><b>'+affected.length+'</b><span>Затронуто занятий</span></div><div><b>'+pending.length+'</b><span>Без решения</span></div></div>';
+ h+='<button id="abs-toggle" class="btn-primary btn-standard absence-add-toggle" type="button">+ Добавить отсутствие</button>';
+ h+='<div id="abs-form" class="absence-form" hidden><label for="abs-teacher">Преподаватель</label><select id="abs-teacher"><option value="" selected disabled>Выберите преподавателя</option>'+teachers.filter(t=>t!=='Не назначен'&&!directoryRefArchived('teacher',t)).map(t=>'<option value="'+esc(t)+'">'+esc(t)+'</option>').join('')+'</select><label for="abs-reason">Причина</label><select id="abs-reason"><option>Болезнь</option><option>Отпуск</option><option>Личные обстоятельства</option><option>Другое</option></select><div class="absence-form-actions"><button id="abs-cancel" class="btn-secondary btn-compact" type="button">Отмена</button><button id="abs-add" class="btn-primary btn-compact" type="button">Сохранить</button></div></div>';
+ h+='<section class="absence-section"><div class="absence-section-heading"><h3>Отсутствующие преподаватели</h3><span>'+absentList.length+'</span></div>';
+ if(!absentList.length)h+='<div class="absence-empty">На выбранную дату отсутствий нет</div>';
+ absentList.forEach(({id,name,reason})=>{
+  const count=affected.filter(x=>teachersOf(x).some(t=>directoryRef('teacher',t)===id)).length;
+  h+='<div class="absence-person"><div class="absence-person-info"><b>'+esc(name)+'</b><span>'+esc(reason)+' · '+count+' '+(count===1?'занятие':'занятий')+'</span></div><button class="btn-secondary btn-compact" data-remove="'+esc(id)+'" type="button">Вернулся</button></div>';
+ });
+ h+='</section><section class="absence-section"><div class="absence-section-heading"><h3>Требуют решения</h3><span>'+pending.length+'</span></div>';
+ if(!pending.length)h+='<div class="absence-empty">Все занятия обеспечены преподавателями</div>';
+ pending.forEach(x=>{
+  const missing=absentTeachers(x),remaining=teachersOf(x).filter(t=>!absent(t)),isEvent=x.kind==='event';
+  h+='<div class="absence-pending"><b>'+esc(isEvent?'Мероприятие · '+x.name:names[x.cls]+' · '+x.name)+'</b><span>'+fmt(x.start)+'–'+fmt(x.end)+(isEvent?' · '+(x.classes||[]).map(i=>names[i]).join(', '):'')+'</span><span>Отсутствуют: '+esc(missing.join(', '))+'</span>'+(remaining.length?'<span>Остаются: '+esc(remaining.join(', '))+'</span>':'')+'<div class="absence-pending-actions"><button class="btn-secondary btn-compact" data-replace="'+esc(x.id)+'">Назначить замену</button>'+(isEvent&&remaining.length?'<button class="btn-secondary btn-compact" data-keep="'+esc(x.id)+'">Оставить '+(remaining.length===1?'одного':'оставшихся')+'</button>':'')+'</div></div>';
+ });
+ h+='</section><button id="abs-back" class="absence-back btn-ghost btn-compact">‹ К расписанию</button></div>';
  $('editor').innerHTML=h;
- $('abs-add').onclick=()=>{const t=$('abs-teacher').value;if(!t||t==='Не назначен'||directoryRefArchived('teacher',t))return;$('abs-teacher').value='';commit(d=>{const id=directoryRef('teacher',t);d.absences[id]=$('abs-reason').value;delete d.absences[t]})};
- document.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>commit(d=>{const id=directoryRef('teacher',b.dataset.remove);delete d.absences[b.dataset.remove];if(id)delete d.absences[id];const name=resolveRef('teacher',b.dataset.remove,null);if(name)delete d.absences[name]}));
+ $('abs-toggle').onclick=()=>{$('abs-form').hidden=false;$('abs-toggle').hidden=true};
+ $('abs-cancel').onclick=()=>{$('abs-form').hidden=true;$('abs-toggle').hidden=false};
+ $('abs-add').onclick=()=>{const t=$('abs-teacher').value;if(!t||t==='Не назначен'||directoryRefArchived('teacher',t))return;commit(d=>{const id=directoryRef('teacher',t);d.absences[id]=$('abs-reason').value;delete d.absences[t]})};
+ document.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>commit(d=>{const id=b.dataset.remove;delete d.absences[id];const name=resolveRef('teacher',id,null);if(name)delete d.absences[name]}));
  document.querySelectorAll('[data-replace]').forEach(b=>b.onclick=()=>{selected=b.dataset.replace;mode=events().some(e=>String(e.id)===String(selected))?'event':'lesson';draft=null;render()});
  document.querySelectorAll('[data-keep]').forEach(b=>b.onclick=()=>{const x=events().find(e=>String(e.id)===b.dataset.keep);if(!x)return;commit(d=>d.resolutions[x.id]={signature:JSON.stringify({teachers:teachersOf(x),absent:absentTeachers(x)})})});
  $('abs-back').onclick=()=>{mode='lesson';render()};
