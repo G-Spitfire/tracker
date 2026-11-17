@@ -361,7 +361,23 @@ h+=`<div class="buttons"><button id="save-event" class="primary" ${canSave?'':'d
 $('editor').innerHTML=h;
 const update=y=>{draft=y;eventEditor()};document.querySelectorAll('[data-field]').forEach(el=>el.onchange=()=>{let k=el.dataset.field;update({...x,[k]:k==='start'||k==='end'?min(el.value):el.value})});document.querySelectorAll('[data-class]').forEach(el=>el.onchange=()=>update({...x,classes:el.checked?[...x.classes,Number(el.dataset.class)]:x.classes.filter(v=>v!==Number(el.dataset.class))}));document.querySelectorAll('[data-teacher]').forEach(el=>el.onchange=()=>update({...x,teachers:el.checked?[...x.teachers,el.dataset.teacher]:x.teachers.filter(v=>v!==el.dataset.teacher)}));document.querySelectorAll('[data-cancel-id]').forEach(el=>el.onchange=()=>update({...x,cancelIds:el.checked?[...(x.cancelIds||[]),el.dataset.cancelId]:(x.cancelIds||[]).filter(v=>v!==Number(el.dataset.cancelId))}));
 $('save-event').onclick=()=>{if(!canSave)return;if((remaining.length||badAbsent.length||overtime(x).length)&&!confirm('Есть пересечения, отсутствия или сверхурочные. Сохранить несмотря на предупреждения?'))return;let event={...x};delete event.cancelIds;commit(d=>{for(const id of x.cancelIds||[]){if(String(id).startsWith('ex'))d.extras=d.extras.map(y=>String(y.id)===String(id)?{...y,cancelled:true,cancelReason:'Общее мероприятие: '+x.name}:y);else d.edits[id]={cancelled:true,cancelReason:'Общее мероприятие: '+x.name}};let idx=d.events.findIndex(e=>e.id===x.id);if(idx<0)d.events.push(event);else d.events[idx]=event});selected=x.id;draft=null;mode='event'};
-$('event-back').onclick=()=>{draft=null;mode='lesson';selected=base[0]?.id||null;render()};if(saved)$('delete-event').onclick=()=>{if(!confirm('Удалить мероприятие? Ранее отменённые уроки останутся отменёнными; их можно вернуть вручную.'))return;commit(d=>d.events=d.events.filter(e=>e.id!==x.id));draft=null;selected=base[0]?.id||null;mode='lesson'};
+$('event-back').onclick=()=>{draft=null;mode='lesson';selected=base[0]?.id||null;render()};if(saved)$('delete-event').onclick=()=>{
+ const reason='Общее мероприятие: '+x.name;
+ const linkedBase=Object.entries(day().edits||{}).filter(([id,v])=>v.cancelled&&v.cancelReason===reason);
+ const linkedExtra=(day().extras||[]).filter(v=>v.cancelled&&v.cancelReason===reason);
+ const linkedCount=linkedBase.length+linkedExtra.length;
+ const choice=prompt('Удалить мероприятие «'+x.name+'»?'+(linkedCount?'\\nСвязанных отменённых уроков: '+linkedCount:'')+'\\n1 — Удалить и восстановить связанные уроки\\n2 — Удалить, оставить уроки отменёнными\\n3 — Не удалять','3');
+ if(choice!=='1'&&choice!=='2')return;
+ commit(d=>{
+  d.events=d.events.filter(e=>String(e.id)!==String(x.id));
+  if(choice==='1'){
+   for(const [id] of linkedBase){const edit={...d.edits[id]};delete edit.cancelled;delete edit.cancelReason;d.edits[id]=edit}
+   const ids=new Set(linkedExtra.map(v=>String(v.id)));
+   d.extras=d.extras.map(v=>ids.has(String(v.id))?({...v,cancelled:false,cancelReason:undefined}):v);
+  }
+ });
+ draft=null;selected=null;mode='lesson';
+};
 }
 function absenceEditor(){
  const list=day().absences||{},pending=unresolved();
