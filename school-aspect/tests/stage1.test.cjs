@@ -91,7 +91,7 @@ function boot(native) {
 const uiNative=memory(initial({}));let ui=boot(uiNative);
 function edit(record, mode='new-lesson') {ui.q.set({date:'2031-05-17',draft:record,selected:mode==='new-lesson'?null:record.id,mode});ui.q.editorLesson();}
 test('UI create a multi-staff lesson and persist it', () => {
-  edit(entry({teachers:['Анна','Елена']}));ui.node('save-lesson').onclick();assert.equal(ui.q.lessons().length,1);
+  edit(entry({teachers:['Анна','Елена']}));ui.node('save-lesson').onclick();assert.equal(ui.q.lessons().length,1);assert.match(ui.node('editor').innerHTML,/Редактор занятия/);
   ui=boot(uiNative);ui.q.set({date:'2031-05-17'});assert.deepEqual(Array.from(ui.q.lessons()[0].teachers),['Анна','Елена']);
 });
 test('UI И2: checkbox replacement, save and reopen', () => {
