@@ -507,6 +507,7 @@ button[class*="btn-"]:active:not(:disabled){filter:brightness(.96)}
 .right.aspect-form-editor .buttons button.btn-primary{min-height:34px;font-weight:600}
 .right.aspect-form-editor .event-actions{gap:7px}
 .right.aspect-form-editor .tiny{font-size:11px;line-height:1.35}
+.right .teacher-permanent-delete{margin:0 0 14px}.right .teacher-permanent-delete button{width:100%;min-height:32px;font-size:12px;font-weight:500;padding:6px 10px}
 </style></head><body><div id="pdf-overlay" class="pdf-overlay" role="dialog" aria-modal="true" aria-label="Предпросмотр расписания"><div class="pdf-dialog"><div class="pdf-bar"><strong id="pdf-heading">Предпросмотр расписания</strong><span id="pdf-warning" class="warn"></span><button id="pdf-print" class=" btn-primary btn-standard">Печать / Сохранить PDF</button><button id="pdf-close" class="btn-secondary btn-standard">Закрыть</button></div><iframe id="pdf-frame" class="pdf-frame" title="Печатное расписание"></iframe></div></div><dialog id="unsaved-draft-dialog" aria-labelledby="unsaved-draft-title" aria-describedby="unsaved-draft-copy"><h2 id="unsaved-draft-title">Есть несохранённые изменения</h2><p id="unsaved-draft-copy">Если перейти, изменения в этом занятии не сохранятся.</p><div class="buttons"><button type="button" id="unsaved-stay" class="btn-secondary btn-standard">Остаться</button><button type="button" id="unsaved-discard" class=" btn-danger btn-standard">Перейти без сохранения</button></div></dialog><dialog id="reset-confirm-dialog" aria-labelledby="reset-confirm-title" aria-describedby="reset-confirm-copy"><h2 id="reset-confirm-title">Сбросить день?</h2><p id="reset-confirm-copy">Будут удалены изменения, мероприятия и отсутствия только на выбранную дату.</p><div class="buttons"><button type="button" id="reset-cancel" class="btn-secondary btn-standard">Отмена</button><button type="button" id="reset-confirm-ok" class=" btn-danger btn-standard">Сбросить день</button></div></dialog><div class="app"><div class="top"><div class="brand" aria-label="Школа · Аспект"><span class="school-logo" aria-hidden="true"><svg viewBox="0 0 100 100" width="30" height="30" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="47" fill="#e60023"/><path d="M23 44 79 23 85 38 33 57 33 63 82 77 77 84 23 68Z" fill="white"/><path d="M36 58 70 46 Q77 55 73 69Z" fill="white"/><path d="M27 72 77 88M29 78 69 91" fill="none" stroke="white" stroke-width="3"/></svg></span><span class="school-name">ASPECT<small>EDUCATIONAL CENTRE</small></span></div><h2 id="title">Расписание</h2><div class="top-actions"><div class="top-group date-group"><button id="today" class="btn-secondary btn-compact">Сегодня</button><button id="tomorrow" class="btn-secondary btn-compact">Завтра</button><button id="copy-day" title="Скопировать занятия из последнего заполненного такого же дня недели" class="btn-secondary btn-compact">Скопировать расписание</button><label class="date-picker"><span id="date-label" aria-hidden="true"></span><span aria-hidden="true">▾</span><input type="date" id="date" aria-label="Выбрать дату расписания"></label></div><details class="add-menu"><summary class="btn-primary btn-compact">+ Добавить</summary><div class="add-menu-items"><button id="new-lesson-button" class="btn-list">Урок</button><button id="new-routine-button" class="btn-list">Режимный момент / перемена</button><button id="event-button" class="btn-list">Мероприятие</button></div></details><button id="absence-button" class="btn-secondary btn-compact">Отсутствия <span id="absence-count"></span></button><button id="settings-button" aria-controls="editor" class="btn-secondary btn-compact">Настройки</button><div class="header-schedule-tools"><div class="issue-strip"><button id="issues-conflicts" class="btn-filter btn-compact">Проблемы: 0</button><button id="issues-absence" hidden class="btn-filter btn-compact">Требуют решения: 0</button><button id="issues-rooms" hidden class="btn-filter btn-compact">Без кабинета: 0</button></div></div></div></div><div class="workspace"><aside class="right" id="editor"></aside><div class="left"><div class="scroll"><div class="board" id="board"></div></div></div></div></div><script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id),names=['1А класс','1Б класс','2 класс','3 класс','4 класс','Preschool'],colors=['#dceafe','#dceafe','#dff4e7','#f0e5fb','#fff0dc','#fce5ee'];
@@ -801,6 +802,23 @@ let chosen=null,showArchived=false,searchText='',adding=false,editing=false,menu
 cfg.teacherRoles=cfg.teacherRoles||{};cfg.teacherSavedHours=cfg.teacherSavedHours||{};
 const dayNames=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const dayValue=(t,d)=>cfg.hours?.[t]&&Object.prototype.hasOwnProperty.call(cfg.hours[t],d)?cfg.hours[t][d]:(d===0||d===6?null:['09:00','18:00']);
+const teacherUsage=name=>{
+ const id=directoryRef('teacher',name),found={past:0,future:0};
+ const seen=new Set(),today=iso(new Date());
+ const scan=(value,key,day)=>{
+  if(!value||typeof value!=='object'||seen.has(value))return;
+  seen.add(value);
+  if(Array.isArray(value)){value.forEach(v=>scan(v,key,day));return}
+  const assigned=value.teacher===name||value.teacherId===id||(Array.isArray(value.teachers)&&value.teachers.includes(name))||(Array.isArray(value.teacherIds)&&value.teacherIds.includes(id));
+  if(assigned){found[day&&day>=today?'future':'past']++}
+  if(value.absences&&Object.prototype.hasOwnProperty.call(value.absences,name))found[day&&day>=today?'future':'past']++;
+  for(const [k,v] of Object.entries(value))if(v&&typeof v==='object')scan(v,k,day);
+ };
+ // Weekly templates and original snapshots count as dependencies, regardless of date.
+ [weekly,snapshot16,weeklySchedule].forEach(v=>scan(v,'',null));
+ for(const [day,data] of Object.entries(store))scan(data,'',day);
+ return found;
+};
 const listView=()=>{chosen=null;draw()};
 function draw(){
  const panel=$('teacher-panel');if(!panel)return;$('panel-back').hidden=!!chosen;
@@ -825,6 +843,7 @@ function draw(){
  h+='<div class="teacher-identity"><h2>'+esc(t)+'</h2>'+(cfg.teacherRoles[t]?'<div class="teacher-role">'+esc(cfg.teacherRoles[t])+'</div>':'')+''+(archived?'<span class="teacher-archived">В архиве</span>':'')+'</div>';
  if(editing)h+='<div class="teacher-add-box"><label>Имя и фамилия<input id="teacher-edit-name" value="'+esc(t)+'"></label><label>Должность<input id="teacher-edit-role" value="'+esc(cfg.teacherRoles[t]||'')+'" placeholder="Например, преподаватель английского"></label><div class="teacher-actions"><button id="teacher-edit-cancel" class="btn-secondary btn-standard">Отмена</button><button class=" btn-primary btn-standard" id="teacher-edit-save">Сохранить</button></div></div>';
  if(!editing)h+='<div class="directory-card-actions"><button id="teacher-edit" class="btn-secondary btn-standard">'+uiIcon('edit')+' Изменить</button><button id="teacher-archive" class="btn-secondary btn-standard">'+(archived?'↩ Восстановить':uiIcon('archive')+' В архив')+'</button></div>';
+ if(archived&&!editing)h+='<div class="teacher-permanent-delete"><button id="teacher-delete-forever" class="btn-danger btn-standard">Удалить навсегда</button></div>';
  h+='<div class="teacher-schedule-title"><strong>Рабочий график</strong><span>Начало — конец</span></div><div class="teacher-schedule">';
  dayNames.forEach((label,i)=>{const d=(i+1)%7,v=dayValue(t,d);h+='<div class="teacher-day"><label><input type="checkbox" data-active="'+d+'" '+(v?'checked':'')+'> '+label+'</label>'+(v?'<input type="time" data-wd="'+d+'" data-part="0" value="'+esc(v[0])+'"><span class="teacher-dash">—</span><input type="time" data-wd="'+d+'" data-part="1" value="'+esc(v[1])+'">':'<span class="teacher-off">Выходной</span>')+'</div>'});
  h+='</div><div class="teacher-save-note">Изменения рабочего графика сохраняются автоматически</div>';
@@ -832,6 +851,20 @@ function draw(){
  $('teacher-list-back').onclick=listView;
  if($('teacher-edit'))$('teacher-edit').onclick=()=>{editing=true;menuOpen=false;draw()};
  if($('teacher-archive'))$('teacher-archive').onclick=async()=>{if(!archived){if(!confirm('Архивировать «'+t+'»? Исторические занятия сохранятся.'))return;if(!await reassignFutureResource('teacher',t))return}archiveRef('teacher',t,!archived);menuOpen=false;draw();board()};
+ if($('teacher-delete-forever'))$('teacher-delete-forever').onclick=()=>{
+  const usage=teacherUsage(t);
+  if(usage.past||usage.future){alert('Удаление невозможно: преподаватель используется в расписании, мероприятиях или истории. Оставьте запись в архиве. Связанных записей: '+(usage.past+usage.future)+'.');return}
+  if(!confirm('Удалить «'+t+'» навсегда? Восстановить запись будет невозможно.'))return;
+  const id=directoryRef('teacher',t);
+  teachers.splice(teachers.indexOf(t),1);
+  cfg.customLists=cfg.customLists||{};
+  cfg.customLists.teachers=teachers.filter(n=>n!=='Не назначен');
+  cfg.deletedTeachers=[...new Set([...(cfg.deletedTeachers||[]),t])];
+  delete cfg.hours?.[t];delete cfg.teacherSavedHours[t];delete cfg.teacherRoles[t];
+  if(cfg.renames?.teachers)delete cfg.renames.teachers[t];
+  if(directoryRefs.teacher)directoryRefs.teacher=directoryRefs.teacher.filter(x=>x.id!==id);
+  saveRefs();saveCfg();chosen=null;editing=false;draw();board();
+ };
  if($('teacher-edit-cancel'))$('teacher-edit-cancel').onclick=()=>{editing=false;draw()};
  if($('teacher-edit-save'))$('teacher-edit-save').onclick=()=>{
  const next=$('teacher-edit-name').value.trim(),role=$('teacher-edit-role').value.trim();
