@@ -723,9 +723,9 @@ async function reassignFutureResource(type,oldName){
   const original=baseForDate(key);
   for(const baseLesson of original){
    const x={...baseLesson,...(d.edits?.[baseLesson.id]||{})};
-   if(!x.cancelled&&x[type]===oldName)items.push({key,id:String(baseLesson.id),lesson:x,extra:false});
+   if(!x.cancelled&&!x.deleted&&(type==='teacher'?teachersOf(x).includes(oldName):x[type]===oldName))items.push({key,id:String(baseLesson.id),lesson:x,extra:false});
   }
-  for(const x of d.extras||[])if(!x.cancelled&&x[type]===oldName)items.push({key,id:String(x.id),lesson:x,extra:true});
+  for(const x of d.extras||[])if(!x.cancelled&&!x.deleted&&(type==='teacher'?teachersOf(x).includes(oldName):x[type]===oldName))items.push({key,id:String(x.id),lesson:x,extra:true});
  }
  if(!items.length)return true;
  const validNames=type==='teacher'?teachers.filter(t=>t!==oldName&&!directoryRefArchived('teacher',t)):rooms.filter(t=>t!==oldName&&!directoryRefArchived('room',t));
@@ -740,10 +740,11 @@ async function reassignFutureResource(type,oldName){
   if(bulk===null||!validNames.includes(bulk.trim())){alert('Выберите действующий кабинет.');return false}
   replacements=items.map(item=>({...item,name:bulk.trim()}));
  }
+ const replaceAssignment=(lesson,name)=>{if(type!=='teacher')return {...lesson,[type]:name};const assigned=teachersOf(lesson);const next=assigned.map(t=>t===oldName?name:t).filter(t=>t!=='Не назначен');return {...lesson,teachers:next,teacherIds:next.map(t=>directoryRef('teacher',t)),teacher:next[0]||'Не назначен',teacherId:next[0]?directoryRef('teacher',next[0]):null}};
  const planned=new Map();
  for(const item of replacements){
   const key=item.key+'|'+item.id+'|'+(item.extra?'extra':'base');
-  planned.set(key,{...item.lesson,[type]:item.name});
+  planned.set(key,replaceAssignment(item.lesson,item.name));
  }
  const warnings=[];
  const timeLabel=x=>fmt(x.start)+'–'+fmt(x.end);
@@ -765,7 +766,8 @@ async function reassignFutureResource(type,oldName){
   }
   if(type==='teacher'){
    const wd=new Date(item.key+'T12:00:00').getDay();
-   const hours=cfg.hours?.[item.name]&&Object.prototype.hasOwnProperty.call(cfg.hours[item.name],wd)?cfg.hours[item.name][wd]:['09:00','18:00'];
+   const teacherHours=cfg.hours?.[directoryRef('teacher',item.name)]||cfg.hours?.[item.name];
+   const hours=teacherHours&&Object.prototype.hasOwnProperty.call(teacherHours,wd)?teacherHours[wd]:(wd===0||wd===6?null:['09:00','18:00']);
    if(!hours||updated.start<min(hours[0])||updated.end>min(hours[1]))warnings.push(item.key+' '+timeLabel(updated)+' · '+item.name+': вне рабочего времени');
   }
  }
@@ -777,8 +779,8 @@ async function reassignFutureResource(type,oldName){
  const previous=JSON.stringify(store);
  for(const item of replacements){
   const d=store[item.key];
-  if(item.extra)d.extras=d.extras.map(x=>String(x.id)===item.id?{...x,[type]:item.name,[type+'Id']:item.name==='Не назначен'?null:directoryRef(type,item.name)}:x);
-  else d.edits[item.id]={...(d.edits?.[item.id]||{}),[type]:item.name,[type+'Id']:item.name==='Не назначен'?null:directoryRef(type,item.name)};
+  if(item.extra)d.extras=d.extras.map(x=>String(x.id)===item.id?replaceAssignment(x,item.name):x);
+  else d.edits[item.id]=replaceAssignment({...item.lesson,...(d.edits?.[item.id]||{})},item.name);
  }
  try{localStorage.setItem('school_real_week_v14',JSON.stringify(store))}
  catch(e){store=JSON.parse(previous);alert('Не удалось сохранить назначения: '+e.message);return false}
