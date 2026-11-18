@@ -38,17 +38,13 @@ function apply(card){
  const data={name:card.dataset.cardName||'',time:card.dataset.cardTime||'',room:card.dataset.cardRoom||'',group:card.dataset.cardGroup||''};
  let names=[];try{names=JSON.parse(card.dataset.cardTeachers||'[]')}catch(_){}
  const teachers=teacherVariants(names);
- // Try the spatial four-corner arrangement first, then a stacked arrangement.
- // Teacher abbreviations are the only permitted textual shortening.
- for(const layout of ['corners','stacked','dense']){
-  for(let i=0;i<Math.max(1,teachers.length);i++){
-   draw(content,data,teachers[i]||'',layout);
-   if(fits(content)){card.dataset.layout=layout;card.dataset.teacherLevel=String(i);delete card.dataset.compact;return false;}
-  }
+ // One fixed reading order for every card: title, teacher, then time and room.
+ // Only the teacher's spelling may be shortened; fields never change positions.
+ for(let i=0;i<Math.max(1,teachers.length);i++){
+  draw(content,data,teachers[i]||'','vertical');
+  if(fits(content)){card.dataset.layout='vertical';card.dataset.teacherLevel=String(i);delete card.dataset.compact;return false;}
  }
- // No ellipsis and no silently omitted field. A warning identifies genuinely
- // impossible cards; complete information remains accessible by opening them.
- draw(content,data,teachers[teachers.length-1]||'','dense');
+ draw(content,data,teachers[teachers.length-1]||'','vertical');
  card.dataset.layout='overflow';card.dataset.compact='true';
  return true;
 }
