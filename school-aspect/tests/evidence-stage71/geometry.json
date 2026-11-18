@@ -1,0 +1,257 @@
+[
+  {
+    "mode": "normal",
+    "bad": [],
+    "board": {
+      "bottom": 1012,
+      "right": 1909
+    },
+    "cardOverlaps": [],
+    "cards": 37,
+    "clockOverlaps": [],
+    "collisions": [],
+    "compact": 0,
+    "editorHidden": false,
+    "fonts": [
+      "adaptive-name:12px",
+      "adaptive-time:9px",
+      "adaptive-teacher:11px",
+      "adaptive-room:9px",
+      "adaptive-group:10px"
+    ],
+    "markerOnly": 0,
+    "scroll": {
+      "contentHeight": 981,
+      "contentWidth": 1638,
+      "height": 981,
+      "width": 1638
+    },
+    "viewport": {
+      "h": 1080,
+      "w": 1920
+    }
+  },
+  {
+    "mode": "fit",
+    "bad": [],
+    "board": {
+      "bottom": 1067,
+      "right": 1909
+    },
+    "cardOverlaps": [],
+    "cards": 37,
+    "clockOverlaps": [],
+    "collisions": [],
+    "compact": 0,
+    "editorHidden": true,
+    "fonts": [
+      "adaptive-name:12px",
+      "adaptive-time:9px",
+      "adaptive-teacher:11px",
+      "adaptive-room:9px",
+      "adaptive-group:10px"
+    ],
+    "markerOnly": 0,
+    "scroll": {
+      "contentHeight": 986,
+      "contentWidth": 1898,
+      "height": 986,
+      "width": 1898
+    },
+    "viewport": {
+      "h": 1080,
+      "w": 1920
+    }
+  },
+  {
+    "mode": "normal",
+    "bad": [],
+    "board": {
+      "bottom": 1012,
+      "right": 1429
+    },
+    "cardOverlaps": [],
+    "cards": 37,
+    "clockOverlaps": [],
+    "collisions": [],
+    "compact": 7,
+    "editorHidden": false,
+    "fonts": [
+      "adaptive-name:12px",
+      "adaptive-time:9px",
+      "adaptive-teacher:11px",
+      "adaptive-room:9px",
+      "adaptive-group:10px"
+    ],
+    "markerOnly": 0,
+    "scroll": {
+      "contentHeight": 924,
+      "contentWidth": 1158,
+      "height": 801,
+      "width": 1158
+    },
+    "viewport": {
+      "h": 900,
+      "w": 1440
+    }
+  },
+  {
+    "mode": "fit",
+    "bad": [],
+    "board": {
+      "bottom": 887,
+      "right": 1429
+    },
+    "cardOverlaps": [],
+    "cards": 37,
+    "clockOverlaps": [],
+    "collisions": [],
+    "compact": 6,
+    "editorHidden": true,
+    "fonts": [
+      "adaptive-name:12px",
+      "adaptive-time:9px",
+      "adaptive-teacher:11px",
+      "adaptive-room:9px",
+      "adaptive-group:10px"
+    ],
+    "markerOnly": 6,
+    "scroll": {
+      "contentHeight": 806,
+      "contentWidth": 1418,
+      "height": 806,
+      "width": 1418
+    },
+    "viewport": {
+      "h": 900,
+      "w": 1440
+    }
+  },
+  {
+    "mode": "normal",
+    "bad": [],
+    "board": {
+      "bottom": 1088,
+      "right": 1285
+    },
+    "cardOverlaps": [],
+    "cards": 37,
+    "clockOverlaps": [],
+    "collisions": [],
+    "compact": 13,
+    "editorHidden": false,
+    "fonts": [
+      "adaptive-name:12px",
+      "adaptive-time:9px",
+      "adaptive-teacher:11px",
+      "adaptive-room:9px",
+      "adaptive-group:10px"
+    ],
+    "markerOnly": 0,
+    "scroll": {
+      "contentHeight": 924,
+      "contentWidth": 1014,
+      "height": 593,
+      "width": 742
+    },
+    "viewport": {
+      "h": 768,
+      "w": 1024
+    }
+  },
+  {
+    "mode": "fit",
+    "bad": [],
+    "board": {
+      "bottom": 755,
+      "right": 1013
+    },
+    "cardOverlaps": [],
+    "cards": 37,
+    "clockOverlaps": [],
+    "collisions": [],
+    "compact": 14,
+    "editorHidden": true,
+    "fonts": [
+      "adaptive-name:12px",
+      "adaptive-time:9px",
+      "adaptive-teacher:11px",
+      "adaptive-room:9px",
+      "adaptive-group:10px"
+    ],
+    "markerOnly": 6,
+    "scroll": {
+      "contentHeight": 674,
+      "contentWidth": 1002,
+      "height": 674,
+      "width": 1002
+    },
+    "viewport": {
+      "h": 768,
+      "w": 1024
+    }
+  },
+  {
+    "mode": "normal",
+    "bad": [],
+    "board": {
+      "bottom": 1088,
+      "right": 1285
+    },
+    "cardOverlaps": [],
+    "cards": 37,
+    "clockOverlaps": [],
+    "collisions": [],
+    "compact": 13,
+    "editorHidden": false,
+    "fonts": [
+      "adaptive-name:12px",
+      "adaptive-time:9px",
+      "adaptive-teacher:11px",
+      "adaptive-room:9px",
+      "adaptive-group:10px"
+    ],
+    "markerOnly": 0,
+    "scroll": {
+      "contentHeight": 924,
+      "contentWidth": 1014,
+      "height": 445,
+      "width": 568
+    },
+    "viewport": {
+      "h": 600,
+      "w": 850
+    }
+  },
+  {
+    "mode": "fit",
+    "bad": [],
+    "board": {
+      "bottom": 587,
+      "right": 839
+    },
+    "cardOverlaps": [],
+    "cards": 37,
+    "clockOverlaps": [],
+    "collisions": [],
+    "compact": 37,
+    "editorHidden": true,
+    "fonts": [
+      "adaptive-name:12px",
+      "adaptive-teacher:11px",
+      "adaptive-time:9px",
+      "adaptive-room:9px"
+    ],
+    "markerOnly": 12,
+    "scroll": {
+      "contentHeight": 506,
+      "contentWidth": 828,
+      "height": 506,
+      "width": 828
+    },
+    "viewport": {
+      "h": 600,
+      "w": 850
+    }
+  }
+]

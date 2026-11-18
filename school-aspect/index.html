@@ -575,6 +575,7 @@ button[class*="btn-"]:active:not(:disabled){filter:brightness(.96)}
 .card-layout-status{height:24px;min-height:24px;font-size:11px;line-height:12px;color:inherit;overflow-wrap:break-word}
 .board .lesson{padding:0!important;display:block!important}
 .board .lesson.low-card{border-top-width:0;border-bottom-width:0}
+.board .end-tick{height:14px;line-height:14px;transform:none}
 .board .lesson .adaptive-content{position:absolute;inset:0 4px 0 4px;display:flex;flex-direction:column;justify-content:center;gap:1px;overflow:visible;pointer-events:none}
 .board .lesson.has-mark .adaptive-content{right:12px}
 .board .lesson .state-mark{font-size:9px;line-height:12px;padding:0 1px;right:1px;top:1px}
@@ -889,8 +890,8 @@ function board(){
  names.forEach((n,i)=>h+=`<div class="head" style="background:${colors[i%colors.length]}">${esc(n)}</div>`);
  h+='<div class="timeline time-lane">';
  const tickStep=fit&&20*px<14?60:20;
- for(let t=begin;t<end;t=(t===begin?Math.floor(t/tickStep)*tickStep+tickStep:t+tickStep)){h+=`<div class="tick ${t%60===0?'hour':''} ${t===begin?'first-tick':''}" style="top:${(t-begin)*px}px">${fmt(t)}</div>`}
- h+='<div class="tick end-tick" style="top:'+((end-begin)*px-20)+'px">'+fmt(end)+'</div></div>';
+ for(let t=begin;t<end;t=(t===begin?Math.floor(t/tickStep)*tickStep+tickStep:t+tickStep)){if(t!==begin&&(end-t)*px<28)continue;h+=`<div class="tick ${t%60===0?'hour':''} ${t===begin?'first-tick':''}" style="top:${(t-begin)*px}px">${fmt(t)}</div>`}
+ h+='<div class="tick end-tick" style="top:'+((end-begin)*px-14)+'px">'+fmt(end)+'</div></div>';
  const routine=/^(WELCOME|BREAK|BREAKFAST|LUNCH|SNACK TIME|DINNER|CIRCL|ПРОГУЛКА|ЗАРЯДКА)$/i;
  names.forEach((n,i)=>{
   h+='<div class="timeline class-lane" data-class="'+i+'">';
