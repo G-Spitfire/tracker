@@ -94,7 +94,7 @@ function home(){
  const hwGrades=all.filter(g=>g.homework),hwAverage=hwGrades.length?fmt(mean(hwGrades.map(g=>g.value))):'—';
  const activeDates=[...new Set(all.map(g=>g.date))].sort().reverse();
  let cleanStreak=0;for(const date of activeDates){if(all.some(g=>g.date===date&&g.value<=3))break;cleanStreak++}
- const tile=(label,value,hint,icon,color)=>'<div class="stat-tile"><div class="stat-top"><span>'+label+'</span><span class="stat-icon">'+ico(icon)+'</span></div><strong class="stat-value"'+(color?' style="color:'+color+'"':'')+'>'+value+'</strong><span class="stat-hint">'+hint+'</span></div>';
+ const tile=(label,value,hint,icon,color)=>'<div class="stat-tile"><div class="stat-top"><span>'+label+'</span><span class="stat-icon">'+kpiIcon(icon)+'</span></div><strong class="stat-value"'+(color?' style="color:'+color+'"':'')+'>'+value+'</strong><span class="stat-hint">'+hint+'</span></div>';
  let out='<section class="home-screen"><div class="stats-grid">'+
  tile('Средний балл',fmt(score()),'За четверть','average')+
  tile('Динамика',arrow+' '+(delta>0?'+':'')+fmt(delta),'За сегодня','trend',delta>0?'#31ad81':delta<0?'#d76a6a':null)+
