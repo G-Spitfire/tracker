@@ -819,13 +819,15 @@ function catalogEditor(kind){
   if(!x&&!creating){
    h+='<button id="catalog-add" class="btn-primary btn-standard">+ Добавить</button><label>Поиск<input id="catalog-search" value="'+esc(search)+'"></label><div class="teacher-list">'+list.filter(v=>v.name.toLocaleLowerCase('ru').includes(search.toLocaleLowerCase('ru'))).slice().sort((a,b)=>a.name.localeCompare(b.name,'ru')).map(v=>'<button class="teacher-list-item btn-list" data-catalog-open="'+esc(v.id)+'"><span>'+esc(v.name)+(v.archived?'<small>Сохранён из прежнего архива</small>':'')+'</span><span>›</span></button>').join('')+'</div>';
   }else if(creating||editing){
-   h+='<label>Название<input id="catalog-name" value="'+esc(x?.name||'')+'"></label>';
+   h+='<label>'+(kind==='staff'?'ФИО':'Название')+'<input id="catalog-name" value="'+esc(x?.name||'')+'"></label>';
+   if(kind==='staff')h+='<label>Короткое имя для расписания<input id="catalog-short-name" value="'+esc(x?.shortName||'')+'" placeholder="Например, Елена И."></label>';
    if(kind==='types')h+='<label>Цвет<input id="catalog-color" type="color" value="'+esc(x?.color||'#dceafe')+'"></label>';
    if(kind==='activities')h+='<label>Тип активности<select id="catalog-type">'+doc.catalogs.types.map(t=>'<option value="'+esc(t.id)+'" '+(t.id===x?.typeId?'selected':'')+'>'+esc(t.name)+'</option>').join('')+'</select></label>';
    if(kind==='staff')h+='<label>Должность (необязательно)<input id="catalog-role" value="'+esc(cfg.teacherRoles?.[x?.id]||cfg.teacherRoles?.[x?.name]||'')+'"></label>';
    h+='<div class="buttons"><button id="catalog-save" data-catalog-mutation class="btn-primary btn-standard">Сохранить</button><button id="catalog-cancel" class="btn-secondary btn-standard">Отмена</button></div>';
   }else{
    h+='<div class="teacher-identity"><h2>'+esc(x.name)+'</h2></div>';
+   if(kind==='staff')h+='<p>На графике: <strong>'+esc(x.shortName||x.name)+'</strong></p>';
    if(kind==='types')h+='<div class="dir-color-row"><span>Цвет типа</span><span class="dir-swatch" style="background:'+esc(x.color)+'"></span></div>';
    if(kind==='activities')h+='<p>Тип: '+esc(doc.catalogs.types.find(t=>t.id===x.typeId)?.name)+'</p>';
    if(x.archived)h+='<p class="tiny">Объект сохранён из прежнего архива. Восстановление вернёт его в списки выбора без изменения расписания.</p><button id="catalog-restore" data-catalog-mutation>Восстановить</button>';
@@ -844,7 +846,7 @@ function catalogEditor(kind){
   if($('catalog-edit'))$('catalog-edit').onclick=()=>{editing=true;draw()};
   if($('catalog-cancel'))$('catalog-cancel').onclick=()=>{creating=false;editing=false;draw()};
   if($('catalog-save'))$('catalog-save').onclick=()=>{
-   const values={id:x?.id,name:$('catalog-name').value,color:$('catalog-color')?.value,typeId:$('catalog-type')?.value};
+   const values={id:x?.id,name:$('catalog-name').value,shortName:$('catalog-short-name')?.value,color:$('catalog-color')?.value,typeId:$('catalog-type')?.value};
    const role=$('catalog-role')?.value.trim();
    const r=commitCatalog(d=>{const r=AspectCatalogs.save(d,kind,values);if(kind==='staff'){const c=r.document.settings[CFGKEY]||={};c.teacherRoles||={};c.teacherRoles[r.id]=role;}return r;});
    if(r){chosen=r.id;creating=false;editing=false;draw();}
@@ -956,12 +958,14 @@ function board(){
    const splitTwoLine=split&&height>=62;
    const splitMeta=split&&height>=78;
    const assignedTeachers=teachersOf(x);const teacherLabel=assignedTeachers.join(' + ');
+   const staffCatalog=localStorage.document().catalogs.staff;
+   const shortTeachers=assignedTeachers.map(name=>{const staff=staffCatalog.find(t=>t.name===name||t.id===name);return staff?.shortName?.trim()||staff?.name||name;});
    const details=[names[i],label,fmt(x.start)+'–'+fmt(x.end),teacherLabel||'Преподаватель не назначен',x.room||'Кабинет не назначен',...issues(x,x.id),...(isAbsent?['Отсутствуют: '+absentTeachers(x).join(', ')+(teachersOf(x).filter(t=>!absent(t)).length?' · остаются: '+teachersOf(x).filter(t=>!absent(t)).join(', '):'')]:[]),...(over?['За пределами рабочего графика']:[]),...(noTeacher?['Не назначен преподаватель']:[]),...(missingRoom?['Не указан кабинет']:[])].filter(Boolean).join(' | ');
    const cls=['lesson','colorized',height<20?'low-card':'',height<4?'micro':'',short?'short':medium?'medium':'long',isEvent?'event':changed?'changed':'',normalRoutine?'routine':'',split?'split '+(x.group==='b'?'side-b':'side-a')+(splitTwoLine?' split-wrap':'')+(splitMeta?' split-meta':''):'',conflict?'conflict':'',isAbsent?'absent-lesson':'',missingRoom?'missing-room':'',noTeacher?'missing-teacher':'',over?'overtime':'',(conflict||isAbsent||missingRoom||noTeacher)?'has-mark':'',String(selected)===String(x.id)?'selected':''].filter(Boolean).join(' ');
    if(issueFilter&&!(issueFilter==='all-issues'&&(conflict||isAbsent||missingRoom||noTeacher||over)||issueFilter==='conflicts'&&conflict||issueFilter==='absence'&&isAbsent||issueFilter==='rooms'&&missingRoom))return;const mark=(conflict||isAbsent||noTeacher)?'!':missingRoom?'·':'';
    const cardProblems=[...(conflict?['Конфликт расписания']:[]),...(isAbsent?['Преподаватель отсутствует']:[]),...(noTeacher?['Не назначен преподаватель']:[]),...(missingRoom?['Не указан кабинет']:[]),...(over?['Вне рабочего времени']:[])];
    const location=x.room&&x.room!=='Не назначен'?x.room:(normalRoutine?'':'Нет кабинета');
-   h+=`<button class="${cls}" data-id="${esc(x.id)}" data-card-type="${esc(isEvent?'event':(x.typeId||directoryItem(x.name)?.typeId||((directoryItem(x.name)?.type==='routine')?'type-routine':'type-subject')))}" data-card-name="${esc(label)}" data-card-time="${fmt(x.start)}–${fmt(x.end)}" data-card-room="${esc(location)}" data-card-group="${splitGroup}" data-card-teachers="${esc(JSON.stringify(assignedTeachers.length?assignedTeachers:['Не назначен']))}" aria-label="${esc(details)}" title="${esc(details)}" style="top:${top}px;height:${height}px;--card-lane:${position.lane};--card-lanes:${position.lanes};--lesson-color:${categoryFor(x).color};--lesson-bg:${tintColor(categoryFor(x).color)}"><span class="adaptive-content"><span class="adaptive-line"><strong class="adaptive-name">${esc(label)}</strong></span></span>${mark?`<span class="state-mark" aria-hidden="true">${mark}</span>`:''}</button>`;
+   h+=`<button class="${cls}" data-id="${esc(x.id)}" data-card-type="${esc(isEvent?'event':(x.typeId||directoryItem(x.name)?.typeId||((directoryItem(x.name)?.type==='routine')?'type-routine':'type-subject')))}" data-card-name="${esc(label)}" data-card-time="${fmt(x.start)}–${fmt(x.end)}" data-card-room="${esc(location)}" data-card-group="${splitGroup}" data-card-teachers="${esc(JSON.stringify(shortTeachers.length?shortTeachers:['Не назначен']))}" aria-label="${esc(details)}" title="${esc(details)}" style="top:${top}px;height:${height}px;--card-lane:${position.lane};--card-lanes:${position.lanes};--lesson-color:${categoryFor(x).color};--lesson-bg:${tintColor(categoryFor(x).color)}"><span class="adaptive-content"><span class="adaptive-line"><strong class="adaptive-name">${esc(label)}</strong></span></span>${mark?`<span class="state-mark" aria-hidden="true">${mark}</span>`:''}</button>`;
 
   });
   if(mode==='new-lesson'&&draft&&draft.cls===i&&Number.isFinite(draft.start)&&Number.isFinite(draft.end)&&draft.end>begin&&draft.start<end){const top=Math.max(0,(Math.max(begin,draft.start)-begin)*px+2),height=Math.max(12,(Math.min(end,draft.end)-Math.max(begin,draft.start))*px-4);h+='<div class="draft-slot'+(draft.end<=draft.start?' invalid':'')+'" style="top:'+top+'px;height:'+height+'px" aria-label="Новое занятие '+fmt(draft.start)+'–'+fmt(draft.end)+'"><strong>Новое занятие</strong><small>'+fmt(draft.start)+'–'+fmt(draft.end)+'</small></div>'}
