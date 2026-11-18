@@ -32,7 +32,7 @@
     const catalogs = {
       groups: previous?.catalogs.groups || GROUP_NAMES.map((name, i) => ({id: 'group-' + i, name})),
       staff: clone(refs.teacher || []), rooms: clone(refs.room || []),
-      types: ['subject', 'routine', 'event'].map(name => ({
+      types: previous ? clone(previous.catalogs.types).map(t => ({...t, color: directory.colors?.[t.id.replace(/^type-/, '')] || t.color})) : ['subject', 'routine', 'event'].map(name => ({
         id: 'type-' + name, name, color: directory.colors?.[name] || ({subject:'#cfe3f8',routine:'#ffe79b',event:'#ccebd9'}[name])
       })),
       activities: (directory.subjects || []).map(item => {
@@ -76,11 +76,10 @@
           const known = catalogs.staff.find(v => v.name === name);
           return reference('staff', name, known?.id || (name === record.teacher ? record.teacherId : null));
         }));
-        const activity = !event && (catalogs.activities.find(v => v.name === record.name) ||
-          catalogs.activities.find(v => v.id === record.subjectId));
-        const typeId = activity?.typeId || (event ? 'type-event' : 'type-subject');
+        const activity = (event ? catalogs.activities.find(v => v.id === record.subjectId) : catalogs.activities.find(v => v.name === record.name)) || catalogs.activities.find(v => v.id === record.subjectId);
+        const typeId = activity?.typeId || record.typeId || (event ? 'type-event' : 'type-subject');
         const {id: ignoredId, kind, cls, classes, teacher, teachers, teacherId, teacherIds,
-          room, roomId, name, subjectId, start, end, group, ...details} = record;
+          room, roomId, name, subjectId, typeId: ignoredType, start, end, group, ...details} = record;
         return {id: entryId, typeId, activityId: activity?.id || null,
           title: activity ? null : (name || ''), groupIds: unique(indices.map(i => catalogs.groups[i].id)),
           staffIds, roomId: reference('rooms', room, roomId), start, end,
@@ -112,7 +111,7 @@
         const activity = c.activities.find(v => v.id === entry.activityId);
         const classes = entry.groupIds.map(id => c.groups.findIndex(v => v.id === id));
         const record = {...entry.details, id: entry.id, name: activity?.name || entry.title || '',
-          subjectId: entry.activityId, start: entry.start, end: entry.end,
+          subjectId: entry.activityId, typeId: entry.typeId, start: entry.start, end: entry.end,
           group: entry.subgroup, teacher: teachers[0] || NONE, teachers,
           teacherId: entry.staffIds[0] || null, teacherIds: [...entry.staffIds],
           room: nameOf(c.rooms, entry.roomId), roomId: entry.roomId};
@@ -144,7 +143,11 @@
       if (ids.some(v => typeof v !== 'string' || !v) || new Set(ids).size !== ids.length)
         throw Error('Некорректные ID справочника: ' + kind);
     }
-    if (!c.groups.length) throw Error('Нет учебных групп.');
+    for (const kind of ['groups','staff','rooms','types','activities']) {
+      const names=c[kind].map(v=>v.name.normalize('NFKC').trim().replace(/\s+/g,' ').toLocaleLowerCase('ru'));
+      if(new Set(names).size!==names.length) throw Error('Повторяющиеся названия справочника: '+kind);
+    }
+    for(const t of c.types) if(!/^#[0-9a-f]{6}$/i.test(t.color)) throw Error('Некорректный цвет типа активности');
     const has = (kind, id) => c[kind].some(v => v.id === id);
     for (const activity of c.activities) if (!has('types', activity.typeId)) throw Error('Неизвестный тип активности');
     for (const [date, day] of Object.entries(document.days)) {
@@ -156,6 +159,7 @@
         seen.add(e.id);
         if (!has('types', e.typeId) || (e.activityId && !has('activities', e.activityId)) ||
             (e.roomId && !has('rooms', e.roomId))) throw Error('Нарушена связь записи');
+        if(e.activityId && c.activities.find(a=>a.id===e.activityId).typeId!==e.typeId) throw Error('Тип записи не соответствует названию активности');
         for (const [field, kind] of [['staffIds', 'staff'], ['groupIds', 'groups']]) {
           if (!Array.isArray(e[field]) || new Set(e[field]).size !== e[field].length ||
               e[field].some(id => !has(kind, id))) throw Error('Нарушена связь: ' + field);

@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Аспект · этап 4</title><style>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Аспект · этап 5</title><style>
 *{box-sizing:border-box}body{margin:0;background:#f3f5f9;color:#19283c;font:13px system-ui,-apple-system,Segoe UI,sans-serif}button,input,select{font:inherit}button{cursor:pointer;border:1px solid #d6dfeb;background:white;border-radius:8px;padding:9px 12px;color:#24374f}button:hover{background:#edf3fc}button:disabled{opacity:.45;cursor:not-allowed}.app{height:100vh;min-height:620px;display:flex;flex-direction:column}.top{background:#fff;border-bottom:1px solid #dae2ed;display:flex;align-items:center;gap:9px;padding:12px 20px;flex-wrap:wrap}.brand{font-weight:800;font-size:18px;margin-right:auto}.muted{color:#728095}.tag{border-radius:99px;padding:5px 10px;background:#eef2f7;color:#4e6078}.workspace{display:grid;grid-template-columns:minmax(0,1fr) 350px;flex:1;min-height:0}.left{min-width:0;display:flex;flex-direction:column;padding:16px;gap:10px}.heading{display:flex;justify-content:space-between;align-items:center;gap:10px}.heading h2{font-size:17px;margin:0}.scroll{overflow:auto;flex:1;background:white;border:1px solid #dce3ed;border-radius:12px}.board{display:grid;grid-template-columns:65px repeat(6,minmax(135px,1fr));min-width:890px}.head{position:sticky;top:0;z-index:4;padding:12px 6px;text-align:center;font-weight:750;border-bottom:1px solid #dce3ed;border-right:1px solid #e4eaf2}.time{border-bottom:1px dashed #e0e6ef;border-right:1px solid #e0e6ef;text-align:center;padding:5px 2px;color:#77869a;height:42px}.cell{height:42px;border-bottom:1px dashed #e0e6ef;border-right:1px solid #e0e6ef;position:relative}.lesson{position:absolute;z-index:1;left:4px;right:4px;border:1px solid #b6cbed;border-left:4px solid #5b8fdb;background:#edf4ff;border-radius:7px;padding:3px 5px;text-align:left;overflow:hidden;display:flex;flex-direction:column;gap:1px;min-height:23px}.lesson strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lesson small{font-size:10px;color:#52657e}.lesson.changed{background:#fff2d9;border-color:#f0c878;border-left-color:#d99420}.lesson.conflict{background:#ffe7e4;border-color:#df766c;border-left-color:#cb423a}.lesson.selected{outline:2px solid #1e60c5;z-index:3}.right{background:white;border-left:1px solid #dce3ed;overflow:auto;padding:20px}.right h2{font-size:18px;margin:0 0 4px}.right label{display:block;font-size:12px;font-weight:650;margin:14px 0 5px}.right select,.right input{width:100%;padding:10px;border:1px solid #d6dfeb;border-radius:8px;background:white;color:#19283c}.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}.notice{background:#f4f6fa;border-radius:9px;padding:12px;margin:15px 0;line-height:1.55}.error{color:#b72f2b}.ok{color:#167345}.buttons{display:flex;gap:7px;flex-wrap:wrap;margin-top:15px}.buttons button{flex:1}.legend{display:flex;gap:16px;color:#718095;font-size:12px}.dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px}.slots{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}.slots button{padding:7px 3px;font-size:11px}.slots .busy{color:#bb3f37;background:#fff1f0}.slots .free{color:#147344;background:#eff9f1}.slots .picked{outline:2px solid #2863c5}.bottom{display:flex;justify-content:space-between;align-items:center;gap:10px}.summary{background:#fff;border:1px solid #e0e6ee;padding:9px 12px;border-radius:9px}.small{font-size:11px}.sub{font-size:12px;color:#6d7c90}.absent-lesson{background:#fff1d9!important;border-left-color:#d97706!important}.absence-panel{background:#fff8e9;border:1px solid #f0d7a4;border-radius:10px;padding:11px;margin:10px 0}.absence-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #e7eaf0}.absence-row:last-child{border:0}.absence-row button{padding:5px 9px}.hidden{display:none!important}@media(max-width:850px){.workspace{grid-template-columns:minmax(0,1fr) 290px}.right{padding:12px}.left{padding:10px}}
 
 .lesson.split{width:calc(50% - 5px);right:auto}.lesson.split.side-b{left:calc(50% + 1px)}.lesson.split.side-a{left:4px}.lesson.split strong{font-size:10px}.lesson.split small{font-size:9px}.event{background:#e7f5f0!important;border-color:#79bca4!important;border-left-color:#168565!important}.event.conflict{background:#ffe7e4!important;border-color:#df766c!important}.multi{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:7px 0}.multi label{display:flex;gap:6px;align-items:center;margin:0;font-weight:500}.multi input{width:auto}.tiny{font-size:11px;color:#66758a}.box{padding:10px;border:1px solid #dae2ed;border-radius:8px;margin:9px 0}.box.warn{border-color:#e6a18f;background:#fff6f3}.event-card{border-bottom:1px solid #e1e6ee;padding:8px 0}.event-card:last-child{border:0}.right textarea{width:100%;padding:9px;border:1px solid #d6dfeb;border-radius:8px;resize:vertical}.right .multi label{font-size:12px}.wide{width:100%}.right h3{font-size:14px;margin:16px 0 7px}
@@ -553,8 +553,9 @@ button[class*="btn-"]:active:not(:disabled){filter:brightness(.96)}
 .right .absence-pending-actions button{font-size:11px;min-height:30px}
 .right .absence-back{margin-top:16px;font-size:11px;min-height:30px}
 .absence-form .pair{grid-template-columns:repeat(2,minmax(0,1fr))}.absence-form .pair>div{min-width:0}.absence-form input[type=date]{min-width:0;padding:7px 3px;font-size:11px}
-</style></head><body><div id="pdf-overlay" class="pdf-overlay" role="dialog" aria-modal="true" aria-label="Предпросмотр расписания"><div class="pdf-dialog"><div class="pdf-bar"><strong id="pdf-heading">Предпросмотр расписания</strong><span id="pdf-warning" class="warn"></span><button id="pdf-print" class=" btn-primary btn-standard">Печать / Сохранить PDF</button><button id="pdf-close" class="btn-secondary btn-standard">Закрыть</button></div><iframe id="pdf-frame" class="pdf-frame" title="Печатное расписание"></iframe></div></div><dialog id="unsaved-draft-dialog" aria-labelledby="unsaved-draft-title" aria-describedby="unsaved-draft-copy"><h2 id="unsaved-draft-title">Есть несохранённые изменения</h2><p id="unsaved-draft-copy">Если перейти, изменения в этом занятии не сохранятся.</p><div class="buttons"><button type="button" id="unsaved-stay" class="btn-secondary btn-standard">Остаться</button><button type="button" id="unsaved-discard" class=" btn-danger btn-standard">Перейти без сохранения</button></div></dialog><dialog id="reset-confirm-dialog" aria-labelledby="reset-confirm-title" aria-describedby="reset-confirm-copy"><h2 id="reset-confirm-title">Сбросить день?</h2><p id="reset-confirm-copy">Будут удалены изменения, мероприятия и отсутствия только на выбранную дату.</p><div class="buttons"><button type="button" id="reset-cancel" class="btn-secondary btn-standard">Отмена</button><button type="button" id="reset-confirm-ok" class=" btn-danger btn-standard">Сбросить день</button></div></dialog><div class="app"><div class="top"><div class="brand" aria-label="Школа · Аспект"><span class="school-logo" aria-hidden="true"><svg viewBox="0 0 100 100" width="30" height="30" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="47" fill="#e60023"/><path d="M23 44 79 23 85 38 33 57 33 63 82 77 77 84 23 68Z" fill="white"/><path d="M36 58 70 46 Q77 55 73 69Z" fill="white"/><path d="M27 72 77 88M29 78 69 91" fill="none" stroke="white" stroke-width="3"/></svg></span><span class="school-name">ASPECT<small>EDUCATIONAL CENTRE</small></span></div><h2 id="title">Расписание</h2><div class="top-actions"><div class="top-group date-group"><button id="today" class="btn-secondary btn-compact">Сегодня</button><button id="tomorrow" class="btn-secondary btn-compact">Завтра</button><button id="copy-day" title="Скопировать занятия из последнего заполненного такого же дня недели" class="btn-secondary btn-compact">Копировать день</button><button id="copy-week" class="btn-secondary btn-compact" title="Копировать неделю с выбранной даты-источника">Копировать неделю</button><label class="date-picker"><span id="date-label" aria-hidden="true"></span><span aria-hidden="true">▾</span><input type="date" id="date" aria-label="Выбрать дату расписания"></label></div><details class="add-menu"><summary class="btn-primary btn-compact">+ Добавить</summary><div class="add-menu-items"><button id="new-lesson-button" class="btn-list">Урок</button><button id="new-routine-button" class="btn-list">Режимный момент / перемена</button><button id="event-button" class="btn-list">Мероприятие</button></div></details><button id="absence-button" class="btn-secondary btn-compact">Отсутствия <span id="absence-count"></span></button><button id="undo-button" title="Отмена последнего изменения расписания до перезагрузки">Отменить</button><button id="settings-button" aria-controls="editor" class="btn-secondary btn-compact">Настройки</button><div class="header-schedule-tools"><div class="issue-strip"><button id="issues-conflicts" class="btn-filter btn-compact">Проблемы: 0</button><button id="issues-absence" hidden class="btn-filter btn-compact">Требуют решения: 0</button><button id="issues-rooms" hidden class="btn-filter btn-compact">Без кабинета: 0</button></div></div></div></div><div id="storage-status" role="status" style="padding:5px 12px;background:#fff4d9" hidden></div><div class="workspace"><aside class="right" id="editor"></aside><div class="left"><div class="scroll"><div class="board" id="board"></div></div></div></div></div><script src="model.js"></script><script src="copy.js"></script><script src="staff.js"></script><script>
+</style></head><body><div id="pdf-overlay" class="pdf-overlay" role="dialog" aria-modal="true" aria-label="Предпросмотр расписания"><div class="pdf-dialog"><div class="pdf-bar"><strong id="pdf-heading">Предпросмотр расписания</strong><span id="pdf-warning" class="warn"></span><button id="pdf-print" class=" btn-primary btn-standard">Печать / Сохранить PDF</button><button id="pdf-close" class="btn-secondary btn-standard">Закрыть</button></div><iframe id="pdf-frame" class="pdf-frame" title="Печатное расписание"></iframe></div></div><dialog id="unsaved-draft-dialog" aria-labelledby="unsaved-draft-title" aria-describedby="unsaved-draft-copy"><h2 id="unsaved-draft-title">Есть несохранённые изменения</h2><p id="unsaved-draft-copy">Если перейти, изменения в этом занятии не сохранятся.</p><div class="buttons"><button type="button" id="unsaved-stay" class="btn-secondary btn-standard">Остаться</button><button type="button" id="unsaved-discard" class=" btn-danger btn-standard">Перейти без сохранения</button></div></dialog><dialog id="reset-confirm-dialog" aria-labelledby="reset-confirm-title" aria-describedby="reset-confirm-copy"><h2 id="reset-confirm-title">Сбросить день?</h2><p id="reset-confirm-copy">Будут удалены изменения, мероприятия и отсутствия только на выбранную дату.</p><div class="buttons"><button type="button" id="reset-cancel" class="btn-secondary btn-standard">Отмена</button><button type="button" id="reset-confirm-ok" class=" btn-danger btn-standard">Сбросить день</button></div></dialog><div class="app"><div class="top"><div class="brand" aria-label="Школа · Аспект"><span class="school-logo" aria-hidden="true"><svg viewBox="0 0 100 100" width="30" height="30" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="47" fill="#e60023"/><path d="M23 44 79 23 85 38 33 57 33 63 82 77 77 84 23 68Z" fill="white"/><path d="M36 58 70 46 Q77 55 73 69Z" fill="white"/><path d="M27 72 77 88M29 78 69 91" fill="none" stroke="white" stroke-width="3"/></svg></span><span class="school-name">ASPECT<small>EDUCATIONAL CENTRE</small></span></div><h2 id="title">Расписание</h2><div class="top-actions"><div class="top-group date-group"><button id="today" class="btn-secondary btn-compact">Сегодня</button><button id="tomorrow" class="btn-secondary btn-compact">Завтра</button><button id="copy-day" title="Скопировать занятия из последнего заполненного такого же дня недели" class="btn-secondary btn-compact">Копировать день</button><button id="copy-week" class="btn-secondary btn-compact" title="Копировать неделю с выбранной даты-источника">Копировать неделю</button><label class="date-picker"><span id="date-label" aria-hidden="true"></span><span aria-hidden="true">▾</span><input type="date" id="date" aria-label="Выбрать дату расписания"></label></div><details class="add-menu"><summary class="btn-primary btn-compact">+ Добавить</summary><div class="add-menu-items"><button id="new-lesson-button" class="btn-list">Урок</button><button id="new-routine-button" class="btn-list">Режимный момент / перемена</button><button id="event-button" class="btn-list">Мероприятие</button></div></details><button id="absence-button" class="btn-secondary btn-compact">Отсутствия <span id="absence-count"></span></button><button id="undo-button" title="Отмена последнего изменения расписания до перезагрузки">Отменить</button><button id="settings-button" aria-controls="editor" class="btn-secondary btn-compact">Настройки</button><div class="header-schedule-tools"><div class="issue-strip"><button id="issues-conflicts" class="btn-filter btn-compact">Проблемы: 0</button><button id="issues-absence" hidden class="btn-filter btn-compact">Требуют решения: 0</button><button id="issues-rooms" hidden class="btn-filter btn-compact">Без кабинета: 0</button></div></div></div></div><div id="storage-status" role="status" style="padding:5px 12px;background:#fff4d9" hidden></div><div class="workspace"><aside class="right" id="editor"></aside><div class="left"><div class="scroll"><div class="board" id="board"></div></div></div></div></div><script src="model.js"></script><script src="copy.js"></script><script src="staff.js"></script><script src="catalogs.js"></script><script>
 (()=>{'use strict';
+const existingDocument=window.localStorage.getItem(AspectModel.KEY)!==null;
 let localStorage;try{localStorage=AspectModel.openStorage(window.localStorage,{guarded:!!document.addEventListener})}catch(e){alert('Не удалось открыть данные Аспект: '+e.message);return}
 const $=id=>document.getElementById(id),names=localStorage.document().catalogs.groups.map(g=>g.name),colors=['#dceafe','#dceafe','#dff4e7','#f0e5fb','#fff0dc','#fce5ee'];
 /* One-time casing migration: keep directory IDs and schedule links intact. */
@@ -587,9 +588,10 @@ const normalizeDirectoryCase=()=>{
  localStorage.setItem(key,JSON.stringify(next))}
  localStorage.setItem(CASE_MIGRATION_KEY,'done');
 };
-normalizeDirectoryCase();
+if(!existingDocument)normalizeDirectoryCase();
 const teachers=["Не назначен", "А.С.", "Анна", "Аракся А.", "Васти", "Д.С.", "Диана С.", "Е.А.", "Е.С.", "Елена", "Елена С.", "И.М.", "Мари", "Мэри", "Николь", "О.Г.", "О.Э.", "Олеся Г.", "Т.В.", "Ю.Р."] ,rooms=["Не назначен", "АКТОВЫЙ ЗАЛ", "БИБЛИОТЕКА", "ДВОР / ПРОГУЛКА", "ИГРОВАЯ", "ИЗО 21", "КАБ. 22", "КАБ. 24", "КАБ. 25", "КАБ. 31 (ПРЕСКУЛ)", "КАБ. 32", "КАБ. 33", "СПОРТЗАЛ", "СТОЛОВАЯ"].map(titleCaseDirectoryName);
 const subjects=["ART & CRAFT / TECHNOLOGY", "BREAK", "BREAKFAST", "CAMBRIDGE N / ОЛИМПИАДНАЯ", "CIRCL", "COMMUNICATIVE ENGLISH", "DINNER", "ENGLISH E/A", "ENGLISH GAME", "ENGLISH MUSIC", "ENGLISH N/M", "ENGLISH STUDIO", "FREE TIME", "HOMEWORK CLUB", "LUNCH", "SNACK TIME", "WELCOME", "ВНИМАТИКА", "ГРАМОТА / ПИСЬМО", "ГРАМОТА / ЧТЕНИЕ", "ДРАМА", "ЗАРЯДКА", "ИГРОВАЯ / КНИЖНЫЕ СОКРОВИЩА", "КАЛЛИГРАФИЯ", "ЛИТЕРАТУРНОЕ ЧТЕНИЕ", "МАТЕМАТИКА", "Мастер-класс", "НЕЙРОГИМНАСТИКА", "ОКРУЖАЮЩИЙ МИР", "ОРКСЭ / ФГ", "ПЛАСТИЛИНОВАЯ ЖИВОПИСЬ", "ПОДГОТОВКА К ВПР", "ПРОГУЛКА", "РИТМИКА", "РУССКИЙ ЯЗЫК", "СЮЖЕТНО-РОЛЕВАЯ ИГРА", "Спектакль", "ТРЕНИРОВОЧНЫЕ ЗАНЯТИЯ", "УМНЫЕ ПУТЕШЕСТВИЯ", "ФИЗКУЛЬТУРА", "Экскурсия", "Я И МОИ ЧУВСТВА"].map(titleCaseDirectoryName);
+if(existingDocument){const c=localStorage.document().catalogs;teachers.splice(0,teachers.length,'Не назначен',...c.staff.map(x=>x.name));rooms.splice(0,rooms.length,'Не назначен',...c.rooms.map(x=>x.name));subjects.splice(0,subjects.length,...c.activities.map(x=>x.name));}
 const SUBJECT_KEY='school_subjects_v19';try{let a=JSON.parse(localStorage.getItem(SUBJECT_KEY)||'null');if(Array.isArray(a))subjects.splice(0,subjects.length,...a)}catch(e){}const saveSubjects=()=>localStorage.setItem(SUBJECT_KEY,JSON.stringify(subjects));
 const DIRECTORY_KEY='school_directory_v20';
 const ROUTINE_NAMES=['BREAK','BREAKFAST','LUNCH','SNACK TIME','DINNER','CIRCL','ПРОГУЛКА','ЗАРЯДКА','FREE TIME','WELCOME'];
@@ -606,23 +608,6 @@ const directoryRef=(type,name)=>{if(!name||name==='Не назначен')return
 const resolveRef=(type,id,fallback)=>{const list=type==='subject'?directory.subjects:(directoryRefs[type]||[]);return list.find(v=>v.id===id)?.name||fallback};
 const saveRefs=()=>localStorage.setItem(DIRECTORY_REF_KEY,JSON.stringify(directoryRefs));const directoryRefArchived=(type,name)=>!!(directoryRefs[type]||[]).find(x=>x.name===name)?.archived;
 const syncRefNames=(type,names)=>{const list=directoryRefs[type]||=[];for(const name of names)if(name&&name!=='Не назначен'&&!list.some(x=>x.name===name))list.push({id:type==='teacher'?'teacher-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10):makeRef(type,name),name,archived:false});saveRefs()};
-const renameRef=(type,old,next)=>{let id=directoryRef(type,old),entry=(directoryRefs[type]||[]).find(x=>x.id===id);if(entry)entry.name=next;saveRefs()};
-const renameStoredResource=(type,oldName,newName)=>{
- const visit=value=>{
-  if(!value||typeof value!=='object')return;
-  if(Array.isArray(value)){value.forEach(visit);return}
-  if(type==='teacher'){
-   if(value.teacher===oldName)value.teacher=newName;
-   if(Array.isArray(value.teachers))value.teachers=value.teachers.map(t=>t===oldName?newName:t);
-  }else if(type==='room'&&value.room===oldName)value.room=newName;
-  for(const [key,v] of Object.entries(value))if(v&&typeof v==='object'&&key!=='teachers')visit(v);
- };
- [weekly,snapshot16,weeklySchedule,store].forEach(visit);
- localStorage.setItem(WEEKLY_EDIT_KEY,JSON.stringify(weeklySchedule));
- localStorage.setItem('school_real_week_v14',JSON.stringify(store));
-};
-const archiveRef=(type,name,archived)=>{let id=directoryRef(type,name),entry=(directoryRefs[type]||[]).find(x=>x.id===id);if(entry)entry.archived=archived;saveRefs()};
-
 const attachRefs=x=>{if(!x||typeof x!=='object')return x;const y={...x};if(y.kind!=='event'){if(!y.subjectId)y.subjectId=directoryRef('subject',y.name);else if(directoryItem(y.name)&&directoryItem(y.name).id!==y.subjectId)y.subjectId=directoryRef('subject',y.name);y.name=resolveRef('subject',y.subjectId,y.name)}// Assignment names are authoritative when edited; IDs must never resurrect removed people.
 const assigned=AspectModel.assignments(y,Array.isArray(y.teachers)?y.teachers:[y.teacher]);
 Object.assign(y,assigned);y.teacherIds=y.teachers.map(t=>directoryRef('teacher',t));y.teacherId=y.teacherIds[0]||null;if(y.room&&y.room!=='Не назначен'){if(!y.roomId)y.roomId=directoryRef('room',y.room);else if((directoryRefs.room||[]).some(t=>t.name===y.room&&t.id!==y.roomId))y.roomId=directoryRef('room',y.room);y.room=resolveRef('room',y.roomId,y.room)}return y};
@@ -635,7 +620,7 @@ let collapsed=false,issueFilter='';const today=new Date();let date=iso(today),se
 try{store=JSON.parse(localStorage.getItem('school_real_week_v14')||'{}')}catch(e){};
 const CFGKEY='school_week_config_v12';let cfg={hours:{},home:{},customLists:{}};try{cfg={...cfg,...JSON.parse(localStorage.getItem(CFGKEY)||'{}')}}catch(e){};
 const TEACHER_ID_MIGRATION='aspect_teacher_id_migration_v1';
-if(!localStorage.getItem(TEACHER_ID_MIGRATION)){
+if(!existingDocument&&!localStorage.getItem(TEACHER_ID_MIGRATION)){
  try{
   const backup={createdAt:new Date().toISOString(),cfg:localStorage.getItem(CFGKEY),refs:localStorage.getItem(DIRECTORY_REF_KEY),store:localStorage.getItem('school_real_week_v14'),weekly:localStorage.getItem(WEEKLY_EDIT_KEY)};
   localStorage.setItem('aspect_teacher_id_backup_v1',JSON.stringify(backup));
@@ -717,140 +702,74 @@ const resolutionValid=x=>{const saved=(day().resolutions||{})[x.id];return x.kin
 const unresolved=()=>resources().filter(x=>absentTeachers(x).length&&!resolutionValid(x));
 function commit(fn){const previous=store[date];let d=day();const next={...d,edits:structuredClone(d.edits||{}),absences:{...(d.absences||{})},events:structuredClone(d.events||[]),extras:structuredClone(d.extras||[]),resolutions:structuredClone(d.resolutions||{}),initialized:true};fn(next);next.extras=next.extras.map(attachRefs);next.events=next.events.map(attachRefs);for(const [id,edit] of Object.entries(next.edits))next.edits[id]=attachRefs(edit);store[date]=next;try{localStorage.setItem('school_real_week_v14',JSON.stringify(store))}catch(e){if(previous===undefined)delete store[date];else store[date]=previous;alert('Изменения НЕ сохранены. Проверьте место в хранилище и создайте резервную копию. '+e.message);return false}render();return true}
 
-for(const t of cfg.customLists?.teachers||[])if(!teachers.includes(t))teachers.push(t);for(const t of cfg.deletedTeachers||[]){let i=teachers.indexOf(t);if(i>=0)teachers.splice(i,1)}for(const r of cfg.customLists?.rooms||[])if(!rooms.includes(r))rooms.push(r);
 const workHours=t=>{let wd=new Date(date+'T12:00:00').getDay(),h=cfg.hours?.[directoryRef('teacher',t)]||cfg.hours?.[t];return h&&Object.prototype.hasOwnProperty.call(h,wd)?h[wd]:(wd===0||wd===6?null:['09:00','18:00'])};
 const overtime=x=>teachersOf(x).filter(t=>{let h=workHours(t);return !h||x.start<min(h[0])||x.end>min(h[1])});
-syncRefNames('teacher',teachers);syncRefNames('room',rooms);if(!cfg.courtyardRoomArchived){archiveRef('room','Двор / Прогулка',true);cfg.courtyardRoomArchived=true;localStorage.setItem(CFGKEY,JSON.stringify(cfg))}const saveCfg=()=>localStorage.setItem(CFGKEY,JSON.stringify(cfg));// Renames are applied at edit time. Replaying historical name mappings on every load
+syncRefNames('teacher',teachers);syncRefNames('room',rooms);const saveCfg=()=>localStorage.setItem(CFGKEY,JSON.stringify(cfg));// Renames are applied at edit time. Replaying historical name mappings on every load
 // would incorrectly rename a newly created resource that reuses an old name.
 base=baseForDate(date);
 let colorCategories=JSON.parse(localStorage.getItem('school_colors_v12')||'null')||[{id:'breaks',name:'Перерывы',color:'#ffe79b',items:['BREAK','BREAKFAST','LUNCH','SNACK TIME','DINNER']},{id:'study',name:'Учебные занятия',color:'#cfe3f8',items:['МАТЕМАТИКА','РУССКИЙ ЯЗЫК','ENGLISH','ГРАМОТА']},{id:'events',name:'Мероприятия и выезды',color:'#ccebd9',items:[],event:true},{id:'other',name:'Другие занятия',color:'#e7edf5',items:[]}];
-const categoryFor=x=>{if(x.kind==='event')return {color:directory.colors.event};const item=directoryItem(x.name);if(item)return {color:directoryColor(x.name)};return {color:directory.colors[isRoutine(x)?'routine':'subject']}};
+const categoryFor=x=>{const item=directoryItem(x.subjectId||x.name);if(item)return {color:directoryColor(item.name)};return {color:directory.colors[x.typeId?.replace(/^type-/,'')]||directory.colors[x.kind==='event'?'event':isRoutine(x)?'routine':'subject']||'#dceafe'}};
 const tintColor=h=>{let v=String(h||'#dfe8f4').replace('#',''),r=parseInt(v.slice(0,2),16),g=parseInt(v.slice(2,4),16),b=parseInt(v.slice(4,6),16);return 'rgb('+Math.round(r*.18+255*.82)+','+Math.round(g*.18+255*.82)+','+Math.round(b*.18+255*.82)+')'};
 let settingsPage='home',settingsSection='settings';
-let showArchivedRooms=false,showArchivedSubjects=false,showArchivedRoutines=false;
-function chooseTeacherArchiveReplacements(oldName,items,validNames){
- return new Promise(resolve=>{
-  const shade=document.createElement('div');shade.className='archive-modal-shade';
-  const options='<option value="">Выберите преподавателя</option>'+validNames.map(n=>'<option value="'+esc(n)+'">'+esc(n)+'</option>').join('');
-  shade.innerHTML='<section class="archive-modal" role="dialog" aria-modal="true" aria-labelledby="archive-modal-title"><header><h2 id="archive-modal-title">Архивировать преподавателя</h2><button type="button" class="archive-close" aria-label="Закрыть">×</button></header><p><strong>'+esc(oldName)+'</strong> ведёт '+items.length+' будущих занятий. Выберите замену перед архивированием. Прошедшие занятия сохранятся.</p><label class="archive-field">Способ замены<select id="archive-mode"><option value="all">Один преподаватель для всех занятий</option><option value="each">Отдельно для каждого занятия</option></select></label><div id="archive-all"><label class="archive-field">Преподаватель на замену<select id="archive-bulk">'+options+'</select></label></div><div id="archive-each" hidden></div><p id="archive-error" class="archive-error" role="alert" hidden>Выберите замену для каждого занятия.</p><footer><button type="button" class="archive-cancel">Отмена</button><button type="button" class="archive-submit">Продолжить</button></footer></section>';
-  document.body.appendChild(shade);
-  const $m=q=>shade.querySelector(q),done=v=>{shade.remove();resolve(v)};
-  $m('.archive-close').onclick=()=>done(null);$m('.archive-cancel').onclick=()=>done(null);
-  shade.addEventListener('click',e=>{if(e.target===shade)done(null)});
-  const each=$m('#archive-each');
-  each.innerHTML=items.map((item,i)=>'<label class="archive-field archive-item"><span>'+esc(item.key+' · '+(names[item.lesson.cls]||item.lesson.cls)+' · '+item.lesson.name+' · '+fmt(item.lesson.start)+'–'+fmt(item.lesson.end))+'</span><select data-archive-index="'+i+'">'+options+'</select></label>').join('');
-  $m('#archive-mode').onchange=()=>{const individual=$m('#archive-mode').value==='each';$m('#archive-all').hidden=individual;each.hidden=!individual;$m('#archive-error').hidden=true};
-  shade.addEventListener('change',()=>{$m('#archive-error').hidden=true});
-  $m('.archive-submit').onclick=()=>{
-   const individual=$m('#archive-mode').value==='each';
-   const values=individual?[...each.querySelectorAll('select')].map(el=>el.value):items.map(()=>$m('#archive-bulk').value);
-   if(values.some(v=>!v)){ $m('#archive-error').hidden=false;return }
-   done(items.map((item,i)=>({...item,name:values[i]})));
-  };
-  $m('#archive-mode').focus();
- });
-}
-async function reassignFutureResource(type,oldName){
- const today=iso(new Date()),items=[];
- for(const [key,d] of Object.entries(store)){
-  if(key<today||!d||typeof d!=='object')continue;
-  const original=baseForDate(key);
-  for(const baseLesson of original){
-   const x={...baseLesson,...(d.edits?.[baseLesson.id]||{})};
-   if(!x.cancelled&&!x.deleted&&(type==='teacher'?teachersOf(x).includes(oldName):x[type]===oldName))items.push({key,id:String(baseLesson.id),lesson:x,extra:false});
-  }
-  for(const x of d.extras||[])if(!x.cancelled&&!x.deleted&&(type==='teacher'?teachersOf(x).includes(oldName):x[type]===oldName))items.push({key,id:String(x.id),lesson:x,extra:true});
- }
- if(!items.length)return true;
- const validNames=type==='teacher'?teachers.filter(t=>t!==oldName&&!directoryRefArchived('teacher',t)):rooms.filter(t=>t!==oldName&&!directoryRefArchived('room',t));
- let replacements;
- if(type==='teacher'){
-  if(!validNames.length){alert('Нет действующих преподавателей для замены. Добавьте преподавателя перед архивированием.');return false}
-  replacements=await chooseTeacherArchiveReplacements(oldName,items,validNames);
-  if(!replacements)return false;
- }else{
-  if(!confirm('Найдено '+items.length+' будущих занятий с кабинетом «'+oldName+'». Назначить замену?'))return false;
-  const bulk=prompt('Введите замену из активного справочника: '+validNames.join(', '),'');
-  if(bulk===null||!validNames.includes(bulk.trim())){alert('Выберите действующий кабинет.');return false}
-  replacements=items.map(item=>({...item,name:bulk.trim()}));
- }
- const replaceAssignment=(lesson,name)=>{if(type!=='teacher')return {...lesson,[type]:name};const assigned=teachersOf(lesson);const next=assigned.map(t=>t===oldName?name:t).filter(t=>t!=='Не назначен');return {...lesson,teachers:next,teacherIds:next.map(t=>directoryRef('teacher',t)),teacher:next[0]||'Не назначен',teacherId:next[0]?directoryRef('teacher',next[0]):null}};
- const planned=new Map();
- for(const item of replacements){
-  const key=item.key+'|'+item.id+'|'+(item.extra?'extra':'base');
-  planned.set(key,replaceAssignment(item.lesson,item.name));
- }
- const warnings=[];
- const timeLabel=x=>fmt(x.start)+'–'+fmt(x.end);
- for(const item of replacements){
-  const updated=planned.get(item.key+'|'+item.id+'|'+(item.extra?'extra':'base'));
-  if(item.name==='Не назначен')continue;
-  const d=store[item.key]||{};
-  const dayLessons=[
-   ...baseForDate(item.key).map(b=>({...b,...(d.edits?.[b.id]||{}),_origin:'base'})),
-   ...(d.extras||[]).map(x=>({...x,_origin:'extra'}))
-  ].filter(x=>!x.cancelled&&!x.deleted).map(x=>planned.get(item.key+'|'+String(x.id)+'|'+x._origin)||x);
-  const dayEvents=(d.events||[]).filter(x=>!x.cancelled&&!x.deleted);
-  for(const other of [...dayLessons,...dayEvents]){
-   if(other===updated||String(other.id)===item.id&&other.kind!=='event')continue;
-   if(!overlap(updated,other))continue;
-   const same=shared(updated,other);
-   const affected=type==='teacher'?same.sameTeachers.includes(item.name):same.sameRoom;
-   if(affected)warnings.push(item.key+' '+timeLabel(updated)+' · '+(names[updated.cls]||updated.cls)+' / '+updated.name+' — '+(other.kind==='event'?'мероприятие ': (names[other.cls]||other.cls)+' / ')+other.name+' ('+item.name+')');
-  }
-  if(type==='teacher'){
-   const wd=new Date(item.key+'T12:00:00').getDay();
-   const teacherHours=cfg.hours?.[directoryRef('teacher',item.name)]||cfg.hours?.[item.name];
-   const hours=teacherHours&&Object.prototype.hasOwnProperty.call(teacherHours,wd)?teacherHours[wd]:(wd===0||wd===6?null:['09:00','18:00']);
-   if(!hours||updated.start<min(hours[0])||updated.end>min(hours[1]))warnings.push(item.key+' '+timeLabel(updated)+' · '+item.name+': вне рабочего времени');
-  }
- }
- if(warnings.length){
-  const unique=[...new Set(warnings)];
-  const shown=unique.slice(0,18).join('\\n');
-  if(!confirm('Обнаружены конфликты после переназначения ('+unique.length+'):\\n'+shown+(unique.length>18?'\\n... и ещё '+(unique.length-18):'')+'\\n\\nСохранить изменения несмотря на предупреждения?'))return false;
- }
- const nextStore={...store};
- for(const item of replacements){
-  const current=nextStore[item.key];
-  const d=nextStore[item.key]===store[item.key]?{...current,extras:[...(current.extras||[])],edits:{...(current.edits||{})}}:current;
-  nextStore[item.key]=d;
-  if(item.extra)d.extras=d.extras.map(x=>String(x.id)===item.id?replaceAssignment(x,item.name):x);
-  else d.edits[item.id]=replaceAssignment({...item.lesson,...(d.edits?.[item.id]||{})},item.name);
- }
- try{localStorage.setItem('school_real_week_v14',JSON.stringify(nextStore))}
- catch(e){alert('Не удалось сохранить назначения: '+e.message);return false}
- store=nextStore;
- return true;
-}
-function archiveSubjectFuture(subject){
- const today=iso(new Date()),affected=[];
- for(const [key,d] of Object.entries(store)){
-  if(key<today||!d||typeof d!=='object')continue;
-  const baseLessons=baseForDate(key);
-  const matches=v=>v&&(v.name===subject.name||v.subjectId===subject.id);
-  const removed=(d.extras||[]).filter(matches);
-  const baseIds=baseLessons.filter(v=>matches({...v,...(d.edits?.[v.id]||{})})).map(v=>String(v.id));
-  if(removed.length||baseIds.length)affected.push({key,removed,baseIds});
- }
- const count=affected.reduce((n,v)=>n+v.removed.length+v.baseIds.length,0);
- if(count&&!confirm('Предмет «'+subject.name+'»: будут удалены '+count+' будущих занятий. Прошедшие занятия сохранятся. Продолжить?'))return false;
- const before=JSON.stringify(store);
- for(const {key,baseIds} of affected){
-  const d=store[key];
-  d.extras=(d.extras||[]).filter(v=>!((v.name===subject.name)||(v.subjectId===subject.id)));
-  d.edits=d.edits||{};
-  for(const id of baseIds)d.edits[id]={...(d.edits[id]||{}),cancelled:true,cancelReason:'Предмет архивирован: '+subject.name};
- }
- try{localStorage.setItem('school_real_week_v14',JSON.stringify(store))}
- catch(e){store=JSON.parse(before);alert('Не удалось сохранить расписание: '+e.message);return false}
- return true;
-}
+
 const uiIcon=kind=>{const paths={subjects:'M4 3h16v18H4z M7 7h10 M7 11h10 M7 15h7',routines:'M12 8v4l3 2 M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0',resources:'M3 21V7h18v14 M7 7V3h10v4 M8 11h2 M14 11h2 M8 15h2 M14 15h2',rooms:'M3 11l9-8 9 8 M5 10v11h14V10 M10 21v-7h4v7',display:'M3 4h18v14H3z M8 22h8 M12 18v4',data:'M4 4h16v16H4z M8 4v6h8V4 M8 20v-6h8v6',edit:'M4 20l4-1L20 7l-3-3L5 16z M14 7l3 3',archive:'M3 4h18v5H3z M5 9v12h14V9 M9 13h6',hours:'M12 8v4l3 2 M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0'};return '<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+(paths[kind]||paths.subjects)+'"/></svg>'};
 let lessonValidationId=null;
 async function openSettings(section='settings',page='home'){if(!await confirmDiscardDraft())return;mode='settings';settingsSection=section;settingsPage=page;selected=null;draft=null;collapsed=false;render()}
 function requestReset(){const dialog=$('reset-confirm-dialog');if(resetInProgress||dialog.open)return;dialog.showModal();$('reset-cancel').focus()}
-function settingsEditor(){let h='';if(settingsPage==='home'&&settingsSection==='directories')h+='<h2>Справочники</h2>';if(settingsPage==='home'&&settingsSection!=='teachers'&&settingsSection!=='directories')h+='<h2>'+(settingsSection==='directories'?'Справочники':'Настройки')+'</h2>';if(settingsPage==='home'){const sections=settingsSection==='directories'?[['subjects','▤','Предметы','Редактирование справочника'],['routines','◷','Режимные моменты','Перерывы, питание, прогулки'],['resources','⌂','Кабинеты','Добавление, переименование и архив']]:settingsSection==='teachers'?[['hours','♙','Преподаватели','Карточки и графики']]:[['teachers','♙','Преподаватели','Карточки и рабочий график'],['directories','▤','Справочники','Предметы, режимные моменты, кабинеты'],['rooms','⌂','Кабинеты классов','Основные кабинеты'],['display','◷','Расписание','Время на сетке'],['data','▤','Данные','Резервные копии'],['pdf','▤','Экспорт PDF','Предпросмотр и печать'],['reset-day','↶','Сбросить день','Удалить изменения выбранной даты']];h+='<div class="settings-menu-clean">'+sections.map(([id,ic,name,sub])=>'<button class="settings-item btn-list" data-page="'+id+'">'+(settingsSection==='settings'?'<span class="settings-icon">'+uiIcon(id)+'</span>':'')+'<span class="settings-label"><b>'+name+'</b><small>'+sub+'</small></span><span class="settings-chevron">›</span></button>').join('')+'</div>'}
+function catalogEditor(kind){
+ const labels={staff:'Сотрудники',groups:'Группы',rooms:'Помещения',types:'Типы активностей',activities:'Названия занятий и активностей'};
+ let chosen=null,creating=false,editing=false,search='';
+ const commitCatalog=action=>{try{const result=action(localStorage.document());localStorage.replace(result.document||result);hydrateDocument();updateUndo();board();storageStatus('Справочник сохранён.');return result;}catch(e){alert(e.message);storageStatus(e.message);return null;}};
+ function draw(){
+  const doc=localStorage.document(),list=doc.catalogs[kind],x=list.find(x=>x.id===chosen),p=$('editor');
+  let h='<button id="catalog-back" class="panel-back btn-ghost btn-standard">‹ '+(x||creating?'К списку':'К справочникам')+'</button><h2>'+labels[kind]+'</h2>';
+  if(!x&&!creating){
+   h+='<button id="catalog-add" class="btn-primary btn-standard">+ Добавить</button><label>Поиск<input id="catalog-search" value="'+esc(search)+'"></label><div class="teacher-list">'+list.filter(v=>v.name.toLocaleLowerCase('ru').includes(search.toLocaleLowerCase('ru'))).slice().sort((a,b)=>a.name.localeCompare(b.name,'ru')).map(v=>'<button class="teacher-list-item btn-list" data-catalog-open="'+esc(v.id)+'"><span>'+esc(v.name)+(v.archived?'<small>Сохранён из прежнего архива</small>':'')+'</span><span>›</span></button>').join('')+'</div>';
+  }else if(creating||editing){
+   h+='<label>Название<input id="catalog-name" value="'+esc(x?.name||'')+'"></label>';
+   if(kind==='types')h+='<label>Цвет<input id="catalog-color" type="color" value="'+esc(x?.color||'#dceafe')+'"></label>';
+   if(kind==='activities')h+='<label>Тип активности<select id="catalog-type">'+doc.catalogs.types.map(t=>'<option value="'+esc(t.id)+'" '+(t.id===x?.typeId?'selected':'')+'>'+esc(t.name)+'</option>').join('')+'</select></label>';
+   if(kind==='staff')h+='<label>Должность (необязательно)<input id="catalog-role" value="'+esc(cfg.teacherRoles?.[x?.id]||cfg.teacherRoles?.[x?.name]||'')+'"></label>';
+   h+='<div class="buttons"><button id="catalog-save" data-catalog-mutation class="btn-primary btn-standard">Сохранить</button><button id="catalog-cancel" class="btn-secondary btn-standard">Отмена</button></div>';
+  }else{
+   h+='<div class="teacher-identity"><h2>'+esc(x.name)+'</h2></div>';
+   if(kind==='types')h+='<div class="dir-color-row"><span>Цвет типа</span><span class="dir-swatch" style="background:'+esc(x.color)+'"></span></div>';
+   if(kind==='activities')h+='<p>Тип: '+esc(doc.catalogs.types.find(t=>t.id===x.typeId)?.name)+'</p>';
+   if(x.archived)h+='<p class="tiny">Объект сохранён из прежнего архива. Восстановление вернёт его в списки выбора без изменения расписания.</p><button id="catalog-restore" data-catalog-mutation>Восстановить</button>';
+   h+='<div class="buttons"><button id="catalog-edit" class="btn-secondary btn-standard">Изменить</button><button id="catalog-delete" data-catalog-mutation class="btn-danger btn-standard">Удалить</button></div>';
+   if(kind==='staff'){
+    const hours=cfg.hours?.[x.id]||cfg.hours?.[x.name]||{};
+    h+='<h3>Рабочий график</h3><div class="teacher-schedule">';
+    ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'].forEach((n,d)=>{const v=Object.prototype.hasOwnProperty.call(hours,d)?hours[d]:(d===0||d===6?null:['09:00','18:00']);h+='<div class="teacher-day"><label><input type="checkbox" data-catalog-day="'+d+'" data-catalog-mutation '+(v?'checked':'')+'>'+n+'</label>'+(v?'<input type="time" data-catalog-hour="'+d+'" data-part="0" data-catalog-mutation value="'+v[0]+'"><span>—</span><input type="time" data-catalog-hour="'+d+'" data-part="1" data-catalog-mutation value="'+v[1]+'">':'<span class="teacher-off">Выходной</span>')+'</div>';});h+='</div>';
+   }
+  }
+  p.innerHTML=h;
+  $('catalog-back').onclick=()=>{if(x||creating){chosen=null;creating=false;editing=false;draw()}else{settingsSection='directories';settingsPage='home';settingsEditor()}};
+  if($('catalog-add'))$('catalog-add').onclick=()=>{creating=true;draw();$('catalog-name').focus()};
+  if($('catalog-search'))$('catalog-search').oninput=e=>{search=e.target.value;const pos=e.target.selectionStart;draw();$('catalog-search').focus();$('catalog-search').setSelectionRange(pos,pos)};
+  p.querySelectorAll('[data-catalog-open]').forEach(b=>b.onclick=()=>{chosen=b.dataset.catalogOpen;editing=false;draw()});
+  if($('catalog-edit'))$('catalog-edit').onclick=()=>{editing=true;draw()};
+  if($('catalog-cancel'))$('catalog-cancel').onclick=()=>{creating=false;editing=false;draw()};
+  if($('catalog-save'))$('catalog-save').onclick=()=>{
+   const values={id:x?.id,name:$('catalog-name').value,color:$('catalog-color')?.value,typeId:$('catalog-type')?.value};
+   const role=$('catalog-role')?.value.trim();
+   const r=commitCatalog(d=>{const r=AspectCatalogs.save(d,kind,values);if(kind==='staff'){const c=r.document.settings[CFGKEY]||={};c.teacherRoles||={};c.teacherRoles[r.id]=role;}return r;});
+   if(r){chosen=r.id;creating=false;editing=false;draw();}
+  };
+  if($('catalog-delete'))$('catalog-delete').onclick=()=>{
+   const reason=AspectCatalogs.deletionReason(localStorage.document(),kind,x.id);if(reason)return alert(reason);
+   if(!confirm('Удалить «'+x.name+'»?'))return;
+   if(commitCatalog(d=>AspectCatalogs.remove(d,kind,x.id))){chosen=null;draw();}
+  };
+  if($('catalog-restore'))$('catalog-restore').onclick=()=>{if(commitCatalog(d=>AspectCatalogs.save(d,kind,{...x,restore:true})))draw()};
+  const saveHours=(d,range)=>{if(commitCatalog(doc=>{const c=doc.settings[CFGKEY]||={};c.hours||={};c.hours[x.id]||={...(c.hours[x.name]||{})};delete c.hours[x.name];c.hours[x.id][d]=range;return doc;}))draw()};
+  p.querySelectorAll('[data-catalog-day]').forEach(b=>b.onchange=()=>saveHours(b.dataset.catalogDay,b.checked?['09:00','18:00']:null));
+  p.querySelectorAll('[data-catalog-hour]').forEach(b=>b.onchange=()=>{const d=b.dataset.catalogHour,a=p.querySelector('[data-catalog-hour="'+d+'"][data-part="0"]').value,z=p.querySelector('[data-catalog-hour="'+d+'"][data-part="1"]').value;if(!a||!z||a>=z)return alert('Окончание должно быть позже начала');saveHours(d,[a,z]);});
+ }
+ draw();
+}
+
+function settingsEditor(){const catalogs={hours:'staff',subjects:'activities',routines:'activities',resources:'rooms',groups:'groups',types:'types'};if(catalogs[settingsPage]){catalogEditor(catalogs[settingsPage]);return;}let h='';if(settingsPage==='home'&&settingsSection==='directories')h+='<h2>Справочники</h2>';if(settingsPage==='home'&&settingsSection!=='teachers'&&settingsSection!=='directories')h+='<h2>'+(settingsSection==='directories'?'Справочники':'Настройки')+'</h2>';if(settingsPage==='home'){const sections=settingsSection==='directories'?[['hours','♙','Сотрудники','Имена и рабочий график'],['groups','▤','Группы','Создание и переименование'],['resources','⌂','Помещения','Создание и редактирование'],['types','◷','Типы активностей','Названия и цвета'],['subjects','▤','Названия занятий и активностей','Связь с типами']]:settingsSection==='teachers'?[['hours','♙','Преподаватели','Карточки и графики']]:[['teachers','♙','Преподаватели','Карточки и рабочий график'],['directories','▤','Справочники','Предметы, режимные моменты, кабинеты'],['rooms','⌂','Кабинеты классов','Основные кабинеты'],['display','◷','Расписание','Время на сетке'],['data','▤','Данные','Резервные копии'],['pdf','▤','Экспорт PDF','Предпросмотр и печать'],['reset-day','↶','Сбросить день','Удалить изменения выбранной даты']];h+='<div class="settings-menu-clean">'+sections.map(([id,ic,name,sub])=>'<button class="settings-item btn-list" data-page="'+id+'">'+(settingsSection==='settings'?'<span class="settings-icon">'+uiIcon(id)+'</span>':'')+'<span class="settings-label"><b>'+name+'</b><small>'+sub+'</small></span><span class="settings-chevron">›</span></button>').join('')+'</div>'}
 else if(['subjects','routines','resources'].includes(settingsPage)){h+='<div id="directory-panel"></div>'}
 else if(settingsPage==='colors'){h+='<h2>Цвета по категориям</h2><p class="tiny">Введите названия предметов через запятую. Категория окрашивает все подходящие уроки; отдельный урок можно перекрасить в редакторе.</p>';colorCategories.forEach((c,i)=>{h+='<div class="box"><div class="pair"><label>Категория<input data-cat-name="'+i+'" value="'+esc(c.name)+'"></label><label>Цвет<input data-cat-color="'+i+'" type="color" value="'+esc(c.color)+'"></label></div><label>Предметы и слова<input data-cat-items="'+i+'" value="'+esc((c.items||[]).join(', '))+'" placeholder="Математика, русский, английский"></label><label><input data-cat-event="'+i+'" type="checkbox" style="width:auto" '+(c.event?'checked':'')+'>Цвет по умолчанию для мероприятий</label><button class="btn-danger btn-standard" data-cat-delete="'+i+'">Удалить категорию</button></div>'});h+='<button id="add-color-category" class="btn-secondary btn-standard">+ Новая категория</button>'}
 else if(settingsPage==='display'){h+='<h2>Отображение расписания</h2><div class="pair"><label>Начало<input id="display-start" type="time" value="'+(cfg.display?.start||'08:00')+'"></label><label>Конец<input id="display-end" type="time" value="'+(cfg.display?.end||'19:00')+'"></label></div>'}
@@ -863,153 +782,6 @@ document.querySelectorAll('[data-home]').forEach(el=>el.onchange=()=>{cfg.home[e
 document.querySelectorAll('[data-cat-name],[data-cat-color],[data-cat-items],[data-cat-event]').forEach(el=>el.onchange=()=>{let i=Number(el.dataset.catName??el.dataset.catColor??el.dataset.catItems??el.dataset.catEvent),c=colorCategories[i];if(el.dataset.catName!==undefined)c.name=el.value.trim()||c.name;if(el.dataset.catColor!==undefined)c.color=el.value;if(el.dataset.catItems!==undefined)c.items=el.value.split(',').map(v=>v.trim()).filter(Boolean);if(el.dataset.catEvent!==undefined)c.event=el.checked;localStorage.setItem('school_colors_v12',JSON.stringify(colorCategories));render()});
 document.querySelectorAll('[data-cat-delete]').forEach(b=>b.onclick=()=>{if(colorCategories.length<=1)return alert('Нужна хотя бы одна категория');colorCategories.splice(Number(b.dataset.catDelete),1);localStorage.setItem('school_colors_v12',JSON.stringify(colorCategories));settingsEditor()});
 if($('add-color-category'))$('add-color-category').onclick=()=>{let name=prompt('Название цветовой категории');if(!name||!name.trim())return;colorCategories.push({id:'c'+Date.now(),name:name.trim(),color:'#d8e8f8',items:[]});localStorage.setItem('school_colors_v12',JSON.stringify(colorCategories));settingsEditor()};
-if(['subjects','routines','resources'].includes(settingsPage)){
-const kind=settingsPage,roomMode=kind==='resources',type=kind==='routines'?'routine':'subject',heading=roomMode?'Кабинеты':kind==='routines'?'Режимные моменты':'Предметы';
-let selected=null,search='',showArchive=roomMode?showArchivedRooms:kind==='routines'?showArchivedRoutines:showArchivedSubjects,adding=false,editing=false,menu=false;
-const entries=()=>roomMode?rooms.filter(n=>n!=='Не назначен').map(n=>({id:n,name:n,archived:directoryRefArchived('room',n)})):directory.subjects.filter(x=>x.type===type);
-const get=()=>entries().find(x=>x.id===selected);
-const renameSubject=(old,next)=>{const visit=o=>{if(!o||typeof o!=='object')return;if(Array.isArray(o)){o.forEach(visit);return}for(const [k,v] of Object.entries(o)){if(k==='name'&&v===old&&('cls' in o))o[k]=next;else if(v&&typeof v==='object')visit(v)}};[weekly,snapshot16,weeklySchedule,store].forEach(visit);localStorage.setItem(WEEKLY_EDIT_KEY,JSON.stringify(weeklySchedule));localStorage.setItem('school_real_week_v14',JSON.stringify(store));base=baseForDate(date)};
-function drawDirectory(){
-const p=$('directory-panel');if(!p)return;
-if(selected!==null&&!get())selected=null;$('panel-back').hidden=selected!==null;
-if(selected===null){
-const list=entries().filter(x=>(showArchive||!x.archived)&&x.name.toLocaleLowerCase('ru').includes(search.toLocaleLowerCase('ru'))).sort((a,b)=>a.name.localeCompare(b.name,'ru'));
-p.innerHTML='<div class="teacher-head"><h2>'+heading+'</h2><button class=" btn-primary btn-compact" id="dir-add-toggle">+ Добавить</button></div>'+
-(adding?'<div class="teacher-add-box"><input id="dir-new" placeholder="Название"><div class="teacher-actions"><button id="dir-cancel" class="btn-secondary btn-standard">Отмена</button><button class=" btn-primary btn-standard" id="dir-create">Создать</button></div></div>':'')+
-'<input id="dir-search" placeholder="Поиск" value="'+esc(search)+'">'+
-(!roomMode?'<div class="dir-default-color"><span>Цвет по умолчанию</span><input id="dir-default-color" type="color" value="'+esc(directory.colors[type])+'"></div>':'')+
-'<div class="teacher-filter"><span>'+entries().filter(x=>!x.archived).length+' активных</span><label><input type="checkbox" id="dir-archive-filter" '+(showArchive?'checked':'')+'> Показать архив</label></div>'+
-'<div class="teacher-list">'+(list.length?list.map(x=>'<button class="teacher-list-item btn-list" data-dir-open="'+esc(x.id)+'"><span class="dir-item-title">'+(!roomMode?'<span class="dir-swatch" style="background:'+esc(x.color||directory.colors[type])+'"></span>':'')+'<span><strong>'+esc(x.name)+'</strong>'+(x.archived?'<small>В архиве</small>':'')+'</span></span><span>›</span></button>').join(''):'<div class="teacher-empty">Записи не найдены</div>')+'</div>';
-$('dir-add-toggle').onclick=()=>{adding=!adding;drawDirectory();if(adding)$('dir-new').focus()};
-if($('dir-cancel'))$('dir-cancel').onclick=()=>{adding=false;drawDirectory()};
-if($('dir-create'))$('dir-create').onclick=()=>{const n=$('dir-new').value.trim();if(!n||entries().some(x=>x.name.toLocaleLowerCase('ru')===n.toLocaleLowerCase('ru'))||(!roomMode&&directoryItem(n)))return alert('Введите уникальное название');if(roomMode){rooms.push(n);archiveRef('room',n,false);cfg.customLists=cfg.customLists||{};cfg.customLists.rooms=rooms.filter(x=>x!=='Не назначен');saveCfg();selected=n}else{const x={id:'subject-'+Date.now(),name:n,archived:false,color:null,type};directory.subjects.push(x);subjects.push(n);saveDirectory();selected=x.id}adding=false;drawDirectory()};
-$('dir-search').oninput=ev=>{const pos=ev.target.selectionStart;search=ev.target.value;drawDirectory();const input=$('dir-search');input.focus();input.setSelectionRange(pos,pos)};
-$('dir-archive-filter').onchange=ev=>{showArchive=ev.target.checked;if(roomMode)showArchivedRooms=showArchive;else if(type==='routine')showArchivedRoutines=showArchive;else showArchivedSubjects=showArchive;drawDirectory()};
-if($('dir-default-color'))$('dir-default-color').onchange=ev=>{directory.colors[type]=ev.target.value;saveDirectory();drawDirectory();board()};
-p.querySelectorAll('[data-dir-open]').forEach(el=>el.onclick=()=>{selected=el.dataset.dirOpen;editing=false;menu=false;drawDirectory()});
-return;
-}
-const x=get();let h='<button id="dir-back" class="panel-back btn-ghost btn-standard">‹ '+(roomMode?'К кабинетам':type==='routine'?'К режимным моментам':'К предметам')+'</button>';
-h+='<div class="teacher-identity"><h2>'+esc(x.name)+'</h2>'+(x.archived?'<span class="teacher-archived">В архиве</span>':'')+'</div>';
-if(!roomMode)h+='<div class="dir-color-row"><span>Цвет</span><input type="color" id="dir-color" title="Выбрать любой цвет" value="'+esc(x.color||directory.colors[type])+'"></div>';
-if(editing)h+='<div class="teacher-add-box"><label>Название<input id="dir-edit-name" value="'+esc(x.name)+'"></label><div class="teacher-actions"><button id="dir-edit-cancel" class="btn-secondary btn-standard">Отмена</button><button class=" btn-primary btn-standard" id="dir-edit-save">Сохранить</button></div></div>';
-if(!editing)h+='<div class="directory-card-actions"><button id="dir-edit" class="btn-secondary btn-standard">'+uiIcon('edit')+' Изменить</button><button id="dir-archive" class="btn-secondary btn-standard">'+(x.archived?'↩ Восстановить':uiIcon('archive')+' В архив')+'</button></div>';
-p.innerHTML=h;
-$('dir-back').onclick=()=>{selected=null;editing=false;menu=false;drawDirectory()};
-if($('dir-edit'))$('dir-edit').onclick=()=>{editing=true;menu=false;drawDirectory()};
-if($('dir-archive'))$('dir-archive').onclick=async()=>{if(!x.archived){if(!confirm('Архивировать «'+x.name+'»? Прошедшие занятия сохранятся.'))return;if(!roomMode&&!archiveSubjectFuture(x))return}if(roomMode){if(!x.archived&&!await reassignFutureResource('room',x.name))return;archiveRef('room',x.name,!x.archived)}else{x.archived=!x.archived;saveDirectory()}menu=false;drawDirectory();board()};
-if($('dir-color'))$('dir-color').onchange=ev=>{x.color=ev.target.value;saveDirectory();board()};
-if($('dir-edit-cancel'))$('dir-edit-cancel').onclick=()=>{editing=false;drawDirectory()};
-if($('dir-edit-save'))$('dir-edit-save').onclick=()=>{
-const next=$('dir-edit-name').value.trim(),old=x.name;if(!next||entries().some(y=>y.id!==selected&&y.name.toLocaleLowerCase('ru')===next.toLocaleLowerCase('ru'))||(!roomMode&&next!==old&&directoryItem(next)))return alert('Название уже используется');
-if(next!==old){if(roomMode){renameStoredResource('room',old,next);for(const [k,v] of Object.entries(cfg.home||{}))if(v===old)cfg.home[k]=next;renameRef('room',old,next);rooms[rooms.indexOf(old)]=next;cfg.customLists=cfg.customLists||{};cfg.customLists.rooms=rooms.filter(v=>v!=='Не назначен');cfg.renames=cfg.renames||{teachers:{},rooms:{}};cfg.renames.rooms=cfg.renames.rooms||{};for(const [k,v] of Object.entries(cfg.renames.rooms))if(v===old)cfg.renames.rooms[k]=next;cfg.renames.rooms[old]=next;saveCfg();localStorage.setItem(WEEKLY_EDIT_KEY,JSON.stringify(weeklySchedule));localStorage.setItem('school_real_week_v14',JSON.stringify(store));base=baseForDate(date);selected=next}else{renameSubject(old,next);const i=subjects.indexOf(old);if(i>=0)subjects[i]=next;x.name=next;saveDirectory()}}
-editing=false;drawDirectory();board()
-};
-}
-drawDirectory();
-}
-document.querySelectorAll('[data-teacher-delete]').forEach(b=>b.onclick=()=>{let n=b.dataset.teacherDelete;if(!confirm('Удалить «'+n+'»? Назначения будут сняты, занятия сохранятся.'))return;const visit=o=>{if(!o||typeof o!=='object')return;if(Array.isArray(o)){o.forEach(visit);return}for(const [k,v] of Object.entries(o)){if(k==='teacher'&&(v===n||o.teacherId===directoryRef('teacher',n))){o[k]='Не назначен';delete o.teacherId}else if(k==='teachers'&&Array.isArray(v)){const ids=o.teacherIds||[];o.teacherIds=ids.filter((id,i)=>v[i]!==n&&id!==directoryRef('teacher',n));o[k]=v.filter((t,i)=>t!==n&&ids[i]!==directoryRef('teacher',n))}else if(v&&typeof v==='object')visit(v)}};[weekly,snapshot16,weeklySchedule,store].forEach(visit);for(const d of Object.values(store)){if(d.absences)delete d.absences[n];d.resolutions={}}if(cfg.hours)delete cfg.hours[n];archiveRef('teacher',n,true);teachers.splice(teachers.indexOf(n),1);cfg.customLists=cfg.customLists||{};cfg.customLists.teachers=teachers.filter(t=>t!=='Не назначен');cfg.deletedTeachers=[...new Set([...(cfg.deletedTeachers||[]),n])];saveCfg();localStorage.setItem(WEEKLY_EDIT_KEY,JSON.stringify(weeklySchedule));localStorage.setItem('school_real_week_v14',JSON.stringify(store));base=baseForDate(date);settingsEditor();board()});
-if(settingsPage==='hours'){
-let chosen=null,showArchived=false,searchText='',adding=false,editing=false,menuOpen=false;
-cfg.teacherRoles=cfg.teacherRoles||{};cfg.teacherSavedHours=cfg.teacherSavedHours||{};cfg.teacherNames=cfg.teacherNames||{};
-const nameParts=t=>cfg.teacherNames[directoryRef('teacher',t)]||cfg.teacherNames[t]||{last:'',first:t,middle:''};
-const fullName=p=>[p.last,p.first,p.middle].map(x=>x.trim()).filter(Boolean).join(' ');
-const teacherFullName=t=>cfg.teacherNames?.[directoryRef('teacher',t)]?fullName(cfg.teacherNames[directoryRef('teacher',t)]):cfg.teacherNames?.[t]?fullName(cfg.teacherNames[t]):t;
-const dayNames=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
-const dayValue=(t,d)=>{const h=cfg.hours?.[directoryRef('teacher',t)]||cfg.hours?.[t];return h&&Object.prototype.hasOwnProperty.call(h,d)?h[d]:(d===0||d===6?null:['09:00','18:00'])};
-const teacherUsage=name=>{
- const id=directoryRef('teacher',name),found={past:0,future:0};
- const seen=new Set(),today=iso(new Date());
- const scan=(value,key,day)=>{
-  if(!value||typeof value!=='object'||seen.has(value))return;
-  seen.add(value);
-  if(Array.isArray(value)){value.forEach(v=>scan(v,key,day));return}
-  const assigned=value.teacher===name||value.teacherId===id||(Array.isArray(value.teachers)&&value.teachers.includes(name))||(Array.isArray(value.teacherIds)&&value.teacherIds.includes(id));
-  if(assigned){found[day&&day>=today?'future':'past']++}
-  if(value.absences&&(Object.prototype.hasOwnProperty.call(value.absences,name)||Object.prototype.hasOwnProperty.call(value.absences,id)))found[day&&day>=today?'future':'past']++;
-  for(const [k,v] of Object.entries(value))if(v&&typeof v==='object')scan(v,k,day);
- };
- // Weekly templates and original snapshots count as dependencies, regardless of date.
- [weekly,snapshot16,weeklySchedule].forEach(v=>scan(v,'',null));
- for(const [day,data] of Object.entries(store))scan(data,'',day);
- return found;
-};
-const listView=()=>{chosen=null;draw()};
-function draw(){
- const panel=$('teacher-panel');if(!panel)return;$('panel-back').hidden=!!chosen;
- if(!chosen){
- const all=teachers.filter(t=>t!=='Не назначен'&&(showArchived||!directoryRefArchived('teacher',t))).sort((a,b)=>a.localeCompare(b,'ru'));
- const filtered=all.filter(t=>teacherFullName(t).toLocaleLowerCase('ru').includes(searchText.toLocaleLowerCase('ru')));
- panel.innerHTML='<div class="teacher-head"><h2>Преподаватели</h2><button class=" btn-primary btn-compact" id="teacher-add-toggle">+ Добавить</button></div>'+
- (adding?'<div class="teacher-add-box"><label>Фамилия<input id="teacher-new-last" placeholder="Фамилия"></label><label>Имя<input id="teacher-new" placeholder="Имя" required></label><label>Отчество<input id="teacher-new-middle" placeholder="Отчество"></label><div class="teacher-actions"><button id="teacher-add-cancel" class="btn-secondary btn-standard">Отмена</button><button class=" btn-primary btn-standard" id="teacher-add">Создать</button></div></div>':'')+
- '<input id="teacher-search" placeholder="Поиск преподавателя" value="'+esc(searchText)+'">'+
- '<div class="teacher-filter"><span>'+teachers.filter(t=>t!=='Не назначен'&&!directoryRefArchived('teacher',t)).length+' активных</span><label><input id="teacher-show-archive" type="checkbox" '+(showArchived?'checked':'')+'> Показать архив</label></div>'+
- '<div class="teacher-list">'+(filtered.length?filtered.map(t=>'<button class="teacher-list-item btn-list" data-teacher-open="'+esc(t)+'"><span><strong>'+esc(teacherFullName(t))+'</strong>'+((directoryRefArchived('teacher',t)||cfg.teacherRoles[t])?'<small>'+(directoryRefArchived('teacher',t)?'В архиве':esc(cfg.teacherRoles[t]))+'</small>':'')+'</span><span>›</span></button>').join(''):'<div class="teacher-empty">Преподаватели не найдены</div>')+'</div>';
- $('teacher-add-toggle').onclick=()=>{adding=!adding;draw();if(adding)$('teacher-new')?.focus()};
- if($('teacher-add-cancel'))$('teacher-add-cancel').onclick=()=>{adding=false;draw()};
- if($('teacher-add'))$('teacher-add').onclick=()=>{const parts={last:$('teacher-new-last').value.trim(),first:$('teacher-new').value.trim(),middle:$('teacher-new-middle').value.trim()};const n=fullName(parts);if(!parts.first||teachers.some(t=>t.toLocaleLowerCase('ru')===n.toLocaleLowerCase('ru')))return alert('Введите уникальное имя преподавателя');teachers.push(n);cfg.teacherNames[directoryRef('teacher',n)]=parts;archiveRef('teacher',n,false);cfg.customLists=cfg.customLists||{};cfg.customLists.teachers=teachers.filter(t=>t!=='Не назначен');saveCfg();chosen=n;adding=false;draw()};
- $('teacher-search').oninput=e=>{const pos=e.target.selectionStart;searchText=e.target.value;draw();const el=$('teacher-search');el.focus();el.setSelectionRange(pos,pos)};
- $('teacher-show-archive').onchange=e=>{showArchived=e.target.checked;draw()};
- panel.querySelectorAll('[data-teacher-open]').forEach(el=>el.onclick=()=>{chosen=el.dataset.teacherOpen;editing=false;menuOpen=false;draw()});
- return;
- }
- const t=chosen,archived=directoryRefArchived('teacher',t);
- let h='<button id="teacher-list-back" class="panel-back btn-ghost btn-standard">‹ К преподавателям</button>';
- h+='<div class="teacher-identity"><h2>'+esc(teacherFullName(t))+'</h2>'+(cfg.teacherRoles[t]?'<div class="teacher-role">'+esc(cfg.teacherRoles[t])+'</div>':'')+''+(archived?'<span class="teacher-archived">В архиве</span>':'')+'</div>';
- if(editing)h+='<div class="teacher-add-box"><label>Фамилия<input id="teacher-edit-last" value="'+esc(nameParts(t).last)+'"></label><label>Имя<input id="teacher-edit-name" value="'+esc(nameParts(t).first)+'" required></label><label>Отчество<input id="teacher-edit-middle" value="'+esc(nameParts(t).middle)+'"></label><label>Должность<input id="teacher-edit-role" value="'+esc(cfg.teacherRoles[t]||'')+'" placeholder="Например, преподаватель английского"></label><div class="teacher-actions"><button id="teacher-edit-cancel" class="btn-secondary btn-standard">Отмена</button><button class=" btn-primary btn-standard" id="teacher-edit-save">Сохранить</button></div></div>';
- if(!editing)h+='<div class="directory-card-actions"><button id="teacher-edit" class="btn-secondary btn-standard">'+uiIcon('edit')+' Изменить</button><button id="teacher-archive" class="btn-secondary btn-standard">'+(archived?'↩ Восстановить':uiIcon('archive')+' В архив')+'</button></div>';
- if(archived&&!editing)h+='<div class="teacher-permanent-delete"><button id="teacher-delete-forever" class="btn-danger btn-standard">Удалить навсегда</button></div>';
- h+='<div class="teacher-schedule-title"><strong>Рабочий график</strong><span>Начало — конец</span></div><div class="teacher-schedule">';
- dayNames.forEach((label,i)=>{const d=(i+1)%7,v=dayValue(t,d);h+='<div class="teacher-day"><label><input type="checkbox" data-active="'+d+'" '+(v?'checked':'')+'> '+label+'</label>'+(v?'<input type="time" data-wd="'+d+'" data-part="0" value="'+esc(v[0])+'"><span class="teacher-dash">—</span><input type="time" data-wd="'+d+'" data-part="1" value="'+esc(v[1])+'">':'<span class="teacher-off">Выходной</span>')+'</div>'});
- h+='</div><div class="teacher-save-note">Изменения рабочего графика сохраняются автоматически</div>';
- panel.innerHTML=h;
- $('teacher-list-back').onclick=listView;
- if($('teacher-edit'))$('teacher-edit').onclick=()=>{editing=true;menuOpen=false;draw()};
- if($('teacher-archive'))$('teacher-archive').onclick=async()=>{if(!archived){if(!confirm('Архивировать «'+t+'»? Исторические занятия сохранятся.'))return;if(!await reassignFutureResource('teacher',t))return}archiveRef('teacher',t,!archived);menuOpen=false;draw();board()};
- if($('teacher-delete-forever'))$('teacher-delete-forever').onclick=()=>{
-  const usage=teacherUsage(t);
-  if(usage.past||usage.future){alert('Удаление невозможно: преподаватель используется в расписании, мероприятиях или истории. Оставьте запись в архиве. Связанных записей: '+(usage.past+usage.future)+'.');return}
-  if(!confirm('Удалить «'+t+'» навсегда? Восстановить запись будет невозможно.'))return;
-  const id=directoryRef('teacher',t);
-  teachers.splice(teachers.indexOf(t),1);
-  cfg.customLists=cfg.customLists||{};
-  cfg.customLists.teachers=teachers.filter(n=>n!=='Не назначен');
-  cfg.deletedTeachers=[...new Set([...(cfg.deletedTeachers||[]),t])];
-  delete cfg.hours?.[t];delete cfg.hours?.[id];delete cfg.teacherSavedHours[t];delete cfg.teacherSavedHours[id];delete cfg.teacherRoles[t];delete cfg.teacherNames[t];delete cfg.teacherNames[id];
-  if(cfg.renames?.teachers)delete cfg.renames.teachers[t];
-  if(directoryRefs.teacher)directoryRefs.teacher=directoryRefs.teacher.filter(x=>x.id!==id);
-  saveRefs();saveCfg();chosen=null;editing=false;draw();board();
- };
- if($('teacher-edit-cancel'))$('teacher-edit-cancel').onclick=()=>{editing=false;draw()};
- if($('teacher-edit-save'))$('teacher-edit-save').onclick=()=>{
- const parts={last:$('teacher-edit-last').value.trim(),first:$('teacher-edit-name').value.trim(),middle:$('teacher-edit-middle').value.trim()};const next=fullName(parts),role=$('teacher-edit-role').value.trim();
- if(!parts.first)return alert('Заполните поле «Имя»');
- const collision=teachers.some(x=>x!==t&&x.toLocaleLowerCase('ru')===next.toLocaleLowerCase('ru'));
- if(next!==t&&!collision){
- renameRef('teacher',t,next);renameStoredResource('teacher',t,next);cfg.renames=cfg.renames||{teachers:{},rooms:{}};cfg.renames.teachers=cfg.renames.teachers||{};cfg.renames.teachers[t]=next;
- for(const d of Object.values(store))if(d.absences?.[t]){d.absences[next]=d.absences[t];delete d.absences[t]}
- if(cfg.hours?.[t]){cfg.hours[directoryRef('teacher',next)]=cfg.hours[t];delete cfg.hours[t]}
- if(cfg.teacherSavedHours?.[t]){cfg.teacherSavedHours[directoryRef('teacher',next)]=cfg.teacherSavedHours[t];delete cfg.teacherSavedHours[t]}
- delete cfg.teacherRoles[t];delete cfg.teacherNames[t];teachers[teachers.indexOf(t)]=next;cfg.customLists=cfg.customLists||{};cfg.customLists.teachers=teachers.filter(x=>x!=='Не назначен');
- localStorage.setItem('school_real_week_v14',JSON.stringify(store));chosen=next;
- }
- cfg.teacherNames[directoryRef('teacher',chosen)]=parts;cfg.teacherRoles[chosen]=role;saveCfg();editing=false;draw();board()
- };
- panel.querySelectorAll('[data-active]').forEach(el=>el.onchange=()=>{
- const d=Number(el.dataset.active),old=dayValue(t,d);
- cfg.hours=cfg.hours||{};const id=directoryRef('teacher',t);cfg.hours[id]=cfg.hours[id]||cfg.hours[t]||{};cfg.teacherSavedHours[id]=cfg.teacherSavedHours[id]||cfg.teacherSavedHours[t]||{};
- if(el.checked)cfg.hours[id][d]=cfg.teacherSavedHours[id][d]||['09:00','18:00'];
- else{if(old)cfg.teacherSavedHours[id][d]=old;cfg.hours[id][d]=null}
- saveCfg();draw();board()
- });
- panel.querySelectorAll('[data-wd]').forEach(el=>el.onchange=()=>{
- const d=Number(el.dataset.wd),a=panel.querySelector('[data-wd="'+d+'"][data-part="0"]'),b=panel.querySelector('[data-wd="'+d+'"][data-part="1"]');
- if(!a.value||!b.value||a.value>=b.value){alert('Время окончания должно быть позже начала');draw();return}
- cfg.hours=cfg.hours||{};const id=directoryRef('teacher',t);cfg.hours[id]=cfg.hours[id]||cfg.hours[t]||{};cfg.hours[id][d]=[a.value,b.value];cfg.teacherSavedHours[id]=cfg.teacherSavedHours[id]||cfg.teacherSavedHours[t]||{};cfg.teacherSavedHours[id][d]=[a.value,b.value];saveCfg();board()
- })
-}
-draw();
-}
 if(settingsPage==='data'){
  $('clear-all-data').onclick=()=>{
   if(!confirm('Очистить все расписания, справочники и настройки? Сначала скачайте резервную копию.'))return;
@@ -1029,9 +801,10 @@ if(settingsPage==='data'){
 }}
 
 function board(){
+ $('board').style.gridTemplateColumns='66px repeat('+Math.max(1,names.length)+',minmax(158px,1fr))';$('board').style.minWidth=(66+158*Math.max(1,names.length))+'px';
  const all=resources(),bad=conflictIds(),begin=min(cfg.display?.start||'08:00'),end=min(cfg.display?.end||'19:00'),px=Math.max(.75,((document.querySelector('.scroll')?.clientHeight||850)-26)/(end-begin));
  let h='<div class="head time-heading" style="background:#f0f3f8" aria-label="Временная шкала"></div>';
- names.forEach((n,i)=>h+=`<div class="head" style="background:${colors[i]}">${esc(n)}</div>`);
+ names.forEach((n,i)=>h+=`<div class="head" style="background:${colors[i%colors.length]}">${esc(n)}</div>`);
  h+='<div class="timeline time-lane">';
  for(let t=begin;t<end;t+=20){h+=`<div class="tick ${t%60===0?'hour':''} ${t===begin?'first-tick':''}" style="top:${(t-begin)*px}px">${fmt(t)}</div>`}
  h+='</div>';
@@ -1039,7 +812,7 @@ function board(){
  names.forEach((n,i)=>{
   h+='<div class="timeline class-lane" data-class="'+i+'">';
   all.filter(x=>classesOf(x).includes(i)&&x.end>begin&&x.start<end).sort((a,b)=>a.start-b.start||a.end-b.end).forEach(x=>{
-   const isEvent=x.kind==='event',changed=!!day().edits[x.id]||(day().extras||[]).some(y=>y.id===x.id),split=!isEvent&&x.group&&x.group!=='all';
+   const isEvent=x.kind==='event',changed=!!day().edits?.[x.id]||(day().extras||[]).some(y=>y.id===x.id),split=!isEvent&&x.group&&x.group!=='all';
    const short=x.end-x.start<=15,medium=x.end-x.start<=30,normalRoutine=isRoutine(x);
    const noTeacher=missingTeacher(x);
    const missingRoom=needsRoom(x)&&(!x.room||x.room==='Не назначен');
@@ -1068,19 +841,19 @@ function board(){
  document.querySelectorAll('.class-lane').forEach(lane=>lane.onclick=async e=>{if(e.target.closest('.lesson'))return;const rect=lane.getBoundingClientRect(),minute=Math.max(begin,Math.min(end-5,begin+Math.round((e.clientY-rect.top)/px/5)*5)),cls=Number(lane.dataset.class),start=minute;if(!await confirmDiscardDraft())return;collapsed=false;mode='new-lesson';newLessonType='subject';selected=null;draft={id:AspectModel.id('ex'),cls,name:'',teacher:'Не назначен',room:cfg.home?.[cls]||'Не назначен',start,end:Math.min(end,start+40),group:'all'};draftBaseline={...draft};render()});
  document.querySelectorAll('[data-id]').forEach(b=>b.onclick=async()=>{if(!await confirmDiscardDraft())return;collapsed=false;selected=b.dataset.id.startsWith('e')?b.dataset.id:Number(b.dataset.id);mode=b.dataset.id.startsWith('e')&&!b.dataset.id.startsWith('ex')?'event':'lesson';draft=null;render()});
 }
-function option(values,val,field){if(field==='name'){const type=mode==='new-lesson'?newLessonType:(directoryItem(val)?.type||(isRoutine({name:val})?'routine':'subject'));values=values.filter(v=>v===val||(directoryItem(v)?.type||'subject')===type)}if(field==='name')values=values.filter(v=>!directoryItem(v)?.archived||v===val);const placeholder=field==='name'&&!val?'<option value="" selected disabled>Выберите занятие</option>':'';return `<select data-field="${field}">${placeholder}${values.map(v=>`<option value="${esc(v)}" ${v===val?'selected':''}>${esc(v)}</option>`).join('')}</select>`}
+function option(values,val,field){if(field==='name'){const type=mode==='new-lesson'?newLessonType:(directoryItem(val)?.type||(isRoutine({name:val})?'routine':'subject'));values=values.filter(v=>v===val||type!=='routine'||directoryItem(v)?.type==='routine')}if(field==='name')values=values.filter(v=>!directoryItem(v)?.archived||v===val);const placeholder=field==='name'&&!val?'<option value="" selected disabled>Выберите занятие</option>':'';return `<select data-field="${field}">${placeholder}${values.map(v=>`<option value="${esc(v)}" ${v===val?'selected':''}>${esc(v)}</option>`).join('')}</select>`}
 function editorLesson(){$('editor').classList.add('aspect-form-editor');let orig=lessons().find(x=>String(x.id)===String(selected))||base.find(x=>String(x.id)===String(selected))||(mode==='new-lesson'?draft:null);if(!orig){mode='empty';$('editor').innerHTML='';return}let x=draft||{...orig},err=issues(x,x.id);for(const t of teachersOf(x).filter(absent))err.unshift('Преподаватель отсутствует: '+t);if(overtime(x).length)err.push('За пределами рабочего графика: '+overtime(x).join(', '));
 let h=`<div class="sub">${names[x.cls]} · ${date}</div><h2>${mode==='new-lesson'?(newLessonType==='routine'?'Новый режимный момент':'Новое занятие'):(isRoutine(x)?'Редактор режимного момента':'Редактор занятия')}</h2>${mode==='new-lesson'?'<label>Класс</label><select data-field="cls">'+names.map((n,i)=>'<option value="'+i+'" '+(i===x.cls?'selected':'')+'>'+esc(n)+'</option>').join('')+'</select>':''}${x.notes?'<div class="box warn"><b>Пометка с фотографии:</b> '+esc(x.notes)+'</div>':''}<label>Занятие</label>${option(subjects,x.name,'name')}<div class="pair"><div><label>Начало</label><input data-field="start" type="time" step="60" value="${fmt(x.start)}"></div><div><label>Конец</label><input data-field="end" type="time" step="60" value="${fmt(x.end)}"></div></div><label>Ответственные преподаватели</label><div class="multi">${teachers.filter(t=>t!=='Не назначен'&&(!directoryRefArchived('teacher',t)||teachersOf(x).includes(t))).map(t=>`<label><input type="checkbox" data-lesson-teacher="${esc(t)}" ${teachersOf(x).includes(t)?'checked':''}>${esc(t)}${absent(t)?' · отсутствует':''}</label>`).join('')}</div><label>Кабинет</label><select data-field="room">${rooms.filter(r=>!directoryRefArchived('room',r)||r===x.room).map(r=>`<option value="${esc(r)}" ${x.room===r?'selected':''}>${esc(r)}${r===x.room?'':issues({...x,room:r},x.id).some(s=>s.startsWith('Помещение'))?' · занят':' · свободен'}</option>`).join('')}</select><details class="advanced-fields"><summary>Дополнительные параметры</summary><label>Кому проводится</label><select data-field="group"><option value="all" ${x.group==='all'?'selected':''}>Весь класс</option><option value="a" ${x.group==='a'?'selected':''}>Подгруппа 1</option><option value="b" ${x.group==='b'?'selected':''}>Подгруппа 2</option></select></details>`;
 const warnings=[...err,...(missingTeacher(x)&&(mode!=='new-lesson'||x.name?.trim())?['Не назначен преподаватель']:[]),...(lessonValidationId===String(x.id)&&!x.name?.trim()?['Выберите занятие']:[]),...(lessonValidationId===String(x.id)&&needsRoom(x)&&(!x.room||x.room==='Не назначен')?['Не указан кабинет']:[])];if(warnings.length)h+='<div class="notice error">'+warnings.map(esc).join('<br>')+'</div>';h+=`<div class="buttons"><button id="save-lesson" class=" btn-primary btn-standard" ${x.end<=x.start?'disabled':''}>Сохранить</button></div><div class="buttons"><button id="add-parallel" class="btn-secondary btn-standard">+ Параллельное занятие</button><button id="cancel-lesson" class="btn-danger btn-standard">Удалить занятие</button></div>`;
 $('editor').innerHTML=h;document.querySelectorAll('[data-field]').forEach(el=>el.onchange=()=>{let k=el.dataset.field;draft={...x,[k]:k==='start'||k==='end'?min(el.value):k==='cls'?Number(el.value):el.value};const wasAdvanced=!!el.closest('.advanced-fields');if(mode==='new-lesson')board();editorLesson();if(wasAdvanced)document.querySelector('.advanced-fields')?.setAttribute('open','')});document.querySelectorAll('[data-lesson-teacher]').forEach(el=>el.onchange=()=>{const chosen=el.dataset.lessonTeacher;const next=el.checked?[...teachersOf(x),chosen]:teachersOf(x).filter(t=>t!==chosen);draft=attachRefs(AspectModel.assignments(x,next));editorLesson()});$('save-lesson').onclick=()=>{if(x.end<=x.start)return;if(mode==='new-lesson'&&(!x.name?.trim()||(needsRoom(x)&&(!x.room||x.room==='Не назначен')))){lessonValidationId=String(x.id);editorLesson();return}const warnings=[...issues(x,x.id),...(missingTeacher(x)?['Не назначен преподаватель']:[]),...teachersOf(x).filter(absent).map(t=>'Преподаватель '+t+' отсутствует'),...overtime(x).map(t=>'Преподаватель '+t+': занятие вне рабочего времени')];if(warnings.length&&!confirm('Предупреждения ('+warnings.length+'):\n'+warnings.join('\n')+'\n\nСохранить несмотря на предупреждения?'))return;if(!commit(d=>{const saved=attachRefs(x);if(String(x.id).startsWith('ex')){d.extras=d.extras.some(y=>String(y.id)===String(x.id))?d.extras.map(y=>String(y.id)===String(x.id)?{...saved,recurring:false}:y):[...d.extras,{...saved,recurring:false}]}else d.edits[x.id]={name:x.name,teacher:saved.teacher,teachers:saved.teachers,teacherId:saved.teacherId,teacherIds:saved.teacherIds,room:x.room,start:x.start,end:x.end,group:x.group,colorCategory:x.colorCategory}}))return;selected=x.id;mode='lesson';draft=null;render()};if(mode==='new-lesson'){$('cancel-lesson').style.display='none';$('add-parallel').style.display='none'}$('cancel-lesson').onclick=()=>{if(!confirm('Удалить занятие «'+x.name+'»?'))return;if(!commit(d=>{if(String(x.id).startsWith('ex')){d.extras=d.extras.filter(y=>String(y.id)!==String(x.id));delete d.edits[x.id]}else d.edits[x.id]={deleted:true};delete d.resolutions[x.id]}))return;selected=null;draft=null;mode='lesson';render()};$('add-parallel').onclick=()=>{let id=AspectModel.id('ex');if(!commit(d=>{if(x.group==='all'){if(String(x.id).startsWith('ex'))d.extras=d.extras.map(y=>String(y.id)===String(x.id)?{...y,group:'a'}:y);else d.edits[x.id]={...(d.edits[x.id]||{}),group:'a'}}d.extras.push({id,cls:x.cls,name:'Английский язык',teachers:[],teacher:'Не назначен',room:cfg.home?.[x.cls]||'Не назначен',start:x.start,end:x.end,group:x.group==='a'?'b':x.group==='b'?'a':'b'})}))return;selected=id;draft=null;mode='lesson';render()}}
-function eventEditor(){$('editor').classList.add('aspect-form-editor');let saved=events().find(e=>e.id===selected),x=draft||saved||{id:AspectModel.id('event'),kind:'event',name:'',start:660,end:720,room:'Библиотека',classes:[0,1],teachers:[]};const collisions=resources().filter(b=>String(b.id)!==String(x.id)&&overlap(x,b)).filter(b=>{let v=shared(x,b);return v.sameClasses.length||v.sameTeachers.length||v.sameRoom});const err=issues(x,x.id),badAbsent=teachersOf(x).filter(absent),valid=x.name.trim()&&x.classes.length&&x.start<x.end;
-let h=`<div class="sub">${date} · единое событие для нескольких классов</div><h2>${saved?'Мероприятие':'Новое мероприятие'}</h2><label>Название</label><input data-field="name" value="${esc(x.name)}" placeholder="Например, библиотека"><div class="pair"><div><label>Начало</label><input data-field="start" type="time" value="${fmt(x.start)}"></div><div><label>Конец</label><input data-field="end" type="time" value="${fmt(x.end)}"></div></div><label>Участвуют классы</label><div class="multi">${names.map((n,i)=>`<label><input type="checkbox" data-class="${i}" ${x.classes.includes(i)?'checked':''}>${esc(n)}</label>`).join('')}</div><label>Сопровождающие</label><div class="multi">${teachers.map(t=>`<label><input type="checkbox" data-teacher="${esc(t)}" ${x.teachers.includes(t)?'checked':''}>${esc(t)}${absent(t)?' (нет)':''}</label>`).join('')}</div><label>Помещение / локация</label><input data-field="room" list="event-rooms" value="${esc(x.room)}" placeholder="Кабинет или внешняя локация"><datalist id="event-rooms">${rooms.map(r=>`<option value="${esc(r)}">`).join('')}</datalist>`;
+function eventEditor(){$('editor').classList.add('aspect-form-editor');let saved=events().find(e=>e.id===selected),x=draft||saved||{id:AspectModel.id('event'),kind:'event',typeId:(localStorage.document().catalogs.types.find(t=>t.id==='type-event')||localStorage.document().catalogs.types[0])?.id,name:'',start:660,end:720,room:'Библиотека',classes:names.map((_,i)=>i).slice(0,2),teachers:[]};const collisions=resources().filter(b=>String(b.id)!==String(x.id)&&overlap(x,b)).filter(b=>{let v=shared(x,b);return v.sameClasses.length||v.sameTeachers.length||v.sameRoom});const err=issues(x,x.id),badAbsent=teachersOf(x).filter(absent),valid=x.name.trim()&&x.classes.length&&x.start<x.end;
+let h=`<div class="sub">${date} · единое событие для нескольких классов</div><h2>${saved?'Мероприятие':'Новое мероприятие'}</h2><label>Название из справочника (необязательно)</label><select id="event-activity"><option value="">Свободное название</option>${directory.subjects.filter(a=>!a.archived||a.id===x.subjectId).map(a=>`<option value="${esc(a.id)}" ${a.id===x.subjectId?'selected':''}>${esc(a.name)}</option>`).join('')}</select><label>Название</label><input data-field="name" value="${esc(x.name)}" placeholder="Например, библиотека"><div class="pair"><div><label>Начало</label><input data-field="start" type="time" value="${fmt(x.start)}"></div><div><label>Конец</label><input data-field="end" type="time" value="${fmt(x.end)}"></div></div><label>Участвуют классы</label><div class="multi">${names.map((n,i)=>`<label><input type="checkbox" data-class="${i}" ${x.classes.includes(i)?'checked':''}>${esc(n)}</label>`).join('')}</div><label>Сопровождающие</label><div class="multi">${teachers.map(t=>`<label><input type="checkbox" data-teacher="${esc(t)}" ${x.teachers.includes(t)?'checked':''}>${esc(t)}${absent(t)?' (нет)':''}</label>`).join('')}</div><label>Помещение / локация</label><input data-field="room" list="event-rooms" value="${esc(x.room)}" placeholder="Кабинет или внешняя локация"><datalist id="event-rooms">${rooms.map(r=>`<option value="${esc(r)}">`).join('')}</datalist>`;
 const warnings=[...err,...(badAbsent.length?['Отсутствуют: '+badAbsent.join(', ')]:[])];if(warnings.length)h+='<div class="notice error">'+warnings.map(esc).join('<br>')+'</div>';
 if(collisions.length){h+='<h3>Затронутые занятия</h3><div class="tiny">Выбери уроки, которые нужно отменить на эту дату. Отмена применяется одновременно с сохранением мероприятия.</div>';collisions.forEach(b=>{if(b.kind==='event'){h+=`<div class="box warn">Другое мероприятие: ${esc(b.name)} (${fmt(b.start)}–${fmt(b.end)}). Его нельзя отменить здесь.</div>`}else{let checked=(x.cancelIds||[]).some(id=>String(id)===String(b.id));h+=`<div class="event-card"><label style="margin:0;display:flex;align-items:center;gap:7px"><input style="width:auto" data-cancel-id="${b.id}" type="checkbox" ${checked?'checked':''}>Отменить: ${esc(names[b.cls])} · ${esc(b.name)} (${fmt(b.start)}–${fmt(b.end)})</label></div>`}})}
 let canceled=new Set((x.cancelIds||[]).map(String)),remaining=collisions.filter(b=>b.kind==='event'||!canceled.has(String(b.id)));let canSave=valid;
 h+=`<div class="buttons event-actions"><button id="save-event" class=" btn-primary btn-standard" ${canSave?'':'disabled'}>${saved?'Сохранить изменения':'Создать мероприятие'}</button><button id="event-back" class="btn-secondary btn-standard">Закрыть</button></div>${saved?'<div class="buttons"><button id="delete-event" class="btn-danger btn-standard">Удалить мероприятие</button></div>':''}<p class="tiny">Одно мероприятие отображается во всех выбранных классах. При сохранении отмеченные уроки отменяются только на эту дату. Автоматического переноса нет.</p>`;
-$('editor').innerHTML=h;
-const update=y=>{draft=attachRefs(y);eventEditor()};document.querySelectorAll('[data-field]').forEach(el=>el.onchange=()=>{let k=el.dataset.field;update({...x,[k]:k==='start'||k==='end'?min(el.value):el.value})});document.querySelectorAll('[data-class]').forEach(el=>el.onchange=()=>update({...x,classes:el.checked?[...x.classes,Number(el.dataset.class)]:x.classes.filter(v=>v!==Number(el.dataset.class))}));document.querySelectorAll('[data-teacher]').forEach(el=>el.onchange=()=>update({...x,teachers:el.checked?[...x.teachers,el.dataset.teacher]:x.teachers.filter(v=>v!==el.dataset.teacher)}));document.querySelectorAll('[data-cancel-id]').forEach(el=>el.onchange=()=>update({...x,cancelIds:el.checked?[...(x.cancelIds||[]),el.dataset.cancelId]:(x.cancelIds||[]).filter(v=>String(v)!==String(el.dataset.cancelId))}));
+$('editor').innerHTML=h;$('event-activity').onchange=()=>{const a=directory.subjects.find(a=>a.id===$('event-activity').value);draft={...x,subjectId:a?.id||null,name:a?.name||x.name,typeId:a?'type-'+a.type:(localStorage.document().catalogs.types.find(t=>t.id==='type-event')||localStorage.document().catalogs.types[0])?.id};eventEditor();};
+const update=y=>{draft=attachRefs(y);eventEditor()};document.querySelectorAll('[data-field]').forEach(el=>el.onchange=()=>{let k=el.dataset.field;update({...x,[k]:k==='start'||k==='end'?min(el.value):el.value,...(k==='name'?{subjectId:null}:{})})});document.querySelectorAll('[data-class]').forEach(el=>el.onchange=()=>update({...x,classes:el.checked?[...x.classes,Number(el.dataset.class)]:x.classes.filter(v=>v!==Number(el.dataset.class))}));document.querySelectorAll('[data-teacher]').forEach(el=>el.onchange=()=>update({...x,teachers:el.checked?[...x.teachers,el.dataset.teacher]:x.teachers.filter(v=>v!==el.dataset.teacher)}));document.querySelectorAll('[data-cancel-id]').forEach(el=>el.onchange=()=>update({...x,cancelIds:el.checked?[...(x.cancelIds||[]),el.dataset.cancelId]:(x.cancelIds||[]).filter(v=>String(v)!==String(el.dataset.cancelId))}));
 $('save-event').onclick=()=>{if(!canSave)return;const warnings=[...issues(x,x.id),...badAbsent.map(t=>'Преподаватель '+t+' отсутствует'),...overtime(x).map(t=>'Преподаватель '+t+': мероприятие вне рабочего времени')];if(warnings.length&&!confirm('Предупреждения ('+warnings.length+'):\n'+warnings.join('\n')+'\n\nСохранить несмотря на предупреждения?'))return;let event=attachRefs(x);delete event.cancelIds;delete event.eventTypeId;if(!commit(d=>{for(const id of x.cancelIds||[]){if(String(id).startsWith('ex'))d.extras=d.extras.map(y=>String(y.id)===String(id)?{...y,cancelled:true,cancelReason:'Общее мероприятие: '+x.name}:y);else d.edits[id]={cancelled:true,cancelReason:'Общее мероприятие: '+x.name}};let idx=d.events.findIndex(e=>e.id===x.id);if(idx<0)d.events.push(event);else d.events[idx]=event}))return;selected=x.id;draft=null;mode='event';render()};
 $('event-back').onclick=async()=>{if(!await confirmDiscardDraft())return;draft=null;mode='lesson';selected=null;render()};if(saved)$('delete-event').onclick=()=>{
  const reason='Общее мероприятие: '+x.name;
@@ -1268,7 +1041,7 @@ if(document.addEventListener){
   const bypass=['backup-export','backup-file','clear-all-data','undo-button'];
   const path=event.composedPath();
   for(const target of path){
-   if(!target||!target['on'+type]||bypass.includes(target.id)||target.hasAttribute?.('data-staff-mutation')||target.closest?.('dialog,.archive-modal-shade'))continue;
+   if(!target||!target['on'+type]||bypass.includes(target.id)||(target.hasAttribute?.('data-staff-mutation')||target.hasAttribute?.('data-catalog-mutation'))||target.closest?.('dialog,.archive-modal-shade'))continue;
    const handler=target['on'+type];if(handler.aspectAtomic)continue;
    const wrapped=function(e){
     const before={draft:draft?structuredClone(draft):null,selected,mode,date};
