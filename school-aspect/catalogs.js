@@ -28,6 +28,7 @@
   if(!name||normalized(name)==='не назначен')throw Error('Введите непустое название. «Не назначен» — служебное значение.');
   if(next.catalogs[kind].some(x=>x.id!==old?.id&&normalized(x.name)===normalized(name)))throw Error('Такое название уже есть в этом справочнике.');
   const value={...(old||{}),id:old?.id||M.id(kind==='types'?'type':kind),name};
+  if(kind==='staff'){const shortName=String(values.shortName??old?.shortName??'').normalize('NFKC').trim().replace(/\s+/g,' ');if(shortName.length>80)throw Error('Короткое имя слишком длинное.');value.shortName=shortName;}
   if(kind==='types'){if(!/^#[0-9a-f]{6}$/i.test(values.color))throw Error('Выберите корректный цвет типа.');value.color=values.color;}
   if(kind==='activities'){item(next,'types',values.typeId);value.typeId=values.typeId;}
   if(values.restore)value.archived=false;
