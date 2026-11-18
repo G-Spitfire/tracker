@@ -881,7 +881,7 @@ if(settingsPage==='data'){
  $('clear-all-data').onclick=()=>{
   if(!confirm('Очистить все расписания, справочники и настройки? Сначала скачайте резервную копию.'))return;
   const empty=AspectModel.encode({});
-  empty.catalogs={groups:structuredClone(localStorage.document().catalogs.groups),staff:[],rooms:[],types:[],activities:[]};
+  empty.catalogs={groups:structuredClone(localStorage.document().catalogs.groups.length?localStorage.document().catalogs.groups:AspectModel.GROUP_NAMES.map((name,i)=>({id:'group-'+i,name}))),staff:[],rooms:[],types:[],activities:[]};
   empty.days={};
   empty.settings={};
   empty.directoryMetadata={};
@@ -1219,7 +1219,7 @@ if(document.addEventListener){
    localStorage.activate(!!lock);
    if(lock&&!localStorage.document().catalogs.groups.length){
     const restored=structuredClone(localStorage.document());
-    restored.catalogs.groups=['1А класс','1Б класс','2 класс','3 класс','4 класс','Preschool'].map((name,i)=>({id:'group-'+i,name}));
+    restored.catalogs.groups=AspectModel.GROUP_NAMES.map((name,i)=>({id:'group-'+i,name}));
     localStorage.replace(AspectModel.validate(restored));
     hydrateDocument();render();
    }
