@@ -555,6 +555,7 @@ button[class*="btn-"]:active:not(:disabled){filter:brightness(.96)}
 .absence-form .pair{grid-template-columns:repeat(2,minmax(0,1fr))}.absence-form .pair>div{min-width:0}.absence-form input[type=date]{min-width:0;padding:7px 3px;font-size:11px}
 
 /* Stage 6: one scroll container for both sticky axes; fixed time scale. */
+.workspace{grid-template-rows:minmax(0,1fr)}.workspace>.left,.workspace>.right{min-height:0}
 .scroll{position:relative;isolation:isolate}.board{position:relative;grid-template-rows:24px auto}
 .board>.head{top:0;z-index:20;background-clip:padding-box}
 .board>.time-heading{left:0;z-index:30}
@@ -563,7 +564,8 @@ button[class*="btn-"]:active:not(:disabled){filter:brightness(.96)}
 .board .lesson .card-heading,.board .lesson .card-teacher,.board .lesson .card-meta{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .board .lesson.conflict{box-shadow:inset 0 0 0 2px #b42328!important}
 .board .lesson:focus-visible{outline:2px solid #174eab;outline-offset:0;z-index:6}
-.board .tick{height:20px;padding-top:0;transform:translateY(-1px)}
+.board .tick{height:20px;padding-top:0;transform:translateY(-1px)}.board .tick.first-tick{transform:none}
+.board .lesson.micro{padding:0;border-top:0;border-bottom:0}
 .occupancy-row{display:block;width:100%;text-align:left;margin:7px 0;padding:9px;white-space:normal;overflow-wrap:anywhere}
 .occupancy-row small{display:block;color:#63748b;margin-top:4px}
 .occupancy-tabs{display:flex;gap:6px;margin:12px 0}.occupancy-tabs button{flex:1}
@@ -857,7 +859,7 @@ function board(){
  names.forEach((n,i)=>h+=`<div class="head" style="background:${colors[i%colors.length]}">${esc(n)}</div>`);
  h+='<div class="timeline time-lane">';
  for(let t=begin;t<end;t=(t===begin?Math.floor(t/20)*20+20:t+20)){h+=`<div class="tick ${t%60===0?'hour':''} ${t===begin?'first-tick':''}" style="top:${(t-begin)*px}px">${fmt(t)}</div>`}
- h+='<div class="tick end-tick" style="top:'+((end-begin)*px-16)+'px">'+fmt(end)+'</div></div>';
+ h+='<div class="tick end-tick" style="top:'+((end-begin)*px-20)+'px">'+fmt(end)+'</div></div>';
  const routine=/^(WELCOME|BREAK|BREAKFAST|LUNCH|SNACK TIME|DINNER|CIRCL|ПРОГУЛКА|ЗАРЯДКА)$/i;
  names.forEach((n,i)=>{
   h+='<div class="timeline class-lane" data-class="'+i+'">';
@@ -878,7 +880,7 @@ function board(){
    const splitMeta=split&&height>=78;
    const teacherLabel=isEvent?(x.teachers||[]).map(teacherGridLabel).join(', '):(x.teachers||[x.teacher]).filter(Boolean).map(teacherGridLabel).join(' + ');
    const details=[names[i],label,fmt(x.start)+'–'+fmt(x.end),teacherLabel||'Преподаватель не назначен',x.room||'Кабинет не назначен',...issues(x,x.id),...(isAbsent?['Отсутствуют: '+absentTeachers(x).join(', ')+(teachersOf(x).filter(t=>!absent(t)).length?' · остаются: '+teachersOf(x).filter(t=>!absent(t)).join(', '):'')]:[]),...(over?['За пределами рабочего графика']:[]),...(noTeacher?['Не назначен преподаватель']:[]),...(missingRoom?['Не указан кабинет']:[])].filter(Boolean).join(' | ');
-   const cls=['lesson','colorized',short?'short':medium?'medium':'long',isEvent?'event':changed?'changed':'',normalRoutine?'routine':'',split?'split '+(x.group==='b'?'side-b':'side-a')+(splitTwoLine?' split-wrap':'')+(splitMeta?' split-meta':''):'',conflict?'conflict':'',isAbsent?'absent-lesson':'',missingRoom?'missing-room':'',noTeacher?'missing-teacher':'',over?'overtime':'',(conflict||isAbsent||missingRoom||noTeacher)?'has-mark':'',String(selected)===String(x.id)?'selected':''].filter(Boolean).join(' ');
+   const cls=['lesson','colorized',height<4?'micro':'',short?'short':medium?'medium':'long',isEvent?'event':changed?'changed':'',normalRoutine?'routine':'',split?'split '+(x.group==='b'?'side-b':'side-a')+(splitTwoLine?' split-wrap':'')+(splitMeta?' split-meta':''):'',conflict?'conflict':'',isAbsent?'absent-lesson':'',missingRoom?'missing-room':'',noTeacher?'missing-teacher':'',over?'overtime':'',(conflict||isAbsent||missingRoom||noTeacher)?'has-mark':'',String(selected)===String(x.id)?'selected':''].filter(Boolean).join(' ');
    if(issueFilter&&!(issueFilter==='all-issues'&&(conflict||isAbsent||missingRoom||noTeacher||over)||issueFilter==='conflicts'&&conflict||issueFilter==='absence'&&isAbsent||issueFilter==='rooms'&&missingRoom))return;const mark=(conflict||isAbsent||noTeacher)?'!':missingRoom?'·':'';
    const cardProblems=[...(conflict?['Конфликт расписания']:[]),...(isAbsent?['Преподаватель отсутствует']:[]),...(noTeacher?['Не назначен преподаватель']:[]),...(missingRoom?['Не указан кабинет']:[]),...(over?['Вне рабочего времени']:[])];
    const location=x.room&&x.room!=='Не назначен'?x.room:(normalRoutine?'':'Нет кабинета');
