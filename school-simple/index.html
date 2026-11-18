@@ -59,7 +59,7 @@ grades:'<rect x="3.5" y="13" width="4" height="7" rx="2"/><rect x="10" y="9" wid
 schedule:'<rect x="3.5" y="5.5" width="17" height="15" rx="3"/><path d="M7.5 3.5v4M16.5 3.5v4M3.5 10h17"/><path d="M8 14h1M12 14h1M16 14h1M8 17h1M12 17h1M16 17h1"/>',
 homework:'<path d="M12 6.5C9.5 4.8 6.2 4.4 3.5 5.5v13c3-1 6-.6 8.5 1.2 2.5-1.8 5.5-2.2 8.5-1.2v-13c-2.7-1.1-6-.7-8.5 1zM12 6.5v13.2"/><path d="M16 4.8v6l1.5-1.1 1.5 1.1V5"/>',
 profile:'<circle cx="12" cy="7.5" r="3.5"/><path d="M4.5 20v-1.3c0-4.2 3.2-6.7 7.5-6.7s7.5 2.5 7.5 6.7V20z"/>',
-trend:'<path d="m3 17 7-7 4 4 7-8"/><path d="M15 6h6v6"/>',star:'<path d="m12 3 2.8 5.8 6.4.9-4.6 4.5 1.1 6.4-5.7-3-5.7 3 1.1-6.4-4.6-4.5 6.4-.9z"/>',alert:'<path d="M12 3 2.5 20h19z"/><path d="M12 9v5M12 17h.01"/>',flame:'<path d="M12 22c4.3 0 7-3.1 7-7 0-3.5-2-5.8-4-7-.2 2.4-1.3 3.6-2.5 4-1-4-2.3-6-4.5-9 0 5-3 7.6-3 12 0 4 2.7 7 7 7z"/>',close:'<path d="M5 5l14 14M19 5 5 19"/>',
+average:'<path d="M4 19V13a2 2 0 0 1 4 0v6M10 19V9a2 2 0 0 1 4 0v10M16 19V5a2 2 0 0 1 4 0v14"/>',hwmark:'<path d="M12 6c-2.5-1.5-5.5-1.7-8.5-.7v13c3-1 6-.7 8.5 1 2.5-1.7 5.5-2 8.5-1v-13c-3-1-6-.8-8.5.7zM12 6v13.3"/><path d="m15 12 1.5 1.5L19 10"/>',trend:'<path d="m3 17 7-7 4 4 7-8"/><path d="M15 6h6v6"/>',star:'<path d="m12 3 2.8 5.8 6.4.9-4.6 4.5 1.1 6.4-5.7-3-5.7 3 1.1-6.4-4.6-4.5 6.4-.9z"/>',alert:'<path d="M12 3 2.5 20h19z"/><path d="M12 9v5M12 17h.01"/>',flame:'<path d="M12 22c4.3 0 7-3.1 7-7 0-3.5-2-5.8-4-7-.2 2.4-1.3 3.6-2.5 4-1-4-2.3-6-4.5-9 0 5-3 7.6-3 12 0 4 2.7 7 7 7z"/>',close:'<path d="M5 5l14 14M19 5 5 19"/>',
 left:'<path d="m15 18-6-6 6-6"/>',right:'<path d="m9 18 6-6-6-6"/>'};
 const filled={
 home:'<path d="M12 3.7 3.4 11v9a1 1 0 0 0 1 1H10v-7h4v7h5.6a1 1 0 0 0 1-1v-9z"/>',
@@ -81,12 +81,12 @@ function home(){
  let cleanStreak=0;for(const date of activeDates){if(all.some(g=>g.date===date&&g.value<=3))break;cleanStreak++}
  const tile=(label,value,hint,icon,color)=>'<div class="stat-tile"><div class="stat-top"><span>'+label+'</span><span class="stat-icon">'+ico(icon)+'</span></div><strong class="stat-value"'+(color?' style="color:'+color+'"':'')+'>'+value+'</strong><span class="stat-hint">'+hint+'</span></div>';
  let out='<section class="home-screen"><div class="stats-grid">'+
- tile('Средний балл',fmt(score()),'За четверть','grades')+
+ tile('Средний балл',fmt(score()),'За четверть','average')+
  tile('Динамика',arrow+' '+(delta>0?'+':'')+fmt(delta),'За сегодня','trend',delta>0?'#31ad81':delta<0?'#d76a6a':null)+
  tile('Доля пятёрок',fiveShare+'%','От всех оценок','star')+
  tile('Под риском',String(riskCount),'Предмета · средний < 3,60','alert')+
  tile('Без троек и двоек',String(cleanStreak),'Дней с оценками подряд','flame')+
- tile('Средний за домашки',hwAverage,'За четверть','homework')+
+ tile('Средний за домашки',hwAverage,'За четверть','hwmark')+
  '</div><div class="home-switch">'+btns([['line','Линейный'],['ring','Кольцевой']],state.chart,'chart')+'</div><div class="home-visual">';
  if(state.chart==='ring'){
   const circumference=2*Math.PI*72;let cum=0;
