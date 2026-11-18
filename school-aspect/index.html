@@ -811,13 +811,13 @@ async function openSettings(section='settings',page='home'){if(!await confirmDis
 function requestReset(){const dialog=$('reset-confirm-dialog');if(resetInProgress||dialog.open)return;dialog.showModal();$('reset-cancel').focus()}
 function catalogEditor(kind){
  const labels={staff:'Сотрудники',groups:'Группы',rooms:'Помещения',types:'Типы активностей',activities:'Названия занятий и активностей'};
- let chosen=null,creating=false,editing=false,search='';
+ let chosen=null,creating=false,editing=false;
  const commitCatalog=action=>{try{const result=action(localStorage.document());localStorage.replace(result.document||result);hydrateDocument();updateUndo();board();storageStatus('Справочник сохранён.');return result;}catch(e){alert(e.message);storageStatus(e.message);return null;}};
  function draw(){
   const doc=localStorage.document(),list=doc.catalogs[kind],x=list.find(x=>x.id===chosen),p=$('editor');
   let h='<button id="catalog-back" class="panel-back btn-ghost btn-standard">‹ '+(x||creating?'К списку':'К справочникам')+'</button><h2>'+labels[kind]+'</h2>';
   if(!x&&!creating){
-   h+='<button id="catalog-add" class="btn-primary btn-standard">+ Добавить</button><label>Поиск<input id="catalog-search" value="'+esc(search)+'"></label><div class="teacher-list">'+list.filter(v=>v.name.toLocaleLowerCase('ru').includes(search.toLocaleLowerCase('ru'))).slice().sort((a,b)=>a.name.localeCompare(b.name,'ru')).map(v=>'<button class="teacher-list-item btn-list" data-catalog-open="'+esc(v.id)+'"><span>'+esc(v.name)+(v.archived?'<small>Сохранён из прежнего архива</small>':'')+'</span><span>›</span></button>').join('')+'</div>';
+   h+='<button id="catalog-add" class="btn-primary btn-standard">+ Добавить</button><div class="teacher-list">'+list.slice().sort((a,b)=>a.name.localeCompare(b.name,'ru')).map(v=>'<button class="teacher-list-item btn-list" data-catalog-open="'+esc(v.id)+'"><span>'+esc(v.name)+(v.archived?'<small>Сохранён из прежнего архива</small>':'')+'</span><span>›</span></button>').join('')+'</div>';
   }else if(creating||editing){
    h+='<label>'+(kind==='staff'?'ФИО':'Название')+'<input id="catalog-name" value="'+esc(x?.name||'')+'"></label>';
    if(kind==='staff')h+='<label>Короткое имя для расписания<input id="catalog-short-name" value="'+esc(x?.shortName||'')+'" placeholder="Например, Елена И."></label>';
@@ -841,7 +841,6 @@ function catalogEditor(kind){
   p.innerHTML=h;
   $('catalog-back').onclick=()=>{if(x||creating){chosen=null;creating=false;editing=false;draw()}else{settingsSection='directories';settingsPage='home';settingsEditor()}};
   if($('catalog-add'))$('catalog-add').onclick=()=>{creating=true;draw();$('catalog-name').focus()};
-  if($('catalog-search'))$('catalog-search').oninput=e=>{search=e.target.value;const pos=e.target.selectionStart;draw();$('catalog-search').focus();$('catalog-search').setSelectionRange(pos,pos)};
   p.querySelectorAll('[data-catalog-open]').forEach(b=>b.onclick=()=>{chosen=b.dataset.catalogOpen;editing=false;draw()});
   if($('catalog-edit'))$('catalog-edit').onclick=()=>{editing=true;draw()};
   if($('catalog-cancel'))$('catalog-cancel').onclick=()=>{creating=false;editing=false;draw()};
