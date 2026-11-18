@@ -2,16 +2,8 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.AspectCards=api;})(typeof globalThis!=='undefined'?globalThis:this,function(){
 'use strict';
 const clean=s=>String(s||'').trim().replace(/\s+/g,' ');
-function teacherVariants(names){
- const full=names.map(clean).filter(Boolean);
- const initial=s=>s?Array.from(s)[0]+'.':'';
- const variants=[
-  full.join(' + '),
-  full.map(n=>{const w=n.split(' ');return w.length>1?w[0]+' '+initial(w[1]):n}).join(' + '),
-  full.map(n=>{const w=n.split(' ');return w.length>1?initial(w[0])+' '+initial(w[1]):n}).join(' + ')
- ];
- return [...new Set(variants)];
-}
+function teacherVariants(names){return [names.map(clean).filter(Boolean).join(' + ')];}
+
 function draw(content,data,teacher,layout,isBreak){
  content.replaceChildren();content.dataset.template=layout;
  const doc=content.ownerDocument;
@@ -53,7 +45,7 @@ function apply(card){
  const height=card.getBoundingClientRect().height;
  card.dataset.textSize=height<54?'small':height<105?'medium':'large';
  // One fixed reading order for every card: title, teacher, then time and room.
- // Only the teacher's spelling may be shortened; fields never change positions.
+ // Staff display names are explicit directory values; never abbreviate them automatically.
  for(let i=0;i<Math.max(1,teachers.length);i++){
   draw(content,data,teachers[i]||'','vertical',isBreak);
   if(fits(content)){card.dataset.layout='vertical';card.dataset.teacherLevel=String(i);delete card.dataset.compact;return false;}
