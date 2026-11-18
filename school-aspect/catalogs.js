@@ -30,7 +30,7 @@
   const value={...(old||{}),id:old?.id||M.id(kind==='types'?'type':kind),name};
   if(kind==='staff'){const shortName=String(values.shortName??old?.shortName??'').normalize('NFKC').trim().replace(/\s+/g,' ');if(shortName.length>80)throw Error('Короткое имя слишком длинное.');value.shortName=shortName;}
   if(kind==='types'){if(!/^#[0-9a-f]{6}$/i.test(values.color))throw Error('Выберите корректный цвет типа.');value.color=values.color;}
-  if(kind==='activities'){item(next,'types',values.typeId);value.typeId=values.typeId;}
+  if(kind==='activities'){if(!['type-subject','type-routine'].includes(values.typeId))throw Error('Для названия выберите «Урок» или «Перерыв».');item(next,'types',values.typeId);value.typeId=values.typeId;}
   if(values.restore)value.archived=false;
   if(old)Object.assign(old,value);else next.catalogs[kind].push(value);
   if(kind==='activities')for(const d of Object.values(next.days))for(const e of d.entries)if(e.activityId===value.id)e.typeId=value.typeId;
