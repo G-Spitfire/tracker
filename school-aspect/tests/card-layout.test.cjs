@@ -8,4 +8,6 @@ test('whitespace is normalized without losing letters',()=>assert.deepEqual(C.te
 test('existing initials are not expanded or repeated',()=>assert.deepEqual(C.teacherVariants(['Е. А.']),['Е. А.']));
 test('no assignments yields a stable empty label choice',()=>assert.deepEqual(C.teacherVariants([]),['']));
 test('three word names and unicode initials stay readable',()=>assert.deepEqual(C.teacherVariants(['Анна Мария Ёлкина']),['Анна Мария Ёлкина','Анна М. Ё.','А. М. Ё.']));
+test('reserved unassigned label stays explicit',()=>assert.deepEqual(C.teacherVariants(['Не назначен']),['Не назначен']));
+test('compact existing initials are never dropped',()=>assert.deepEqual(C.teacherVariants(['А.С.']),['А.С.']));
 console.log(JSON.stringify({passed,scope:'pure teacher label variants; geometry checked separately in actual browser'}));module.exports={passed};

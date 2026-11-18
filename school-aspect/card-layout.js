@@ -3,12 +3,12 @@
  'use strict';
  const clean=s=>String(s||'').trim().replace(/\s+/g,' ');
  function teacherVariants(names){
-  const initial=s=>/^\p{L}/u.test(s)?Array.from(s)[0]+'.':s;
+  const initial=s=>/^\p{L}\./u.test(s)?s:/^\p{L}/u.test(s)?Array.from(s)[0]+'.':s;
   const words=names.map(n=>clean(n).split(' '));
   return [...new Set([
    names.map(clean).join(' + '),
-   words.map(w=>w.length>1?[w[0],...w.slice(1).map(initial)].join(' '):w[0]).join(' + '),
-   words.map(w=>w.map(initial).join(' ')).join(' + ')
+   words.map(w=>w.join(' ')==='Не назначен'?'Не назначен':w.length>1?[w[0],...w.slice(1).map(initial)].join(' '):w[0]).join(' + '),
+   words.map(w=>w.join(' ')==='Не назначен'?'Не назначен':w.map(initial).join(' ')).join(' + ')
   ])];
  }
  const templates={
