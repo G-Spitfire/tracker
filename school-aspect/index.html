@@ -881,7 +881,7 @@ if(settingsPage==='data'){
  $('clear-all-data').onclick=()=>{
   if(!confirm('Очистить все расписания, справочники и настройки? Сначала скачайте резервную копию.'))return;
   const empty=AspectModel.encode({});
-  empty.catalogs={groups:[],staff:[],rooms:[],types:[],activities:[]};
+  empty.catalogs={groups:structuredClone(localStorage.document().catalogs.groups),staff:[],rooms:[],types:[],activities:[]};
   empty.days={};
   empty.settings={};
   empty.directoryMetadata={};
@@ -1215,7 +1215,16 @@ if(document.addEventListener){
  // A single writer tab avoids check/write races between localStorage operations.
  // Other tabs can inspect/export their snapshot but cannot change shared data.
  if(navigator.locks?.request){navigator.locks.request('aspect-document-writer',{ifAvailable:true},lock=>{
-  try{localStorage.activate(!!lock);updateUndo();storageStatus(lock?'':'Эта вкладка доступна для просмотра. Закройте другую вкладку Аспект и обновите страницу для редактирования.');}
+  try{
+   localStorage.activate(!!lock);
+   if(lock&&!localStorage.document().catalogs.groups.length){
+    const restored=structuredClone(localStorage.document());
+    restored.catalogs.groups=['1А класс','1Б класс','2 класс','3 класс','4 класс','Preschool'].map((name,i)=>({id:'group-'+i,name}));
+    localStorage.replace(AspectModel.validate(restored));
+    hydrateDocument();render();
+   }
+   updateUndo();storageStatus(lock?'':'Эта вкладка доступна для просмотра. Закройте другую вкладку Аспект и обновите страницу для редактирования.');
+  }
   catch(e){storageStatus(e.message)}
   return lock?new Promise(()=>{}):undefined;
  }).catch(e=>storageStatus('Сохранение недоступно: '+e.message));}
