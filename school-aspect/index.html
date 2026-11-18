@@ -880,7 +880,13 @@ if($('add-color-category'))$('add-color-category').onclick=()=>{let name=prompt(
 if(settingsPage==='data'){
  $('clear-all-data').onclick=()=>{
   if(!confirm('Очистить все расписания, справочники и настройки? Сначала скачайте резервную копию.'))return;
-  localStorage.replace(AspectModel.encode({}));location.reload();
+  const empty=AspectModel.encode({});
+  empty.catalogs={groups:[],staff:[],rooms:[],types:[],activities:[]};
+  empty.days={};
+  empty.settings={};
+  empty.directoryMetadata={};
+  localStorage.replace(AspectModel.validate(empty));
+  location.reload();
  };
  $('backup-export').onclick=()=>{
   try{const text=localStorage.exportBackup(),blob=new Blob([text],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='aspect-backup-'+date+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);$('backup-status').textContent='Резервная копия скачана';}catch(e){alert(e.message)}
