@@ -1217,10 +1217,22 @@ if(document.addEventListener){
  if(navigator.locks?.request){navigator.locks.request('aspect-document-writer',{ifAvailable:true},lock=>{
   try{
    localStorage.activate(!!lock);
-   if(lock&&!localStorage.document().catalogs.groups.length){
+   // One-time recovery after the 2026-11-18 reset accidentally removed permanent groups.
+   // Keep any groups created since then and never change their IDs or linked entries.
+   const recoveryKey='aspect_permanent_groups_recovery_20261118_v2';
+   if(lock&&window.localStorage.getItem(recoveryKey)!=='done'){
     const restored=structuredClone(localStorage.document());
-    restored.catalogs.groups=AspectModel.GROUP_NAMES.map((name,i)=>({id:'group-'+i,name}));
+    const existingNames=new Set(restored.catalogs.groups.map(g=>g.name.normalize('NFKC').trim().toLocaleLowerCase('ru')));
+    const existingIds=new Set(restored.catalogs.groups.map(g=>g.id));
+    for(const [i,name] of AspectModel.GROUP_NAMES.entries()){
+     if(existingNames.has(name.normalize('NFKC').trim().toLocaleLowerCase('ru')))continue;
+     let id='group-'+i;
+     if(existingIds.has(id))id=AspectModel.id('group');
+     restored.catalogs.groups.push({id,name});
+     existingIds.add(id);
+    }
     localStorage.replace(AspectModel.validate(restored));
+    window.localStorage.setItem(recoveryKey,'done');
     hydrateDocument();render();
    }
    updateUndo();storageStatus(lock?'':'Эта вкладка доступна для просмотра. Закройте другую вкладку Аспект и обновите страницу для редактирования.');
