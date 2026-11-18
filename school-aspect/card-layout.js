@@ -48,7 +48,8 @@ function apply(card){
  const data={name:card.dataset.cardName||'',time:card.dataset.cardTime||'',room:card.dataset.cardRoom||'',group:card.dataset.cardGroup||''};
  let names=[];try{names=JSON.parse(card.dataset.cardTeachers||'[]')}catch(_){}
  const teachers=teacherVariants(names);
- const isBreak=card.dataset.cardBreak==='true';
+ const type=card.dataset.cardType;
+ const isBreak=type==='type-routine'||type==='routine';
  const height=card.getBoundingClientRect().height;
  card.dataset.textSize=height<54?'small':height<105?'medium':'large';
  // One fixed reading order for every card: title, teacher, then time and room.
