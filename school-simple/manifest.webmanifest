@@ -1,0 +1,10 @@
+{
+  "name": "Школа — демо",
+  "short_name": "Школа",
+  "start_url": "./?source=homescreen",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f7f8fb",
+  "lang": "ru"
+}
