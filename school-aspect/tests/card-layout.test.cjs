@@ -1,0 +1,11 @@
+'use strict';
+const assert=require('node:assert/strict'),C=require('../card-layout.js');let passed=0;
+const test=(name,fn)=>{fn();passed++;console.log('PASS '+name);};
+test('two-part name keeps full first, then patronymic initial, then initials',()=>assert.deepEqual(C.teacherVariants(['Елена Александровна']),['Елена Александровна','Елена А.','Е. А.']));
+test('single name is not needlessly shortened before initials',()=>assert.deepEqual(C.teacherVariants(['Николь']),['Николь','Н.']));
+test('several responsible people are retained in every abbreviation level',()=>{const a=C.teacherVariants(['Анна Владимировна','Мария Сергеевна']);assert.equal(a[0],'Анна Владимировна + Мария Сергеевна');assert.equal(a[1],'Анна В. + Мария С.');assert.equal(a[2],'А. В. + М. С.');});
+test('whitespace is normalized without losing letters',()=>assert.deepEqual(C.teacherVariants(['  Елена  Александровна  ']),['Елена Александровна','Елена А.','Е. А.']));
+test('existing initials are not expanded or repeated',()=>assert.deepEqual(C.teacherVariants(['Е. А.']),['Е. А.']));
+test('no assignments yields a stable empty label choice',()=>assert.deepEqual(C.teacherVariants([]),['']));
+test('three word names and unicode initials stay readable',()=>assert.deepEqual(C.teacherVariants(['Анна Мария Ёлкина']),['Анна Мария Ёлкина','Анна М. Ё.','А. М. Ё.']));
+console.log(JSON.stringify({passed,scope:'pure teacher label variants; geometry checked separately in actual browser'}));module.exports={passed};
