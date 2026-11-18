@@ -12,10 +12,20 @@ function teacherVariants(names){
  ];
  return [...new Set(variants)];
 }
-function draw(content,data,teacher,layout){
+function draw(content,data,teacher,layout,isBreak){
  content.replaceChildren();content.dataset.template=layout;
  const doc=content.ownerDocument;
- const fields=[['name',data.name],['time',data.time],['teacher',teacher],['room',data.room],['group',data.group]];
+ if(isBreak){
+  const line=doc.createElement('div');line.className='adaptive-break-line';
+  const title=doc.createElement('strong');title.className='adaptive-name';title.textContent=data.name;line.appendChild(title);
+  if(teacher){const who=doc.createElement('span');who.className='adaptive-teacher';who.textContent=teacher;line.appendChild(who);}
+  content.appendChild(line);
+  for(const [key,value] of [['time',data.time],['room',data.room],['group',data.group]]){
+   if(!value)continue;const el=doc.createElement('span');el.className='adaptive-'+key;el.textContent=value;content.appendChild(el);
+  }
+  return;
+ }
+ const fields=[['name',data.name],['teacher',teacher],['time',data.time],['room',data.room],['group',data.group]];
  for(const [key,value] of fields){if(!value)continue;const el=doc.createElement(key==='name'?'strong':'span');el.className='adaptive-'+key;el.textContent=value;content.appendChild(el);}
 }
 function fits(content){
@@ -38,15 +48,16 @@ function apply(card){
  const data={name:card.dataset.cardName||'',time:card.dataset.cardTime||'',room:card.dataset.cardRoom||'',group:card.dataset.cardGroup||''};
  let names=[];try{names=JSON.parse(card.dataset.cardTeachers||'[]')}catch(_){}
  const teachers=teacherVariants(names);
+ const isBreak=card.dataset.cardBreak==='true';
  const height=card.getBoundingClientRect().height;
  card.dataset.textSize=height<54?'small':height<105?'medium':'large';
  // One fixed reading order for every card: title, teacher, then time and room.
  // Only the teacher's spelling may be shortened; fields never change positions.
  for(let i=0;i<Math.max(1,teachers.length);i++){
-  draw(content,data,teachers[i]||'','vertical');
+  draw(content,data,teachers[i]||'','vertical',isBreak);
   if(fits(content)){card.dataset.layout='vertical';card.dataset.teacherLevel=String(i);delete card.dataset.compact;return false;}
  }
- draw(content,data,teachers[teachers.length-1]||'','vertical');
+ draw(content,data,teachers[teachers.length-1]||'','vertical',isBreak);
  card.dataset.layout='overflow';card.dataset.compact='true';
  return true;
 }
