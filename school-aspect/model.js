@@ -1,6 +1,7 @@
 /* Aspect data boundary. Browser global + CommonJS for dependency-free tests. */
 (function (root, factory) {
   const api = factory();
+  api.board = typeof module === 'object' && module.exports ? require('./board.js') : root.AspectBoard;
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.AspectModel = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
