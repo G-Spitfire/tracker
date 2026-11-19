@@ -160,7 +160,11 @@ def git(repo: Path, *args: str, check: bool = True, env=None) -> str:
         raise RuntimeError(p.stderr.strip() or p.stdout.strip() or "git command failed")
     return p.stdout.strip()
 
-def publish(source_repo: Path, encrypted: str) -> None:
+def publish(source_repo: Path, encrypted: str, payload_digest: str) -> None:
+    digest_path = Path.home() / "Library/Application Support/SchoolDiary/last-published.sha256"
+    if digest_path.exists() and digest_path.read_text(encoding="ascii").strip() == payload_digest:
+        print("Snapshot unchanged; no GitHub publication needed.")
+        return
     if not (source_repo / ".git").exists():
         raise RuntimeError(f"Not a git repository: {source_repo}")
     remote_url = git(source_repo, "remote", "get-url", "origin")
@@ -197,7 +201,9 @@ def publish(source_repo: Path, encrypted: str) -> None:
         "user.email=school-sync@users.noreply.github.com",
         "commit", "-m", "chore: publish encrypted school diary snapshot")
     git(repo, "push", "-u", "origin", DATA_BRANCH, env=env)
-    digest_path.write_text(payload_digest + "\\n", encoding="ascii")\n    os.chmod(digest_path, 0o600)\n    print(f"Published encrypted snapshot to branch {DATA_BRANCH} (file {DATA_PATH}).")
+    digest_path.write_text(payload_digest + "\n", encoding="ascii")
+    os.chmod(digest_path, 0o600)
+    print(f"Published encrypted snapshot to branch {DATA_BRANCH} (file {DATA_PATH}).")
 
 def main() -> None:
     parser = argparse.ArgumentParser()
@@ -211,8 +217,10 @@ def main() -> None:
         return
     source = json.loads(args.data.expanduser().read_text(encoding="utf-8"))
     payload = normalize(source)
+    canonical = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    digest = hashlib.sha256(canonical).hexdigest()
     encrypted = encrypt(payload, get_secret(), get_salt())
-    publish(args.repo.expanduser(), encrypted)
+    publish(args.repo.expanduser(), encrypted, digest)
     for child, values in payload["children"].items():
         print(f"{child}: {len(values['marks'])} marks, {len(values['lessons'])} lessons")
 
