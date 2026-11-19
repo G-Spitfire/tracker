@@ -17,7 +17,7 @@ The public encrypted blob is still publicly downloadable if the repository is pu
 
 - `marks` is the canonical source for grade records. Lesson-level `estimates` are retained as lesson detail, not added to the grade list.
 - The numeric value is taken from `estimate_value_name` (for example, code `4/5` with displayed value `4` becomes numeric 4).
-- Homework tasks remain attached to the lesson. The source format shown so far has no explicit due date. The app displays the assignment date as the lesson date and does not pretend it is the due date. Generic placeholders such as `Домашнее задание` and `не задано` are omitted because they contain no actual instruction.
+- Homework tasks remain attached to the lesson. The source format shown so far has no explicit due date. The app currently estimates the due date from the next scheduled lesson of the same subject (matched by subject ID), when future schedule data is available. This is an estimate, not an official due date; without matching schedule the task has no estimated due date. Generic placeholders such as `Домашнее задание` and `не задано` are omitted because they contain no actual instruction.
 - Empty or malformed child datasets cause publishing to stop, preserving the last published snapshot.
 
 ## Mac setup (once)
@@ -53,4 +53,6 @@ The publisher uses a separate isolated Git repository at `~/Library/Application 
 
 ## Current status
 
-Publisher and browser decryption/cache primitives are committed on the integration branch. They have not yet passed an end-to-end Mac-to-browser test. Do not schedule publishing with launchd or replace demo data until that test and full application integration pass.
+Publisher and browser decryption/cache primitives are committed on the integration branch. The app also includes a live-data mapper and a future-schedule screen (with completed lessons as fallback for dates absent from the schedule). End-to-end Mac collection, automated publishing and mobile-browser validation are not confirmed in this repository. Do not merge into main until a complete two-child collection, encrypted publish, decrypt and UI acceptance test passes.
+
+The local collector.py, Chrome profile, LaunchAgent and its logs live outside GitHub and cannot be audited from this repository alone. A successful GitHub code inspection does not prove that scheduled collection works. The publisher currently requires non-empty marks and lessons for both children, but does not require non-empty future schedules; incomplete schedule exports can therefore pass publication validation. Check this before enabling automatic publication.
