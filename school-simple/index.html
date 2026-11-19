@@ -255,7 +255,7 @@ function homework(){
  const nextDate=new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate()+1);
  const tomorrow=iso(nextDate);
  const isWeekday=d=>{const day=new Date(d+'T12:00:00').getDay();return day!==0&&day!==6};
- const upcomingDays=[...new Set(kid.schedule.map(l=>(l.from||'').slice(0,10)).filter(d=>/^\\d{4}-\\d{2}-\\d{2}$/.test(d)&&d>today))].sort().slice(0,5);
+ const upcomingDays=[...new Set(kid.schedule.map(l=>(l.from||'').slice(0,10)).filter(d=>d.length===10&&d>today))].sort().slice(0,5);
  const weekDays=new Set(upcomingDays);
  const list=kid.tasks.filter(t=>{
   if(state.hw==='tomorrow')return t.nextLessonDate===tomorrow;
