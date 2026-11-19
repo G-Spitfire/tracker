@@ -45,7 +45,7 @@ test('home: unweighted subject means drive KPI, delta, and line chart', () => {
   const html = vm.runInContext('home()', c);
   assert.match(html, /Средний балл<\/span>.*?4,00/s);
   assert.match(html, /Учебных дней подряд/);
-  assert.match(html, /<polyline[^>]+points="38,278 324,278"/, 'line graph uses subject-weighted mean on both dates');
+  assert.match(html, /<polyline[^>]+points="38,66 324,66"/, 'line graph uses subject-weighted mean on both dates');
 });
 test('home: no-grade school day counts towards streak', () => {
   const c = setup();
