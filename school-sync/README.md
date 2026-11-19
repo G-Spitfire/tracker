@@ -17,7 +17,7 @@ The public encrypted blob is still publicly downloadable if the repository is pu
 
 - `marks` is the canonical source for grade records. Lesson-level `estimates` are retained as lesson detail, not added to the grade list.
 - The numeric value is taken from `estimate_value_name` (for example, code `4/5` with displayed value `4` becomes numeric 4).
-- Homework tasks remain attached to the lesson. The source format shown so far has no explicit due date. The app must label/filter them by the lesson date (for example, “к уроку 20.11”), not invent a due date.
+- Homework tasks remain attached to the lesson. The source format shown so far has no explicit due date. The app displays the assignment date as the lesson date and does not pretend it is the due date. Generic placeholders such as `Домашнее задание` and `не задано` are omitted because they contain no actual instruction.
 - Empty or malformed child datasets cause publishing to stop, preserving the last published snapshot.
 
 ## Mac setup (once)
