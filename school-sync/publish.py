@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Validate, normalize, encrypt and publish the School diary snapshot.
-
-The source JSON and passphrase never enter Git. Only data.enc.json is committed.
-Requires: pip install -r requirements.txt
-"""
+"""Validate, normalize, encrypt and publish the School diary snapshot."""
 from __future__ import annotations
 import argparse, base64, getpass, json, os, subprocess, sys
 from datetime import datetime
@@ -13,7 +9,6 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
 
-APP_DIR = Path(__file__).resolve().parent
 DEFAULT_DATA = Path.home() / "school-diary-data.json"
 DATA_BRANCH = "school-data"
 DATA_PATH = "data.enc.json"
@@ -38,12 +33,9 @@ def normalize(source: dict) -> dict:
     for child_id in sorted(EXPECTED_CHILDREN):
         child = children[child_id]
         marks, lessons = child.get("marks"), child.get("lessons")
-        if not isinstance(marks, list) or not isinstance(lessons, list):
-            raise ValueError(f"{child_id}: marks/lessons must be arrays")
-        if not marks or not lessons:
-            raise ValueError(f"{child_id}: empty marks or lessons; refusing to publish")
-        clean_marks = []
-        seen = set()
+        if not isinstance(marks, list) or not isinstance(lessons, list) or not marks or not lessons:
+            raise ValueError(f"{child_id}: marks/lessons missing or empty; refusing to publish")
+        clean_marks, seen = [], set()
         for mark in marks:
             if not isinstance(mark, dict):
                 raise ValueError(f"{child_id}: malformed mark")
@@ -118,9 +110,9 @@ def get_secret() -> bytes:
             ["security", "find-generic-password", "-a", getpass.getuser(), "-s", KEYCHAIN_SERVICE, "-w"],
             check=True, capture_output=True, text=True,
         )
-        secret = result.stdout.rstrip("\n")
     except (subprocess.CalledProcessError, FileNotFoundError):
-        raise RuntimeError("Encryption passphrase not found in macOS Keychain. Run: python publish.py setup-secret")
+        raise RuntimeError("Passphrase not found in macOS Keychain. Run: python publish.py setup-secret")
+    secret = result.stdout.rstrip("\n")
     if len(secret) < 12:
         raise RuntimeError("Passphrase must contain at least 12 characters")
     return secret.encode("utf-8")
@@ -130,24 +122,32 @@ def setup_secret() -> None:
     second = getpass.getpass("Repeat passphrase: ")
     if first != second or len(first) < 12:
         raise RuntimeError("Passphrases do not match or are shorter than 12 characters")
-    subprocess.run([
-        "security", "add-generic-password", "-U", "-a", getpass.getuser(),
-        "-s", KEYCHAIN_SERVICE, "-w", first,
-    ], check=True)
+    subprocess.run(["security", "add-generic-password", "-U", "-a", getpass.getuser(),
+                    "-s", KEYCHAIN_SERVICE, "-w", first], check=True)
     print("Encryption passphrase saved in macOS Keychain.")
 
-def encrypt(payload: dict, secret: bytes) -> str:
-    salt, nonce = os.urandom(16), os.urandom(12)
+def get_salt() -> bytes:
+    path = Path.home() / "Library/Application Support/SchoolDiary/encryption.salt"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.exists():
+        salt = path.read_bytes()
+        if len(salt) != 16:
+            raise RuntimeError("Invalid encryption salt file; refusing to rotate it automatically")
+        return salt
+    salt = os.urandom(16)
+    path.write_bytes(salt)
+    os.chmod(path, 0o600)
+    return salt
+
+def encrypt(payload: dict, secret: bytes, salt: bytes) -> str:
+    nonce = os.urandom(12)
     kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=600_000)
     key = kdf.derive(secret)
     plaintext = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     ciphertext = AESGCM(key).encrypt(nonce, plaintext, b"school-diary-v1")
     envelope = {
-        "format": "school-diary-encrypted",
-        "version": 1,
-        "kdf": "PBKDF2-SHA256",
-        "iterations": 600000,
-        "cipher": "AES-256-GCM",
+        "format": "school-diary-encrypted", "version": 1,
+        "kdf": "PBKDF2-SHA256", "iterations": 600000, "cipher": "AES-256-GCM",
         "salt": base64.b64encode(salt).decode(),
         "nonce": base64.b64encode(nonce).decode(),
         "ciphertext": base64.b64encode(ciphertext).decode(),
@@ -169,30 +169,24 @@ def publish(source_repo: Path, encrypted: str) -> None:
     if ssh_command:
         env["GIT_SSH_COMMAND"] = ssh_command
 
-    # A dedicated isolated clone prevents the data-only orphan branch from
-    # ever switching or deleting files in the application working tree.
+    # The data-only publisher clone is isolated from the application working tree.
     repo = Path.home() / "Library/Application Support/SchoolDiary/publish-repo"
     repo.parent.mkdir(parents=True, exist_ok=True)
     if not (repo / ".git").exists():
         subprocess.run(["git", "init", "-b", DATA_BRANCH, str(repo)], check=True, capture_output=True, text=True)
         git(repo, "remote", "add", "origin", remote_url)
-    else:
-        existing = git(repo, "remote", "get-url", "origin")
-        if existing != remote_url:
-            raise RuntimeError("Publisher repository remote does not match the application repository")
+    elif git(repo, "remote", "get-url", "origin") != remote_url:
+        raise RuntimeError("Publisher clone remote does not match the application repository")
 
-    fetched = git(repo, "fetch", "origin", DATA_BRANCH, check=False, env=env)
-    if fetched or git(repo, "rev-parse", "--verify", "FETCH_HEAD", check=False):
-        # A successful fetch updates FETCH_HEAD; reset only this isolated clone.
+    fetch = subprocess.run(["git", "-C", str(repo), "fetch", "origin", DATA_BRANCH],
+                           capture_output=True, text=True, env=env)
+    if fetch.returncode == 0:
         git(repo, "switch", "-C", DATA_BRANCH, "FETCH_HEAD")
     else:
-        # Only create the initial orphan branch when the remote branch is absent.
-        # Authentication/network errors are not treated as an empty branch.
-        probe = subprocess.run(["git", "-C", str(repo), "fetch", "origin", DATA_BRANCH],
-                               capture_output=True, text=True, env=env)
-        message = (probe.stderr + probe.stdout).lower()
-        if "couldn't find remote ref" not in message and "could not find remote ref" not in message:
-            raise RuntimeError(probe.stderr.strip() or "Could not inspect remote data branch")
+        message = (fetch.stderr + fetch.stdout).lower()
+        missing = "couldn't find remote ref" in message or "could not find remote ref" in message
+        if not missing:
+            raise RuntimeError(fetch.stderr.strip() or "Could not fetch remote data branch")
         git(repo, "switch", "--orphan", DATA_BRANCH)
 
     target = repo / DATA_PATH
@@ -205,3 +199,26 @@ def publish(source_repo: Path, encrypted: str) -> None:
     git(repo, "push", "-u", "origin", DATA_BRANCH, env=env)
     print(f"Published encrypted snapshot to branch {DATA_BRANCH} (file {DATA_PATH}).")
 
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--repo", type=Path, default=Path.home() / "school-integration",
+                        help="local integration-branch clone (publisher uses a separate isolated clone)")
+    parser.add_argument("--data", type=Path, default=DEFAULT_DATA)
+    parser.add_argument("command", nargs="?", choices=["publish", "setup-secret"], default="publish")
+    args = parser.parse_args()
+    if args.command == "setup-secret":
+        setup_secret()
+        return
+    source = json.loads(args.data.expanduser().read_text(encoding="utf-8"))
+    payload = normalize(source)
+    encrypted = encrypt(payload, get_secret(), get_salt())
+    publish(args.repo.expanduser(), encrypted)
+    for child, values in payload["children"].items():
+        print(f"{child}: {len(values['marks'])} marks, {len(values['lessons'])} lessons")
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        sys.exit(1)
