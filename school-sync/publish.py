@@ -217,7 +217,7 @@ def main() -> None:
         return
     source = json.loads(args.data.expanduser().read_text(encoding="utf-8"))
     payload = normalize(source)
-    canonical = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    digest_payload = {key: value for key, value in payload.items() if key != "generatedAt"}\n    canonical = json.dumps(digest_payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
     digest = hashlib.sha256(canonical).hexdigest()
     encrypted = encrypt(payload, get_secret(), get_salt())
     publish(args.repo.expanduser(), encrypted, digest)
