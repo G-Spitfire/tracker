@@ -11,7 +11,7 @@ This directory contains the Mac-side publisher for the encrypted diary snapshot.
 - Only `data.enc.json` is committed to the dedicated orphan branch `school-data`. That branch contains no application source files.
 - Never put the passphrase in JavaScript, GitHub, shell history, or a support message.
 
-The public encrypted blob is still publicly downloadable if the repository is public. Its confidentiality therefore depends on a strong, unique passphrase. Anyone who obtains the passphrase can decrypt it.
+The public encrypted blob is still publicly downloadable if the repository is public. Its confidentiality therefore depends on a strong, unique passphrase of at least 20 characters. Anyone who obtains the passphrase can decrypt it.
 
 ## Data semantics
 
