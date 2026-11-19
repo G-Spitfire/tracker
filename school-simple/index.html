@@ -321,8 +321,18 @@ document.addEventListener('change',e=>{if(e.target.matches('#quarter-select')){s
 async function loadDiarySnapshot(){
  if(!window.SchoolSync){dataSource='error';syncWarning='Модуль синхронизации недоступен';render();return;}
  if(dataSource!=='live'){dataSource='loading';syncWarning=null;render();}
- try{const result=await window.SchoolSync.sync();applyDiary(result.data,result.source);syncWarning=result.warning||null;render();}
- catch(error){if(dataSource!=='live')dataSource='error';syncWarning=error.message;render();}
+ try{
+  const cached=await window.SchoolSync.readCached();
+  if(cached){applyDiary(cached.data,'cache');render();}
+  const result=await window.SchoolSync.sync();
+  applyDiary(result.data,result.source);
+  syncWarning=result.warning||null;
+  render();
+ }catch(error){
+  if(dataSource!=='live'&&dataSource!=='cached')dataSource='error';
+  syncWarning=error.message;
+  render();
+ }
 }
 loadDiarySnapshot();
 checkForUpdate();
