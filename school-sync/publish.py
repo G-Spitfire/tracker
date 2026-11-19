@@ -113,7 +113,7 @@ def get_secret() -> bytes:
     except (subprocess.CalledProcessError, FileNotFoundError):
         raise RuntimeError("Passphrase not found in macOS Keychain. Run: python publish.py setup-secret")
     secret = result.stdout.rstrip("\n")
-    if len(secret) < 12:
+    if len(secret) < 20:
         raise RuntimeError("Passphrase must contain at least 20 characters")
     return secret.encode("utf-8")
 
@@ -121,7 +121,7 @@ def setup_secret() -> None:
     first = getpass.getpass("Create encryption passphrase (20+ characters): ")
     second = getpass.getpass("Repeat passphrase: ")
     if first != second or len(first) < 20:
-        raise RuntimeError("Passphrases do not match or are shorter than 12 characters")
+        raise RuntimeError("Passphrases do not match or are shorter than 20 characters")
     subprocess.run(["security", "add-generic-password", "-U", "-a", getpass.getuser(),
                     "-s", KEYCHAIN_SERVICE, "-w", first], check=True)
     print("Encryption passphrase saved in macOS Keychain.")
