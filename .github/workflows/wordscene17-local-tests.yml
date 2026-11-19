@@ -63,6 +63,14 @@ jobs:
             sleep 1
           done
           node wordscene/browser-acceptance.cjs
+      - name: Test School browser flows with synthetic data
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/school-http.log 2>&1 &
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:8765/school-simple/index.html >/dev/null; then break; fi
+            sleep 1
+          done
+          node school-simple/browser-smoke.cjs
       - name: Save mobile browser screenshots
         if: always()
         uses: actions/upload-artifact@v4
