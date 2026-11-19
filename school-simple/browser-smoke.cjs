@@ -9,7 +9,7 @@ const assert = require('node:assert/strict');
   page.on('pageerror',e=>errors.push(e.message));
   await page.route('**/school-sync-client.js',route=>route.fulfill({
     contentType:'application/javascript',
-    body:`window.SchoolSync={sync:async()=>({source:'network',data:{
+    body:`window.SchoolSync={readCached:async()=>null,sync:async()=>({source:'network',data:{
       schemaVersion:1,generatedAt:new Date().toISOString(),children:{
         polina:{marks:[{subjectId:'m',subject:'Математика',value:5,date:'2026-11-19',type:'Урок'}],lessons:[{subjectId:'m',subject:'Математика',from:'2026-11-19T09:00:00',tasks:[{name:'Упражнение 5'}]}],schedule:[{subjectId:'m',subject:'Математика',from:'2026-11-20T09:00:00'}]},
         matvey:{marks:[{subjectId:'r',subject:'Русский язык',value:4,date:'2026-11-19',type:'Урок'}],lessons:[],schedule:[]}
