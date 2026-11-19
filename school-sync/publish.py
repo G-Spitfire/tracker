@@ -57,6 +57,8 @@ def normalize(source: dict) -> dict:
             if key not in seen:
                 seen.add(key)
                 clean_marks.append(item)
+        if not clean_marks:
+            raise ValueError(f"{child_id}: no usable grades after normalization; refusing to publish")
         clean_lessons = []
         for lesson in lessons:
             if not isinstance(lesson, dict):
