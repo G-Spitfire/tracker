@@ -177,7 +177,7 @@ def publish(source_repo: Path, encrypted: str, payload_digest: str) -> None:
     repo = Path.home() / "Library/Application Support/SchoolDiary/publish-repo"
     repo.parent.mkdir(parents=True, exist_ok=True)
     if not (repo / ".git").exists():
-        subprocess.run(["git", "init", "-b", DATA_BRANCH, str(repo)], check=True, capture_output=True, text=True)
+        subprocess.run(["git", "init", str(repo)], check=True, capture_output=True, text=True)
         git(repo, "remote", "add", "origin", remote_url)
     elif git(repo, "remote", "get-url", "origin") != remote_url:
         raise RuntimeError("Publisher clone remote does not match the application repository")
