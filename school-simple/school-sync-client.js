@@ -133,6 +133,11 @@
     if (cached) return { data: cached.data, source: "cache", savedAt: cached.savedAt };
     throw new Error("Нет сохранённых данных. Подключись к интернету и выполни первую синхронизацию.");
   }
+  async function readCached() {
+    const cached = await dbGet(SNAPSHOT_KEY).catch(() => null);
+    if (!cached || !cached.data || cached.data.schemaVersion !== 1 || !cached.data.children?.polina || !cached.data.children?.matvey) return null;
+    return { data: cached.data, source: 'cache', savedAt: cached.savedAt };
+  }
   async function clearLocal() {
     const db = await openDb();
     return new Promise((resolve, reject) => {
@@ -142,5 +147,5 @@
       tx.onerror = () => { db.close(); reject(tx.error); };
     });
   }
-  window.SchoolSync = { sync, clearLocal };
+  window.SchoolSync = { sync, readCached, clearLocal };
 })();
