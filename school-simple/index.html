@@ -241,7 +241,6 @@ function schedule(){
  let monday=new Date(d);monday.setDate(d.getDate()-(d.getDay()+6)%7);
  let days=Array.from({length:7},(_,i)=>{let x=new Date(monday);x.setDate(x.getDate()+i);return x});
  let selected=new Date(state.date+'T12:00:00');
- let weekend=[0,6].includes(selected.getDay());
  const kid=kids[state.child];
  const planned=(kid.schedule||[]).filter(l=>l.from.slice(0,10)===state.date);
  const completed=(kid.lessons||[]).filter(l=>l.from.slice(0,10)===state.date);
