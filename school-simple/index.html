@@ -122,14 +122,54 @@ html{background:var(--surface)}
   .stat-icon svg{width:19px;height:19px}
 }
 </style></head><body><div class="app"><header class="head"><div class="head-title"><span id="brand-mark" class="brand-mark" aria-hidden="true"></span><h1 id="title">Главная</h1></div><button class="icon" id="profile" aria-label="Профиль"></button></header><main id="main"></main></div><nav class="bottom" id="nav"></nav>
+<script src="./school-sync-client.js"></script>
 <script>
-const TODAY=new Date();TODAY.setHours(12,0,0,0);const iso=d=>{let x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};const offset=n=>{let d=new Date(TODAY);d.setDate(d.getDate()+n);return iso(d)};const escapeHTML=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const sample=(name,shift)=>({name,subjects:['Математика','Русский язык','Литература','Английский','История','Биология','География'].map((subject,i)=>({name:subject,grades:[-19,-13,-8,-4,-1,0].filter((_,j)=>(i+j+shift)%5!==0).map((d,j)=>({value:[5,4,5,3,4,5,5][(i+j+shift)%7],date:offset(d),test:(i+j+shift)%3===0,homework:(i+j+shift)%3===1}))})),lessons:['Русский язык','Математика','Английский язык','История','Литература','Физкультура'],tasks:[{subject:'Математика',text:'№ 245–248, стр. 76',due:offset(1)},{subject:'Русский язык',text:'Упр. 132, правило',due:offset(1)},{subject:'Английский',text:'Слова, стр. 42',due:offset(2)},{subject:'История',text:'§ 12',due:offset(5)},{subject:'Биология',text:'Подготовить сообщение',due:offset(7)}]});
-const SCHOOL_QUARTERS=[{start:'2026-09-01',end:'2026-10-23'},{start:'2026-11-04',end:'2026-12-30'},{start:'2027-01-11',end:'2027-03-26'},{start:'2027-04-05',end:'2027-05-26'}];
+const TODAY=new Date();TODAY.setHours(12,0,0,0);const iso=d=>{let x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};const offset=n=>{let d=new Date(TODAY);d.setDate(d.getDate()+n);return iso(d)};const escapeHTML=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const SCHOOL_QUARTERS=[{start:'2026-09-01',end:'2026-10-23'},{start:'2026-11-04',end:'2026-12-30'},{start:'2027-01-11',end:'2027-03-26'},{start:'2027-04-05',end:'2027-05-26'}];
 const currentQuarter=()=>{const d=iso(TODAY);const active=SCHOOL_QUARTERS.findIndex(q=>d>=q.start&&d<=q.end);if(active>=0)return String(active+1);let last=-1;for(let i=0;i<SCHOOL_QUARTERS.length;i++){if(d>SCHOOL_QUARTERS[i].end)last=i}return String(last>=0?last+1:1)};
 const readSetting=(key,fallback)=>{try{return localStorage.getItem(key)||fallback}catch{return fallback}};
 const saveSetting=(key,value)=>{try{localStorage.setItem(key,value)}catch{}};
-const kids=[sample('Полина',0),sample('Матвей',2)];let state={tab:'home',child:0,gradesView:'grades',quarter:currentQuarter(),filter:'all',chart:'ring',hw:'tomorrow',date:iso(TODAY),week:0,theme:readSetting('school-theme','system'),accent:readSetting('school-accent','#4c8bf5'),returnTab:'home'};
-const main=document.querySelector('#main'),nav=document.querySelector('#nav');const mean=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:0;const fmt=n=>n.toFixed(2).replace('.',',');const gradeData=()=>kids[state.child].subjects.flatMap(s=>s.grades);const score=()=>mean(gradeData().map(g=>g.value));const setTab=t=>{state.tab=t;render()};const btns=(items,current,handler)=>'<div class="seg">'+items.map(([v,l])=>'<button data-action="'+handler+'" data-value="'+v+'" class="'+(v===current?'active':'')+'">'+l+'</button>').join('')+'</div>';
+const kids=[{name:'Полина',subjects:[],lessons:[],schedule:[],tasks:[]},{name:'Матвей',subjects:[],lessons:[],schedule:[],tasks:[]}];
+let dataSource='loading',diaryUpdatedAt=null,syncWarning=null;
+function mapDiaryChild(raw,name){
+ const subjectsMap=new Map();
+ const ensure=(id,label)=>{const key=String(id||label);if(!subjectsMap.has(key))subjectsMap.set(key,{name:label||'Без названия',grades:[]});return subjectsMap.get(key)};
+ (raw.marks||[]).forEach(m=>{const sub=ensure(m.subjectId,m.subject);sub.grades.push({value:Number(m.value),date:m.date,test:/контрольн|проверочн|тест|диктант|самостоятельн/i.test(m.type||''),homework:/домашн/i.test(m.type||''),type:m.type||'',comment:m.comment||null,id:m.id,lessonId:m.lessonId})});
+ (raw.lessons||[]).forEach(l=>ensure(l.subjectId,l.subject));
+ const schedule=(raw.schedule||[]).filter(l=>l&&l.from&&l.subjectId).slice().sort((a,b)=>a.from.localeCompare(b.from));
+ const today=iso(TODAY);
+ // Only the latest completed lesson for each subject can supply its current assignment.
+ // Older lessons are historical and must not be reassigned to a future lesson.
+ const latestBySubject=new Map();
+ (raw.lessons||[]).filter(l=>l&&l.from&&l.from.slice(0,10)<=today).forEach(l=>{
+  const key=String(l.subjectId||l.subject);
+  const previous=latestBySubject.get(key);
+  if(!previous||l.from>previous.from)latestBySubject.set(key,l);
+ });
+ const tasks=[];
+ for(const l of latestBySubject.values()){
+  const next=schedule.find(x=>String(x.subjectId)===String(l.subjectId)&&x.from.slice(0,10)>today);
+  if(!next)continue;
+  const seen=new Set();
+  for(const t of l.tasks||[]){
+   const name=String(t.name||'').trim();
+   if(!name||/^(?:не задано|домашнее задание(?:\s*:\s*не задано)?)\s*$/i.test(name))continue;
+   const key=name.toLocaleLowerCase('ru')+'|'+String(t.kind||'');
+   if(seen.has(key))continue;
+   seen.add(key);
+   tasks.push({subject:l.subject,text:name,lessonDate:l.from.slice(0,10),due:next.from.slice(0,10),kind:t.kind,files:t.files||[],lessonId:l.id});
+  }
+ }
+ const studyDays=[...new Set(schedule.map(l=>l.from.slice(0,10)))].sort();
+ return {name,subjects:[...subjectsMap.values()].sort((a,b)=>a.name.localeCompare(b.name,'ru')),lessons:raw.lessons||[],schedule,tasks,studyDays};
+}
+function applyDiary(data){
+ if(!data||data.schemaVersion!==1||!data.children?.polina||!data.children?.matvey)throw new Error('Неполный набор данных дневника');
+ kids[0]=mapDiaryChild(data.children.polina,'Полина');kids[1]=mapDiaryChild(data.children.matvey,'Матвей');
+ dataSource='live';diaryUpdatedAt=data.generatedAt||null;syncWarning=null;
+}
+let state={tab:'home',child:0,gradesView:'grades',quarter:currentQuarter(),filter:'all',chart:'ring',hw:'tomorrow',date:iso(TODAY),week:0,theme:readSetting('school-theme','system'),accent:readSetting('school-accent','#4c8bf5'),returnTab:'home'};
+const main=document.querySelector('#main'),nav=document.querySelector('#nav');const mean=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:0;const fmt=n=>n.toFixed(2).replace('.',',');const gradeData=()=>kids[state.child].subjects.flatMap(s=>s.grades).filter(g=>inQuarter(g.date));
+const quarterRange=q=>SCHOOL_QUARTERS[Number(q)-1];const inQuarter=date=>{const q=quarterRange(state.quarter);return !!q&&date>=q.start&&date<=q.end};const score=()=>mean(kids[state.child].subjects.map(s=>s.grades.filter(g=>inQuarter(g.date))).filter(g=>g.length).map(g=>mean(g.map(x=>x.value))));const setTab=t=>{state.tab=t;render()};const btns=(items,current,handler)=>'<div class="seg">'+items.map(([v,l])=>'<button data-action="'+handler+'" data-value="'+v+'" class="'+(v===current?'active':'')+'">'+l+'</button>').join('')+'</div>';
 function ico(name,active=false){
 const line={
 home:'<path d="M4 11.2 12 4l8 7.2V20H4z"/><path d="M10 20v-6h4v6"/>',
@@ -165,7 +205,7 @@ function home(){
  const direction=delta>0.000001?'up':delta< -0.000001?'down':'flat';
  const arrow=direction==='up'?'↑':direction==='down'?'↓':'→';
  const fiveShare=all.length?Math.round(counts[0]/all.length*100):0;
- const riskCount=kids[state.child].subjects.filter(s=>s.grades.length&&mean(s.grades.map(g=>g.value))<3.6).length;
+ const riskCount=kids[state.child].subjects.filter(s=>{const q=s.grades.filter(g=>inQuarter(g.date));return q.length&&mean(q.map(g=>g.value))<3.6}).length;
  const hwGrades=all.filter(g=>g.homework),hwAverage=hwGrades.length?fmt(mean(hwGrades.map(g=>g.value))):'—';
  const activeDates=[...new Set(all.map(g=>g.date))].sort().reverse();
  let cleanStreak=0;for(const date of activeDates){if(all.some(g=>g.date===date&&g.value<=3))break;cleanStreak++}
@@ -178,7 +218,7 @@ function home(){
  tile('Без троек и двоек',String(cleanStreak),'Дней с оценками подряд','flame')+
  tile('Средний за домашки',hwAverage,'За четверть','homework')+
  '</div><div class="home-switch">'+btns([['line','Линейный'],['ring','Кольцевой']],state.chart,'chart')+'</div><div class="home-visual">';
- if(state.chart==='ring'){
+ if(!all.length){out+='<div class="empty">Пока нет оценок за эту четверть</div>';}else if(state.chart==='ring'){
   const circumference=2*Math.PI*72;let cum=0;
   out+='<div class="home-ring-layout"><svg class="home-ring" viewBox="0 0 200 200" aria-label="Распределение оценок"><circle cx="100" cy="100" r="72" stroke="var(--soft)" stroke-width="25" fill="none"/>'+counts.map((n,i)=>{let part='<circle cx="100" cy="100" r="72" fill="none" stroke="'+colors[i]+'" stroke-width="25" stroke-dasharray="'+(n/all.length*circumference)+' '+circumference+'" stroke-dashoffset="'+(-cum/all.length*circumference)+'" transform="rotate(-90 100 100)"/>';cum+=n;return part}).join('')+'<text x="100" y="99" text-anchor="middle" fill="var(--fg)" font-size="37" font-weight="700">'+all.length+'</text><text x="100" y="119" text-anchor="middle" fill="var(--muted)" font-size="12">оценок</text></svg><div class="home-legend">'+counts.map((n,i)=>'<div class="home-legend-item"><span class="home-dot" style="background:'+colors[i]+'"></span><span>'+['Пятёрки','Четвёрки','Тройки','Двойки'][i]+'</span><b>'+n+'</b></div>').join('')+'</div></div>';
  }else{
@@ -189,12 +229,12 @@ function home(){
 }
 function grades(){
  const tabs='<div class="grades-tabs">'+btns([['grades','Оценки'],['forecast','Прогноз'],['graph','График']],state.gradesView,'grades-view')+'</div>';
- if(state.gradesView==='grades')return tabs+'<div class="grades-filter-row"><label class="grades-filter-check"><input type="checkbox" id="tests-toggle" '+(state.filter==='tests'?'checked':'')+'>Только контрольные</label></div><div class="content-after-controls">'+kids[state.child].subjects.map(s=>{let visible=s.grades.filter(g=>state.filter==='all'||g.test);if(!visible.length)return '';return '<section class="subject"><div class="row"><strong>'+escapeHTML(s.name)+'</strong><strong>'+fmt(mean(s.grades.map(g=>g.value)))+'</strong></div><div class="marks">'+visible.map(g=>'<button class="mark '+(g.date>=offset(-1)&&g.date<=iso(TODAY)?'new':'')+'" data-action="grade" data-value="'+encodeURIComponent(JSON.stringify({subject:s.name,...g}))+'" aria-label="Оценка '+g.value+' за '+g.date+'">'+g.value+'</button>').join('')+'</div></section>'}).join('')+'</div>';
  const period='<div class="grades-period"><span class="sub">Учебный период</span><select id="quarter-select" aria-label="Четверть">'+[1,2,3,4].map(n=>'<option value="'+n+'"'+(state.quarter===String(n)?' selected':'')+'>'+['I','II','III','IV'][n-1]+' четверть</option>').join('')+'</select></div>';
- const subjects=kids[state.child].subjects.map(s=>({...s,avg:mean(s.grades.map(g=>g.value))}));
- const demoNote='<p class="grades-footnote">Предварительные данные: расчёт по условным порогам 2,60 / 3,60 / 4,60. Оценки пока демонстрационные, разбивки по четвертям нет.</p>';
- if(state.gradesView==='forecast')return tabs+period+'<div class="content-after-controls"><div class="forecast-header"><span>Предмет</span><span class="forecast-number">Средний</span><span class="forecast-number">Прогноз</span></div>'+subjects.map(s=>'<div class="forecast-row"><strong>'+escapeHTML(s.name)+'</strong><span class="forecast-number sub">'+fmt(s.avg)+'</span><strong class="forecast-number">'+(s.avg>=4.6?5:s.avg>=3.6?4:s.avg>=2.6?3:2)+'</strong></div>').join('')+demoNote+'</div>';
- return tabs+period+'<div class="content-after-controls"><div class="heading" style="margin:0 0 16px">Средние баллы по предметам</div>'+subjects.sort((a,b)=>a.avg-b.avg).map(s=>'<div class="grades-graph-item"><div class="row"><strong>'+escapeHTML(s.name)+'</strong><strong>'+fmt(s.avg)+'</strong></div><div class="grades-graph-track"><div class="grades-graph-fill" style="width:'+Math.max(0,Math.min(100,s.avg/5*100))+'%"></div></div></div>').join('')+'<p class="grades-footnote">Предметы отсортированы от меньшего среднего балла к большему. Данные демонстрационные; четверти пока не разделены.</p></div>';
+ const subjects=kids[state.child].subjects.map(s=>({...s,grades:s.grades.filter(g=>inQuarter(g.date)),avg:mean(s.grades.filter(g=>inQuarter(g.date)).map(g=>g.value))}));
+ const note='Оценки загружены из электронного дневника.';
+ if(state.gradesView==='grades')return tabs+period+'<div class="grades-filter-row"><label class="grades-filter-check"><input type="checkbox" id="tests-toggle" '+(state.filter==='tests'?'checked':'')+'>Только контрольные</label></div><div class="content-after-controls">'+subjects.map(s=>{let visible=s.grades.filter(g=>state.filter==='all'||g.test);if(!visible.length)return '';return '<section class="subject"><div class="row"><strong>'+escapeHTML(s.name)+'</strong><strong>'+fmt(s.avg)+'</strong></div><div class="marks">'+visible.map(g=>'<button class="mark '+(g.date>=offset(-1)&&g.date<=iso(TODAY)?'new':'')+'" data-action="grade" data-value="'+encodeURIComponent(JSON.stringify({subject:s.name,...g}))+'" aria-label="Оценка '+g.value+' за '+g.date+'">'+g.value+'</button>').join('')+'</div></section>'}).join('')+'<p class="grades-footnote">'+note+'</p></div>';
+ if(state.gradesView==='forecast')return tabs+period+'<div class="content-after-controls"><div class="forecast-header"><span>Предмет</span><span class="forecast-number">Средний</span><span class="forecast-number">Прогноз</span></div>'+subjects.filter(s=>s.grades.length).map(s=>'<div class="forecast-row"><strong>'+escapeHTML(s.name)+'</strong><span class="forecast-number sub">'+fmt(s.avg)+'</span><strong class="forecast-number">'+(s.avg>=4.6?5:s.avg>=3.6?4:s.avg>=2.6?3:2)+'</strong></div>').join('')+'<p class="grades-footnote">Прогноз предварительный: используются пороги 2,60 / 3,60 / 4,60, а не официальные правила выставления итоговой оценки.</p></div>';
+ return tabs+period+'<div class="content-after-controls"><div class="heading" style="margin:0 0 16px">Средние баллы по предметам</div>'+subjects.filter(s=>s.grades.length).sort((a,b)=>a.avg-b.avg).map(s=>'<div class="grades-graph-item"><div class="row"><strong>'+escapeHTML(s.name)+'</strong><strong>'+fmt(s.avg)+'</strong></div><div class="grades-graph-track"><div class="grades-graph-fill" style="width:'+Math.max(0,Math.min(100,s.avg/5*100))+'%"></div></div></div>').join('')+'<p class="grades-footnote">'+note+'</p></div>';
 }
 function schedule(){
  let d=new Date(TODAY);d.setDate(d.getDate()+state.week*7);
@@ -202,18 +242,54 @@ function schedule(){
  let days=Array.from({length:7},(_,i)=>{let x=new Date(monday);x.setDate(x.getDate()+i);return x});
  let selected=new Date(state.date+'T12:00:00');
  let weekend=[0,6].includes(selected.getDay());
- let dayLessons=[['Русский язык','Математика','Литература','Физкультура','История'],['Математика','Английский язык','География','Русский язык','Биология'],['Русский язык','Математика','Английский язык','История','Литература','Физкультура'],['Биология','Русский язык','Математика','География','Английский язык'],['Литература','История','Математика','Физкультура','Русский язык']];
- let lessons=dayLessons[(selected.getDay()+6)%7].slice();if(state.child===1)lessons.reverse();
+ const kid=kids[state.child];
+ const planned=(kid.schedule||[]).filter(l=>l.from.slice(0,10)===state.date);
+ const completed=(kid.lessons||[]).filter(l=>l.from.slice(0,10)===state.date);
+ let lessons=planned.length?planned:completed;
+ lessons.sort((a,b)=>(a.from||'').localeCompare(b.from||'')||(Number(a.number)||0)-(Number(b.number)||0));
  let sameMonth=days[0].getMonth()===days[6].getMonth();
  let monthLabel=sameMonth?days[0].toLocaleDateString('ru-RU',{month:'long',year:'numeric'}):days[0].toLocaleDateString('ru-RU',{month:'short'})+' — '+days[6].toLocaleDateString('ru-RU',{month:'short',year:'numeric'});
- return '<div class="schedule-bar"><span class="schedule-month">'+monthLabel+'</span><div class="schedule-arrows"><button class="icon" data-action="week" data-value="-1" aria-label="Предыдущая неделя">'+ico('left')+'</button><button class="icon" data-action="week" data-value="1" aria-label="Следующая неделя">'+ico('right')+'</button></div></div><div class="calendar schedule-calendar">'+days.map(x=>'<button class="day-cell '+(iso(x)===state.date?'active':'')+'" data-action="date" data-value="'+iso(x)+'"><span class="sub">'+['Вс','Пн','Вт','Ср','Чт','Пт','Сб'][x.getDay()]+'</span><span>'+x.getDate()+'</span></button>').join('')+'</div><h3 class="heading">'+selected.toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'long'})+'</h3>'+(weekend?'<div class="empty">Нет уроков</div>':lessons.map((l,i)=>'<div class="lesson"><span class="sub">'+(i+1)+'</span>'+escapeHTML(l)+'</div>').join(''));
+ return '<div class="schedule-bar"><span class="schedule-month">'+monthLabel+'</span><div class="schedule-arrows"><button class="icon" data-action="week" data-value="-1" aria-label="Предыдущая неделя">'+ico('left')+'</button><button class="icon" data-action="week" data-value="1" aria-label="Следующая неделя">'+ico('right')+'</button></div></div><div class="calendar schedule-calendar">'+days.map(x=>'<button class="day-cell '+(iso(x)===state.date?'active':'')+'" data-action="date" data-value="'+iso(x)+'"><span class="sub">'+['Вс','Пн','Вт','Ср','Чт','Пт','Сб'][x.getDay()]+'</span><span>'+x.getDate()+'</span></button>').join('')+'</div><h3 class="heading">'+selected.toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'long'})+'</h3>'+(lessons.length?lessons.map((l,i)=>'<div class="lesson"><span class="sub">'+(l.number||i+1)+'</span><div><strong>'+escapeHTML(l.subject)+'</strong>'+(l.from?'<div class="sub">'+escapeHTML(l.from.slice(11,16))+(l.to?'–'+escapeHTML(l.to.slice(11,16)):'')+'</div>':'')+(l.topic?'<div class="sub">'+escapeHTML(l.topic)+'</div>':'')+'</div></div>').join(''):'<div class="empty">Нет уроков</div>');
 }
-function homework(){let next=new Date(TODAY);next.setDate(next.getDate()+1);while([0,6].includes(next.getDay()))next.setDate(next.getDate()+1);let end=new Date(TODAY);end.setDate(end.getDate()+7);let list=kids[state.child].tasks.filter(t=>t.due>=iso(TODAY)&&(state.hw==='all'||(state.hw==='tomorrow'?t.due===iso(next):t.due<=iso(end))));return btns([['tomorrow','На завтра'],['week','На неделю'],['all','Всё']],state.hw,'hw')+'<div class="content-after-controls">'+(list.length?list.map(t=>'<div class="task"><div class="row"><strong>'+escapeHTML(t.subject)+'</strong><span class="sub">'+t.due.slice(8)+'.'+t.due.slice(5,7)+'</span></div><p>'+escapeHTML(t.text)+'</p></div>').join(''):'<div class="empty">Нет актуальных заданий</div>')+'</div>'}
-function profile(){return '<div class="heading">Ученик</div><div class="seg">'+kids.map((k,i)=>'<button data-action="child" data-value="'+i+'" class="'+(i===state.child?'active':'')+'">'+escapeHTML(k.name)+'</button>').join('')+'</div><h3 class="heading">Оформление</h3><div class="sub" style="margin-bottom:7px">Тема</div>'+btns([['system','Системная'],['light','Светлая'],['dark','Тёмная']],state.theme,'theme')+'<div class="sub" style="margin-top:15px">Акцентный цвет</div><div class="swatches">'+[['#4c8bf5','Синий'],['#22a77a','Зелёный'],['#9168de','Фиолетовый'],['#e68b39','Оранжевый']].map(([c,name])=>'<button class="swatch" style="background:'+c+'" data-action="accent" data-value="'+c+'" aria-label="'+name+'">'+(state.accent===c?'✓':'')+'</button>').join('')+'</div><h3 class="heading">Электронный дневник</h3><div class="sub">Петербургское образование</div><p class="notice">Подключение электронного дневника — в разработке. Сейчас используются только демонстрационные данные.</p><footer class="profile-footer">Spitfire Studio<div>Версия 1.31.8</div></footer>'}
-function render(){document.documentElement.dataset.theme=state.theme;const dark=state.theme==='dark'||(state.theme==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.querySelector('meta[name="theme-color"]').setAttribute('content',dark?'#1c2430':'#ffffff');document.documentElement.style.setProperty('--accent',state.accent);document.querySelector('#brand-mark').innerHTML=state.tab==='home'?'<img src="./brand-mark.svg" width="30" height="30" alt="" decoding="async">':'';document.querySelector('#brand-mark').style.display=state.tab==='home'?'inline-flex':'none';document.querySelector('#title').textContent=({home:'Главная',grades:'Оценки',schedule:'Расписание',homework:'Домашка',profile:'Профиль'})[state.tab];document.querySelector('#profile').innerHTML=ico(state.tab==='profile'?'close':'profile');main.innerHTML=({home,grades,schedule,homework,profile})[state.tab]();nav.innerHTML=[['home','home','Главная'],['grades','grades','Оценки'],['schedule','schedule','Расписание'],['homework','homework','Домашка']].map(([id,icon,name])=>'<button data-action="tab" data-value="'+id+'" class="'+(state.tab===id?'active':'')+'"><span class="symbol">'+ico(icon,state.tab===id)+'</span>'+name+'</button>').join('')}
-const APP_VERSION='1.31.8';
+function homework(){
+ const kid=kids[state.child],today=iso(TODAY);
+ const nextDate=new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate()+1);
+ const tomorrow=iso(nextDate);
+ const isWeekday=d=>{const day=new Date(d+'T12:00:00').getDay();return day!==0&&day!==6};
+ const upcomingDays=[];
+ for(let offset=1;upcomingDays.length<5&&offset<=14;offset++){
+  const date=iso(new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate()+offset));
+  if(isWeekday(date))upcomingDays.push(date);
+ }
+ const weekDays=new Set(upcomingDays);
+ const list=kid.tasks.filter(t=>{
+  if(state.hw==='tomorrow')return isWeekday(tomorrow)&&t.due===tomorrow;
+  if(state.hw==='week')return !!t.due&&weekDays.has(t.due);
+  return !t.due||(t.due>=tomorrow&&isWeekday(t.due));
+ }).slice().sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999')||a.subject.localeCompare(b.subject,'ru'));
+ const dateLabel=d=>d?new Date(d+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'long'}):'Дата не определена';
+ let lastDate='';
+ const content=list.map(t=>{
+  const due=t.due||'';
+  const heading=due!==lastDate?'<h3 class="heading">'+escapeHTML(dateLabel(due))+'</h3>':'';
+  lastDate=due;
+  return heading+'<div class="task"><div class="row"><strong>'+escapeHTML(t.subject)+'</strong></div><p>'+escapeHTML(t.text)+'</p></div>';
+ }).join('');
+ const note='<p class="grades-footnote">Сроки рассчитаны по ближайшему следующему уроку предмета и могут отличаться от официального дневника.</p>';
+ const weekendTomorrow=!isWeekday(tomorrow);
+ const emptyMessage=state.hw==='tomorrow'&&weekendTomorrow
+  ?dateLabel(tomorrow)+'. Уроков нет'
+  :'Нет заданий на выбранный период';
+ return btns([['tomorrow','На завтра'],['week','На неделю'],['all','Всё']],state.hw,'hw')+
+ '<div class="content-after-controls">'+(list.length?content:'<div class="empty">'+escapeHTML(emptyMessage)+'</div>')+note+'</div>';
+}
+function profile(){return '<div class="heading">Ученик</div><div class="seg">'+kids.map((k,i)=>'<button data-action="child" data-value="'+i+'" class="'+(i===state.child?'active':'')+'">'+escapeHTML(k.name)+'</button>').join('')+'</div><h3 class="heading">Оформление</h3><div class="sub" style="margin-bottom:7px">Тема</div>'+btns([['system','Системная'],['light','Светлая'],['dark','Тёмная']],state.theme,'theme')+'<div class="sub" style="margin-top:15px">Акцентный цвет</div><div class="swatches">'+[['#4c8bf5','Синий'],['#22a77a','Зелёный'],['#9168de','Фиолетовый'],['#e68b39','Оранжевый']].map(([c,name])=>'<button class="swatch" style="background:'+c+'" data-action="accent" data-value="'+c+'" aria-label="'+name+'">'+(state.accent===c?'✓':'')+'</button>').join('')+'</div><h3 class="heading">Электронный дневник</h3><div class="sub">Петербургское образование</div><p class="notice">'+'Данные электронного дневника. Обновлено: '+escapeHTML(diaryUpdatedAt||'дата не указана')+(syncWarning?' · '+escapeHTML(syncWarning):'')+'</p><footer class="profile-footer">Spitfire Studio<div>Версия 1.32.3 · тестовая ветка</div></footer>'}
+function render(){document.documentElement.dataset.theme=state.theme;const dark=state.theme==='dark'||(state.theme==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.querySelector('meta[name="theme-color"]').setAttribute('content',dark?'#1c2430':'#ffffff');document.documentElement.style.setProperty('--accent',state.accent);document.querySelector('#brand-mark').innerHTML=state.tab==='home'?'<img src="./brand-mark.svg" width="30" height="30" alt="" decoding="async">':'';document.querySelector('#brand-mark').style.display=state.tab==='home'?'inline-flex':'none';document.querySelector('#title').textContent=({home:'Главная',grades:'Оценки',schedule:'Расписание',homework:'Домашка',profile:'Профиль'})[state.tab];document.querySelector('#profile').innerHTML=ico(state.tab==='profile'?'close':'profile');main.innerHTML=dataSource==='live'?({home,grades,schedule,homework,profile})[state.tab]():('<div class="empty" style="margin:24px 12px;padding:24px 16px"><h3>'+(dataSource==='loading'?'Загрузка электронного дневника':'Не удалось загрузить данные')+'</h3><p>'+escapeHTML(syncWarning||'Подождите, загружаем актуальные данные.')+'</p>'+(dataSource==='error'?'<button class="icon" data-action="retry-sync" style="width:auto;padding:10px 18px">Повторить</button>':'')+'</div>');nav.innerHTML=[['home','home','Главная'],['grades','grades','Оценки'],['schedule','schedule','Расписание'],['homework','homework','Домашка']].map(([id,icon,name])=>'<button data-action="tab" data-value="'+id+'" class="'+(state.tab===id?'active':'')+'"><span class="symbol">'+ico(icon,state.tab===id)+'</span>'+name+'</button>').join('')}
+const APP_VERSION='1.32.3';
 const APP_SCOPE=new URL('./',location.href).pathname;
-if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.filter(r=>{try{return new URL(r.scope).pathname===APP_SCOPE}catch{return false}}).forEach(r=>r.unregister())).catch(()=>{})}
+if('serviceWorker' in navigator){
+ navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'}).catch(()=>{});
+}
 let checkingVersion=false;
 async function checkForUpdate(){
  if(checkingVersion||!navigator.onLine)return;
@@ -235,7 +311,20 @@ async function checkForUpdate(){
  }catch(e){/* Offline or unavailable version endpoint: keep the current app usable. */}
  finally{checkingVersion=false}
 }
-window.addEventListener('focus',checkForUpdate);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkForUpdate()});document.querySelector('#profile').addEventListener('click',()=>{if(state.tab==='profile')setTab(state.returnTab);else{state.returnTab=state.tab;setTab('profile')}});
-document.addEventListener('change',e=>{if(e.target.matches('#quarter-select')){state.quarter=e.target.value;render()}else if(e.target.matches('#tests-toggle')){state.filter=e.target.checked?'tests':'all';render()}});document.addEventListener('click',e=>{let b=e.target.closest('[data-action]');if(!b)return;let a=b.dataset.action,v=b.dataset.value;switch(a){case'tab':setTab(v);return;case'grade':{let g=JSON.parse(decodeURIComponent(v));let overlay=document.createElement('div');overlay.className='detail-overlay';overlay.innerHTML='<div class="detail-box"><h3>'+escapeHTML(g.subject)+'</h3><p>Оценка: <b>'+g.value+'</b></p><p>Дата: '+new Date(g.date+'T12:00:00').toLocaleDateString('ru-RU')+'</p><p>Тип работы: '+(g.test?'Контрольная':'Обычная')+'</p><button class="icon" data-action="close-detail">Закрыть</button></div>';document.body.appendChild(overlay);overlay.addEventListener('click',ev=>{if(ev.target===overlay||ev.target.closest('[data-action="close-detail"]'))overlay.remove()});return}case'close-detail':b.closest('.detail-overlay')?.remove();return;case'filter':state.filter=v;break;case'grades-view':state.gradesView=v;break;case'chart':state.chart=v;break;case'hw':state.hw=v;break;case'child':state.child=+v;break;case'theme':state.theme=v;saveSetting('school-theme',v);break;case'accent':state.accent=v;saveSetting('school-accent',v);break;case'date':state.date=v;break;case'week':state.week+=+v;{let d=new Date(state.date+'T12:00:00');d.setDate(d.getDate()+7*(+v));state.date=iso(d)}break;}render()});render();checkForUpdate();
+// Reopen the app on a new calendar day so all date-based views and homework are recalculated.
+function refreshOnNewDay(){
+ if(iso(new Date())!==iso(TODAY)){location.reload();return true}
+ return false;
+}
+window.addEventListener('focus',()=>{if(!refreshOnNewDay())checkForUpdate()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!refreshOnNewDay())checkForUpdate()});document.querySelector('#profile').addEventListener('click',()=>{if(state.tab==='profile')setTab(state.returnTab);else{state.returnTab=state.tab;setTab('profile')}});
+document.addEventListener('change',e=>{if(e.target.matches('#quarter-select')){state.quarter=e.target.value;render()}else if(e.target.matches('#tests-toggle')){state.filter=e.target.checked?'tests':'all';render()}});document.addEventListener('click',e=>{let b=e.target.closest('[data-action]');if(!b)return;let a=b.dataset.action,v=b.dataset.value;switch(a){case'retry-sync':loadDiarySnapshot();return;case'tab':setTab(v);return;case'grade':{let g=JSON.parse(decodeURIComponent(v));let overlay=document.createElement('div');overlay.className='detail-overlay';overlay.innerHTML='<div class="detail-box"><h3>'+escapeHTML(g.subject)+'</h3><p>Оценка: <b>'+g.value+'</b></p><p>Дата: '+new Date(g.date+'T12:00:00').toLocaleDateString('ru-RU')+'</p><p>Тип работы: '+escapeHTML(g.type||(g.test?'Контрольная':'Обычная'))+'</p><button class="icon" data-action="close-detail">Закрыть</button></div>';document.body.appendChild(overlay);overlay.addEventListener('click',ev=>{if(ev.target===overlay||ev.target.closest('[data-action="close-detail"]'))overlay.remove()});return}case'close-detail':b.closest('.detail-overlay')?.remove();return;case'filter':state.filter=v;break;case'grades-view':state.gradesView=v;break;case'chart':state.chart=v;break;case'hw':state.hw=v;break;case'child':state.child=+v;break;case'theme':state.theme=v;saveSetting('school-theme',v);break;case'accent':state.accent=v;saveSetting('school-accent',v);break;case'date':state.date=v;break;case'week':state.week+=+v;{let d=new Date(state.date+'T12:00:00');d.setDate(d.getDate()+7*(+v));state.date=iso(d)}break;}render()});render();
+async function loadDiarySnapshot(){
+ if(!window.SchoolSync){dataSource='error';syncWarning='Модуль синхронизации недоступен';render();return;}
+ if(dataSource!=='live'){dataSource='loading';syncWarning=null;render();}
+ try{const result=await window.SchoolSync.sync();applyDiary(result.data);syncWarning=result.warning||null;render();}
+ catch(error){if(dataSource!=='live')dataSource='error';syncWarning=error.message;render();}
+}
+loadDiarySnapshot();
+checkForUpdate();
 </script></body></html>
