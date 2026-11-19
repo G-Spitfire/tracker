@@ -48,6 +48,46 @@
       ["decrypt"]
     );
   }
+  function requestPassphrase() {
+    return new Promise((resolve, reject) => {
+      const overlay = document.createElement("div");
+      overlay.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:20px";
+      const form = document.createElement("form");
+      form.style.cssText = "width:min(100%,360px);background:var(--card,#fff);color:var(--text,#222);padding:24px;border-radius:16px;box-shadow:0 8px 36px #0004";
+      const title = document.createElement("h2");
+      title.textContent = "Подключение дневника";
+      title.style.cssText = "margin:0 0 12px;font-size:20px";
+      const description = document.createElement("p");
+      description.textContent = "Введите пароль шифрования, сохранённый на Mac. Он не будет сохранён в открытом виде.";
+      description.style.cssText = "font-size:14px;line-height:1.5;margin:0 0 14px";
+      const field = document.createElement("input");
+      field.type = "password";
+      field.autocomplete = "off";
+      field.required = true;
+      field.placeholder = "Пароль шифрования";
+      field.setAttribute("aria-label", "Пароль шифрования");
+      field.style.cssText = "box-sizing:border-box;width:100%;padding:12px;border:1px solid #999;border-radius:8px;font-size:16px;color:#222;background:#fff";
+      const actions = document.createElement("div");
+      actions.style.cssText = "display:flex;gap:10px;justify-content:flex-end;margin-top:16px";
+      const cancel = document.createElement("button");
+      cancel.type = "button";
+      cancel.textContent = "Отмена";
+      const submit = document.createElement("button");
+      submit.type = "submit";
+      submit.textContent = "Подключить";
+      for (const button of [cancel, submit]) button.style.cssText = "padding:10px 14px;border-radius:8px;border:1px solid #aaa;cursor:pointer";
+      submit.style.background = "#376fe5";
+      submit.style.color = "#fff";
+      actions.append(cancel, submit);
+      form.append(title, description, field, actions);
+      overlay.append(form);
+      document.body.append(overlay);
+      const close = () => overlay.remove();
+      cancel.addEventListener("click", () => { close(); reject(new Error("Подключение отменено")); });
+      form.addEventListener("submit", event => { event.preventDefault(); const value = field.value; field.value = ""; close(); resolve(value); });
+      field.focus();
+    });
+  }
   async function decryptEnvelope(envelope) {
     if (envelope.format !== "school-diary-encrypted" || envelope.version !== 1 ||
         envelope.kdf !== "PBKDF2-SHA256" || envelope.cipher !== "AES-256-GCM" ||
@@ -55,7 +95,7 @@
     const salt = fromB64(envelope.salt);
     let key = await dbGet(CRYPTO_KEY);
     if (!key) {
-      const passphrase = window.prompt("Введите пароль шифрования данных «Школы». Он не сохраняется.");
+      const passphrase = await requestPassphrase();
       if (!passphrase) throw new Error("Для первого подключения нужен пароль шифрования");
       key = await deriveKey(passphrase, salt);
       await dbSet(CRYPTO_KEY, key);
