@@ -195,7 +195,7 @@ function home(){
  tile('Без троек и двоек',String(cleanStreak),'Дней с оценками подряд','flame')+
  tile('Средний за домашки',hwAverage,'За четверть','homework')+
  '</div><div class="home-switch">'+btns([['line','Линейный'],['ring','Кольцевой']],state.chart,'chart')+'</div><div class="home-visual">';
- if(state.chart==='ring'){
+ if(!all.length){out+='<div class="empty">Пока нет оценок за эту четверть</div>';}else if(state.chart==='ring'){
   const circumference=2*Math.PI*72;let cum=0;
   out+='<div class="home-ring-layout"><svg class="home-ring" viewBox="0 0 200 200" aria-label="Распределение оценок"><circle cx="100" cy="100" r="72" stroke="var(--soft)" stroke-width="25" fill="none"/>'+counts.map((n,i)=>{let part='<circle cx="100" cy="100" r="72" fill="none" stroke="'+colors[i]+'" stroke-width="25" stroke-dasharray="'+(n/all.length*circumference)+' '+circumference+'" stroke-dashoffset="'+(-cum/all.length*circumference)+'" transform="rotate(-90 100 100)"/>';cum+=n;return part}).join('')+'<text x="100" y="99" text-anchor="middle" fill="var(--fg)" font-size="37" font-weight="700">'+all.length+'</text><text x="100" y="119" text-anchor="middle" fill="var(--muted)" font-size="12">оценок</text></svg><div class="home-legend">'+counts.map((n,i)=>'<div class="home-legend-item"><span class="home-dot" style="background:'+colors[i]+'"></span><span>'+['Пятёрки','Четвёрки','Тройки','Двойки'][i]+'</span><b>'+n+'</b></div>').join('')+'</div></div>';
  }else{
