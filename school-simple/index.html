@@ -166,7 +166,7 @@ function applyDiary(data,source='network'){
  kids[0]=mapDiaryChild(data.children.polina,'Полина');kids[1]=mapDiaryChild(data.children.matvey,'Матвей');
  dataSource=source==='cache'?'cached':'live';diaryUpdatedAt=data.generatedAt||null;syncWarning=null;
 }
-let state={tab:'home',child:0,gradesView:'grades',quarter:currentQuarter(),filter:'all',chart:'ring',hw:'tomorrow',date:iso(TODAY),week:0,theme:readSetting('school-theme','system'),accent:readSetting('school-accent','#4c8bf5'),returnTab:'home'};
+let state={tab:'home',child:0,gradesView:'grades',quarter:currentQuarter(),filter:'all',chart:'line',hw:'tomorrow',date:iso(TODAY),week:0,theme:readSetting('school-theme','system'),accent:readSetting('school-accent','#4c8bf5'),returnTab:'home'};
 const main=document.querySelector('#main'),nav=document.querySelector('#nav');const mean=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:0;const fmt=n=>n.toFixed(2).replace('.',',');const gradeData=()=>kids[state.child].subjects.flatMap(s=>s.grades).filter(g=>inQuarter(g.date));
 const quarterRange=q=>SCHOOL_QUARTERS[Number(q)-1];const inQuarter=date=>{const q=quarterRange(state.quarter);return !!q&&date>=q.start&&date<=q.end};const score=()=>mean(kids[state.child].subjects.map(s=>s.grades.filter(g=>inQuarter(g.date))).filter(g=>g.length).map(g=>mean(g.map(x=>x.value))));const setTab=t=>{state.tab=t;render()};const btns=(items,current,handler)=>'<div class="seg">'+items.map(([v,l])=>'<button data-action="'+handler+'" data-value="'+v+'" class="'+(v===current?'active':'')+'">'+l+'</button>').join('')+'</div>';
 function ico(name,active=false){
@@ -207,15 +207,15 @@ function home(){
  const fiveShare=all.length?Math.round(counts[0]/all.length*100):0;
  const riskCount=kids[state.child].subjects.filter(s=>{const q=s.grades.filter(g=>inQuarter(g.date));return q.length&&mean(q.map(g=>g.value))<3.6}).length;
  const hwGrades=all.filter(g=>g.homework),hwAverage=hwGrades.length?fmt(mean(hwGrades.map(g=>g.value))):'—';
- const activeDates=[...new Set(all.map(g=>g.date))].sort().reverse();
- let cleanStreak=0;for(const date of activeDates){if(all.some(g=>g.date===date&&g.value<=3))break;cleanStreak++}
+ const schoolDates=[...new Set(kids[state.child].lessons.map(l=>(l.from||'').slice(0,10)).filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d)&&d<=today))].sort().reverse();
+ let cleanStreak=0;for(const date of schoolDates){if(all.some(g=>g.date===date&&g.value<=3))break;cleanStreak++}
  const tile=(label,value,hint,icon,color)=>'<div class="stat-tile"><div class="stat-top"><span>'+label+'</span><span class="stat-icon">'+kpiIcon(icon)+'</span></div><strong class="stat-value"'+(color?' style="color:'+color+'"':'')+'>'+value+'</strong><span class="stat-hint">'+hint+'</span></div>';
  let out='<section class="home-screen"><div class="stats-grid">'+
  tile('Средний балл',fmt(score()),'За четверть','average')+
  tile('Динамика',arrow+' '+(delta>0?'+':'')+fmt(delta),'За сегодня','trend',delta>0?'#31ad81':delta<0?'#d76a6a':null)+
  tile('Доля пятёрок',fiveShare+'%','От всех оценок','star')+
  tile('Под риском',String(riskCount),'Предмета · средний < 3,60','alert')+
- tile('Без троек и двоек',String(cleanStreak),'Дней с оценками подряд','flame')+
+ tile('Без троек и двоек',String(cleanStreak),'Учебных дней подряд','flame')+
  tile('Средний за домашки',hwAverage,'За четверть','homework')+
  '</div><div class="home-switch">'+btns([['line','Линейный'],['ring','Кольцевой']],state.chart,'chart')+'</div><div class="home-visual">';
  if(!all.length){out+='<div class="empty">Пока нет оценок за эту четверть</div>';}else if(state.chart==='ring'){
@@ -258,19 +258,19 @@ function homework(){
  const upcomingDays=[...new Set(kid.schedule.map(l=>(l.from||'').slice(0,10)).filter(d=>/^\\d{4}-\\d{2}-\\d{2}$/.test(d)&&d>today))].sort().slice(0,5);
  const weekDays=new Set(upcomingDays);
  const list=kid.tasks.filter(t=>{
-  if(state.hw==='tomorrow')return isWeekday(tomorrow)&&t.due===tomorrow;
-  if(state.hw==='week')return !!t.due&&weekDays.has(t.due);
-  return !t.due||(t.due>=tomorrow&&isWeekday(t.due));
- }).slice().sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999')||a.subject.localeCompare(b.subject,'ru'));
- const dateLabel=d=>d?new Date(d+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'long'}):'Дата не определена';
+  if(state.hw==='tomorrow')return t.nextLessonDate===tomorrow;
+  if(state.hw==='week')return !!t.nextLessonDate&&weekDays.has(t.nextLessonDate);
+  return true;
+ }).slice().sort((a,b)=>(a.nextLessonDate||'9999').localeCompare(b.nextLessonDate||'9999')||a.subject.localeCompare(b.subject,'ru'));
+ const dateLabel=d=>d?new Date(d+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'long'}):'Дата следующего урока не определена';
  let lastDate='';
  const content=list.map(t=>{
-  const due=t.due||'';
-  const heading=due!==lastDate?'<h3 class="heading">'+escapeHTML(dateLabel(due))+'</h3>':'';
+  const due=t.nextLessonDate||'';
+  const heading=due!==lastDate?'<h3 class="heading">'+(due?'К следующему уроку · '+escapeHTML(dateLabel(due)):'Дата следующего урока не определена')+'</h3>':'';
   lastDate=due;
   return heading+'<div class="task"><div class="row"><strong>'+escapeHTML(t.subject)+'</strong></div><p>'+escapeHTML(t.text)+'</p></div>';
  }).join('');
- const note='<p class="grades-footnote">Сроки рассчитаны по ближайшему следующему уроку предмета и могут отличаться от официального дневника.</p>';
+ const note='<p class="grades-footnote">Задания привязаны к следующему уроку предмета. Официальная дата сдачи в источнике не предоставляется.</p>';
  const weekendTomorrow=!isWeekday(tomorrow);
  const emptyMessage=state.hw==='tomorrow'&&weekendTomorrow
   ?dateLabel(tomorrow)+'. Уроков нет'
