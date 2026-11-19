@@ -142,7 +142,7 @@ function mapDiaryChild(raw,name){
   return {subject:l.subject,text:t.name,lessonDate:l.from.slice(0,10),due:next?next.from.slice(0,10):null,kind:t.kind,files:t.files||[],lessonId:l.id};
  }));
  const studyDays=[...new Set(schedule.map(l=>l.from.slice(0,10)))].sort();
- return {name,subjects:[...subjectsMap.values()].sort((a,b)=>a.name.localeCompare(b.name,'ru')),lessons:raw.lessons||[],tasks,studyDays};
+ return {name,subjects:[...subjectsMap.values()].sort((a,b)=>a.name.localeCompare(b.name,'ru')),lessons:raw.lessons||[],schedule,tasks,studyDays};
 }
 function applyDiary(data){
  if(!data||data.schemaVersion!==1||!data.children?.polina||!data.children?.matvey)throw new Error('Неполный набор данных дневника');
@@ -225,8 +225,9 @@ function schedule(){
  let selected=new Date(state.date+'T12:00:00');
  let weekend=[0,6].includes(selected.getDay());
  let dayLessons=[['Русский язык','Математика','Литература','Физкультура','История'],['Математика','Английский язык','География','Русский язык','Биология'],['Русский язык','Математика','Английский язык','История','Литература','Физкультура'],['Биология','Русский язык','Математика','География','Английский язык'],['Литература','История','Математика','Физкультура','Русский язык']];
- let lessons=dataSource==='live'?kids[state.child].lessons.filter(l=>l.from.slice(0,10)===state.date):dayLessons[(selected.getDay()+6)%7].map((subject,i)=>({number:i+1,subject,from:state.date+'T09:00',to:state.date+'T09:45',topic:''}));
+ let lessons=dataSource==='live'?(() => {const kid=kids[state.child];const planned=(kid.schedule||[]).filter(l=>l.from.slice(0,10)===state.date);const completed=(kid.lessons||[]).filter(l=>l.from.slice(0,10)===state.date);return planned.length?planned:completed;})():dayLessons[(selected.getDay()+6)%7].map((subject,i)=>({number:i+1,subject,from:state.date+'T09:00',to:state.date+'T09:45',topic:''}));
  if(dataSource==='demo'&&state.child===1)lessons.reverse();
+ lessons.sort((a,b)=>(a.from||'').localeCompare(b.from||'')||(Number(a.number)||0)-(Number(b.number)||0));
  let sameMonth=days[0].getMonth()===days[6].getMonth();
  let monthLabel=sameMonth?days[0].toLocaleDateString('ru-RU',{month:'long',year:'numeric'}):days[0].toLocaleDateString('ru-RU',{month:'short'})+' — '+days[6].toLocaleDateString('ru-RU',{month:'short',year:'numeric'});
  return '<div class="schedule-bar"><span class="schedule-month">'+monthLabel+'</span><div class="schedule-arrows"><button class="icon" data-action="week" data-value="-1" aria-label="Предыдущая неделя">'+ico('left')+'</button><button class="icon" data-action="week" data-value="1" aria-label="Следующая неделя">'+ico('right')+'</button></div></div><div class="calendar schedule-calendar">'+days.map(x=>'<button class="day-cell '+(iso(x)===state.date?'active':'')+'" data-action="date" data-value="'+iso(x)+'"><span class="sub">'+['Вс','Пн','Вт','Ср','Чт','Пт','Сб'][x.getDay()]+'</span><span>'+x.getDate()+'</span></button>').join('')+'</div><h3 class="heading">'+selected.toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'long'})+'</h3>'+((dataSource==='demo'&&weekend)?'<div class="empty">Нет уроков</div>':lessons.length?lessons.map((l,i)=>'<div class="lesson"><span class="sub">'+(l.number||i+1)+'</span><div><strong>'+escapeHTML(l.subject)+'</strong>'+(l.from?'<div class="sub">'+escapeHTML(l.from.slice(11,16))+(l.to?'–'+escapeHTML(l.to.slice(11,16)):'')+'</div>':'')+(l.topic?'<div class="sub">'+escapeHTML(l.topic)+'</div>':'')+'</div></div>').join(''):'<div class="empty">Нет уроков</div>');
