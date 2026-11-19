@@ -154,60 +154,54 @@ def encrypt(payload: dict, secret: bytes) -> str:
     }
     return json.dumps(envelope, separators=(",", ":")) + "\n"
 
-def git(repo: Path, *args: str) -> str:
-    p = subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True, text=True)
+def git(repo: Path, *args: str, check: bool = True, env=None) -> str:
+    p = subprocess.run(["git", "-C", str(repo), *args], check=False, capture_output=True, text=True, env=env)
+    if check and p.returncode:
+        raise RuntimeError(p.stderr.strip() or p.stdout.strip() or "git command failed")
     return p.stdout.strip()
 
-def publish(repo: Path, encrypted: str) -> None:
+def publish(source_repo: Path, encrypted: str) -> None:
+    if not (source_repo / ".git").exists():
+        raise RuntimeError(f"Not a git repository: {source_repo}")
+    remote_url = git(source_repo, "remote", "get-url", "origin")
+    ssh_command = git(source_repo, "config", "--get", "core.sshCommand", check=False)
+    env = os.environ.copy()
+    if ssh_command:
+        env["GIT_SSH_COMMAND"] = ssh_command
+
+    # A dedicated isolated clone prevents the data-only orphan branch from
+    # ever switching or deleting files in the application working tree.
+    repo = Path.home() / "Library/Application Support/SchoolDiary/publish-repo"
+    repo.parent.mkdir(parents=True, exist_ok=True)
     if not (repo / ".git").exists():
-        raise RuntimeError(f"Not a git repository: {repo}")
-    # Use a dedicated data branch; never publish to main or the application branch.
-    branches = git(repo, "branch", "--list", DATA_BRANCH)
-    current = git(repo, "branch", "--show-current")
-    if current != DATA_BRANCH:
-        if branches:
-            git(repo, "switch", DATA_BRANCH)
-        else:
-            git(repo, "switch", "--orphan", DATA_BRANCH)
-            # An orphan branch must not inherit source files.
-            for p in (repo / ".").iterdir():
-                if p.name != ".git":
-                    if p.is_dir():
-                        import shutil; shutil.rmtree(p)
-                    else:
-                        p.unlink()
+        subprocess.run(["git", "init", "-b", DATA_BRANCH, str(repo)], check=True, capture_output=True, text=True)
+        git(repo, "remote", "add", "origin", remote_url)
+    else:
+        existing = git(repo, "remote", "get-url", "origin")
+        if existing != remote_url:
+            raise RuntimeError("Publisher repository remote does not match the application repository")
+
+    fetched = git(repo, "fetch", "origin", DATA_BRANCH, check=False, env=env)
+    if fetched or git(repo, "rev-parse", "--verify", "FETCH_HEAD", check=False):
+        # A successful fetch updates FETCH_HEAD; reset only this isolated clone.
+        git(repo, "switch", "-C", DATA_BRANCH, "FETCH_HEAD")
+    else:
+        # Only create the initial orphan branch when the remote branch is absent.
+        # Authentication/network errors are not treated as an empty branch.
+        probe = subprocess.run(["git", "-C", str(repo), "fetch", "origin", DATA_BRANCH],
+                               capture_output=True, text=True, env=env)
+        message = (probe.stderr + probe.stdout).lower()
+        if "couldn't find remote ref" not in message and "could not find remote ref" not in message:
+            raise RuntimeError(probe.stderr.strip() or "Could not inspect remote data branch")
+        git(repo, "switch", "--orphan", DATA_BRANCH)
+
     target = repo / DATA_PATH
     target.write_text(encrypted, encoding="utf-8")
     os.chmod(target, 0o600)
     git(repo, "add", DATA_PATH)
-    # Do not create a commit if the ciphertext is byte-identical (normally nonce changes).
     git(repo, "-c", "user.name=School Diary Sync", "-c",
         "user.email=school-sync@users.noreply.github.com",
         "commit", "-m", "chore: publish encrypted school diary snapshot")
-    git(repo, "push", "-u", "origin", DATA_BRANCH)
+    git(repo, "push", "-u", "origin", DATA_BRANCH, env=env)
     print(f"Published encrypted snapshot to branch {DATA_BRANCH} (file {DATA_PATH}).")
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--repo", type=Path, default=Path.home() / "school-sync-test",
-                        help="local clone of G-Spitfire/tracker")
-    parser.add_argument("--data", type=Path, default=DEFAULT_DATA)
-    parser.add_argument("command", nargs="?", choices=["publish", "setup-secret"], default="publish")
-    args = parser.parse_args()
-    if args.command == "setup-secret":
-        setup_secret()
-        return
-    source = json.loads(args.data.read_text(encoding="utf-8"))
-    payload = normalize(source)
-    secret = get_secret()
-    encrypted = encrypt(payload, secret, get_salt())
-    publish(args.repo.expanduser(), encrypted)
-    for child, values in payload["children"].items():
-        print(f"{child}: {len(values['marks'])} marks, {len(values['lessons'])} lessons")
-
-if __name__ == "__main__":
-    try:
-        main()
-    except Exception as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
-        sys.exit(1)
