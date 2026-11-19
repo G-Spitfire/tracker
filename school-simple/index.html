@@ -159,7 +159,7 @@ function mapDiaryChild(raw,name){
    tasks.push({subject:l.subject,text:name,lessonDate:l.from.slice(0,10),due:next.from.slice(0,10),kind:t.kind,files:t.files||[],lessonId:l.id});
   }
  }
- return {name,subjects:[...subjectsMap.values()].sort((a,b)=>a.name.localeCompare(b.name,'ru')),lessons:raw.lessons||[],schedule,tasks,studyDays};
+ return {name,subjects:[...subjectsMap.values()].sort((a,b)=>a.name.localeCompare(b.name,'ru')),lessons:raw.lessons||[],schedule,tasks};
 }
 function applyDiary(data){
  if(!data||data.schemaVersion!==1||!data.children?.polina||!data.children?.matvey)throw new Error('Неполный набор данных дневника');
