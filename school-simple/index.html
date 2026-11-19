@@ -218,10 +218,10 @@ async function checkForUpdate(){
   const response=await fetch('./version.json?t='+Date.now(),{cache:'no-store'});
   if(!response.ok)return;
   const data=await response.json();
-  if(!data||typeof data.version!=='string'||!/^\\d+\\.\\d+(?:\\.\\d+)?$/.test(data.version)||data.version===APP_VERSION)return;
+  if(!data||typeof data.version!=='string'||!/^\d+\.\d+(?:\.\d+)?$/.test(data.version)||data.version===APP_VERSION)return;
   const target=new URL(location.href);
   const currentParam=target.searchParams.get('v');
-  const targetParam=data.version.replace(/\\./g,'');
+  const targetParam=data.version.replace(/\./g,'');
   if(currentParam===targetParam)return;
   const attemptKey='school-update-attempt-'+data.version;
   if(sessionStorage.getItem(attemptKey)==='1')return;
