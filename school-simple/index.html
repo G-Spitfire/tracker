@@ -136,7 +136,7 @@ function mapDiaryChild(raw,name){
  const ensure=(id,label)=>{const key=String(id||label);if(!subjectsMap.has(key))subjectsMap.set(key,{name:label||'Без названия',grades:[]});return subjectsMap.get(key)};
  (raw.marks||[]).forEach(m=>{const sub=ensure(m.subjectId,m.subject);sub.grades.push({value:Number(m.value),date:m.date,test:/контрольн|проверочн|тест|диктант|самостоятельн/i.test(m.type||''),homework:/домашн/i.test(m.type||''),type:m.type||'',comment:m.comment||null,id:m.id,lessonId:m.lessonId})});
  (raw.lessons||[]).forEach(l=>ensure(l.subjectId,l.subject));
- const tasks=(raw.lessons||[]).flatMap(l=>(l.tasks||[]).filter(t=>t.name&&t.name.toLowerCase()!=='не задано').map(t=>({subject:l.subject,text:t.name,lessonDate:l.from.slice(0,10),due:null,kind:t.kind,files:t.files||[],lessonId:l.id})));
+ const tasks=(raw.lessons||[]).flatMap(l=>(l.tasks||[]).filter(t=>t.name&&!['не задано','домашнее задание'].includes(t.name.toLowerCase())).map(t=>({subject:l.subject,text:t.name,lessonDate:l.from.slice(0,10),due:null,kind:t.kind,files:t.files||[],lessonId:l.id})));
  return {name,subjects:[...subjectsMap.values()].sort((a,b)=>a.name.localeCompare(b.name,'ru')),lessons:raw.lessons||[],tasks};
 }
 function applyDiary(data){
