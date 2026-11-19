@@ -200,7 +200,7 @@ def main():
     source = json.loads(args.data.read_text(encoding="utf-8"))
     payload = normalize(source)
     secret = get_secret()
-    encrypted = encrypt(payload, secret)
+    encrypted = encrypt(payload, secret, get_salt())
     publish(args.repo.expanduser(), encrypted)
     for child, values in payload["children"].items():
         print(f"{child}: {len(values['marks'])} marks, {len(values['lessons'])} lessons")
