@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validate, normalize, encrypt and publish the School diary snapshot."""
 from __future__ import annotations
-import argparse, base64, getpass, json, os, subprocess, sys
+import argparse, base64, getpass, hashlib, json, os, subprocess, sys
 from datetime import datetime
 from pathlib import Path
 
@@ -197,7 +197,7 @@ def publish(source_repo: Path, encrypted: str) -> None:
         "user.email=school-sync@users.noreply.github.com",
         "commit", "-m", "chore: publish encrypted school diary snapshot")
     git(repo, "push", "-u", "origin", DATA_BRANCH, env=env)
-    print(f"Published encrypted snapshot to branch {DATA_BRANCH} (file {DATA_PATH}).")
+    digest_path.write_text(payload_digest + "\\n", encoding="ascii")\n    os.chmod(digest_path, 0o600)\n    print(f"Published encrypted snapshot to branch {DATA_BRANCH} (file {DATA_PATH}).")
 
 def main() -> None:
     parser = argparse.ArgumentParser()
