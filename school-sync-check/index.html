@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Проверка передачи данных — Школа</title><style>
+:root{font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;color:#1f2937;background:#f6f7fb}body{max-width:520px;margin:0 auto;padding:40px 20px}main{background:white;padding:24px;border-radius:20px;box-shadow:0 4px 24px #0000000a}h1{font-size:23px;line-height:1.2}p{line-height:1.5;color:#526070}button{display:block;width:100%;border:0;border-radius:12px;background:#3458d3;color:white;font-weight:600;font-size:17px;padding:16px;margin-top:22px}button:disabled{opacity:.6}#result{margin-top:20px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5;background:#f1f4fa;border-radius:12px;padding:16px;min-height:50px}.note{font-size:13px}</style></head><body><main><h1>Проверка «Школы»</h1><p>Нажми кнопку. Проверим загрузку зашифрованных тестовых оценок с GitHub, расшифровку и сохранение для повторного открытия.</p><button id="run">Проверить</button><div id="result" role="status">Ожидание проверки</div><p class="note">Только вымышленные данные. Рабочее приложение не меняется. Для первой проверки нужен интернет.</p></main><script>
+const b=document.querySelector('#run'),out=document.querySelector('#result'),te=new TextEncoder(),td=new TextDecoder();
+const decode=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function decrypt(e){if(e.format!==1||e.iterations!==250000||e.kdf!=='PBKDF2-SHA256')throw Error('Неподдерживаемый формат');
+const material=await crypto.subtle.importKey('raw',te.encode('demo-only-not-for-real-data'),'PBKDF2',false,['deriveKey']);
+const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:decode(e.salt),iterations:e.iterations,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['decrypt']);
+return JSON.parse(td.decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:decode(e.iv)},key,decode(e.ciphertext))))}
+b.onclick=async()=>{b.disabled=true;out.textContent='Проверяем…';try{
+const response=await fetch('./data.enc.json?t='+Date.now(),{cache:'no-store'});if(!response.ok)throw Error('Не удалось загрузить файл: HTTP '+response.status);
+const envelope=await response.json(),data=await decrypt(envelope);if(data.test!==true||data.source!=='github-fixture')throw Error('Данные не прошли проверку');
+localStorage.setItem('school-sync-check-v1',JSON.stringify(envelope));
+const cached=JSON.parse(localStorage.getItem('school-sync-check-v1'));const reread=await decrypt(cached);if(JSON.stringify(reread)!==JSON.stringify(data))throw Error('Локальная копия отличается');
+out.textContent='✓ Загрузка с GitHub — успешно\n✓ Расшифровка — успешно\n✓ Локальное сохранение — успешно\n\nТестовые оценки: '+data.grades.join(', ')+'\n\nЭто не проверка офлайн-режима всей PWA.';
+}catch(e){out.textContent='Проверка не пройдена: '+e.message}finally{b.disabled=false}};
+</script></body></html>
