@@ -182,7 +182,7 @@ function home(){
  const direction=delta>0.000001?'up':delta< -0.000001?'down':'flat';
  const arrow=direction==='up'?'↑':direction==='down'?'↓':'→';
  const fiveShare=all.length?Math.round(counts[0]/all.length*100):0;
- const riskCount=kids[state.child].subjects.filter(s=>s.grades.length&&mean(s.grades.map(g=>g.value))<3.6).length;
+ const riskCount=kids[state.child].subjects.filter(s=>{const q=s.grades.filter(g=>inQuarter(g.date));return q.length&&mean(q.map(g=>g.value))<3.6}).length;
  const hwGrades=all.filter(g=>g.homework),hwAverage=hwGrades.length?fmt(mean(hwGrades.map(g=>g.value))):'—';
  const activeDates=[...new Set(all.map(g=>g.date))].sort().reverse();
  let cleanStreak=0;for(const date of activeDates){if(all.some(g=>g.date===date&&g.value<=3))break;cleanStreak++}
