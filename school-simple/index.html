@@ -137,10 +137,29 @@ function mapDiaryChild(raw,name){
  (raw.marks||[]).forEach(m=>{const sub=ensure(m.subjectId,m.subject);sub.grades.push({value:Number(m.value),date:m.date,test:/контрольн|проверочн|тест|диктант|самостоятельн/i.test(m.type||''),homework:/домашн/i.test(m.type||''),type:m.type||'',comment:m.comment||null,id:m.id,lessonId:m.lessonId})});
  (raw.lessons||[]).forEach(l=>ensure(l.subjectId,l.subject));
  const schedule=(raw.schedule||[]).filter(l=>l&&l.from&&l.subjectId).slice().sort((a,b)=>a.from.localeCompare(b.from));
- const tasks=(raw.lessons||[]).flatMap(l=>(l.tasks||[]).filter(t=>t.name&&!/^(?:не задано|домашнее задание(?:\s*:\s*не задано)?)\s*$/i.test(t.name.trim())).map(t=>{
-  const next=schedule.find(x=>String(x.subjectId)===String(l.subjectId)&&x.from>l.from);
-  return {subject:l.subject,text:t.name,lessonDate:l.from.slice(0,10),due:next?next.from.slice(0,10):null,kind:t.kind,files:t.files||[],lessonId:l.id};
- }));
+ const today=iso(TODAY);
+ // Only the latest completed lesson for each subject can supply its current assignment.
+ // Older lessons are historical and must not be reassigned to a future lesson.
+ const latestBySubject=new Map();
+ (raw.lessons||[]).filter(l=>l&&l.from&&l.from.slice(0,10)<=today).forEach(l=>{
+  const key=String(l.subjectId||l.subject);
+  const previous=latestBySubject.get(key);
+  if(!previous||l.from>previous.from)latestBySubject.set(key,l);
+ });
+ const tasks=[];
+ for(const l of latestBySubject.values()){
+  const next=schedule.find(x=>String(x.subjectId)===String(l.subjectId)&&x.from.slice(0,10)>today);
+  if(!next)continue;
+  const seen=new Set();
+  for(const t of l.tasks||[]){
+   const name=String(t.name||'').trim();
+   if(!name||/^(?:не задано|домашнее задание(?:\\s*:\\s*не задано)?)\\s*$/i.test(name))continue;
+   const key=name.toLocaleLowerCase('ru')+'|'+String(t.kind||'');
+   if(seen.has(key))continue;
+   seen.add(key);
+   tasks.push({subject:l.subject,text:name,lessonDate:l.from.slice(0,10),due:next.from.slice(0,10),kind:t.kind,files:t.files||[],lessonId:l.id});
+  }
+ }
  const studyDays=[...new Set(schedule.map(l=>l.from.slice(0,10)))].sort();
  return {name,subjects:[...subjectsMap.values()].sort((a,b)=>a.name.localeCompare(b.name,'ru')),lessons:raw.lessons||[],schedule,tasks,studyDays};
 }
