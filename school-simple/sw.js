@@ -69,14 +69,14 @@ self.addEventListener("fetch", event => {
   if (url.pathname.includes("/data.enc.json")) return;
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
-    const cached = await cache.match(request);
-    if (cached) return cached;
+    // Prefer fresh application assets; retain cached copies for offline use.
+    // This also delivers fixes when a deployment keeps the same app version.
     try {
       const response = await fetch(request);
       if (response && response.ok) await cache.put(request, response.clone());
       return response;
     } catch {
-      return cached || Response.error();
+      return (await cache.match(request)) || Response.error();
     }
   })());
 });
