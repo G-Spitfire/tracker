@@ -35,6 +35,20 @@ self.addEventListener("fetch", event => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
+  if (url.pathname.endsWith("/version.json")) {
+    event.respondWith((async () => {
+      const cache = await caches.open(CACHE_NAME);
+      try {
+        const response = await fetch(request);
+        if (response && response.ok) await cache.put(request, response.clone());
+        return response;
+      } catch {
+        return (await cache.match(request)) || Response.error();
+      }
+    })());
+    return;
+  }
+
   if (request.mode === "navigate") {
     event.respondWith((async () => {
       const cache = await caches.open(CACHE_NAME);
