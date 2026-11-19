@@ -153,7 +153,7 @@ function mapDiaryChild(raw,name){
   const seen=new Set();
   for(const t of l.tasks||[]){
    const name=String(t.name||'').trim();
-   if(!name||/^(?:не задано|домашнее задание(?:\\s*:\\s*не задано)?)\\s*$/i.test(name))continue;
+   if(!name||/^(?:не задано|домашнее задание(?:\s*:\s*не задано)?)\s*$/i.test(name))continue;
    const key=name.toLocaleLowerCase('ru')+'|'+String(t.kind||'');
    if(seen.has(key))continue;
    seen.add(key);
