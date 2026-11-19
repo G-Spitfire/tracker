@@ -93,9 +93,21 @@ def normalize(source: dict) -> dict:
                 "tasks": tasks,
                 "estimates": estimates,
             })
+        clean_schedule = []
+        for entry in child.get("schedule") or []:
+            if not isinstance(entry, dict) or not entry.get("datetime_from"):
+                continue
+            start = datetime.strptime(entry["datetime_from"], "%d.%m.%Y %H:%M:%S")
+            clean_schedule.append({
+                "from": start.isoformat(timespec="minutes"),
+                "subjectId": str(entry.get("subject_id") or ""),
+                "subject": str(entry.get("subject_name") or "Без названия"),
+                "number": entry.get("number"),
+            })
         normalized[child_id] = {
             "marks": sorted(clean_marks, key=lambda x: (x["date"], x["subject"])),
             "lessons": sorted(clean_lessons, key=lambda x: x["from"]),
+            "schedule": sorted(clean_schedule, key=lambda x: x["from"]),
         }
     return {
         "schemaVersion": 1,
