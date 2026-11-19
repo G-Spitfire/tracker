@@ -1,4 +1,5 @@
 import {setMarkup} from './ui.js';
+import {initParent} from './parent.js';
 import {icon as uiIcon} from './icons.js';
 import {readAppearance,saveAppearance,applyAppearance} from './appearance.js';
 import {localKey,totalForDate,splitSession,legacyConvert} from './core.js';
@@ -68,7 +69,8 @@ const panel=$('appearancePanel'),appearanceToggle=$('appearanceToggle');
 function syncAppearance(){applyAppearance(appearance);panel.querySelectorAll('[data-palette]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.palette===appearance.palette)));panel.querySelectorAll('[data-theme]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.theme===appearance.theme)));}
 function closeAppearance(){panel.hidden=true;appearanceToggle.setAttribute('aria-expanded','false');}
 appearanceToggle.onclick=()=>{panel.hidden=!panel.hidden;appearanceToggle.setAttribute('aria-expanded',String(!panel.hidden));};
-panel.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.palette)appearance.palette=b.dataset.palette;if(b.dataset.theme)appearance.theme=b.dataset.theme;saveAppearance(appearance);syncAppearance();};
+panel.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.palette)appearance.palette=b.dataset.palette;if(b.dataset.theme)appearance.theme=b.dataset.theme;saveAppearance(appearance);syncAppearance();
+initParent();};
 document.addEventListener('click',e=>{if(!panel.contains(e.target)&&!appearanceToggle.contains(e.target))closeAppearance()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden){closeAppearance();appearanceToggle.focus()}});
 document.querySelectorAll('[data-icon]').forEach(el=>el.innerHTML=uiIcon(el.dataset.icon));
