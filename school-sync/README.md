@@ -6,7 +6,7 @@ This directory contains the Mac-side publisher for the encrypted diary snapshot.
 
 - The source file `~/school-diary-data.json` is read locally and is never copied into Git.
 - The normalized snapshot is encrypted with AES-256-GCM.
-- A key is derived with PBKDF2-HMAC-SHA256 (600,000 iterations) and a random 16-byte salt.
+- A key is derived with PBKDF2-HMAC-SHA256 (600,000 iterations) and a persistent random 16-byte salt stored locally at `~/Library/Application Support/SchoolDiary/encryption.salt` (mode 0600), so the browser can retain a non-exportable CryptoKey across daily updates.
 - The encryption passphrase is stored in macOS Keychain under service `SchoolDiarySync`; it is not stored in this repository or passed on the command line.
 - Only `data.enc.json` is committed to the dedicated orphan branch `school-data`. That branch contains no application source files.
 - Never put the passphrase in JavaScript, GitHub, shell history, or a support message.
@@ -49,8 +49,8 @@ git clone --depth 1 --branch feature/real-diary-integration \
   --repo "$HOME/school-integration" publish
 ```
 
-The publisher switches to an orphan `school-data` branch before writing. It never commits source JSON and never pushes to `main`.
+The publisher uses a separate isolated Git repository at `~/Library/Application Support/SchoolDiary/publish-repo`. It creates/updates an orphan `school-data` branch there; it never switches or deletes files in the application clone, never commits source JSON, and never pushes to `main`.
 
 ## Current status
 
-Publisher implementation is under development. Do not schedule it with launchd until an end-to-end publish/decrypt test has passed and the Mac clone points to the reviewed integration branch.
+Publisher and browser decryption/cache primitives are committed on the integration branch. They have not yet passed an end-to-end Mac-to-browser test. Do not schedule publishing with launchd or replace demo data until that test and full application integration pass.
