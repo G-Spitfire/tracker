@@ -4,10 +4,14 @@ on:
     branches: [main]
     paths:
       - 'wordscene/**'
+      - 'school-simple/**'
+      - 'school-sync/**'
       - '.github/workflows/wordscene17-local-tests.yml'
   pull_request:
     paths:
       - 'wordscene/**'
+      - 'school-simple/**'
+      - 'school-sync/**'
       - 'index.html'
       - 'README.md'
       - '.github/workflows/wordscene17-local-tests.yml'
@@ -26,6 +30,11 @@ jobs:
           node --check wordscene/engine.js
           node --check wordscene/accounts.js
           node --check wordscene/sw.js
+      - name: School application syntax checks
+        run: |
+          node --check school-simple/school-sync-client.js
+          node -e "const fs=require('fs'),vm=require('vm');const html=fs.readFileSync('school-simple/index.html','utf8');const scripts=[...html.matchAll(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gi)].map(m=>m[1]).filter(x=>x.trim());if(!scripts.length)throw new Error('No inline application script found');scripts.forEach((code,i)=>new vm.Script(code,{filename:'school-simple/index.inline.'+i+'.js'}));console.log('Checked '+scripts.length+' inline script(s)')"
+          python3 -m py_compile school-sync/publish.py
       - name: WordScene unit tests
         run: node --test wordscene/*.test.cjs
 
