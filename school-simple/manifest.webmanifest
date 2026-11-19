@@ -1,10 +1,18 @@
 {
-  "name": "Школа — демо",
+  "name": "Школа",
   "short_name": "Школа",
   "start_url": "./?source=homescreen",
   "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#f7f8fb",
-  "lang": "ru"
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }
