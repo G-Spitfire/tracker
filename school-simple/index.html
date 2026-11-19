@@ -136,8 +136,13 @@ function mapDiaryChild(raw,name){
  const ensure=(id,label)=>{const key=String(id||label);if(!subjectsMap.has(key))subjectsMap.set(key,{name:label||'Без названия',grades:[]});return subjectsMap.get(key)};
  (raw.marks||[]).forEach(m=>{const sub=ensure(m.subjectId,m.subject);sub.grades.push({value:Number(m.value),date:m.date,test:/контрольн|проверочн|тест|диктант|самостоятельн/i.test(m.type||''),homework:/домашн/i.test(m.type||''),type:m.type||'',comment:m.comment||null,id:m.id,lessonId:m.lessonId})});
  (raw.lessons||[]).forEach(l=>ensure(l.subjectId,l.subject));
- const tasks=(raw.lessons||[]).flatMap(l=>(l.tasks||[]).filter(t=>t.name&&!['не задано','домашнее задание'].includes(t.name.toLowerCase())).map(t=>({subject:l.subject,text:t.name,lessonDate:l.from.slice(0,10),due:l.from.slice(0,10),kind:t.kind,files:t.files||[],lessonId:l.id})));
- return {name,subjects:[...subjectsMap.values()].sort((a,b)=>a.name.localeCompare(b.name,'ru')),lessons:raw.lessons||[],tasks};
+ const schedule=(raw.schedule||[]).filter(l=>l&&l.from&&l.subjectId).slice().sort((a,b)=>a.from.localeCompare(b.from));
+ const tasks=(raw.lessons||[]).flatMap(l=>(l.tasks||[]).filter(t=>t.name&&!/^(?:не задано|домашнее задание(?:\s*:\s*не задано)?)\s*$/i.test(t.name.trim())).map(t=>{
+  const next=schedule.find(x=>String(x.subjectId)===String(l.subjectId)&&x.from>l.from);
+  return {subject:l.subject,text:t.name,lessonDate:l.from.slice(0,10),due:next?next.from.slice(0,10):null,kind:t.kind,files:t.files||[],lessonId:l.id};
+ }));
+ const studyDays=[...new Set(schedule.map(l=>l.from.slice(0,10)))].sort();
+ return {name,subjects:[...subjectsMap.values()].sort((a,b)=>a.name.localeCompare(b.name,'ru')),lessons:raw.lessons||[],tasks,studyDays};
 }
 function applyDiary(data){
  if(!data||data.schemaVersion!==1||!data.children?.polina||!data.children?.matvey)throw new Error('Неполный набор данных дневника');
@@ -227,25 +232,27 @@ function schedule(){
  return '<div class="schedule-bar"><span class="schedule-month">'+monthLabel+'</span><div class="schedule-arrows"><button class="icon" data-action="week" data-value="-1" aria-label="Предыдущая неделя">'+ico('left')+'</button><button class="icon" data-action="week" data-value="1" aria-label="Следующая неделя">'+ico('right')+'</button></div></div><div class="calendar schedule-calendar">'+days.map(x=>'<button class="day-cell '+(iso(x)===state.date?'active':'')+'" data-action="date" data-value="'+iso(x)+'"><span class="sub">'+['Вс','Пн','Вт','Ср','Чт','Пт','Сб'][x.getDay()]+'</span><span>'+x.getDate()+'</span></button>').join('')+'</div><h3 class="heading">'+selected.toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'long'})+'</h3>'+((dataSource==='demo'&&weekend)?'<div class="empty">Нет уроков</div>':lessons.length?lessons.map((l,i)=>'<div class="lesson"><span class="sub">'+(l.number||i+1)+'</span><div><strong>'+escapeHTML(l.subject)+'</strong>'+(l.from?'<div class="sub">'+escapeHTML(l.from.slice(11,16))+(l.to?'–'+escapeHTML(l.to.slice(11,16)):'')+'</div>':'')+(l.topic?'<div class="sub">'+escapeHTML(l.topic)+'</div>':'')+'</div></div>').join(''):'<div class="empty">Нет уроков</div>');
 }
 function homework(){
- const tasks=kids[state.child].tasks;
- const tomorrow=offset(1),weekEnd=offset(7);
- const list=tasks.filter(t=>{
-  const due=t.due||t.lessonDate||'';
-  if(state.hw==='tomorrow')return due===tomorrow;
-  if(state.hw==='week')return due>=iso(TODAY)&&due<=weekEnd;
+ const kid=kids[state.child],today=iso(TODAY);
+ const days=(kid.studyDays||[]).filter(d=>d>today);
+ const nextDay=days[0]||'';
+ const weekDays=new Set(days.slice(0,5));
+ const list=kid.tasks.filter(t=>{
+  if(state.hw==='tomorrow')return !!nextDay&&t.due===nextDay;
+  if(state.hw==='week')return !!t.due&&weekDays.has(t.due);
   return true;
- }).slice().sort((a,b)=>(b.due||b.lessonDate||'').localeCompare(a.due||a.lessonDate||'')||a.subject.localeCompare(b.subject,'ru'));
- const dateLabel=d=>d?new Date(d+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'long'}):'Дата не указана';
- const note=dataSource==='live'?'<p class="grades-footnote">Задания сгруппированы по датам уроков, к которым они прикреплены в электронном дневнике.</p>':'';
+ }).slice().sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999')||a.subject.localeCompare(b.subject,'ru'));
+ const dateLabel=d=>d?new Date(d+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'long'}):'Дата следующего урока неизвестна';
  let lastDate='';
  const content=list.map(t=>{
-  const due=t.due||t.lessonDate||'';
+  const due=t.due||'';
   const heading=due!==lastDate?'<h3 class="heading">'+escapeHTML(dateLabel(due))+'</h3>':'';
   lastDate=due;
   return heading+'<div class="task"><div class="row"><strong>'+escapeHTML(t.subject)+'</strong></div><p>'+escapeHTML(t.text)+'</p></div>';
  }).join('');
+ const note=dataSource==='live'?'<p class="grades-footnote">Сроки рассчитаны по ближайшему следующему уроку предмета и могут отличаться от официального дневника.</p>':'';
+ const unavailable=dataSource==='live'&&!days.length&&state.hw!=='all';
  return btns([['tomorrow','На завтра'],['week','На неделю'],['all','Всё']],state.hw,'hw')+
- '<div class="content-after-controls">'+(list.length?content:'<div class="empty">Нет заданий на выбранный период</div>')+note+'</div>';
+ '<div class="content-after-controls">'+(list.length?content:'<div class="empty">'+(unavailable?'Нет данных о предстоящем расписании':'Нет заданий на выбранный период')+'</div>')+note+'</div>';
 }
 function profile(){return '<div class="heading">Ученик</div><div class="seg">'+kids.map((k,i)=>'<button data-action="child" data-value="'+i+'" class="'+(i===state.child?'active':'')+'">'+escapeHTML(k.name)+'</button>').join('')+'</div><h3 class="heading">Оформление</h3><div class="sub" style="margin-bottom:7px">Тема</div>'+btns([['system','Системная'],['light','Светлая'],['dark','Тёмная']],state.theme,'theme')+'<div class="sub" style="margin-top:15px">Акцентный цвет</div><div class="swatches">'+[['#4c8bf5','Синий'],['#22a77a','Зелёный'],['#9168de','Фиолетовый'],['#e68b39','Оранжевый']].map(([c,name])=>'<button class="swatch" style="background:'+c+'" data-action="accent" data-value="'+c+'" aria-label="'+name+'">'+(state.accent===c?'✓':'')+'</button>').join('')+'</div><h3 class="heading">Электронный дневник</h3><div class="sub">Петербургское образование</div><p class="notice">'+(dataSource==='live'?'Данные загружены из электронного дневника. Обновлено: '+escapeHTML(diaryUpdatedAt||'дата не указана')+(syncWarning?' · '+escapeHTML(syncWarning):''):(syncWarning?'Не удалось обновить дневник: '+escapeHTML(syncWarning)+'. Пока используются демонстрационные данные.':'Подключение готовится. Пока используются демонстрационные данные.'))+'</p><footer class="profile-footer">Spitfire Studio<div>Версия 1.32.0 · тестовая ветка</div></footer>'}
 function render(){document.documentElement.dataset.theme=state.theme;const dark=state.theme==='dark'||(state.theme==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.querySelector('meta[name="theme-color"]').setAttribute('content',dark?'#1c2430':'#ffffff');document.documentElement.style.setProperty('--accent',state.accent);document.querySelector('#brand-mark').innerHTML=state.tab==='home'?'<img src="./brand-mark.svg" width="30" height="30" alt="" decoding="async">':'';document.querySelector('#brand-mark').style.display=state.tab==='home'?'inline-flex':'none';document.querySelector('#title').textContent=({home:'Главная',grades:'Оценки',schedule:'Расписание',homework:'Домашка',profile:'Профиль'})[state.tab];document.querySelector('#profile').innerHTML=ico(state.tab==='profile'?'close':'profile');main.innerHTML=({home,grades,schedule,homework,profile})[state.tab]();nav.innerHTML=[['home','home','Главная'],['grades','grades','Оценки'],['schedule','schedule','Расписание'],['homework','homework','Домашка']].map(([id,icon,name])=>'<button data-action="tab" data-value="'+id+'" class="'+(state.tab===id?'active':'')+'"><span class="symbol">'+ico(icon,state.tab===id)+'</span>'+name+'</button>').join('')}
