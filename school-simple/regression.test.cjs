@@ -72,3 +72,21 @@ test('homework: unknown next lesson only in all view', () => {
   c.state.hw='all';
   assert.match(vm.runInContext('homework()',c),/Упражнение 7/);
 });
+
+test('home: seven-day change compares cumulative subject means', () => {
+  const c=setup();
+  c.kids[0].subjects=[
+    {name:'A',grades:[{value:4,date:'2026-11-10'},{value:5,date:'2026-11-18'}]},
+    {name:'B',grades:[{value:3,date:'2026-11-10'},{value:5,date:'2026-11-19'}]}
+  ];
+  const html=vm.runInContext('home()',c);
+  assert.ok(html.includes('↑ +0,75'), 'seven-day delta should be +0.75');
+  assert.ok(html.includes('За 7 дней'));
+});
+test('home: seven-day change is unavailable without a baseline', () => {
+  const c=setup();
+  c.kids[0].subjects=[{name:'A',grades:[{value:5,date:'2026-11-18'}]}];
+  const html=vm.runInContext('home()',c);
+  assert.ok(html.includes('<strong class="stat-value">—</strong>'), 'no baseline shows dash');
+  assert.ok(html.includes('За 7 дней'));
+});
