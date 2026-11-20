@@ -18,7 +18,7 @@ html[data-theme=dark]{--bg:#111720;--surface:#1c2430;--fg:#f3f5fa;--muted:#9ba9b
 .forecast-row{min-height:48px;border-bottom:1px solid var(--line)}
 .forecast-row strong{font-weight:var(--weight-medium)}
 .forecast-number{text-align:right;font-variant-numeric:tabular-nums}
-.header-quarter{max-width:100px;min-height:38px;border:0;border-radius:var(--radius-control);background:var(--soft);color:var(--fg);padding:5px;font:inherit;font-size:12px;margin-left:auto;margin-right:6px}.grades-graph-item{margin-bottom:var(--space-5)}
+.header-quarter{max-width:100px;min-height:44px;border:0;border-radius:var(--radius-control);background:var(--soft);color:var(--fg);padding:5px;font:inherit;font-size:12px;margin-left:auto;margin-right:6px}.grades-graph-item{margin-bottom:var(--space-5)}
 .grades-graph-item .row{margin-bottom:var(--space-2)}
 .grades-graph-track{height:12px;background:var(--soft);border-radius:999px;overflow:hidden}
 .grades-graph-fill{height:100%;background:var(--accent);border-radius:999px}
@@ -66,7 +66,7 @@ html[data-theme=dark]{--bg:#111720;--surface:#1c2430;--fg:#f3f5fa;--muted:#9ba9b
 .home-legend-item b{margin-left:auto}
 .home-dot{width:9px;height:9px;flex:0 0 9px;border-radius:50%}
 .home-line{display:block;width:100%;height:auto;max-height:none}
-:root{--bg:#f7f8fb;--surface:#fff;--fg:#202734;--muted:#788393;--line:#e9edf3;--soft:#f0f3f8;--accent:#4c8bf5;--on:#fff;--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-controls-content:var(--space-5);--space-item-detail:var(--space-2);--space-item-vertical:var(--space-3);--radius-sm:6px;--radius-control:10px;--radius-panel:14px;--font-body:14px;--font-caption:12px;--font-section:16px;--font-page:22px;--font-control:14px;--font-nav:12px;--font-kpi-label:11px;--font-kpi-hint:11px;--font-kpi-value:26px;--font-legend:13px;--weight-regular:400;--weight-medium:600;--weight-bold:700}
+:root{--bg:#f7f8fb;--surface:#fff;--fg:#202734;--muted:#788393;--line:#e9edf3;--soft:#f0f3f8;--accent:#4c8bf5;--on:#fff;--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-controls-content:var(--space-5);--space-item-detail:var(--space-2);--space-item-vertical:var(--space-3);--radius-sm:6px;--radius-control:10px;--radius-panel:14px;--font-body:14px;--font-caption:12px;--font-section:16px;--font-page:22px;--font-control:14px;--font-nav:12px;--font-kpi-label:12px;--font-kpi-hint:12px;--font-kpi-value:26px;--font-legend:13px;--weight-regular:400;--weight-medium:600;--weight-bold:700}
 .brand-mark{width:30px;height:30px;flex:none;display:inline-flex;color:var(--accent)}.brand-mark svg{width:100%;height:100%}.head-title{display:flex;align-items:center;gap:9px;min-width:0}
 .profile-footer{text-align:center;margin-top:32px;padding:16px 0 8px;color:var(--muted);font-size:10px;line-height:1.8}
 .grades-graph-heading{margin:0 0 var(--space-4)}.sync-error-panel{margin:24px 12px;padding:24px 16px}.sync-retry-button{width:auto;padding:10px 18px}
@@ -120,8 +120,8 @@ html{background:var(--surface)}
   .stats-grid{gap:8px}
   .stat-tile{min-height:94px;padding:9px}
   .stat-value{font-size:24px}
-  .stat-top{font-size:10.5px}
-  .stat-hint{font-size:10.5px}
+  .stat-top{font-size:11px}
+  .stat-hint{font-size:11px}
   .stat-icon svg{width:19px;height:19px}
 }
 @media(max-width:360px) and (max-height:600px){body.is-profile .app .heading{margin:10px 0 7px}body.is-profile .app .swatches{margin:6px 0 8px;gap:8px}body.is-profile .app .sync-meta{margin-top:4px}body.is-profile .app .notice{margin-top:6px}body.is-profile .app .profile-footer{margin-top:12px;padding-top:8px}body.is-profile .app .profile-accent-label{margin-top:var(--space-2)}}
@@ -268,13 +268,14 @@ function homework(){
   const tasks=list.filter(t=>(t.nextLessonDate||'')===d);
   const scheduled=kid.schedule.some(l=>(l.from||'').slice(0,10)===d);
   const noLessons=!scheduled;
+  const scheduleKnown=scheduled||kid.schedule.some(l=>(l.from||'').slice(0,10)>d);
   const seed=d.split('').reduce((sum,ch)=>sum+ch.charCodeAt(0),state.child);
   const variants=[['bag','Ура! Домашки нет!','Рюкзак сегодня отдыхает!'],['cat','Можно передохнуть!','Даже кот одобряет такой день.'],['pencil','Свободный день!','Карандаш объявил выходной.'],['books','Домашки нет!','Книги тоже решили отдохнуть.']];
   const chosen=variants[seed%variants.length];
   const icon=kind=>{
    const shapes={bag:'<rect x="18" y="17" width="44" height="50" rx="11"/><path d="M29 18v-5a11 11 0 0 1 22 0v5M27 43h26v14H27zM31 33h2m14 0h2M35 38q5 5 10 0M18 33l-10-8m54 8 10-8"/>',cat:'<path d="M18 33 17 17l13 9q10-5 20 0l13-9-1 16q8 21-7 28-15 8-30 0-15-7-7-28zM31 40h2m14 0h2m-14 9q5 5 10 0M23 48l-13-3m13 8-13 2m47-7 13-3m-13 8 13 2"/>',pencil:'<path d="m22 56 29-42q5-7 12-2t2 12L36 66 16 73zM22 56l14 10M47 20l14 10M16 73l7-18M11 25l-6-4m12-5-2-8m49 44 8 4"/>',books:'<path d="M14 29h45l8 11-8 11H14q-8-11 0-22zM18 51h45l-5 13H13q-6-7 5-13zM17 40h46M25 35h13m5 0h10M29 35v6m18-6v6M9 18l4-8 4 8 8 4-8 4-4 8-4-8-8-4z"/>'};return '<svg class="homework-doodle" viewBox="0 0 80 80" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">'+shapes[kind]+'</g></svg>';
   };
-  const body=tasks.length?tasks.map(t=>'<div class="task"><div class="row"><strong>'+escapeHTML(t.subject)+'</strong></div><p>'+escapeHTML(t.text)+'</p></div>').join(''):'<div class="homework-celebration">'+icon(chosen[0])+'<strong>'+(noLessons?'Ура! Свободный день!':'Ура! Домашки нет!')+'</strong><span>'+(noLessons?'Уроков по расписанию нет.':'Заданий на этот день нет.')+'</span></div>';
+  const body=tasks.length?tasks.map(t=>'<div class="task"><div class="row"><strong>'+escapeHTML(t.subject)+'</strong></div><p>'+escapeHTML(t.text)+'</p></div>').join(''):!scheduleKnown?'<div class="homework-unknown">Расписание на этот день пока неизвестно. Проверьте синхронизацию дневника.</div>':'<div class="homework-celebration">'+icon(chosen[0])+'<strong>'+(noLessons?'Ура! Свободный день!':'Ура! Домашки нет!')+'</strong><span>'+(noLessons?'Уроков по расписанию нет.':'Заданий на этот день нет.')+'</span></div>';
   return '<section class="homework-day"><h3 class="homework-day-title">'+escapeHTML(dateLabel(d))+'</h3><div class="homework-day-body">'+body+'</div></section>';
  }).join('');
  const note='<p class="grades-footnote">Задания привязаны к следующему уроку предмета. Официальная дата сдачи в источнике не предоставляется.</p>';
