@@ -34,6 +34,8 @@ jobs:
           exit 1
       - name: Run browser audit
         run: node календарь/tests/browser-audit.cjs
+      - name: Run calendar E2E scenarios
+        run: node календарь/tests/calendar-e2e.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
