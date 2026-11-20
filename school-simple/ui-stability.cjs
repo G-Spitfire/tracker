@@ -26,6 +26,10 @@ async function check(label,condition,details=''){console.log((condition?'PASS':'
    await page.locator('[data-action="tab"][data-value="schedule"]').click();
    const top=await page.evaluate(()=>window.scrollY);
    check(width+' navigation starts at top',top<3,'scroll='+top);
+   await page.locator('#profile').click();
+   const navBox=await page.locator('#nav').boundingBox();
+   const statusBox=await page.getByText(/^Обновлено/).boundingBox().catch(()=>null);
+   check(width+' profile status above nav',Boolean(navBox&&statusBox&&statusBox.y+statusBox.height<=navBox.y+1),'statusBottom='+(statusBox?statusBox.y+statusBox.height:'missing')+' navTop='+navBox?.y);
    check(width+' JavaScript exceptions',errors.length===0,JSON.stringify(errors));
    await context.close();
   }
