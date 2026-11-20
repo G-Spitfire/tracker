@@ -67,6 +67,12 @@ async function check(label,condition,details=''){console.log((condition?'PASS':'
    await offlinePage.waitForFunction(()=>typeof dataSource!=='undefined'&&dataSource==='cached',{timeout:10000});
    const cachedState=await offlinePage.evaluate(()=>({source:dataSource,subjects:kids[0].subjects.length}));
    check('offline IndexedDB diary available',cachedState.source==='cached'&&cachedState.subjects>0,JSON.stringify(cachedState));
+   await offlineContext.setOffline(false);
+   await offlinePage.route('**/school-data/data.enc.json*',route=>route.fulfill({status:503,contentType:'text/plain',body:'Temporary unavailable'}));
+   await offlinePage.evaluate(()=>loadDiarySnapshot());
+   await offlinePage.waitForFunction(()=>Boolean(syncWarning));
+   const fallback=await offlinePage.evaluate(()=>({source:dataSource,subjects:kids[0].subjects.length,warning:syncWarning}));
+   check('failed online sync preserves cached diary',fallback.source==='cached'&&fallback.subjects>0&&Boolean(fallback.warning),JSON.stringify(fallback));
    check('offline shell no JavaScript exceptions',offlineErrors.length===0,JSON.stringify(offlineErrors));
   }finally{await offlineContext.close();}
  }finally{await browser.close();}
