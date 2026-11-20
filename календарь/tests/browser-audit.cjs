@@ -16,12 +16,22 @@ if(!fs.existsSync(html))throw new Error('Calendar application missing: кале�
    page.on('pageerror',e=>errors.push(String(e)));
    await page.goto('file://'+html,{waitUntil:'load'});
    await page.screenshot({path:path.join(out,'calendar-'+width+'.png'),fullPage:true});
+   await page.waitForFunction(()=>document.querySelector('#status')?.textContent!=='Загрузка…',{timeout:10000});
    const visible=await page.locator('body').isVisible();
+   const db=await page.evaluate(async()=>{const list=await indexedDB.databases();return list.map(x=>x.name)});
+   await page.locator('#side-new').click();
+   const editorOpened=await page.locator('#editor').evaluate(el=>el.open);
+   await page.locator('#cancel').click();
+   const editorClosed=await page.locator('#editor').evaluate(el=>!el.open);
+   await page.locator('#side-absence').click();
+   const absenceOpened=await page.locator('#absence-dialog').evaluate(el=>el.open);
+   await page.locator('#absence-cancel').click();
+   const absenceClosed=await page.locator('#absence-dialog').evaluate(el=>!el.open);
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
-   results.push({width,visible,overflow,errors});
+   results.push({width,visible,overflow,db,editorOpened,editorClosed,absenceOpened,absenceClosed,errors});
    await page.close();
   }
  } finally {await browser.close();}
  fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(results,null,2));
- if(results.some(x=>!x.visible||x.overflow||x.errors.length))process.exitCode=1;
+ if(results.some(x=>!x.visible||x.overflow||!x.db.length||!x.editorOpened||!x.editorClosed||!x.absenceOpened||!x.absenceClosed||x.errors.length))process.exitCode=1;
 })().catch(e=>{console.error(e);process.exitCode=1});
