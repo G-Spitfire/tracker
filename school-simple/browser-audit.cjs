@@ -68,7 +68,7 @@ async function run() {
       if(tab!=='home')await page.locator('[data-action="tab"][data-value="'+tab+'"]').click();
       const g=await geometry(page);
       record(view,scenario+' geometry',!g.overflow && !g.offenders.length,g);
-      await page.screenshot({path:path.join(OUT,view+'-'+scenario+'.png'),fullPage:true});
+      await page.screenshot({path:path.join(OUT,view+'-'+scenario+'.png'),fullPage:false});
     }
     await page.locator('#profile').click();
     const p=await geometry(page);
@@ -82,7 +82,7 @@ async function run() {
       const current=await page.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--accent').trim());
       record(view,'accent '+accent,current.toLowerCase()===accent);
     }
-    await page.screenshot({path:path.join(OUT,view+'-profile.png'),fullPage:true});
+    await page.screenshot({path:path.join(OUT,view+'-profile.png'),fullPage:false});
     await page.locator('[data-action="child"][data-value="1"]').click();
     await page.locator('#profile').click();
     await page.locator('[data-action="tab"][data-value="grades"]').click();
