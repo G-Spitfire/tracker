@@ -1,0 +1,23 @@
+'use strict';
+const {chromium}=require('playwright');
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const out=path.join(__dirname,'artifacts');fs.mkdirSync(out,{recursive:true});
+(async()=>{
+ const browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1280,height:800}}),report={};
+ const dbRows=store=>page.evaluate(async store=>{const db=await new Promise((ok,no)=>{const r=indexedDB.open('school-calendar-mvp');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});const rows=await new Promise((ok,no)=>{const r=db.transaction(store).objectStore(store).getAll();r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});db.close();return rows},store);
+ const seed=()=>page.evaluate(async()=>{const db=await new Promise((ok,no)=>{const r=indexedDB.open('school-calendar-mvp');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});await new Promise((ok,no)=>{const tx=db.transaction(['events','employees'],'readwrite');tx.objectStore('employees').put({id:'audit-person',name:'Аудит',displayName:'Аудит',archived:false});tx.objectStore('events').put({id:'audit-existing',name:'Первое занятие',type:'event',date:'2026-12-09',start:'10:00',end:'11:00',classIds:[],employeeIds:['audit-person'],roomId:''});tx.oncomplete=ok;tx.onerror=()=>no(tx.error)});db.close()});
+ try{
+  await page.goto('http://127.0.0.1:8765/календарь/index.html');await page.waitForFunction(()=>document.querySelector('#status')?.textContent!=='Загрузка…');await seed();await page.reload();await page.waitForFunction(()=>document.querySelector('#status')?.textContent!=='Загрузка…');
+  await page.locator('#side-new').click();await page.locator('[data-kind="event"]').click();await page.locator('#event-name').fill('Второе занятие');await page.locator('#event-date').fill('2026-12-09');await page.locator('#event-start').fill('10:30');await page.locator('#event-end').fill('11:30');await page.locator('#event-employees input[type="checkbox"]').filter({has:page.locator('input')}).count().catch(()=>{});
+  await page.locator('#event-employees input[type="checkbox"]').first().check();
+  page.once('dialog',d=>d.dismiss());await page.locator('#event-form button[type="submit"]').click();await page.waitForTimeout(300);
+  assert.equal((await dbRows('events')).length,1,'Conflicting event was saved despite cancellation');report.conflictCancel=true;
+  page.once('dialog',d=>d.accept());await page.locator('#event-form button[type="submit"]').click();await page.waitForFunction(()=>document.querySelector('#status')?.textContent==='Событие сохранено');assert.equal((await dbRows('events')).length,2);report.conflictOverride=true;
+  const second=(await dbRows('events')).find(x=>x.name==='Второе занятие');await page.locator('#day').fill('2026-12-09');await page.locator('#day').dispatchEvent('change');await page.locator('.event').filter({hasText:'Второе занятие'}).first().click();await page.locator('#event-name').fill('Отредактированное занятие');await page.locator('#event-start').fill('12:00');await page.locator('#event-end').fill('13:00');await page.locator('#event-form button[type="submit"]').click();await page.waitForFunction(()=>document.querySelector('#status')?.textContent==='Событие сохранено');assert.equal((await dbRows('events')).find(x=>x.id===second.id).name,'Отредактированное занятие');report.edit=true;
+  await page.locator('#data-nav').click();const promise=page.waitForEvent('download');await page.locator('#export').click();const download=await promise;const file=path.join(out,'restore-fixture.json');await download.saveAs(file);
+  await page.evaluate(async id=>{const db=await new Promise(ok=>{const r=indexedDB.open('school-calendar-mvp');r.onsuccess=()=>ok(r.result)});await new Promise(ok=>{const tx=db.transaction('events','readwrite');tx.objectStore('events').delete(id);tx.oncomplete=ok});db.close()},second.id);
+  assert.equal((await dbRows('events')).length,1);
+  await page.locator('#settings-import-nav').click();page.once('dialog',d=>d.accept());await page.locator('#import').setInputFiles(file);await page.waitForFunction(()=>document.querySelector('#status')?.textContent==='Резервная копия восстановлена');
+  assert.equal((await dbRows('events')).length,2);report.restore=true;
+ }catch(e){report.failure=e.stack||String(e);throw e}finally{fs.writeFileSync(path.join(out,'regression-e2e-report.json'),JSON.stringify(report,null,2));await browser.close()}
+})().catch(e=>{console.error(e);process.exitCode=1});
