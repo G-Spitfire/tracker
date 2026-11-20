@@ -162,7 +162,7 @@ async function run(name, browserType, contextOptions) {
 
   await page.locator('[data-action="manualTab:topics"]').click();
   await page.locator('[data-action="manualTopic:food"]').click();
-  await page.locator('[data-action="pick:apple"]').click();
+  await page.locator('[data-action="pick:apple"]').first().click();
   await page.locator('[data-action="manualTopic:animals"]').click();
   await page.locator('[data-action="pick:cat"]').click();
   await page.locator('[data-action="pick:dog"]').click();
