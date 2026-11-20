@@ -73,10 +73,8 @@ async function run() {
     await page.locator('#profile').click();
     const p=await geometry(page);
     record(view,'profile geometry',!p.overflow && !p.offenders.length,p);
-    const navBox=await page.locator('#nav').boundingBox();
-    const diaryUpdated=await page.getByText(/^Обновлено/).boundingBox().catch(()=>null);
-    const statusClear=Boolean(navBox && diaryUpdated && diaryUpdated.y+diaryUpdated.height<=navBox.y+1);
-    record(view,'profile status clear of bottom navigation',statusClear,{navTop:navBox?.y,statusBottom:diaryUpdated?diaryUpdated.y+diaryUpdated.height:null});
+    const oldSyncBlock=await page.locator('.sync-meta').count();
+    record(view,'profile sync information moved to dialog',oldSyncBlock===0,{oldSyncBlock});
     for(const theme of ['light','dark','system']) {
       await page.locator('[data-action="theme"][data-value="'+theme+'"]').click();
       record(view,'theme '+theme,(await page.locator('html').getAttribute('data-theme'))===theme);
