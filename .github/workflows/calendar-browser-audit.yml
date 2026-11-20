@@ -1,0 +1,48 @@
+name: Calendar browser audit
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'календарь/**'
+      - '.github/workflows/calendar-browser-audit.yml'
+  push:
+    branches: [calendar-playwright-audit]
+    paths:
+      - 'календарь/**'
+      - '.github/workflows/calendar-browser-audit.yml'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright@1.58.2
+      - run: npx playwright install --with-deps chromium
+      - name: Start local web server
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/calendar-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8765/календарь/index.html > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/calendar-server.log
+          exit 1
+      - name: Run browser audit
+        run: node календарь/tests/browser-audit.cjs
+      - name: Run calendar E2E scenarios
+        run: node календарь/tests/calendar-e2e.cjs
+      - name: Run absence and replacement E2E
+        run: node календарь/tests/absence-e2e.cjs
+      - name: Run conflict, edit and restore E2E
+        run: node календарь/tests/regression-e2e.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: calendar-audit
+          path: календарь/tests/artifacts/
+          if-no-files-found: ignore
