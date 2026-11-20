@@ -1,4 +1,4 @@
-const CACHE_NAME = "school-shell-v1.33.5";
+const CACHE_NAME = "school-shell-v1.33.6";
 const SHELL = [
   "./",
   "./index.html",
