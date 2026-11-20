@@ -93,3 +93,10 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}html{-webkit-text
  .parent-record{grid-template-columns:minmax(0,1fr) 96px}
  .parent-menu button{padding:12px}
 }
+/* Parent navigation and iOS date input containment. */
+#page-parent,#parentContent{min-width:0;width:100%}
+#page-parent .back{margin-bottom:12px}
+#page-parent h2{margin:0 0 16px}
+.parent-date{min-width:0;max-width:100%;width:100%;display:grid;grid-template-columns:minmax(0,1fr)}
+.parent-date input[type="date"]{display:block;box-sizing:border-box;width:100%;min-width:0;max-width:100%;-webkit-appearance:none;appearance:none}
+.parent-auth input,.parent-add input,.parent-record input{min-width:0;max-width:100%}
