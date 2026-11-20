@@ -81,7 +81,7 @@ async function run() {
       await page.locator('[data-action="theme"][data-value="'+theme+'"]').click();
       record(view,'theme '+theme,(await page.locator('html').getAttribute('data-theme'))===theme);
     }
-    for(const accent of ['#4c8bf5','#22a77a','#9168de','#e68b39','#e05252','#e56aa6']) {
+    for(const accent of ['#4c8bf5','#16a34a','#8b5cf6','#f97316','#ef4444','#ec4899']) {
       await page.locator('[data-action="accent"][data-value="'+accent+'"]').click();
       const current=await page.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--accent').trim());
       record(view,'accent '+accent,current.toLowerCase()===accent);
