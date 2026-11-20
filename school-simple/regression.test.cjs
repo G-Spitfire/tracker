@@ -90,3 +90,31 @@ test('home: seven-day change is unavailable without a baseline', () => {
   assert.ok(html.includes('<strong class="stat-value">—</strong>'), 'no baseline shows dash');
   assert.ok(html.includes('За 7 дней'));
 });
+
+test('homework: empty scheduled day without explicit confirmation is not celebrated', () => {
+ const c=setup({dataSource:'live',syncWarning:null});
+ c.state.hw='tomorrow';
+ c.kids[0].schedule=[{subjectId:'m',from:'2026-11-20T09:00'}];
+ c.kids[0].lessons=[{subjectId:'m',from:'2026-11-19T09:00',tasks:[]}];
+ const html=vm.runInContext('homework()',c);
+ assert.doesNotMatch(html,/Ура! Домашки нет!|Можно передохнуть!|Свободный день!|Домашки нет!/);
+ assert.match(html,/Проверьте дневник/);
+});
+test('homework: explicit no-homework confirmation may show illustration', () => {
+ const c=setup({dataSource:'live',syncWarning:null});
+ c.state.hw='tomorrow';
+ c.kids[0].schedule=[{subjectId:'m',from:'2026-11-20T09:00'}];
+ c.kids[0].lessons=[{subjectId:'m',from:'2026-11-19T09:00',tasks:[{name:'Не задано'}]}];
+ const html=vm.runInContext('homework()',c);
+ assert.match(html,/homework-celebration/);
+ assert.match(html,/homework-doodle/);
+});
+test('homework: cached or sync-warning data cannot confirm an empty day', () => {
+ const c=setup({dataSource:'cached',syncWarning:null});
+ c.state.hw='tomorrow';
+ c.kids[0].schedule=[{subjectId:'m',from:'2026-11-20T09:00'}];
+ c.kids[0].lessons=[{subjectId:'m',from:'2026-11-19T09:00',tasks:[{name:'Не задано'}]}];
+ assert.doesNotMatch(vm.runInContext('homework()',c),/homework-celebration/);
+ c.dataSource='live';c.syncWarning='network issue';
+ assert.doesNotMatch(vm.runInContext('homework()',c),/homework-celebration/);
+});
