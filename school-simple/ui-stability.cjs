@@ -47,6 +47,19 @@ async function check(label,condition,details=''){console.log((condition?'PASS':'
    check(width+' JavaScript exceptions',errors.length===0,JSON.stringify(errors));
    await context.close();
   }
+  // Exercise the actual service worker cache, rather than the mocked UI-only mode.
+  const offlineContext=await browser.newContext({viewport:{width:375,height:844},serviceWorkers:'allow'});
+  try{
+   const offlinePage=await offlineContext.newPage(),offlineErrors=[];
+   offlinePage.on('pageerror',e=>offlineErrors.push(e.message));
+   await offlinePage.goto('http://127.0.0.1:8765/school-simple/index.html');
+   await offlinePage.evaluate(async()=>{await navigator.serviceWorker.ready;});
+   await offlinePage.waitForTimeout(500);
+   await offlineContext.setOffline(true);
+   await offlinePage.reload({waitUntil:'domcontentloaded'});
+   check('offline shell reload',await offlinePage.title()==='Школа');
+   check('offline shell no JavaScript exceptions',offlineErrors.length===0,JSON.stringify(offlineErrors));
+  }finally{await offlineContext.close();}
  }finally{await browser.close();}
  console.log('Failures: '+failures);
  if(failures)process.exitCode=1;
