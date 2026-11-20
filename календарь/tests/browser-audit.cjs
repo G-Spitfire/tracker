@@ -14,9 +14,9 @@ if(!fs.existsSync(html))throw new Error('Calendar application missing: кале�
    const page=await browser.newPage({viewport:{width,height:800}});
    const errors=[];
    page.on('pageerror',e=>errors.push(String(e)));
-   await page.goto('file://'+html,{waitUntil:'load'});
+   await page.goto('http://127.0.0.1:8765/календарь/index.html',{waitUntil:'load'});
    await page.screenshot({path:path.join(out,'calendar-'+width+'.png'),fullPage:true});
-   await page.waitForFunction(()=>document.querySelector('#status')?.textContent!=='Загрузка…',{timeout:10000});
+   await page.waitForFunction(()=>document.querySelector('#status')?.textContent!=='Загрузка…',null,{timeout:10000});
    const visible=await page.locator('body').isVisible();
    const db=await page.evaluate(async()=>{const list=await indexedDB.databases();return list.map(x=>x.name)});
    await page.locator('#side-new').click();
