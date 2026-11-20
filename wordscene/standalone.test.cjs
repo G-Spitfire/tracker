@@ -31,7 +31,7 @@ test('vendored dictionary and topics initialize independently of WordScene 16 di
  assert.ok(catalog.topics.length>1);
  assert.equal(new Set(catalog.words.map(w=>w.id.toLowerCase())).size,catalog.words.length,'word IDs must be unique');
  assert.ok(catalog.words.every(w=>w.en&&w.ru&&w.ipa&&w.cue&&w.scene&&Array.isArray(w.topics)),'all cards must keep core learning content');
- const context={console};context.window=context;vm.createContext(context);
+ const context={console};context.window=context;context.WordSceneCatalog=catalog;vm.createContext(context);
  vm.runInContext(read('illustrations.js'),context,{filename:'illustrations.js'});
  assert.equal(typeof context.WordSceneIllustrations.render,'function');
  assert.ok(Object.keys(context.WordSceneIllustrations.symbols).length>0,'illustration symbols must load');

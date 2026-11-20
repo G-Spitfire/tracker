@@ -84,7 +84,7 @@ def split_ids(text):
     return [s.strip() for s in text.split(';') if s.strip()]
 
 
-def import_rows(catalog, rows):
+def import_rows(catalog, rows, valid_symbols=None):
     if not rows:
         raise ValueError('Empty input file')
     headers = [h.strip().lower() for h in rows[0]]
@@ -131,6 +131,10 @@ def import_rows(catalog, rows):
                 raise ValueError('Row %s: container must be an integer' % line)
         if item.get('props'):
             word['props'] = split_ids(item['props'])
+            if valid_symbols is not None:
+                invalid = set(word['props']) - valid_symbols
+                if invalid:
+                    raise ValueError('Row %s: unknown SVG symbols: %s' % (line, ', '.join(sorted(invalid))))
         if item.get('topics'):
             topic_ids = split_ids(item['topics'])
             for topic in topic_ids:
@@ -155,8 +159,12 @@ def import_rows(catalog, rows):
             changed += 1
     # Rebuild topic membership from canonical word data; keep topic order.
     for topic in catalog['topics']:
-        topic['words'] = [word['en'] for word in words
-                          if topic['id'] in word.get('topics', [])]
+        topic_id = topic['id']
+        wanted = {word['en'].casefold() for word in words if topic_id in word.get('topics', [])}
+        original = [en for en in topic['words'] if en.casefold() in wanted]
+        existing = {en.casefold() for en in original}
+        additions = [word['en'] for word in words if word['en'].casefold() in wanted and word['en'].casefold() not in existing]
+        topic['words'] = original + additions
     return added, changed
 
 
@@ -166,10 +174,18 @@ def main():
     parser.add_argument('--catalog', type=Path, default=Path('wordscene/words.json'))
     parser.add_argument('--output', type=Path, help='Output JSON; defaults to --catalog')
     parser.add_argument('--check', action='store_true', help='Validate only, do not write')
+    parser.add_argument('--illustrations', type=Path, default=Path('wordscene/illustrations.js'), help='SVG symbols source')
     args = parser.parse_args()
     original = json.loads(args.catalog.read_text(encoding='utf-8'))
     catalog = copy.deepcopy(original)
-    added, changed = import_rows(catalog, read_rows(args.input))
+    # Parse the existing SVG registry; unknown image codes must not enter the catalog.
+    illustrations = args.illustrations.read_text(encoding='utf-8')
+    marker = 'const symbols='
+    start = illustrations.find(marker)
+    if start < 0:
+        raise ValueError('SVG symbol registry not found')
+    symbols, _ = json.JSONDecoder().raw_decode(illustrations[start + len(marker):])
+    added, changed = import_rows(catalog, read_rows(args.input), set(symbols))
     print('OK: added=%s updated=%s total=%s' % (added, changed, len(catalog['words'])))
     if not args.check:
         target = args.output or args.catalog
