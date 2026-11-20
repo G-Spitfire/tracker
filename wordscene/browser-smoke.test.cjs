@@ -14,7 +14,9 @@ function boot(options={}){
  };
  let now=options.now??Date.now(),tick;
  class TestDate extends Date{static now(){return now}}
- const catalog=JSON.parse(file('words.json'));catalog.forWord=en=>catalog.words.find(w=>w.en.toLowerCase()===String(en).toLowerCase())?.topics||[];
+ const catalog=JSON.parse(file('words.json'));
+ if(options.topics){catalog.topics=options.topics.topics;catalog.forWord=options.topics.forWord;}
+ else catalog.forWord=en=>catalog.words.find(w=>w.en.toLowerCase()===String(en).toLowerCase())?.topics||[];
  const window={WordSceneCatalog:catalog,WordSceneIllustrations:{render:()=>'<svg></svg>'},confirm:()=>true};
  const doc={getElementById:id=>id==='childName'||id==='childAge'?{value:options.inputs?.[id]??''}:root,createElement(){const actions={};const dialog={setAttribute(){},hidden:true,addEventListener(){},remove(){root.dialog=null},querySelector(selector){const key=selector.includes('stay')?'stay':'leave';if(!actions[key])actions[key]={listeners:{},addEventListener(name,cb){this.listeners[name]=cb},click(){this.listeners.click?.()},focus(){doc.activeElement=this}};return actions[key]}};return dialog},body:{append(){}}};
  const context={window,document:doc,localStorage:storage,navigator:{},setInterval:cb=>{tick=cb},setTimeout:()=>0,clearTimeout:()=>{},Date:TestDate,Math,console};
@@ -620,7 +622,7 @@ test('installed PWA uses consistent WordScene lighthouse icon assets and Paper c
  assert.equal(mask.readUInt32BE(16),512);
  assert.equal(mask.readUInt32BE(20),512);
  const sw=file('sw.js');
- assert.match(sw,/wordscene-17-lab-cache-v46/);
+ assert.match(sw,/wordscene-17-lab-cache-v47/);
  assert.match(sw,/icon-maskable-512\.png/);
  assert.match(sw,/wordscene-lighthouse-icon\.svg/);
 });
