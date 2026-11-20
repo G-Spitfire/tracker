@@ -1,5 +1,5 @@
-const CACHE='wordscene-17-lab-cache-v48';
-const ASSETS=['./','./index.html','./style.css','./style.css?v=paper-audit-45','./paper-lighthouse.svg','./app.js?v=47','./engine.js?v=22','./accounts.js?v=22','./catalog.js?v=1','./words.json','./illustrations.js?v=2','./manifest.webmanifest','./assets/mug-scene.png','./assets/icon-192.png','./assets/icon-512.png','./assets/icon-180.png','./assets/icon-maskable-512.png','./assets/wordscene-lighthouse-icon.svg'];
+const CACHE='wordscene-17-lab-cache-v49';
+const ASSETS=['./','./index.html','./style.css','./style.css?v=paper-polish-46','./paper-lighthouse.svg','./app.js?v=47','./engine.js?v=22','./accounts.js?v=22','./catalog.js?v=1','./words.json','./illustrations.js?v=2','./manifest.webmanifest','./assets/mug-scene.png','./assets/icon-192.png','./assets/icon-512.png','./assets/icon-180.png','./assets/icon-maskable-512.png','./assets/wordscene-lighthouse-icon.svg'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('wordscene-17-lab-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
