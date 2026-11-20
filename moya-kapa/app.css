@@ -43,3 +43,53 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}html{-webkit-text
 
 /* Parent entry is below both home navigation cards. */
 .parent-entry{margin:14px 2px 0;justify-content:center}
+
+/* Design system v2.4 — shared scale and components.
+   Keep the child-facing layout and palette unchanged. */
+:root{
+ --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;
+ --space-6:24px;--space-8:32px;
+ --radius-control:12px;--radius-card:16px;--radius-panel:24px;
+ --type-caption:12px;--type-small:14px;--type-body:16px;
+ --type-section:20px;--type-title:28px;
+ --control-min:44px;--field-min:48px;--primary-min:56px;
+}
+.head h1{font-size:var(--type-title);line-height:1.2}
+.page h2{font-size:var(--type-section);line-height:1.3;letter-spacing:-.3px}
+.card{border-radius:var(--radius-panel)}
+.link-card,.parent-menu button,.parent-add,.parent-night-box{border-radius:var(--radius-card)}
+.header-link,.calendar-head button,.graph-nav button,.parent-lock{border-radius:var(--radius-control);min-width:var(--control-min);min-height:var(--control-min)}
+.primary{min-height:var(--primary-min);border-radius:var(--radius-card);font-size:18px;line-height:1.25}
+.back{min-height:var(--control-min);font-size:var(--type-small);gap:var(--space-2)}
+.link-card span{font-size:var(--type-body)}
+.link-card small{font-size:var(--type-caption);line-height:1.35}
+.parent-entry button{min-height:var(--control-min);padding:10px 14px;font-size:var(--type-caption)}
+.parent-entry .icon{width:16px;height:16px}
+.parent-auth{margin:var(--space-6) auto}
+.parent-auth p,.parent-top p{font-size:var(--type-small)}
+.parent-note,.parent-record small,.parent-journal small{font-size:var(--type-caption);line-height:1.45}
+.parent-auth label,.parent-add label,.parent-record label,.parent-date{font-size:var(--type-small);line-height:1.35}
+.parent-auth input,.parent-add input,.parent-record input,.parent-date input{
+ min-height:var(--field-min);border-radius:var(--radius-control);
+ font-size:16px;line-height:1.3;
+}
+.parent-auth .pin-input{font-size:28px;line-height:1.3}
+.parent-menu{gap:var(--space-3);margin-top:var(--space-4)}
+.parent-menu button{min-height:72px;padding:var(--space-4);gap:4px 12px}
+.parent-menu button b{font-size:var(--type-body);line-height:1.25}
+.parent-menu button small{font-size:var(--type-caption);line-height:1.35}
+.parent-menu button .icon{width:24px;height:24px}
+.parent-record{border-radius:var(--radius-card);padding:var(--space-3);gap:var(--space-2)}
+.parent-record-actions button,.parent-night-actions button{min-height:var(--control-min);border-radius:var(--radius-control);font-size:var(--type-small)}
+.parent-record-actions button{flex:1}
+.parent-record-actions .danger-button{color:var(--night-no)}
+.parent-night-actions{gap:var(--space-2)}
+.parent-journal{border-bottom:1px solid var(--border);padding:var(--space-3) 0}
+.parent-journal p{font-size:var(--type-small);line-height:1.4}
+.parent-symbol .icon{width:36px;height:36px}
+.award-icon .icon{width:36px;height:36px}
+@media(max-width:350px){
+ .head h1{font-size:26px}
+ .parent-record{grid-template-columns:minmax(0,1fr) 96px}
+ .parent-menu button{padding:12px}
+}
