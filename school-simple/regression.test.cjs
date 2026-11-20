@@ -99,6 +99,7 @@ test('homework: scheduled day without assignments celebrates', () => {
 });
 test('homework: day without scheduled lessons celebrates a free day', () => {
  const c=setup({dataSource:'live'}); c.state.hw='tomorrow';
+ c.kids[0].schedule=[{subjectId:'m',from:'2026-11-23T09:00'}];
  const html=vm.runInContext('homework()',c);
  assert.match(html,/Ура! Свободный день!/); assert.match(html,/homework-doodle/);
  assert.doesNotMatch(html,/Проверьте дневник/);
@@ -110,4 +111,11 @@ test('homework: cached data retains assignments and empty-day celebrations', () 
  c.kids[0].tasks=[{subject:'Математика',text:'Номер 5',nextLessonDate:'2026-11-20'}];
  const html=vm.runInContext('homework()',c);
  assert.match(html,/Номер 5/); assert.doesNotMatch(html,/homework-celebration/);
+});
+
+test('homework: missing schedule does not falsely celebrate a free day', () => {
+ const c=setup({dataSource:'live'}); c.state.hw='tomorrow';
+ const html=vm.runInContext('homework()',c);
+ assert.match(html,/Расписание на этот день пока неизвестно/);
+ assert.doesNotMatch(html,/homework-celebration/);
 });
