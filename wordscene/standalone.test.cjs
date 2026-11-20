@@ -8,7 +8,7 @@ const root=__dirname;
 const read=name=>fs.readFileSync(path.join(root,name),'utf8');
 
 test('WordScene 17 HTML and PWA have no runtime dependency on WordScene 16',()=>{
- const html=read('index.html'),sw=read('sw.js'),art=read('legacy-art.js'),manifest=read('manifest.webmanifest');
+ const html=read('index.html'),sw=read('sw.js'),art=read('illustrations.js'),manifest=read('manifest.webmanifest');
  for(const [name,src] of [['HTML',html],['SW',sw],['art',art],['manifest',manifest]]) {
   assert.doesNotMatch(src,/\.\.\/wordscene\//,name+' references legacy WordScene');
  }
@@ -16,7 +16,8 @@ test('WordScene 17 HTML and PWA have no runtime dependency on WordScene 16',()=>
   assert.ok(fs.existsSync(path.join(root,name)),name+' missing locally');
  }
  assert.match(html,/\.\/catalog\.js\?v=1/);
- assert.match(html,/\.\/illustrations\.js\?v=1/);
+ assert.match(html,/\.\/illustrations\.js\?v=2/);
+ assert.doesNotMatch(html,/legacy-art\.js/);
  assert.doesNotMatch(html,/\.\/(?:content|topics|seed)\.js/);
  assert.match(sw,/wordscene-17-lab-cache-v\d+/);
  assert.match(manifest,/\.\/assets\/icon-192\.png/);
