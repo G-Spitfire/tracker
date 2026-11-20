@@ -176,9 +176,8 @@ def git(repo: Path, *args: str, check: bool = True, env=None) -> str:
 
 def publish(source_repo: Path, encrypted: str, payload_digest: str) -> None:
     digest_path = Path.home() / "Library/Application Support/SchoolDiary/last-published.sha256"
-    if digest_path.exists() and digest_path.read_text(encoding="ascii").strip() == payload_digest:
-        print("Snapshot unchanged; no GitHub publication needed.")
-        return
+    # Always publish a successfully checked snapshot. generatedAt is the time of
+    # the last successful diary collection, even when grades are unchanged.
     if not (source_repo / ".git").exists():
         raise RuntimeError(f"Not a git repository: {source_repo}")
     remote_url = git(source_repo, "remote", "get-url", "origin")
