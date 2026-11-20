@@ -53,7 +53,35 @@ const URL='http://127.0.0.1:8765/календарь/index.html';
   report.png={bytes:bytes.length,width:bytes.readUInt32BE(16),height:bytes.readUInt32BE(20)};
   await page.reload();await page.waitForFunction(()=>document.querySelector('#status')?.textContent!=='Загрузка…');
   assert.equal(await page.evaluate(()=>cache.events.length),fixture.events,'Data lost after reload');
-  report.persistence=true;assert.deepEqual(errors,[]);report.errors=errors;
+  report.persistence=true;
+  await page.locator('#data-nav').click();
+  const backupWait=page.waitForEvent('download');await page.locator('#export').click();
+  const backup=await backupWait;const backupPath=path.join(out,'realistic-week-backup.json');await backup.saveAs(backupPath);
+  const original=JSON.parse(fs.readFileSync(backupPath,'utf8'));
+  const stores=['classes','employees','rooms','subjects','breaks','events','absences'];
+  for(const store of stores)assert.ok(Array.isArray(original.data[store]),'Missing backup store '+store);
+  assert.equal(original.data.events.length,fixture.events);
+  const before=Object.fromEntries(stores.map(store=>[store,original.data[store].length]));
+  await page.evaluate(async()=>{
+   const db=await new Promise(ok=>{const q=indexedDB.open('school-calendar-mvp');q.onsuccess=()=>ok(q.result)});
+   await new Promise((ok,no)=>{const tx=db.transaction(['events','employees'],'readwrite');tx.objectStore('events').clear();tx.objectStore('employees').clear();tx.oncomplete=ok;tx.onerror=()=>no(tx.error)});db.close();
+  });
+  await page.locator('#settings-import-nav').click();
+  page.once('dialog',dialog=>dialog.accept());
+  await page.locator('#import').setInputFiles(backupPath);
+  await page.waitForFunction(()=>document.querySelector('#status')?.textContent==='Резервная копия восстановлена');
+  const restored=await page.evaluate(async stores=>{
+   const db=await new Promise(ok=>{const q=indexedDB.open('school-calendar-mvp');q.onsuccess=()=>ok(q.result)});
+   const result={};for(const store of stores)result[store]=await new Promise((ok,no)=>{const q=db.transaction(store).objectStore(store).getAll();q.onsuccess=()=>ok(q.result);q.onerror=()=>no(q.error)});
+   db.close();return result;
+  },stores);
+  for(const store of stores){
+   assert.equal(restored[store].length,before[store],'Restore count mismatch: '+store);
+   const sorted=a=>[...a].sort((x,y)=>x.id.localeCompare(y.id));
+   assert.deepEqual(sorted(restored[store]),sorted(original.data[store]),'Restore content mismatch: '+store);
+  }
+  report.jsonRoundTrip={stores:before,bytes:fs.statSync(backupPath).size,exactContent:true};
+  assert.deepEqual(errors,[]);report.errors=errors;
  }catch(e){report.failure=e.stack||String(e);throw e}
  finally{fs.writeFileSync(path.join(out,'realistic-week-report.json'),JSON.stringify(report,null,2));await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});
