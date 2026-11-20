@@ -268,7 +268,12 @@ function homework(){
   const tasks=list.filter(t=>(t.nextLessonDate||'')===d);
   // Only show the celebration when there is an actual scheduled lesson on this date and a live snapshot.
   const scheduled=kid.schedule.some(l=>(l.from||'').slice(0,10)===d);
-  const confirmedEmpty=!tasks.length&&scheduled&&dataSource==='live'&&!syncWarning;
+  const scheduledSubjects=[...new Set(kid.schedule.filter(l=>(l.from||'').slice(0,10)===d).map(l=>String(l.subjectId)))];
+  const explicitlyNoHomework=scheduledSubjects.length>0&&scheduledSubjects.every(subjectId=>{
+   const previous=kid.lessons.filter(l=>String(l.subjectId)===subjectId&&(l.from||'').slice(0,10)<=today).sort((a,b)=>b.from.localeCompare(a.from))[0];
+   return previous&&Array.isArray(previous.tasks)&&previous.tasks.some(t=>/^(?:не задано|домашнее задание\s*:\s*не задано)\s*$/i.test(String(t.name||'').trim()));
+  });
+  const confirmedEmpty=!tasks.length&&scheduled&&explicitlyNoHomework&&dataSource==='live'&&!syncWarning;
   const seed=d.split('').reduce((sum,ch)=>sum+ch.charCodeAt(0),state.child);
   const variants=[['bag','Ура! Домашки нет!','Рюкзак сегодня отдыхает!'],['cat','Можно передохнуть!','Даже кот одобряет такой день.'],['pencil','Свободный день!','Карандаш объявил выходной.'],['books','Домашки нет!','Книги тоже решили отдохнуть.']];
   const chosen=variants[seed%variants.length];
