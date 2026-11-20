@@ -55,9 +55,18 @@ async function check(label,condition,details=''){console.log((condition?'PASS':'
    await offlinePage.goto('http://127.0.0.1:8765/school-simple/index.html');
    await offlinePage.evaluate(async()=>{await navigator.serviceWorker.ready;});
    await offlinePage.waitForTimeout(500);
+   // Seed a synthetic snapshot in the real IndexedDB store to verify offline diary rendering.
+   await offlinePage.evaluate(async sample=>{
+    const db=await new Promise((resolve,reject)=>{const r=indexedDB.open('school-diary-private',1);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
+    await new Promise((resolve,reject)=>{const tx=db.transaction('records','readwrite');tx.objectStore('records').put({data:sample,savedAt:new Date().toISOString()},'latest-snapshot');tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});
+    db.close();
+   },diary);
    await offlineContext.setOffline(true);
    await offlinePage.reload({waitUntil:'domcontentloaded'});
    check('offline shell reload',await offlinePage.title()==='Школа');
+   await offlinePage.waitForFunction(()=>typeof dataSource!=='undefined'&&dataSource==='cached',{timeout:10000});
+   const cachedState=await offlinePage.evaluate(()=>({source:dataSource,subjects:kids[0].subjects.length}));
+   check('offline IndexedDB diary available',cachedState.source==='cached'&&cachedState.subjects>0,JSON.stringify(cachedState));
    check('offline shell no JavaScript exceptions',offlineErrors.length===0,JSON.stringify(offlineErrors));
   }finally{await offlineContext.close();}
  }finally{await browser.close();}
