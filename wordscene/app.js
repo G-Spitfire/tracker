@@ -392,7 +392,7 @@ function review(mode='review'){
 function cardActions(){
  return session.mode==='practice'?btn('Закончить тренировку','stopPractice','quiet'):btn('Отменить занятие','cancel','quiet');
 }
-function visual(w){if(window.WS17_illustration){try{return window.WS17_illustration(w.en)}catch(e){}}if(w.props&&C?.render){try{return C.render(w)}catch(e){}}return '<div class="simple-art">'+h(w.cue||w.en)+'</div>'}
+function visual(w){if(C?.render){try{return C.render(w)}catch(e){console.error('WordScene illustration error:',w.en,e)}}return '<div class="simple-art">'+h(w.cue||w.en)+'</div>'}
 function learn(focusWord=false){
  if(!session)return home();view='learn';const w=byId[session.ids[session.learnIndex]];
  const position=session.learnIndex+1,total=session.ids.length,progress=Math.round(100*position/total);

@@ -22,7 +22,7 @@ function boot(options={}){
  const context={window,document:doc,localStorage:storage,navigator:{},setInterval:cb=>{tick=cb},setTimeout:()=>0,clearTimeout:()=>{},Date:TestDate,Math,console};
  vm.createContext(context);
  const mod={exports:{}};vm.runInNewContext(file('engine.js'),Object.assign(context,{module:mod,exports:mod.exports}));window.WS17Engine=mod.exports;
- vm.runInContext(file('legacy-art.js'),context);
+ 
  delete context.module;delete context.exports;vm.runInContext(file('accounts.js'),context);window.WS17Accounts=context.WS17Accounts;vm.runInContext(file('app.js'),context);
  function click(action){if(action==='flip'){assert.ok(root.flip,'Flip handler missing');return root.flip()}const el=root.listeners[action];assert.ok(el,'Missing action '+action+'; available '+Object.keys(root.listeners).join(','));el.click()}
  return {click,root,map,window,now:()=>now,advanceTime:ms=>{now+=ms;tick()},setFailProfileWrite:v=>{failProfileWrite=v}};
@@ -622,7 +622,7 @@ test('installed PWA uses consistent WordScene lighthouse icon assets and Paper c
  assert.equal(mask.readUInt32BE(16),512);
  assert.equal(mask.readUInt32BE(20),512);
  const sw=file('sw.js');
- assert.match(sw,/wordscene-17-lab-cache-v47/);
+ assert.match(sw,/wordscene-17-lab-cache-v48/);
  assert.match(sw,/icon-maskable-512\.png/);
  assert.match(sw,/wordscene-lighthouse-icon\.svg/);
 });
