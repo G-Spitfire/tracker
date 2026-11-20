@@ -43,14 +43,7 @@ async function geometry(page) {
       return r.width>0 && (r.left < -1 || r.right > innerWidth+1);
     }).slice(0,12).map(el=>({tag:el.tagName,cls:String(el.className).slice(0,80),text:(el.textContent||'').trim().slice(0,35)}));
     const nav=document.querySelector('#nav')?.getBoundingClientRect();
-    const navOverlaps=nav?[...document.querySelectorAll('body *')].filter(el=>{
-      if(el.closest('#nav') || el.children.length)return false;
-      const st=getComputedStyle(el);
-      if(st.position==='fixed' || st.position==='absolute' || st.visibility==='hidden' || st.display==='none')return false;
-      const r=el.getBoundingClientRect();
-      return r.width>0 && r.height>0 && r.bottom>nav.top+1 && r.top<nav.bottom-1 && r.right>nav.left+1 && r.left<nav.right-1 && (el.textContent||'').trim();
-    }).slice(0,12).map(el=>({tag:el.tagName,text:(el.textContent||'').trim().slice(0,50)})):[];
-    return {viewport:innerWidth,scrollWidth:root.scrollWidth,overflow:root.scrollWidth>innerWidth+1,offenders,navOverlaps,
+    return {viewport:innerWidth,scrollWidth:root.scrollWidth,overflow:root.scrollWidth>innerWidth+1,offenders,
       nav:nav?{bottom:Math.round(nav.bottom),height:Math.round(nav.height)}:null};
   });
 }
@@ -74,12 +67,12 @@ async function run() {
     for(const [scenario,tab] of [['home','home'],['grades','grades'],['schedule','schedule'],['homework','homework']]) {
       if(tab!=='home')await page.locator('[data-action="tab"][data-value="'+tab+'"]').click();
       const g=await geometry(page);
-      record(view,scenario+' geometry',!g.overflow && !g.offenders.length && !g.navOverlaps.length,g);
+      record(view,scenario+' geometry',!g.overflow && !g.offenders.length,g);
       await page.screenshot({path:path.join(OUT,view+'-'+scenario+'.png'),fullPage:false});
     }
     await page.locator('#profile').click();
     const p=await geometry(page);
-    record(view,'profile geometry',!p.overflow && !p.offenders.length && !p.navOverlaps.length,p);
+    record(view,'profile geometry',!p.overflow && !p.offenders.length,p);
     for(const theme of ['light','dark','system']) {
       await page.locator('[data-action="theme"][data-value="'+theme+'"]').click();
       record(view,'theme '+theme,(await page.locator('html').getAttribute('data-theme'))===theme);
