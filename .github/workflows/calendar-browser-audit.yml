@@ -1,6 +1,10 @@
 name: Calendar browser audit
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'календарь/**'
+      - '.github/workflows/calendar-browser-audit.yml'
   push:
     branches: [calendar-playwright-audit]
     paths:
