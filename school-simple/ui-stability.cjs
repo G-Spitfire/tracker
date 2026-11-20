@@ -1,5 +1,7 @@
 'use strict';
 const {chromium}=require('playwright');
+const fs=require('node:fs');
+const path=require('node:path');
 const sizes=[320,375,390,430];
 const marks=Array.from({length:35},(_,i)=>({subjectId:'s'+i,subject:'Предмет '+i,value:4,date:'2026-11-19',type:'Урок'}));
 const diary={schemaVersion:1,generatedAt:new Date().toISOString(),children:{polina:{marks,lessons:[],schedule:[]},matvey:{marks,lessons:[],schedule:[]}}};
@@ -45,6 +47,15 @@ async function check(label,condition,details=''){console.log((condition?'PASS':'
    check(width+' theme survives reload',settings.theme==='dark',JSON.stringify(settings));
    check(width+' accent survives reload',settings.accent==='#e05252',JSON.stringify(settings));
    check(width+' JavaScript exceptions',errors.length===0,JSON.stringify(errors));
+   // Visual evidence: five screens, two themes, all four mobile widths.
+   const screenshotDir=path.join(process.cwd(),'school-ui-screenshots');
+   fs.mkdirSync(screenshotDir,{recursive:true});
+   for(const theme of ['light','dark']){
+    for(const tab of ['home','grades','schedule','homework','profile']){
+     await page.evaluate(({theme,tab})=>{state.theme=theme;setTab(tab);render();window.scrollTo(0,0);},{theme,tab});
+     await page.screenshot({path:path.join(screenshotDir,width+'-'+theme+'-'+tab+'.png'),fullPage:true,animations:'disabled'});
+    }
+   }
    await context.close();
   }
   // Exercise the actual service worker cache, rather than the mocked UI-only mode.
