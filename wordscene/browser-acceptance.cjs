@@ -32,8 +32,8 @@ async function run(name, browserType, contextOptions) {
    assert.ok((await page.locator('.paper-progress').innerText()).includes('За неделю:'));
   }
   const resources=await page.evaluate(()=>({
-   cardCount:window.WordSceneContent?.cards?.length,
-   topics:window.WordSceneTopics?.topics?.length,
+   cardCount:window.WordSceneCatalog?.words?.length ?? [...(window.WS17_SEED||[]),...(window.WordSceneContent?.cards||[])].filter((w,i,a)=>a.findIndex(x=>x.en===w.en)===i).length,
+   topics:window.WordSceneCatalog?.topics?.length ?? window.WordSceneTopics?.topics?.length,
    scriptSrcs:[...document.scripts].map(s=>s.src)
   }));
   assert.ok(resources.cardCount > 100,'dictionary not loaded: '+JSON.stringify(resources));
@@ -162,7 +162,7 @@ async function run(name, browserType, contextOptions) {
 
   await page.locator('[data-action="manualTab:topics"]').click();
   await page.locator('[data-action="manualTopic:food"]').click();
-  await page.locator('[data-action="pick:apple"]').click();
+  await page.locator('[data-action="pick:apple"]').first().click();
   await page.locator('[data-action="manualTopic:animals"]').click();
   await page.locator('[data-action="pick:cat"]').click();
   await page.locator('[data-action="pick:dog"]').click();
@@ -189,7 +189,7 @@ async function run(name, browserType, contextOptions) {
   assert.match(await page.locator('.ws-manual-total').innerText(),/2 \/ (?:10|15)/);
   assert.equal(await page.locator('[data-action="startManual"]').isDisabled(),true);
   await page.locator('[data-action="manualTopic:food"]').click();
-  await page.locator('[data-action="pick:apple"]').click();
+  await page.locator('[data-action="pick:apple"]').first().click();
   assert.match(await page.locator('.ws-manual-total').innerText(),/3 \/ (?:10|15)/);
   assert.equal(await page.locator('[data-action="startManual"]').isEnabled(),true);
   await page.locator('[data-action="startManual"]').click();

@@ -1,8 +1,10 @@
 /* WordScene 17.0 - isolated UI; no reads/writes to 16.17 data. */
 (()=>{
 'use strict';
-const E=window.WS17Engine,T=window.WordSceneTopics||{topics:[],forWord:()=>[]},C=window.WordSceneContent;
-const dictionary=[...window.WS17_SEED,...(C?.cards||[])].filter((w,i,a)=>a.findIndex(x=>x.en===w.en)===i);
+function startApp(){
+const E=window.WS17Engine,T=window.WordSceneCatalog,C=window.WordSceneIllustrations;
+const dictionary=window.WordSceneCatalog.words;
+
 const byId=Object.fromEntries(dictionary.map(w=>[w.en,w]));
 // Keep the active pre-refactor storage namespace without offering account switching.
 const legacyStorageSuffix=(()=>{
@@ -720,4 +722,7 @@ else if(session)resume();
 else home();
 setInterval(refreshHomeDay,1000);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+if(window.WordSceneCatalog)startApp();
+else window.addEventListener('wordscene-catalog-ready',startApp,{once:true});
 })();

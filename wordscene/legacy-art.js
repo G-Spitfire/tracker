@@ -1,6 +1,7 @@
 /* Reused 16.17 illustration rendering, isolated from its progress/state. */
 (function(){
-const words=window.WS17_SEED.slice();
+function init(){
+const words=window.WordSceneCatalog.words;
 const svgPath=(d,fill='none',stroke='#463252',width=3)=>`<path d="${d}" fill="${fill}" stroke="${stroke}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"/>`;
 const ellipse=(x,y,rx,ry,fill)=>`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${fill}"/>`;
 const circle=(x,y,r,fill)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}"/>`;
@@ -60,7 +61,7 @@ lamp:()=>svgPath('M165 90 L165 207 M124 207 L210 207','none',ink,9)+svgPath('M12
 star:()=>group(177,121,svgPath('M0 -76 L22 -23 L79 -22 L34 13 L47 72 L0 40 L-47 72 L-34 13 L-79 -22 L-22 -23Z',cream)+circle(-17,-4,13,'#fffdf4')+circle(17,-4,13,'#fffdf4')+svgPath('M-4 -4 L4 -4 M-42 25 L-73 39 M40 25 L70 39 M70 36 L70 101','none',ink,4)+eyes(0,-4))+label(180,247,'старая звезда идёт с палочкой')
 });
 
-function illustration(key){const entry=words.find(w=>w.en===key);if(entry?.props)return WordSceneContent.render(entry);return `<svg class="scene-svg" viewBox="0 0 360 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${words.find(w=>w.en===key)?.scene||key}"><rect width="360" height="270" rx="20" fill="#f0eaf9"/>${artBodies[key]()}</svg>`}
+function illustration(key){const entry=words.find(w=>w.en===key);if(entry?.props)return window.WordSceneIllustrations.render(entry);return `<svg class="scene-svg" viewBox="0 0 360 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${words.find(w=>w.en===key)?.scene||key}"><rect width="360" height="270" rx="20" fill="#f0eaf9"/>${artBodies[key]()}</svg>`}
 let sceneHidden=false;
 
 
@@ -138,7 +139,8 @@ ear:()=>ellipse(157,164,64,40,'#a5b7b7')+svgPath('M118 190 L111 220 M187 190 L19
 tooth:()=>rect(109,27,142,197,'#fffdf4')+label(130,54,'A')+label(231,211,'A')+group(180,119,toothShape(),.77)+group(131,77,toothShape(),.2)+group(230,184,toothShape(),.2)+label(180,250,'туз новой масти: зубы')
 });
 
-// Append only: interrupted sessions retain their numeric word positions.
-words.push(...WordSceneContent.cards);
 window.WS17_illustration=illustration;
+}
+if(window.WordSceneCatalog)init();
+else window.addEventListener('wordscene-catalog-ready',init,{once:true});
 })();

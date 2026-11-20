@@ -18,7 +18,7 @@ function boot({active=false}={}){
  const E=c.WS17Engine,p=E.empty();p.words.mug={origin:'learned',schedule:{...E.newSchedule(now),nextDay:'2026-11-06'},history:[]};
  data.set('wordscene-17-lab-v1',JSON.stringify(p));
  if(active)data.set('wordscene-17-lab-active-v1',JSON.stringify(E.start(p,'new',['cat','dog','net'],[],now)));
- c.WS17_SEED=['mug','cat','dog','net'].map(en=>({en,ru:en}));
+ c.WordSceneCatalog={words:['mug','cat','dog','net'].map(en=>({id:en,en,ru:en,topics:[]})),topics:[],forWord:()=>[]};
  vm.runInContext(fs.readFileSync(path.join(__dirname,'app.js'),'utf8'),c);
  return {get html(){return html},get renders(){return renders},writes,
   tomorrow(){now+=2000},tick(){intervals.forEach(fn=>fn())},event(name,event={}){events[name]?.(event)},click(action){nodes.find(n=>n.dataset.action===action).click()},
