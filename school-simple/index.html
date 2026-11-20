@@ -86,7 +86,7 @@ html[data-theme=dark]{--bg:#111720;--surface:#1c2430;--fg:#f3f5fa;--muted:#9ba9b
 .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
 .calendar button{background:none;border:0;border-radius:var(--radius-control);padding:8px 0;color:var(--fg);min-height:44px;font:inherit}
 .calendar .sub{align-self:center}
-.bottom{position:fixed;bottom:calc(8px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);max-width:526px;width:calc(100% - 24px);display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:0 4px 20px #00000014;padding:6px}
+.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:550px;width:100%;display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border:0;border-top:1px solid var(--line);border-radius:18px 18px 0 0;box-shadow:0 -3px 14px #0000000a;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
 .swatches{display:flex;flex-wrap:wrap;gap:clamp(6px,2vw,12px);margin:11px 0 18px}
 .swatch{width:44px;height:44px;border:0;border-radius:50%;color:white;font-size:19px;flex-shrink:0}
 .detail-box{background:var(--surface);color:var(--fg);border-radius:var(--radius-panel);padding:20px;width:min(100%,350px);box-shadow:0 12px 45px #0002}
