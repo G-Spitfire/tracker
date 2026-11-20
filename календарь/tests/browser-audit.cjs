@@ -15,8 +15,8 @@ if(!fs.existsSync(html))throw new Error('Calendar application missing: кале�
    const errors=[];
    page.on('pageerror',e=>errors.push(String(e)));
    await page.goto('http://127.0.0.1:8765/календарь/index.html',{waitUntil:'load'});
-   await page.screenshot({path:path.join(out,'calendar-'+width+'.png'),fullPage:true});
    await page.waitForFunction(()=>document.querySelector('#status')?.textContent!=='Загрузка…',null,{timeout:10000});
+   await page.screenshot({path:path.join(out,'calendar-'+width+'.png'),fullPage:true});
    const visible=await page.locator('body').isVisible();
    const db=await page.evaluate(async()=>{const list=await indexedDB.databases();return list.map(x=>x.name)});
    await page.locator('#side-new').click();
@@ -28,12 +28,14 @@ if(!fs.existsSync(html))throw new Error('Calendar application missing: кале�
    await page.waitForFunction(()=>document.querySelector('#status')?.textContent!=='Загрузка…');
    await page.locator('#side-absence').click();
    const absenceOpened=await page.locator('#absence-dialog').evaluate(el=>el.open);
+   await page.screenshot({path:path.join(out,'absence-'+width+'.png')});
    await page.locator('#absence-cancel').click();
    const absenceClosed=await page.locator('#absence-dialog').evaluate(el=>!el.open);
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
    const layout=await page.evaluate(()=>({gridWidth:document.querySelector('#grid').getBoundingClientRect().width,viewportWidth:innerWidth,brandVisible:!!document.querySelector('.school-brand-text'),logoSlot:!!document.querySelector('.school-logo-slot')}));
    await page.locator('#side-new').click();
    const editorFits=await page.locator('#editor').evaluate(el=>{const r=el.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight+1});
+   await page.screenshot({path:path.join(out,'editor-'+width+'.png')});
    await page.locator('#cancel').click();
    results.push({width,visible,overflow,db,editorOpened,editorClosed,absenceOpened,absenceClosed,editorFits,layout,errors});
    await page.close();
