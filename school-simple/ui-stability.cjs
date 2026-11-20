@@ -37,6 +37,13 @@ async function check(label,condition,details=''){console.log((condition?'PASS':'
    const navBox=await page.locator('#nav').boundingBox();
    const statusBox=await page.getByText(/^Обновлено/).boundingBox().catch(()=>null);
    check(width+' profile status above nav',Boolean(navBox&&statusBox&&statusBox.y+statusBox.height<=navBox.y+1),'statusBottom='+(statusBox?statusBox.y+statusBox.height:'missing')+' navTop='+navBox?.y);
+   await page.locator('[data-action="theme"][data-value="dark"]').click();
+   await page.locator('[data-action="accent"][data-value="#e05252"]').click();
+   await page.reload();
+   await page.locator('#profile').click();
+   const settings=await page.evaluate(()=>({theme:document.documentElement.dataset.theme,accent:getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()}));
+   check(width+' theme survives reload',settings.theme==='dark',JSON.stringify(settings));
+   check(width+' accent survives reload',settings.accent==='#e05252',JSON.stringify(settings));
    check(width+' JavaScript exceptions',errors.length===0,JSON.stringify(errors));
    await context.close();
   }
