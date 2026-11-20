@@ -222,7 +222,7 @@ function showMatveyAchievement(){
  const dark=state.theme==='dark'||(state.theme==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);
  const achievement=eggState();
  const savedDelta=Number(achievement?.delta);
- const deltaText=Number.isFinite(savedDelta)&&savedDelta>0?'+'+fmt(savedDelta):'+'+fmt(0);
+ const deltaText=achievement?.delta!=null&&Number.isFinite(savedDelta)&&savedDelta>0?'+'+fmt(savedDelta):'—';
  const overlay=document.createElement('div');
  overlay.id='matvey-easter-egg';overlay.className='egg-screen'+(dark?' egg-dark':'');
  overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','Секретное достижение Матвея');
