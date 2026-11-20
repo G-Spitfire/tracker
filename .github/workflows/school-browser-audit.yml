@@ -1,0 +1,45 @@
+name: School - browser UI audit
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'school-simple/**'
+      - '.github/workflows/school-browser-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  browser-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright and Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright@1.58.2
+          npx playwright install --with-deps chromium
+      - name: Start local read-only web server
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/school-audit-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8765/school-simple/index.html > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Run existing browser smoke test
+        run: node school-simple/browser-smoke.cjs
+      - name: Run responsive UI audit
+        run: node school-simple/browser-audit.cjs
+      - name: Upload screenshots and results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: school-browser-audit
+          path: school-audit-results/
+          if-no-files-found: warn
+          retention-days: 14
