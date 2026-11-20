@@ -176,7 +176,7 @@ async function start(){try{db=await openDB();await seed();await refresh();showVi
  $('week-today').onclick=()=>{selectedDate=localDate(new Date());render()};
  $('week-date').onchange=e=>{if(e.target.value){selectedDate=e.target.value;render()}};
  $('side-new').onclick=()=>openEditor();
- $('side-absence').onclick=openAbsence;
+ $('side-absence').onclick=()=>openAbsence();
  $('absence-close').onclick=$('absence-cancel').onclick=()=>$('absence-dialog').close();$('absence-new').onclick=()=>openAbsence();
  for(const id of ['absence-staff','absence-from','absence-to'])$(id).onchange=renderAbsenceEvents;
  $('absence-bulk-apply').onclick=()=>{document.querySelectorAll('.absence-choice').forEach(s=>s.value=$('absence-bulk-staff').value)};
