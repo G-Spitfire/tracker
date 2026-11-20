@@ -34,7 +34,7 @@ const URL='http://127.0.0.1:8765/календарь/index.html';
   });
   report.fixture=fixture;
   await page.reload();await page.waitForFunction(()=>document.querySelector('#status')?.textContent!=='Загрузка…');
-  await page.locator('#day').fill('2026-12-09');await page.locator('#day').dispatchEvent('change');
+  await page.evaluate(async()=>{selectedDate='2026-12-09';await render()});
   await page.screenshot({path:path.join(out,'realistic-day-1366.png'),fullPage:true});
   const result=await page.evaluate(()=>{
    const dayEvents=cache.events.filter(e=>e.date==='2026-12-09');
