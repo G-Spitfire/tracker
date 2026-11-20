@@ -1422,3 +1422,52 @@ html:has(.ws-result-page),body:has(.ws-result-page){background:#fdf7ed}
 .ws-manual-v3 .ws-manual-all,
 .ws-manual-v3 .ws-manual-summary-toggle,
 .ws-progress-page .progress-switch button{min-height:44px;min-width:44px}
+
+
+/* WordScene Paper polish: stationary paper with a gentle content reveal.
+   The physical underlay never rotates; both faces occupy the same plane. */
+.ws-paper-sheet,.ws-paper-inner{transform-style:flat;perspective:none}
+.ws-paper-inner,.ws-paper-sheet.is-flipped .ws-paper-inner,
+.ws-paper-turn-back .ws-paper-inner,.ws-paper-turn-front .ws-paper-inner{
+ transform:none!important;animation:none!important;transition:none!important;
+}
+.ws-paper-face,.ws-paper-face-back{transform:none!important;backface-visibility:visible}
+.ws-paper-face[aria-hidden="true"]{visibility:hidden!important;opacity:0!important;animation:none!important}
+.ws-paper-face[aria-hidden="false"]{
+ visibility:visible!important;opacity:1;animation:ws-paper-content-appear .18s ease-out both!important;
+}
+@keyframes ws-paper-content-appear{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){
+ .ws-paper-face[aria-hidden="false"]{animation:none!important}
+}
+
+/* Keep the answer controls anchored while the imagination panel is compact.
+   The picture itself scales up; the SVG source is unchanged. */
+.ws-paper-learn .ws-paper-dream.is-open,
+.ws-paper-recall .ws-paper-dream.is-open{flex:1 1 0;min-height:0}
+.ws-paper-learn .ws-paper-art,
+.ws-paper-recall .ws-paper-art{max-height:190px}
+.ws-paper-learn .ws-paper-art svg,.ws-paper-learn .ws-paper-art img,
+.ws-paper-recall .ws-paper-art svg,.ws-paper-recall .ws-paper-art img{
+ max-height:185px;max-width:100%;object-fit:contain;
+}
+.ws-paper-recall .ws-paper-dream.is-collapsed{
+ flex:0 0 auto;height:auto;min-height:0;
+}
+.ws-paper-recall .ws-paper-dream.is-collapsed .ws-paper-dream-head{min-height:40px}
+.ws-paper-recall .ws-paper-dream.is-collapsed .ws-paper-dream-scroll{
+ flex:0 0 auto;padding:0 12px 10px;
+}
+.ws-paper-recall .ws-paper-dream.is-collapsed .ws-paper-dream-hint{
+ margin:0 auto;font-size:12px;line-height:1.35;
+}
+@media(max-height:700px){
+ .ws-paper-learn .ws-paper-art,.ws-paper-recall .ws-paper-art{max-height:135px}
+ .ws-paper-learn .ws-paper-art svg,.ws-paper-learn .ws-paper-art img,
+ .ws-paper-recall .ws-paper-art svg,.ws-paper-recall .ws-paper-art img{max-height:130px}
+}
+@media(max-height:570px){
+ .ws-paper-learn .ws-paper-art,.ws-paper-recall .ws-paper-art{max-height:95px}
+ .ws-paper-learn .ws-paper-art svg,.ws-paper-learn .ws-paper-art img,
+ .ws-paper-recall .ws-paper-art svg,.ws-paper-recall .ws-paper-art img{max-height:90px}
+}
