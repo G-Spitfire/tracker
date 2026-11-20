@@ -73,6 +73,18 @@ async function check(label,condition,details=''){console.log((condition?'PASS':'
    await offlinePage.waitForFunction(()=>Boolean(syncWarning));
    const fallback=await offlinePage.evaluate(()=>({source:dataSource,subjects:kids[0].subjects.length,warning:syncWarning}));
    check('failed online sync preserves cached diary',fallback.source==='cached'&&fallback.subjects>0&&Boolean(fallback.warning),JSON.stringify(fallback));
+   // Simulate a successful sync response after the failed network request.
+   // This validates the app's recovery/render path, not remote encryption or transport.
+   await offlinePage.evaluate(async sample=>{
+    window.SchoolSync.sync=async()=>({source:'network',data:sample});
+    await loadDiarySnapshot();
+   },diary);
+   const recovered=await offlinePage.evaluate(()=>({source:dataSource,subjects:kids[0].subjects.length,warning:syncWarning}));
+   check('successful resync restores live status',recovered.source==='live'&&!recovered.warning,JSON.stringify(recovered));
+   check('successful resync retains diary content',recovered.subjects>0,JSON.stringify(recovered));
+   await offlinePage.evaluate(()=>{window.dispatchEvent(new Event('focus'));document.dispatchEvent(new Event('visibilitychange'));});
+   await offlinePage.waitForTimeout(200);
+   check('resume events cause no JavaScript exceptions',offlineErrors.length===0,JSON.stringify(offlineErrors));
    check('offline shell no JavaScript exceptions',offlineErrors.length===0,JSON.stringify(offlineErrors));
   }finally{await offlineContext.close();}
  }finally{await browser.close();}
