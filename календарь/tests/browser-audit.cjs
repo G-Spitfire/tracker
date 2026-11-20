@@ -23,7 +23,7 @@ if(!fs.existsSync(html))throw new Error('Calendar application missing: кале�
    const editorOpened=await page.locator('#editor').evaluate(el=>el.open);
    await page.locator('#cancel').click();
    const editorClosed=await page.locator('#editor').evaluate(el=>!el.open);
-   await page.evaluate(async()=>{const db=await new Promise((resolve,reject)=>{const q=indexedDB.open('school-calendar');q.onsuccess=()=>resolve(q.result);q.onerror=()=>reject(q.error)});const stores=[...db.objectStoreNames];if(!stores.includes('employees'))throw Error('Missing employees store');await new Promise((resolve,reject)=>{const tx=db.transaction('employees','readwrite');tx.objectStore('employees').put({id:'audit-staff',name:'Тестовый сотрудник',displayName:'Тестовый',archived:false});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close()});
+   await page.evaluate(async()=>{const db=await new Promise((resolve,reject)=>{const q=indexedDB.open('school-calendar-mvp');q.onsuccess=()=>resolve(q.result);q.onerror=()=>reject(q.error)});const stores=[...db.objectStoreNames];if(!stores.includes('employees'))throw Error('Missing employees store');await new Promise((resolve,reject)=>{const tx=db.transaction('employees','readwrite');tx.objectStore('employees').put({id:'audit-staff',name:'Тестовый сотрудник',displayName:'Тестовый',archived:false});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close()});
    await page.reload({waitUntil:'load'});
    await page.waitForFunction(()=>document.querySelector('#status')?.textContent!=='Загрузка…');
    await page.locator('#side-absence').click();
