@@ -14,12 +14,13 @@ function boot(options={}){
  };
  let now=options.now??Date.now(),tick;
  class TestDate extends Date{static now(){return now}}
- const window={WordSceneTopics:options.topics||{topics:[],forWord:()=>[]},WordSceneContent:{cards:[],render:()=>'<svg></svg>'},confirm:()=>true};
+ const catalog=JSON.parse(file('words.json'));catalog.forWord=en=>catalog.words.find(w=>w.en.toLowerCase()===String(en).toLowerCase())?.topics||[];
+ const window={WordSceneCatalog:catalog,WordSceneIllustrations:{render:()=>'<svg></svg>'},confirm:()=>true};
  const doc={getElementById:id=>id==='childName'||id==='childAge'?{value:options.inputs?.[id]??''}:root,createElement(){const actions={};const dialog={setAttribute(){},hidden:true,addEventListener(){},remove(){root.dialog=null},querySelector(selector){const key=selector.includes('stay')?'stay':'leave';if(!actions[key])actions[key]={listeners:{},addEventListener(name,cb){this.listeners[name]=cb},click(){this.listeners.click?.()},focus(){doc.activeElement=this}};return actions[key]}};return dialog},body:{append(){}}};
  const context={window,document:doc,localStorage:storage,navigator:{},setInterval:cb=>{tick=cb},setTimeout:()=>0,clearTimeout:()=>{},Date:TestDate,Math,console};
  vm.createContext(context);
  const mod={exports:{}};vm.runInNewContext(file('engine.js'),Object.assign(context,{module:mod,exports:mod.exports}));window.WS17Engine=mod.exports;
- vm.runInContext(file('seed.js'),context);vm.runInContext(file('legacy-art.js'),Object.assign(context,{WordSceneContent:window.WordSceneContent}));
+ vm.runInContext(file('legacy-art.js'),context);
  delete context.module;delete context.exports;vm.runInContext(file('accounts.js'),context);window.WS17Accounts=context.WS17Accounts;vm.runInContext(file('app.js'),context);
  function click(action){if(action==='flip'){assert.ok(root.flip,'Flip handler missing');return root.flip()}const el=root.listeners[action];assert.ok(el,'Missing action '+action+'; available '+Object.keys(root.listeners).join(','));el.click()}
  return {click,root,map,window,now:()=>now,advanceTime:ms=>{now+=ms;tick()},setFailProfileWrite:v=>{failProfileWrite=v}};
@@ -172,7 +173,7 @@ test('reload restores the same card after several days',()=>{
 });
 
 test('mandatory review unlocks voluntary practice for final errors without changing saved progress',()=>{
- const initial=boot(),E=initial.window.WS17Engine,id=initial.window.WS17_SEED[0].en;
+ const initial=boot(),E=initial.window.WS17Engine,id=initial.window.WordSceneCatalog.words[0].en;
  const profile=E.empty(),key='wordscene-17-lab-v1';
  profile.words[id]={origin:'learned',schedule:E.newSchedule(initial.now()-2*86400000),history:[]};
  initial.map.set(key,JSON.stringify(profile));
@@ -195,7 +196,7 @@ test('mandatory review unlocks voluntary practice for final errors without chang
 });
 
 test('review results show real remaining hard words and only then offer voluntary practice',()=>{
- const initial=boot(),E=initial.window.WS17Engine,id=initial.window.WS17_SEED[0].en;
+ const initial=boot(),E=initial.window.WS17Engine,id=initial.window.WordSceneCatalog.words[0].en;
  const profile=E.empty(),key='wordscene-17-lab-v1';
  profile.words[id]={origin:'learned',schedule:E.newSchedule(initial.now()-2*86400000),history:[]};
  initial.map.set(key,JSON.stringify(profile));
