@@ -36,9 +36,8 @@ async function check(label,condition,details=''){console.log((condition?'PASS':'
    await page.locator('#profile').click();
    const profileGeometry=await page.evaluate(()=>({viewport:innerWidth,scrollWidth:document.documentElement.scrollWidth}));
    check(width+' profile no horizontal overflow',profileGeometry.scrollWidth<=profileGeometry.viewport+1,JSON.stringify(profileGeometry));
-   const navBox=await page.locator('#nav').boundingBox();
-   const statusBox=await page.getByText(/^Обновлено/).boundingBox().catch(()=>null);
-   check(width+' profile status above nav',Boolean(navBox&&statusBox&&statusBox.y+statusBox.height<=navBox.y+1),'statusBottom='+(statusBox?statusBox.y+statusBox.height:'missing')+' navTop='+navBox?.y);
+   const oldSyncBlock=await page.locator('.sync-meta').count();
+   check(width+' profile sync information moved to dialog',oldSyncBlock===0,'oldSyncBlock='+oldSyncBlock);
    await page.locator('[data-action="theme"][data-value="dark"]').click();
    await page.locator('[data-action="accent"][data-value="#ef4444"]').click();
    await page.reload();
