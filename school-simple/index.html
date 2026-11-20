@@ -227,7 +227,7 @@ function home(){
  tile('Динамика',hasBaseline?arrow+' '+(delta>0?'+':'')+fmt(delta):'—','За 7 дней','trend',delta>0?'#31ad81':delta<0?'#d76a6a':null)+
  tile('Доля пятёрок',fiveShare+'%','От всех оценок','star')+
  tile('Под риском',String(riskCount),'Предмета · средний < 3,60','alert')+
- (holidayInfo()?tile('До Нового года',String(holidayInfo().days),holidayInfo().days===0?'Сегодня праздник!':'Дней до праздника','tree'):tile('Без троек и двоек',String(cleanStreak),'Учебных дней подряд','flame'))+
+ (holidayInfo()?tile('До Нового года',String(holidayInfo().days),holidayInfo().days===0?'Сегодня Новый год!':'Дней до праздника','tree'):tile('Без троек и двоек',String(cleanStreak),'Учебных дней подряд','flame'))+
  tile('Средний за домашки',hwAverage,'За четверть','homework')+
  '</div><div class="home-switch">'+btns([['line','Линейный'],['ring','Кольцевой']],state.chart,'chart')+'</div><div class="home-visual">';
  if(!all.length){out+='<div class="empty">Пока нет оценок за эту четверть</div>';}else if(state.chart==='ring'){
