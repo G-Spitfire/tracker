@@ -28,6 +28,7 @@ if(!fs.existsSync(html))throw new Error('Calendar application missing: кале�
    await page.waitForFunction(()=>document.querySelector('#status')?.textContent!=='Загрузка…');
    await page.locator('#side-absence').click();
    const absenceOpened=await page.locator('#absence-dialog').evaluate(el=>el.open);
+   const absenceContentFits=await page.locator('#absence-dialog').evaluate(el=>{const d=el.getBoundingClientRect(),inner=el.querySelector('.absence-dialog')?.getBoundingClientRect();return !!inner&&inner.left>=d.left-1&&inner.right<=d.right+1&&d.left>=0&&d.right<=innerWidth+1});
    await page.screenshot({path:path.join(out,'absence-'+width+'.png')});
    await page.locator('#absence-cancel').click();
    const absenceClosed=await page.locator('#absence-dialog').evaluate(el=>!el.open);
@@ -37,10 +38,10 @@ if(!fs.existsSync(html))throw new Error('Calendar application missing: кале�
    const editorFits=await page.locator('#editor').evaluate(el=>{const r=el.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight+1});
    await page.screenshot({path:path.join(out,'editor-'+width+'.png')});
    await page.locator('#cancel').click();
-   results.push({width,visible,overflow,db,editorOpened,editorClosed,absenceOpened,absenceClosed,editorFits,layout,errors});
+   results.push({width,visible,overflow,db,editorOpened,editorClosed,absenceOpened,absenceClosed,absenceContentFits,editorFits,layout,errors});
    await page.close();
   }
  } finally {await browser.close();}
  fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(results,null,2));
- if(results.some(x=>!x.visible||x.overflow||!x.db.length||!x.editorOpened||!x.editorClosed||!x.absenceOpened||!x.absenceClosed||!x.editorFits||!x.layout.brandVisible||!x.layout.logoSlot||x.errors.length))process.exitCode=1;
+ if(results.some(x=>!x.visible||x.overflow||!x.db.length||!x.editorOpened||!x.editorClosed||!x.absenceOpened||!x.absenceClosed||!x.absenceContentFits||!x.editorFits||!x.layout.brandVisible||!x.layout.logoSlot||x.errors.length))process.exitCode=1;
 })().catch(e=>{console.error(e);process.exitCode=1});
