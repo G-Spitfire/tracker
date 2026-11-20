@@ -189,7 +189,7 @@ async function run(name, browserType, contextOptions) {
   assert.match(await page.locator('.ws-manual-total').innerText(),/2 \/ (?:10|15)/);
   assert.equal(await page.locator('[data-action="startManual"]').isDisabled(),true);
   await page.locator('[data-action="manualTopic:food"]').click();
-  await page.locator('[data-action="pick:apple"]').click();
+  await page.locator('[data-action="pick:apple"]').first().click();
   assert.match(await page.locator('.ws-manual-total').innerText(),/3 \/ (?:10|15)/);
   assert.equal(await page.locator('[data-action="startManual"]').isEnabled(),true);
   await page.locator('[data-action="startManual"]').click();
