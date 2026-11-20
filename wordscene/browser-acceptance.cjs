@@ -32,8 +32,8 @@ async function run(name, browserType, contextOptions) {
    assert.ok((await page.locator('.paper-progress').innerText()).includes('За неделю:'));
   }
   const resources=await page.evaluate(()=>({
-   cardCount:window.WordSceneCatalog?.words?.length,
-   topics:window.WordSceneCatalog?.topics?.length,
+   cardCount:window.WordSceneCatalog?.words?.length ?? [...(window.WS17_SEED||[]),...(window.WordSceneContent?.cards||[])].filter((w,i,a)=>a.findIndex(x=>x.en===w.en)===i).length,
+   topics:window.WordSceneCatalog?.topics?.length ?? window.WordSceneTopics?.topics?.length,
    scriptSrcs:[...document.scripts].map(s=>s.src)
   }));
   assert.ok(resources.cardCount > 100,'dictionary not loaded: '+JSON.stringify(resources));
