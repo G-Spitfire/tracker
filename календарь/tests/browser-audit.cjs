@@ -10,7 +10,7 @@ if(!fs.existsSync(html))throw new Error('Calendar application missing: кале�
  const browser=await chromium.launch({headless:true});
  const results=[];
  try {
-  for(const width of [1280,1440]){
+  for(const width of [1280,1366,1440]){
    const page=await browser.newPage({viewport:{width,height:800}});
    const errors=[];
    page.on('pageerror',e=>errors.push(String(e)));
@@ -31,10 +31,14 @@ if(!fs.existsSync(html))throw new Error('Calendar application missing: кале�
    await page.locator('#absence-cancel').click();
    const absenceClosed=await page.locator('#absence-dialog').evaluate(el=>!el.open);
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
-   results.push({width,visible,overflow,db,editorOpened,editorClosed,absenceOpened,absenceClosed,errors});
+   const layout=await page.evaluate(()=>({gridWidth:document.querySelector('#grid').getBoundingClientRect().width,viewportWidth:innerWidth,brandVisible:!!document.querySelector('.school-brand-text'),logoSlot:!!document.querySelector('.school-logo-slot')}));
+   await page.locator('#side-new').click();
+   const editorFits=await page.locator('#editor').evaluate(el=>{const r=el.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight+1});
+   await page.locator('#cancel').click();
+   results.push({width,visible,overflow,db,editorOpened,editorClosed,absenceOpened,absenceClosed,editorFits,layout,errors});
    await page.close();
   }
  } finally {await browser.close();}
  fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(results,null,2));
- if(results.some(x=>!x.visible||x.overflow||!x.db.length||!x.editorOpened||!x.editorClosed||!x.absenceOpened||!x.absenceClosed||x.errors.length))process.exitCode=1;
+ if(results.some(x=>!x.visible||x.overflow||!x.db.length||!x.editorOpened||!x.editorClosed||!x.absenceOpened||!x.absenceClosed||!x.editorFits||!x.layout.brandVisible||!x.layout.logoSlot||x.errors.length))process.exitCode=1;
 })().catch(e=>{console.error(e);process.exitCode=1});
