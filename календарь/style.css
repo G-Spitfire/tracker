@@ -64,3 +64,38 @@ main{grid-template-columns:190px minmax(0,1fr)}
 .saved-absences-wrap{display:grid;gap:8px}.saved-absences{display:grid;gap:6px;max-height:150px;overflow:auto}.saved-absence-row{display:flex;align-items:center;gap:8px;padding:7px;border:1px solid var(--border);border-radius:8px}.saved-absence-row span{flex:1;font-size:13px}.saved-absence-row button{font-size:12px}
 
 .saved-absences-head{display:flex;justify-content:space-between;align-items:center}
+
+/* Design-system consolidation, v0.11.3: shared sizing without layout redesign. */
+:root{
+ --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;
+ --control-height:36px;--control-radius:9px;
+ --font-caption:11px;--font-small:12px;--font-body:13px;--font-control:14px;
+ --font-heading:20px;--modal-radius:16px;
+}
+button,.import{border-radius:var(--control-radius);min-height:var(--control-height)}
+input[type=date],input[type=time],input[type=text],select{border-radius:var(--control-radius)}
+.modal-head h2{font-size:var(--font-heading)}
+#event-form,#reference-form,.replace-dialog,.absence-dialog{gap:var(--space-3)}
+#event-form,#reference-form,.replace-dialog{padding:20px}
+.absence-dialog{padding:20px}
+.modal-actions{gap:var(--space-2);flex-wrap:wrap}
+.event{font-size:var(--font-small)}
+.event strong{font-size:var(--font-small)}
+.event small{font-size:var(--font-caption)}
+.side-brand{display:flex;align-items:center;gap:var(--space-2);min-width:0}
+.school-brand-text{display:block;min-width:0}
+.school-brand-text>span{display:block;color:var(--accent)}
+.school-logo-slot{display:none;flex:0 0 32px;width:32px;height:32px;border-radius:8px;overflow:hidden}
+/* Slot is intentionally hidden until a real school logo is provided. */
+dialog[open]{max-height:min(92dvh,calc(100dvh - 24px));overflow-y:auto;overscroll-behavior:contain}
+#editor[open],#reference-editor[open],#absence-dialog[open]{max-height:min(92dvh,calc(100dvh - 24px))}
+@media(min-width:901px) and (max-width:1366px){
+ .workspace{padding:12px 14px}
+ .sidebar{width:auto}
+ .calendar-controls{gap:6px}
+ .week-navigation{gap:5px}
+}
+@media(max-width:650px){
+ #event-form,#reference-form,.replace-dialog,.absence-dialog{padding:16px}
+ .modal-actions{gap:8px}
+}
