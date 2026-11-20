@@ -30,3 +30,11 @@ jobs:
           exit 1
       - name: Test scroll and navigation
         run: node school-simple/ui-stability.cjs
+      - name: Upload visual audit screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: school-ui-screenshots
+          path: school-ui-screenshots/
+          if-no-files-found: warn
+          retention-days: 7
