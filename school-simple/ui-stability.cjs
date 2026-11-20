@@ -26,6 +26,11 @@ async function check(label,condition,details=''){console.log((condition?'PASS':'
    await page.locator('[data-action="tab"][data-value="schedule"]').click();
    const top=await page.evaluate(()=>window.scrollY);
    check(width+' navigation starts at top',top<3,'scroll='+top);
+   for(const tab of ['home','grades','schedule','homework']){
+    await page.locator('[data-action="tab"][data-value="'+tab+'"]').click();
+    const geometry=await page.evaluate(()=>({viewport:innerWidth,scrollWidth:document.documentElement.scrollWidth,navHeight:document.querySelector('#nav').getBoundingClientRect().height}));
+    check(width+' '+tab+' no horizontal overflow',geometry.scrollWidth<=geometry.viewport+1,JSON.stringify(geometry));
+   }
    await page.locator('#profile').click();
    const navBox=await page.locator('#nav').boundingBox();
    const statusBox=await page.getByText(/^Обновлено/).boundingBox().catch(()=>null);
