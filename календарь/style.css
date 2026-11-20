@@ -99,3 +99,11 @@ dialog[open]{max-height:min(92dvh,calc(100dvh - 24px));overflow-y:auto;overscrol
  #event-form,#reference-form,.replace-dialog,.absence-dialog{padding:16px}
  .modal-actions{gap:8px}
 }
+
+/* Absence dialog: size the actual dialog, not only its inner content. */
+#absence-dialog{width:min(760px,calc(100vw - 32px));max-width:760px;min-width:0}
+#absence-dialog>.absence-dialog{width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+@media(max-width:650px){
+ #absence-dialog{width:calc(100vw - 24px)}
+ #absence-dialog>.absence-dialog{width:100%;min-width:0}
+}
