@@ -7,6 +7,7 @@ import pathlib
 import re
 import shutil
 import tempfile
+from urllib.request import urlopen
 
 home = pathlib.Path.home()
 base = home / "Library/Application Support/SchoolDiary"
@@ -106,9 +107,16 @@ replacement = (
     + indent + "        return 2"
 )
 new_collector = original[:match.start()] + replacement + original[match.end():]
+publisher_path = home / 'school-integration/school-sync/publish.py'
+publisher_url = 'https://raw.githubusercontent.com/G-Spitfire/tracker/main/school-sync/publish.py'
+with urlopen(publisher_url, timeout=20) as response:
+    publisher_code = response.read().decode('utf-8')
+if 'Always publish a successfully checked snapshot' not in publisher_code:
+    raise SystemExit('Остановка без изменений: не получена актуальная версия publish.py.')
 ast.parse(sync_code)
 ast.parse(new_collector)
-for path, contents in ((sync_path, sync_code), (collector_path, new_collector)):
+ast.parse(publisher_code)
+for path, contents in ((sync_path, sync_code), (collector_path, new_collector), (publisher_path, publisher_code)):
     backup = path.with_name(path.name + ".backup-" + stamp)
     shutil.copy2(path, backup)
     with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=path.parent, delete=False) as handle:
