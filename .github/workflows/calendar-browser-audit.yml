@@ -10,6 +10,8 @@ on:
     paths:
       - 'календарь/**'
       - '.github/workflows/calendar-browser-audit.yml'
+permissions:
+  contents: read
 jobs:
   audit:
     runs-on: ubuntu-latest
@@ -21,6 +23,15 @@ jobs:
           node-version: '22'
       - run: npm install --no-save playwright@1.58.2
       - run: npx playwright install --with-deps chromium
+      - name: Start local web server
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/calendar-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8765/календарь/index.html > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/calendar-server.log
+          exit 1
       - name: Run browser audit
         run: node календарь/tests/browser-audit.cjs
       - uses: actions/upload-artifact@v4
