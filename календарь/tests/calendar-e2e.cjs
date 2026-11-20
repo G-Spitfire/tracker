@@ -51,7 +51,7 @@ const DATE='2026-12-09';
   const json=JSON.parse(fs.readFileSync(file,'utf8'));
   assert.equal(json.version,3);assert.ok(json.data.events.some(e=>e.id===saved.id));
   report.backup=true;
-  await page.locator('#schedule-nav').click();
+  await page.locator('#settings-back').click();
   const pngPromise=page.waitForEvent('download');
   await page.locator('#side-png').click();
   const png=await pngPromise;
