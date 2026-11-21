@@ -33,16 +33,15 @@ function eventCard(e){
  const meta=[staff,room].filter(Boolean).join(' · ');
  const time=elt('small','event-time',`${e.start}–${e.end}`);
  const name=elt('strong','event-name',e.name);
- const details=elt('small','event-meta',meta);
- card.append(time,name,details);
- card.title=[e.name,`${e.start}–${e.end}`,meta,'Перетащите для переноса'].filter(Boolean).join('\n');
+ const teacher=elt('span','event-teacher',staff);
+ const place=elt('small','event-room',room||'');
+ const top=elt('span','event-top');
+ top.append(name,time);
+ const details=elt('span','event-details');
+ details.append(teacher,place);
+ card.append(top,details);
+ card.title=[e.name,`${e.start}–${e.end}`,meta,'Перетащите для переноса'].filter(Boolean).join('\\n');
  card.onclick=()=>openEditor(e);
- if(staff){
-  const link=elt('span','staff-jump','↗ '+staff);link.tabIndex=0;link.setAttribute('role','link');link.title='Открыть неделю сотрудника';
-  link.onclick=ev=>{ev.stopPropagation();openStaffWeek((e.employeeIds||[])[0])};
-  link.onkeydown=ev=>{if(ev.key==='Enter'){ev.stopPropagation();openStaffWeek((e.employeeIds||[])[0])}};
-  card.append(link);
- }
  const layout=()=>{
   const height=card.getBoundingClientRect().height,width=card.getBoundingClientRect().width;
   card.classList.toggle('event-tiny',height<28);
