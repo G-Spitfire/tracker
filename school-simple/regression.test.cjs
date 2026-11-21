@@ -23,7 +23,7 @@ function setup(extra = {}) {
     fmt: n => n.toFixed(2).replace('.', ','),
     inQuarter: d => d >= '2026-11-01' && d <= '2026-12-31',
     kpiIcon: () => '',
-    homeworkIllustration: () => '',
+    homeworkIllustration: () => '<svg class="homework-doodle"></svg>',
     btns: () => '',
     escapeHTML: s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'),
     ...extra
