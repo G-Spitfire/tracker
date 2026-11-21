@@ -26,13 +26,15 @@ dialog{border:0;border-radius:16px;padding:0;width:min(560px,calc(100% - 24px));
 .time-guide-label{border:0;transform:translateY(-50%);text-align:center;font-size:11px;font-weight:400;color:#8391a5;font-variant-numeric:tabular-nums;z-index:1}
 .time-guide-label.time-guide-major{font-size:14px;font-weight:750;color:#263b55}
 .event{z-index:1}
+/* Card layout follows the rendered dimensions, without changing event geometry. */
 .event .event-time,.event .event-name,.event .event-meta{display:block;min-width:0;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .event .event-name{font-weight:700}
-.event-compact{flex-direction:row;align-items:center;justify-content:flex-start;gap:5px;white-space:nowrap}
-.event-compact .event-time,.event-compact .staff-jump{display:none}
-.event-compact .event-name{flex:0 1 auto;font-size:12px}
-.event-compact .event-meta{flex:1 1 auto;text-align:right;font-size:10px;opacity:.75}
-.event-tiny{flex-direction:row;align-items:center;padding-top:0;padding-bottom:0}
+.event-compact{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;align-content:center;align-items:center;column-gap:7px;row-gap:2px}
+.event-compact .event-name{grid-column:1;grid-row:1;font-size:12px}
+.event-compact .event-time{grid-column:2;grid-row:1;font-size:10px;text-align:right}
+.event-compact .event-meta{grid-column:1/-1;grid-row:2;font-size:10px;opacity:.8}
+.event-compact .staff-jump{display:none}
+.event-tiny{display:flex;flex-direction:row;align-items:center;justify-content:flex-start;padding-top:0;padding-bottom:0}
 .event-tiny .event-time,.event-tiny .event-meta,.event-tiny .staff-jump{display:none}
 .event-tiny .event-name{font-size:11px}
 .event-narrow.event-compact .event-meta{display:none}
@@ -116,3 +118,6 @@ dialog[open]{max-height:min(92dvh,calc(100dvh - 24px));overflow-y:auto;overscrol
  #absence-dialog{width:calc(100vw - 24px)}
  #absence-dialog>.absence-dialog{width:100%;min-width:0}
 }
+
+/* Override the generic 36px button minimum for timeline events. */
+button.event{min-height:0}
