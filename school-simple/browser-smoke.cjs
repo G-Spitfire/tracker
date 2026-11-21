@@ -24,9 +24,9 @@ const assert = require('node:assert/strict');
   const iconLibrary=await page.evaluate(()=>({
     navigation:typeof ico==='function' && ico('home').includes('<svg'),
     metrics:typeof kpiIcon==='function' && kpiIcon('average').includes('<svg'),
-    illustrations:typeof homeworkIllustration==='function' && ['bag','cat','pencil','books'].every(n=>homeworkIllustration(n).includes('<svg'))
+    illustrations:typeof homeworkIllustration==='function' && ['pencil','dance','clay','tv','console','ball','phone','book'].every(n=>homeworkIllustration(n).includes('/empty-states/'+n+'.png'))
   }));
-  assert.deepEqual(iconLibrary,{navigation:true,metrics:true,illustrations:true},'Shared SVG library loaded');
+  assert.deepEqual(iconLibrary,{navigation:true,metrics:true,illustrations:true},'Shared icon and illustration libraries loaded');
   await page.getByText('Средний балл',{exact:true}).waitFor();
   await page.locator('[data-action="tab"][data-value="grades"]').click();
   await page.getByText('Математика',{exact:true}).first().waitFor();
