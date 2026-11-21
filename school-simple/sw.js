@@ -1,4 +1,4 @@
-const CACHE_NAME = "school-shell-v1.33.6-lightning-approved-art";
+const CACHE_NAME = "school-shell-v1.33.6-profile-close-fix";
 const SHELL = [
   "./",
   "./index.html",
