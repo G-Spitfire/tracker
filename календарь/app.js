@@ -173,32 +173,32 @@ function exportPNG(){
  const H=Math.ceil(top+headHeight+Math.max(60,rows.reduce((sum,r)=>sum+r.height,0))+appendixHeight+footer);
  canvas.width=W*scale;canvas.height=H*scale;const ctx=canvas.getContext('2d');ctx.scale(scale,scale);
  ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
- ctx.fillStyle='#17253b';ctx.font='bold 30px system-ui';ctx.fillText('Расписание школы',margin,44);
- ctx.font='19px system-ui';ctx.fillStyle='#63748a';ctx.fillText(selectedDate,margin,77);
- ctx.fillStyle='#eaf0fa';ctx.fillRect(margin,top,W-2*margin,headHeight);
- ctx.fillStyle='#17253b';ctx.font='bold 19px system-ui';cols.forEach((c,i)=>ctx.fillText(c.name,margin+timeWidth+i*colWidth+12,top+31));
+ ctx.fillStyle='#e52520';ctx.font='bold 30px system-ui';ctx.fillText('ASPECT',margin,44);
+ ctx.font='19px system-ui';ctx.fillStyle='#66707b';ctx.fillText('Расписание · '+selectedDate,margin,77);
+ ctx.fillStyle='#f2f3f5';ctx.fillRect(margin,top,W-2*margin,headHeight);
+ ctx.fillStyle='#22252b';ctx.font='bold 19px system-ui';cols.forEach((c,i)=>ctx.fillText(c.name,margin+timeWidth+i*colWidth+12,top+31));
  ctx.fillText('Время',margin+12,top+31);
- const palette={lesson:['#e9f2ff','#3977cc'],break:['#f0f3f7','#a5b0bd'],meal:['#fff4e1','#dba94d'],walk:['#e6f7ed','#4caa74'],meeting:['#f1eaff','#9873c9'],event:['#fceaf0','#d67b9b']};
+ const palette={lesson:['#f2f4f6','#87929f'],break:['#f0f3f7','#a5b0bd'],meal:['#fff4e1','#dba94d'],walk:['#e6f7ed','#4caa74'],meeting:['#f1eaff','#9873c9'],event:['#fceaf0','#d67b9b']};
  const drawCard=(e,x,y,w)=>{
   const item=prepared.get(e.id),h=item.height,colors=palette[e.type]||palette.lesson;
   ctx.fillStyle=colors[0];ctx.fillRect(x,y,w,h);
   ctx.fillStyle=conflictMessages(e).length?'#b92f42':colors[1];ctx.fillRect(x,y,5,h);
   let cursor=y+9;
-  for(const part of item.parts){ctx.font=part.font;ctx.fillStyle='#203650';for(const line of part.lines){cursor+=part.lineHeight;ctx.fillText(line,x+12,cursor-5)}cursor+=4}
+  for(const part of item.parts){ctx.font=part.font;ctx.fillStyle='#22252b';for(const line of part.lines){cursor+=part.lineHeight;ctx.fillText(line,x+12,cursor-5)}cursor+=4}
   return h;
  };
  let y=top+headHeight;
  for(const row of rows){
-  ctx.fillStyle='#f7f9fc';ctx.fillRect(margin,y,timeWidth,row.height);
-  const isHour=minutes(row.time)%60===0;ctx.font=isHour?'bold 21px system-ui':'15px system-ui';ctx.fillStyle=isHour?'#17253b':'#8290a3';ctx.fillText(row.time,margin+12,y+28);
+  ctx.fillStyle='#f7f8f9';ctx.fillRect(margin,y,timeWidth,row.height);
+  const isHour=minutes(row.time)%60===0;ctx.font=isHour?'bold 21px system-ui':'15px system-ui';ctx.fillStyle=isHour?'#505862':'#7b828a';ctx.fillText(row.time,margin+12,y+28);
   for(let i=0;i<6;i++){let cy=y+5;for(const e of row.byClass[i])cy+=drawCard(e,margin+timeWidth+i*colWidth+5,cy,colWidth-10)+7}
-  ctx.strokeStyle=isHour?'#a9bacd':'#e6ebf1';ctx.lineWidth=isHour?2:1;ctx.beginPath();ctx.moveTo(margin,y+row.height);ctx.lineTo(W-margin,y+row.height);ctx.stroke();y+=row.height;
+  ctx.strokeStyle=isHour?'#b8bec6':'#e9eaed';ctx.lineWidth=isHour?2:1;ctx.beginPath();ctx.moveTo(margin,y+row.height);ctx.lineTo(W-margin,y+row.height);ctx.stroke();y+=row.height;
  }
  if(!rows.length){ctx.fillStyle='#64748b';ctx.font='18px system-ui';ctx.fillText('Нет событий для классов на выбранную дату',margin+timeWidth+14,y+35);y+=60}
- if(appendix.length){y+=32;ctx.fillStyle='#17253b';ctx.font='bold 23px system-ui';ctx.fillText('Встречи сотрудников без классов',margin,y);y+=22;
+ if(appendix.length){y+=32;ctx.fillStyle='#22252b';ctx.font='bold 23px system-ui';ctx.fillText('Встречи сотрудников без классов',margin,y);y+=22;
   for(const entry of appendix){drawCard(entry.event,margin,y,W-2*margin);y+=entry.height+10}
  }
- ctx.strokeStyle='#dfe6ee';for(let i=0;i<=6;i++){const x=margin+timeWidth+i*colWidth;ctx.beginPath();ctx.moveTo(x,top);ctx.lineTo(x,top+headHeight+rows.reduce((sum,r)=>sum+r.height,0));ctx.stroke()}
+ ctx.strokeStyle='#dfe2e6';for(let i=0;i<=6;i++){const x=margin+timeWidth+i*colWidth;ctx.beginPath();ctx.moveTo(x,top);ctx.lineTo(x,top+headHeight+rows.reduce((sum,r)=>sum+r.height,0));ctx.stroke()}
  const a=document.createElement('a');a.download='calendar-'+selectedDate+'.png';a.href=canvas.toDataURL('image/png');a.click();setStatus('PNG экспортирован');
 }
 
