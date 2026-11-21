@@ -70,6 +70,57 @@ async function run() {
       record(view,scenario+' geometry',!g.overflow && !g.offenders.length,g);
       await page.screenshot({path:path.join(OUT,view+'-'+scenario+'.png'),fullPage:false});
     }
+    // Cross-screen typography and density contract for the four school lists.
+    const styles = {};
+    await page.locator('[data-action="tab"][data-value="grades"]').click();
+    styles.grades = await page.evaluate(() => {
+      const subject=document.querySelector('.subject .row strong');
+      const average=document.querySelector('.subject-average');
+      const item=document.querySelector('.subject');
+      const cs=el=>el?getComputedStyle(el):null;
+      return {subject:subject?{size:cs(subject).fontSize,weight:cs(subject).fontWeight}:null,
+        average:average?{size:cs(average).fontSize,weight:cs(average).fontWeight}:null,
+        padding:item?cs(item).paddingTop:null};
+    });
+    await page.locator('[data-action="grades-view"][data-value="forecast"]').click();
+    styles.forecast = await page.evaluate(() => {
+      const subject=document.querySelector('.forecast-row strong');
+      const result=document.querySelector('.forecast-result');
+      const track=document.querySelector('.forecast-track');
+      const item=document.querySelector('.forecast-item');
+      const cs=el=>el?getComputedStyle(el):null;
+      return {subject:subject?{size:cs(subject).fontSize,weight:cs(subject).fontWeight}:null,
+        result:result?{size:cs(result).fontSize,weight:cs(result).fontWeight}:null,
+        track:track?cs(track).height:null,
+        padding:item?cs(item).paddingBottom:null};
+    });
+    const fg=await geometry(page);
+    record(view,'forecast geometry',!fg.overflow&&!fg.offenders.length,fg);
+    await page.screenshot({path:path.join(OUT,view+'-forecast.png'),fullPage:false});
+    await page.locator('[data-action="tab"][data-value="homework"]').click();
+    await page.locator('[data-action="hw"][data-value="all"]').click();
+    styles.homework=await page.evaluate(()=>{
+      const subject=document.querySelector('.task strong');
+      const item=document.querySelector('.task');
+      return {subject:subject?{size:getComputedStyle(subject).fontSize,weight:getComputedStyle(subject).fontWeight}:null,
+        padding:item?getComputedStyle(item).paddingTop:null};
+    });
+    await page.locator('[data-action="tab"][data-value="schedule"]').click();
+    styles.schedule=await page.evaluate(()=>{
+      const subject=document.querySelector('.lesson strong');
+      const item=document.querySelector('.lesson');
+      return {subject:subject?{size:getComputedStyle(subject).fontSize,weight:getComputedStyle(subject).fontWeight}:null,
+        padding:item?getComputedStyle(item).paddingTop:null};
+    });
+    const sameSubject=Object.values(styles).every(x=>x.subject?.size==='14px'&&x.subject?.weight==='600');
+    const numbers=styles.grades.average?.size==='16px'&&styles.grades.average?.weight==='700'
+      &&styles.forecast.result?.size==='16px'&&styles.forecast.result?.weight==='700';
+    const density=styles.grades.padding==='7px'&&styles.forecast.padding==='8px'
+      &&styles.homework.padding==='8px'&&styles.schedule.padding==='8px'
+      &&styles.forecast.track==='3px';
+    record(view,'cross-screen subject typography',sameSubject,styles);
+    record(view,'grades and forecast numeric emphasis',numbers,styles);
+    record(view,'list spacing and forecast indicator',density,styles);
     await page.locator('#profile').click();
     const p=await geometry(page);
     record(view,'profile geometry',!p.overflow && !p.offenders.length,p);
