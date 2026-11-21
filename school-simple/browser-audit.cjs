@@ -80,12 +80,12 @@ async function run() {
         document.body.append(img);
         await new Promise(resolve=>{if(img.complete)return resolve();img.addEventListener('load',resolve,{once:true});img.addEventListener('error',resolve,{once:true});});
         const style=getComputedStyle(img);
-        results.push({name,loaded:img.naturalWidth>0&&img.naturalHeight>0,width:img.getBoundingClientRect().width,height:img.getBoundingClientRect().height,opacity:Number(style.opacity),margin:style.margin});
+        results.push({name,loaded:img.naturalWidth>0&&img.naturalHeight>0,width:img.getBoundingClientRect().width,height:img.getBoundingClientRect().height,opacity:Number(style.opacity),padding:style.padding,fit:style.objectFit});
         img.remove();
       }
       return results;
     });
-    record(view,'all eight homework illustrations load and fit',art.every(x=>x.loaded&&x.width===68&&x.height===68&&x.opacity===.52&&x.margin==='5px'),art);
+    record(view,'all eight homework illustrations load and fit',art.every(x=>x.loaded&&x.width===78&&x.height===78&&x.opacity===.52&&x.padding==='8px'&&x.fit==='contain'),art);
     await page.locator('#profile').click();
     const p=await geometry(page);
     record(view,'profile geometry',!p.overflow && !p.offenders.length,p);
