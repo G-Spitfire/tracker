@@ -201,3 +201,8 @@ button.event.event-tiny .event-name{font-size:11px}
 button.event.event-tiny .event-teacher{font-size:10px}
 .reference-info strong{font-size:var(--font-body)}
 .reference-info small,.reference-top p{font-size:var(--font-small)}
+
+/* Keep 10-minute events readable while the timetable scrolls vertically. */
+.schedule{max-height:calc(100dvh - 155px);min-height:320px;overflow:auto;overscroll-behavior:contain}
+.schedule .head{position:sticky;top:0;z-index:3}
+@media(max-width:650px){.schedule{max-height:calc(100dvh - 175px);min-height:260px}}
