@@ -4,7 +4,10 @@ const assert = require('node:assert/strict');
 
 (async () => {
   const browser = await chromium.launch({headless:true});
+  try {
   const page = await browser.newPage({viewport:{width:390,height:844}});
+  page.setDefaultTimeout(10000);
+  page.setDefaultNavigationTimeout(15000);
   const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.route('**/school-sync-client.js',route=>route.fulfill({
@@ -28,6 +31,8 @@ const assert = require('node:assert/strict');
   await page.locator('[data-action="tab"][data-value="grades"]').click();
   await page.getByText('Русский язык',{exact:true}).first().waitFor();
   assert.deepEqual(errors,[],'No uncaught browser exceptions');
-  await browser.close();
   console.log('School browser smoke: navigation, grades, homework, child switching passed');
+  } finally {
+    await browser.close();
+  }
 })().catch(e=>{console.error(e);process.exitCode=1});
