@@ -17,16 +17,15 @@ html[data-theme=dark]{--bg:#111720;--surface:#1c2430;--fg:#f3f5fa;--muted:#9ba9b
 .forecast-header{color:var(--muted);font-size:var(--font-caption);padding-bottom:var(--space-2)}
 .forecast-row{min-height:48px;border-bottom:1px solid var(--line)}
 .forecast-row strong{font-weight:var(--weight-medium)}
-.forecast-item{padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid var(--line)}
+.forecast-row strong.forecast-result{font-size:16px;font-weight:var(--weight-bold)}
+.subject .subject-average{font-size:16px;font-weight:var(--weight-bold)}
+.lesson strong,.task strong{font-size:var(--font-body);font-weight:var(--weight-medium)}
+.forecast-item{padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid var(--line)}
 .forecast-item .forecast-row{min-height:38px;border-bottom:0}
-.forecast-track{height:4px;background:var(--soft);border-radius:999px;overflow:hidden;margin-top:4px}
+.forecast-track{height:3px;background:var(--soft);border-radius:999px;overflow:hidden;margin-top:4px}
 .forecast-fill{height:100%;border-radius:999px}
 .forecast-number{text-align:right;font-variant-numeric:tabular-nums}
-.header-quarter{width:44px;min-width:44px;max-width:44px;height:44px;min-height:44px;border:0;border-radius:var(--radius-control);background:var(--soft);color:var(--fg);padding:0 5px;font:inherit;font-size:var(--font-control);font-weight:var(--weight-medium);text-align:center;text-align-last:center;appearance:none;-webkit-appearance:none;cursor:pointer;margin-left:auto;margin-right:8px}.grades-graph-item{margin-bottom:var(--space-5)}
-.grades-graph-item .row{margin-bottom:var(--space-2)}
-.grades-graph-track{height:12px;background:var(--soft);border-radius:999px;overflow:hidden}
-.grades-graph-fill{height:100%;background:var(--accent);border-radius:999px}
-.grades-footnote{margin-top:var(--space-4);color:var(--muted);font-size:var(--font-caption)}
+.header-quarter{width:44px;min-width:44px;max-width:44px;height:44px;min-height:44px;border:0;border-radius:var(--radius-control);background:var(--soft);color:var(--fg);padding:0 5px;font:inherit;font-size:var(--font-control);font-weight:var(--weight-medium);text-align:center;text-align-last:center;appearance:none;-webkit-appearance:none;cursor:pointer;margin-left:auto;margin-right:8px}.grades-footnote{margin-top:var(--space-4);color:var(--muted);font-size:var(--font-caption)}
 .content-after-controls{margin-top:var(--space-controls-content)}
 .content-after-controls>.task:first-child,.content-after-controls>.subject:first-child{padding-top:0}
 .marks{display:flex;gap:5px;overflow-x:auto;white-space:nowrap;margin-top:7px;scrollbar-width:none}
@@ -70,10 +69,10 @@ html[data-theme=dark]{--bg:#111720;--surface:#1c2430;--fg:#f3f5fa;--muted:#9ba9b
 .home-legend-item b{margin-left:auto}
 .home-dot{width:9px;height:9px;flex:0 0 9px;border-radius:50%}
 .home-line{display:block;width:100%;height:auto;max-height:none}
-:root{--bg:#f7f8fb;--surface:#fff;--fg:#202734;--muted:#788393;--line:#e9edf3;--soft:#f0f3f8;--accent:#4c8bf5;--on:#fff;--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-controls-content:var(--space-5);--space-item-detail:var(--space-2);--space-item-vertical:var(--space-3);--radius-sm:6px;--radius-control:10px;--radius-panel:14px;--font-body:14px;--font-caption:12px;--font-section:16px;--font-page:22px;--font-control:14px;--font-nav:12px;--font-kpi-label:12px;--font-kpi-hint:12px;--font-kpi-value:26px;--font-legend:13px;--weight-regular:400;--weight-medium:600;--weight-bold:700}
+:root{--bg:#f7f8fb;--surface:#fff;--fg:#202734;--muted:#788393;--line:#e9edf3;--soft:#f0f3f8;--accent:#4c8bf5;--on:#fff;--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-controls-content:var(--space-5);--space-item-detail:var(--space-2);--space-item-vertical:var(--space-2);--radius-sm:6px;--radius-control:10px;--radius-panel:14px;--font-body:14px;--font-caption:12px;--font-section:16px;--font-page:22px;--font-control:14px;--font-nav:12px;--font-kpi-label:12px;--font-kpi-hint:12px;--font-kpi-value:26px;--font-legend:13px;--weight-regular:400;--weight-medium:600;--weight-bold:700}
 .brand-mark{width:30px;height:30px;flex:none;display:inline-flex;color:var(--accent)}.brand-mark svg{width:100%;height:100%}.head-title{display:flex;align-items:center;gap:9px;min-width:0}
 .profile-footer{text-align:center;margin-top:32px;padding:16px 0 8px;color:var(--muted);font-size:10px;line-height:1.8}
-.grades-graph-heading{margin:0 0 var(--space-4)}.sync-error-panel{margin:24px 12px;padding:24px 16px}.sync-retry-button{width:auto;padding:10px 18px}
+.sync-error-panel{margin:24px 12px;padding:24px 16px}.sync-retry-button{width:auto;padding:10px 18px}
 .profile-theme-label{margin-bottom:var(--space-2)}.profile-accent-label{margin-top:var(--space-4)}
 .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-4);min-height:44px}
 .head h1{font-size:var(--font-page);margin:0;line-height:1.2;font-weight:700;letter-spacing:-.35px}
@@ -83,7 +82,7 @@ html[data-theme=dark]{--bg:#111720;--surface:#1c2430;--fg:#f3f5fa;--muted:#9ba9b
 .seg{display:flex;background:var(--soft);padding:3px;border-radius:var(--radius-control);gap:2px;width:100%;min-height:44px}
 .seg button{flex:1;border:0;background:none;border-radius:8px;color:var(--muted);padding:8px 6px;font:inherit;white-space:nowrap;min-height:38px;font-size:var(--font-control);line-height:1.2}
 .heading{font-size:var(--font-section);margin:20px 0 12px;font-weight:600;line-height:1.3}
-.subject{padding:10px 0;border-bottom:1px solid var(--line)}
+.subject{padding:7px 0;border-bottom:1px solid var(--line)}
 .subject strong{font-weight:600;font-size:14px;font-variant-numeric:tabular-nums}
 .mark{min-width:29px;width:29px;height:29px;flex-shrink:0;border:0;color:var(--fg);font:inherit;cursor:pointer;background:var(--soft);border-radius:6px;display:grid;place-items:center;font-weight:600;font-size:14px}
 .lesson,.task{padding:var(--space-item-vertical) 0;line-height:1.4}
@@ -308,8 +307,8 @@ function grades(){
  const period='';
  const subjects=kids[state.child].subjects.map(s=>({...s,grades:s.grades.filter(g=>inQuarter(g.date)),avg:mean(s.grades.filter(g=>inQuarter(g.date)).map(g=>g.value))}));
  const note='Оценки загружены из электронного дневника.';const performanceColor=n=>n>=4.6?'#16a34a':n>=3.6?'#eab308':n>=2.6?'#f97316':'#ef4444';
- if(state.gradesView==='grades')return tabs+period+'<div class="grades-filter-row"><label class="grades-filter-check"><input type="checkbox" id="tests-toggle" '+(state.filter==='tests'?'checked':'')+'>Только контрольные</label></div><div class="content-after-controls">'+subjects.map(s=>{let visible=s.grades.filter(g=>state.filter==='all'||g.test);if(!visible.length)return '';return '<section class="subject"><div class="row"><strong>'+escapeHTML(s.name)+'</strong><strong>'+fmt(s.avg)+'</strong></div><div class="marks">'+visible.map(g=>'<button class="mark '+(g.date>=offset(-1)&&g.date<=iso(TODAY)?'new':'')+'" data-action="grade" data-value="'+encodeURIComponent(JSON.stringify({subject:s.name,...g}))+'" aria-label="Оценка '+g.value+' за '+g.date+'">'+g.value+'</button>').join('')+'</div></section>'}).join('')+'<p class="grades-footnote">'+note+'</p></div>';
- if(state.gradesView==='forecast')return tabs+period+'<div class="content-after-controls"><div class="forecast-header"><span>Предмет</span><span class="forecast-number">Средний</span><span class="forecast-number">Прогноз</span></div>'+subjects.filter(s=>s.grades.length).map(s=>'<div class="forecast-item"><div class="forecast-row"><strong>'+escapeHTML(s.name)+'</strong><span class="forecast-number sub">'+fmt(s.avg)+'</span><strong class="forecast-number" style="color:'+performanceColor(s.avg)+'">'+(s.avg>=4.6?5:s.avg>=3.6?4:s.avg>=2.6?3:2)+'</strong></div><div class="forecast-track" aria-label="Средний балл '+fmt(s.avg)+' из 5"><div class="forecast-fill" style="background:'+performanceColor(s.avg)+';width:'+Math.max(0,Math.min(100,s.avg/5*100))+'%"></div></div></div>').join('')+'<p class="grades-footnote">Прогноз предварительный: используются пороги 2,60 / 3,60 / 4,60, а не официальные правила выставления итоговой оценки.</p></div>';
+ if(state.gradesView==='grades')return tabs+period+'<div class="grades-filter-row"><label class="grades-filter-check"><input type="checkbox" id="tests-toggle" '+(state.filter==='tests'?'checked':'')+'>Только контрольные</label></div><div class="content-after-controls">'+subjects.map(s=>{let visible=s.grades.filter(g=>state.filter==='all'||g.test);if(!visible.length)return '';return '<section class="subject"><div class="row"><strong>'+escapeHTML(s.name)+'</strong><strong class="subject-average">'+fmt(s.avg)+'</strong></div><div class="marks">'+visible.map(g=>'<button class="mark '+(g.date>=offset(-1)&&g.date<=iso(TODAY)?'new':'')+'" data-action="grade" data-value="'+encodeURIComponent(JSON.stringify({subject:s.name,...g}))+'" aria-label="Оценка '+g.value+' за '+g.date+'">'+g.value+'</button>').join('')+'</div></section>'}).join('')+'<p class="grades-footnote">'+note+'</p></div>';
+ if(state.gradesView==='forecast')return tabs+period+'<div class="content-after-controls"><div class="forecast-header"><span>Предмет</span><span class="forecast-number">Средний</span><span class="forecast-number">Прогноз</span></div>'+subjects.filter(s=>s.grades.length).map(s=>'<div class="forecast-item"><div class="forecast-row"><strong>'+escapeHTML(s.name)+'</strong><span class="forecast-number sub">'+fmt(s.avg)+'</span><strong class="forecast-number forecast-result" style="color:'+performanceColor(s.avg)+'">'+(s.avg>=4.6?5:s.avg>=3.6?4:s.avg>=2.6?3:2)+'</strong></div><div class="forecast-track" aria-label="Средний балл '+fmt(s.avg)+' из 5"><div class="forecast-fill" style="background:'+performanceColor(s.avg)+';width:'+Math.max(0,Math.min(100,s.avg/5*100))+'%"></div></div></div>').join('')+'<p class="grades-footnote">Прогноз предварительный: используются пороги 2,60 / 3,60 / 4,60, а не официальные правила выставления итоговой оценки.</p></div>';
  return tabs+period+'<div class="content-after-controls"></div>';
 }
 function schedule(){
