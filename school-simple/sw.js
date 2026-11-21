@@ -1,4 +1,4 @@
-const CACHE_NAME = "school-shell-v1.33.6";
+const CACHE_NAME = "school-shell-v1.33.6-icons1";
 const SHELL = [
   "./",
   "./index.html",
@@ -10,6 +10,9 @@ const SHELL = [
   "./icon-512.png",
   "./brand-mark.svg",
   "./school-sync-client.js",
+  "./assets/icons.js",
+  "./assets/illustrations.js",
+  "./icons.html",
   "./caveman-run-light.webp",
   "./caveman-run-dark.webp"
 ];
