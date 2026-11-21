@@ -40,7 +40,7 @@ function eventCard(e){
  const details=elt('span','event-details');
  details.append(teacher,place);
  card.append(top,details);
- card.title=[e.name,`${e.start}–${e.end}`,meta,'Перетащите для переноса'].filter(Boolean).join('\\n');
+ card.title=[e.name,`${e.start}–${e.end}`,meta,'Перетащите для переноса'].filter(Boolean).join('\n');
  card.onclick=()=>openEditor(e);
  const layout=()=>{
   const height=card.getBoundingClientRect().height,width=card.getBoundingClientRect().width;
