@@ -70,6 +70,12 @@ async function run() {
       record(view,scenario+' geometry',!g.overflow && !g.offenders.length,g);
       await page.screenshot({path:path.join(OUT,view+'-'+scenario+'.png'),fullPage:false});
     }
+    // Forecast is a distinct grades view: verify it at every supported viewport.
+    await page.locator('[data-action="tab"][data-value="grades"]').click();
+    await page.locator('[data-action="grades-view"][data-value="forecast"]').click();
+    const forecastGeometry=await geometry(page);
+    record(view,'forecast geometry',!forecastGeometry.overflow && !forecastGeometry.offenders.length,forecastGeometry);
+    await page.screenshot({path:path.join(OUT,view+'-forecast.png'),fullPage:false});
     const art=await page.evaluate(async()=>{
       const names=['pencil','dance','clay','tv','console','ball','phone','book'];
       const results=[];
