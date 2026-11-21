@@ -144,6 +144,8 @@ body.is-loading header,body.is-loading nav{visibility:hidden}body.is-loading mai
 .egg-dark .egg-button{background:#d8ff76;color:#171d12}
 @media(max-height:720px){.egg-screen{gap:6px}.egg-runner{max-height:30dvh;min-height:110px}.egg-head{font-size:28px}.egg-lines{gap:3px}}
 </style></head><body><div class="app"><header class="head"><div class="head-title"><span id="brand-mark" class="brand-mark" aria-hidden="true"></span><h1 id="title">Главная</h1></div><button class="icon" id="profile" aria-label="Профиль"></button></header><main id="main"></main></div><nav class="bottom" id="nav"></nav>
+<script src="./assets/icons.js"></script>
+<script src="./assets/illustrations.js"></script>
 <script src="./school-sync-client.js"></script>
 <script>
 const TODAY=new Date();TODAY.setHours(12,0,0,0);const iso=d=>{let x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};const offset=n=>{let d=new Date(TODAY);d.setDate(d.getDate()+n);return iso(d)};const escapeHTML=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const SCHOOL_QUARTERS=[{start:'2026-09-01',end:'2026-10-23'},{start:'2026-11-04',end:'2026-12-30'},{start:'2027-01-11',end:'2027-03-26'},{start:'2027-04-05',end:'2027-05-26'}];
@@ -238,36 +240,8 @@ function showMatveyAchievement(){
 let state={tab:'home',child:readSetting('school-active-child','0')==='1'?1:0,gradesView:'grades',quarter:currentQuarter(),filter:'all',chart:'line',hw:'tomorrow',date:iso(TODAY),week:0,theme:readSetting('school-theme','system'),accent:readSetting('school-accent','#4c8bf5'),returnTab:'home'};
 const main=document.querySelector('#main'),nav=document.querySelector('#nav');const mean=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:0;const fmt=n=>n.toFixed(2).replace('.',',');const gradeData=()=>kids[state.child].subjects.flatMap(s=>s.grades).filter(g=>inQuarter(g.date));
 const quarterRange=q=>SCHOOL_QUARTERS[Number(q)-1];const inQuarter=date=>{const q=quarterRange(state.quarter);return !!q&&date>=q.start&&date<=q.end};const score=()=>mean(kids[state.child].subjects.map(s=>s.grades.filter(g=>inQuarter(g.date))).filter(g=>g.length).map(g=>mean(g.map(x=>x.value))));const setTab=t=>{if(state.tab===t)return;state.tab=t;render();window.scrollTo({top:0,left:0,behavior:'instant'})};const btns=(items,current,handler)=>'<div class="seg">'+items.map(([v,l])=>'<button data-action="'+handler+'" data-value="'+v+'" class="'+(v===current?'active':'')+'">'+l+'</button>').join('')+'</div>';
-function ico(name,active=false){
-const line={
-home:'<path d="M4 11.2 12 4l8 7.2V20H4z"/><path d="M10 20v-6h4v6"/>',
-grades:'<rect x="3.5" y="13" width="4" height="7" rx="2"/><rect x="10" y="9" width="4" height="11" rx="2"/><rect x="16.5" y="4" width="4" height="16" rx="2"/>',
-schedule:'<rect x="3.5" y="5.5" width="17" height="15" rx="3"/><path d="M7.5 3.5v4M16.5 3.5v4M3.5 10h17"/><path d="M8 14h1M12 14h1M16 14h1M8 17h1M12 17h1M16 17h1"/>',
-homework:'<path d="M12 6.5C9.5 4.8 6.2 4.4 3.5 5.5v13c3-1 6-.6 8.5 1.2 2.5-1.8 5.5-2.2 8.5-1.2v-13c-2.7-1.1-6-.7-8.5 1zM12 6.5v13.2"/><path d="M16 4.8v6l1.5-1.1 1.5 1.1V5"/>',
-refresh:'<path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.8 9a7 7 0 0 1 12-2L20 12M4 12l2.2 5a7 7 0 0 0 12-2"/>',profile:'<circle cx="12" cy="7.5" r="3.5"/><path d="M4.5 20v-1.3c0-4.2 3.2-6.7 7.5-6.7s7.5 2.5 7.5 6.7V20z"/>',
-average:'<path d="M4 19V13a2 2 0 0 1 4 0v6M10 19V9a2 2 0 0 1 4 0v10M16 19V5a2 2 0 0 1 4 0v14"/>',hwmark:'<path d="M12 6c-2.5-1.5-5.5-1.7-8.5-.7v13c3-1 6-.7 8.5 1 2.5-1.7 5.5-2 8.5-1v-13c-3-1-6-.8-8.5.7zM12 6v13.3"/><path d="m15 12 1.5 1.5L19 10"/>',trend:'<path d="m3 17 7-7 4 4 7-8"/><path d="M15 6h6v6"/>',star:'<path d="m12 3 2.8 5.8 6.4.9-4.6 4.5 1.1 6.4-5.7-3-5.7 3 1.1-6.4-4.6-4.5 6.4-.9z"/>',alert:'<path d="M12 3 2.5 20h19z"/><path d="M12 9v5M12 17h.01"/>',flame:'<path d="M12 22c4.3 0 7-3.1 7-7 0-3.5-2-5.8-4-7-.2 2.4-1.3 3.6-2.5 4-1-4-2.3-6-4.5-9 0 5-3 7.6-3 12 0 4 2.7 7 7 7z"/>',close:'<path d="M5 5l14 14M19 5 5 19"/>',
-left:'<path d="m15 18-6-6 6-6"/>',right:'<path d="m9 18 6-6-6-6"/>'};
-const filled={
-home:'<path d="M12 3.7 3.4 11v9a1 1 0 0 0 1 1H10v-7h4v7h5.6a1 1 0 0 0 1-1v-9z"/>',
-grades:'<rect x="3.5" y="13" width="4" height="7" rx="2"/><rect x="10" y="9" width="4" height="11" rx="2"/><rect x="16.5" y="4" width="4" height="16" rx="2"/>',
-schedule:'<rect x="3.5" y="5.5" width="17" height="15" rx="3"/><path d="M3.5 10h17" stroke="var(--surface)" stroke-width="1.7"/><path d="M7.5 3.5v4M16.5 3.5v4" fill="none" stroke="currentColor" stroke-width="2.4"/><g fill="var(--surface)"><circle cx="8" cy="14" r="1"/><circle cx="12" cy="14" r="1"/><circle cx="16" cy="14" r="1"/><circle cx="8" cy="17.5" r="1"/><circle cx="12" cy="17.5" r="1"/></g>',
-homework:'<path d="M12 6.5C9.5 4.8 6.2 4.4 3.5 5.5v13c3-1 6-.6 8.5 1.2 2.5-1.8 5.5-2.2 8.5-1.2v-13c-2.7-1.1-6-.7-8.5 1z"/><path d="M12 6.5v13.2M16 5v5.8l1.5-1.1 1.5 1.1V5" fill="none" stroke="var(--surface)" stroke-width="1.6"/>',
-profile:'<circle cx="12" cy="7.5" r="3.7"/><path d="M3.8 20v-1.3c0-4.2 3.5-6.7 8.2-6.7s8.2 2.5 8.2 6.7V20z"/>'};
-let isFilled=active&&filled[name];return '<svg width="22" height="22" viewBox="0 0 24 24" fill="'+(isFilled?'currentColor':'none')+'" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(isFilled?filled[name]:line[name]||'')+'</svg>'}
 // Every December the fifth KPI temporarily displays a New Year countdown.
 function holidayInfo(){const now=new Date();return now.getMonth()===11?{days:31-now.getDate()}:null;}
-function kpiIcon(name){
- const art={
- average:'<rect x="3.5" y="13" width="4" height="7" rx="2"/><rect x="10" y="9" width="4" height="11" rx="2"/><rect x="16.5" y="4" width="4" height="16" rx="2"/>',
- trend:'<path d="m3.5 17 6-6 4 3.5 7-8"/><path d="M15.5 6.5h5v5"/><circle cx="3.5" cy="17" r="1" fill="currentColor" stroke="none"/>',
- star:'<path d="m12 3 2.8 5.7 6.3.9-4.55 4.45 1.08 6.2L12 17.3l-5.63 2.95 1.08-6.2L2.9 9.6l6.3-.9z"/><path d="m9.1 12 2 2 3.9-4"/>',
- alert:'<path d="M10.1 4.3a2.2 2.2 0 0 1 3.8 0l7.8 13.3a2.2 2.2 0 0 1-1.9 3.3H4.2a2.2 2.2 0 0 1-1.9-3.3z"/><path d="M12 9v5"/><circle cx="12" cy="17.4" r=".9" fill="currentColor" stroke="none"/>',
- tree:'<path d="m12 3-5 7h2l-5 7h16l-5-7h2z"/><path d="M12 17v4M9.5 21h5"/><path d="m12 1.8.7 1.5 1.6.2-1.2 1.1.3 1.6L12 5.4l-1.4.8.3-1.6-1.2-1.1 1.6-.2z"/>',
- flame:'<path d="M12 3c.6 3 3.5 5.1 3.5 8.1 1-1 1.5-2.1 1.5-3.1 2.1 2.5 3 5 3 7.2a8 8 0 0 1-16 0c0-3.8 2.4-6.8 4.6-9.4.1 2.2.7 3.6 1.5 4.4C11.3 8.3 12 5.7 12 3z"/>',
- homework:'<path d="M12 6.5C9.5 4.8 6.2 4.4 3.5 5.5v13c3-1 6-.6 8.5 1.2 2.5-1.8 5.5-2.2 8.5-1.2v-13c-2.7-1.1-6-.7-8.5 1zM12 6.5v13.2"/><path d="M16 4.8v6l1.5-1.1 1.5 1.1V5"/>'
- };
- return '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(art[name]||'')+'</svg>';
-}
 function home(){
  const all=gradeData(),counts=[5,4,3,2].map(n=>all.filter(g=>g.value===n).length),colors=['#31ad81','#538fe0','#e8ac45','#e36565'];
  const today=iso(TODAY),weekAgo=new Date(TODAY);weekAgo.setDate(weekAgo.getDate()-7);
@@ -340,10 +314,7 @@ function homework(){
   const seed=d.split('').reduce((sum,ch)=>sum+ch.charCodeAt(0),state.child);
   const variants=[['bag','Ура! Домашки нет!','Рюкзак сегодня отдыхает!'],['cat','Можно передохнуть!','Даже кот одобряет такой день.'],['pencil','Свободный день!','Карандаш объявил выходной.'],['books','Домашки нет!','Книги тоже решили отдохнуть.']];
   const chosen=variants[seed%variants.length];
-  const icon=kind=>{
-   const shapes={bag:'<rect x="18" y="17" width="44" height="50" rx="11"/><path d="M29 18v-5a11 11 0 0 1 22 0v5M27 43h26v14H27zM31 33h2m14 0h2M35 38q5 5 10 0M18 33l-10-8m54 8 10-8"/>',cat:'<path d="M18 33 17 17l13 9q10-5 20 0l13-9-1 16q8 21-7 28-15 8-30 0-15-7-7-28zM31 40h2m14 0h2m-14 9q5 5 10 0M23 48l-13-3m13 8-13 2m47-7 13-3m-13 8 13 2"/>',pencil:'<path d="m22 56 29-42q5-7 12-2t2 12L36 66 16 73zM22 56l14 10M47 20l14 10M16 73l7-18M11 25l-6-4m12-5-2-8m49 44 8 4"/>',books:'<path d="M14 29h45l8 11-8 11H14q-8-11 0-22zM18 51h45l-5 13H13q-6-7 5-13zM17 40h46M25 35h13m5 0h10M29 35v6m18-6v6M9 18l4-8 4 8 8 4-8 4-4 8-4-8-8-4z"/>'};return '<svg class="homework-doodle" viewBox="0 0 80 80" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">'+shapes[kind]+'</g></svg>';
-  };
-  const body=tasks.length?tasks.map(t=>'<div class="task"><div class="row"><strong>'+escapeHTML(t.subject)+'</strong></div><p>'+escapeHTML(t.text)+'</p></div>').join(''):!scheduleKnown?'<div class="homework-unknown">Расписание на этот день пока неизвестно. Проверьте синхронизацию дневника.</div>':'<div class="homework-celebration">'+icon(chosen[0])+'<strong>'+(noLessons?'Ура! Свободный день!':'Ура! Домашки нет!')+'</strong><span>'+(noLessons?'Уроков по расписанию нет.':'Заданий на этот день нет.')+'</span></div>';
+  const body=tasks.length?tasks.map(t=>'<div class="task"><div class="row"><strong>'+escapeHTML(t.subject)+'</strong></div><p>'+escapeHTML(t.text)+'</p></div>').join(''):!scheduleKnown?'<div class="homework-unknown">Расписание на этот день пока неизвестно. Проверьте синхронизацию дневника.</div>':'<div class="homework-celebration">'+homeworkIllustration(chosen[0])+'<strong>'+(noLessons?'Ура! Свободный день!':'Ура! Домашки нет!')+'</strong><span>'+(noLessons?'Уроков по расписанию нет.':'Заданий на этот день нет.')+'</span></div>';
   return '<section class="homework-day"><h3 class="homework-day-title">'+escapeHTML(dateLabel(d))+'</h3><div class="homework-day-body">'+body+'</div></section>';
  }).join('');
  const note='<p class="grades-footnote">Задания привязаны к следующему уроку предмета. Официальная дата сдачи в источнике не предоставляется.</p>';
