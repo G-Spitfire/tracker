@@ -34,6 +34,7 @@ const assert = require('node:assert/strict');
   await page.locator('[data-action="hw"][data-value="all"]').click();
   await page.getByText('Упражнение 5').waitFor();
   await page.locator('#profile').click();
+  assert.ok(await page.locator('#profile svg path').count()>0,'Profile close icon must be visible');
   await page.locator('[data-action="child"][data-value="1"]').click();
   await page.locator('#profile').click();
   await page.locator('[data-action="tab"][data-value="grades"]').click();
