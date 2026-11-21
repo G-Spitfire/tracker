@@ -76,41 +76,70 @@ main{grid-template-columns:190px minmax(0,1fr)}
 
 .saved-absences-head{display:flex;justify-content:space-between;align-items:center}
 
-/* Design-system consolidation, v0.11.3: shared sizing without layout redesign. */
+/* Shared design tokens: compact desktop workspace. */
 :root{
  --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;
- --control-height:36px;--control-radius:9px;
- --font-caption:11px;--font-small:12px;--font-body:13px;--font-control:14px;
- --font-heading:20px;--modal-radius:16px;--selected-bg:#e9f1ff;--selected-text:#194b92;--line-soft:#e8edf3;
+ --control-height:28px;--control-compact-height:26px;--form-control-height:30px;
+ --control-radius:6px;--font-caption:11px;--font-small:12px;
+ --font-body:13px;--font-control:12px;--font-heading:20px;
+ --modal-radius:16px;--selected-bg:#e9f1ff;--selected-text:#194b92;--line-soft:#e8edf3;
 }
-button,.import{border-radius:var(--control-radius);min-height:var(--control-height)}
-input[type=date],input[type=time],input[type=text],select{border-radius:var(--control-radius)}
+button:not(.event),.import{border-radius:var(--control-radius);min-height:var(--control-height);font-size:var(--font-control);padding:4px 9px}
+input[type=date],input[type=time],input[type=text],input[type=number],select{border-radius:var(--control-radius);min-height:var(--form-control-height);font-size:var(--font-body);padding:5px 7px}
 .modal-head h2{font-size:var(--font-heading)}
 #event-form,#reference-form,.replace-dialog,.absence-dialog{gap:var(--space-3)}
-#event-form,#reference-form,.replace-dialog{padding:20px}
-.absence-dialog{padding:20px}
+#event-form,#reference-form,.replace-dialog,.absence-dialog{padding:20px}
 .modal-actions{gap:var(--space-2);flex-wrap:wrap}
-.event{font-size:var(--font-small)}
-.event strong{font-size:var(--font-small)}
-.event small{font-size:var(--font-caption)}
 .side-brand{display:flex;align-items:center;gap:var(--space-2);min-width:0}
 .school-brand-text{display:block;min-width:0}
 .school-brand-text>span{display:block;color:var(--accent)}
 .school-logo-slot{display:none;flex:0 0 32px;width:32px;height:32px;border-radius:8px;overflow:hidden}
-/* Slot is intentionally hidden until a real school logo is provided. */
 dialog[open]{max-height:min(92dvh,calc(100dvh - 24px));overflow-y:auto;overscroll-behavior:contain}
 #editor[open],#reference-editor[open],#absence-dialog[open]{max-height:min(92dvh,calc(100dvh - 24px))}
-@media(min-width:901px) and (max-width:1366px){
- .workspace{padding:12px 14px}
- .sidebar{width:auto}
- .calendar-controls{gap:6px}
- .week-navigation{gap:5px}
-}
 @media(max-width:650px){
  #event-form,#reference-form,.replace-dialog,.absence-dialog{padding:16px}
- .modal-actions{gap:8px}
 }
 
+/* Compact workbench: controls are dense, timetable scale stays unchanged. */
+main{grid-template-columns:150px minmax(0,1fr)}
+.sidebar{padding:10px 6px;gap:10px}
+.side-brand{font-size:15px;padding:0 7px}
+.side-controls{padding:0 3px;gap:4px}
+.side-controls>button{min-height:var(--control-height);font-size:var(--font-control);padding:5px 7px}
+.side-nav{gap:2px}
+.nav-link{padding:6px 8px;gap:6px;font-size:12px}
+.side-section-title{padding:7px 8px 3px}
+.workspace{padding:8px 10px}
+.workspace>header{min-height:26px}
+.workspace>header h1{font-size:14px}
+.title-status{gap:9px}
+.calendar-controls{gap:4px;margin:3px 0 5px}
+.view-switch,.weekdays{gap:4px}
+.view-switch button,.weekdays button,.week-navigation>button{min-height:var(--control-compact-height);font-size:11px;padding:3px 7px}
+.week-navigation{gap:4px}
+.week-navigation>input{min-height:var(--control-compact-height);font-size:11px;padding:3px 5px;width:116px}
+.head{font-size:12px;padding:6px 4px}
+.reference-row{padding:9px 12px}
+.reference-top{margin-bottom:10px}
+.reference-view,.data-view{margin:12px auto}
+.event-kind{padding:6px 4px;font-size:12px}
+@media(min-width:901px) and (max-width:1366px){
+ .workspace{padding:8px 10px}
+ .calendar-controls,.week-navigation{gap:4px}
+}
+@media(max-width:650px){
+ main{display:block}
+ .sidebar{padding:7px;gap:6px}
+ .workspace{padding:7px}
+ .side-controls{gap:5px}
+}
+
+/* Timeline cards are time-based surfaces, never generic form buttons. */
+button.event{min-height:0;padding:3px 5px;border-radius:6px;font-size:12px;line-height:1.12}
+button.event .event-name{font-size:12px}
+button.event .event-time,button.event .event-meta{font-size:11px}
+button.event.event-compact .event-time,button.event.event-compact .event-meta{font-size:10px}
+button.event.event-tiny .event-name{font-size:11px}
 /* Absence dialog: size the actual dialog, not only its inner content. */
 #absence-dialog{width:min(760px,calc(100vw - 32px));max-width:760px;min-width:0}
 #absence-dialog>.absence-dialog{width:100%;min-width:0;max-width:100%;box-sizing:border-box}
@@ -119,5 +148,3 @@ dialog[open]{max-height:min(92dvh,calc(100dvh - 24px));overflow-y:auto;overscrol
  #absence-dialog>.absence-dialog{width:100%;min-width:0}
 }
 
-/* Override the generic 36px button minimum for timeline events. */
-button.event{min-height:0}
