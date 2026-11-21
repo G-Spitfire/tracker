@@ -16,7 +16,7 @@ grades:'<rect x="3.5" y="13" width="4" height="7" rx="2"/><rect x="10" y="9" wid
 schedule:'<rect x="3.5" y="5.5" width="17" height="15" rx="3"/><path d="M3.5 10h17" stroke="var(--surface)" stroke-width="1.7"/><path d="M7.5 3.5v4M16.5 3.5v4" fill="none" stroke="currentColor" stroke-width="2.4"/><g fill="var(--surface)"><circle cx="8" cy="14" r="1"/><circle cx="12" cy="14" r="1"/><circle cx="16" cy="14" r="1"/><circle cx="8" cy="17.5" r="1"/><circle cx="12" cy="17.5" r="1"/></g>',
 homework:'<path d="M12 6.5C9.5 4.8 6.2 4.4 3.5 5.5v13c3-1 6-.6 8.5 1.2 2.5-1.8 5.5-2.2 8.5-1.2v-13c-2.7-1.1-6-.7-8.5 1z"/><path d="M12 6.5v13.2M16 5v5.8l1.5-1.1 1.5 1.1V5" fill="none" stroke="var(--surface)" stroke-width="1.6"/>',
 profile:'<circle cx="12" cy="7.5" r="3.7"/><path d="M3.8 20v-1.3c0-4.2 3.5-6.7 8.2-6.7s8.2 2.5 8.2 6.7V20z"/>'};
-let isFilled=false; // Soft Minimal: active navigation is highlighted by CSS color, not solid fill.return '<svg width="22" height="22" viewBox="0 0 24 24" fill="'+(isFilled?'currentColor':'none')+'" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(isFilled?filled[name]:line[name]||'')+'</svg>'}
+let isFilled=false;return '<svg width="22" height="22" viewBox="0 0 24 24" fill="'+(isFilled?'currentColor':'none')+'" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(isFilled?filled[name]:line[name]||'')+'</svg>'}
 
 function kpiIcon(name){
  const art={
