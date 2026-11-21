@@ -1,4 +1,4 @@
-const CACHE_NAME = "school-shell-v1.33.6-profile-close-fix";
+const CACHE_NAME = "school-shell-v1.33.6-muted-art";
 const SHELL = [
   "./",
   "./index.html",
