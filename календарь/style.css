@@ -26,9 +26,18 @@ dialog{border:0;border-radius:16px;padding:0;width:min(560px,calc(100% - 24px));
 .time-guide-label{border:0;transform:translateY(-50%);text-align:center;font-size:11px;font-weight:400;color:#8391a5;font-variant-numeric:tabular-nums;z-index:1}
 .time-guide-label.time-guide-major{font-size:14px;font-weight:750;color:#263b55}
 .event{z-index:1}
-.event-compact{flex-direction:row;align-items:center;justify-content:space-between;gap:5px;white-space:nowrap}
-.event-compact strong{flex:0 1 auto;font-size:12px}
-.event-compact small{flex:0 1 auto;text-align:right;font-size:10px}
+.event .event-time,.event .event-name,.event .event-meta{display:block;min-width:0;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.event .event-name{font-weight:700}
+.event-compact{flex-direction:row;align-items:center;justify-content:flex-start;gap:5px;white-space:nowrap}
+.event-compact .event-time,.event-compact .staff-jump{display:none}
+.event-compact .event-name{flex:0 1 auto;font-size:12px}
+.event-compact .event-meta{flex:1 1 auto;text-align:right;font-size:10px;opacity:.75}
+.event-tiny{flex-direction:row;align-items:center;padding-top:0;padding-bottom:0}
+.event-tiny .event-time,.event-tiny .event-meta,.event-tiny .staff-jump{display:none}
+.event-tiny .event-name{font-size:11px}
+.event-narrow.event-compact .event-meta{display:none}
+.event-narrow:not(.event-compact):not(.event-tiny) .staff-jump{display:none}
+.event:not(.event-compact):not(.event-tiny) .staff-jump{margin-top:auto}
 
 /* v0.10: sidebar controls and week views */
 .side-controls{display:grid;gap:9px;padding:0 8px}.side-controls label{display:grid;gap:5px;color:var(--muted);font-size:12px}.side-controls input{width:100%;font-size:13px}.side-date-nav{display:grid;grid-template-columns:36px 1fr 36px;gap:5px}.side-date-nav button{padding:4px}.side-controls>.primary{width:100%}.side-actions summary{cursor:pointer;padding:9px 12px;border:1px solid var(--border);border-radius:9px;font-size:13px}.side-action-list{display:grid;gap:4px;margin-top:5px}.side-action-list button{text-align:left;font-size:12px;padding:6px 8px}.calendar-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 7px}.view-switch{display:flex;gap:3px}.view-switch button,.weekdays button{font-size:12px;min-height:30px;padding:5px 9px}.view-switch .selected,.weekdays .selected{background:var(--selected-bg);border-color:#82a6db;color:var(--selected-text);font-weight:700}.weekdays{display:flex;gap:3px;flex-wrap:wrap}.calendar-controls label{font-size:12px;display:flex;align-items:center;gap:6px}.calendar-controls select{font-size:12px;padding:5px;max-width:170px}.workspace>header{min-height:28px}.workspace>header h1{font-size:15px}.workspace>header .actions,.workspace>.toolbar .toolbar-actions{display:none!important}.workspace>.toolbar{min-height:18px;margin:2px 0 5px}.workspace>.toolbar #status{display:none}.week-grid{grid-template-columns:54px repeat(5,minmax(132px,1fr));min-width:715px}.head-clickable{border-radius:0;min-height:0;cursor:pointer}.staff-jump{font-size:10px;text-decoration:underline;color:var(--selected-text);cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.event-compact .staff-jump{display:none}.week-grid .event{cursor:pointer}.week-grid .staff-jump{display:none}
