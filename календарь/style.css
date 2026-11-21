@@ -182,3 +182,13 @@ button.event.event-tiny .event-time{display:none}
 button.event.event-tiny .event-details{display:contents}
 button.event.event-tiny .event-teacher{display:block;flex:0 1 auto;max-width:45%;font-size:10px;min-width:0}
 button.event.event-tiny .event-room{display:none}
+
+/* ASPECT controls: red primary, restrained red selection, neutral secondary. */
+button:not(.event):not(.primary):not(.nav-link):hover,.import:hover{background:#fff2f0;border-color:#e8a09d}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover);color:#fff}
+button.nav-link:hover{background:var(--selected-bg);color:var(--selected-text)}
+button.nav-link.active{background:var(--selected-bg);color:var(--selected-text)}
+button.view-switch .selected{background:var(--selected-bg)}
+.view-switch button.selected,.weekdays button.selected{background:var(--selected-bg);border-color:#e8a09d;color:var(--selected-text)}
+button.event:hover{filter:brightness(.98)}
