@@ -206,3 +206,7 @@ button.event.event-tiny .event-teacher{font-size:10px}
 .schedule{max-height:calc(100dvh - 155px);min-height:320px;overflow:auto;overscroll-behavior:contain}
 .schedule .head{position:sticky;top:0;z-index:3}
 @media(max-width:650px){.schedule{max-height:calc(100dvh - 175px);min-height:260px}}
+
+/* Tiny events: keep the title readable on one line at the 1200px scale. */
+button.event.event-tiny .event-teacher{display:none}
+button.event.event-tiny .event-name{max-width:100%}
