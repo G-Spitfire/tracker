@@ -108,14 +108,14 @@ main{grid-template-columns:150px minmax(0,1fr)}
 .side-section-title{padding:7px 8px 3px}
 .workspace{padding:8px 10px}
 .workspace>header{min-height:26px}
-.workspace>header h1{font-size:14px}
+
 .title-status{gap:9px}
 .calendar-controls{gap:4px;margin:3px 0 5px}
 .view-switch,.weekdays{gap:4px}
 .view-switch button,.weekdays button,.week-navigation>button{min-height:var(--control-compact-height);font-size:11px;padding:3px 7px}
 .week-navigation{gap:4px}
 .week-navigation>input{min-height:var(--control-compact-height);font-size:11px;padding:3px 5px;width:116px}
-.head{font-size:12px;padding:6px 4px}
+.head{padding:6px 4px}
 .reference-row{padding:9px 12px}
 .reference-top{margin-bottom:10px}
 .reference-view,.data-view{margin:12px auto}
@@ -133,7 +133,7 @@ main{grid-template-columns:150px minmax(0,1fr)}
 
 /* Timeline cards are time-based surfaces, never generic form buttons. */
 button.event{min-height:0;padding:3px 5px;border-radius:6px;font-size:12px;line-height:1.12}
-button.event .event-name{font-size:12px}
+
 button.event .event-time,button.event .event-meta{font-size:11px}
 button.event.event-compact .event-time,button.event.event-compact .event-meta{font-size:10px}
 button.event.event-tiny .event-name{font-size:11px}
@@ -148,7 +148,6 @@ button.event.event-tiny .event-name{font-size:11px}
 
 /* ASPECT brand: restrained red accent and compact timeline. */
 :root{--selected-bg:#fff0ef;--selected-text:#b71f1b;--line-soft:#e9eaed}
-.primary:hover{background:var(--accent-hover)}
 .nav-link.active{background:var(--selected-bg);color:var(--selected-text)}
 .view-switch .selected,.weekdays .selected{background:var(--selected-bg);border-color:#e8a09d;color:var(--selected-text)}
 .event{background:#f2f4f6;border-color:#aeb7c1;border-left-color:#87929f;color:#22252b}
