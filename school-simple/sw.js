@@ -1,4 +1,4 @@
-const CACHE_NAME = "school-shell-v1.33.6-muted-art-inset";
+const CACHE_NAME = "school-shell-v1.33.6-art-optical-padding";
 const SHELL = [
   "./",
   "./index.html",
@@ -13,13 +13,21 @@ const SHELL = [
   "./assets/icons.js",
   "./assets/illustrations.js",
   "./assets/empty-states/pencil.png",
+  "./assets/empty-states/pencil-padded.svg",
   "./assets/empty-states/dance.png",
+  "./assets/empty-states/dance-padded.svg",
   "./assets/empty-states/clay.png",
+  "./assets/empty-states/clay-padded.svg",
   "./assets/empty-states/tv.png",
+  "./assets/empty-states/tv-padded.svg",
   "./assets/empty-states/console.png",
+  "./assets/empty-states/console-padded.svg",
   "./assets/empty-states/ball.png",
+  "./assets/empty-states/ball-padded.svg",
   "./assets/empty-states/phone.png",
+  "./assets/empty-states/phone-padded.svg",
   "./assets/empty-states/book.png",
+  "./assets/empty-states/book-padded.svg",
   "./icons.html",
   "./caveman-run-light.webp",
   "./caveman-run-dark.webp"
