@@ -1,4 +1,4 @@
-const CACHE_NAME = "school-shell-v1.33.6-kpi-refine";
+const CACHE_NAME = "school-shell-v1.33.6-approved-art";
 const SHELL = [
   "./",
   "./index.html",
@@ -12,6 +12,14 @@ const SHELL = [
   "./school-sync-client.js",
   "./assets/icons.js",
   "./assets/illustrations.js",
+  "./assets/empty-states/pencil.png",
+  "./assets/empty-states/dance.png",
+  "./assets/empty-states/clay.png",
+  "./assets/empty-states/tv.png",
+  "./assets/empty-states/console.png",
+  "./assets/empty-states/ball.png",
+  "./assets/empty-states/phone.png",
+  "./assets/empty-states/book.png",
   "./icons.html",
   "./caveman-run-light.webp",
   "./caveman-run-dark.webp"
