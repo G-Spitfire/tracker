@@ -19,6 +19,12 @@ const assert = require('node:assert/strict');
       }}})};`
   }));
   await page.goto('http://127.0.0.1:8765/school-simple/index.html',{waitUntil:'domcontentloaded'});
+  const iconLibrary=await page.evaluate(()=>({
+    navigation:typeof ico==='function' && ico('home').includes('<svg'),
+    metrics:typeof kpiIcon==='function' && kpiIcon('average').includes('<svg'),
+    illustrations:typeof homeworkIllustration==='function' && ['bag','cat','pencil','books'].every(n=>homeworkIllustration(n).includes('<svg'))
+  }));
+  assert.deepEqual(iconLibrary,{navigation:true,metrics:true,illustrations:true},'Shared SVG library loaded');
   await page.getByText('Средний балл',{exact:true}).waitFor();
   await page.locator('[data-action="tab"][data-value="grades"]').click();
   await page.getByText('Математика',{exact:true}).first().waitFor();
