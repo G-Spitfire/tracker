@@ -40,6 +40,8 @@ jobs:
         run: node календарь/tests/absence-e2e.cjs
       - name: Run conflict, edit and restore E2E
         run: node календарь/tests/regression-e2e.cjs
+      - name: Run realistic school-week E2E
+        run: node календарь/tests/realistic-week-e2e.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
