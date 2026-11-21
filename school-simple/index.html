@@ -312,9 +312,9 @@ function homework(){
   const noLessons=!scheduled;
   const scheduleKnown=scheduled||kid.schedule.some(l=>(l.from||'').slice(0,10)>d);
   const seed=d.split('').reduce((sum,ch)=>sum+ch.charCodeAt(0),state.child);
-  const variants=[['bag','Ура! Домашки нет!','Рюкзак сегодня отдыхает!'],['cat','Можно передохнуть!','Даже кот одобряет такой день.'],['pencil','Свободный день!','Карандаш объявил выходной.'],['books','Домашки нет!','Книги тоже решили отдохнуть.']];
+  const variants=state.child===0?['pencil','dance','clay','tv']:['console','ball','phone','book'];
   const chosen=variants[seed%variants.length];
-  const body=tasks.length?tasks.map(t=>'<div class="task"><div class="row"><strong>'+escapeHTML(t.subject)+'</strong></div><p>'+escapeHTML(t.text)+'</p></div>').join(''):!scheduleKnown?'<div class="homework-unknown">Расписание на этот день пока неизвестно. Проверьте синхронизацию дневника.</div>':'<div class="homework-celebration">'+homeworkIllustration(chosen[0])+'<strong>'+(noLessons?'Ура! Свободный день!':'Ура! Домашки нет!')+'</strong><span>'+(noLessons?'Уроков по расписанию нет.':'Заданий на этот день нет.')+'</span></div>';
+  const body=tasks.length?tasks.map(t=>'<div class="task"><div class="row"><strong>'+escapeHTML(t.subject)+'</strong></div><p>'+escapeHTML(t.text)+'</p></div>').join(''):!scheduleKnown?'<div class="homework-unknown">Расписание на этот день пока неизвестно. Проверьте синхронизацию дневника.</div>':'<div class="homework-celebration">'+homeworkIllustration(chosen)+'<strong>'+(noLessons?'Ура! Свободный день!':'Ура! Домашки нет!')+'</strong><span>'+(noLessons?'Уроков по расписанию нет.':'Заданий на этот день нет.')+'</span></div>';
   return '<section class="homework-day"><h3 class="homework-day-title">'+escapeHTML(dateLabel(d))+'</h3><div class="homework-day-body">'+body+'</div></section>';
  }).join('');
  const note='<p class="grades-footnote">Задания привязаны к следующему уроку предмета. Официальная дата сдачи в источнике не предоставляется.</p>';
