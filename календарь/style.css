@@ -167,3 +167,24 @@ button:hover,.import:hover{background:#fff2f0}
 .week-grid{grid-template-columns:46px repeat(5,minmax(132px,1fr));min-width:707px}
 .side-brand{padding:0 3px}
 .aspect-brand{width:100%;height:auto;display:block;max-width:138px;border-radius:2px}
+
+/* Consistent card hierarchy: title first, teacher next, time smallest. */
+button.event{display:flex;flex-direction:column;justify-content:flex-start;gap:2px}
+button.event .event-top{display:flex;align-items:baseline;justify-content:space-between;gap:5px;min-width:0;flex-shrink:0}
+button.event .event-name{display:block;min-width:0;flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:700}
+button.event .event-time{display:block;flex:0 0 auto;font-size:10px;font-weight:400;white-space:nowrap;opacity:.78}
+button.event .event-details{display:flex;gap:4px;min-width:0;align-items:baseline;overflow:hidden;flex-shrink:0}
+button.event .event-teacher{font-size:11px;min-width:0;flex:0 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+button.event .event-room{font-size:11px;min-width:0;flex:0 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.78}
+button.event .event-room:not(:empty)::before{content:"· ";white-space:pre}
+button.event.event-compact{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:2px}
+button.event.event-compact .event-top{display:flex}
+button.event.event-compact .event-details{display:flex}
+button.event.event-narrow .event-room{display:none}
+button.event.event-tiny{display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:5px}
+button.event.event-tiny .event-top{display:contents}
+button.event.event-tiny .event-name{font-size:11px;flex:1 1 auto;min-width:0}
+button.event.event-tiny .event-time{display:none}
+button.event.event-tiny .event-details{display:contents}
+button.event.event-tiny .event-teacher{display:block;flex:0 1 auto;max-width:45%;font-size:10px;min-width:0}
+button.event.event-tiny .event-room{display:none}
