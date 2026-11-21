@@ -6,5 +6,5 @@ const HOMEWORK_ART = Object.freeze({
 });
 function homeworkIllustration(kind){
  const file=HOMEWORK_ART[kind]||HOMEWORK_ART.pencil;
- return '<img class="homework-doodle" src="./assets/empty-states/'+file+'.png" width="78" height="78" alt="" aria-hidden="true" decoding="async">';
+ return '<img class="homework-doodle" src="./assets/empty-states/'+file+'-padded.svg" width="78" height="78" alt="" aria-hidden="true" decoding="async">';
 }
