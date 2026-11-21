@@ -18,7 +18,7 @@ const assert = require('node:assert/strict');
         matvey:{marks:[{subjectId:'r',subject:'Русский язык',value:4,date:'2026-11-19',type:'Урок'}],lessons:[],schedule:[]}
       }}})};`
   }));
-  await page.goto('http://127.0.0.1:8765/school-simple/index.html',{waitUntil:'domcontentloaded'});
+  await page.goto('http://127.0.0.1:8765/school-simple/index.html?v=1336',{waitUntil:'load'});
   await page.getByText('Средний балл',{exact:true}).waitFor();
   await page.locator('[data-action="tab"][data-value="grades"]').click();
   await page.getByText('Математика',{exact:true}).first().waitFor();
