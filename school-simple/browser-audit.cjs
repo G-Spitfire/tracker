@@ -59,7 +59,7 @@ async function run() {
      contentType:'application/javascript',
      body:'window.SchoolSync={readCached:async()=>null,sync:async()=>({source:"network",data:'+JSON.stringify(fakeDiary)+'})};'
    }));
-   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.32.7"}'}));
+   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.33.6"}'}));
    const view=size.name;
    try {
     await page.goto(BASE,{waitUntil:'domcontentloaded',timeout:30000});
@@ -70,6 +70,22 @@ async function run() {
       record(view,scenario+' geometry',!g.overflow && !g.offenders.length,g);
       await page.screenshot({path:path.join(OUT,view+'-'+scenario+'.png'),fullPage:false});
     }
+    const art=await page.evaluate(async()=>{
+      const names=['pencil','dance','clay','tv','console','ball','phone','book'];
+      const results=[];
+      for(const name of names){
+        const holder=document.createElement('div');
+        holder.innerHTML=homeworkIllustration(name);
+        const img=holder.firstElementChild;
+        document.body.append(img);
+        await new Promise(resolve=>{if(img.complete)return resolve();img.addEventListener('load',resolve,{once:true});img.addEventListener('error',resolve,{once:true});});
+        const style=getComputedStyle(img);
+        results.push({name,loaded:img.naturalWidth>0&&img.naturalHeight>0,width:img.getBoundingClientRect().width,height:img.getBoundingClientRect().height,opacity:Number(style.opacity),margin:style.margin});
+        img.remove();
+      }
+      return results;
+    });
+    record(view,'all eight homework illustrations load and fit',art.every(x=>x.loaded&&x.width===68&&x.height===68&&x.opacity===.52&&x.margin==='5px'),art);
     await page.locator('#profile').click();
     const p=await geometry(page);
     record(view,'profile geometry',!p.overflow && !p.offenders.length,p);
