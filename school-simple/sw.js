@@ -1,4 +1,4 @@
-const CACHE_NAME = "school-shell-v1.33.6-softminimal-clean";
+const CACHE_NAME = "school-shell-v1.33.6-child-art8";
 const SHELL = [
   "./",
   "./index.html",
