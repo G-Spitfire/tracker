@@ -33,7 +33,7 @@ if(!fs.existsSync(html))throw new Error('Calendar application missing: кале�
    await page.locator('#absence-cancel').click();
    const absenceClosed=await page.locator('#absence-dialog').evaluate(el=>!el.open);
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
-   const layout=await page.evaluate(()=>({gridWidth:document.querySelector('#grid').getBoundingClientRect().width,viewportWidth:innerWidth,brandVisible:!!document.querySelector('.school-brand-text'),logoSlot:!!document.querySelector('.school-logo-slot')}));
+   const layout=await page.evaluate(()=>({gridWidth:document.querySelector('#grid').getBoundingClientRect().width,viewportWidth:innerWidth,brandVisible:!!document.querySelector('.aspect-brand'),brandAccessible:document.querySelector('.aspect-brand')?.getAttribute('aria-label')==='ASPECT Educational Centre'}));
    await page.locator('#side-new').click();
    const editorFits=await page.locator('#editor').evaluate(el=>{const r=el.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight+1});
    await page.screenshot({path:path.join(out,'editor-'+width+'.png')});
@@ -43,5 +43,5 @@ if(!fs.existsSync(html))throw new Error('Calendar application missing: кале�
   }
  } finally {await browser.close();}
  fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(results,null,2));
- if(results.some(x=>!x.visible||x.overflow||!x.db.length||!x.editorOpened||!x.editorClosed||!x.absenceOpened||!x.absenceClosed||!x.absenceContentFits||!x.editorFits||!x.layout.brandVisible||!x.layout.logoSlot||x.errors.length))process.exitCode=1;
+ if(results.some(x=>!x.visible||x.overflow||!x.db.length||!x.editorOpened||!x.editorClosed||!x.absenceOpened||!x.absenceClosed||!x.absenceContentFits||!x.editorFits||!x.layout.brandVisible||!x.layout.brandAccessible||x.errors.length))process.exitCode=1;
 })().catch(e=>{console.error(e);process.exitCode=1});
