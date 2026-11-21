@@ -63,7 +63,8 @@ async function check(label,condition,details=''){console.log((condition?'PASS':'
    const offlinePage=await offlineContext.newPage(),offlineErrors=[];
    offlinePage.on('pageerror',e=>offlineErrors.push(e.message));
    await offlinePage.goto('http://127.0.0.1:8765/school-simple/index.html');
-   await offlinePage.evaluate(async()=>{await navigator.serviceWorker.ready;});
+   // Service worker activation may trigger a page navigation; Playwright's waitForFunction retries across navigations.
+   await offlinePage.waitForFunction(()=>navigator.serviceWorker.ready.then(()=>true),null,{timeout:15000});
    await offlinePage.waitForTimeout(500);
    // Seed a synthetic snapshot in the real IndexedDB store to verify offline diary rendering.
    await offlinePage.evaluate(async sample=>{
