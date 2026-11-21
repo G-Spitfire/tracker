@@ -1,4 +1,4 @@
-const CACHE_NAME = "school-shell-v1.33.6-muted-art-inset";
+const CACHE_NAME = "school-shell-v1.33.6-art-safe-padding";
 const SHELL = [
   "./",
   "./index.html",
