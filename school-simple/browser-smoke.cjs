@@ -27,6 +27,8 @@ const assert = require('node:assert/strict');
     illustrations:typeof homeworkIllustration==='function' && ['pencil','dance','clay','tv','console','ball','phone','book'].every(n=>homeworkIllustration(n).includes('/empty-states/'+n+'.png'))
   }));
   assert.deepEqual(iconLibrary,{navigation:true,metrics:true,illustrations:true},'Shared icon and illustration libraries loaded');
+  const artStyle=await page.evaluate(()=>{const img=document.createElement('img');img.className='homework-doodle';document.body.append(img);const cs=getComputedStyle(img);const result={width:cs.width,height:cs.height,padding:cs.padding,opacity:cs.opacity,fit:cs.objectFit};img.remove();return result;});
+  assert.deepEqual(artStyle,{width:'78px',height:'78px',padding:'8px',opacity:'0.52',fit:'contain'},'Artwork must keep 8px inner padding and muted styling');
   await page.getByText('Средний балл',{exact:true}).waitFor();
   await page.locator('[data-action="tab"][data-value="grades"]').click();
   await page.getByText('Математика',{exact:true}).first().waitFor();
