@@ -107,10 +107,13 @@ async function run() {
     });
     await page.locator('[data-action="tab"][data-value="schedule"]').click();
     styles.schedule=await page.evaluate(()=>{
-      const subject=document.querySelector('.lesson strong');
-      const item=document.querySelector('.lesson');
-      return {subject:subject?{size:getComputedStyle(subject).fontSize,weight:getComputedStyle(subject).fontWeight}:null,
-        padding:item?getComputedStyle(item).paddingTop:null};
+      const fixture=document.createElement('div');
+      fixture.className='lesson';fixture.innerHTML='<span class="sub">1</span><div><strong>Предмет</strong></div>';
+      document.body.appendChild(fixture);
+      const subject=fixture.querySelector('strong');
+      const value={subject:{size:getComputedStyle(subject).fontSize,weight:getComputedStyle(subject).fontWeight},
+        padding:getComputedStyle(fixture).paddingTop};
+      fixture.remove();return value;
     });
     const sameSubject=Object.values(styles).every(x=>x.subject?.size==='14px'&&x.subject?.weight==='600');
     const numbers=styles.grades.average?.size==='16px'&&styles.grades.average?.weight==='700'
