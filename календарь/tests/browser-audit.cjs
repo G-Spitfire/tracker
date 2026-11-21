@@ -33,7 +33,7 @@ if(!fs.existsSync(html))throw new Error('Calendar application missing: кале�
    await page.locator('#absence-cancel').click();
    const absenceClosed=await page.locator('#absence-dialog').evaluate(el=>!el.open);
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
-   const layout=await page.evaluate(()=>({gridWidth:document.querySelector('#grid').getBoundingClientRect().width,viewportWidth:innerWidth,brandVisible:!!document.querySelector('.aspect-brand'),brandAccessible:document.querySelector('.aspect-brand')?.getAttribute('aria-label')==='ASPECT Educational Centre'}));
+   const layout=await page.evaluate(()=>{const style=s=>getComputedStyle(document.querySelector(s));const logo=document.querySelector('.aspect-brand');const selected=document.querySelector('.view-switch button.selected');const primary=style('#side-new');const major=document.createElement('span');major.className='time-guide-label time-guide-major';document.body.append(major);const majorSize=getComputedStyle(major).fontSize;major.remove();return {gridWidth:document.querySelector('#grid').getBoundingClientRect().width,viewportWidth:innerWidth,brandVisible:!!logo,brandAccessible:logo?.getAttribute('aria-label')==='ASPECT Educational Centre',brandTransparent:!!logo&&!logo.querySelector('rect[fill]')&&!logo.querySelector('rect[style]'),brandRed:logo?.querySelector('text')?.getAttribute('fill')==='#e52520',primaryRed:primary.backgroundColor==='rgb(229, 37, 32)',selectedRed:!!selected&&getComputedStyle(selected).backgroundColor==='rgb(255, 240, 239)',titleSize:style('#view-title').fontSize,majorSize};});
    await page.locator('#side-new').click();
    const editorFits=await page.locator('#editor').evaluate(el=>{const r=el.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight+1});
    await page.screenshot({path:path.join(out,'editor-'+width+'.png')});
@@ -43,5 +43,5 @@ if(!fs.existsSync(html))throw new Error('Calendar application missing: кале�
   }
  } finally {await browser.close();}
  fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(results,null,2));
- if(results.some(x=>!x.visible||x.overflow||!x.db.length||!x.editorOpened||!x.editorClosed||!x.absenceOpened||!x.absenceClosed||!x.absenceContentFits||!x.editorFits||!x.layout.brandVisible||!x.layout.brandAccessible||x.errors.length))process.exitCode=1;
+ if(results.some(x=>!x.visible||x.overflow||!x.db.length||!x.editorOpened||!x.editorClosed||!x.absenceOpened||!x.absenceClosed||!x.absenceContentFits||!x.editorFits||!x.layout.brandVisible||!x.layout.brandAccessible||!x.layout.brandTransparent||!x.layout.brandRed||!x.layout.primaryRed||!x.layout.selectedRed||x.layout.titleSize!=='14px'||x.layout.majorSize!=='11px'||x.errors.length))process.exitCode=1;
 })().catch(e=>{console.error(e);process.exitCode=1});
