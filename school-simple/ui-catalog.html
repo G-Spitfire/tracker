@@ -11,7 +11,7 @@ html[data-theme=dark]{--bg:#111720;--surface:#1c2430;--fg:#f3f5fa;--muted:#9ba9b
 <section><h2>Утверждённые иллюстрации</h2><p>Полина</p><div class="art-grid" id="polina"></div><p>Матвей</p><div class="art-grid" id="matvey"></div></section>
 <section><h2>Параметры и проверка</h2><p>Базовый шаг 4 px; поля 16 px (12 px до 360 px); радиусы 6 / 10 / 14 px. Проверка: 320, 375, 393, 430 CSS px, две темы, оба ребёнка, шесть акцентов.</p><a href="./UI_STANDARD.md">Нормативный стандарт (Markdown)</a></section>
 </main><script src="./assets/icons.js"></script><script>
-const $=id=>document.getElementById(id), colors=['#4C8BF5','#22A77A','#9168DE','#E68B39','#E05252','#E56AA6'];
+const $=id=>document.getElementById(id), colors=['#4C8BF5','#16A34A','#8B5CF6','#F97316','#EF4444','#EC4899'];
 function draw(){const dark=document.documentElement.dataset.theme==='dark';$('theme').textContent=dark?'Светлая тема':'Тёмная тема';$('neutrals').innerHTML=[['Фон',dark?'#111720':'#F7F8FB'],['Поверхность',dark?'#1C2430':'#FFFFFF'],['Подложка',dark?'#293443':'#F0F3F8'],['Текст',dark?'#F3F5FA':'#202734'],['Вторичный',dark?'#9BA9BB':'#788393']].map(([n,c])=>'<div><div class="swatch" style="background:'+c+'"></div><div class="caption">'+n+'</div></div>').join('')}
 $('theme').onclick=()=>{document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';draw()};
 $('accents').innerHTML=colors.map(c=>'<button class="swatch" aria-label="Акцент '+c+'" title="'+c+'" style="background:'+c+'" data-color="'+c+'"></button>').join('');
