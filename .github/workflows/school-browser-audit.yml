@@ -32,9 +32,9 @@ jobs:
           done
           exit 1
       - name: Run existing browser smoke test
-        run: node school-simple/browser-smoke.cjs
+        run: node school-simple/tests/browser-smoke.cjs
       - name: Run responsive UI audit
-        run: node school-simple/browser-audit.cjs
+        run: node school-simple/tests/browser-audit.cjs
       - name: Upload screenshots and results
         if: always()
         uses: actions/upload-artifact@v4

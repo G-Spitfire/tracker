@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const {overallAverage}=require('./analytics.js');
+const {overallAverage}=require('../analytics.js');
 const quarters=[{start:'2026-11-04',end:'2026-12-30'}];
 test('overall average is the unweighted mean of subject averages',()=>{
  const subjects=[{grades:[{value:5,date:'2026-11-10'},{value:5,date:'2026-11-11'},{value:5,date:'2026-11-12'}]},{grades:[{value:3,date:'2026-11-10'}]}];

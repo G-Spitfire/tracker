@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
 
-const source = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+const source = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 function functionSource(name, next) {
   const start = source.indexOf('function ' + name + '(');
   const end = source.indexOf('\nfunction ' + next + '(', start);
