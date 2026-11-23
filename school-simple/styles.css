@@ -88,7 +88,7 @@ html[data-theme=dark]{--bg:#09090b;--surface:#202023;--fg:#ffffff;--muted:#b4b4b
 .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
 .calendar button{background:none;border:0;border-radius:var(--radius-control);padding:8px 0;color:var(--fg);min-height:44px;font:inherit}
 .calendar .sub{align-self:center}
-.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:550px;width:100%;display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border:0;border-top:1px solid var(--line);border-radius:18px 18px 0 0;box-shadow:0 -3px 14px #0000000a;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+.bottom{position:fixed;bottom:0;left:0;right:0;margin-inline:auto;z-index:20;max-width:550px;width:100%;display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border:0;border-top:1px solid var(--line);border-radius:18px 18px 0 0;box-shadow:0 -3px 14px #0000000a;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
 .swatches{display:flex;flex-wrap:wrap;gap:clamp(6px,2vw,12px);margin:11px 0 18px}
 .swatch{width:44px;height:44px;border:0;border-radius:50%;color:white;font-size:19px;flex-shrink:0}
 .detail-box{background:var(--surface);color:var(--fg);border-radius:var(--radius-panel);padding:20px;width:min(100%,350px);box-shadow:0 12px 45px #0002}
@@ -212,3 +212,11 @@ html[data-theme=dark] .lesson-mark-2{color:#ff8a8a}
 .grades-filter-check input:checked::after{content:"";width:9px;height:5px;border-left:2px solid white;border-bottom:2px solid white;transform:translateY(-1px) rotate(-45deg)}
 html[data-theme=dark] .home-line text{fill:#d2d2da}
 @media(prefers-color-scheme:dark){html[data-theme=system] .home-line text{fill:#d2d2da}}
+
+/* Apple-only typographic refinements. Other platforms retain the existing design. */
+html.platform-apple body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;-webkit-font-smoothing:antialiased}
+html.platform-apple .head h1{letter-spacing:-.045em;font-weight:700}
+html.platform-apple .heading{letter-spacing:-.025em}
+html.platform-apple .stat-value{font-variant-numeric:tabular-nums lining-nums;letter-spacing:-.045em;font-weight:650}
+html.platform-apple .subject-average,html.platform-apple .forecast-result{font-variant-numeric:tabular-nums lining-nums;letter-spacing:-.025em}
+html.platform-apple .calendar button,html.platform-apple .schedule-month{font-variant-numeric:tabular-nums lining-nums;letter-spacing:-.02em}
