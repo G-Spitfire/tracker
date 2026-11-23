@@ -92,8 +92,10 @@ window.addEventListener('storage',e=>{if(e.key===THEME_KEY||e.key===null){themeC
 <div class="nav"><div class="navinner" id="nav"></div></div><div id="toast" class="toast hidden" role="status"></div><input type="file" id="importFile" accept="application/json,.json" class="hidden">
 <script>
 'use strict';
-const DB_KEY='forma12_v1';
-const DAY_LABEL={A:'A',B:'B',V:'C',G:'D'};
+const DB_KEY='forma_v2_20261123';
+const LEGACY_KEY='forma12_v1';
+const PROGRAM_START='2026-11-23';
+const DAY_LABEL={A:'A',B:'B',V:'C',G:'D',E:'E'};
 const CUES={
  pull:{name:'Подтягивания на турнике',cue:'Тяни локти вниз, к рёбрам и тазу — не подбородок к перекладине.',tech:'Комфортный хват, корпус устойчив, без раскачивания. Плавное опускание.',avoid:'Рывки ногами, плечи у ушей, «половинки».',rest:180},
  row:{name:'Тяга резинки к поясу',cue:'Локти уходят назад, кисти — крючки.',tech:'Зафиксируй петлю безопасно. Тяни к нижним рёбрам без раскачивания корпуса.',avoid:'Резкое отпускание резинки, вытягивание шеи.',rest:100},
@@ -113,12 +115,32 @@ const CUES={
  ball:{name:'Сгибания ног с фитболом',cue:'Подтягиваю мяч пятками, удерживая таз.',tech:'Пятки на мяче, таз приподнят, сгибай колени под контролем.',avoid:'Провисание таза и болевой прогиб поясницы.',rest:90}
 };
 // 'perLeg' means one saved set represents the indicated repetitions FOR EACH leg.
+Object.assign(CUES,{
+ deadbug:{name:'Dead bug',cue:'Поясница стабильна.',tech:'Медленно выпрямляй противоположные руку и ногу.',avoid:'Прогиб.',rest:45},
+ incline:{name:'Наклонный жим гантелей',cue:'Контролируй движение.',tech:'Скамья 15–30°, устойчивые лопатки.',avoid:'Рывки.',rest:120},
+ lat:{name:'Вертикальная тяга блока',cue:'Локти вниз.',tech:'Не раскачивай корпус.',avoid:'Тяга за голову.',rest:120},
+ cable:{name:'Горизонтальная тяга блока',cue:'Тяни к корпусу.',tech:'Спина стабильна.',avoid:'Рывки.',rest:120},
+ ohp:{name:'Жим гантелей сидя',cue:'Выжимай вверх плавно.',tech:'Комфортная амплитуда.',avoid:'Прогиб.',rest:120},
+ dblateral:{name:'Подъёмы гантелей в стороны',cue:'Локти в стороны.',tech:'Без раскачивания.',avoid:'Рывки.',rest:60},
+ reverse:{name:'Обратная бабочка',cue:'Разводи руки.',tech:'Контролируй движение.',avoid:'Поднятые плечи.',rest:60},
+ curl:{name:'Сгибания рук на бицепс',cue:'Локти стабильны.',tech:'Без раскачивания.',avoid:'Рывки.',rest:75},
+ pressdown:{name:'Разгибания рук на блоке',cue:'Локти у корпуса.',tech:'Плавно.',avoid:'Рывки.',rest:75},
+ legpress:{name:'Жим ногами',cue:'Дави всей стопой.',tech:'Не отрывай таз.',avoid:'Резкая блокировка коленей.',rest:150},
+ dbrdl:{name:'Румынская тяга с гантелями',cue:'Таз назад.',tech:'Спина нейтральна.',avoid:'Округление.',rest:120},
+ legcurl:{name:'Сгибание ног в тренажёре',cue:'Плавно сгибай колени.',tech:'Контролируй опускание.',avoid:'Рывки.',rest:90},
+ calves:{name:'Подъёмы на носки',cue:'Плавно поднимай пятки.',tech:'Комфортная амплитуда.',avoid:'Пружинящие рывки.',rest:60},
+ crunch:{name:'Скручивания на блоке',cue:'Рёбра к тазу.',tech:'Двигай корпусом.',avoid:'Рывки.',rest:60},
+ sideplank:{name:'Боковая планка (сек)',cue:'Корпус прямой.',tech:'Вводи секунды вместо повторений.',avoid:'Провисание.',rest:45},
+ plank:{name:'Планка (сек)',cue:'Корпус прямой.',tech:'Вводи секунды вместо повторений.',avoid:'Прогиб.',rest:45}
+});
 const PROGRAM={
- A:{label:'A',title:'Ширина спины + грудь',where:'Турник → домой',summary:'Широчайшие, грудь, ноги, средние дельты',items:[['pull',4,4,6],['row',3,10,20,'aussie',8,15],['push',3,8,15],['bulgar',3,8,12,null,null,null,true],['lateral',3,12,20]]},
- B:{label:'B',title:'Ноги + задняя цепь',where:'Дома',summary:'Ноги, ягодичные, грудь, верх спины',items:[['decline',3,8,15],['squat',3,10,20],['rdl',3,10,15],['row',3,10,20,'aussie',8,15],['bridge',2,12,20]]},
- V:{label:'C',title:'Спина + плечи + трицепс',where:'Турник → домой',summary:'Второй стимул для широчайших, плеч и груди',items:[['pull',3,4,5],['narrow',3,8,15,'dips',6,12],['bulgar',3,8,12,null,null,null,true],['face',3,12,20],['lateral',3,12,20]]},
- G:{label:'D',title:'Дополнительная',where:'Дома · по желанию',summary:'Руки, плечи, задняя поверхность бедра',items:[['lateral',2,12,20],['biceps',2,10,20],['triceps',2,10,20],['ball',2,10,15]]}
+ A:{label:'A',title:'Дома · всё тело',where:'Дома · 40–50 минут',summary:'Грудь, спина, ноги, корпус',items:[['push',3,8,15],['row',3,10,20],['bulgar',3,8,12,null,null,null,true],['rdl',2,12,20],['lateral',2,12,20],['deadbug',2,10,10]]},
+ B:{label:'B',title:'DDX · верх тела',where:'Зал · до 60 минут',summary:'Грудь, спина, плечи и руки',items:[['incline',3,8,12],['lat',3,8,12],['cable',3,10,12],['ohp',2,8,12],['dblateral',3,12,20],['reverse',2,12,20],['curl',2,10,15],['pressdown',2,10,15]]},
+ V:{label:'C',title:'DDX · ноги и корпус',where:'Зал · до 60 минут',summary:'Ноги, ягодицы, плечи, пресс',items:[['legpress',3,10,12],['dbrdl',3,8,12],['legcurl',2,10,15],['calves',3,12,20],['dblateral',2,12,20],['crunch',2,10,15],['sideplank',2,20,40]]},
+ G:{label:'D',title:'Дома · альтернативная',where:'Дома · 40–50 минут',summary:'Для недель с одним посещением DDX',items:[['decline',3,8,15],['row',3,12,20],['bulgar',3,8,12,null,null,null,true],['bridge',2,10,15],['face',2,15,20],['plank',2,30,45]]},
+ E:{label:'E',title:'DDX · всё тело',where:'Зал · до 60 минут',summary:'Для недель с одним посещением DDX',items:[['legpress',3,10,12],['incline',3,8,12],['lat',3,8,12],['dbrdl',2,10,12],['cable',2,10,12],['dblateral',2,12,20],['pressdown',2,10,15]]}
 };
+/* OLD_PROGRAM_REMOVED */
 const ICONS={today:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/>',history:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M8 14h3M8 18h5"/>',progress:'<path d="M4 20V12M10 20V7M16 20V10M22 20V3"/>',settings:'<path d="M12 3v3M12 18v3M4.2 7.5l2.6 1.5M17.2 15l2.6 1.5M4.2 16.5 6.8 15M17.2 9l2.6-1.5"/><circle cx="12" cy="12" r="4"/>'};
 const EMPTY=()=>({version:1,createdAt:new Date().toISOString(),sessions:[],measures:[],ofpDays:[],active:null,programOverrides:{},programStartedAt:null});
 let db=load();
@@ -142,8 +164,8 @@ function notify(msg){const el=document.getElementById('toast');el.textContent=ms
 function setTab(t){ui.tab=t;ui.showSession=null;render();scrollTo({top:0,behavior:'instant'})}
 function navHTML(){const tabs=[['today','Тренировка'],['history','История'],['progress','Прогресс'],['settings','Данные']];return tabs.map(([id,title])=>`<button data-action="tab" data-val="${id}" class="${ui.tab===id?'active':''}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[id]}</svg>${title}</button>`).join('')}
 function render(){document.getElementById('topDate').innerHTML=`${dateFmt(new Date(),{weekday:'long'})}<br>${dateFmt(new Date(),{day:'numeric',month:'long',year:'numeric'})}`;document.getElementById('nav').innerHTML=navHTML();document.getElementById('main').innerHTML=ui.tab==='today'?renderToday():ui.tab==='history'?renderHistory():ui.tab==='progress'?renderProgress():renderSettings();updateClock()}
-function renderToday(){if(db.active)return renderActive();const chosen=PROGRAM[ui.chosen];const items=exercises(ui.chosen,ui.goodWeather?'outdoor':'home');const indoors=exercises(ui.chosen,'home'),outdoors=exercises(ui.chosen,'outdoor');const swaps=indoors.flatMap((item,i)=>item.id===outdoors[i].id?[]:[item.name+' → '+outdoors[i].name]);return `<section class="card hero"><div class="eyebrow">ЭТА НЕДЕЛЯ · ${weeklyCount()}/3 ОСНОВНЫХ</div><h2>Сильнее.<br>Шире. Собраннее.</h2><p>Три основные тренировки в неделю. Отмечай подходы — время и прогресс сохраняются автоматически.</p><span class="pill dark">Следующая по циклу: ${DAY_LABEL[nextWorkout()]}</span></section>
-<div class="section">Выбери тренировку<small>A → B → C. D — дополнительная, по желанию.</small></div><div class="workouts">${Object.keys(PROGRAM).map(id=>`<button class="workout-tile ${ui.chosen===id?'selected':''}" data-action="choose" data-val="${id}"><div class="letter">${PROGRAM[id].label}</div><b>${esc(PROGRAM[id].title)}</b><div class="name">${esc(PROGRAM[id].where)}</div></button>`).join('')}</div>
+function renderToday(){if(db.active)return renderActive();const chosen=PROGRAM[ui.chosen];const items=exercises(ui.chosen,ui.goodWeather?'outdoor':'home');const indoors=exercises(ui.chosen,'home'),outdoors=exercises(ui.chosen,'outdoor');const swaps=indoors.flatMap((item,i)=>item.id===outdoors[i].id?[]:[item.name+' → '+outdoors[i].name]);return `<section class="card hero"><div class="eyebrow">НЕДЕЛЯ ${Math.max(1,Math.min(26,Math.floor((Date.now()-Date.parse(PROGRAM_START+'T00:00:00'))/604800000)+1))}/26 · ${weeklyCount()}/3</div><h2>Сильнее.<br>Шире. Собраннее.</h2><p>26 недель. Записывай подходы, рабочие веса и измерения.</p><span class="pill dark">Следующая по циклу: ${DAY_LABEL[nextWorkout()]}</span></section>
+<div class="section">Выбери тренировку<small>2 DDX: A+B+C. 1 DDX: A+D+E.</small></div><div class="workouts">${Object.keys(PROGRAM).map(id=>`<button class="workout-tile ${ui.chosen===id?'selected':''}" data-action="choose" data-val="${id}"><div class="letter">${PROGRAM[id].label}</div><b>${esc(PROGRAM[id].title)}</b><div class="name">${esc(PROGRAM[id].where)}</div></button>`).join('')}</div>
 <div class="card" style="margin-top:13px"><div class="flex"><div><div class="eyebrow">ПЛАН ${chosen.label}</div><h2 style="font-size:20px;margin:6px 0 5px">${chosen.title}</h2><div class="caption">${chosen.summary}</div></div><span class="pill">${items.length} упражнений</span></div>${ui.chosen!=='G'?`<div class="switchrow"><label class="switch"><input id="outdoor" type="checkbox" ${ui.goodWeather?'checked':''}><span class="knob"></span></label><div><strong>На улице</strong><div class="muted">${swaps.length?'При включении: '+esc(swaps.join('; ')):'Замены не настроены, список упражнений не изменится'}</div></div></div>`:''}<div class="line" style="margin:1px 0 8px"></div>${items.map((e,i)=>`<div class="plan-row"><div class="no">${i+1}</div><div class="plan-details"><b>${esc(e.name)}</b><div class="caption">${esc(CUES[e.id].cue)}</div></div><div class="count">${e.sets}×${e.min===e.max?e.min:e.min+'–'+e.max}${e.perLeg?' / н':''}</div></div>`).join('')}<button class="btn light full" data-action="edit-plan" style="margin-top:14px">Настроить упражнения</button><button class="btn primary full" data-action="start" style="margin-top:9px">Начать тренировку ${chosen.label} →</button><p class="caption">Время начала фиксируется по кнопке. Время первого подхода — при первой отметке. Каждый подход получает собственную временную метку.</p></div>${renderOfp()}`}
 function renderOfp(){const today=dayKey();const done=db.ofpDays.includes(today);return `<div class="card soft"><div class="checkrow"><div class="circlecheck">${done?'✓':'＋'}</div><div style="flex:1"><b>Ежедневная ОФП</b><div class="caption">Шея, изометрия в 4 направлениях, лопатки, bird dog / dead bug · 7–10 минут</div></div><button class="btn small ${done?'light':'primary'}" data-action="ofp">${done?'Готово':'Отметить'}</button></div><details class="how"><summary>Показать комплекс ▾</summary><p>1. Chin tuck — 8–10×3 сек.<br>2. Изометрия: лоб, затылок, вправо, влево — по 3×5 сек. с лёгким усилием (20–30%).<br>3. Контроль лопаток — 10 раз.<br>4. Bird dog и dead bug чередуются по дням — 2×6–8 на сторону.<br><strong>Остановись, если появляются боль, онемение или головокружение.</strong></p></details></div>`}
 function start(){if(db.active)return notify('Сначала заверши текущую тренировку');armAudio();const active={id:'s_'+Date.now(),workout:ui.chosen,mode:ui.goodWeather?'outdoor':'home',startedAt:nowISO(),exercises:exercises(ui.chosen,ui.goodWeather?'outdoor':'home'),logs:[],note:'',rest:null};if(!save({...db,active,programStartedAt:db.programStartedAt||active.startedAt}))return;ui.drafts={};ui.focusSlot=active.exercises[0]?.slot??null;render();notify('Тренировка началась. Удачи!')}
@@ -152,7 +174,7 @@ function previousSet(e,setIndex){
   const s=db.sessions[i];if(sameWorkout&&s.workout!==db.active?.workout)continue;
   const logs=(s.logs||[]).filter(l=>l.exId===e.id);
   const log=logs.find(l=>l.setNumber===setIndex+1)||logs.at(-1);
-  if(log)return {reps:log.reps,setNumber:log.setNumber,at:s.startedAt};
+  if(log)return {reps:log.reps,weight:log.weight??0,setNumber:log.setNumber,at:s.startedAt};
  }
  return null;
 }
@@ -166,7 +188,7 @@ let center='';
 if(s.pausedAt){center=`<div class="focus-center"><div class="caption">ТРЕНИРОВКА НА ПАУЗЕ</div><div class="focus-value">Ⅱ</div><div class="caption">Таймер и отдых остановлены</div></div><button class="btn primary full" data-action="resume-workout">▶ Продолжить тренировку</button>`}
 else if(done){center=`<div class="focus-center"><div class="focus-value">✓</div><b>Упражнение выполнено</b><div class="caption">${logs.reduce((sum,l)=>sum+l.reps,0)} повторений за ${e.sets} подходов</div></div><button class="btn primary full" data-action="${at===s.exercises.length-1?'finish':'next-exercise'}">${at===s.exercises.length-1?'Завершить тренировку':'Следующее упражнение →'}</button>`}
 else if(resting){center=`<div class="focus-center"><div class="caption">${s.rest.betweenExercises?'ОТДЫХ МЕЖДУ УПРАЖНЕНИЯМИ':'ОТДЫХ ПОСЛЕ ПОДХОДА'}</div><div class="focus-value" id="rest-count">${dur(s.rest.until-Date.now())}</div><div class="caption">${s.rest.betweenExercises?'После: '+esc(s.rest.from||'предыдущего упражнения'):'Записано: '+(logs.at(-1)?.reps??'—')+' повторений'}</div></div><div class="focus-buttons"><button class="btn" data-action="more-rest">+30 сек</button><button class="btn primary" data-action="skip-rest">Пропустить отдых →</button></div>`}
-else {center=`<div class="focus-center"><div class="caption">СКОЛЬКО ПОВТОРЕНИЙ СДЕЛАЛ?</div><div class="focus-stepper"><button data-action="step" data-slot="${e.slot}" data-diff="-1" aria-label="Меньше повторений">−</button><input class="reps" type="number" min="1" max="300" inputmode="numeric" data-slot="${e.slot}" value="${draft}" aria-label="Повторения"><button data-action="step" data-slot="${e.slot}" data-diff="1" aria-label="Больше повторений">+</button></div><div class="focus-previous">${previous?`Прошлый подход №${previous.setNumber}: <strong>${previous.reps}${e.perLeg?' на ногу':''} повт.</strong> · ${dateFmt(previous.at)}`:'Предыдущего результата пока нет'}</div></div><button class="btn primary full" data-action="log" data-slot="${e.slot}">✓ Записать подход</button>`}
+else {center=`<div class="focus-center"><div class="caption">ВЕС И ПОВТОРЕНИЯ</div><div class="field" style="width:160px"><label for="set-weight">Рабочий вес, кг</label><input id="set-weight" type="number" min="0" max="1000" step="0.5" inputmode="decimal" value="${previous?.weight??0}"></div><div class="focus-stepper"><button data-action="step" data-slot="${e.slot}" data-diff="-1" aria-label="Меньше повторений">−</button><input class="reps" type="number" min="1" max="300" inputmode="numeric" data-slot="${e.slot}" value="${draft}" aria-label="Повторения"><button data-action="step" data-slot="${e.slot}" data-diff="1" aria-label="Больше повторений">+</button></div><div class="focus-previous">${previous?`Прошлый подход №${previous.setNumber}: <strong>${previous.reps}${e.perLeg?' на ногу':''} повт.</strong> · ${dateFmt(previous.at)}`:'Предыдущего результата пока нет'}</div></div><button class="btn primary full" data-action="log" data-slot="${e.slot}">✓ Записать подход</button>`}
 const tips=`<div class="focus-tools"><details class="how"><summary>Техника ▾</summary><p><strong>Думай:</strong> ${esc(CUES[e.id]?.cue||'')}<br><strong>Как выполнять:</strong> ${esc(CUES[e.id]?.tech||'')}<br><strong>Избегай:</strong> ${esc(CUES[e.id]?.avoid||'')}</p></details>${logs.length?`<button class="btn ghost small" data-action="undo" data-slot="${e.slot}">↶ Отменить</button>`:''}</div></div>`;
 const footer=`<div class="card focus-secondary"><div class="flex"><span class="tiny muted">Всего ${completed}/${all} подходов</span><span class="tiny muted">${Math.round(completed/all*100)}%</span></div><div class="progress-track"><div style="width:${completed/all*100}%"></div></div><details id="focus-all" class="focus-details"><summary>Все упражнения · сменить упражнение</summary><div class="focus-list">${s.exercises.map(x=>{const n=s.logs.filter(l=>l.slot===x.slot).length;return `<button class="btn ${x.slot===e.slot?'primary':'ghost'}" data-action="focus-exercise" data-slot="${x.slot}">${esc(x.name)} · ${n}/${x.sets}</button>`}).join('')}</div></details><details class="focus-details"><summary>Завершение тренировки</summary><button class="btn full" data-action="finish">Завершить тренировку · ${completed}/${all}</button><button class="btn ghost danger full" data-action="discard">Отменить без сохранения</button></details></div>`;
 return head+center+tips+footer
@@ -178,9 +200,10 @@ function logSet(slot){
  const logged=s.logs.filter(x=>x.slot===slot);if(logged.length>=e.sets)return;
  const inp=document.querySelector(`.reps[data-slot="${slot}"]`);
  const reps=Number(inp?.value??ui.drafts[slot]??e.min);
+ const weight=Number(document.getElementById('set-weight')?.value??0);if(!Number.isFinite(weight)||weight<0||weight>1000)return notify('Проверь рабочий вес');
  if(!Number.isInteger(reps)||reps<1||reps>300)return notify('Укажи число повторений от 1 до 300');
  armAudio();
- const log={slot,exId:e.id,exerciseName:e.name,setNumber:logged.length+1,reps,loggedAt:nowISO()};
+ const log={slot,exId:e.id,exerciseName:e.name,setNumber:logged.length+1,reps,weight,loggedAt:nowISO()};
  const logs=[...s.logs,log],finishedExercise=logged.length+1>=e.sets;
  let rest=null,next=null;
  if(finishedExercise){
@@ -229,7 +252,7 @@ function finish(){
  notify(`Тренировка завершена: ${dur(workoutElapsed(done,endedAt))}`);
 }
 function renderHistory(){if(ui.showSession){const s=db.sessions.find(x=>x.id===ui.showSession);if(s)return renderSessionDetail(s);ui.showSession=null}return `<div class="section">История<small>Здесь хранятся точные временные метки и фактические повторения.</small></div>${db.sessions.length?`<div class="card">${db.sessions.slice().reverse().map(s=>`<div class="history-item"><div class="flex"><div><div class="history-title">Тренировка ${DAY_LABEL[s.workout]} · ${esc(dateFmt(s.startedAt,{day:'numeric',month:'long',year:'numeric'}))}</div><div class="caption">${timeFmt(s.startedAt)} → ${timeFmt(s.endedAt)} · ${dur(workoutElapsed(s,s.endedAt))}</div><div class="selected-facts"><span class="pill">${s.logs.length} подходов</span>${s.mode==='outdoor'?'<span class="pill green">Хорошая погода</span>':''}</div></div><button class="btn small" data-action="view" data-id="${esc(s.id)}">Открыть</button></div></div>`).join('')}</div>`:'<div class="card empty"><div class="big">◷</div>Пока нет завершённых тренировок.<br>После первой здесь появятся время, повторения и длительность.</div>'}`}
-function renderSessionDetail(s){const first=s.logs?.[0]?.loggedAt;return `<div class="buttons"><button class="btn ghost" data-action="back-history">← Все тренировки</button></div><div class="card hero"><div class="eyebrow">ТРЕНИРОВКА ${DAY_LABEL[s.workout]} · ${dateFmt(s.startedAt,{day:'numeric',month:'long'})}</div><h2>${dur(workoutElapsed(s,s.endedAt))}</h2><p>Начало: ${timeFmt(s.startedAt)}<br>Первая отметка: ${first?timeFmt(first):'—'}<br>Завершение: ${timeFmt(s.endedAt)}</p></div><div class="card"><div class="flex"><b>Подходы и отметки</b><span class="pill">${s.logs.length} записей</span></div>${s.exercises.map(e=>{const logs=s.logs.filter(x=>x.slot===e.slot);return `<div class="plan-row"><div class="no">${e.slot+1}</div><div class="plan-details"><b>${esc(e.name)}</b><div class="caption">${logs.length?logs.map(l=>`№${l.setNumber}: ${l.reps}${e.perLeg?' на ногу':''} — ${timeFmt(l.loggedAt)}`).join('<br>'):'Нет отмеченных подходов'}</div></div></div>`}).join('')}${s.note?`<p class="notice">${esc(s.note)}</p>`:''}<div class="buttons"><button class="btn danger ghost full" data-action="delete-session" data-id="${esc(s.id)}">Удалить эту тренировку</button></div></div>`}
+function renderSessionDetail(s){const first=s.logs?.[0]?.loggedAt;return `<div class="buttons"><button class="btn ghost" data-action="back-history">← Все тренировки</button></div><div class="card hero"><div class="eyebrow">ТРЕНИРОВКА ${DAY_LABEL[s.workout]} · ${dateFmt(s.startedAt,{day:'numeric',month:'long'})}</div><h2>${dur(workoutElapsed(s,s.endedAt))}</h2><p>Начало: ${timeFmt(s.startedAt)}<br>Первая отметка: ${first?timeFmt(first):'—'}<br>Завершение: ${timeFmt(s.endedAt)}</p></div><div class="card"><div class="flex"><b>Подходы и отметки</b><span class="pill">${s.logs.length} записей</span></div>${s.exercises.map(e=>{const logs=s.logs.filter(x=>x.slot===e.slot);return `<div class="plan-row"><div class="no">${e.slot+1}</div><div class="plan-details"><b>${esc(e.name)}</b><div class="caption">${logs.length?logs.map(l=>`№${l.setNumber}: ${l.weight?l.weight+' кг × ':''}${l.reps}${e.perLeg?' на ногу':''} — ${timeFmt(l.loggedAt)}`).join('<br>'):'Нет отмеченных подходов'}</div></div></div>`}).join('')}${s.note?`<p class="notice">${esc(s.note)}</p>`:''}<div class="buttons"><button class="btn danger ghost full" data-action="delete-session" data-id="${esc(s.id)}">Удалить эту тренировку</button></div></div>`}
 function measurePoints(){return db.measures.slice().sort((a,b)=>Date.parse(a.createdAt)-Date.parse(b.createdAt))}
 function strengthRecords(id){
  return db.sessions.filter(s=>Array.isArray(s.logs)&&s.logs.some(l=>l.exId===id)).map(s=>{
@@ -440,18 +463,18 @@ function validBackup(n){
   return Number.isInteger(min)&&min>=1&&min<=100&&Number.isInteger(max)&&max>=min&&max<=100;
  };
  const validProgram=p=>p==null||(p&&typeof p==='object'&&!Array.isArray(p)&&
-  Object.keys(p).every(k=>['A','B','V','G'].includes(k)&&
+  Object.keys(p).every(k=>['A','B','V','G','E'].includes(k)&&
     Array.isArray(p[k])&&p[k].length>=1&&p[k].length<=30&&
     p[k].every(row)&&!planConflict(p[k])));
  const ex=e=>e&&Number.isInteger(e.slot)&&e.slot>=0&&str(e.id,100)&&str(e.name,300)&&
   Number.isInteger(e.sets)&&e.sets>=0&&e.sets<=100&&Number.isFinite(e.min)&&
   Number.isFinite(e.max)&&Number.isFinite(e.rest)&&e.rest>=0&&
   (e.perLeg==null||typeof e.perLeg==='boolean');
- const session=s=>s&&str(s.id,100)&&['A','B','V','G'].includes(s.workout)&&date(s.startedAt)&&
+ const session=s=>s&&str(s.id,100)&&['A','B','V','G','E'].includes(s.workout)&&date(s.startedAt)&&
   (s.endedAt==null||date(s.endedAt))&&Array.isArray(s.exercises)&&s.exercises.length<=100&&
   s.exercises.every(ex)&&Array.isArray(s.logs)&&s.logs.length<=1000&&
   s.logs.every(l=>l&&Number.isInteger(l.slot)&&str(l.exId,100)&&str(l.exerciseName,300)&&
-   Number.isInteger(l.setNumber)&&Number.isInteger(l.reps)&&l.reps>=1&&l.reps<=300&&date(l.loggedAt))&&
+   Number.isInteger(l.setNumber)&&Number.isInteger(l.reps)&&l.reps>=1&&l.reps<=300&&(l.weight==null||(Number.isFinite(l.weight)&&l.weight>=0&&l.weight<=1000))&&date(l.loggedAt))&&
   (s.note==null||str(s.note))&&(!s.rest||(Number.isFinite(s.rest.until)&&Number.isFinite(s.rest.duration)))&&
   (s.pausedAt==null||date(s.pausedAt))&&(s.pausedMs==null||(Number.isFinite(s.pausedMs)&&s.pausedMs>=0));
  return validProgram(n.programOverrides)&&(n.programStartedAt==null||date(n.programStartedAt))&&
@@ -565,6 +588,7 @@ window.addEventListener('storage',e=>{if(e.key===DB_KEY){db=load();if(ui.editRow
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)updateClock()});
 if('serviceWorker'in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('./sw.js').catch(()=>{})}
 ui.chosen=nextWorkout();render();
+if(!localStorage.getItem('forma_v2_legacy_prompted')&&localStorage.getItem(LEGACY_KEY)){localStorage.setItem('forma_v2_legacy_prompted','1');if(confirm('Новая программа начинает историю с нуля. Удалить старую историю с устройства?'))localStorage.removeItem(LEGACY_KEY);}
 </script>
 </body>
 </html>
