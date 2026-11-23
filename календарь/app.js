@@ -103,7 +103,11 @@ function updateCalendarControls(){
  if(!items.some(x=>x.id===(calendarMode==='class'?scopeClassId:scopeStaffId))){if(calendarMode==='class')scopeClassId=items[0]?.id||null;else scopeStaffId=items[0]?.id||null}
  items.forEach(item=>select.add(new Option(item.displayName||item.name,item.id)));
  select.value=calendarMode==='class'?scopeClassId||'':scopeStaffId||'';
- label.firstChild.textContent=calendarMode==='class'?'Класс ':'Сотрудник ';
+ label.firstChild.textContent=calendarMode==='class'?'Расписание класса ':'Расписание сотрудника ';
+ label.classList.toggle('scope-class',calendarMode==='class');
+ label.classList.toggle('scope-staff',calendarMode==='staff');
+ const activeClass=calendarMode==='class'?cache.classes.find(c=>c.id===scopeClassId):null;
+ select.style.backgroundColor=activeClass?classColor(activeClass):'';
  }
  const days=$('weekdays');days.replaceChildren();const monday=weekMonday(selectedDate);['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].forEach((label,i)=>{const date=shiftDate(monday,i),btn=elt('button','weekday'+(date===selectedDate?' selected':''),`${label} ${date.slice(8)}`);btn.type='button';btn.onclick=()=>{selectedDate=date;render()};days.append(btn)});
  $('weekdays').hidden=calendarMode!=='day';$('date-picker-wrap').hidden=false;$('calendar-popover').hidden=true;
