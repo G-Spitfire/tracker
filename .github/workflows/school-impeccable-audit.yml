@@ -1,0 +1,51 @@
+name: School - Impeccable audit
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'school-simple/**'
+      - '.github/workflows/school-impeccable-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  design-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run read-only Impeccable source audit
+        id: audit
+        shell: bash
+        run: |
+          set +e
+          npx --yes impeccable detect --json school-simple/ > impeccable-report.json 2> impeccable-stderr.log
+          code=$?
+          set -e
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Impeccable: school-simple/"
+            echo
+            echo "Exit code: \`$code\` (0 = no findings, 2 = findings, 1 = scan error)."
+            echo
+            echo "Download the JSON report and stderr log from the workflow artifacts."
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$code" -eq 1 ] || [ "$code" -gt 2 ]; then
+            echo "::error::Impeccable scan failed (exit $code)"
+            exit 1
+          fi
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: school-impeccable-report
+          path: |
+            impeccable-report.json
+            impeccable-stderr.log
+          if-no-files-found: warn
+          retention-days: 14
