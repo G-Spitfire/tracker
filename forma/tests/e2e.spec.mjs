@@ -42,3 +42,36 @@ test('iPhone SE viewport has no horizontal overflow', async ({ page }) => {
 test('service worker can register over localhost', async ({ page }) => {
   await expect.poll(async () => page.evaluate(async () => !!(await navigator.serviceWorker.getRegistration('./')))).toBeTruthy();
 });
+
+test('offline PWA reload preserves active workout and logged set', async ({ page, context }) => {
+  await expect.poll(async () => page.evaluate(() => navigator.serviceWorker.controller !== null)).toBeTruthy();
+  await page.locator('[data-action="start"]').click();
+  await page.locator('#set-weight').fill('7.5');
+  await page.locator('[data-action="log"]').click();
+  await context.setOffline(true);
+  try {
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#main')).toContainText('ТРЕНИРОВКА A');
+    await expect(page.locator('#main')).toContainText('Всего 1/');
+    await page.locator('[data-action="tab"][data-val="history"]').click();
+    await page.locator('[data-action="tab"][data-val="today"]').click();
+    await expect(page.locator('#main')).toContainText('ТРЕНИРОВКА A');
+  } finally {
+    await context.setOffline(false);
+  }
+});
+
+test('service worker update keeps locally saved schedule', async ({ page }) => {
+  await expect.poll(async () => page.evaluate(() => navigator.serviceWorker.controller !== null)).toBeTruthy();
+  await page.locator('[data-action="schedule"][data-val="one"]').click();
+  const before = await page.evaluate(() => navigator.serviceWorker.controller.scriptURL);
+  await page.evaluate(async () => {
+    const registration = await navigator.serviceWorker.getRegistration('./');
+    if (!registration) throw new Error('Missing service worker registration');
+    await registration.update();
+  });
+  await page.reload();
+  await expect(page.locator('[data-action="schedule"][data-val="one"]')).toHaveClass(/primary/);
+  const after = await page.evaluate(() => navigator.serviceWorker.controller?.scriptURL);
+  expect(after).toBe(before);
+});
