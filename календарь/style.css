@@ -232,3 +232,9 @@ button.event.event-ten-minute .event-top{display:flex;align-items:center;justify
 button.event.event-ten-minute .event-name{flex:1 1 auto;min-width:0;font-size:8px;font-weight:600;line-height:1;letter-spacing:.02em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 button.event.event-ten-minute .event-time{display:block;flex:0 0 auto;font-size:8px;line-height:1;white-space:nowrap;opacity:.85}
 button.event.event-ten-minute .event-details{display:none}
+
+/* Events 40+ minutes: keep teacher bottom-left and room bottom-right. */
+button.event.event-long{justify-content:space-between}
+button.event.event-long .event-details{display:flex;width:100%;justify-content:space-between;align-items:baseline;gap:3px;min-width:0;margin-top:auto}
+button.event.event-long .event-teacher{flex:1 1 auto;min-width:0;text-align:left}
+button.event.event-long .event-room,button.event.event-long.event-narrow .event-room{display:block;flex:0 1 auto;min-width:0;max-width:48%;margin-left:auto;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
