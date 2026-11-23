@@ -212,3 +212,11 @@ html[data-theme=dark] .lesson-mark-2{color:#ff8a8a}
 .grades-filter-check input:checked::after{content:"";width:9px;height:5px;border-left:2px solid white;border-bottom:2px solid white;transform:translateY(-1px) rotate(-45deg)}
 html[data-theme=dark] .home-line text{fill:#d2d2da}
 @media(prefers-color-scheme:dark){html[data-theme=system] .home-line text{fill:#d2d2da}}
+
+/* Apple-only typographic refinements. Other platforms retain the existing design. */
+html.platform-apple body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;-webkit-font-smoothing:antialiased}
+html.platform-apple .head h1{letter-spacing:-.045em;font-weight:700}
+html.platform-apple .heading{letter-spacing:-.025em}
+html.platform-apple .stat-value{font-variant-numeric:tabular-nums lining-nums;letter-spacing:-.045em;font-weight:650}
+html.platform-apple .subject-average,html.platform-apple .forecast-result{font-variant-numeric:tabular-nums lining-nums;letter-spacing:-.025em}
+html.platform-apple .calendar button,html.platform-apple .schedule-month{font-variant-numeric:tabular-nums lining-nums;letter-spacing:-.02em}
