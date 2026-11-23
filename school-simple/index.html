@@ -42,9 +42,63 @@ function mapDiaryChild(raw,name){
  }
  return {name,subjects:[...subjectsMap.values()].sort((a,b)=>a.name.localeCompare(b.name,'ru')),lessons:raw.lessons||[],schedule,tasks};
 }
+// Snapshot-based homework discovery. First successful network snapshot establishes a baseline.
+const HOMEWORK_EVENTS_KEY='school-homework-events-v1';
+const HOMEWORK_BASELINE_KEY='school-homework-baseline-v1';
+const HOME_UPDATES_OPEN_KEY='school-home-updates-open-v1';
+let homeUpdatesOpen=readSetting(HOME_UPDATES_OPEN_KEY,'0')==='1';
+function homeworkIdentity(task){
+ return JSON.stringify([task.lessonId||'',task.subject,task.text,task.kind||'']);
+}
+function readStoredJSON(key,fallback){try{const raw=localStorage.getItem(key);return raw?JSON.parse(raw):fallback}catch{return fallback}}
+function trackHomeworkChanges(){
+ const today=iso(TODAY);
+ const previous=readStoredJSON(HOMEWORK_BASELINE_KEY,null);
+ const next=kids.map(k=>k.tasks.map(homeworkIdentity));
+ if(previous&&Array.isArray(previous)&&previous.length===2){
+  const events=readStoredJSON(HOMEWORK_EVENTS_KEY,[]);
+  const retained=Array.isArray(events)?events.filter(e=>e&&e.day===today&&[0,1].includes(e.child)):[];
+  for(let child=0;child<2;child++){
+   const old=new Set(Array.isArray(previous[child])?previous[child]:[]);
+   for(const task of kids[child].tasks){
+    const id=homeworkIdentity(task);
+    if(!old.has(id)&&!retained.some(e=>e.child===child&&e.id===id)){
+     retained.push({child,id,day:today,subject:task.subject,text:task.text,nextLessonDate:task.nextLessonDate});
+    }
+   }
+  }
+  saveSetting(HOMEWORK_EVENTS_KEY,JSON.stringify(retained.slice(-100)));
+ }else{
+  saveSetting(HOMEWORK_EVENTS_KEY,JSON.stringify([]));
+ }
+ saveSetting(HOMEWORK_BASELINE_KEY,JSON.stringify(next));
+}
+function recentUpdates(){
+ const today=iso(TODAY),yesterday=offset(-1);
+ const grades=kids[state.child].subjects.flatMap(subject=>subject.grades.filter(g=>g.date===today||g.date===yesterday).map(g=>({kind:'grade',day:g.date,subject:subject.name,grade:g})));
+ const stored=readStoredJSON(HOMEWORK_EVENTS_KEY,[]);
+ const homework=(Array.isArray(stored)?stored:[]).filter(e=>e.child===state.child&&e.day===today).map(e=>({kind:'homework',day:today,subject:e.subject,text:e.text,nextLessonDate:e.nextLessonDate}));
+ return grades.concat(homework).sort((a,b)=>b.day.localeCompare(a.day)||(a.kind==='grade'?-1:1));
+}
+function recentUpdatesPanel(){
+ const events=recentUpdates(),today=iso(TODAY);
+ const eventHTML=e=>e.kind==='grade'
+ ?'<button class="update-event" data-action="grade" data-value="'+encodeURIComponent(JSON.stringify({subject:e.subject,...e.grade}))+'"><span class="mark">'+e.grade.value+'</span><span class="update-event-text"><strong>'+escapeHTML(e.subject)+'</strong><small>'+escapeHTML(e.grade.type||'Оценка')+'</small></span><span aria-hidden="true">›</span></button>'
+ :'<button class="update-event" data-action="homework-detail" data-value="'+encodeURIComponent(JSON.stringify(e))+'"><span class="update-book" aria-hidden="true">▤</span><span class="update-event-text"><strong>'+escapeHTML(e.subject)+'</strong><small>Новое домашнее задание</small></span><span aria-hidden="true">›</span></button>';
+ let html='<section class="updates-panel"><button class="updates-toggle" data-action="toggle-updates" aria-expanded="'+homeUpdatesOpen+'"><span class="updates-title">Последние обновления</span><span class="updates-count">'+events.length+' '+(events.length===1?'событие':'событий')+'</span><span aria-hidden="true">'+(homeUpdatesOpen?'⌃':'⌄')+'</span></button>';
+ if(homeUpdatesOpen){
+  if(!events.length)html+='<div class="updates-empty">Новых событий за сегодня и вчера нет</div>';
+  else for(const day of [today,offset(-1)]){
+   const group=events.filter(e=>e.day===day);
+   if(group.length)html+='<div class="updates-day"><div class="updates-day-label">'+(day===today?'Сегодня':'Вчера')+'</div>'+group.map(eventHTML).join('')+'</div>';
+  }
+ }
+ return html+'</section>';
+}
 function applyDiary(data,source='network'){
  if(!data||data.schemaVersion!==1||!data.children?.polina||!data.children?.matvey)throw new Error('Неполный набор данных дневника');
  kids[0]=mapDiaryChild(data.children.polina,'Полина');kids[1]=mapDiaryChild(data.children.matvey,'Матвей');
+ if(source==='network')trackHomeworkChanges();
  dataSource=source==='cache'?'cached':'live';diaryUpdatedAt=data.generatedAt||null;syncWarning=null;
  checkMatveyAchievement();
 }
@@ -124,7 +178,7 @@ function home(){
  tile('Под риском',String(riskCount),'Предмета · средний < 3,60','alert')+
  (holidayInfo()?tile('До Нового года',String(holidayInfo().days),'Дней до праздника','tree'):tile('Без троек и двоек',String(cleanStreak),'Учебных дней подряд','flame'))+
  tile('Средний за домашки',hwAverage,'За четверть','homework')+
- '</div><div class="home-switch">'+btns([['line','Линейный'],['ring','Кольцевой']],state.chart,'chart')+'</div><div class="home-visual">';
+ '</div>'+recentUpdatesPanel()+'<div class="home-switch">'+btns([['line','Линейный'],['ring','Кольцевой']],state.chart,'chart')+'</div><div class="home-visual">';
  if(!all.length){out+='<div class="empty">Пока нет оценок за эту четверть</div>';}else if(state.chart==='ring'){
   const circumference=2*Math.PI*72;let cum=0;
   out+='<div class="home-ring-layout"><svg class="home-ring" viewBox="0 0 200 200" aria-label="Распределение оценок"><circle cx="100" cy="100" r="72" stroke="var(--soft)" stroke-width="25" fill="none"/>'+counts.map((n,i)=>{let part='<circle cx="100" cy="100" r="72" fill="none" stroke="'+colors[i]+'" stroke-width="25" stroke-dasharray="'+(n/all.length*circumference)+' '+circumference+'" stroke-dashoffset="'+(-cum/all.length*circumference)+'" transform="rotate(-90 100 100)"/>';cum+=n;return part}).join('')+'<text x="100" y="99" text-anchor="middle" fill="var(--fg)" font-size="37" font-weight="700">'+all.length+'</text><text x="100" y="119" text-anchor="middle" fill="var(--muted)" font-size="12">оценок</text></svg><div class="home-legend">'+counts.map((n,i)=>'<div class="home-legend-item"><span class="home-dot" style="background:'+colors[i]+'"></span><span>'+['Пятёрки','Четвёрки','Тройки','Двойки'][i]+'</span><b>'+n+'</b></div>').join('')+'</div></div>';
@@ -225,7 +279,7 @@ function refreshOnNewDay(){
 }
 window.addEventListener('focus',()=>{if(!refreshOnNewDay())checkForUpdate()});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!refreshOnNewDay())checkForUpdate()});document.querySelector('#profile').addEventListener('click',()=>{if(state.tab==='profile')setTab(state.returnTab);else{state.returnTab=state.tab;setTab('profile')}});
-document.addEventListener('change',e=>{if(e.target.matches('#quarter-select, #header-quarter')){state.quarter=e.target.value;render({preserveScroll:true})}else if(e.target.matches('#tests-toggle')){state.filter=e.target.checked?'tests':'all';render({preserveScroll:true})}});document.querySelector('#profile').parentElement.addEventListener('click',e=>{if(e.target.closest('#sync-indicator'))showSyncDialog()});document.addEventListener('click',e=>{let b=e.target.closest('[data-action]');if(!b)return;let a=b.dataset.action,v=b.dataset.value;switch(a){case'retry-sync':loadDiarySnapshot();return;case'refresh-diary':if(!syncInProgress){loadDiarySnapshot(true)}return;case'tab':setTab(v);return;case'grade':{let g=JSON.parse(decodeURIComponent(v));openModal(g.subject,'<div class="modal-row"><span class="modal-label">Оценка</span><strong>'+g.value+'</strong></div><div class="modal-row"><span class="modal-label">Дата</span><span>'+new Date(g.date+'T12:00:00').toLocaleDateString('ru-RU')+'</span></div><div class="modal-row"><span class="modal-label">Тип работы</span><span>'+escapeHTML(g.type||(g.test?'Контрольная':'Обычная'))+'</span></div>','<button class="modal-button" data-action="close-detail">Закрыть</button>');return}case'close-detail':b.closest('.detail-overlay')?.remove();return;case'grades-view':state.gradesView=v;break;case'chart':state.chart=v;break;case'hw':state.hw=v;break;case'child':state.child=+v;saveSetting('school-active-child',String(state.child));if(state.child===1&&eggState()?.pending)queueMicrotask(showMatveyAchievement);break;case'theme':state.theme=v;saveSetting('school-theme',v);break;case'accent':state.accent=v;saveSetting('school-accent',v);break;case'date':state.date=v;break;case'week':state.week+=+v;{let d=new Date(state.date+'T12:00:00');d.setDate(d.getDate()+7*(+v));state.date=iso(d)}break;}render({preserveScroll:true})});render();
+document.addEventListener('change',e=>{if(e.target.matches('#quarter-select, #header-quarter')){state.quarter=e.target.value;render({preserveScroll:true})}else if(e.target.matches('#tests-toggle')){state.filter=e.target.checked?'tests':'all';render({preserveScroll:true})}});document.querySelector('#profile').parentElement.addEventListener('click',e=>{if(e.target.closest('#sync-indicator'))showSyncDialog()});document.addEventListener('click',e=>{let b=e.target.closest('[data-action]');if(!b)return;let a=b.dataset.action,v=b.dataset.value;switch(a){case'toggle-updates':homeUpdatesOpen=!homeUpdatesOpen;saveSetting(HOME_UPDATES_OPEN_KEY,homeUpdatesOpen?'1':'0');render({preserveScroll:true});return;case'homework-detail':{const t=JSON.parse(decodeURIComponent(v));openModal(t.subject,'<div class="modal-row"><span class="modal-label">Задание</span><span>'+escapeHTML(t.text)+'</span></div>'+(t.nextLessonDate?'<div class="modal-row"><span class="modal-label">Следующий урок</span><span>'+escapeHTML(t.nextLessonDate)+'</span></div>':''),'<button class="modal-button" data-action="close-detail">Закрыть</button>');return;} case'retry-sync':loadDiarySnapshot();return;case'refresh-diary':if(!syncInProgress){loadDiarySnapshot(true)}return;case'tab':setTab(v);return;case'grade':{let g=JSON.parse(decodeURIComponent(v));openModal(g.subject,'<div class="modal-row"><span class="modal-label">Оценка</span><strong>'+g.value+'</strong></div><div class="modal-row"><span class="modal-label">Дата</span><span>'+new Date(g.date+'T12:00:00').toLocaleDateString('ru-RU')+'</span></div><div class="modal-row"><span class="modal-label">Тип работы</span><span>'+escapeHTML(g.type||(g.test?'Контрольная':'Обычная'))+'</span></div>','<button class="modal-button" data-action="close-detail">Закрыть</button>');return}case'close-detail':b.closest('.detail-overlay')?.remove();return;case'grades-view':state.gradesView=v;break;case'chart':state.chart=v;break;case'hw':state.hw=v;break;case'child':state.child=+v;saveSetting('school-active-child',String(state.child));if(state.child===1&&eggState()?.pending)queueMicrotask(showMatveyAchievement);break;case'theme':state.theme=v;saveSetting('school-theme',v);break;case'accent':state.accent=v;saveSetting('school-accent',v);break;case'date':state.date=v;break;case'week':state.week+=+v;{let d=new Date(state.date+'T12:00:00');d.setDate(d.getDate()+7*(+v));state.date=iso(d)}break;}render({preserveScroll:true})});render();
 async function loadDiarySnapshot(fromDialog=false){
  if(syncInProgress)return;syncInProgress=true;syncError=false;if(fromDialog)showSyncDialog();else if(state.tab==='home')render({preserveScroll:true});
  if(!window.SchoolSync){dataSource='error';syncWarning='Модуль синхронизации недоступен';syncError=true;syncInProgress=false;render();if(fromDialog)showSyncDialog();return;}
