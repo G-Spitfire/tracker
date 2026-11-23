@@ -1,7 +1,8 @@
-const CACHE_NAME = "school-shell-v1.33.6-art-safe-padding";
+const CACHE_NAME = "school-shell-v1.33.6-extracted-css";
 const SHELL = [
   "./",
   "./index.html",
+  "./styles.css",
   "./manifest.webmanifest",
   "./version.json",
   "./icon.svg",
