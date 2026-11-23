@@ -43,12 +43,16 @@ function mapDiaryChild(raw,name){
  return {name,subjects:[...subjectsMap.values()].sort((a,b)=>a.name.localeCompare(b.name,'ru')),lessons:raw.lessons||[],schedule,tasks};
 }
 // Snapshot-based homework discovery. First successful network snapshot establishes a baseline.
-const HOMEWORK_EVENTS_KEY='school-homework-events-v1';
-const HOMEWORK_BASELINE_KEY='school-homework-baseline-v1';
+const HOMEWORK_EVENTS_KEY='school-homework-events-v2';
+const HOMEWORK_BASELINE_KEY='school-homework-baseline-v2';
 const HOME_UPDATES_OPEN_KEY='school-home-updates-open-v1';
 let homeUpdatesOpen=readSetting(HOME_UPDATES_OPEN_KEY,'0')==='1';
 function homeworkIdentity(task){
- return JSON.stringify([task.lessonId||'',task.subject,task.text,task.kind||'']);
+ const value=JSON.stringify([task.lessonId||'',task.subject,task.text,task.kind||'']);
+ // Two compact checksums keep homework text out of localStorage.
+ let h1=2166136261,h2=0x9e3779b9;
+ for(let i=0;i<value.length;i++){const c=value.charCodeAt(i);h1=Math.imul(h1^c,16777619);h2=Math.imul(h2^(c+i),2246822519)}
+ return (h1>>>0).toString(36)+'-'+(h2>>>0).toString(36)+'-'+value.length;
 }
 function readStoredJSON(key,fallback){try{const raw=localStorage.getItem(key);return raw?JSON.parse(raw):fallback}catch{return fallback}}
 function trackHomeworkChanges(){
@@ -63,7 +67,7 @@ function trackHomeworkChanges(){
    for(const task of kids[child].tasks){
     const id=homeworkIdentity(task);
     if(!old.has(id)&&!retained.some(e=>e.child===child&&e.id===id)){
-     retained.push({child,id,day:today,subject:task.subject,text:task.text,nextLessonDate:task.nextLessonDate});
+     retained.push({child,id,day:today});
     }
    }
   }
@@ -77,7 +81,8 @@ function recentUpdates(){
  const today=iso(TODAY),yesterday=offset(-1);
  const grades=kids[state.child].subjects.flatMap(subject=>subject.grades.filter(g=>g.date===today||g.date===yesterday).map(g=>({kind:'grade',day:g.date,subject:subject.name,grade:g})));
  const stored=readStoredJSON(HOMEWORK_EVENTS_KEY,[]);
- const homework=(Array.isArray(stored)?stored:[]).filter(e=>e.child===state.child&&e.day===today).map(e=>({kind:'homework',day:today,subject:e.subject,text:e.text,nextLessonDate:e.nextLessonDate}));
+ const byId=new Map(kids[state.child].tasks.map(task=>[homeworkIdentity(task),task]));
+ const homework=(Array.isArray(stored)?stored:[]).filter(e=>e.child===state.child&&e.day===today&&byId.has(e.id)).map(e=>{const task=byId.get(e.id);return {kind:'homework',day:today,subject:task.subject,text:task.text,nextLessonDate:task.nextLessonDate};});
  return grades.concat(homework).sort((a,b)=>b.day.localeCompare(a.day)||(a.kind==='grade'?-1:1));
 }
 function recentUpdatesPanel(){
