@@ -26,10 +26,8 @@ const assert = require('node:assert/strict');
     metrics:typeof kpiIcon==='function' && kpiIcon('average').includes('<svg')
   }));
   assert.deepEqual(iconLibrary,{navigation:true,metrics:true},'Shared icon libraries loaded');
-  await page.locator('[data-action="toggle-updates"]').click();
-  assert.equal(await page.locator('[data-action="toggle-updates"]').getAttribute('aria-expanded'),'true','Recent updates expand');
-  await page.locator('[data-action="toggle-updates"]').click();
-  assert.equal(await page.locator('[data-action="toggle-updates"]').getAttribute('aria-expanded'),'false','Recent updates collapse');
+   assert.equal(await page.locator('[data-action="toggle-updates"]').isDisabled(),true,'Empty recent updates are not expandable');
+   await page.getByText('Нет новых',{exact:true}).waitFor();
   await page.getByText('Средний балл',{exact:true}).waitFor();
   await page.locator('[data-action="tab"][data-value="grades"]').click();
   await page.getByText('Математика',{exact:true}).first().waitFor();
