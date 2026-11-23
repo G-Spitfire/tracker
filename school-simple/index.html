@@ -203,7 +203,7 @@ function lessonGradeButtons(lesson,lessons,index,kid,date){
  const matched=grades.filter(g=>g.lessonId!=null&&lesson.id!=null&&String(g.lessonId)===String(lesson.id));
  const first=lessons.findIndex(l=>String(l.subject||'').trim().toLocaleLowerCase('ru')===subjectKey)===index;
  const fallback=first?grades.filter(g=>g.lessonId==null||!lessons.some(l=>l.id!=null&&String(l.id)===String(g.lessonId))):[];
- return matched.concat(fallback).map(g=>'<button class="mark" data-action="grade" data-value="'+encodeURIComponent(JSON.stringify(g))+'" aria-label="Оценка '+g.value+' по предмету '+escapeHTML(g.subject)+'">'+g.value+'</button>').join('');
+ return matched.concat(fallback).map(g=>'<button class="mark lesson-mark lesson-mark-'+(g.value>=2&&g.value<=5?g.value:'other')+'" data-action="grade" data-value="'+encodeURIComponent(JSON.stringify(g))+'" aria-label="Оценка '+g.value+' по предмету '+escapeHTML(g.subject)+'">'+g.value+'</button>').join('');
 }
 function schedule(){
  let d=new Date(TODAY);d.setDate(d.getDate()+state.week*7);
