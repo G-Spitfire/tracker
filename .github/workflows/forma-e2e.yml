@@ -1,0 +1,35 @@
+name: Forma 2.0 browser tests
+on:
+  pull_request:
+    paths:
+      - 'forma/**'
+      - '.github/workflows/forma-e2e.yml'
+  workflow_dispatch:
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright
+        run: |
+          npm install --no-save @playwright/test
+          npx playwright install --with-deps chromium
+      - name: Serve site
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/forma-server.log 2>&1 &
+      - name: Run Chromium browser tests
+        run: npx playwright test forma/tests/e2e.spec.mjs --reporter=line --workers=1
+        env:
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:8765
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: forma-browser-failure
+          path: test-results/
+          if-no-files-found: ignore
