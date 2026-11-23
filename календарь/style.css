@@ -249,3 +249,9 @@ button.event.event-long .event-details{margin-top:auto}
 /* Trial: flat, square event cards. Keep typography, spacing and palette intact. */
 button.event{border-radius:0;border-width:1px;border-left-width:2px;box-shadow:none}
 button.event:hover{box-shadow:none}
+
+/* Reference editor: alphabetized subjects in a vertical checklist; class order controls. */
+#reference-subjects{display:flex;flex-direction:column;align-items:stretch;gap:5px}
+#reference-subjects label{display:flex;align-items:center;gap:7px;width:100%}
+.class-order-controls{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.class-order-button{min-width:28px;padding:4px 7px}
