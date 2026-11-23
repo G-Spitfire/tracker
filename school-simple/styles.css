@@ -27,7 +27,7 @@ html[data-theme=dark]{--bg:#09090b;--surface:#202023;--fg:#ffffff;--muted:#b4b4b
 .content-after-controls{margin-top:var(--space-controls-content)}
 .content-after-controls>.task:first-child,.content-after-controls>.subject:first-child{padding-top:0}
 .marks{display:flex;flex-wrap:wrap;gap:5px;overflow:visible;white-space:normal;margin-top:7px}
-.marks::-webkit-scrollbar{display:none}
+
 .mark.new{position:relative}
 .mark.new::after{content:"";position:absolute;top:9px;right:9px;width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 1px var(--soft)}
 .bottom button.active{color:var(--accent);font-weight:var(--weight-bold)}
@@ -48,7 +48,7 @@ html[data-theme=dark]{--bg:#09090b;--surface:#202023;--fg:#ffffff;--muted:#b4b4b
 .grades-filter-check input{width:20px;height:20px;accent-color:var(--accent);margin:0}
 .grades-filter-row .sub{white-space:nowrap}
 .lesson{display:flex;gap:12px;padding:11px 3px;border-bottom:1px solid var(--line)}
-.homework-day{border:1px solid var(--line);border-radius:var(--radius-panel);overflow:hidden;margin-bottom:var(--space-4)}.homework-day-title{font-size:var(--font-body);font-weight:600;margin:0;background:var(--soft);padding:12px 12px 12px 17px;position:relative}.homework-day-title:before{content:"";position:absolute;left:8px;top:11px;bottom:11px;width:3px;border-radius:3px;background:var(--accent)}.homework-day-body{padding:0 12px}.homework-day-body .task:last-child{border-bottom:0}.homework-celebration{padding:15px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}.homework-celebration strong{font-size:var(--font-body)}.homework-celebration span,.homework-unknown{color:var(--muted);font-size:var(--font-caption)}.homework-doodle{width:78px;height:78px;padding:8px;object-fit:contain;opacity:.52;display:block}html[data-theme=dark] .homework-doodle{filter:brightness(0) invert(1)}@media(prefers-color-scheme:dark){html[data-theme=system] .homework-doodle{filter:brightness(0) invert(1)}}.homework-unknown{padding:15px 0}.task{padding:11px 2px;border-bottom:1px solid var(--line)}
+.homework-day{border:1px solid var(--line);border-radius:var(--radius-panel);overflow:hidden;margin-bottom:var(--space-4)}.homework-day-title{font-size:var(--font-body);font-weight:600;margin:0;background:var(--soft);padding:12px 12px 12px 17px;position:relative}.homework-day-title:before{content:"";position:absolute;left:8px;top:11px;bottom:11px;width:3px;border-radius:3px;background:var(--accent)}.homework-day-body{padding:0 12px}.homework-day-body .task:last-child{border-bottom:0}.homework-celebration{padding:15px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}.homework-celebration strong{font-size:var(--font-body)}.homework-celebration span,.homework-unknown{color:var(--muted);font-size:var(--font-caption)}.homework-unknown{padding:15px 0}.task{padding:11px 2px;border-bottom:1px solid var(--line)}
 .task p{margin:var(--space-item-detail) 0 0}
 .field{display:grid;gap:5px;margin:12px 0}
 .field input,.field select{width:100%;background:var(--soft);border:1px solid var(--line);border-radius:9px;color:var(--fg);padding:12px;font:inherit}
@@ -165,3 +165,14 @@ body.is-loading header,body.is-loading nav{visibility:hidden}body.is-loading mai
 .update-event-text small{font-size:var(--font-caption);color:var(--muted);overflow-wrap:anywhere}
 .update-book{width:30px;min-width:30px;text-align:center;font-size:22px;color:var(--accent)}
 .updates-empty{padding:2px 14px 16px;font-size:var(--font-body);color:var(--muted)}
+
+/* Schedule-only semantic grade colors; the main grades grid remains neutral. */
+.lesson-mark-5{color:#18835e}
+.lesson-mark-4{color:#2677ce}
+.lesson-mark-3{color:#ac710c}
+.lesson-mark-2{color:#cf4545}
+html[data-theme=dark] .lesson-mark-5{color:#57d5a6}
+html[data-theme=dark] .lesson-mark-4{color:#82b6ff}
+html[data-theme=dark] .lesson-mark-3{color:#f0c06d}
+html[data-theme=dark] .lesson-mark-2{color:#ff8a8a}
+@media(prefers-color-scheme:dark){html[data-theme=system] .lesson-mark-5{color:#57d5a6}html[data-theme=system] .lesson-mark-4{color:#82b6ff}html[data-theme=system] .lesson-mark-3{color:#f0c06d}html[data-theme=system] .lesson-mark-2{color:#ff8a8a}}
