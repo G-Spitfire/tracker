@@ -237,3 +237,15 @@ html.platform-apple .calendar button,html.platform-apple .schedule-month{font-va
 .subject .subject-score{position:static;display:block;min-width:62px;text-align:right}
 .subject .subject-score .subject-trend{position:absolute;right:0;top:31px;display:block;line-height:1.2;white-space:nowrap}
 .subject .marks{padding-right:76px;min-height:44px}
+
+/* Home screen polish: consistent KPI text baselines and compact updates. */
+.stats-grid{grid-auto-rows:1fr;margin-bottom:10px}
+.stat-tile .stat-top{min-height:2.5em}
+.stat-tile .stat-hint{min-height:2.5em}
+.updates-panel{margin:0 0 4px}
+.updates-day{padding:0 0 4px}
+.updates-day-label{padding:6px 2px 3px}
+.update-event{min-height:44px;padding:4px 0;gap:10px}
+.home-switch{margin-bottom:10px}
+/* Preserve scroll room above the fixed bottom navigation in iOS PWA. */
+.app{padding-bottom:calc(112px + env(safe-area-inset-bottom))}
