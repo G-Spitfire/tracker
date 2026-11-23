@@ -44,7 +44,7 @@ function eventCard(e){
  card.onclick=()=>openEditor(e);
  const layout=()=>{
   const height=card.getBoundingClientRect().height,width=card.getBoundingClientRect().width;
-  card.classList.toggle('event-ten-minute',end-start<=10);card.classList.toggle('event-tiny',height<20);
+  card.classList.toggle('event-ten-minute',end-start<=15);card.classList.toggle('event-long',end-start>=30);card.classList.toggle('event-tiny',height<20);
   card.classList.toggle('event-compact',height>=20&&height<37);
   card.classList.toggle('event-narrow',width<175);
  };
