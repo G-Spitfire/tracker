@@ -197,3 +197,18 @@ html[data-theme=dark] .lesson-mark-2{color:#ff8a8a}
 .schedule-arrows .icon{position:relative;min-width:44px;min-height:44px;width:44px;height:44px;background:transparent}
 .schedule-arrows .icon::before{content:"";position:absolute;inset:4px;border-radius:var(--radius-control);background:var(--soft)}
 .schedule-arrows .icon svg{position:relative;width:20px;height:20px}
+
+/* 1.33.9: mobile visual audit corrections. Keep KPI tiles and navigation unchanged. */
+.home-visual .home-line{display:block;width:100%;height:auto;max-height:none;aspect-ratio:350 / 210;margin:0}
+.lesson{display:flex;align-items:flex-start;width:100%;min-width:0}
+.lesson-main,.lesson-title-row,.lesson-copy{min-width:0}
+.lesson-title-row{width:100%}
+.lesson-copy{overflow-wrap:break-word;word-break:normal}
+.lesson-grades{flex:0 1 auto;min-width:0;max-width:48%}
+.forecast-track{height:6px;margin-top:6px}
+.grades-filter-check{min-height:44px}
+.grades-filter-check input{appearance:none;-webkit-appearance:none;display:grid;place-items:center;flex:none;width:19px;height:19px;border:1.5px solid var(--muted);border-radius:5px;background:var(--surface);cursor:pointer}
+.grades-filter-check input:checked{background:var(--accent);border-color:var(--accent)}
+.grades-filter-check input:checked::after{content:"";width:9px;height:5px;border-left:2px solid white;border-bottom:2px solid white;transform:translateY(-1px) rotate(-45deg)}
+html[data-theme=dark] .home-line text{fill:#d2d2da}
+@media(prefers-color-scheme:dark){html[data-theme=system] .home-line text{fill:#d2d2da}}

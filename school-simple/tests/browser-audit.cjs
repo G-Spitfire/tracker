@@ -20,7 +20,7 @@ const fakeDiary = {
     polina:{
       marks:[{subjectId:'m',subject:'Математика',value:5,date:'2026-11-19',type:'Контрольная работа'}],
       lessons:[{subjectId:'m',subject:'Математика',from:'2026-11-19T09:00:00',tasks:[{name:'Упражнение 5'}]}],
-      schedule:[{subjectId:'m',subject:'Математика',from:'2026-11-20T09:00:00'}]
+      schedule:[{subjectId:'m',subject:'Математика',from:'2026-11-20T09:00:00',topic:'Решение задач на движение и вычисление расстояния с подробным разбором'}, {subjectId:'r',subject:'Русский язык',from:'2026-11-20T10:00:00',topic:'Правописание сложных слов'}]
     },
     matvey:{
       marks:[{subjectId:'r',subject:'Русский язык',value:4,date:'2026-11-19',type:'Урок'}],
@@ -66,6 +66,19 @@ async function run() {
     await page.getByText('Средний балл',{exact:true}).waitFor({timeout:15000});
     for(const [scenario,tab] of [['home','home'],['grades','grades'],['schedule','schedule'],['homework','homework']]) {
       if(tab!=='home')await page.locator('[data-action="tab"][data-value="'+tab+'"]').click();
+      if(tab==='home'){
+        const graph=await page.locator('.home-line').evaluate(el=>{const r=el.getBoundingClientRect(),p=el.parentElement.getBoundingClientRect();return {ratio:r.width/p.width,width:r.width,parent:p.width}});
+        record(view,'line chart fills available width',graph.ratio>=0.94,graph);
+      }
+      if(tab==='schedule'){
+        await page.evaluate(()=>{state.date='2026-11-20';render();});
+        const layout=await page.evaluate(()=>{
+          const cards=[...document.querySelectorAll('.lesson')];
+          const main=document.querySelector('main');
+          return {count:cards.length,allDirect:cards.every(el=>el.parentElement===main),widths:cards.map(el=>Math.round(el.getBoundingClientRect().width))};
+        });
+        record(view,'schedule lessons are independent full-width rows',layout.count>=2&&layout.allDirect&&layout.widths.every(w=>w>=size.width-55),layout);
+      }
       const g=await geometry(page);
       record(view,scenario+' geometry',!g.overflow && !g.offenders.length,g);
       await page.screenshot({path:path.join(OUT,view+'-'+scenario+'.png'),fullPage:false});
