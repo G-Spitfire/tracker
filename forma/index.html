@@ -171,12 +171,26 @@ function renderOfp(){const today=dayKey();const done=db.ofpDays.includes(today);
 function start(){if(db.active)return notify('Сначала заверши текущую тренировку');armAudio();const week=Math.max(1,Math.floor((Date.now()-Date.parse(PROGRAM_START+'T00:00:00'))/604800000)+1);const planned=exercises(ui.chosen,'home');if(week<=4)planned.forEach((e,i)=>{e.sets=week<=2?(i<3?2:1):Math.min(e.sets,i<3?3:2)});const active={id:'s_'+Date.now(),workout:ui.chosen,mode:'home',startedAt:nowISO(),exercises:planned,logs:[],note:'',rest:null};if(!save({...db,active,programStartedAt:db.programStartedAt||active.startedAt}))return;ui.drafts={};ui.focusSlot=active.exercises[0]?.slot??null;render();notify('Тренировка началась. Удачи!')}
 function previousSet(e,setIndex){
  for(const sameWorkout of [true,false])for(let i=db.sessions.length-1;i>=0;i--){
-  const s=db.sessions[i];if(sameWorkout&&s.workout!==db.active?.workout)continue;
-  const logs=(s.logs||[]).filter(l=>l.exId===e.id);
-  const log=logs.find(l=>l.setNumber===setIndex+1)||logs.at(-1);
-  if(log)return {reps:log.reps,weight:log.weight??0,setNumber:log.setNumber,at:s.startedAt};
+  const session=db.sessions[i];if(sameWorkout&&session.workout!==db.active?.workout)continue;
+  const logs=(session.logs||[]).filter(l=>l.exId===e.id);
+  const log=logs.find(l=>l.slot===e.slot&&l.setNumber===setIndex+1)||logs.find(l=>l.setNumber===setIndex+1)||logs.at(-1);
+  if(log)return {reps:log.reps,weight:log.weight??0,setNumber:log.setNumber,at:session.startedAt};
  }
  return null;
+}
+function progressionHint(e){
+ if(!db.active)return '';
+ const session=db.sessions.slice().reverse().find(s=>s.workout===db.active.workout&&s.exercises?.some(x=>x.id===e.id)&&s.logs?.some(l=>l.exId===e.id));
+ if(!session)return 'Начни с комфортной нагрузки, сохраняя 2–4 повторения в запасе.';
+ const slots=session.exercises.filter(x=>x.id===e.id).map(x=>x.slot);
+ const sets=session.logs.filter(l=>slots.includes(l.slot)&&l.exId===e.id);
+ const planned=session.exercises.find(x=>x.id===e.id)?.sets??e.sets;
+ if(sets.length<planned)return 'Прошлая тренировка была неполной: сначала выполни плановый объём.';
+ const weighted=sets.every(l=>Number.isFinite(l.weight)&&l.weight>0);
+ const sameWeight=weighted&&sets.every(l=>l.weight===sets[0].weight);
+ if(sameWeight&&sets.every(l=>l.reps>=e.max))return 'Все подходы достигли верхней границы. Если техника и запас повторений были хорошими, можно немного увеличить вес.';
+ if(sets.every(l=>l.reps>=e.max))return 'Верхняя граница достигнута. При сохранении техники усложни упражнение или натяжение резинки.';
+ return 'Сохрани нагрузку и попробуй добавить 1 повторение в одном из подходов без ухудшения техники.';
 }
 function lastSetSuggestion(e,setIndex){return previousSet(e,setIndex)?.reps??e.min}
 function activeSlot(s){return s.exercises.find(e=>e.slot===ui.focusSlot)||s.exercises.find(e=>s.logs.filter(l=>l.slot===e.slot).length<e.sets)||s.exercises.at(-1)}
@@ -188,7 +202,7 @@ let center='';
 if(s.pausedAt){center=`<div class="focus-center"><div class="caption">ТРЕНИРОВКА НА ПАУЗЕ</div><div class="focus-value">Ⅱ</div><div class="caption">Таймер и отдых остановлены</div></div><button class="btn primary full" data-action="resume-workout">▶ Продолжить тренировку</button>`}
 else if(done){center=`<div class="focus-center"><div class="focus-value">✓</div><b>Упражнение выполнено</b><div class="caption">${logs.reduce((sum,l)=>sum+l.reps,0)} повторений за ${e.sets} подходов</div></div><button class="btn primary full" data-action="${at===s.exercises.length-1?'finish':'next-exercise'}">${at===s.exercises.length-1?'Завершить тренировку':'Следующее упражнение →'}</button>`}
 else if(resting){center=`<div class="focus-center"><div class="caption">${s.rest.betweenExercises?'ОТДЫХ МЕЖДУ УПРАЖНЕНИЯМИ':'ОТДЫХ ПОСЛЕ ПОДХОДА'}</div><div class="focus-value" id="rest-count">${dur(s.rest.until-Date.now())}</div><div class="caption">${s.rest.betweenExercises?'После: '+esc(s.rest.from||'предыдущего упражнения'):'Записано: '+(logs.at(-1)?.reps??'—')+' повторений'}</div></div><div class="focus-buttons"><button class="btn" data-action="more-rest">+30 сек</button><button class="btn primary" data-action="skip-rest">Пропустить отдых →</button></div>`}
-else {center=`<div class="focus-center"><div class="caption">ВЕС И ПОВТОРЕНИЯ</div><div class="field" style="width:160px"><label for="set-weight">Рабочий вес, кг</label><input id="set-weight" type="number" min="0" max="1000" step="0.5" inputmode="decimal" value="${logs.at(-1)?.weight??previous?.weight??0}"></div><div class="focus-stepper"><button data-action="step" data-slot="${e.slot}" data-diff="-1" aria-label="Меньше повторений">−</button><input class="reps" type="number" min="1" max="300" inputmode="numeric" data-slot="${e.slot}" value="${draft}" aria-label="Повторения"><button data-action="step" data-slot="${e.slot}" data-diff="1" aria-label="Больше повторений">+</button></div><div class="focus-previous">${previous?`Прошлый подход №${previous.setNumber}: <strong>${previous.weight?previous.weight+' кг × ':''}${previous.reps}${e.perLeg?' на ногу':''} повт.</strong> · ${dateFmt(previous.at)}`:'Предыдущего результата пока нет'}</div></div><button class="btn primary full" data-action="log" data-slot="${e.slot}">✓ Записать подход</button>`}
+else {center=`<div class="focus-center"><div class="caption">ВЕС И ПОВТОРЕНИЯ</div><div class="field" style="width:160px"><label for="set-weight">Рабочий вес, кг</label><input id="set-weight" type="number" min="0" max="1000" step="0.5" inputmode="decimal" value="${logs.at(-1)?.weight??previous?.weight??0}"></div><div class="focus-stepper"><button data-action="step" data-slot="${e.slot}" data-diff="-1" aria-label="Меньше повторений">−</button><input class="reps" type="number" min="1" max="300" inputmode="numeric" data-slot="${e.slot}" value="${draft}" aria-label="Повторения"><button data-action="step" data-slot="${e.slot}" data-diff="1" aria-label="Больше повторений">+</button></div><div class="focus-previous">${previous?`Прошлый подход №${previous.setNumber}: <strong>${previous.weight?previous.weight+' кг × ':''}${previous.reps}${e.perLeg?' на ногу':''} повт.</strong> · ${dateFmt(previous.at)}` :'Предыдущего результата пока нет'}</div><div class="caption" style="margin-top:8px">${esc(progressionHint(e))}</div></div><button class="btn primary full" data-action="log" data-slot="${e.slot}">✓ Записать подход</button>`}
 const tips=`<div class="focus-tools"><details class="how"><summary>Техника ▾</summary><p><strong>Думай:</strong> ${esc(CUES[e.id]?.cue||'')}<br><strong>Как выполнять:</strong> ${esc(CUES[e.id]?.tech||'')}<br><strong>Избегай:</strong> ${esc(CUES[e.id]?.avoid||'')}</p></details>${logs.length?`<button class="btn ghost small" data-action="undo" data-slot="${e.slot}">↶ Отменить</button>`:''}</div></div>`;
 const footer=`<div class="card focus-secondary"><div class="flex"><span class="tiny muted">Всего ${completed}/${all} подходов</span><span class="tiny muted">${Math.round(completed/all*100)}%</span></div><div class="progress-track"><div style="width:${completed/all*100}%"></div></div><details id="focus-all" class="focus-details"><summary>Все упражнения · сменить упражнение</summary><div class="focus-list">${s.exercises.map(x=>{const n=s.logs.filter(l=>l.slot===x.slot).length;return `<button class="btn ${x.slot===e.slot?'primary':'ghost'}" data-action="focus-exercise" data-slot="${x.slot}">${esc(x.name)} · ${n}/${x.sets}</button>`}).join('')}</div></details><details class="focus-details"><summary>Завершение тренировки</summary><button class="btn full" data-action="finish">Завершить тренировку · ${completed}/${all}</button><button class="btn ghost danger full" data-action="discard">Отменить без сохранения</button></details></div>`;
 return head+center+tips+footer
@@ -200,7 +214,7 @@ function logSet(slot){
  const logged=s.logs.filter(x=>x.slot===slot);if(logged.length>=e.sets)return;
  const inp=document.querySelector(`.reps[data-slot="${slot}"]`);
  const reps=Number(inp?.value??ui.drafts[slot]??e.min);
- const weight=Number(document.getElementById('set-weight')?.value??0);if(!Number.isFinite(weight)||weight<0||weight>1000)return notify('Проверь рабочий вес');
+ const weightInput=document.getElementById('set-weight');const rawWeight=weightInput?.value?.trim()??'';if(rawWeight==='')return notify('Укажи вес (0 — собственный вес или резинка)');const weight=Number(rawWeight);if(!Number.isFinite(weight)||weight<0||weight>1000)return notify('Проверь рабочий вес');
  if(!Number.isInteger(reps)||reps<1||reps>300)return notify('Укажи число повторений от 1 до 300');
  armAudio();
  const log={slot,exId:e.id,exerciseName:e.name,setNumber:logged.length+1,reps,weight,loggedAt:nowISO()};
@@ -272,6 +286,7 @@ function recentActivity(){
  const previousStart=new Date(start);previousStart.setDate(start.getDate()-30);
  const counts=new Map();let last30=0,prior30=0;
  const main=db.sessions.filter(s=>s.logs?.length&&Number.isFinite(Date.parse(s.startedAt)));
+ // Count all five workout templates, including D in the one-gym-day schedule.
  for(const session of main){
   const when=new Date(session.startedAt),day=dayKey(when);
   if(when>=start){last30++;counts.set(day,(counts.get(day)||0)+1)}
