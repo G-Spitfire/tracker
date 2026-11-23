@@ -31,8 +31,24 @@ const assert = require('node:assert/strict');
    await page.getByText('За сегодня и вчера событий нет').waitFor();
    await page.locator('[data-action="close-detail"]').click();
   await page.getByText('Средний балл',{exact:true}).waitFor();
+  // Late grade: discovered today, lesson dated earlier; old marks must not be flagged.
+  const gradeDots=await page.evaluate(()=>{
+   const subject=kids[0].subjects.find(s=>s.name==='Математика');
+   const existing=subject.grades[0];
+   const before=recentGradeNoticeIds(0).has(gradeNoticeId(0,subject.name,existing));
+   const late={...existing,id:'late-grade-test-987',date:'2026-11-12',value:4};
+   subject.grades.push(late);
+   noticeTrack();
+   const lateMarked=recentGradeNoticeIds(0).has(gradeNoticeId(0,subject.name,late));
+   const existingMarked=recentGradeNoticeIds(0).has(gradeNoticeId(0,subject.name,existing));
+   return {before,lateMarked,existingMarked};
+  });
+  assert.equal(gradeDots.before,false,'Historical grade not marked as new');
+  assert.equal(gradeDots.lateMarked,true,'Backdated newly discovered grade marked as new');
+  assert.equal(gradeDots.existingMarked,false,'Old grade remains unmarked');
   await page.locator('[data-action="tab"][data-value="grades"]').click();
   await page.getByText('Математика',{exact:true}).first().waitFor();
+  assert.equal(await page.locator('.mark.new').count(),1,'Only newly discovered backdated grade has new sticker');
   await page.locator('[data-action="tab"][data-value="homework"]').click();
   await page.locator('[data-action="hw"][data-value="all"]').click();
   await page.getByText('Упражнение 5').waitFor();
