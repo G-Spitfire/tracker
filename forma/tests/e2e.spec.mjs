@@ -24,6 +24,7 @@ test('complete workout and restore state after reload', async ({ page }) => {
   await page.locator('[data-action="log"]').first().click();
   await page.reload();
   await expect(page.locator('#main')).toContainText('ТРЕНИРОВКА A');
+  await page.locator('details').filter({ has: page.locator('[data-action="finish"]') }).locator('summary').click();
   await page.locator('[data-action="finish"]').first().click();
   await page.locator('[data-action="tab"][data-val="history"]').click();
   await expect(page.locator('#main')).toContainText('Тренировка A');
