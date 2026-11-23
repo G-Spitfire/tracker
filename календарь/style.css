@@ -225,3 +225,10 @@ button.event.event-ten-minute{padding:0 2px;gap:0;justify-content:center}
 button.event.event-ten-minute .event-top{display:block;min-width:0}
 button.event.event-ten-minute .event-name{font-size:8px;font-weight:600;line-height:1;letter-spacing:.02em;text-transform:uppercase;white-space:nowrap}
 button.event.event-ten-minute .event-time,button.event.event-ten-minute .event-details{display:none}
+
+/* 10- and 15-minute events: uppercase title on the left, full time on the right. */
+button.event.event-ten-minute{display:flex;flex-direction:row;align-items:center;justify-content:space-between;min-width:0;gap:2px;padding:0 2px}
+button.event.event-ten-minute .event-top{display:flex;align-items:center;justify-content:space-between;gap:2px;min-width:0;width:100%}
+button.event.event-ten-minute .event-name{flex:1 1 auto;min-width:0;font-size:8px;font-weight:600;line-height:1;letter-spacing:.02em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+button.event.event-ten-minute .event-time{display:block;flex:0 0 auto;font-size:8px;line-height:1;white-space:nowrap;opacity:.85}
+button.event.event-ten-minute .event-details{display:none}
