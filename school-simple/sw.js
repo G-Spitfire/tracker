@@ -1,4 +1,4 @@
-const CACHE_NAME = "school-shell-v1.33.9-visual-fixes";
+const CACHE_NAME = "school-shell-v1.33.10-apple-type-nav";
 const SHELL = [
   "./",
   "./index.html",
