@@ -83,8 +83,13 @@ async function run() {
     await page.locator('[data-action="tab"][data-value="home"]').click();
     const updates=page.locator('.updates-panel');
     record(view,'recent updates initially present',await updates.count()===1);
-    await page.locator('[data-action="toggle-updates"]').click();
-    record(view,'recent updates expandable',(await page.locator('[data-action="toggle-updates"]').getAttribute('aria-expanded'))==='true');
+     const updatesToggle=page.locator('[data-action="toggle-updates"]');
+     if(await updatesToggle.isDisabled()){
+       record(view,'empty recent updates not expandable',(await updatesToggle.getAttribute('aria-expanded'))==='false' && await page.getByText('Нет новых',{exact:true}).count()===1);
+     }else{
+       await updatesToggle.click();
+       record(view,'recent updates expandable',(await updatesToggle.getAttribute('aria-expanded'))==='true');
+     }
     await page.locator('#profile').click();
     const p=await geometry(page);
     record(view,'profile geometry',!p.overflow && !p.offenders.length,p);
