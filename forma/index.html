@@ -117,6 +117,7 @@ const CUES={
 };
 // 'perLeg' means one saved set represents the indicated repetitions FOR EACH leg.
 Object.assign(CUES,{
+ reverseLunge:{name:'Обратные выпады',cue:'Шаг назад и контролируемое опускание.',tech:'Колено передней ноги направлено по линии стопы.',avoid:'Потеря равновесия и рывки.',rest:75},
  deadbug:{name:'Dead bug',cue:'Поясница стабильна.',tech:'Медленно выпрямляй противоположные руку и ногу.',avoid:'Прогиб.',rest:45},
  incline:{name:'Наклонный жим гантелей',cue:'Контролируй движение.',tech:'Скамья 15–30°, устойчивые лопатки.',avoid:'Рывки.',rest:120},
  lat:{name:'Вертикальная тяга блока',cue:'Локти вниз.',tech:'Не раскачивай корпус.',avoid:'Тяга за голову.',rest:120},
@@ -135,7 +136,7 @@ Object.assign(CUES,{
  plank:{name:'Планка (сек)',cue:'Корпус прямой.',tech:'Вводи секунды вместо повторений.',avoid:'Прогиб.',rest:45}
 });
 const PROGRAM={
- A:{label:'A',title:'Дома · всё тело',where:'Дома · 40–50 минут',summary:'Грудь, спина, ноги, корпус',items:[['push',3,8,15],['row',3,10,20],['bulgar',3,8,12,null,null,null,true],['rdl',2,12,20],['lateral',2,12,20],['deadbug',2,10,10]]},
+ A:{label:'A',title:'Дома · всё тело',where:'Дома · 40–50 минут',summary:'Грудь, спина, ноги, корпус',items:[['push',3,8,15],['row',3,10,20],['reverseLunge',3,10,10,null,null,null,true],['rdl',2,12,20],['lateral',2,12,20],['deadbug',2,10,10]]},
  B:{label:'B',title:'DDX · верх тела',where:'Зал · до 60 минут',summary:'Грудь, спина, плечи и руки',items:[['incline',3,8,12],['lat',3,8,12],['cable',3,10,12],['ohp',2,8,12],['dblateral',3,12,20],['reverse',2,12,20],['curl',2,10,15],['pressdown',2,10,15]]},
  V:{label:'C',title:'DDX · ноги и корпус',where:'Зал · до 60 минут',summary:'Ноги, ягодицы, плечи, пресс',items:[['legpress',3,10,12],['dbrdl',3,8,12],['legcurl',2,10,15],['calves',3,12,20],['dblateral',2,12,20],['crunch',2,10,15],['sideplank',2,20,40]]},
  G:{label:'D',title:'Дома · альтернативная',where:'Дома · 40–50 минут',summary:'Для недель с одним посещением DDX',items:[['decline',3,8,15],['row',3,12,20],['bulgar',3,8,12,null,null,null,true],['bridge',2,10,15],['face',2,15,20],['plank',2,30,45]]},
