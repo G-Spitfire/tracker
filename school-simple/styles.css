@@ -18,7 +18,7 @@ html[data-theme=dark]{--bg:#09090b;--surface:#202023;--fg:#ffffff;--muted:#b4b4b
 .forecast-row strong.forecast-result{font-size:16px;font-weight:var(--weight-bold)}
 .subject .subject-average{font-size:16px;font-weight:var(--weight-bold)}
 .lesson strong,.task strong{font-size:var(--font-body);font-weight:var(--weight-medium)}
-.forecast-item{padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid var(--line)}
+.forecast-item{padding-bottom:8px;margin-bottom:8px}
 .forecast-item .forecast-row{min-height:38px;border-bottom:0}
 .forecast-track{height:3px;background:var(--soft);border-radius:999px;overflow:hidden;margin-top:4px}
 .forecast-fill{height:100%;border-radius:999px}
@@ -26,7 +26,7 @@ html[data-theme=dark]{--bg:#09090b;--surface:#202023;--fg:#ffffff;--muted:#b4b4b
 .header-quarter{width:44px;min-width:44px;max-width:44px;height:44px;min-height:44px;border:0;border-radius:var(--radius-control);background:var(--soft);color:var(--fg);padding:0 5px;font:inherit;font-size:var(--font-control);font-weight:var(--weight-medium);text-align:center;text-align-last:center;appearance:none;-webkit-appearance:none;cursor:pointer;margin-left:auto;margin-right:8px}.grades-footnote{margin-top:var(--space-4);color:var(--muted);font-size:var(--font-caption)}
 .content-after-controls{margin-top:var(--space-controls-content)}
 .content-after-controls>.task:first-child,.content-after-controls>.subject:first-child{padding-top:0}
-.marks{display:flex;gap:5px;overflow-x:auto;white-space:nowrap;margin-top:7px;scrollbar-width:none}
+.marks{display:flex;flex-wrap:wrap;gap:5px;overflow:visible;white-space:normal;margin-top:7px}
 .marks::-webkit-scrollbar{display:none}
 .mark.new{position:relative}
 .mark.new::after{content:"";position:absolute;top:9px;right:9px;width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 1px var(--soft)}
@@ -44,7 +44,7 @@ html[data-theme=dark]{--bg:#09090b;--surface:#202023;--fg:#ffffff;--muted:#b4b4b
 .schedule-calendar .day-cell{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:48px;padding:4px 0}
 .schedule-calendar .day-cell .sub{font-size:11px}
 .grades-filter-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px}
-.grades-filter-check{display:flex;align-items:center;gap:8px;font-size:var(--font-control);min-height:44px;cursor:pointer}
+.grades-filter-check{display:inline-flex;align-items:center;gap:8px;font-size:var(--font-control);min-height:44px;cursor:pointer;align-self:flex-start}
 .grades-filter-check input{width:20px;height:20px;accent-color:var(--accent);margin:0}
 .grades-filter-row .sub{white-space:nowrap}
 .lesson{display:flex;gap:12px;padding:11px 3px;border-bottom:1px solid var(--line)}
