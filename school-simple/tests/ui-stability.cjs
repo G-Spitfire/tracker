@@ -57,6 +57,28 @@ async function check(label,condition,details=''){console.log((condition?'PASS':'
    }
    await context.close();
   }
+  // Notification regression: late grade, first snapshot, duplicate, read, per-child, two-day window.
+  const noticeContext=await browser.newContext({viewport:{width:375,height:844},serviceWorkers:'block'});
+  try{
+   const page=await noticeContext.newPage();
+   const initial={...diary,children:{polina:{...diary.children.polina,marks:[]},matvey:{...diary.children.matvey,marks:[]}}};
+   await page.route('**/school-sync-client.js',route=>route.fulfill({contentType:'application/javascript',body:'window.SchoolSync={readCached:async()=>null,sync:async()=>({source:"network",data:'+JSON.stringify(initial)+'})};'}));
+   await page.goto('http://127.0.0.1:8765/school-simple/index.html');
+   await page.waitForFunction(()=>dataSource==='live');
+   const result=await page.evaluate(()=>{
+    const initial=noticeData().events.length===0;
+    kids[0].subjects=[{name:'Математика',grades:[{id:12345,date:'2026-11-19',value:5,type:'Домашняя работа'}]}];
+    noticeTrack();const first=noticeData().events.length===1;
+    noticeTrack();const noDuplicate=noticeData().events.length===1;
+    const e=noticeData().events[0],late=e?.grade.date==='2026-11-19'&&e.day===iso(TODAY);
+    const polina=noticeList().length===1;state.child=1;const matvey=noticeList().length===0;state.child=0;
+    noticeOpen(e.id);const read=noticeData().events[0].read===true;
+    kids[0].subjects=[];noticeTrack();kids[0].subjects=[{name:'Математика',grades:[{id:12345,date:'2026-11-19',value:5,type:'Домашняя работа'}]}];noticeTrack();
+    const rediscovered=noticeData().events.length===1;
+    return {initial,first,noDuplicate,late,polina,matvey,read,rediscovered};
+   });
+   for(const [name,passed] of Object.entries(result))check('notice '+name,passed);
+  }finally{await noticeContext.close();}
   // Exercise the actual service worker cache, rather than the mocked UI-only mode.
   const offlineContext=await browser.newContext({viewport:{width:375,height:844},serviceWorkers:'allow'});
   try{
