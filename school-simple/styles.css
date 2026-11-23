@@ -142,3 +142,10 @@ body.is-loading header,body.is-loading nav{visibility:hidden}body.is-loading mai
 .egg-button{width:100%;max-width:380px;background:#242a3b;color:white;border:0;border-radius:16px;padding:17px;font-size:16px;font-weight:900;cursor:pointer}
 .egg-dark .egg-button{background:#d8ff76;color:#171d12}
 @media(max-height:720px){.egg-screen{gap:6px}.egg-runner{max-height:30dvh;min-height:110px}.egg-head{font-size:28px}.egg-lines{gap:3px}}
+
+/* Unified compact lesson grades: preserve full touch targets without overflowing the subject. */
+.lesson-main{flex:1;min-width:0}
+.lesson-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.lesson-title-row>strong{min-width:0;overflow-wrap:anywhere}
+.lesson-grades{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:4px;flex-shrink:0;max-width:48%}
+.lesson-grades:empty{display:none}
