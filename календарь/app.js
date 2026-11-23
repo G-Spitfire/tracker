@@ -106,7 +106,7 @@ function updateCalendarControls(){
  label.firstChild.textContent=calendarMode==='class'?'Класс ':'Сотрудник ';
  }
  const days=$('weekdays');days.replaceChildren();const monday=weekMonday(selectedDate);['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].forEach((label,i)=>{const date=shiftDate(monday,i),btn=elt('button','weekday'+(date===selectedDate?' selected':''),`${label} ${date.slice(8)}`);btn.type='button';btn.onclick=()=>{selectedDate=date;render()};days.append(btn)});
- $('weekdays').hidden=calendarMode!=='day';$('date-picker-wrap').hidden=calendarMode!=='day';$('calendar-popover').hidden=true;
+ $('weekdays').hidden=calendarMode!=='day';$('date-picker-wrap').hidden=false;$('calendar-popover').hidden=true;
  $('view-title').textContent=calendarMode==='day'?'Расписание':calendarMode==='class'?'Неделя класса':'Неделя сотрудника';
 }
 async function render(){
