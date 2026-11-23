@@ -255,3 +255,19 @@ button.event:hover{box-shadow:none}
 #reference-subjects label{display:flex;align-items:center;gap:7px;width:100%}
 .class-order-controls{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .class-order-button{min-width:28px;padding:4px 7px}
+
+/* Compact two-column event editor and drag-to-create preview. */
+#editor{width:min(730px,calc(100% - 24px))}
+#event-form{padding:16px;gap:10px}
+#event-form .event-types{margin:0;gap:5px}
+#event-form .event-kind{padding:7px 5px}
+.event-editor-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.event-editor-primary,.event-editor-participants{display:grid;align-content:start;gap:10px;min-width:0}
+.event-editor-participants fieldset{padding:8px}
+.event-editor-participants .checks{gap:6px 10px}
+.event-end-summary{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)}
+.event-end-summary strong{color:var(--text,#22252b)}
+#event-more-toggle{margin-left:auto;font-size:12px;padding:3px 5px}
+#event-more{padding-top:2px}
+.event-selection-preview{position:absolute;left:3px;right:3px;z-index:2;pointer-events:none;background:#dce9fbab;border:1px dashed #3977cc;color:#244e87;font-size:10px;font-weight:600;padding:2px;overflow:hidden}
+@media(max-width:620px){.event-editor-columns{grid-template-columns:1fr}#editor{width:calc(100% - 16px)}#event-form{padding:12px}}
