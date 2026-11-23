@@ -4,6 +4,7 @@
 <script src="./assets/icons.js"></script>
 <script src="./assets/illustrations.js"></script>
 <script src="./school-sync-client.js"></script>
+<script src="./analytics.js"></script>
 <script>
 const TODAY=new Date();TODAY.setHours(12,0,0,0);const iso=d=>{let x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};const offset=n=>{let d=new Date(TODAY);d.setDate(d.getDate()+n);return iso(d)};const escapeHTML=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const SCHOOL_QUARTERS=[{start:'2026-09-01',end:'2026-10-23'},{start:'2026-11-04',end:'2026-12-30'},{start:'2027-01-11',end:'2027-03-26'},{start:'2027-04-05',end:'2027-05-26'}];
 const currentQuarter=()=>{const d=iso(TODAY);const active=SCHOOL_QUARTERS.findIndex(q=>d>=q.start&&d<=q.end);if(active>=0)return String(active+1);let last=-1;for(let i=0;i<SCHOOL_QUARTERS.length;i++){if(d>SCHOOL_QUARTERS[i].end)last=i}return String(last>=0?last+1:1)};
@@ -96,7 +97,7 @@ function showMatveyAchievement(){
 
 let state={tab:'home',child:readSetting('school-active-child','0')==='1'?1:0,gradesView:'grades',quarter:currentQuarter(),filter:'all',chart:'line',hw:'tomorrow',date:iso(TODAY),week:0,theme:readSetting('school-theme','system'),accent:readSetting('school-accent','#4c8bf5'),returnTab:'home'};
 const main=document.querySelector('#main'),nav=document.querySelector('#nav');const mean=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:0;const fmt=n=>n.toFixed(2).replace('.',',');const gradeData=()=>kids[state.child].subjects.flatMap(s=>s.grades).filter(g=>inQuarter(g.date));
-const quarterRange=q=>SCHOOL_QUARTERS[Number(q)-1];const inQuarter=date=>{const q=quarterRange(state.quarter);return !!q&&date>=q.start&&date<=q.end};const score=()=>mean(kids[state.child].subjects.map(s=>s.grades.filter(g=>inQuarter(g.date))).filter(g=>g.length).map(g=>mean(g.map(x=>x.value))));const setTab=t=>{if(state.tab===t)return;state.tab=t;render();window.scrollTo({top:0,left:0,behavior:'instant'})};const btns=(items,current,handler)=>'<div class="seg">'+items.map(([v,l])=>'<button data-action="'+handler+'" data-value="'+v+'" class="'+(v===current?'active':'')+'">'+l+'</button>').join('')+'</div>';
+const quarterRange=q=>SCHOOL_QUARTERS[Number(q)-1];const inQuarter=date=>{const q=quarterRange(state.quarter);return !!q&&date>=q.start&&date<=q.end};const score=()=>SchoolAnalytics.overallAverage(kids[state.child].subjects,state.quarter,SCHOOL_QUARTERS);const setTab=t=>{if(state.tab===t)return;state.tab=t;render();window.scrollTo({top:0,left:0,behavior:'instant'})};const btns=(items,current,handler)=>'<div class="seg">'+items.map(([v,l])=>'<button data-action="'+handler+'" data-value="'+v+'" class="'+(v===current?'active':'')+'">'+l+'</button>').join('')+'</div>';
 // Every December the fifth KPI temporarily displays a New Year countdown.
 function holidayInfo(){const now=new Date();return now.getMonth()===11?{days:31-now.getDate()}:null;}
 function home(){

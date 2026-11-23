@@ -1,8 +1,9 @@
-const CACHE_NAME = "school-shell-v1.33.6-extracted-css";
+const CACHE_NAME = "school-shell-v1.33.6-grade-analytics";
 const SHELL = [
   "./",
   "./index.html",
   "./styles.css",
+  "./analytics.js",
   "./manifest.webmanifest",
   "./version.json",
   "./icon.svg",
