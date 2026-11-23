@@ -605,7 +605,7 @@ document.addEventListener('change',e=>{if(e.target.id==='themeChoice'){themeChoi
 document.addEventListener('input',e=>{if(e.target.id==='planSearch'){const q=e.target.value.trim().toLocaleLowerCase('ru');document.querySelectorAll('.plan-choice').forEach(x=>{x.hidden=!x.dataset.search.includes(q)})}if(e.target.classList.contains('reps'))ui.drafts[Number(e.target.dataset.slot)]=Number(e.target.value);});
 window.addEventListener('storage',e=>{if(e.key===DB_KEY){db=load();if(ui.editRows!==null){ui.editRows=null;ui.editSelected=null;ui.planPicker=null;notify('Данные изменены в другой вкладке. Редактор обновлён.')}render()}});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)updateClock()});
-if('serviceWorker'in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('./sw.js').catch(()=>{})}
+if('serviceWorker'in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1')){navigator.serviceWorker.register('./sw.js').catch(()=>{})}
 ui.chosen=nextWorkout();render();
 if(!localStorage.getItem('forma_v2_legacy_prompted')&&localStorage.getItem(LEGACY_KEY)){localStorage.setItem('forma_v2_legacy_prompted','1');if(confirm('Новая программа начинает историю с нуля. Удалить старую историю с устройства?'))localStorage.removeItem(LEGACY_KEY);}
 </script>
