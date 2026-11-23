@@ -194,5 +194,6 @@ html[data-theme=dark] .lesson-mark-2{color:#ff8a8a}
 .lesson-copy>strong{min-width:0}
 .lesson-grades{max-width:48%;align-self:flex-start}
 .lesson{padding:8px 3px}
-.schedule-arrows .icon{min-width:44px;min-height:44px;width:44px;height:44px}
-.schedule-arrows .icon svg{width:20px;height:20px}
+.schedule-arrows .icon{position:relative;min-width:44px;min-height:44px;width:44px;height:44px;background:transparent}
+.schedule-arrows .icon::before{content:"";position:absolute;inset:4px;border-radius:var(--radius-control);background:var(--soft)}
+.schedule-arrows .icon svg{position:relative;width:20px;height:20px}
