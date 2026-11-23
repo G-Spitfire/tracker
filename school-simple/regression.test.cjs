@@ -44,7 +44,7 @@ test('home: unweighted subject means drive KPI, delta, and line chart', () => {
     {from:'2026-11-17T09:00'},{from:'2026-11-18T09:00'},{from:'2026-11-19T09:00'}
   ];
   const html = vm.runInContext('home()', c);
-  assert.match(html, /Средний балл<\/span>.*?4,00/s);
+  assert.match(html, /Средний<\/span>.*?4,00/s);
   assert.match(html, /Учебных дней подряд/);
   assert.match(html, /<polyline[^>]+points="38,66 324,66"/, 'line graph uses subject-weighted mean on both dates');
 });
@@ -53,7 +53,7 @@ test('home: no-grade school day counts towards streak', () => {
   c.kids[0].subjects = [{name:'A',grades:[{value:5,date:'2026-11-17'}]}];
   c.kids[0].lessons = [{from:'2026-11-17T09:00'},{from:'2026-11-18T09:00'},{from:'2026-11-19T09:00'}];
   const html = vm.runInContext('home()',c);
-  assert.match(html, /Без троек и двоек<\/span>.*?<strong class="stat-value">3<\/strong>/s);
+  assert.match(html, /Без 2 и 3<\/span>.*?<strong class="stat-value">3<\/strong>/s);
 });
 test('homework: next five actual scheduled days, skipping weekends', () => {
   const c = setup();
