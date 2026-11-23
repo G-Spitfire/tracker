@@ -31,7 +31,7 @@ html[data-theme=dark]{--bg:#111720;--surface:#1c2430;--fg:#f3f5fa;--muted:#9ba9b
 .marks{display:flex;gap:5px;overflow-x:auto;white-space:nowrap;margin-top:7px;scrollbar-width:none}
 .marks::-webkit-scrollbar{display:none}
 .mark.new{position:relative}
-.mark.new::after{content:"";position:absolute;top:2px;right:2px;width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 1px var(--soft)}
+.mark.new::after{content:"";position:absolute;top:9px;right:9px;width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 1px var(--soft)}
 .bottom button.active{color:var(--accent);font-weight:var(--weight-bold)}
 .bottom .symbol{display:grid;place-items:center;width:28px;height:28px}
 .bottom .symbol svg{width:28px;height:28px}
@@ -84,7 +84,8 @@ html[data-theme=dark]{--bg:#111720;--surface:#1c2430;--fg:#f3f5fa;--muted:#9ba9b
 .heading{font-size:var(--font-section);margin:20px 0 12px;font-weight:600;line-height:1.3}
 .subject{padding:7px 0;border-bottom:1px solid var(--line)}
 .subject strong{font-weight:600;font-size:14px;font-variant-numeric:tabular-nums}
-.mark{min-width:29px;width:29px;height:29px;flex-shrink:0;border:0;color:var(--fg);font:inherit;cursor:pointer;background:var(--soft);border-radius:6px;display:grid;place-items:center;font-weight:600;font-size:14px}
+.mark{position:relative;isolation:isolate;min-width:44px;width:44px;height:44px;flex-shrink:0;border:0;color:var(--fg);font:inherit;cursor:pointer;background:transparent;display:grid;place-items:center;font-weight:600;font-size:14px}
+.mark::before{content:"";position:absolute;inset:7px;background:var(--soft);border-radius:6px;z-index:-1}
 .lesson,.task{padding:var(--space-item-vertical) 0;line-height:1.4}
 .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
 .calendar button{background:none;border:0;border-radius:var(--radius-control);padding:8px 0;color:var(--fg);min-height:44px;font:inherit}
@@ -300,12 +301,13 @@ function schedule(){
  return '<div class="schedule-bar"><span class="schedule-month">'+monthLabel+'</span><div class="schedule-arrows"><button class="icon" data-action="week" data-value="-1" aria-label="Предыдущая неделя">'+ico('left')+'</button><button class="icon" data-action="week" data-value="1" aria-label="Следующая неделя">'+ico('right')+'</button></div></div><div class="calendar schedule-calendar">'+days.map(x=>'<button class="day-cell '+(iso(x)===state.date?'active':'')+'" data-action="date" data-value="'+iso(x)+'"><span class="sub">'+['Вс','Пн','Вт','Ср','Чт','Пт','Сб'][x.getDay()]+'</span><span>'+x.getDate()+'</span></button>').join('')+'</div><h3 class="heading">'+selected.toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'long'})+'</h3>'+(lessons.length?lessons.map((l,i)=>'<div class="lesson"><span class="sub">'+(l.number||i+1)+'</span><div><strong>'+escapeHTML(l.subject)+'</strong>'+(l.from?'<div class="sub">'+escapeHTML(l.from.slice(11,16))+(l.to?'–'+escapeHTML(l.to.slice(11,16)):'')+'</div>':'')+(l.topic?'<div class="sub">'+escapeHTML(l.topic)+'</div>':'')+'</div></div>').join(''):'<div class="empty">Нет уроков</div>');
 }
 function homework(){
- const kid=kids[state.child],today=iso(TODAY),nextDay=new Date(TODAY);nextDay.setDate(nextDay.getDate()+1);const tomorrow=iso(nextDay);
+ const kid=kids[state.child],today=iso(TODAY),nextDay=new Date(TODAY);nextDay.setDate(nextDay.getDate()+1);const calendarTomorrow=iso(nextDay);
+ const nextSchoolDay=[...new Set(kid.schedule.map(l=>(l.from||'').slice(0,10)).filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d)&&d>today))].sort()[0]||calendarTomorrow;
  const upcomingDays=[...new Set(kid.schedule.map(l=>(l.from||'').slice(0,10)).filter(d=>d.length===10&&d>today))].sort().slice(0,5);
  const weekDays=new Set(upcomingDays);
- const list=kid.tasks.filter(t=>state.hw==='tomorrow'?t.nextLessonDate===tomorrow:state.hw==='week'?!!t.nextLessonDate&&weekDays.has(t.nextLessonDate):true).slice().sort((a,b)=>(a.nextLessonDate||'9999').localeCompare(b.nextLessonDate||'9999')||a.subject.localeCompare(b.subject,'ru'));
+ const list=kid.tasks.filter(t=>state.hw==='tomorrow'?t.nextLessonDate===nextSchoolDay:state.hw==='week'?!!t.nextLessonDate&&weekDays.has(t.nextLessonDate):true).slice().sort((a,b)=>(a.nextLessonDate||'9999').localeCompare(b.nextLessonDate||'9999')||a.subject.localeCompare(b.subject,'ru'));
  const dateLabel=d=>d?new Date(d+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'long'}):'Дата следующего урока не определена';
- const dates=state.hw==='tomorrow'?[tomorrow]:state.hw==='week'?upcomingDays:[...new Set(list.map(t=>t.nextLessonDate||''))];
+ const dates=state.hw==='tomorrow'?[nextSchoolDay]:state.hw==='week'?upcomingDays:[...new Set(list.map(t=>t.nextLessonDate||''))];
  const grouped=dates.map(d=>{
   const tasks=list.filter(t=>(t.nextLessonDate||'')===d);
   const scheduled=kid.schedule.some(l=>(l.from||'').slice(0,10)===d);
@@ -318,7 +320,7 @@ function homework(){
   return '<section class="homework-day"><h3 class="homework-day-title">'+escapeHTML(dateLabel(d))+'</h3><div class="homework-day-body">'+body+'</div></section>';
  }).join('');
  const note='<p class="grades-footnote">Задания привязаны к следующему уроку предмета. Официальная дата сдачи в источнике не предоставляется.</p>';
- return btns([['tomorrow','На завтра'],['week','На неделю'],['all','Всё']],state.hw,'hw')+'<div class="content-after-controls">'+(grouped||'<div class="empty">Нет заданий на выбранный период</div>')+note+'</div>';
+ return btns([['tomorrow','Ближайший день'],['week','На неделю'],['all','Всё']],state.hw,'hw')+'<div class="content-after-controls">'+(grouped||'<div class="empty">Нет заданий на выбранный период</div>')+note+'</div>';
 }
 function snapshotAgeMs(){const timestamp=Date.parse(diaryUpdatedAt||'');return Number.isFinite(timestamp)?Math.max(0,Date.now()-timestamp):Infinity}
 function syncIndicatorState(){return syncInProgress?'loading':dataSource==='error'?'error':snapshotAgeMs()<150*60000?'fresh':'stale'}
