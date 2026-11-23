@@ -76,22 +76,15 @@ async function run() {
     const forecastGeometry=await geometry(page);
     record(view,'forecast geometry',!forecastGeometry.overflow && !forecastGeometry.offenders.length,forecastGeometry);
     await page.screenshot({path:path.join(OUT,view+'-forecast.png'),fullPage:false});
-    const art=await page.evaluate(async()=>{
-      const names=['pencil','dance','clay','tv','console','ball','phone','book'];
-      const results=[];
-      for(const name of names){
-        const holder=document.createElement('div');
-        holder.innerHTML=homeworkIllustration(name);
-        const img=holder.firstElementChild;
-        document.body.append(img);
-        await new Promise(resolve=>{if(img.complete)return resolve();img.addEventListener('load',resolve,{once:true});img.addEventListener('error',resolve,{once:true});});
-        const style=getComputedStyle(img);
-        results.push({name,loaded:img.naturalWidth>0&&img.naturalHeight>0,width:img.getBoundingClientRect().width,height:img.getBoundingClientRect().height,opacity:Number(style.opacity),padding:style.padding,fit:style.objectFit});
-        img.remove();
-      }
-      return results;
-    });
-    record(view,'all eight homework illustrations load and fit',art.every(x=>x.loaded&&x.width===78&&x.height===78&&x.opacity===.52&&x.padding==='8px'&&x.fit==='contain'),art);
+    // Homework illustrations were intentionally removed from the UI.
+    await page.locator('[data-action="tab"][data-value="homework"]').click();
+    const illustrations=await page.locator('.homework-doodle').count();
+    record(view,'homework uses no illustrations',illustrations===0,{illustrations});
+    await page.locator('[data-action="tab"][data-value="home"]').click();
+    const updates=page.locator('.updates-panel');
+    record(view,'recent updates initially present',await updates.count()===1);
+    await page.locator('[data-action="toggle-updates"]').click();
+    record(view,'recent updates expandable',(await page.locator('[data-action="toggle-updates"]').getAttribute('aria-expanded'))==='true');
     await page.locator('#profile').click();
     const p=await geometry(page);
     record(view,'profile geometry',!p.overflow && !p.offenders.length,p);
