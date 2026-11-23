@@ -303,3 +303,10 @@ button:has(>.ui-icon){display:inline-flex;align-items:center;justify-content:fle
 .reference-row .reference-edit{width:32px;height:32px;min-height:32px;padding:0;display:inline-flex;align-items:center;justify-content:center;flex:0 0 32px}
 .reference-row .reference-edit .ui-icon{width:16px;height:16px;flex-basis:16px}
 .reference-row .class-order-controls{display:flex;align-items:center;gap:5px;flex-shrink:0}
+
+/* Align the bottom of the logo zone with the top edge of the schedule grid. */
+@media(min-width:651px){
+ .sidebar:has(#side-controls:not([hidden])){gap:0}
+ .sidebar:has(#side-controls:not([hidden])) .side-brand{height:var(--sidebar-brand-height,185px);flex:0 0 var(--sidebar-brand-height,185px);display:flex;align-items:center}
+ .sidebar:has(#side-controls:not([hidden])) .side-controls{margin-bottom:24px}
+}
