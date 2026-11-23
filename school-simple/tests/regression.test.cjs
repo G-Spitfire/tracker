@@ -23,7 +23,9 @@ function setup(extra = {}) {
     fmt: n => n.toFixed(2).replace('.', ','),
     inQuarter: d => d >= '2026-11-01' && d <= '2026-12-31',
     kpiIcon: () => '',
-    homeworkIllustration: () => '<svg class="homework-doodle"></svg>',
+    recentUpdatesPanel: () => '<section class="updates-panel"></section>',
+    diaryUpdatedAt: '2026-11-19T12:00:00+03:00',
+    snapshotAgeMs: () => 0,
     btns: () => '',
     escapeHTML: s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'),
     ...extra
@@ -92,11 +94,11 @@ test('home: seven-day change is unavailable without a baseline', () => {
   assert.ok(html.includes('За 7 дней'));
 });
 
-test('homework: scheduled day without assignments celebrates', () => {
+test('homework: scheduled day without assignments shows neutral empty state', () => {
  const c=setup({dataSource:'live'}); c.state.hw='tomorrow';
  c.kids[0].schedule=[{subjectId:'m',from:'2026-11-20T09:00'}];
  const html=vm.runInContext('homework()',c);
- assert.match(html,/Ура! Домашки нет!/); assert.match(html,/homework-doodle/);
+ assert.match(html,/Домашних заданий пока нет/); assert.doesNotMatch(html,/homework-doodle/);
 });
 test('homework: nearest school day skips days without lessons', () => {
  const c=setup({dataSource:'live'}); c.state.hw='tomorrow';
@@ -105,12 +107,12 @@ test('homework: nearest school day skips days without lessons', () => {
  const html=vm.runInContext('homework()',c);
  assert.match(html,/понедельник, 23 ноября/);
  assert.match(html,/Номер 12/);
- assert.doesNotMatch(html,/Ура! Свободный день!/);
+ assert.doesNotMatch(html,/Свободный день!/);
 });
-test('homework: cached data retains assignments and empty-day celebrations', () => {
+test('homework: cached data retains assignments and neutral empty states', () => {
  const c=setup({dataSource:'cached',syncWarning:'Нет связи'}); c.state.hw='tomorrow';
  c.kids[0].schedule=[{subjectId:'m',from:'2026-11-20T09:00'}];
- assert.match(vm.runInContext('homework()',c),/Ура! Домашки нет!/);
+ assert.match(vm.runInContext('homework()',c),/Домашних заданий пока нет/);
  c.kids[0].tasks=[{subject:'Математика',text:'Номер 5',nextLessonDate:'2026-11-20'}];
  const html=vm.runInContext('homework()',c);
  assert.match(html,/Номер 5/); assert.doesNotMatch(html,/homework-celebration/);
