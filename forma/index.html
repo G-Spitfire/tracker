@@ -95,6 +95,7 @@ window.addEventListener('storage',e=>{if(e.key===THEME_KEY||e.key===null){themeC
 const DB_KEY='forma_v2_20261123';
 const LEGACY_KEY='forma12_v1';
 const PROGRAM_START='2026-11-23';
+const PROGRAM_SCHEMA=2;
 const DAY_LABEL={A:'A',B:'B',V:'C',G:'D',E:'E'};
 const CUES={
  pull:{name:'Подтягивания на турнике',cue:'Тяни локти вниз, к рёбрам и тазу — не подбородок к перекладине.',tech:'Комфортный хват, корпус устойчив, без раскачивания. Плавное опускание.',avoid:'Рывки ногами, плечи у ушей, «половинки».',rest:180},
@@ -142,7 +143,7 @@ const PROGRAM={
 };
 /* OLD_PROGRAM_REMOVED */
 const ICONS={today:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/>',history:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M8 14h3M8 18h5"/>',progress:'<path d="M4 20V12M10 20V7M16 20V10M22 20V3"/>',settings:'<path d="M12 3v3M12 18v3M4.2 7.5l2.6 1.5M17.2 15l2.6 1.5M4.2 16.5 6.8 15M17.2 9l2.6-1.5"/><circle cx="12" cy="12" r="4"/>'};
-const EMPTY=()=>({version:1,createdAt:new Date().toISOString(),sessions:[],measures:[],ofpDays:[],active:null,programOverrides:{},programStartedAt:null,schedule:'two'});
+const EMPTY=()=>({version:2,createdAt:new Date().toISOString(),sessions:[],measures:[],ofpDays:[],active:null,programOverrides:{},programStartedAt:PROGRAM_START,schedule:'two'});
 let db=load();
 let ui={tab:'today',chosen:'A',goodWeather:false,chart:'abdomen',showSession:null,focusSlot:null,drafts:{},toastTimer:null,editWorkout:'A',editRows:null,editSelected:null,planPicker:null};
 let audioCtx=null;
@@ -150,7 +151,7 @@ function armAudio(){try{const Audio=window.AudioContext||window.webkitAudioConte
 function chime(){try{if(!audioCtx||audioCtx.state!=='running')return;const at=audioCtx.currentTime,osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type='sine';osc.frequency.setValueAtTime(880,at);osc.frequency.setValueAtTime(1100,at+.12);gain.gain.setValueAtTime(.0001,at);gain.gain.exponentialRampToValueAtTime(.12,at+.025);gain.gain.exponentialRampToValueAtTime(.0001,at+.29);osc.connect(gain);gain.connect(audioCtx.destination);osc.start(at);osc.stop(at+.3)}catch(_){}}
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function load(){try{let x=JSON.parse(localStorage.getItem(DB_KEY)||'null');if(x&&Array.isArray(x.sessions)&&Array.isArray(x.measures))return {...EMPTY(),...x,programStartedAt:x.programStartedAt||[...x.sessions.map(s=>s.startedAt),x.active?.startedAt].filter(Boolean).sort()[0]||null};}catch(e){}return EMPTY();}
+function load(){try{let x=JSON.parse(localStorage.getItem(DB_KEY)||'null');if(x&&x.version===2&&Array.isArray(x.sessions)&&Array.isArray(x.measures))return {...EMPTY(),...x,programStartedAt:x.programStartedAt||PROGRAM_START};}catch(e){}return EMPTY();}
 function save(next=db){try{localStorage.setItem(DB_KEY,JSON.stringify(next));db=next;return true}catch(e){notify('Данные НЕ сохранены. Экспортируй резервную копию.');return false}}
 function nowISO(){return new Date().toISOString()}
 function dayKey(t=new Date()){const d=new Date(t);return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
@@ -158,8 +159,8 @@ function dateFmt(x,opts={day:'numeric',month:'short'}){return new Date(x).toLoca
 function timeFmt(x){return new Date(x).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
 function dur(ms){let s=Math.max(0,Math.floor(ms/1000));let h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return h?`${h} ч ${String(m).padStart(2,'0')} мин`:`${m}:${String(sec).padStart(2,'0')}`}
 function exercises(workout,mode){return (db.programOverrides?.[workout]||PROGRAM[workout].items).map((a,i)=>{const [id,n,min,max,replace,rMin,rMax,perLeg]=a;const variant=(mode==='outdoor'&&replace)?replace:id,swapped=variant!==id;return {slot:i,id:variant,name:CUES[variant].name,sets:n,min:swapped?(rMin??min):min,max:swapped?(rMax??max):max,rest:Number.isFinite(a[8])?a[8]:CUES[id].rest,perLeg:swapped?variant==='bulgar':(!!perLeg||variant==='bulgar')}})}
-function nextWorkout(){const sequence=db.schedule==='one'?['A','G','E']:['A','B','V'];const arr=db.sessions.filter(s=>sequence.includes(s.workout)&&s.logs?.length).sort((a,b)=>Date.parse(a.endedAt)-Date.parse(b.endedAt));const last=arr.at(-1)?.workout;return sequence[(sequence.indexOf(last)+1)%sequence.length]}
-function weeklyCount(){const now=new Date(),monday=new Date(now);const weekday=(now.getDay()+6)%7;monday.setHours(0,0,0,0);monday.setDate(now.getDate()-weekday);return db.sessions.filter(s=>new Date(s.startedAt)>=monday&&s.logs?.length).length}
+function nextWorkout(){const sequence=db.schedule==='one'?['A','G','E']:['A','B','V'];const monday=new Date();monday.setHours(0,0,0,0);monday.setDate(monday.getDate()-(monday.getDay()+6)%7);const thisWeek=db.sessions.filter(s=>sequence.includes(s.workout)&&s.logs?.length&&Date.parse(s.startedAt)>=monday.getTime());return sequence.find(id=>!thisWeek.some(s=>s.workout===id))||sequence[0]}
+function weeklyCount(){const now=new Date(),monday=new Date(now);const weekday=(now.getDay()+6)%7;monday.setHours(0,0,0,0);monday.setDate(now.getDate()-weekday);const allowed=db.schedule==='one'?['A','G','E']:['A','B','V'];return db.sessions.filter(s=>new Date(s.startedAt)>=monday&&new Date(s.startedAt)<=now&&allowed.includes(s.workout)&&s.logs?.length).length}
 function notify(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.remove('hidden');clearTimeout(ui.toastTimer);ui.toastTimer=setTimeout(()=>el.classList.add('hidden'),3300)}
 function setTab(t){ui.tab=t;ui.showSession=null;render();scrollTo({top:0,behavior:'instant'})}
 function navHTML(){const tabs=[['today','Тренировка'],['history','История'],['progress','Прогресс'],['settings','Данные']];return tabs.map(([id,title])=>`<button data-action="tab" data-val="${id}" class="${ui.tab===id?'active':''}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[id]}</svg>${title}</button>`).join('')}
@@ -462,7 +463,7 @@ function themeIcons(){return '<div class="theme-icons">'+[['light','☀','Све
 function renderSettings(){return '<div class="flex" style="align-items:center;justify-content:space-between"><h2>Настройки</h2>'+themeIcons()+'</div>'+programEditor()+'<div class="card"><details><summary>Резервная копия</summary><p class="caption">Сохраняет всю историю и настройки программы.</p><button class="btn full" data-action="export-json">Сохранить JSON</button><button class="btn full" data-action="import">Восстановить JSON</button></details></div><div class="card"><details><summary>Сбросить все данные</summary><button class="btn danger ghost full" data-action="clear">Удалить все записи</button></details></div>'}
 function download(filename,content,mime){const blob=new Blob([content],{type:mime});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);notify('Файл подготовлен')}
 function validBackup(n){
- if(!n||n.version!==1||!Array.isArray(n.sessions)||!Array.isArray(n.measures)||!Array.isArray(n.ofpDays)||
+ if(!n||n.version!==2||!Array.isArray(n.sessions)||!Array.isArray(n.measures)||!Array.isArray(n.ofpDays)||
    n.sessions.length>10000||n.measures.length>10000||n.ofpDays.length>50000)return false;
  const date=x=>typeof x==='string'&&Number.isFinite(Date.parse(x));
  const str=(x,max=10000)=>typeof x==='string'&&x.length<=max;
