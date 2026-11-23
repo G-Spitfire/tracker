@@ -106,13 +106,13 @@ button,a,[data-action]{touch-action:manipulation}
 .home-switch{display:block;width:100%;margin:0 0 var(--space-controls-content)}
 body{margin:0;font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--surface);color:var(--fg);font-size:var(--font-body);line-height:1.4}
 .app{width:100%;max-width:550px;margin:auto;min-height:100dvh;background:var(--surface);padding:var(--space-3) var(--space-4) calc(88px + env(safe-area-inset-bottom));overflow-x:hidden}
-.stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;width:100%;margin:0 0 15px}
-.stat-tile{display:flex;flex-direction:column;min-width:0;min-height:96px;padding:10px 11px;background:var(--soft);border-radius:var(--radius-panel);gap:4px}
-.stat-top{display:flex;align-items:flex-start;justify-content:space-between;gap:5px;color:var(--muted);font-size:var(--font-kpi-label);font-weight:var(--weight-medium);line-height:1.25}
-.stat-value{display:block;font-size:var(--font-kpi-value);line-height:1.05;letter-spacing:-.5px;font-weight:var(--weight-bold);font-variant-numeric:tabular-nums;white-space:nowrap}
-.stat-hint{font-size:var(--font-kpi-hint);color:var(--muted);line-height:1.25;margin-top:auto}
-.stat-icon svg{width:26px;height:26px;stroke-width:1.7}
-.stat-icon{display:flex;flex:0 0 26px;color:var(--accent)}
+.stats-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:100%;margin:0 0 15px}
+.stat-tile{display:flex;flex-direction:column;min-width:0;min-height:100px;padding:10px 9px;background:var(--soft);border-radius:var(--radius-panel);gap:4px}
+.stat-top{display:flex;align-items:flex-start;justify-content:space-between;gap:3px;color:var(--muted);font-size:11px;font-weight:var(--weight-medium);line-height:1.25;min-width:0}.stat-top>span:first-child{overflow-wrap:break-word}
+.stat-value{display:block;font-size:23px;line-height:1.05;letter-spacing:-.5px;font-weight:var(--weight-bold);font-variant-numeric:tabular-nums;white-space:nowrap}
+.stat-hint{font-size:10px;color:var(--muted);line-height:1.3;margin-top:auto}
+.stat-icon svg{width:16px;height:16px;stroke-width:1.7}
+.stat-icon{display:flex;flex:0 0 16px;color:var(--accent)}
 /* Native page scrolling in Safari and installed PWA. */
 @media(display-mode:standalone){
   .app{padding-top:calc(env(safe-area-inset-top, 0px) + 12px)}
@@ -122,11 +122,12 @@ html{background:var(--surface)}
   .app{padding-left:12px;padding-right:12px}
   .home-legend-item{font-size:12px}
   .stats-grid{gap:8px}
-  .stat-tile{min-height:94px;padding:9px}
-  .stat-value{font-size:24px}
-  .stat-top{font-size:11px}
-  .stat-hint{font-size:11px}
-  .stat-icon svg{width:24px;height:24px}
+  .stat-tile{min-height:98px;padding:8px 7px}
+  .stat-value{font-size:21px}
+  .stat-top{font-size:10px}
+  .stat-hint{font-size:10px}
+  .stat-icon svg{width:14px;height:14px}
+  .stat-icon{flex-basis:14px}
 }
 @media(max-width:360px) and (max-height:600px){body.is-profile .app .heading{margin:10px 0 7px}body.is-profile .app .swatches{margin:6px 0 8px;gap:8px}body.is-profile .app .sync-meta{margin-top:4px}body.is-profile .app .notice{margin-top:6px}body.is-profile .app .profile-footer{margin-top:12px;padding-top:8px}body.is-profile .app .profile-accent-label{margin-top:var(--space-2)}}
 body.is-loading header,body.is-loading nav{visibility:hidden}body.is-loading main{min-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:center}.school-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;width:100%;padding:32px 16px;text-align:center}.school-loading img{width:96px;height:96px;object-fit:contain}.school-loading-title{font-size:27px;font-weight:700;letter-spacing:-.02em;color:var(--fg)}.school-loading-spinner{width:22px;height:22px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:school-spin .8s linear infinite}@keyframes school-spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.school-loading-spinner{animation:none;border-top-color:var(--accent)}}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
@@ -261,12 +262,12 @@ function home(){
  let cleanStreak=0;for(const date of schoolDates){if(all.some(g=>g.date===date&&g.value<=3))break;cleanStreak++}
  const tile=(label,value,hint,icon,color)=>'<div class="stat-tile"><div class="stat-top"><span>'+label+'</span><span class="stat-icon">'+kpiIcon(icon)+'</span></div><strong class="stat-value"'+(color?' style="color:'+color+'"':'')+'>'+value+'</strong><span class="stat-hint">'+hint+'</span></div>';
  let out='<section class="home-screen"><div class="stats-grid">'+
- tile('Средний балл',fmt(score()),'За четверть','average')+
+ tile('Средний',fmt(score()),'За четверть','average')+
  tile('Динамика',hasBaseline?arrow+' '+(delta>0?'+':'')+fmt(delta):'—','За 7 дней','trend',delta>0?'#31ad81':delta<0?'#d76a6a':null)+
- tile('Доля пятёрок',fiveShare+'%','От всех оценок','star')+
- tile('Под риском',String(riskCount),'Предмета · средний < 3,60','alert')+
- (holidayInfo()?tile('До Нового года',String(holidayInfo().days),'Дней до праздника','tree'):tile('Без троек и двоек',String(cleanStreak),'Учебных дней подряд','flame'))+
- tile('Средний за домашки',hwAverage,'За четверть','homework')+
+ tile('Пятёрки',fiveShare+'%','От всех оценок','star')+
+ tile('Риск',String(riskCount),'Предметов ниже 3,60','alert')+
+ (holidayInfo()?tile('До Нового года',String(holidayInfo().days),'Дней до праздника','tree'):tile('Без 2 и 3',String(cleanStreak),'Учебных дней','flame'))+
+ tile('Домашки',hwAverage,'Средний балл','homework')+
  '</div><div class="home-switch">'+btns([['line','Линейный'],['ring','Кольцевой']],state.chart,'chart')+'</div><div class="home-visual">';
  if(!all.length){out+='<div class="empty">Пока нет оценок за эту четверть</div>';}else if(state.chart==='ring'){
   const circumference=2*Math.PI*72;let cum=0;
