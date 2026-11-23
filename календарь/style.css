@@ -271,3 +271,20 @@ button.event:hover{box-shadow:none}
 #event-more{padding-top:2px}
 .event-selection-preview{position:absolute;left:3px;right:3px;z-index:2;pointer-events:none;background:#dce9fbab;border:1px dashed #3977cc;color:#244e87;font-size:10px;font-weight:600;padding:2px;overflow:hidden}
 @media(max-width:620px){.event-editor-columns{grid-template-columns:1fr}#editor{width:calc(100% - 16px)}#event-form{padding:12px}}
+
+/* Calendar navigation and three semantic event palettes. */
+button.event.lesson{background:#e9f2ff;border-color:#3977cc;color:#203650}
+button.event.break,button.event.meal,button.event.walk{background:#fff4e1;border-color:#dba94d;color:#46371d}
+button.event.meeting,button.event.event-type{background:#f1eaff;border-color:#9873c9;color:#342449}
+button.event.conflicted{border:2px solid var(--danger);border-left:5px solid var(--danger)}
+.side-controls #side-new{min-height:42px;font-size:14px;font-weight:700;text-align:center}
+.side-controls>button:not(#side-new),.side-nav .nav-link{min-height:28px;border:0;border-radius:6px;background:transparent;text-align:left;font-size:12px;font-weight:550;padding:5px 8px}
+.side-controls>button:not(#side-new):hover,.side-nav .nav-link:hover{background:#fff0ef;color:#b71f1b}
+.side-nav .nav-link.active{background:#fff0ef;color:#b71f1b}
+.date-picker-wrap{position:relative}
+#calendar-picker{min-width:32px;min-height:28px;font-size:19px;line-height:1;padding:2px 6px}
+.calendar-popover{position:absolute;right:0;top:calc(100% + 5px);z-index:12;display:flex;align-items:center;gap:6px;padding:9px;background:white;border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 22px #17283f25}
+.calendar-popover input{width:130px;min-height:30px;font-size:12px}
+.calendar-popover button{min-height:30px;font-size:12px}
+.class-color-swatch{display:inline-block;width:13px;height:13px;border:1px solid #b9c1ca;border-radius:3px;margin-right:7px;vertical-align:-2px}
+#class-color-field select{width:100%}
