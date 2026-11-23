@@ -2,6 +2,8 @@
 // Canonical SVG icon definitions used by the app and the icon gallery.
 // Keep names and markup stable; the gallery renders these exact functions.
 function ico(name,active=false){
+if(name==='notice')return '<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10 3.5a2.3 2.3 0 0 1 4 0l9 15.6a2.3 2.3 0 0 1-2 3.4H3a2.3 2.3 0 0 1-2-3.4Z"/><path d="M12 9v5" stroke="white" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="17.7" r="1.5" fill="white"/></svg>';
+
 const line={
 home:'<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M9.5 20v-6.5h5V20"/>',
 grades:'<rect x="4" y="13" width="3.7" height="7" rx="1.7"/><rect x="10.2" y="9" width="3.7" height="11" rx="1.7"/><rect x="16.4" y="5" width="3.7" height="15" rx="1.7"/>',
