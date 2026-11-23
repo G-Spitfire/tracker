@@ -230,3 +230,10 @@ html.platform-apple .calendar button,html.platform-apple .schedule-month{font-va
 .subject .subject-score{display:grid;grid-template-columns:max-content;justify-items:end;align-content:start;row-gap:4px;flex:0 0 auto;min-width:62px}
 .subject .subject-score .subject-average{display:block;line-height:1.2}
 .subject .subject-score .subject-trend{display:block;font-size:12px;line-height:1.2;white-space:nowrap}
+
+/* Compact subject trends: occupy unused space beside grade chips, not an extra row. */
+.subject{position:relative}
+.subject .row{padding-right:0}
+.subject .subject-score{position:static;display:block;min-width:62px;text-align:right}
+.subject .subject-score .subject-trend{position:absolute;right:0;top:31px;display:block;line-height:1.2;white-space:nowrap}
+.subject .marks{padding-right:76px;min-height:44px}
