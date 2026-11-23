@@ -321,3 +321,14 @@ button:has(>.ui-icon){display:inline-flex;align-items:center;justify-content:fle
 .reference-row .reference-edit{flex-shrink:0}
 .reference-top{gap:10px}
 @media(max-width:650px){.reference-view{width:100%;max-width:480px}}
+
+/* Two lesson subgroups: compact, readable at half-column width. */
+button.event.event-subgroup{padding:3px 4px;gap:2px;overflow:hidden}
+button.event.event-subgroup .event-top{display:flex;align-items:flex-start;gap:2px;min-width:0;flex-shrink:0}
+button.event.event-subgroup .event-name{font-size:9px;line-height:1.12;min-width:0;flex:1 1 auto;white-space:normal;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow-wrap:anywhere}
+button.event.event-subgroup .event-subgroup-label{font-size:9px;font-weight:700;white-space:nowrap;flex:0 0 auto}
+button.event.event-subgroup .event-subgroup-room{font-size:9px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;display:block}
+button.event.event-subgroup .event-time,button.event.event-subgroup .event-details{display:none}
+button.event.event-subgroup.event-tiny .event-top{display:flex}
+button.event.event-subgroup.event-tiny .event-name{font-size:8px}
+button.event.event-subgroup.event-tiny .event-subgroup-room{display:none}
