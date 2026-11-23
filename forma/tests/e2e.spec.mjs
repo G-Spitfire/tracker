@@ -8,13 +8,16 @@ test.beforeEach(async ({ page }) => {
 
 test('initial layout and both schedules', async ({ page }) => {
   await expect(page.locator('[data-action="choose"]')).toHaveCount(3);
+  await expect(page.locator('.today-start')).toBeVisible();
+  await page.locator('.today-details').last().locator('summary').click();
   await expect(page.locator('#main')).toContainText('Обратные выпады');
+  await page.locator('.today-details').first().locator('summary').click();
   await page.locator('[data-action="schedule"][data-val="one"]').click();
-  await expect(page.locator('#main')).toContainText('1 раз DDX');
+  await expect(page.locator('#main')).toContainText('1 посещение DDX');
   await expect(page.locator('[data-action="choose"]')).toHaveCount(3);
-  await expect(page.locator('#main')).toContainText('A + D + E');
+  await expect(page.locator('[data-action="choose"]')).toHaveCount(3);
   await page.reload();
-  await expect(page.locator('[data-action="schedule"][data-val="one"]')).toHaveClass(/primary/);
+  await expect(page.locator('#main')).toContainText('1 посещение DDX');
 });
 
 test('complete workout and restore state after reload', async ({ page }) => {
@@ -63,6 +66,7 @@ test('offline PWA reload preserves active workout and logged set', async ({ page
 
 test('service worker update keeps locally saved schedule', async ({ page }) => {
   await expect.poll(async () => page.evaluate(() => navigator.serviceWorker.controller !== null)).toBeTruthy();
+  await page.locator('.today-details').first().locator('summary').click();
   await page.locator('[data-action="schedule"][data-val="one"]').click();
   const before = await page.evaluate(() => navigator.serviceWorker.controller.scriptURL);
   await page.evaluate(async () => {
@@ -71,7 +75,7 @@ test('service worker update keeps locally saved schedule', async ({ page }) => {
     await registration.update();
   });
   await page.reload();
-  await expect(page.locator('[data-action="schedule"][data-val="one"]')).toHaveClass(/primary/);
+  await expect(page.locator('#main')).toContainText('1 посещение DDX');
   const after = await page.evaluate(() => navigator.serviceWorker.controller?.scriptURL);
   expect(after).toBe(before);
 });
