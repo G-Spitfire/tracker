@@ -66,6 +66,18 @@ async function run() {
     await page.getByText('Средний балл',{exact:true}).waitFor({timeout:15000});
     for(const [scenario,tab] of [['home','home'],['grades','grades'],['schedule','schedule'],['homework','homework']]) {
       if(tab!=='home')await page.locator('[data-action="tab"][data-value="'+tab+'"]').click();
+      if(tab==='home'){
+        const graph=await page.locator('.home-line').evaluate(el=>{const r=el.getBoundingClientRect(),p=el.parentElement.getBoundingClientRect();return {ratio:r.width/p.width,width:r.width,parent:p.width}});
+        record(view,'line chart fills available width',graph.ratio>=0.94,graph);
+      }
+      if(tab==='schedule'){
+        const layout=await page.evaluate(()=>{
+          const cards=[...document.querySelectorAll('.lesson')];
+          const main=document.querySelector('main');
+          return {count:cards.length,allDirect:cards.every(el=>el.parentElement===main),widths:cards.map(el=>Math.round(el.getBoundingClientRect().width))};
+        });
+        record(view,'schedule lessons are independent full-width rows',layout.count>0&&layout.allDirect&&layout.widths.every(w=>w>=size.width-55),layout);
+      }
       const g=await geometry(page);
       record(view,scenario+' geometry',!g.overflow && !g.offenders.length,g);
       await page.screenshot({path:path.join(OUT,view+'-'+scenario+'.png'),fullPage:false});
