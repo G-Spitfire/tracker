@@ -29,7 +29,7 @@ jobs:
           done
           exit 1
       - name: Test scroll and navigation
-        run: node school-simple/ui-stability.cjs
+        run: node school-simple/tests/ui-stability.cjs
       - name: Upload visual audit screenshots
         if: always()
         uses: actions/upload-artifact@v4
