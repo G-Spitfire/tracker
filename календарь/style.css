@@ -238,3 +238,10 @@ button.event.event-long{justify-content:space-between}
 button.event.event-long .event-details{display:flex;width:100%;justify-content:space-between;align-items:baseline;gap:3px;min-width:0;margin-top:auto}
 button.event.event-long .event-teacher{flex:1 1 auto;min-width:0;text-align:left}
 button.event.event-long .event-room,button.event.event-long.event-narrow .event-room{display:block;flex:0 1 auto;min-width:0;max-width:48%;margin-left:auto;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Unified 8px time and two-line layout from 30 minutes. */
+button.event .event-time{font-size:8px}
+button.event.event-long .event-time{font-size:8px}
+button.event.event-long.event-compact .event-details{display:flex}
+button.event.event-long .event-top{width:100%;min-width:0}
+button.event.event-long .event-details{margin-top:auto}
