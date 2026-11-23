@@ -143,12 +143,12 @@ function editorAvailability(){
  for(const input of $('event-employees').querySelectorAll('input')){
   const label=input.closest('label');const name=label.querySelector('.availability-name');const busy=matches.filter(e=>(e.employeeIds||[]).includes(input.value));const absent=absences.some(a=>a.employeeId===input.value);
   label.classList.toggle('availability-busy',!!busy.length||absent);
-  name.title=absent?'Отсутствует':busy.length?'Занят: '+busy.map(describe).join('; '):'';
-  if(input.checked){if(absent)details.push('Отсутствует: '+employeeNames(input.value));for(const e of busy)details.push('Преподаватель '+employeeNames(input.value)+' занят: '+describe(e))}
+  name.title=absent?'Отсутствует':busy.length?'Занят':'';
+  if(input.checked){if(absent)details.push({message:'Отсутствует: '+employeeNames(input.value)});for(const e of busy)details.push({message:'Преподаватель '+employeeNames(input.value)+' занят: '+describe(e),event:e})}
  }
  const room=$('event-room');for(const option of room.options){if(!option.value)continue;const occupied=matches.some(e=>e.roomId===option.value);const original=cache.rooms.find(r=>r.id===option.value)?.name||option.value;option.textContent=original+(occupied?' · Занят':'');}
- if(room.value){for(const e of matches.filter(e=>e.roomId===room.value))details.push('Кабинет '+(cache.rooms.find(r=>r.id===room.value)?.name||room.value)+' занят: '+describe(e))}
- const panel=$('event-conflicts');panel.replaceChildren();panel.hidden=!details.length;if(details.length){const heading=elt('strong','',details.length===1?'Конфликт':'Конфликты: '+details.length);panel.append(heading);for(const detail of details)panel.append(elt('div','',detail))}
+ if(room.value){for(const e of matches.filter(e=>e.roomId===room.value))details.push({message:'Кабинет '+(cache.rooms.find(r=>r.id===room.value)?.name||room.value)+' занят: '+describe(e),event:e})}
+ const panel=$('event-conflicts');panel.replaceChildren();panel.hidden=!details.length;if(details.length){const heading=elt('strong','',details.length===1?'Конфликт':'Конфликты: '+details.length);panel.append(heading);for(const detail of details){if(!detail.event){panel.append(elt('div','',detail.message));continue}const link=elt('button','conflict-event-link',detail.message+' · Открыть');link.type='button';link.onclick=()=>openEditor(detail.event);panel.append(link)}}
  const hint=$('employee-availability-hint');hint.hidden=![...$('event-employees').querySelectorAll('.availability-busy')].length;
 }
 function checked(target){return [...$(target).querySelectorAll('input:checked')].map(x=>x.value)}
