@@ -52,7 +52,9 @@ const DATE='2026-12-09';
   assert.equal(json.version,3);assert.ok(json.data.events.some(e=>e.id===saved.id));
   report.backup=true;
   // Two-step subgroup creation: first lesson persists before second is completed.
-  await page.locator('#settings-back').click();
+  // Fresh IndexedDB contains no subjects: create one before selecting it.
+  await page.evaluate(async()=>{const db=await new Promise((ok,no)=>{const q=indexedDB.open('school-calendar-mvp');q.onsuccess=()=>ok(q.result);q.onerror=()=>no(q.error)});await new Promise((ok,no)=>{const tx=db.transaction('subjects','readwrite');tx.objectStore('subjects').put({id:'test-subject',name:'Тестовый предмет'});tx.oncomplete=ok;tx.onerror=()=>no(tx.error)});db.close()});
+  await page.reload();await page.waitForFunction(()=>document.querySelector('#status')?.textContent!=='Загрузка…');
   await page.locator('#side-new').click();
   await page.locator('#event-date').fill(DATE);
   await page.locator('#event-classes input[type="checkbox"]').first().check();
