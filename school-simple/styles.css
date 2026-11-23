@@ -223,3 +223,10 @@ html.platform-apple .calendar button,html.platform-apple .schedule-month{font-va
 
 /* Subject-average trend after the latest grade in the selected quarter. */
 .subject-score{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0}.subject-trend{font-size:11px;font-weight:600;line-height:1.2;font-variant-numeric:tabular-nums}.subject-trend.up{color:#27a978}.subject-trend.down{color:#e16c70}.subject-trend.neutral{color:var(--muted)}
+
+/* Explicit vertical layout for the grade average and trend, including installed iOS PWAs. */
+.subject .row{align-items:flex-start;gap:12px}
+.subject .row>strong:first-child{min-width:0;flex:1}
+.subject .subject-score{display:grid;grid-template-columns:max-content;justify-items:end;align-content:start;row-gap:4px;flex:0 0 auto;min-width:62px}
+.subject .subject-score .subject-average{display:block;line-height:1.2}
+.subject .subject-score .subject-trend{display:block;font-size:12px;line-height:1.2;white-space:nowrap}
