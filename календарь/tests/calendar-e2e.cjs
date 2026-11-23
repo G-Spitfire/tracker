@@ -51,6 +51,34 @@ const DATE='2026-12-09';
   const json=JSON.parse(fs.readFileSync(file,'utf8'));
   assert.equal(json.version,3);assert.ok(json.data.events.some(e=>e.id===saved.id));
   report.backup=true;
+  // Two-step subgroup creation: first lesson persists before second is completed.
+  // Fresh IndexedDB contains no subjects: create one before selecting it.
+  await page.evaluate(async()=>{const db=await new Promise((ok,no)=>{const q=indexedDB.open('school-calendar-mvp');q.onsuccess=()=>ok(q.result);q.onerror=()=>no(q.error)});await new Promise((ok,no)=>{const tx=db.transaction('subjects','readwrite');tx.objectStore('subjects').put({id:'test-subject',name:'Тестовый предмет'});tx.oncomplete=ok;tx.onerror=()=>no(tx.error)});db.close()});
+  await page.reload();await page.waitForFunction(()=>document.querySelector('#status')?.textContent!=='Загрузка…');
+  await page.locator('#side-new').click();
+  await page.locator('#event-date').fill(DATE);
+  await page.locator('#event-classes input[type="checkbox"]').first().check();
+  await page.locator('#event-subgroup').selectOption('1');
+  assert.equal(await page.locator('#event-save').innerText(),'Продолжить');
+  assert.equal(await page.locator('#event-save-only').isVisible(),true);
+  await page.locator('#event-subject').selectOption({index:1});
+  await page.locator('#event-name').fill('Английский подгруппа');
+  await page.locator('#event-save').click();
+  await page.waitForFunction(()=>document.querySelector('#event-subgroup')?.value==='2');
+  assert.equal(await page.locator('#editor').isVisible(),true);
+  assert.equal(await page.locator('#event-subgroup').inputValue(),'2');
+  assert.equal(await page.locator('#event-save').innerText(),'Сохранить');
+  assert.equal(await page.locator('#event-name').inputValue(),'');
+  assert.equal(await page.locator('#event-subject').inputValue(),'');
+  assert.ok((await getEvents()).some(e=>e.name==='Английский подгруппа'&&e.subgroup==='1'));
+  await page.locator('#event-subject').selectOption({index:1});
+  await page.locator('#event-name').fill('Музыка подгруппа');
+  await page.locator('#event-save').click();
+  await page.waitForFunction(()=>!document.querySelector('#editor')?.open);
+  assert.ok((await getEvents()).some(e=>e.name==='Музыка подгруппа'&&e.subgroup==='2'));
+  report.subgroupContinue=true;
+  await page.locator('#data-nav').click();
+
   await page.locator('#settings-back').click();
   const pngPromise=page.waitForEvent('download');
   await page.locator('#side-png').click();
