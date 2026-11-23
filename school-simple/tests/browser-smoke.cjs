@@ -26,8 +26,10 @@ const assert = require('node:assert/strict');
     metrics:typeof kpiIcon==='function' && kpiIcon('average').includes('<svg')
   }));
   assert.deepEqual(iconLibrary,{navigation:true,metrics:true},'Shared icon libraries loaded');
-   assert.equal(await page.locator('[data-action="toggle-updates"]').isDisabled(),true,'Empty recent updates are not expandable');
-   await page.getByText('Нет новых',{exact:true}).waitFor();
+   assert.equal(await page.locator('#notice-indicator').count(),1,'Notification indicator appears on home');
+   await page.locator('#notice-indicator').click();
+   await page.getByText('За сегодня и вчера событий нет').waitFor();
+   await page.locator('[data-action="close-detail"]').click();
   await page.getByText('Средний балл',{exact:true}).waitFor();
   await page.locator('[data-action="tab"][data-value="grades"]').click();
   await page.getByText('Математика',{exact:true}).first().waitFor();
