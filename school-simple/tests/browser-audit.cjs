@@ -71,6 +71,7 @@ async function run() {
         record(view,'line chart fills available width',graph.ratio>=0.94,graph);
       }
       if(tab==='schedule'){
+        await page.evaluate(()=>{state.date='2026-11-20';render();});
         const layout=await page.evaluate(()=>{
           const cards=[...document.querySelectorAll('.lesson')];
           const main=document.querySelector('main');
