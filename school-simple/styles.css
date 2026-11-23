@@ -220,3 +220,6 @@ html.platform-apple .heading{letter-spacing:-.025em}
 html.platform-apple .stat-value{font-variant-numeric:tabular-nums lining-nums;letter-spacing:-.045em;font-weight:650}
 html.platform-apple .subject-average,html.platform-apple .forecast-result{font-variant-numeric:tabular-nums lining-nums;letter-spacing:-.025em}
 html.platform-apple .calendar button,html.platform-apple .schedule-month{font-variant-numeric:tabular-nums lining-nums;letter-spacing:-.02em}
+
+/* Subject-average trend after the latest grade in the selected quarter. */
+.subject-score{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0}.subject-trend{font-size:11px;font-weight:600;line-height:1.2;font-variant-numeric:tabular-nums}.subject-trend.up{color:#27a978}.subject-trend.down{color:#e16c70}.subject-trend.neutral{color:var(--muted)}
