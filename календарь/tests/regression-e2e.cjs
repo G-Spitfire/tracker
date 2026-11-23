@@ -9,7 +9,7 @@ const out=path.join(__dirname,'artifacts');fs.mkdirSync(out,{recursive:true});
  try{
   await page.goto('http://127.0.0.1:8765/календарь/index.html');await page.waitForFunction(()=>document.querySelector('#status')?.textContent!=='Загрузка…');await seed();await page.reload();await page.waitForFunction(()=>document.querySelector('#status')?.textContent!=='Загрузка…');
   await page.locator('#side-new').click();await page.locator('[data-kind="event"]').click();await page.locator('#event-name').fill('Второе занятие');await page.locator('#event-date').fill('2026-12-09');await page.locator('#event-start').fill('10:30');await page.locator('#event-more-toggle').click();await page.locator('#event-end').fill('11:30');
-  await page.locator('#employee-picker-toggle').click();await page.locator('#event-employees input[type="checkbox"]').first().check();
+  await page.locator('#employee-picker-toggle').click();assert.equal(await page.locator('#employee-picker-toggle').getAttribute('aria-expanded'),'true');await page.locator('#event-employees input[type="checkbox"]').first().check();assert.match(await page.locator('#employee-picker-toggle').textContent(),/Аудит/);
   page.once('dialog',d=>d.dismiss());await page.locator('#event-form button[type="submit"]').click();await page.waitForTimeout(300);
   assert.equal((await dbRows('events')).length,1,'Conflicting event was saved despite cancellation');report.conflictCancel=true;
   page.once('dialog',d=>d.accept());await page.locator('#event-form button[type="submit"]').click();await page.waitForFunction(()=>document.querySelector('#status')?.textContent==='Событие сохранено');assert.equal((await dbRows('events')).length,2);report.conflictOverride=true;
