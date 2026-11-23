@@ -79,7 +79,7 @@ async function attachEventSelection(lane,classId){
  const finish=(ev,cancel=false)=>{if(!selection||ev.pointerId!==selection.id)return;const current=selection;selection=null;current.preview.remove();if(lane.hasPointerCapture(ev.pointerId))lane.releasePointerCapture(ev.pointerId);if(cancel)return;const dragged=Math.abs(ev.clientY-current.originY)>=4;const a=Math.min(current.start,current.end),b=Math.max(current.start,current.end);const from=Math.min(DAY_END-5,a),to=dragged?Math.max(from+5,b):Math.min(DAY_END,from+40);openEditor(null,classId,timeString(from),timeString(Math.min(DAY_END,to)))};
  lane.addEventListener('pointerup',ev=>finish(ev));lane.addEventListener('pointercancel',ev=>finish(ev,true));
 }
-function renderDay(){ const viewport=Math.max(420,window.innerHeight-140);const height=700;PIXELS_PER_MINUTE=height/(DAY_END-DAY_START);document.documentElement.style.setProperty('--day-height',height+'px');$('day').value=selectedDate;const grid=$('grid');grid.replaceChildren();grid.append(elt('div','head','Время'));cache.classes.forEach(c=>{const head=elt('button','head head-clickable',c.name);head.style.backgroundColor=classColor(c);head.onclick=()=>{scopeClassId=c.id;calendarMode='class';render()};grid.append(head)});const timeLane=elt('div','lane time-lane');appendTimeGuides(timeLane,true);grid.append(timeLane);const dayEvents=cache.events.filter(e=>e.date===selectedDate);const conflicts=dayEvents.filter(e=>conflictMessages(e).length);$('conflict-summary').textContent=conflicts.length?`Конфликты: ${conflicts.length} событий`:'Конфликтов нет';for(const c of cache.classes){const lane=elt('div','lane');appendTimeGuides(lane);lane.title=`Нажмите или протяните мышью для создания события: ${c.name}`;attachEventSelection(lane,c.id);lane.addEventListener('dragover',ev=>{ev.preventDefault();ev.dataTransfer.dropEffect='move'});lane.addEventListener('drop',ev=>{ev.preventDefault();const id=ev.dataTransfer.getData('text/plain'),event=cache.events.find(x=>x.id===id);if(!event)return;const rect=lane.getBoundingClientRect();const start=Math.max(DAY_START,Math.min(DAY_END-20,DAY_START+Math.round((ev.clientY-rect.top)/20)*20));moveEvent(event,c.id,timeString(start)).catch(err=>setStatus('Ошибка переноса: '+err.message))});const classEvents=dayEvents.filter(e=>(e.classIds||[]).includes(c.id)&&minutes(e.end)>DAY_START&&minutes(e.start)<DAY_END);const layout=laneLayout(classEvents);for(const e of classEvents){const card=eventCard(e),slot=layout.get(e.id);card.style.left=`calc(${slot.track*100/slot.count}% + 3px)`;card.style.width=`calc(${100/slot.count}% - 6px)`;card.style.right='auto';lane.append(card)}grid.append(lane)}setStatus('Данные сохраняются на этом устройстве')}
+function renderDay(){ const viewport=Math.max(420,window.innerHeight-140);const height=700;PIXELS_PER_MINUTE=height/(DAY_END-DAY_START);document.documentElement.style.setProperty('--day-height',height+'px');$('day').value=selectedDate;const grid=$('grid');grid.replaceChildren();grid.append(elt('div','head','Время'));cache.classes.forEach(c=>{const head=elt('button','head head-clickable',c.name);head.style.backgroundColor=classColor(c);head.onclick=()=>{scopeClassId=c.id;calendarMode='class';render()};grid.append(head)});const timeLane=elt('div','lane time-lane');appendTimeGuides(timeLane,true);grid.append(timeLane);const dayEvents=cache.events.filter(e=>e.date===selectedDate);const conflicts=dayEvents.filter(e=>conflictMessages(e).length);$('conflict-summary').textContent=conflicts.length?`Конфликты: ${conflicts.length} событий`:'Конфликтов нет';for(const c of cache.classes){const lane=elt('div','lane');appendTimeGuides(lane);lane.title=`Нажмите или протяните мышью для создания события: ${c.name}`;attachEventSelection(lane,c.id);lane.addEventListener('dragover',ev=>{ev.preventDefault();ev.dataTransfer.dropEffect='move'});lane.addEventListener('drop',ev=>{ev.preventDefault();const id=ev.dataTransfer.getData('text/plain'),event=cache.events.find(x=>x.id===id);if(!event)return;const rect=lane.getBoundingClientRect();const duration=minutes(event.end)-minutes(event.start);const raw=DAY_START+(ev.clientY-rect.top)/PIXELS_PER_MINUTE;const snapped=DAY_START+Math.round((raw-DAY_START)/5)*5;const start=Math.max(DAY_START,Math.min(DAY_END-duration,snapped));moveEvent(event,c.id,timeString(start)).catch(err=>setStatus('Ошибка переноса: '+err.message))});const classEvents=dayEvents.filter(e=>(e.classIds||[]).includes(c.id)&&minutes(e.end)>DAY_START&&minutes(e.start)<DAY_END);const layout=laneLayout(classEvents);for(const e of classEvents){const card=eventCard(e),slot=layout.get(e.id);card.style.left=`calc(${slot.track*100/slot.count}% + 3px)`;card.style.width=`calc(${100/slot.count}% - 6px)`;card.style.right='auto';lane.append(card)}grid.append(lane)}setStatus('Данные сохраняются на этом устройстве')}
 function renderWeek(){
  const grid=$('grid');grid.replaceChildren();grid.classList.add('week-grid');const monday=weekMonday(selectedDate);$('conflict-summary').textContent='';
  grid.append(elt('div','head','Время'));
@@ -168,7 +168,7 @@ function exportPNG(){
  const scale=2,W=2160,margin=32,timeWidth=126,cols=cache.classes.slice(0,6);
  const colWidth=(W-2*margin-timeWidth)/6,inner=colWidth-24;
  const canvas=document.createElement('canvas');const measure=canvas.getContext('2d');
- const font={title:'bold 19px system-ui',meta:'16px system-ui',time:'15px system-ui'};
+ const font={title:'bold 11px system-ui',compactTitle:'bold 8px system-ui',meta:'10px system-ui',time:'8px system-ui'};
  const textLines=(text,width,face)=>{
   measure.font=face;const result=[];
   for(const paragraph of String(text||'').split('\n')){
@@ -185,19 +185,14 @@ function exportPNG(){
  const visible=events.filter(e=>(e.classIds||[]).some(id=>cols.some(c=>c.id===id)));
  const ticks=[timeString(DAY_START),...displayMarks().map(mark=>timeString(mark.minute))];
  const starts=[...new Set([...ticks,...visible.map(e=>e.start)])].sort((a,b)=>minutes(a)-minutes(b));
- const details=e=>{
-  const staff=(e.employeeIds||[]).map(id=>cache.employees.find(x=>x.id===id)?.displayName||cache.employees.find(x=>x.id===id)?.name||id).join(', ');
-  const room=cache.rooms.find(x=>x.id===e.roomId)?.name||'';
-  return [e.start+'–'+e.end,e.name,...(staff?['Преподаватели: '+staff]:[]),...(room?['Место: '+room]:[])];
- };
- const prepared=new Map();
- for(const e of events){const fields=details(e),parts=[];fields.forEach((value,i)=>parts.push({font:i===1?font.title:i===0?font.time:font.meta,lines:textLines(value,inner,i===1?font.title:i===0?font.time:font.meta),lineHeight:i===1?24:21}));prepared.set(e.id,{parts,height:12+parts.reduce((sum,p)=>sum+p.lines.length*p.lineHeight+4,0)+8})}
+ const details=e=>{const staff=(e.employeeIds||[]).map(id=>cache.employees.find(x=>x.id===id)?.displayName||cache.employees.find(x=>x.id===id)?.name||id).join(', ');const room=cache.rooms.find(x=>x.id===e.roomId)?.name||'';return {staff,room}};
+ const prepared=new Map();for(const e of events){const duration=minutes(e.end)-minutes(e.start),{staff,room}=details(e),height=duration<=15?28:duration===20?36:58;prepared.set(e.id,{duration,staff,room,height})}
  const rows=starts.map(time=>{
   const byClass=cols.map(c=>visible.filter(e=>e.start===time&&(e.classIds||[]).includes(c.id)));
   return {time,byClass,height:Math.max(36,...byClass.map(list=>list.reduce((sum,e)=>sum+prepared.get(e.id).height+7,8)))};
  });
  const meetings=events.filter(e=>!(e.classIds||[]).length);
- const appendix=meetings.map(e=>({event:e,lines:details(e).flatMap((value,i)=>textLines(value,W-2*margin-34,i===1?font.title:font.meta)),height:prepared.get(e.id).height}));
+ const appendix=meetings.map(e=>({event:e,height:prepared.get(e.id).height}));
  const top=125,headHeight=48,footer=50,appendixHeight=appendix.length?70+appendix.reduce((sum,x)=>sum+x.height+10,0):0;
  const H=Math.ceil(top+headHeight+Math.max(60,rows.reduce((sum,r)=>sum+r.height,0))+appendixHeight+footer);
  canvas.width=W*scale;canvas.height=H*scale;const ctx=canvas.getContext('2d');ctx.scale(scale,scale);
@@ -208,14 +203,7 @@ function exportPNG(){
  ctx.fillStyle='#22252b';ctx.font='bold 19px system-ui';cols.forEach((c,i)=>{ctx.fillStyle=classColor(c);ctx.fillRect(margin+timeWidth+i*colWidth,top,colWidth,headHeight);ctx.fillStyle='#22252b';ctx.fillText(c.name,margin+timeWidth+i*colWidth+12,top+31)});
  ctx.fillText('Время',margin+12,top+31);
  const palette={lesson:['#e9f2ff','#3977cc'],break:['#fff4e1','#dba94d'],meeting:['#f1eaff','#9873c9']};
- const drawCard=(e,x,y,w)=>{
-  const item=prepared.get(e.id),h=item.height,colors=palette[cardType(e.type)]||palette.lesson;
-  ctx.fillStyle=colors[0];ctx.fillRect(x,y,w,h);
-  ctx.fillStyle=conflictMessages(e).length?'#b92f42':colors[1];ctx.fillRect(x,y,5,h);
-  let cursor=y+9;
-  for(const part of item.parts){ctx.font=part.font;ctx.fillStyle='#22252b';for(const line of part.lines){cursor+=part.lineHeight;ctx.fillText(line,x+12,cursor-5)}cursor+=4}
-  return h;
- };
+ const drawCard=(e,x,y,w)=>{const item=prepared.get(e.id),h=item.height,colors=palette[cardType(e.type)]||palette.lesson,duration=item.duration;ctx.fillStyle=colors[0];ctx.fillRect(x,y,w,h);ctx.fillStyle=conflictMessages(e).length?'#b92f42':colors[1];ctx.fillRect(x,y,5,h);ctx.fillStyle='#22252b';const left=x+12,right=x+w-10,time=e.start+'–'+e.end;if(duration<=15){ctx.font=font.compactTitle;ctx.fillText(String(e.name||'').toLocaleUpperCase('ru'),left,y+18,Math.max(10,w-90));ctx.font=font.time;ctx.textAlign='right';ctx.fillText(time,right,y+18);ctx.textAlign='left'}else if(duration===20){ctx.font=font.title;ctx.fillText(e.name||'',left,y+23,Math.max(10,w-90));ctx.font=font.time;ctx.textAlign='right';ctx.fillText(time,right,y+23);ctx.textAlign='left'}else{ctx.font=font.title;ctx.fillText(e.name||'',left,y+21,Math.max(10,w-90));ctx.font=font.time;ctx.textAlign='right';ctx.fillText(time,right,y+21);ctx.textAlign='left';ctx.font=font.meta;if(item.staff)ctx.fillText(item.staff,left,y+43,Math.max(10,w-100));if(item.room){ctx.textAlign='right';ctx.fillText(item.room,right,y+43);ctx.textAlign='left'}}return h};
  let y=top+headHeight;
  for(const row of rows){
   ctx.fillStyle='#f7f8f9';ctx.fillRect(margin,y,timeWidth,row.height);
