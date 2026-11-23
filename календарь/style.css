@@ -340,3 +340,6 @@ button.event.event-subgroup.event-tiny .event-subgroup-room{display:none}
 .editor-conflicts{border:1px solid #edaaa8;background:#fff4f3;color:#792b29;border-radius:9px;padding:10px 12px;font-size:13px;line-height:1.45;margin-top:12px}
 .editor-conflicts strong{display:block;margin-bottom:5px}
 .editor-conflicts div+div{margin-top:5px}
+
+.conflict-event-link{display:block;width:100%;text-align:left;border:0;background:transparent;color:#792b29;text-decoration:underline;text-underline-offset:2px;padding:5px 0;cursor:pointer;font:inherit}
+.conflict-event-link:hover{color:#e52520}
