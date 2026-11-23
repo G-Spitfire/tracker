@@ -296,3 +296,10 @@ button:has(>.ui-icon){display:inline-flex;align-items:center;justify-content:fle
 #side-new:has(>.ui-icon),#reference-add:has(>.ui-icon){justify-content:center}
 .side-nav .nav-link:has(>.ui-icon){display:flex;align-items:center;gap:8px}
 .reference-nav-link .ui-icon{width:15px;height:15px;flex-basis:15px}
+
+/* Compact reference lists: preserve accessible edit controls and mobile width. */
+.reference-view{max-width:600px}
+.reference-row{padding:6px 12px;min-height:44px}
+.reference-row .reference-edit{width:32px;height:32px;min-height:32px;padding:0;display:inline-flex;align-items:center;justify-content:center;flex:0 0 32px}
+.reference-row .reference-edit .ui-icon{width:16px;height:16px;flex-basis:16px}
+.reference-row .class-order-controls{display:flex;align-items:center;gap:5px;flex-shrink:0}
