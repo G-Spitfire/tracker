@@ -159,7 +159,7 @@ function timeFmt(x){return new Date(x).toLocaleTimeString('ru-RU',{hour:'2-digit
 function dur(ms){let s=Math.max(0,Math.floor(ms/1000));let h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return h?`${h} ч ${String(m).padStart(2,'0')} мин`:`${m}:${String(sec).padStart(2,'0')}`}
 function exercises(workout,mode){return (db.programOverrides?.[workout]||PROGRAM[workout].items).map((a,i)=>{const [id,n,min,max,replace,rMin,rMax,perLeg]=a;const variant=(mode==='outdoor'&&replace)?replace:id,swapped=variant!==id;return {slot:i,id:variant,name:CUES[variant].name,sets:n,min:swapped?(rMin??min):min,max:swapped?(rMax??max):max,rest:Number.isFinite(a[8])?a[8]:CUES[id].rest,perLeg:swapped?variant==='bulgar':(!!perLeg||variant==='bulgar')}})}
 function nextWorkout(){const sequence=db.schedule==='one'?['A','G','E']:['A','B','V'];const arr=db.sessions.filter(s=>sequence.includes(s.workout)&&s.logs?.length).sort((a,b)=>Date.parse(a.endedAt)-Date.parse(b.endedAt));const last=arr.at(-1)?.workout;return sequence[(sequence.indexOf(last)+1)%sequence.length]}
-function weeklyCount(){const now=new Date(),monday=new Date(now);const weekday=(now.getDay()+6)%7;monday.setHours(0,0,0,0);monday.setDate(now.getDate()-weekday);return db.sessions.filter(s=>new Date(s.startedAt)>=monday&&s.workout!=='G'&&s.logs?.length).length}
+function weeklyCount(){const now=new Date(),monday=new Date(now);const weekday=(now.getDay()+6)%7;monday.setHours(0,0,0,0);monday.setDate(now.getDate()-weekday);return db.sessions.filter(s=>new Date(s.startedAt)>=monday&&s.logs?.length).length}
 function notify(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.remove('hidden');clearTimeout(ui.toastTimer);ui.toastTimer=setTimeout(()=>el.classList.add('hidden'),3300)}
 function setTab(t){ui.tab=t;ui.showSession=null;render();scrollTo({top:0,behavior:'instant'})}
 function navHTML(){const tabs=[['today','Тренировка'],['history','История'],['progress','Прогресс'],['settings','Данные']];return tabs.map(([id,title])=>`<button data-action="tab" data-val="${id}" class="${ui.tab===id?'active':''}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[id]}</svg>${title}</button>`).join('')}
@@ -188,7 +188,7 @@ let center='';
 if(s.pausedAt){center=`<div class="focus-center"><div class="caption">ТРЕНИРОВКА НА ПАУЗЕ</div><div class="focus-value">Ⅱ</div><div class="caption">Таймер и отдых остановлены</div></div><button class="btn primary full" data-action="resume-workout">▶ Продолжить тренировку</button>`}
 else if(done){center=`<div class="focus-center"><div class="focus-value">✓</div><b>Упражнение выполнено</b><div class="caption">${logs.reduce((sum,l)=>sum+l.reps,0)} повторений за ${e.sets} подходов</div></div><button class="btn primary full" data-action="${at===s.exercises.length-1?'finish':'next-exercise'}">${at===s.exercises.length-1?'Завершить тренировку':'Следующее упражнение →'}</button>`}
 else if(resting){center=`<div class="focus-center"><div class="caption">${s.rest.betweenExercises?'ОТДЫХ МЕЖДУ УПРАЖНЕНИЯМИ':'ОТДЫХ ПОСЛЕ ПОДХОДА'}</div><div class="focus-value" id="rest-count">${dur(s.rest.until-Date.now())}</div><div class="caption">${s.rest.betweenExercises?'После: '+esc(s.rest.from||'предыдущего упражнения'):'Записано: '+(logs.at(-1)?.reps??'—')+' повторений'}</div></div><div class="focus-buttons"><button class="btn" data-action="more-rest">+30 сек</button><button class="btn primary" data-action="skip-rest">Пропустить отдых →</button></div>`}
-else {center=`<div class="focus-center"><div class="caption">ВЕС И ПОВТОРЕНИЯ</div><div class="field" style="width:160px"><label for="set-weight">Рабочий вес, кг</label><input id="set-weight" type="number" min="0" max="1000" step="0.5" inputmode="decimal" value="${previous?.weight??0}"></div><div class="focus-stepper"><button data-action="step" data-slot="${e.slot}" data-diff="-1" aria-label="Меньше повторений">−</button><input class="reps" type="number" min="1" max="300" inputmode="numeric" data-slot="${e.slot}" value="${draft}" aria-label="Повторения"><button data-action="step" data-slot="${e.slot}" data-diff="1" aria-label="Больше повторений">+</button></div><div class="focus-previous">${previous?`Прошлый подход №${previous.setNumber}: <strong>${previous.reps}${e.perLeg?' на ногу':''} повт.</strong> · ${dateFmt(previous.at)}`:'Предыдущего результата пока нет'}</div></div><button class="btn primary full" data-action="log" data-slot="${e.slot}">✓ Записать подход</button>`}
+else {center=`<div class="focus-center"><div class="caption">ВЕС И ПОВТОРЕНИЯ</div><div class="field" style="width:160px"><label for="set-weight">Рабочий вес, кг</label><input id="set-weight" type="number" min="0" max="1000" step="0.5" inputmode="decimal" value="${logs.at(-1)?.weight??previous?.weight??0}"></div><div class="focus-stepper"><button data-action="step" data-slot="${e.slot}" data-diff="-1" aria-label="Меньше повторений">−</button><input class="reps" type="number" min="1" max="300" inputmode="numeric" data-slot="${e.slot}" value="${draft}" aria-label="Повторения"><button data-action="step" data-slot="${e.slot}" data-diff="1" aria-label="Больше повторений">+</button></div><div class="focus-previous">${previous?`Прошлый подход №${previous.setNumber}: <strong>${previous.weight?previous.weight+' кг × ':''}${previous.reps}${e.perLeg?' на ногу':''} повт.</strong> · ${dateFmt(previous.at)}`:'Предыдущего результата пока нет'}</div></div><button class="btn primary full" data-action="log" data-slot="${e.slot}">✓ Записать подход</button>`}
 const tips=`<div class="focus-tools"><details class="how"><summary>Техника ▾</summary><p><strong>Думай:</strong> ${esc(CUES[e.id]?.cue||'')}<br><strong>Как выполнять:</strong> ${esc(CUES[e.id]?.tech||'')}<br><strong>Избегай:</strong> ${esc(CUES[e.id]?.avoid||'')}</p></details>${logs.length?`<button class="btn ghost small" data-action="undo" data-slot="${e.slot}">↶ Отменить</button>`:''}</div></div>`;
 const footer=`<div class="card focus-secondary"><div class="flex"><span class="tiny muted">Всего ${completed}/${all} подходов</span><span class="tiny muted">${Math.round(completed/all*100)}%</span></div><div class="progress-track"><div style="width:${completed/all*100}%"></div></div><details id="focus-all" class="focus-details"><summary>Все упражнения · сменить упражнение</summary><div class="focus-list">${s.exercises.map(x=>{const n=s.logs.filter(l=>l.slot===x.slot).length;return `<button class="btn ${x.slot===e.slot?'primary':'ghost'}" data-action="focus-exercise" data-slot="${x.slot}">${esc(x.name)} · ${n}/${x.sets}</button>`}).join('')}</div></details><details class="focus-details"><summary>Завершение тренировки</summary><button class="btn full" data-action="finish">Завершить тренировку · ${completed}/${all}</button><button class="btn ghost danger full" data-action="discard">Отменить без сохранения</button></details></div>`;
 return head+center+tips+footer
@@ -260,10 +260,10 @@ function strengthRecords(id){
   for(const l of s.logs){
    if(l.exId!==id)continue;
    const prior=firstBySlot.get(l.slot);
-   if(!prior||l.setNumber<prior.setNumber)firstBySlot.set(l.slot,l);
+   if(!prior||(l.weight??0)*(1+l.reps/30)>(prior.weight??0)*(1+prior.reps/30))firstBySlot.set(l.slot,l);
   }
-  const values=[...firstBySlot.values()].map(l=>l.reps);
-  return {date:new Date(s.startedAt),reps:Math.max(...values)};
+  const values=[...firstBySlot.values()].map(l=>({reps:l.reps,weight:l.weight??0}));
+  const best=values.sort((a,b)=>(b.weight*(1+b.reps/30))-(a.weight*(1+a.reps/30)))[0];return {date:new Date(s.startedAt),reps:best?.reps??0,weight:best?.weight??0,score:best?.weight?best.weight*(1+best.reps/30):best?.reps??0};
  }).filter(p=>Number.isFinite(p.date.getTime())&&Number.isFinite(p.reps)).sort((a,b)=>a.date-b.date).slice(-16);
 }
 function recentActivity(){
@@ -271,7 +271,7 @@ function recentActivity(){
  const start=new Date(today);start.setDate(today.getDate()-29);
  const previousStart=new Date(start);previousStart.setDate(start.getDate()-30);
  const counts=new Map();let last30=0,prior30=0;
- const main=db.sessions.filter(s=>s.workout!=='G'&&s.logs?.length&&Number.isFinite(Date.parse(s.startedAt)));
+ const main=db.sessions.filter(s=>s.logs?.length&&Number.isFinite(Date.parse(s.startedAt)));
  for(const session of main){
   const when=new Date(session.startedAt),day=dayKey(when);
   if(when>=start){last30++;counts.set(day,(counts.get(day)||0)+1)}
@@ -286,10 +286,10 @@ function recentActivity(){
 function statDiff(data,unit){const a=data.filter(x=>Number.isFinite(x));if(a.length<2)return '—';const d=a.at(-1)-a[0];return(d>0?'+':'')+Number(d.toFixed(2)).toLocaleString('ru-RU')+' '+unit+(a[0]?' ('+(d>0?'+':'')+Math.round(100*d/a[0])+'%)':'')}
 function statPlot(a){const good=a.map((y,i)=>({y,i})).filter(p=>Number.isFinite(p.y));if(!good.length)return '<p class="caption">Нет данных</p>';let mn=Math.min(...good.map(x=>x.y)),mx=Math.max(...good.map(x=>x.y)),s=Math.max(1,mx-mn);const X=i=>30+i*540/Math.max(1,a.length-1),Y=y=>155-(y-mn+s*.2)/(s*1.4)*130;let lines=[],part=[];a.forEach((y,i)=>{if(!Number.isFinite(y)){if(part.length>1)lines.push(part.join(' '));part=[]}else part.push(X(i)+','+Y(y))});if(part.length>1)lines.push(part.join(' '));return '<div class="chart-wrap"><svg viewBox="0 0 600 180" role="img" aria-label="График">'+lines.map(p=>'<polyline points="'+p+'" fill="none" stroke="var(--accent)" stroke-width="3"/>').join('')+good.map(p=>'<circle cx="'+X(p.i)+'" cy="'+Y(p.y)+'" r="4" fill="var(--accent)"><title>№'+(p.i+1)+': '+p.y+'</title></circle>').join('')+'</svg></div>'}
 function strengthChart(){
- const defs=[['pull','Подтягивания','#245cdb'],['push','Отжимания','#dd843f'],['squat','Приседания','#24977d']];
+ const defs=[['incline','Наклонный жим','#245cdb'],['lat','Вертикальная тяга','#dd843f'],['legpress','Жим ногами','#24977d']];
  const groups=defs.map(([id,name,color])=>{
-  const records=strengthRecords(id),base=records[0]?.reps;
-  return {name,color,records,points:records.map(p=>({...p,pct:base?100*(p.reps/base-1):0}))};
+  const records=strengthRecords(id),base=records[0]?.score;
+  return {name,color,records,points:records.map(p=>({...p,pct:base?100*(p.score/base-1):0}))};
  });
  const all=groups.flatMap(g=>g.points);
  if(!all.length)return '<p class="caption">Пока нет результатов по базовым упражнениям.</p>';
@@ -302,12 +302,12 @@ function strengthChart(){
  for(const g of groups){
   const points=g.points.map(p=>X(p.date).toFixed(2)+','+Y(p.pct).toFixed(2));
   if(points.length>1)artwork+='<polyline fill="none" stroke="'+g.color+'" stroke-width="3" points="'+points.join(' ')+'"/>';
-  for(const p of g.points)artwork+='<circle cx="'+X(p.date)+'" cy="'+Y(p.pct)+'" r="4" fill="'+g.color+'"><title>'+g.name+', '+dateFmt(p.date)+': '+p.reps+' повт. ('+Math.round(p.pct)+'%)</title></circle>';
+  for(const p of g.points)artwork+='<circle cx="'+X(p.date)+'" cy="'+Y(p.pct)+'" r="4" fill="'+g.color+'"><title>'+g.name+', '+dateFmt(p.date)+': '+(p.weight?p.weight+' кг × ':'')+p.reps+' повт. ('+Math.round(p.pct)+'%)</title></circle>';
  }
  const labels=groups.map(g=>{
   const first=g.records[0],last=g.records.at(-1);
-  const change=first&&last?(last.reps-first.reps):null;
-  return '<div class="strength-legend"><span style="background:'+g.color+'"></span><div><b>'+g.name+'</b><div class="caption">'+(last?first.reps+' → '+last.reps+' повторений'+(g.records.length>1?' ('+(change>0?'+':'')+Math.round(100*change/first.reps)+'%)':''):'Нет данных')+'</div></div></div>';
+  const change=first&&last?(last.score-first.score):null;
+  return '<div class="strength-legend"><span style="background:'+g.color+'"></span><div><b>'+g.name+'</b><div class="caption">'+(last?(first.weight?first.weight+' кг × ':'')+first.reps+' → '+(last.weight?last.weight+' кг × ':'')+last.reps+(g.records.length>1?' ('+(change>0?'+':'')+Math.round(100*change/first.score)+'%)':''):'Нет данных')+'</div></div></div>';
  }).join('');
  return '<div class="chart-wrap"><svg viewBox="0 0 600 180" role="img" aria-label="Силовой прогресс по датам занятий"><line x1="40" x2="575" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="currentColor" opacity=".2"/>'+artwork+'<text x="40" y="177" font-size="11" fill="currentColor">'+dateFmt(minTime)+'</text><text x="575" y="177" text-anchor="end" font-size="11" fill="currentColor">'+dateFmt(maxTime)+'</text></svg></div>'+labels;
 }
@@ -316,7 +316,7 @@ const activity=recentActivity(),weight=measurePoints().filter(x=>Number.isFinite
 const completedWorkouts=db.sessions.filter(x=>x.logs?.length&&Number.isFinite(Date.parse(x.startedAt))&&Number.isFinite(Date.parse(x.endedAt))&&Date.parse(x.endedAt)>=Date.parse(x.startedAt));const totalMinutes=Math.floor(completedWorkouts.reduce((sum,x)=>sum+workoutElapsed(x,x.endedAt),0)/60000);
 let s='<div class="section">Мой прогресс<small>Программа 26 недель · контроль каждые 4 недели</small></div>';
 s+='<div class="statgrid"><div class="stat"><div class="label">Всего тренировок</div><div class="value">'+completedWorkouts.length+'</div></div><div class="stat"><div class="label">Время тренировок</div><div class="value" style="font-size:17px">'+Math.floor(totalMinutes/60)+' ч '+totalMinutes%60+' мин</div></div><div class="stat"><div class="label">Основных занятий</div><div class="value">'+activity.allMain+'</div></div><div class="stat"><div class="label">Живот</div><div class="value" style="font-size:15px">'+statDiff(abd.map(x=>x.abdomen),'см')+'</div></div><div class="stat"><div class="label">Вес</div><div class="value" style="font-size:15px">'+statDiff(weight.map(x=>x.weight),'кг')+'</div></div></div>';
-s+='<div class="card" style="margin-top:13px"><b>Силовой прогресс</b><p class="caption">График повторений не учитывает рабочий вес. Вес каждого подхода доступен в истории.</p>'+strengthChart()+'</div>';
+s+='<div class="card" style="margin-top:13px"><b>Силовой прогресс</b><p class="caption">График отражает относительное изменение расчётного силового показателя по весу и повторам, а не фактический максимум.</p>'+strengthChart()+'</div>';
 s+='<div class="card"><b>Изменения тела</b><div class="formgrid" style="margin:12px 0"><div class="stat"><div class="label">Вес, последнее</div><div class="value">'+(weight.at(-1)?.weight??'—')+'</div><div class="caption">'+statDiff(weight.map(x=>x.weight),'кг')+'</div></div><div class="stat"><div class="label">Живот, последнее</div><div class="value">'+(abd.at(-1)?.abdomen??'—')+'</div><div class="caption">'+statDiff(abd.map(x=>x.abdomen),'см')+'</div></div></div><div class="seg"><button data-action="chart" data-val="waist" class="'+(ui.chart==='waist'?'active':'')+'">Талия</button><button data-action="chart" data-val="abdomen" class="'+(ui.chart==='abdomen'?'active':'')+'">Живот</button><button data-action="chart" data-val="weight" class="'+(ui.chart==='weight'?'active':'')+'">Вес</button></div>'+statPlot(body.map(x=>x[ui.chart]))+'</div>';
 s+='<div class="card"><b>Регулярность</b><p class="caption">Силовые тренировки · последние 30 дней. Закрашенные дни — дни с тренировкой.</p><div class="activity-stats"><div><strong>'+activity.last30+'</strong><small>За 30 дней</small></div><div><strong>'+activity.prior30+'</strong><small>За предыдущие 30 дней</small></div></div><div class="activity-days" role="group" aria-label="Тренировочные дни за 30 дней">'+activity.days.map(d=>'<span class="activity-day '+(d.count?'trained':'')+'" title="'+d.label+': '+d.count+' осн. тренировок" aria-label="'+d.label+': '+d.count+' основных тренировок"></span>').join('')+'</div><div class="caption activity-range">'+activity.days[0].label+' — '+activity.days.at(-1).label+'</div></div>';
 s+='<div class="card"><b>Контроль трансформации</b><p class="caption">Каждые 4 недели: вес, талия, фото и силовые. При хорошем прогрессе не добавляй подходы автоматически.</p></div>';
