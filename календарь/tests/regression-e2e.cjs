@@ -10,6 +10,7 @@ const out=path.join(__dirname,'artifacts');fs.mkdirSync(out,{recursive:true});
   await page.goto('http://127.0.0.1:8765/календарь/index.html');await page.waitForFunction(()=>document.querySelector('#status')?.textContent!=='Загрузка…');await seed();await page.reload();await page.waitForFunction(()=>document.querySelector('#status')?.textContent!=='Загрузка…');
   await page.locator('#side-new').click();await page.locator('[data-kind="event"]').click();await page.locator('#event-name').fill('Второе занятие');await page.locator('#event-date').fill('2026-12-09');await page.locator('#event-start').fill('10:30');await page.locator('#event-more-toggle').click();await page.locator('#event-end').fill('11:30');
   await page.locator('#employee-picker-toggle').click();assert.equal(await page.locator('#employee-picker-toggle').getAttribute('aria-expanded'),'true');await page.locator('#event-employees input[type="checkbox"]').first().check();assert.match(await page.locator('#employee-picker-toggle').textContent(),/Аудит/);
+  page.once('dialog',d=>d.dismiss());await page.locator('.conflict-event-link').first().click();assert.equal(await page.locator('#event-name').inputValue(),'Второе занятие');report.conflictNavigationCancel=true;
   page.once('dialog',d=>d.dismiss());await page.locator('#event-form button[type="submit"]').click();await page.waitForTimeout(300);
   assert.equal((await dbRows('events')).length,1,'Conflicting event was saved despite cancellation');report.conflictCancel=true;
   page.once('dialog',d=>d.accept());await page.locator('#event-form button[type="submit"]').click();await page.waitForFunction(()=>document.querySelector('#status')?.textContent==='Событие сохранено');assert.equal((await dbRows('events')).length,2);report.conflictOverride=true;
@@ -19,5 +20,12 @@ const out=path.join(__dirname,'artifacts');fs.mkdirSync(out,{recursive:true});
   assert.equal((await dbRows('events')).length,1);
   await page.locator('#settings-import-nav').click();page.once('dialog',d=>d.accept());await page.locator('#import').setInputFiles(file);await page.waitForFunction(()=>document.querySelector('#status')?.textContent==='Резервная копия восстановлена');
   assert.equal((await dbRows('events')).length,2);report.restore=true;
+  const original=await dbRows('events');const valid=JSON.parse(fs.readFileSync(file,'utf8'));
+  for(const mutate of [x=>x.data.events.push({...x.data.events[0]}),x=>x.data.events[0].start='99:00',x=>x.data.events[0].employeeIds=['missing-id']]){
+   const invalid=JSON.parse(JSON.stringify(valid));mutate(invalid);
+   const result=await page.evaluate(async raw=>{try{await restore(new File([JSON.stringify(raw)],'invalid.json'));return 'accepted'}catch(e){return e.message}},invalid);
+   assert.match(result,/Неверная резервная копия/);assert.deepEqual(await dbRows('events'),original);
+  }report.invalidBackupRejected=true;
+
  }catch(e){report.failure=e.stack||String(e);throw e}finally{fs.writeFileSync(path.join(out,'regression-e2e-report.json'),JSON.stringify(report,null,2));await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});
