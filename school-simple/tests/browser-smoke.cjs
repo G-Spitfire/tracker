@@ -21,6 +21,19 @@ const assert = require('node:assert/strict');
   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.33.6"}'}));
   await page.goto('http://127.0.0.1:8765/school-simple/index.html?v=1336',{waitUntil:'load'});
   await page.getByText('Средний балл',{exact:true}).waitFor();
+  const streak=await page.evaluate(()=>{
+    const previous=state.quarter;state.quarter='2';
+    try{
+      const lesson=d=>({from:d+'T09:00:00'});
+      const kid={lessons:['2026-11-19','2026-11-20','2026-11-21'].map(lesson),schedule:['2026-11-21','2026-11-23','2026-11-24','2026-11-25'].map(lesson),subjects:[{grades:[{date:'2026-11-19',value:3},{date:'2026-11-20',value:5}]}]};
+      const saturday=completedCleanStreak(kid,'2026-11-22');
+      const tuesday=completedCleanStreak(kid,'2026-11-24');
+      kid.subjects[0].grades.push({date:'2026-11-21',value:2});
+      const backdated=completedCleanStreak(kid,'2026-11-24');
+      return {saturday,tuesday,backdated};
+    }finally{state.quarter=previous}
+  });
+  assert.deepEqual(streak,{saturday:2,tuesday:3,backdated:1},'Completed school day streak, schedule union, deduplication, no grades, weekend, today and backdated grade');
   const iconLibrary=await page.evaluate(()=>({
     navigation:typeof ico==='function' && ico('home').includes('<svg'),
     metrics:typeof kpiIcon==='function' && kpiIcon('average').includes('<svg')
