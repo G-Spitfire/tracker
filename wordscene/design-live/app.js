@@ -215,7 +215,7 @@ function home(openPicker=false){
   errors.length?paperAction('Повторить ещё раз','practice',blocked,'Если хочешь, потренируй ещё '+errors.length+' '+(errors.length%100>=11&&errors.length%100<=14?'трудных слов':errors.length%10===1?'трудное слово':errors.length%10>=2&&errors.length%10<=4?'трудных слова':'трудных слов')):
   (profile.sessions.some(s=>s.mode==='new'||s.mode==='review')?paperDone():paperWelcome());
  shell('', '', '<main class="paper"><div class="paper-heading"><h1>'+paperIcon('book')+'WordScene</h1></div>'+
- '<div class="paper-hero"><img src="./paper-lighthouse.svg" alt="" width="729" height="160"></div>'+
+ '<div class="paper-hero"><img src="../paper-lighthouse.svg" alt="" width="729" height="160"></div>'+
  paperLevel()+paperProgress()+'<div class="paper-actions">'+fresh+repeat+'</div>'+
  '<p class="paper-scroll-cue" hidden aria-hidden="true">Листай вниз ↓</p><nav class="paper-nav" aria-label="Разделы">'+btn(paperIcon('progress')+'Мой прогресс','progress')+btn(paperIcon('book')+'Словарь','dictionaryOpen')+'</nav></main>'+
  (openPicker?'<div class="paper-sheet-backdrop" data-action="closeSources"><section class="paper-sheet" role="dialog" aria-modal="true" aria-labelledby="picker-title"><div class="paper-sheet-handle" aria-hidden="true"></div><div class="paper-sheet-head"><h2 id="picker-title">Как будем учить?</h2>'+btn('×','closeSources','paper-sheet-close')+'</div>'+
