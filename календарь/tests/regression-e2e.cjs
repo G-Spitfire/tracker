@@ -32,5 +32,11 @@ const out=path.join(__dirname,'artifacts');fs.mkdirSync(out,{recursive:true});
   await page.evaluate(async()=>{for(let i=0;i<3;i++)await put('events',{id:'png-group-'+i,name:'Подгруппа тест '+i,type:'lesson',subgroup:i===1?'2':'1',date:'2026-12-09',start:'09:00',end:'09:40',classIds:['class-1'],employeeIds:['audit-person'],roomId:''});await refresh()});
   const png=await page.evaluate(()=>{const calls=[],rects=[];const proto=CanvasRenderingContext2D.prototype,fill=proto.fillText,rect=proto.fillRect,click=HTMLAnchorElement.prototype.click;proto.fillText=function(t,...args){calls.push(String(t));return fill.call(this,t,...args)};proto.fillRect=function(x,y,w,h){if(this.fillStyle==='#e9f2ff')rects.push({x,y,w,h});return rect.call(this,x,y,w,h)};HTMLAnchorElement.prototype.click=function(){};try{exportPNG()}finally{proto.fillText=fill;proto.fillRect=rect;HTMLAnchorElement.prototype.click=click}return {calls,rects}});
   assert.equal(png.rects.length,3);assert.ok(png.calls.includes('09:00–09:40'));assert.ok(png.calls.includes('Аудит'));for(let i=1;i<png.rects.length;i++)assert.ok(png.rects[i].y>=png.rects[i-1].y+png.rects[i-1].h);report.pngSubgroups=true;
+  await page.evaluate(async()=>{await put('events',{id:'drag-test',name:'QA перенос мышью',type:'event',date:'2026-12-09',start:'14:00',end:'14:40',classIds:['class-1'],employeeIds:[],roomId:''});await refresh()});
+  const source=page.locator('.event').filter({hasText:'QA перенос мышью'}),target=page.locator('#grid .lane[role="group"]').nth(1);
+  const y=await page.evaluate(()=> (15*60-DAY_START)*PIXELS_PER_MINUTE);
+  await source.dragTo(target,{targetPosition:{x:20,y}});
+  await page.waitForFunction(()=>cache.events.find(e=>e.id==='drag-test')?.classIds[0]==='class-2');
+  const moved=(await dbRows('events')).find(e=>e.id==='drag-test');assert.equal(moved.start,'15:00');assert.equal(moved.end,'15:40');assert.deepEqual(moved.classIds,['class-2']);report.dragMove=true;
  }catch(e){report.failure=e.stack||String(e);throw e}finally{fs.writeFileSync(path.join(out,'regression-e2e-report.json'),JSON.stringify(report,null,2));await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});
