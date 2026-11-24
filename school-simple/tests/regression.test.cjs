@@ -33,7 +33,7 @@ function setup(extra = {}) {
   context.gradeData = () => context.kids[context.state.child].subjects.flatMap(s => s.grades).filter(g => context.inQuarter(g.date));
   context.score = () => context.mean(context.kids[context.state.child].subjects.map(s => s.grades.filter(g => context.inQuarter(g.date))).filter(a => a.length).map(a => context.mean(a.map(g => g.value))));
   vm.createContext(context);
-  vm.runInContext(functionSource('holidayInfo','home') + '\n' + functionSource('home','grades') + '\n' + functionSource('homework','syncStatus'), context);
+  vm.runInContext(functionSource('weeklyDynamics','matveyTrend') + '\n' + functionSource('holidayInfo','home') + '\n' + functionSource('home','grades') + '\n' + functionSource('homework','syncStatus'), context);
   return context;
 }
 test('home: unweighted subject means drive KPI, delta, and line chart', () => {
@@ -76,22 +76,22 @@ test('homework: unknown next lesson only in all view', () => {
   assert.match(vm.runInContext('homework()',c),/Упражнение 7/);
 });
 
-test('home: seven-day change compares cumulative subject means', () => {
+test('home: seven-day change compares matched weekly subject means', () => {
   const c=setup();
   c.kids[0].subjects=[
     {name:'A',grades:[{value:4,date:'2026-11-10'},{value:5,date:'2026-11-18'}]},
     {name:'B',grades:[{value:3,date:'2026-11-10'},{value:5,date:'2026-11-19'}]}
   ];
   const html=vm.runInContext('home()',c);
-  assert.ok(html.includes('↑ +0,75'), 'seven-day delta should be +0.75');
-  assert.ok(html.includes('За 7 дней'));
+  assert.ok(html.includes('↑ +1,50'), 'seven-day delta should be +1.50');
+  assert.ok(html.includes('К прошлым 7 дням'));
 });
 test('home: seven-day change is unavailable without a baseline', () => {
   const c=setup();
   c.kids[0].subjects=[{name:'A',grades:[{value:5,date:'2026-11-18'}]}];
   const html=vm.runInContext('home()',c);
   assert.ok(html.includes('<strong class="stat-value">—</strong>'), 'no baseline shows dash');
-  assert.ok(html.includes('За 7 дней'));
+  assert.ok(html.includes('Нет данных'));
 });
 
 test('homework: scheduled day without assignments shows neutral empty state', () => {
