@@ -67,6 +67,8 @@ async function check(label,condition,details=''){console.log((condition?'PASS':'
    check(width+' unchanged average',(await page.locator('.subject-average').innerText())==='3,00');
    const compact=await page.evaluate(()=>{const a=document.querySelector('#tests-toggle').getBoundingClientRect(),b=document.querySelector('#twos-toggle').getBoundingClientRect();return a.y===b.y&&a.width===16&&b.width===16});
    check(width+' compact filters',compact);
+   const accentMatch=await page.evaluate(()=>{const probe=document.createElement('span');probe.style.backgroundColor='var(--accent)';document.body.append(probe);const expected=getComputedStyle(probe).backgroundColor;probe.remove();return getComputedStyle(document.querySelector('#twos-toggle')).backgroundColor===expected});
+   check(width+' checked filter uses selected accent',accentMatch);
    const weekly=await page.evaluate(()=>{const q=quarterRange(state.quarter);const end=new Date(q.start+'T12:00:00');end.setDate(end.getDate()+14);const old=new Date(end);old.setDate(old.getDate()-10);const low=new Date(end);low.setDate(low.getDate()-8);const original=TODAY.getTime();try{TODAY.setTime(end.getTime());kids[0].subjects=[{name:'Test',grades:[{value:5,date:iso(old)},{value:2,date:iso(low)},{value:5,date:iso(end)}]}];state.chart='line';const html=home();return html.includes('↑ +0,50')&&html.includes('stroke="#16a34a" stroke-width="1.7" stroke-dasharray="5 5"');}finally{TODAY.setTime(original)}});
    check(width+' weekly trend agrees with KPI',weekly);
    await context.close();
