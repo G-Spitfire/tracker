@@ -244,7 +244,38 @@ function exportPNG(){
 }
 
 async function backup(){const data={format:'school-calendar',version:3,exportedAt:new Date().toISOString(),data:{}};for(const s of STORES)data.data[s]=await all(s);const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=elt('a');a.href=url;a.download=`calendar-backup-${localDate(new Date())}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
-async function restore(file){const raw=JSON.parse(await file.text());const legacy=['classes','employees','rooms','events'];if(raw.format!=='school-calendar'||![1,2,3].includes(raw.version)||!raw.data||!legacy.every(s=>Array.isArray(raw.data[s])&&raw.data[s].every(x=>x&&typeof x.id==='string'))||!['subjects','breaks','absences'].every(s=>raw.data[s]===undefined||Array.isArray(raw.data[s])&&raw.data[s].every(x=>x&&typeof x.id==='string')))throw Error('Неверный формат резервной копии');if(!confirm('Заменить все локальные данные содержимым резервной копии?'))return;await new Promise((resolve,reject)=>{const tx=db.transaction(STORES,'readwrite');for(const s of STORES){const os=tx.objectStore(s);os.clear();for(const item of raw.data[s]||[])os.put(item)}tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)});await refresh();setStatus('Резервная копия восстановлена')}
+function validateBackup(raw){
+ const fail=(where)=>{throw Error('Неверная резервная копия: '+where)};
+ const obj=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
+ const str=x=>typeof x==='string'&&x.trim().length>0;
+ const date=x=>typeof x==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x)&&!Number.isNaN(Date.parse(x))&&new Date(x).toISOString().slice(0,10)===x;
+ const time=x=>typeof x==='string'&&/^([01]\d|2[0-3]):[0-5]\d$/.test(x);
+ if(!obj(raw)||raw.format!=='school-calendar'||![1,2,3].includes(raw.version)||!obj(raw.data))fail('формат или версия');
+ const ids={};
+ for(const store of STORES){
+  const rows=raw.data[store];
+  if(rows===undefined&&raw.version<3&&['subjects','breaks','absences'].includes(store)){ids[store]=new Set();continue}
+  if(!Array.isArray(rows))fail(store);
+  ids[store]=new Set();
+  for(const row of rows){
+   if(!obj(row)||!str(row.id)||ids[store].has(row.id))fail(store+' — ID');
+   ids[store].add(row.id);
+   if(!['events','absences'].includes(store)&&!str(row.name))fail(store+' — название');
+   if(row.archived!==undefined&&typeof row.archived!=='boolean')fail(store+' — архив');
+   if(store==='employees'&&['displayName','position'].some(k=>row[k]!==undefined&&typeof row[k]!=='string'))fail(store+' — поля сотрудника');
+   if(store==='classes'&&row.order!==undefined&&!Number.isFinite(row.order))fail(store+' — порядок');
+  }
+ }
+ const links=(values,store)=>Array.isArray(values)&&new Set(values).size===values.length&&values.every(id=>ids[store].has(id));
+ const optional=(id,store)=>id===undefined||id===null||id===''||ids[store].has(id);
+ for(const e of raw.data.events){
+  if(!str(e.name)||!['lesson','break','meal','walk','event','meeting'].includes(e.type)||!date(e.date)||!time(e.start)||!time(e.end)||minutes(e.end)<=minutes(e.start))fail('событие '+e.id+' — поля');
+  if(!links(e.classIds,'classes')||!links(e.employeeIds,'employees')||(!e.classIds.length&&!e.employeeIds.length)||!optional(e.roomId,'rooms')||!optional(e.subjectId,'subjects')||!optional(e.breakId,'breaks'))fail('событие '+e.id+' — связи');
+  if(e.subgroup!==undefined&&e.subgroup!==null&&e.subgroup!==''&&(!['1','2'].includes(String(e.subgroup))||e.type!=='lesson'||e.classIds.length!==1))fail('событие '+e.id+' — подгруппа');
+ }
+ for(const a of raw.data.absences||[])if(!ids.employees.has(a.employeeId)||!date(a.from)||!date(a.to)||a.from>a.to)fail('отсутствие '+a.id);
+}
+async function restore(file){const raw=JSON.parse(await file.text());validateBackup(raw);if(!confirm('Заменить все локальные данные содержимым резервной копии?'))return;await new Promise((resolve,reject)=>{const tx=db.transaction(STORES,'readwrite');for(const s of STORES){const os=tx.objectStore(s);os.clear();for(const item of raw.data[s]||[])os.put(item)}tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)});await refresh();setStatus('Резервная копия восстановлена')}
 async function start(){try{db=await openDB();await seed();await refresh();showView('schedule');$('prev').onclick=async()=>{selectedDate=shiftDate(selectedDate,-1);await render()};$('next').onclick=async()=>{selectedDate=shiftDate(selectedDate,1);await render()};$('today').onclick=async()=>{selectedDate=localDate(new Date());await render()};$('day').onchange=async e=>{if(e.target.value){selectedDate=e.target.value;await render()}};$('week-prev').onclick=()=>{selectedDate=shiftDate(selectedDate,-7);render()};
  $('week-next').onclick=()=>{selectedDate=shiftDate(selectedDate,7);render()};
  $('week-today').onclick=()=>{selectedDate=localDate(new Date());$('calendar-popover').hidden=true;render()};
