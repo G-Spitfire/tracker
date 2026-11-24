@@ -2,7 +2,7 @@
 const {chromium}=require('playwright');
 const fs=require('node:fs');
 const path=require('node:path');
-const sizes=[320,375,390,430];
+const sizes=[320,375,393,430];
 const marks=Array.from({length:35},(_,i)=>({subjectId:'s'+i,subject:'Предмет '+i,value:4,date:'2026-11-19',type:'Урок'}));
 const diary={schemaVersion:1,generatedAt:new Date().toISOString(),children:{polina:{marks,lessons:[],schedule:[]},matvey:{marks,lessons:[],schedule:[]}}};
 let failures=0;
@@ -55,6 +55,20 @@ async function check(label,condition,details=''){console.log((condition?'PASS':'
      await page.screenshot({path:path.join(screenshotDir,width+'-'+theme+'-'+tab+'.png'),fullPage:true,animations:'disabled'});
     }
    }
+   await page.evaluate(()=>{state.child=0;state.quarter=currentQuarter();state.gradesView='grades';state.testsOnly=false;state.twosOnly=false;kids[0].subjects=[{name:'Test',grades:[{value:2,test:true,date:iso(TODAY)},{value:2,test:false,date:iso(TODAY)},{value:5,test:true,date:iso(TODAY)}]}];setTab('grades');render();});
+   const count=()=>page.locator('.subject .mark').count();
+   check(width+' all marks',await count()===3);
+   await page.locator('#tests-toggle').check();
+   check(width+' control filter',await count()===2);
+   await page.locator('#twos-toggle').check();
+   check(width+' combined filters',await count()===1);
+   await page.locator('#tests-toggle').uncheck();
+   check(width+' twos filter',await count()===2);
+   check(width+' unchanged average',(await page.locator('.subject-average').innerText())==='3,00');
+   const compact=await page.evaluate(()=>{const a=document.querySelector('#tests-toggle').getBoundingClientRect(),b=document.querySelector('#twos-toggle').getBoundingClientRect();return a.y===b.y&&a.width===16&&b.width===16});
+   check(width+' compact filters',compact);
+   const weekly=await page.evaluate(()=>{const q=quarterRange(state.quarter);const end=new Date(q.start+'T12:00:00');end.setDate(end.getDate()+14);const old=new Date(end);old.setDate(old.getDate()-10);const low=new Date(end);low.setDate(low.getDate()-8);const original=TODAY.getTime();try{TODAY.setTime(end.getTime());kids[0].subjects=[{name:'Test',grades:[{value:5,date:iso(old)},{value:2,date:iso(low)},{value:5,date:iso(end)}]}];state.chart='line';const html=home();return html.includes('↑ +0,50')&&html.includes('stroke="#16a34a" stroke-width="1.7" stroke-dasharray="5 5"');}finally{TODAY.setTime(original)}});
+   check(width+' weekly trend agrees with KPI',weekly);
    await context.close();
   }
   // Notification regression: late grade, first snapshot, duplicate, read, per-child, two-day window.

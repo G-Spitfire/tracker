@@ -262,3 +262,11 @@ html.platform-apple .calendar button,html.platform-apple .schedule-month{font-va
 .notice-item small{font-size:12px;color:var(--muted)}
 .notice-item.unread strong:before{content:"";display:inline-block;width:6px;height:6px;margin-right:7px;border-radius:50%;background:#ef4444;vertical-align:middle}
 .notice-empty{font-size:14px;color:var(--muted);padding:8px 0}
+
+/* Compact grade filters: explicit exception to general control sizing. */
+.grades-filter-row{justify-content:flex-start;gap:12px;min-height:28px;margin-top:4px}
+.grades-filter-check{min-height:28px;gap:4px;font-size:var(--font-caption,12px);white-space:nowrap}
+.grades-filter-check input{width:16px;height:16px;border-radius:4px}
+.grades-filter-check input:checked{background:var(--fg);border-color:var(--fg)}
+.grades-filter-check input:checked::after{border-color:var(--surface)}
+.grades-filter-row+.content-after-controls{margin-top:4px}
