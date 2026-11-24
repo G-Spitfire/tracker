@@ -113,7 +113,7 @@ function updateCalendarControls(){
  }
  const days=$('weekdays');days.replaceChildren();const monday=weekMonday(selectedDate);['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].forEach((label,i)=>{const date=shiftDate(monday,i),btn=elt('button','weekday'+(date===selectedDate?' selected':''),`${label} ${date.slice(8)}`);btn.type='button';btn.onclick=()=>{selectedDate=date;render()};days.append(btn)});
  $('weekdays').hidden=calendarMode!=='day';$('date-picker-wrap').hidden=false;$('calendar-popover').hidden=true;
- $('view-title').textContent=calendarMode==='day'?'Расписание':calendarMode==='class'?'Неделя класса':'Неделя сотрудника';
+ if(currentView==='schedule')$('view-title').textContent=calendarMode==='day'?'Расписание':calendarMode==='class'?'Неделя класса':'Неделя сотрудника';
 }
 function alignSidebarWithSchedule(){
  const sidebar=document.querySelector('.sidebar'),schedule=$('schedule');
@@ -149,7 +149,7 @@ function editorAvailability(){
  }
  const room=$('event-room');for(const option of room.options){if(!option.value)continue;const occupied=matches.some(e=>e.roomId===option.value);const original=cache.rooms.find(r=>r.id===option.value)?.name||option.value;option.textContent=original+(occupied?' · Занят':'');}
  if(room.value){for(const e of matches.filter(e=>e.roomId===room.value))details.push({message:'Кабинет '+(cache.rooms.find(r=>r.id===room.value)?.name||room.value)+' занят: '+describe(e),event:e})}
- const panel=$('event-conflicts');panel.replaceChildren();panel.hidden=!details.length;if(details.length){const heading=elt('strong','',details.length===1?'Конфликт':'Конфликты: '+details.length);panel.append(heading);for(const detail of details){if(!detail.event){panel.append(elt('div','',detail.message));continue}const link=elt('button','conflict-event-link',detail.message+' · Открыть');link.type='button';link.onclick=()=>openEditor(detail.event);panel.append(link)}}
+ const panel=$('event-conflicts');panel.replaceChildren();panel.hidden=!details.length;if(details.length){const heading=elt('strong','',details.length===1?'Конфликт':'Конфликты: '+details.length);panel.append(heading);for(const detail of details){if(!detail.event){panel.append(elt('div','',detail.message));continue}const link=elt('button','conflict-event-link',detail.message+' · Открыть');link.type='button';link.onclick=()=>{if(confirm('Открыть конфликтующее событие? Несохранённые изменения текущей формы будут потеряны.'))openEditor(detail.event)};panel.append(link)}}
  updateEmployeePickerSummary();
 }
 function checked(target){return [...$(target).querySelectorAll('input:checked')].map(x=>x.value)}
@@ -173,7 +173,7 @@ async function toggleArchive(){const id=$('reference-id').value,item=cache[refer
 function fillEventTemplates(event){for(const [store,id] of [['subjects','event-subject'],['breaks','event-break']]){const select=$(id);select.replaceChildren(new Option('Не выбрано',''));for(const item of cache[store])if(!item.archived||item.id===event?.[store==='subjects'?'subjectId':'breakId'])select.add(new Option(item.name,item.id));select.value=event?.[store==='subjects'?'subjectId':'breakId']||''}}
 function chooseTemplate(store){const id=$(store==='subjects'?'event-subject':'event-break').value,item=cache[store].find(x=>x.id===id);if(!item)return;if(store==='subjects'){$('event-break').value='';$('event-type').value='lesson'}else{$('event-subject').value='';$('event-type').value='break'}if(!$('event-name').value.trim())$('event-name').placeholder=`Необязательно — ${item.name}`;}
 function weekMonday(date){const d=new Date(`${date}T12:00:00`);const weekday=(d.getDay()+6)%7;return shiftDate(date,-weekday)}
-async function copyWeek(){const source=weekMonday(selectedDate),target=shiftDate(source,7);const sourceEvents=cache.events.filter(e=>e.date>=source&&e.date<=shiftDate(source,6));if(!sourceEvents.length){alert('В выбранной неделе нет событий');return}const existing=cache.events.filter(e=>e.date>=target&&e.date<=shiftDate(target,6));if(existing.length){alert('Следующая неделя уже содержит события. Чтобы избежать потери данных или дублей, копирование отменено.');return}if(!confirm(`Скопировать ${sourceEvents.length} событий с недели ${source} на неделю ${target}? Каждое событие будет независимой копией.`))return;const copies=sourceEvents.map(e=>({...e,id:uid(),date:shiftDate(e.date,7)}));await new Promise((resolve,reject)=>{const tx=db.transaction('events','readwrite');for(const e of copies)tx.objectStore('events').put(e);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)});selectedDate=target;await refresh();setStatus(`Скопировано ${copies.length} событий`)}
+async function copyWeek(){const source=weekMonday(selectedDate),target=shiftDate(source,7);const sourceEvents=cache.events.filter(e=>e.date>=source&&e.date<=shiftDate(source,6));if(!sourceEvents.length){alert('В выбранной неделе нет событий');return}const existing=cache.events.filter(e=>e.date>=target&&e.date<=shiftDate(target,6));if(existing.length){alert('Следующая неделя уже содержит события. Чтобы избежать потери данных или дублей, копирование отменено.');return}if(!confirm(`Скопировать ${sourceEvents.length} событий с недели ${source} на неделю ${target}? Каждое событие будет независимой копией.`))return;const copies=sourceEvents.map(e=>({...e,id:uid(),date:shiftDate(e.date,7)}));if(!confirmConflicts(copies,cache.events))return;await new Promise((resolve,reject)=>{const tx=db.transaction('events','readwrite');for(const e of copies)tx.objectStore('events').put(e);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)});selectedDate=target;await refresh();setStatus(`Скопировано ${copies.length} событий`)}
 function replacementPreview(){const oldId=$('replace-old').value,newId=$('replace-new').value,period=$('replace-period').value;const monday=weekMonday(selectedDate);const dates=period==='day'?[selectedDate]:Array.from({length:7},(_,i)=>shiftDate(monday,i));const affected=cache.events.filter(e=>dates.includes(e.date)&&(e.employeeIds||[]).includes(oldId));const preview=$('replace-preview');preview.replaceChildren();if(!oldId||!newId||oldId===newId){preview.textContent='Выберите двух разных сотрудников';return []}if(!affected.length){preview.textContent='Подходящих событий нет';return []}const changes=affected.map(e=>({...e,employeeIds:[...new Set(e.employeeIds.map(id=>id===oldId?newId:id))]}));const untouched=cache.events.filter(e=>!affected.some(a=>a.id===e.id));const problems=changes.flatMap(e=>conflictMessages(e,[...untouched,...changes]));preview.append(elt('strong','',`Затронуто событий: ${affected.length}`));for(const e of affected.slice(0,40))preview.append(elt('div','preview-line',`${e.date} · ${e.start}–${e.end} · ${e.name}`));if(affected.length>40)preview.append(elt('div','',`И ещё ${affected.length-40}`));if(problems.length)preview.append(elt('div','warning',`Обнаружено пересечений: ${problems.length}. При сохранении потребуется подтверждение.`));return changes}
 function openReplacement(){if(cache.employees.filter(x=>!x.archived).length<2){alert('Сначала добавьте минимум двух сотрудников');return}for(const id of ['replace-old','replace-new']){const select=$(id);select.replaceChildren();for(const person of cache.employees.filter(x=>!x.archived))select.add(new Option(person.displayName||person.name,person.id))}if(cache.employees.filter(x=>!x.archived).length>1)$('replace-new').selectedIndex=1;$('replace-period').value='day';replacementPreview();$('replacement').showModal()}
 async function applyReplacement(){const changes=replacementPreview();if(!changes.length)return;const affected=new Set(changes.map(x=>x.id)),untouched=cache.events.filter(e=>!affected.has(e.id));if(!confirmConflicts(changes,untouched))return;await new Promise((resolve,reject)=>{const tx=db.transaction('events','readwrite');for(const e of changes)tx.objectStore('events').put(e);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)});$('replacement').close();await refresh();setStatus(`Заменён преподаватель в ${changes.length} событиях`)}
@@ -244,7 +244,38 @@ function exportPNG(){
 }
 
 async function backup(){const data={format:'school-calendar',version:3,exportedAt:new Date().toISOString(),data:{}};for(const s of STORES)data.data[s]=await all(s);const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=elt('a');a.href=url;a.download=`calendar-backup-${localDate(new Date())}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
-async function restore(file){const raw=JSON.parse(await file.text());const legacy=['classes','employees','rooms','events'];if(raw.format!=='school-calendar'||![1,2,3].includes(raw.version)||!raw.data||!legacy.every(s=>Array.isArray(raw.data[s])&&raw.data[s].every(x=>x&&typeof x.id==='string'))||!['subjects','breaks','absences'].every(s=>raw.data[s]===undefined||Array.isArray(raw.data[s])&&raw.data[s].every(x=>x&&typeof x.id==='string')))throw Error('Неверный формат резервной копии');if(!confirm('Заменить все локальные данные содержимым резервной копии?'))return;await new Promise((resolve,reject)=>{const tx=db.transaction(STORES,'readwrite');for(const s of STORES){const os=tx.objectStore(s);os.clear();for(const item of raw.data[s]||[])os.put(item)}tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)});await refresh();setStatus('Резервная копия восстановлена')}
+function validateBackup(raw){
+ const fail=(where)=>{throw Error('Неверная резервная копия: '+where)};
+ const obj=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
+ const str=x=>typeof x==='string'&&x.trim().length>0;
+ const date=x=>typeof x==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x)&&!Number.isNaN(Date.parse(x))&&new Date(x).toISOString().slice(0,10)===x;
+ const time=x=>typeof x==='string'&&/^([01]\d|2[0-3]):[0-5]\d$/.test(x);
+ if(!obj(raw)||raw.format!=='school-calendar'||![1,2,3].includes(raw.version)||!obj(raw.data))fail('формат или версия');
+ const ids={};
+ for(const store of STORES){
+  const rows=raw.data[store];
+  if(rows===undefined&&raw.version<3&&['subjects','breaks','absences'].includes(store)){ids[store]=new Set();continue}
+  if(!Array.isArray(rows))fail(store);
+  ids[store]=new Set();
+  for(const row of rows){
+   if(!obj(row)||!str(row.id)||ids[store].has(row.id))fail(store+' — ID');
+   ids[store].add(row.id);
+   if(!['events','absences'].includes(store)&&!str(row.name))fail(store+' — название');
+   if(row.archived!==undefined&&typeof row.archived!=='boolean')fail(store+' — архив');
+   if(store==='employees'&&['displayName','position'].some(k=>row[k]!==undefined&&typeof row[k]!=='string'))fail(store+' — поля сотрудника');
+   if(store==='classes'&&row.order!==undefined&&!Number.isFinite(row.order))fail(store+' — порядок');
+  }
+ }
+ const links=(values,store)=>Array.isArray(values)&&new Set(values).size===values.length&&values.every(id=>ids[store].has(id));
+ const optional=(id,store)=>id===undefined||id===null||id===''||ids[store].has(id);
+ for(const e of raw.data.events){
+  if(!str(e.name)||!['lesson','break','meal','walk','event','meeting'].includes(e.type)||!date(e.date)||!time(e.start)||!time(e.end)||minutes(e.end)<=minutes(e.start))fail('событие '+e.id+' — поля');
+  if(!links(e.classIds,'classes')||!links(e.employeeIds,'employees')||(!e.classIds.length&&!e.employeeIds.length)||!optional(e.roomId,'rooms')||!optional(e.subjectId,'subjects')||!optional(e.breakId,'breaks'))fail('событие '+e.id+' — связи');
+  if(e.subgroup!==undefined&&e.subgroup!==null&&e.subgroup!==''&&(!['1','2'].includes(String(e.subgroup))||e.type!=='lesson'||e.classIds.length!==1))fail('событие '+e.id+' — подгруппа');
+ }
+ for(const a of raw.data.absences||[])if(!ids.employees.has(a.employeeId)||!date(a.from)||!date(a.to)||a.from>a.to)fail('отсутствие '+a.id);
+}
+async function restore(file){const raw=JSON.parse(await file.text());validateBackup(raw);if(!confirm('Заменить все локальные данные содержимым резервной копии?'))return;await new Promise((resolve,reject)=>{const tx=db.transaction(STORES,'readwrite');for(const s of STORES){const os=tx.objectStore(s);os.clear();for(const item of raw.data[s]||[])os.put(item)}tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)});await refresh();setStatus('Резервная копия восстановлена')}
 async function start(){try{db=await openDB();await seed();await refresh();showView('schedule');$('prev').onclick=async()=>{selectedDate=shiftDate(selectedDate,-1);await render()};$('next').onclick=async()=>{selectedDate=shiftDate(selectedDate,1);await render()};$('today').onclick=async()=>{selectedDate=localDate(new Date());await render()};$('day').onchange=async e=>{if(e.target.value){selectedDate=e.target.value;await render()}};$('week-prev').onclick=()=>{selectedDate=shiftDate(selectedDate,-7);render()};
  $('week-next').onclick=()=>{selectedDate=shiftDate(selectedDate,7);render()};
  $('week-today').onclick=()=>{selectedDate=localDate(new Date());$('calendar-popover').hidden=true;render()};
