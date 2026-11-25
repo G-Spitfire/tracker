@@ -71,6 +71,7 @@ async function run() {
     await page.waitForFunction(n=>window.__syncCalls===n+1,initialCalls);
     await page.waitForFunction(()=>!syncInProgress);
     record(view,'resume after five minutes fetches once',await page.evaluate(()=>window.__syncCalls)===initialCalls+1);
+    record(view,'sync error overrides fresh cached snapshot',await page.evaluate(()=>{const old=syncError;syncError=true;const ok=syncIndicatorState()==='error';syncError=old;return ok;}));
     for(const [scenario,tab] of [['home','home'],['grades','grades'],['schedule','schedule'],['homework','homework']]) {
       if(tab!=='home')await page.locator('[data-action="tab"][data-value="'+tab+'"]').click();
       if(tab==='home'){
