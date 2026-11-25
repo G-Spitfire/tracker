@@ -40,16 +40,16 @@ html[data-theme=dark]{--bg:#09090b;--surface:#202023;--fg:#ffffff;--muted:#b4b4b
 .schedule-month{font-weight:var(--weight-medium);font-size:var(--font-body)}
 .schedule-arrows{display:flex;gap:6px}
 .schedule-arrows .icon{min-width:44px;min-height:44px}
-.schedule-calendar{margin-top:var(--space-3)}
+.schedule-calendar{margin-top:var(--space-2)}
 .schedule-calendar .day-cell{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:48px;padding:4px 0}
 .schedule-calendar .day-cell .sub{font-size:11px}
 .grades-filter-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px}
 .grades-filter-check{display:inline-flex;align-items:center;gap:8px;font-size:var(--font-control);min-height:44px;cursor:pointer;align-self:flex-start}
 .grades-filter-check input{width:20px;height:20px;accent-color:var(--accent);margin:0}
 .grades-filter-row .sub{white-space:nowrap}
-.lesson{display:flex;gap:12px;padding:11px 3px;border-bottom:1px solid var(--line)}
-.homework-day{border:1px solid var(--line);border-radius:var(--radius-panel);overflow:hidden;margin-bottom:var(--space-4)}.homework-day-title{font-size:var(--font-body);font-weight:var(--weight-medium);margin:0;background:var(--soft);padding:12px 12px 12px 17px;position:relative}.homework-day-title:before{content:"";position:absolute;left:8px;top:11px;bottom:11px;width:3px;border-radius:3px;background:var(--accent)}.homework-day-body{padding:0 12px}.homework-day-body .task:last-child{border-bottom:0}.homework-celebration{padding:15px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}.homework-celebration strong{font-size:var(--font-body)}.homework-celebration span,.homework-unknown{color:var(--muted);font-size:var(--font-caption)}.homework-unknown{padding:15px 0}.task{padding:11px 2px;border-bottom:1px solid var(--line)}
-.task p{margin:var(--space-item-detail) 0 0}
+.lesson{gap:12px;border-bottom:1px solid var(--line)}
+.homework-day{border:1px solid var(--line);border-radius:var(--radius-panel);overflow:hidden;margin-bottom:var(--space-4)}.homework-day-title{font-size:var(--font-body);font-weight:var(--weight-medium);margin:0;background:var(--soft);padding:8px 12px 8px 17px;position:relative}.homework-day-title:before{content:"";position:absolute;left:8px;top:7px;bottom:7px;width:3px;border-radius:3px;background:var(--accent)}.homework-day-body{padding:0 12px}.homework-day-body .task:last-child{border-bottom:0}.homework-celebration{padding:15px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}.homework-celebration strong{font-size:var(--font-body)}.homework-celebration span,.homework-unknown{color:var(--muted);font-size:var(--font-caption)}.homework-unknown{padding:15px 0}.task{border-bottom:1px solid var(--line)}
+.task p{margin:var(--space-tight) 0 0}
 .field{display:grid;gap:5px;margin:12px 0}
 .field input,.field select{width:100%;background:var(--soft);border:1px solid var(--line);border-radius:9px;color:var(--fg);padding:12px;font:inherit}
 .detail-overlay{position:fixed;inset:0;background:#0007;display:grid;place-items:center;z-index:10;padding:22px}
@@ -83,7 +83,7 @@ html[data-theme=dark]{--bg:#09090b;--surface:#202023;--fg:#ffffff;--muted:#b4b4b
 .subject strong{font-weight:var(--weight-medium);font-size:var(--font-body);font-variant-numeric:tabular-nums}
 .mark{position:relative;isolation:isolate;min-width:44px;width:44px;height:44px;flex-shrink:0;border:0;color:var(--fg);font:inherit;cursor:pointer;background:transparent;display:grid;place-items:center;font-weight:var(--weight-medium);font-size:var(--font-body)}
 .mark::before{content:"";position:absolute;inset:7px;background:var(--soft);border-radius:6px;z-index:-1}
-.lesson,.task{padding:var(--space-item-vertical) 0;line-height:1.4}
+.task{padding:var(--space-item-vertical) 0;line-height:1.3}
 .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
 .calendar button{background:none;border:0;border-radius:var(--radius-control);padding:8px 0;color:var(--fg);min-height:44px;font:inherit}
 .calendar .sub{align-self:center}
@@ -176,7 +176,7 @@ html[data-theme=dark] .lesson-mark-2{color:#ff8a8a}
 .lesson-copy{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;overflow-wrap:anywhere}
 .lesson-copy>strong{min-width:0}
 .lesson-grades{max-width:48%;align-self:flex-start}
-.lesson{padding:8px 3px}
+.lesson{padding:6px 3px}
 .schedule-arrows .icon{position:relative;min-width:44px;min-height:44px;width:44px;height:44px;background:transparent}
 .schedule-arrows .icon::before{content:"";position:absolute;inset:4px;border-radius:var(--radius-control);background:var(--soft)}
 .schedule-arrows .icon svg{position:relative;width:20px;height:20px}
@@ -272,7 +272,7 @@ html.platform-apple .calendar button,html.platform-apple .schedule-month{font-va
 .notice-overlay .notice-grade-text strong{font-size:var(--font-body);font-weight:var(--weight-medium);line-height:1.4}
 .notice-overlay .notice-grade-text small{font-size:var(--font-caption);line-height:1.4}
 
-/* 1.33.32 — Soft Minimal Compact: shared density tokens and scoped exceptions. */
+/* 1.33.33 — Soft Minimal Compact: shared density tokens and scoped exceptions. */
 body{line-height:1.3}
 .sub,.notice,.lesson,.task,.home-legend-item{line-height:1.3}
 .head{margin-bottom:var(--space-3)}
@@ -282,13 +282,13 @@ body{line-height:1.3}
 .stat-top{gap:var(--space-1)}
 .home-switch{margin-bottom:var(--space-1)}
 .home-legend{gap:var(--space-2)}
-.subject{padding:var(--space-1) 0}
-.subject .marks{gap:0;margin-top:var(--space-tight);min-height:40px}
-.subject .marks .mark{width:40px;min-width:40px;height:40px}
-.subject .marks .mark::before{inset:5.5px}
-.subject .marks .mark.new::after{top:7px;right:7px}
-.subject .subject-score .subject-trend{top:29px}
-.task p{margin-top:var(--space-1)}
+.subject{padding:var(--space-tight) 0}
+.subject .marks{gap:0;margin-top:0;min-height:36px}
+.subject .marks .mark{width:36px;min-width:36px;height:36px}
+.subject .marks .mark::before{inset:3.5px}
+.subject .marks .mark.new::after{top:5px;right:5px}
+.subject .subject-score .subject-trend{top:25px}
+
 .detail-overlay{z-index:30}
 .detail-box{display:flex;flex-direction:column;max-height:80vh;max-height:80dvh;overflow:hidden;padding:var(--space-4)}
 .detail-box h3{flex:none;font-size:var(--font-section);font-weight:var(--weight-medium);line-height:1.3;margin:0 0 var(--space-2)}
@@ -301,7 +301,9 @@ html.platform-apple .stat-value{font-weight:var(--weight-bold)}
 
 /* Shared compact controls and grade column labels. */
 .head{gap:4px}.head .icon{position:relative;min-width:44px;min-height:44px;background:transparent}.head .icon::before{content:"";position:absolute;inset:6px;background:var(--soft);border-radius:var(--radius-control)}.head .icon svg,.head .notice-badge{position:relative}.head .notice-badge{position:absolute}.head .notice-indicator::before,.head .sync-indicator::before{background:transparent}.header-quarter{width:32px;min-width:32px;max-width:32px;height:32px;min-height:32px;margin:0}.schedule-arrows .icon::before{inset:6px}
-#header-filters{margin-left:auto;min-width:0}#header-filters .grades-filter-row{display:flex;flex-direction:column;align-items:flex-start;gap:0;margin:0;min-height:0}#header-filters .grades-filter-check{min-height:22px;gap:4px;font-size:var(--font-caption)}
+#header-filters{margin-left:auto;min-width:0}#header-filters .grades-filter-row{display:flex;flex-direction:row;align-items:center;gap:4px;margin:0;min-height:0}#header-filters .grades-filter-check{min-height:32px;gap:3px;font-size:var(--font-caption);color:var(--fg);align-self:center}
 .grades-column-header{display:flex;justify-content:space-between;color:var(--muted);font-size:var(--font-caption);padding-bottom:var(--space-2)}
 .home-legend{width:max-content;max-width:100%}.home-legend-item{gap:4px}.home-legend-item b{padding-left:4px}
-@media(max-width:360px){.head{gap:2px}#header-filters .grades-filter-check{font-size:11px}}
+@media(max-width:360px){.head{gap:2px}#header-filters .grades-filter-row{gap:2px}#header-filters .grades-filter-check{font-size:11px;gap:2px}.head:has(#header-filters) h1{font-size:20px}.head:has(#header-filters) #profile{min-width:36px}}
+
+.schedule-calendar + .heading{margin:12px 0 8px}
