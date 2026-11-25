@@ -100,3 +100,7 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}html{-webkit-text
 .parent-date{min-width:0;max-width:100%;width:100%;display:grid;grid-template-columns:minmax(0,1fr)}
 .parent-date input[type="date"]{display:block;box-sizing:border-box;width:100%;min-width:0;max-width:100%;-webkit-appearance:none;appearance:none}
 .parent-auth input,.parent-add input,.parent-record input{min-width:0;max-width:100%}
+
+/* Keep long elapsed times inside the progress ring. */
+.ring .bigtime.long-time{font-size:clamp(24px,7.5vw,34px);letter-spacing:-1px;white-space:nowrap;max-width:100%}
+@media(max-width:350px){.ring .bigtime.long-time{font-size:27px}}
