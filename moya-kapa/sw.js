@@ -1,5 +1,5 @@
 // Serve a consistent, versioned offline shell; update it atomically on install.
-const CACHE='moya-kapa-v2-4-1-parent-layout';
+const CACHE='moya-kapa-v2-4-2-night-evening';
 const ASSETS=['./','./index.html','./app.css','./app.js','./parent.js','./ui.js','./appearance.js','./icons.js','./core.js','./db.js','./initial-history.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'];
 self.addEventListener('install',event=>{
  event.waitUntil((async()=>{
