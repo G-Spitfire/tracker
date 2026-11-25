@@ -59,7 +59,7 @@ async function run() {
      contentType:'application/javascript',
      body:'window.__syncCalls=0;window.SchoolSync={readCached:async()=>null,sync:async()=>{window.__syncCalls++;return {source:"network",data:'+JSON.stringify(fakeDiary)+'}}};'
    }));
-   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.33.42"}'}));
+   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.33.43"}'}));
    const view=size.name;
    try {
     await page.goto(BASE,{waitUntil:'domcontentloaded',timeout:30000});
@@ -74,8 +74,8 @@ async function run() {
     for(const [scenario,tab] of [['home','home'],['grades','grades'],['schedule','schedule'],['homework','homework']]) {
       if(tab!=='home')await page.locator('[data-action="tab"][data-value="'+tab+'"]').click();
       if(tab==='home'){
-        await page.waitForTimeout(500);
-        await page.evaluate(()=>{render();});
+        await page.waitForFunction(()=>!document.querySelector('.motion-line'),undefined,{timeout:5000});
+         await page.evaluate(()=>{render();});
         record(view,'unchanged graph does not replay',await page.locator('.motion-line').count()===0);
         await page.evaluate(()=>{window.__stableNodes=['#brand-mark img','#notice-indicator svg','#sync-indicator','.stats-grid'].map(s=>document.querySelector(s))});
         await page.locator('[data-action="chart"][data-value="ring"]').click();
@@ -90,12 +90,12 @@ async function run() {
         await page.evaluate(()=>render());
         record(view,'reduced motion disables graph effect',await page.locator('.motion-line').count()===0);
         await page.emulateMedia({reducedMotion:'no-preference'});
-        const scroll=await page.evaluate(()=>{window.scrollTo(0,0);const content=document.querySelector('.home-screen').getBoundingClientRect(),nav=document.querySelector('#nav').getBoundingClientRect();return {fits:content.bottom<=nav.top+1,extra:document.scrollingElement.scrollHeight-innerHeight}});record(view,'no unnecessary home scroll',!scroll.fits||scroll.extra<=1,scroll);
+        const scroll=await page.evaluate(()=>{document.querySelector("#main").scrollTop=0;const content=document.querySelector('.home-screen').getBoundingClientRect(),nav=document.querySelector('#nav').getBoundingClientRect();return {fits:content.bottom<=nav.top+1,extra:document.querySelector("#main").scrollHeight-document.querySelector("#main").clientHeight}});record(view,'no unnecessary home scroll',!scroll.fits||scroll.extra<=1,scroll);
         const graph=await page.locator('.home-line').evaluate(el=>{const r=el.getBoundingClientRect(),p=el.parentElement.getBoundingClientRect();return {ratio:r.width/p.width,width:r.width,parent:p.width}});
         record(view,'line chart fills available width',graph.ratio>=0.94,graph);
         const compact=await page.evaluate(()=>{const g=document.querySelector('.stats-grid'),s=document.querySelector('.home-switch .seg'),v=document.querySelector('.home-visual');return {edge:Math.round(g.getBoundingClientRect().left),gap:parseFloat(getComputedStyle(g).gap),height:Math.round(s.getBoundingClientRect().height),chartGap:Math.round(v.getBoundingClientRect().top-s.getBoundingClientRect().bottom)}});record(view,'compact home geometry',compact.edge===6&&compact.gap===6&&compact.height===32&&compact.chartGap===4,compact);
       }
-      if(tab==='grades'){const sticky=await page.evaluate(async()=>{const h=document.querySelector('.head'),spacer=document.createElement('div');spacer.style.height='1500px';document.querySelector('#main').append(spacer);window.scrollTo(0,300);await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));const rect=h.getBoundingClientRect(),top=parseFloat(getComputedStyle(h).top)||0,ok=Math.abs(rect.top-top)<=2&&rect.bottom>top&&scrollY>=250;spacer.remove();window.scrollTo(0,0);return {ok,top:rect.top,expected:top}});record(view,'header stays visible during actual scroll',sticky.ok,sticky);record(view,'sticky header CSS',await page.locator('.head').evaluate(e=>getComputedStyle(e).position==='sticky'));record(view,'grade filters in header',await page.locator('#header-filters #tests-toggle').count()===1&&await page.locator('.grades-column-header').count()===1);}
+      if(tab==='grades'){const sticky=await page.evaluate(async()=>{const h=document.querySelector('.head'),m=document.querySelector('#main'),initial=h.getBoundingClientRect().top,spacer=document.createElement('div');spacer.style.height='1500px';document.querySelector('#main').append(spacer);m.scrollTop=300;await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));const rect=h.getBoundingClientRect(),top=initial,ok=Math.abs(rect.top-top)<=2&&rect.bottom>top&&m.scrollTop>=250&&window.scrollY===0;spacer.remove();m.scrollTop=0;return {ok,top:rect.top,expected:top}});record(view,'header stays visible during actual scroll',sticky.ok,sticky);record(view,'isolated content scrolling',await page.locator('#main').evaluate(e=>getComputedStyle(e).overflowY==='auto'&&getComputedStyle(document.body).overflow==='hidden'));record(view,'grade filters in header',await page.locator('#header-filters #tests-toggle').count()===1&&await page.locator('.grades-column-header').count()===1);}
       if(tab==='schedule'){
         await page.evaluate(()=>{state.date='2026-11-20';render();});
         const layout=await page.evaluate(()=>{
