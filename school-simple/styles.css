@@ -350,4 +350,4 @@ html[data-motion=off] button .symbol,html[data-motion=off] button svg,html[data-
 @media(prefers-reduced-motion:no-preference){html[data-motion=on] .seg button:active,html[data-motion=on] .modal-button:active{opacity:.8;transition:opacity 100ms ease}}
 
 /* Keep the safe-area background opaque without covering content below the header. */
-.head::after{content:'';position:absolute;bottom:100%;left:-16px;right:-16px;height:calc(env(safe-area-inset-top,0px) + 12px);background:var(--surface);pointer-events:none}
+.head::after{content:'';position:absolute;bottom:100%;left:0;right:0;height:calc(env(safe-area-inset-top,0px) + 12px);background:var(--surface);pointer-events:none}
