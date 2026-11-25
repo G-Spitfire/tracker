@@ -281,10 +281,10 @@ function refreshOnNewDay(){
  return false;
 }
 const DIARY_REFRESH_MS=5*60000;let lastDiaryAttempt=0;
-function refreshDiaryIfDue(force=false){if(document.hidden||!navigator.onLine||syncInProgress||document.querySelector('.detail-overlay')||(!force&&Date.now()-lastDiaryAttempt<DIARY_REFRESH_MS))return;loadDiarySnapshot(false,true)}
+function refreshDiaryIfDue(){if(document.hidden||!navigator.onLine||syncInProgress||document.querySelector('.detail-overlay')||Date.now()-lastDiaryAttempt<DIARY_REFRESH_MS)return;loadDiarySnapshot(false,true)}
 function resumeDiary(){if(!refreshOnNewDay()){checkForUpdate();refreshDiaryIfDue()}}
 window.addEventListener('focus',resumeDiary);
-window.addEventListener('online',()=>refreshDiaryIfDue(true));
+
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)resumeDiary()});document.querySelector('#profile').addEventListener('click',()=>{if(state.tab==='profile')setTab(state.returnTab);else{state.returnTab=state.tab;setTab('profile')}});
 document.addEventListener('change',e=>{if(e.target.matches('#tests-toggle')){state.testsOnly=e.target.checked;render({preserveScroll:true})}else if(e.target.matches('#twos-toggle')){state.twosOnly=e.target.checked;render({preserveScroll:true})}});document.querySelector('#profile').parentElement.addEventListener('click',e=>{if(e.target.closest('#sync-indicator'))showSyncDialog();else if(e.target.closest('#notice-indicator'))noticePopup()});document.addEventListener('click',e=>{let b=e.target.closest('[data-action]');if(!b)return;let a=b.dataset.action,v=b.dataset.value;switch(a){case'homework-detail':{const t=JSON.parse(decodeURIComponent(v));openModal(t.subject,'<div class="modal-row"><span class="modal-label">Задание</span><span>'+escapeHTML(t.text)+'</span></div>'+(t.nextLessonDate?'<div class="modal-row"><span class="modal-label">Следующий урок</span><span>'+escapeHTML(t.nextLessonDate)+'</span></div>':''),'<button class="modal-button" data-action="close-detail">Закрыть</button>');return;} case'retry-sync':loadDiarySnapshot();return;case'refresh-diary':if(!syncInProgress){loadDiarySnapshot(true)}return;case'tab':setTab(v);return;case'grade':{let g=JSON.parse(decodeURIComponent(v));openModal(g.subject,'<div class="modal-row"><span class="modal-label">Оценка</span><strong>'+g.value+'</strong></div><div class="modal-row"><span class="modal-label">Дата</span><span>'+new Date(g.date+'T12:00:00').toLocaleDateString('ru-RU')+'</span></div><div class="modal-row"><span class="modal-label">Тип работы</span><span>'+escapeHTML(g.type||(g.test?'Контрольная':'Обычная'))+'</span></div>','<button class="modal-button" data-action="close-detail">Закрыть</button>');return}case'close-detail':b.closest('.detail-overlay')?.remove();return;case'quarter':state.quarter=v;break;case'grades-view':state.gradesView=v;break;case'chart':state.chart=v;break;case'hw':state.hw=v;break;case'child':state.child=+v;saveSetting('school-active-child',String(state.child));break;case'theme':state.theme=v;saveSetting('school-theme',v);break;case'accent':state.accent=v;saveSetting('school-accent',v);break;case'date':state.date=v;break;case'week':state.week+=+v;{let d=new Date(state.date+'T12:00:00');d.setDate(d.getDate()+7*(+v));state.date=iso(d)}break;}render({preserveScroll:true})});render();
 async function loadDiarySnapshot(fromDialog=false,background=false){
@@ -306,5 +306,5 @@ async function loadDiarySnapshot(fromDialog=false,background=false){
 }
 loadDiarySnapshot();
 checkForUpdate();
-setInterval(()=>{if(document.hidden||refreshOnNewDay())return;refreshDiaryIfDue();if(state.tab==='home'&&!syncInProgress&&!document.querySelector('.detail-overlay'))render({preserveScroll:true})},60000);
+setInterval(()=>{if(document.hidden||refreshOnNewDay())return;if(state.tab==='home'&&!syncInProgress&&!document.querySelector('.detail-overlay'))render({preserveScroll:true})},60000);
 </script></body></html>
