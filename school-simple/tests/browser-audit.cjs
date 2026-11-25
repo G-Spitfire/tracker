@@ -98,7 +98,7 @@ async function run() {
      record(view,'notice indicator present',await indicator.count()===1);
      await indicator.click();
      record(view,'notice dialog opens',await page.locator('.detail-overlay').count()===1);
-     await page.locator('[data-action="close-detail"]').click();
+     await page.locator('[data-action="notice-read"]').click();
      await page.locator('#profile').click();
     const p=await geometry(page);
     record(view,'profile geometry',!p.overflow && !p.offenders.length,p);
