@@ -71,6 +71,7 @@ async function run() {
         record(view,'line chart fills available width',graph.ratio>=0.94,graph);
         const compact=await page.evaluate(()=>{const g=document.querySelector('.stats-grid'),s=document.querySelector('.home-switch .seg'),v=document.querySelector('.home-visual');return {edge:Math.round(g.getBoundingClientRect().left),gap:parseFloat(getComputedStyle(g).gap),height:Math.round(s.getBoundingClientRect().height),chartGap:Math.round(v.getBoundingClientRect().top-s.getBoundingClientRect().bottom)}});record(view,'compact home geometry',compact.edge===6&&compact.gap===6&&compact.height===32&&compact.chartGap===4,compact);
       }
+      if(tab==='grades'){record(view,'grade filters in header',await page.locator('#header-filters #tests-toggle').count()===1&&await page.locator('.grades-column-header').count()===1);}
       if(tab==='schedule'){
         await page.evaluate(()=>{state.date='2026-11-20';render();});
         const layout=await page.evaluate(()=>{
