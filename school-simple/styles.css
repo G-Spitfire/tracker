@@ -191,7 +191,7 @@ html[data-theme=dark] .lesson-mark-2{color:#ff8a8a}
 .forecast-track{height:6px;margin-top:6px}
 .grades-filter-check{min-height:44px}
 .grades-filter-check input{appearance:none;-webkit-appearance:none;display:grid;place-items:center;flex:none;width:16px;height:16px;margin:0;border:1.5px solid var(--muted);border-radius:4px;background:var(--surface);cursor:pointer}
-.grades-filter-check input:checked{background:var(--accent);border-color:var(--accent)}
+
 .grades-filter-check input:checked::after{content:"";width:9px;height:5px;border-left:2px solid white;border-bottom:2px solid white;transform:translateY(-1px) rotate(-45deg)}
 html[data-theme=dark] .home-line text{fill:#d2d2da}
 @media(prefers-color-scheme:dark){html[data-theme=system] .home-line text{fill:#d2d2da}}
@@ -250,7 +250,7 @@ html.platform-apple .calendar button,html.platform-apple .schedule-month{font-va
 .grades-filter-row{justify-content:flex-start;gap:12px;min-height:28px;margin-top:4px}
 .grades-filter-check{min-height:28px;gap:4px;font-size:var(--font-caption,12px);white-space:nowrap}
 
-.grades-filter-check input:checked{background:var(--accent);border-color:var(--accent)}
+
 
 .grades-filter-row+.content-after-controls{margin-top:4px}
 
@@ -272,7 +272,7 @@ html.platform-apple .calendar button,html.platform-apple .schedule-month{font-va
 .notice-overlay .notice-grade-text strong{font-size:var(--font-body);font-weight:var(--weight-medium);line-height:1.4}
 .notice-overlay .notice-grade-text small{font-size:var(--font-caption);line-height:1.4}
 
-/* 1.33.36 — Soft Minimal Compact: shared density tokens and scoped exceptions. */
+/* 1.33.37 — Soft Minimal Compact: shared density tokens and scoped exceptions. */
 body{line-height:1.3}
 .sub,.notice,.lesson,.task,.home-legend-item{line-height:1.3}
 
