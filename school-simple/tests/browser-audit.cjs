@@ -74,8 +74,8 @@ async function run() {
     for(const [scenario,tab] of [['home','home'],['grades','grades'],['schedule','schedule'],['homework','homework']]) {
       if(tab!=='home')await page.locator('[data-action="tab"][data-value="'+tab+'"]').click();
       if(tab==='home'){
-        await page.waitForTimeout(500);
-        await page.evaluate(()=>{render();});
+        await page.waitForFunction(()=>!document.querySelector('.motion-line'),undefined,{timeout:5000});
+         await page.evaluate(()=>{render();});
         record(view,'unchanged graph does not replay',await page.locator('.motion-line').count()===0);
         await page.evaluate(()=>{window.__stableNodes=['#brand-mark img','#notice-indicator svg','#sync-indicator','.stats-grid'].map(s=>document.querySelector(s))});
         await page.locator('[data-action="chart"][data-value="ring"]').click();
