@@ -2,7 +2,7 @@
 const {chromium}=require('playwright');
 const fs=require('node:fs');
 const path=require('node:path');
-const sizes=[320,375,393,402];
+const sizes=[320,375,393,430];
 const marks=Array.from({length:35},(_,i)=>({subjectId:'s'+i,subject:'Предмет '+i,value:4,date:'2026-11-19',type:'Урок'}));
 const diary={schemaVersion:1,generatedAt:new Date().toISOString(),children:{polina:{marks,lessons:[],schedule:[]},matvey:{marks,lessons:[],schedule:[]}}};
 let failures=0;
@@ -19,14 +19,14 @@ async function check(label,condition,details=''){console.log((condition?'PASS':'
    await page.goto('http://127.0.0.1:8765/school-simple/index.html');
    await page.locator('[data-action="tab"][data-value="grades"]').click();
    await page.waitForTimeout(100);
-   await page.evaluate(()=>{window.__navBefore=document.querySelector('#nav').firstElementChild;document.querySelector('#main').scrollTop=document.querySelector('#main').scrollHeight});
-   const before=await page.evaluate(()=>document.querySelector('#main').scrollTop);
+   await page.evaluate(()=>{window.__navBefore=document.querySelector('#nav').firstElementChild;window.scrollTo(0,document.documentElement.scrollHeight)});
+   const before=await page.evaluate(()=>window.scrollY);
    await page.evaluate(()=>render({preserveScroll:true}));
-   const after=await page.evaluate(()=>document.querySelector('#main').scrollTop);
+   const after=await page.evaluate(()=>window.scrollY);
    check(width+' preserve scroll',before>100&&Math.abs(after-before)<3,'before='+before+' after='+after);
    check(width+' nav identity',await page.evaluate(()=>window.__navBefore===document.querySelector('#nav').firstElementChild));
    await page.locator('[data-action="tab"][data-value="schedule"]').click();
-   const top=await page.evaluate(()=>document.querySelector('#main').scrollTop);
+   const top=await page.evaluate(()=>window.scrollY);
    check(width+' navigation starts at top',top<3,'scroll='+top);
    for(const tab of ['home','grades','schedule','homework']){
     await page.locator('[data-action="tab"][data-value="'+tab+'"]').click();
@@ -51,7 +51,7 @@ async function check(label,condition,details=''){console.log((condition?'PASS':'
    fs.mkdirSync(screenshotDir,{recursive:true});
    for(const theme of ['light','dark']){
     for(const tab of ['home','grades','schedule','homework','profile']){
-     await page.evaluate(({theme,tab})=>{state.theme=theme;setTab(tab);render();document.querySelector('#main').scrollTop=0;},{theme,tab});
+     await page.evaluate(({theme,tab})=>{state.theme=theme;setTab(tab);render();window.scrollTo(0,0);},{theme,tab});
      await page.screenshot({path:path.join(screenshotDir,width+'-'+theme+'-'+tab+'.png'),fullPage:true,animations:'disabled'});
     }
    }
