@@ -330,3 +330,13 @@ button{transition:transform 100ms ease}button:active{transform:scale(.96)}
 @keyframes motion-fade{from{opacity:0}to{opacity:1}}
 @keyframes motion-modal{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes motion-bell{0%,100%{transform:rotate(0)}15%,55%{transform:rotate(12deg)}35%,75%{transform:rotate(-12deg)}}
+
+/* Local motion preference; system reduced motion remains authoritative. */
+.motion-setting{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:44px;margin-top:12px;padding:4px 0;border:0;background:none;color:var(--fg);font:inherit;text-align:left}
+.motion-setting small{display:block;color:var(--muted);font-size:var(--font-caption);margin-top:2px}
+.motion-toggle{position:relative;flex:none;width:46px;height:28px;border-radius:14px;background:var(--soft);border:1px solid var(--muted)}
+.motion-toggle::after{content:'';position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0003}
+.motion-setting[aria-checked=true] .motion-toggle{background:var(--accent-fill);border-color:var(--accent-fill)}
+.motion-setting[aria-checked=true] .motion-toggle::after{left:20px}
+html[data-motion=off] button{transition:none;transform:none}
+html[data-motion=off] .motion-line,html[data-motion=off] .motion-area,html[data-motion=off] .detail-box,html[data-motion=off] .motion-bell{animation:none}
