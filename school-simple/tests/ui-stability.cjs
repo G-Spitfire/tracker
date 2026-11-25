@@ -65,7 +65,7 @@ async function check(label,condition,details=''){console.log((condition?'PASS':'
    await page.locator('#tests-toggle').uncheck();
    check(width+' twos filter',await count()===2);
    check(width+' unchanged average',(await page.locator('.subject-average').innerText())==='3,00');
-   const compact=await page.evaluate(()=>{const a=document.querySelector('#tests-toggle').getBoundingClientRect(),b=document.querySelector('#twos-toggle').getBoundingClientRect();return a.y===b.y&&a.width===16&&b.width===16});
+   const compact=await page.evaluate(()=>{const a=document.querySelector('#tests-toggle').getBoundingClientRect(),b=document.querySelector('#twos-toggle').getBoundingClientRect();const h=document.querySelector('#header-filters').getBoundingClientRect(),q=document.querySelector('#header-quarter').getBoundingClientRect(),t=document.querySelector('.head-title').getBoundingClientRect();return a.x===b.x&&a.bottom<=b.top&&a.width===16&&b.width===16&&t.right<=h.left&&h.right<=q.left});
    check(width+' compact filters',compact);
    const accentMatch=await page.evaluate(()=>{const probe=document.createElement('span');probe.style.backgroundColor='var(--accent)';document.body.append(probe);const expected=getComputedStyle(probe).backgroundColor;probe.remove();return getComputedStyle(document.querySelector('#twos-toggle')).backgroundColor===expected});
    check(width+' checked filter uses selected accent',accentMatch);
