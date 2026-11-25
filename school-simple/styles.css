@@ -101,7 +101,7 @@ button,a,[data-action]{touch-action:manipulation}
 .stat-top>span:first-child{min-width:0}
 .home-switch{display:block;width:100%;margin:0 0 var(--space-controls-content)}
 body{margin:0;font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--surface);color:var(--fg);font-size:var(--font-body);line-height:1.4}
-.app{width:100%;max-width:550px;margin:auto;min-height:100dvh;background:var(--surface);padding:var(--space-3) var(--space-4) calc(88px + env(safe-area-inset-bottom));overflow-x:clip}
+.app{width:100%;max-width:550px;margin:auto;min-height:100dvh;background:var(--surface);padding:var(--space-3) var(--space-4) calc(88px + env(safe-area-inset-bottom));overflow-x:visible}
 .stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;width:100%;margin:0 0 15px}
 .stat-tile{display:flex;flex-direction:column;min-width:0;min-height:90px;padding:10px 11px;background:var(--soft);border-radius:var(--radius-panel);gap:4px}
 .stat-top{display:flex;align-items:flex-start;justify-content:space-between;gap:5px;color:var(--muted);font-size:var(--font-kpi-label);font-weight:var(--weight-medium);line-height:1.25}
@@ -231,7 +231,7 @@ html.platform-apple .calendar button,html.platform-apple .schedule-month{font-va
 .update-event{min-height:44px;padding:4px 0;gap:10px}
 .home-switch{margin-bottom:10px}
 /* Preserve scroll room above the fixed bottom navigation in iOS PWA. */
-.app{padding-bottom:calc(112px + env(safe-area-inset-bottom))}
+.app{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 
 /* Solid notification indicator, 44px tap target */
 .notice-indicator{margin-left:auto;margin-right:4px;background:transparent;color:var(--muted)}
@@ -346,5 +346,8 @@ html[data-motion=off] .motion-line,html[data-motion=off] .motion-area,html[data-
 html[data-motion=off] button .symbol,html[data-motion=off] button svg,html[data-motion=off] button .mark,html[data-motion=off] button::before{transition:none;transform:none}
 
 /* Sticky header: no scroll listener or duplicated markup. */
-.head{position:sticky;top:env(safe-area-inset-top,0px);z-index:21;background:var(--surface);box-shadow:0 -12px 0 12px var(--surface)}
+.head{position:sticky;top:env(safe-area-inset-top,0px);z-index:21;background:var(--surface);box-shadow:none}
 @media(prefers-reduced-motion:no-preference){html[data-motion=on] .seg button:active,html[data-motion=on] .modal-button:active{opacity:.8;transition:opacity 100ms ease}}
+
+/* Keep the safe-area background opaque without covering content below the header. */
+.head::after{content:'';position:absolute;bottom:100%;left:-16px;right:-16px;height:calc(env(safe-area-inset-top,0px) + 12px);background:var(--surface);pointer-events:none}
