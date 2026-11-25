@@ -87,7 +87,7 @@ html[data-theme=dark]{--bg:#09090b;--surface:#202023;--fg:#ffffff;--muted:#b4b4b
 .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
 .calendar button{background:none;border:0;border-radius:var(--radius-control);padding:8px 0;color:var(--fg);min-height:44px;font:inherit}
 .calendar .sub{align-self:center}
-.bottom{position:fixed;bottom:0;left:0;right:0;margin-inline:auto;z-index:20;max-width:550px;width:100%;display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border:0;border-top:1px solid var(--line);border-radius:18px 18px 0 0;box-shadow:0 -3px 14px #0000000a;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+.bottom{position:relative;flex:none;margin:0;width:100%;z-index:20;display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border:0;border-top:1px solid var(--line);border-radius:18px 18px 0 0;box-shadow:0 -3px 14px #0000000a;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
 .swatches{display:flex;flex-wrap:wrap;gap:clamp(6px,2vw,12px);margin:11px 0 18px}
 .swatch{width:44px;height:44px;border:0;border-radius:50%;color:white;font-size:19px;flex-shrink:0}
 .detail-box{background:var(--surface);color:var(--fg);border-radius:var(--radius-panel);padding:20px;width:min(100%,350px);box-shadow:0 12px 45px #0002}
@@ -101,7 +101,7 @@ button,a,[data-action]{touch-action:manipulation}
 .stat-top>span:first-child{min-width:0}
 .home-switch{display:block;width:100%;margin:0 0 var(--space-controls-content)}
 body{margin:0;font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--surface);color:var(--fg);font-size:var(--font-body);line-height:1.4}
-.app{width:100%;max-width:550px;margin:auto;min-height:100dvh;background:var(--surface);padding:var(--space-3) var(--space-4) calc(88px + env(safe-area-inset-bottom));overflow-x:visible}
+.app{--shell-gutter:var(--space-4);position:fixed;inset:0;width:100%;max-width:550px;margin:0 auto;min-height:0;height:auto;max-height:none;background:var(--surface);padding:var(--space-3) 0 0;display:flex;flex-direction:column;overflow:hidden}
 .stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;width:100%;margin:0 0 15px}
 .stat-tile{display:flex;flex-direction:column;min-width:0;min-height:90px;padding:10px 11px;background:var(--soft);border-radius:var(--radius-panel);gap:4px}
 .stat-top{display:flex;align-items:flex-start;justify-content:space-between;gap:5px;color:var(--muted);font-size:var(--font-kpi-label);font-weight:var(--weight-medium);line-height:1.25}
@@ -115,7 +115,7 @@ body{margin:0;font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;b
 }
 html{background:var(--surface)}
 @media(max-width:360px){
-  .app{padding-left:12px;padding-right:12px}
+  .app{--shell-gutter:12px}
   .home-legend-item{font-size:var(--font-caption)}
   .stats-grid{gap:8px}
   .stat-tile{min-height:88px;padding:9px}
@@ -231,7 +231,6 @@ html.platform-apple .calendar button,html.platform-apple .schedule-month{font-va
 .update-event{min-height:44px;padding:4px 0;gap:10px}
 .home-switch{margin-bottom:10px}
 /* Preserve scroll room above the fixed bottom navigation in iOS PWA. */
-.app{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 
 /* Solid notification indicator, 44px tap target */
 .notice-indicator{margin-left:auto;margin-right:4px;background:transparent;color:var(--muted)}
@@ -345,23 +344,15 @@ html[data-motion=off] .motion-line,html[data-motion=off] .motion-area,html[data-
 @keyframes motion-modal-out{to{opacity:0;transform:translateY(8px)}}
 html[data-motion=off] button .symbol,html[data-motion=off] button svg,html[data-motion=off] button .mark,html[data-motion=off] button::before{transition:none;transform:none}
 
-/* Sticky header: no scroll listener or duplicated markup. */
-.head{position:relative;flex:none;z-index:21;background:var(--surface);box-shadow:none}
+/* Header outside the scrolling region. */
+.head{position:relative;flex:none;z-index:21;background:var(--surface);box-shadow:none;margin-inline:var(--shell-gutter)}
 @media(prefers-reduced-motion:no-preference){html[data-motion=on] .seg button:active,html[data-motion=on] .modal-button:active{opacity:.8;transition:opacity 100ms ease}}
 
-/* Keep the safe-area background opaque without covering content below the header. */
+
 
 
 /* Fixed viewport shell: only the content scrolls. */
 html,body{height:100%;overflow:hidden;overscroll-behavior:none}
-.app{position:fixed;inset:0;min-height:0;height:100%;height:100dvh;display:flex;flex-direction:column;padding-bottom:0;overflow:hidden}
-#main{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
-.bottom{position:relative;flex:none;left:auto;right:auto;bottom:auto;margin-inline:0;width:auto;max-width:none}
+#main{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding-inline:var(--shell-gutter);overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
 body.is-loading #main{min-height:0}
 
-/* Preserve full-width navigation and home gutters inside the fixed shell. */
-.app{--shell-gutter:var(--space-4);margin:0 auto;top:0;bottom:0;height:auto;max-height:none;padding-inline:0}
-.head{margin-inline:var(--shell-gutter)}
-#main{padding-inline:var(--shell-gutter)}
-.bottom{width:100%;margin:0;flex-shrink:0}
-@media(max-width:360px){.app{--shell-gutter:12px;padding-inline:0}}
