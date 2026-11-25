@@ -358,3 +358,10 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 #main{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
 .bottom{position:relative;flex:none;left:auto;right:auto;bottom:auto;margin-inline:0;width:auto;max-width:none}
 body.is-loading #main{min-height:0}
+
+/* Preserve full-width navigation and home gutters inside the fixed shell. */
+.app{--shell-gutter:var(--space-4);margin:0 auto;top:0;bottom:0;height:auto;max-height:none;padding-inline:0}
+.head{margin-inline:var(--shell-gutter)}
+#main{padding-inline:var(--shell-gutter)}
+.bottom{width:100%;margin:0;flex-shrink:0}
+@media(max-width:360px){.app{--shell-gutter:12px;padding-inline:0}}
