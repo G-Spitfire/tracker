@@ -276,7 +276,7 @@ html.platform-apple .calendar button,html.platform-apple .schedule-month{font-va
 .notice-overlay .notice-grade-text strong{font-size:var(--font-body);font-weight:var(--weight-medium);line-height:1.4}
 .notice-overlay .notice-grade-text small{font-size:var(--font-caption);line-height:1.4}
 
-/* 1.33.31 — Soft Minimal Compact: shared density tokens and scoped exceptions. */
+/* 1.33.32 — Soft Minimal Compact: shared density tokens and scoped exceptions. */
 :root{--space-tight:2px;--space-compact:6px;--font-page:22px;--font-legend:12px;--space-controls-content:var(--space-3);--space-item-detail:var(--space-1);--space-item-vertical:var(--space-compact)}
 body{line-height:1.3}
 .sub,.notice,.lesson,.task,.home-legend-item{line-height:1.3}
@@ -286,8 +286,8 @@ body{line-height:1.3}
 .stat-tile{padding:10px;gap:var(--space-1)}
 .stat-top{gap:var(--space-1)}
 .home-switch{margin-bottom:var(--space-1)}
-.home-switch .seg{min-height:32px;padding:2px;gap:2px}
-.home-switch .seg button{min-height:28px;padding:4px 6px}
+.seg{min-height:32px;padding:2px;gap:2px}
+.seg button{min-height:28px;padding:4px 6px}
 .home-legend{gap:var(--space-2)}
 .subject{padding:var(--space-1) 0}
 .subject .marks{gap:0;margin-top:var(--space-tight);min-height:40px}
@@ -305,3 +305,10 @@ body{line-height:1.3}
 .sync-meta>span,.schedule-calendar .day-cell .sub{font-size:var(--font-caption)}
 html.platform-apple .stat-value{font-weight:var(--weight-bold)}
 @media(max-width:360px){.home-screen{width:calc(100% + 12px);margin-inline:-6px}.stat-top,.stat-hint{font-size:var(--font-caption)}.stat-tile{padding:8px}}
+
+/* Shared compact controls and grade column labels. */
+.head{gap:4px}.head .icon{position:relative;min-width:44px;min-height:44px;background:transparent}.head .icon::before{content:"";position:absolute;inset:6px;background:var(--soft);border-radius:var(--radius-control)}.head .icon svg,.head .notice-badge{position:relative}.head .notice-badge{position:absolute}.head .notice-indicator::before,.head .sync-indicator::before{background:transparent}.header-quarter{width:32px;min-width:32px;max-width:32px;height:32px;min-height:32px;margin:0}.schedule-arrows .icon::before{inset:6px}
+#header-filters{margin-left:auto;min-width:0}#header-filters .grades-filter-row{display:flex;flex-direction:column;align-items:flex-start;gap:0;margin:0;min-height:0}#header-filters .grades-filter-check{min-height:22px;gap:4px;font-size:var(--font-caption)}
+.grades-column-header{display:flex;justify-content:space-between;color:var(--muted);font-size:var(--font-caption);padding-bottom:var(--space-2)}
+.home-visual .home-line{aspect-ratio:auto}.home-legend{width:max-content;max-width:100%}.home-legend-item{gap:4px}.home-legend-item b{padding-left:4px}
+@media(max-width:360px){.head{gap:2px}#header-filters .grades-filter-check{font-size:11px}}
