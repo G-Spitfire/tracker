@@ -1,4 +1,4 @@
-const CACHE_NAME = "school-shell-v1.33.26-grade-trends";
+const CACHE_NAME = "school-shell-v1.33.28-grade-trends";
 const SHELL = [
   "./",
   "./index.html",
@@ -23,8 +23,6 @@ const SHELL = [
   "./assets/empty-states/phone.png",
   "./assets/empty-states/book.png",
   "./icons.html",
-  "./caveman-run-light.webp",
-  "./caveman-run-dark.webp"
 ];
 
 self.addEventListener("install", event => {

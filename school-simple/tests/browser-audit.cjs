@@ -98,6 +98,15 @@ async function run() {
      record(view,'notice indicator present',await indicator.count()===1);
      await indicator.click();
      record(view,'notice dialog opens',await page.locator('.detail-overlay').count()===1);
+     // Long notification lists must scroll independently of their action button.
+     const modalLayout=await page.evaluate(()=>{
+      const box=document.querySelector('.notice-overlay .detail-box'),body=box?.querySelector('.modal-body'),actions=box?.querySelector('.modal-actions'),nav=document.querySelector('.bottom'),overlay=document.querySelector('.notice-overlay');
+      if(!box||!body||!actions||!nav)return null;
+      body.insertAdjacentHTML('beforeend',Array.from({length:36},(_,i)=>'<div class="notice-item"><span class="mark">5</span><div class="notice-grade-text"><strong>Математика '+i+'</strong><small>Контрольная работа</small></div></div>').join(''));
+      const b=box.getBoundingClientRect(),x=body.getBoundingClientRect(),a=actions.getBoundingClientRect();
+      return {overlayAboveNav:+getComputedStyle(overlay).zIndex>+getComputedStyle(nav).zIndex,buttonVisible:a.bottom<=innerHeight&&a.top>=b.top,scrollsList:body.scrollHeight>body.clientHeight,inside:a.top>=x.bottom-1};
+     });
+     record(view,'long notice modal scroll and button accessible',!!modalLayout&&Object.values(modalLayout).every(Boolean),modalLayout);
      await page.locator('[data-action="notice-read"]').click();
      await page.locator('#profile').click();
     const p=await geometry(page);

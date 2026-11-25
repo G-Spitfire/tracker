@@ -33,7 +33,7 @@ function setup(extra = {}) {
   context.gradeData = () => context.kids[context.state.child].subjects.flatMap(s => s.grades).filter(g => context.inQuarter(g.date));
   context.score = () => context.mean(context.kids[context.state.child].subjects.map(s => s.grades.filter(g => context.inQuarter(g.date))).filter(a => a.length).map(a => context.mean(a.map(g => g.value))));
   vm.createContext(context);
-  vm.runInContext(functionSource('weeklyDynamics','matveyTrend') + '\n' + functionSource('holidayInfo','home') + '\n' + functionSource('home','grades') + '\n' + functionSource('homework','syncStatus'), context);
+  vm.runInContext(source.slice(source.indexOf('function weeklyDynamics('),source.indexOf('\nlet state=',source.indexOf('function weeklyDynamics('))) + '\n' + functionSource('holidayInfo','home') + '\n' + functionSource('home','grades') + '\n' + functionSource('homework','syncStatus'), context);
   return context;
 }
 test('home: unweighted subject means drive KPI, delta, and line chart', () => {
