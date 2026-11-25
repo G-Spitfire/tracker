@@ -10,8 +10,8 @@ fs.mkdirSync(OUT, { recursive: true });
 const results = [];
 const sizes = [
   {name:'iphone-se', width:375, height:667},
-  {name:'iphone-regular', width:390, height:844},
-  {name:'iphone-large', width:430, height:932},
+  {name:'iphone-14-pro', width:393, height:852},
+  {name:'iphone-16-pro', width:402, height:874},
   {name:'small-320', width:320, height:568},
 ];
 const fakeDiary = {
@@ -90,6 +90,7 @@ async function run() {
         await page.evaluate(()=>render());
         record(view,'reduced motion disables graph effect',await page.locator('.motion-line').count()===0);
         await page.emulateMedia({reducedMotion:'no-preference'});
+        const scroll=await page.evaluate(()=>{window.scrollTo(0,0);const content=document.querySelector('.home-screen').getBoundingClientRect(),nav=document.querySelector('#nav').getBoundingClientRect();return {fits:content.bottom<=nav.top+1,extra:document.scrollingElement.scrollHeight-innerHeight}});record(view,'no unnecessary home scroll',!scroll.fits||scroll.extra<=1,scroll);
         const graph=await page.locator('.home-line').evaluate(el=>{const r=el.getBoundingClientRect(),p=el.parentElement.getBoundingClientRect();return {ratio:r.width/p.width,width:r.width,parent:p.width}});
         record(view,'line chart fills available width',graph.ratio>=0.94,graph);
         const compact=await page.evaluate(()=>{const g=document.querySelector('.stats-grid'),s=document.querySelector('.home-switch .seg'),v=document.querySelector('.home-visual');return {edge:Math.round(g.getBoundingClientRect().left),gap:parseFloat(getComputedStyle(g).gap),height:Math.round(s.getBoundingClientRect().height),chartGap:Math.round(v.getBoundingClientRect().top-s.getBoundingClientRect().bottom)}});record(view,'compact home geometry',compact.edge===6&&compact.gap===6&&compact.height===32&&compact.chartGap===4,compact);
