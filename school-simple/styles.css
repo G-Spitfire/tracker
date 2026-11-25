@@ -270,3 +270,5 @@ html.platform-apple .calendar button,html.platform-apple .schedule-month{font-va
 .grades-filter-check input:checked{background:var(--accent);border-color:var(--accent)}
 .grades-filter-check input:checked::after{border-color:white}
 .grades-filter-row+.content-after-controls{margin-top:4px}
+
+.notice-indicator{position:relative}.notice-indicator.unread{color:var(--accent)}.notice-badge{position:absolute;top:0;right:0;background:var(--accent);color:white;border-radius:12px;min-width:17px;height:17px;padding:0 3px;font-size:10px;display:grid;place-items:center}.notice-item{cursor:default}.notice-item .mark{flex:none;display:inline-flex}.notice-grade-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.notice-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex:none}.notice-summary{font-size:14px;color:var(--muted)}

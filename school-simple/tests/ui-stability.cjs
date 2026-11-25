@@ -90,10 +90,10 @@ async function check(label,condition,details=''){console.log((condition?'PASS':'
     noticeTrack();const noDuplicate=noticeData().events.length===1;
     const e=noticeData().events[0],late=e?.grade.date==='2026-11-19'&&e.day===iso(TODAY);
     const polina=noticeList().length===1;state.child=1;const matvey=noticeList().length===0;state.child=0;
-    noticeOpen(e.id);const read=noticeData().events[0].read===true;
+    noticePopup();const details=document.querySelector('.notice-grade-text').textContent.includes('Домашняя работа');document.querySelector('.detail-overlay').click();const stillUnread=noticeUnread()===1;noticePopup();document.querySelector('[data-action="notice-read"]').click();const read=noticeData().events[0].read===true;
     kids[0].subjects=[];noticeTrack();kids[0].subjects=[{name:'Математика',grades:[{id:12345,date:'2026-11-19',value:5,type:'Домашняя работа'}]}];noticeTrack();
     const rediscovered=noticeData().events.length===1;
-    return {initial,first,noDuplicate,late,polina,matvey,read,rediscovered};
+    kids[0].subjects[0].grades[0].value=4;noticeTrack();const corrected=noticeList().some(e=>e.previousValue===5&&e.grade.value===4&&!e.read);return {initial,first,noDuplicate,late,polina,matvey,read,rediscovered,details,stillUnread,corrected};
    });
    for(const [name,passed] of Object.entries(result))check('notice '+name,passed);
   }finally{await noticeContext.close();}

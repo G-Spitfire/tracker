@@ -41,8 +41,8 @@ const assert = require('node:assert/strict');
   assert.deepEqual(iconLibrary,{navigation:true,metrics:true},'Shared icon libraries loaded');
    assert.equal(await page.locator('#notice-indicator').count(),1,'Notification indicator appears on home');
    await page.locator('#notice-indicator').click();
-   await page.getByText('За сегодня и вчера событий нет').waitFor();
-   await page.locator('[data-action="close-detail"]').click();
+   await page.getByText('Новых оценок нет').waitFor();
+   await page.locator('[data-action="notice-read"]').click();
   await page.getByText('Средний балл',{exact:true}).waitFor();
   // Late grade: discovered today, lesson dated earlier; old marks must not be flagged.
   const gradeDots=await page.evaluate(()=>{
