@@ -70,10 +70,10 @@ function noticePopup(){
  let html='<div class="notice-summary">'+escapeHTML(kids[child].name)+' · Новых: '+count+'</div>';
  for(const day of [...new Set(events.map(e=>e.day))]){
  html+='<div class="notice-day">'+(day===iso(TODAY)?'Сегодня':day===offset(-1)?'Вчера':new Date(day+'T12:00:00').toLocaleDateString('ru-RU'))+'</div>';
- for(const e of events.filter(e=>e.day===day))html+='<div class="notice-grade-row"><span class="mark">'+escapeHTML(e.grade.value)+'</span><div class="notice-grade-text"><strong>'+escapeHTML(e.subject)+'</strong><small>'+escapeHTML(e.grade.type||(e.grade.test?'Контрольная':'Тип работы не указан'))+(e.previousValue!==undefined?' · '+escapeHTML(e.previousValue)+' → '+escapeHTML(e.grade.value):'')+'</small></div>'+(!e.read?'<i class="notice-dot"></i>':'')+'</div>';
+ for(const e of events.filter(e=>e.day===day))html+='<div class="notice-item"><span class="mark">'+escapeHTML(e.grade.value)+'</span><div class="notice-grade-text"><strong>'+escapeHTML(e.subject)+'</strong><small>'+escapeHTML(e.grade.type||(e.grade.test?'Контрольная':'Тип работы не указан'))+(e.previousValue!==undefined?' · '+escapeHTML(e.previousValue)+' → '+escapeHTML(e.grade.value):'')+'</small></div>'+(!e.read?'<i class="notice-dot"></i>':'')+'</div>';
  }
- const o=openModal('Что нового',html+(events.length?'':'<div class="notice-empty">Новых оценок нет</div>'),'<button class="modal-button primary" data-action="notice-read">Прочитано</button>');
- o.classList.add('notice-overlay');o.querySelector('h3').insertAdjacentHTML('beforeend','<button class="notice-close" aria-label="Закрыть" data-action="close-detail">×</button>');
+ const o=openModal('Что нового',html+(events.length?'':'<div class="notice-empty">Новых оценок нет</div>'),'<button class="modal-button primary" data-action="notice-read">Прочитал</button>');
+ o.classList.add('notice-overlay');
  o.querySelector('[data-action="notice-read"]').addEventListener('click',()=>{noticeRead(child,keys);o.remove();render({preserveScroll:true})});
 }
 function noticeRead(child,keys){const data=noticeData();for(const e of data.events)if(e.child===child&&keys.includes(e.noticeId||e.id)){e.read=true;e.readDay=iso(TODAY)}saveSetting(NOTICE_KEY,JSON.stringify(data))}
