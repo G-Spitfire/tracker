@@ -367,5 +367,9 @@ body.is-loading #main{min-height:0}
 @media(max-width:360px){.app{--shell-gutter:12px;padding-inline:0}}
 
 /* Installed iOS PWA: anchor navigation independently of the flex shell. */
-html.ios-standalone .app{padding-bottom:calc(67px + env(safe-area-inset-bottom,0px));overflow:visible}
+html.ios-standalone .app{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px));overflow:visible}
 html.ios-standalone .bottom{position:fixed;bottom:0;left:0;right:0;width:100%;max-width:550px;margin-inline:auto}
+
+/* Safari already reserves its browser controls; do not reserve the home indicator twice. */
+html.platform-apple:not(.ios-standalone) .bottom{padding-bottom:6px}
+html.platform-apple #main{padding-bottom:8px}
