@@ -1,6 +1,6 @@
 # Школа
 
-**Текущая версия:** 1.33.43 (семь согласованных микроанимаций).
+**Текущая версия:** 1.33.44 (семь согласованных микроанимаций).
 **Приложение:** https://g-spitfire.github.io/tracker/school-simple/  
 **Основная ветка:** `main`  
 **Источник данных:** электронный дневник Санкт-Петербурга — https://dnevnik2.petersburgedu.ru/
@@ -192,8 +192,10 @@ launchctl print gui/$(id -u)/local.school.diary.collector
 
 Настройка «Анимации» в профиле позволяет отключить согласованные микроанимации; выбор сохраняется на устройстве.
 
-1.33.43: стабильные элементы шапки, частичное обновление главной, закреплённая шапка и исправления микроанимаций.
+1.33.44: стабильные элементы шапки, частичное обновление главной, закреплённая шапка и исправления микроанимаций.
 
-1.33.43: корректировка sticky-шапки и нижнего запаса прокрутки, проверка WebKit.
+1.33.44: корректировка sticky-шапки и нижнего запаса прокрутки, проверка WebKit.
 
-Version 1.33.43: fixed viewport shell; header and navigation outside the scrolling main region. Physical iOS overscroll acceptance remains required.
+Version 1.33.44: fixed viewport shell; header and navigation outside the scrolling main region. Physical iOS overscroll acceptance remains required.
+
+1.33.44: restore full-width bottom navigation and unclipped home gutters; fixed shell uses viewport insets rather than explicit dynamic height.
