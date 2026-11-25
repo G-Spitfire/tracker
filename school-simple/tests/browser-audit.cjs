@@ -74,11 +74,16 @@ async function run() {
     for(const [scenario,tab] of [['home','home'],['grades','grades'],['schedule','schedule'],['homework','homework']]) {
       if(tab!=='home')await page.locator('[data-action="tab"][data-value="'+tab+'"]').click();
       if(tab==='home'){
+        await page.waitForTimeout(500);
         await page.evaluate(()=>{render();});
         record(view,'unchanged graph does not replay',await page.locator('.motion-line').count()===0);
         await page.locator('[data-action="chart"][data-value="ring"]').click();
         await page.locator('[data-action="chart"][data-value="line"]').click();
         record(view,'line chart motion on selection',await page.locator('.motion-line').count()===1);
+        await page.waitForTimeout(500);
+        await page.locator('[data-action="tab"][data-value="grades"]').click();
+        await page.locator('[data-action="tab"][data-value="home"]').click();
+        record(view,'return home does not replay unchanged graph',await page.locator('.motion-line').count()===0);
         await page.emulateMedia({reducedMotion:'reduce'});
         await page.evaluate(()=>render());
         record(view,'reduced motion disables graph effect',await page.locator('.motion-line').count()===0);
@@ -128,6 +133,20 @@ async function run() {
      record(view,'long notice modal scroll and button accessible',!!modalLayout&&Object.values(modalLayout).every(Boolean),modalLayout);
      await page.locator('[data-action="notice-read"]').click();
      await page.locator('#profile').click();
+    const motionSwitch=page.locator('[data-action="motion"]');
+    record(view,'motion enabled by default',await motionSwitch.getAttribute('aria-checked')==='true');
+    await motionSwitch.click();
+    record(view,'motion disabled and persisted',await page.evaluate(()=>!motionAllowed()&&document.documentElement.dataset.motion==='off'&&readSetting('school-motion','on')==='off'));
+    await page.locator('#profile').click();
+    await page.locator('[data-action="chart"][data-value="ring"]').click();
+    await page.locator('[data-action="chart"][data-value="line"]').click();
+    record(view,'disabled graph stays static',await page.locator('.motion-line').count()===0);
+    await page.locator('#notice-indicator').click();
+    record(view,'disabled modal stays static',await page.locator('.detail-box').evaluate(e=>getComputedStyle(e).animationName==='none'));
+    await page.locator('[data-action="notice-read"]').click();
+    await page.locator('#profile').click();
+    await motionSwitch.click();
+    record(view,'motion re-enabled',await motionSwitch.getAttribute('aria-checked')==='true');
     const p=await geometry(page);
     record(view,'profile geometry',!p.overflow && !p.offenders.length,p);
     await page.locator('[data-action="quarter"][data-value="1"]').click();
