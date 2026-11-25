@@ -356,20 +356,16 @@ html[data-motion=off] button .symbol,html[data-motion=off] button svg,html[data-
 html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 .app{position:fixed;inset:0;min-height:0;height:100%;height:100dvh;display:flex;flex-direction:column;padding-bottom:0;overflow:hidden}
 #main{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
-.bottom{position:relative;flex:none;left:auto;right:auto;bottom:auto;margin-inline:0;width:auto;max-width:none}
 body.is-loading #main{min-height:0}
 
 /* Preserve full-width navigation and home gutters inside the fixed shell. */
 .app{--shell-gutter:var(--space-4);margin:0 auto;top:0;bottom:0;height:auto;max-height:none;padding-inline:0}
 .head{margin-inline:var(--shell-gutter)}
 #main{padding-inline:var(--shell-gutter)}
-.bottom{width:100%;margin:0;flex-shrink:0}
 @media(max-width:360px){.app{--shell-gutter:12px;padding-inline:0}}
 
-/* Installed iOS PWA: anchor navigation independently of the flex shell. */
-html.ios-standalone .app{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px));overflow:visible}
-html.ios-standalone .bottom{position:fixed;bottom:0;left:0;right:0;width:100%;max-width:550px;margin-inline:auto}
 
-/* Safari already reserves its browser controls; do not reserve the home indicator twice. */
-html.platform-apple:not(.ios-standalone) .bottom{padding-bottom:6px}
 html.platform-apple #main{padding-bottom:8px}
+
+/* Independent viewport navigation, as in 1.33.41. Reserve its height once. */
+.app{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
