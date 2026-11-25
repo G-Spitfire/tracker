@@ -1,4 +1,4 @@
-const CACHE_NAME = "school-shell-v1.33.37-grade-trends";
+const CACHE_NAME = "school-shell-v1.33.38-grade-trends";
 const SHELL = [
   "./",
   "./index.html",
@@ -13,15 +13,6 @@ const SHELL = [
   "./brand-mark.svg",
   "./school-sync-client.js",
   "./assets/icons.js",
-  "./assets/illustrations.js",
-  "./assets/empty-states/pencil.png",
-  "./assets/empty-states/dance.png",
-  "./assets/empty-states/clay.png",
-  "./assets/empty-states/tv.png",
-  "./assets/empty-states/console.png",
-  "./assets/empty-states/ball.png",
-  "./assets/empty-states/phone.png",
-  "./assets/empty-states/book.png",
   "./icons.html",
 ];
 
