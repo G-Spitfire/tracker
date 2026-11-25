@@ -74,6 +74,15 @@ async function run() {
     for(const [scenario,tab] of [['home','home'],['grades','grades'],['schedule','schedule'],['homework','homework']]) {
       if(tab!=='home')await page.locator('[data-action="tab"][data-value="'+tab+'"]').click();
       if(tab==='home'){
+        await page.evaluate(()=>{render();});
+        record(view,'unchanged graph does not replay',await page.locator('.motion-line').count()===0);
+        await page.locator('[data-action="chart"][data-value="ring"]').click();
+        await page.locator('[data-action="chart"][data-value="line"]').click();
+        record(view,'line chart motion on selection',await page.locator('.motion-line').count()===1);
+        await page.emulateMedia({reducedMotion:'reduce'});
+        await page.evaluate(()=>render());
+        record(view,'reduced motion disables graph effect',await page.locator('.motion-line').count()===0);
+        await page.emulateMedia({reducedMotion:'no-preference'});
         const graph=await page.locator('.home-line').evaluate(el=>{const r=el.getBoundingClientRect(),p=el.parentElement.getBoundingClientRect();return {ratio:r.width/p.width,width:r.width,parent:p.width}});
         record(view,'line chart fills available width',graph.ratio>=0.94,graph);
         const compact=await page.evaluate(()=>{const g=document.querySelector('.stats-grid'),s=document.querySelector('.home-switch .seg'),v=document.querySelector('.home-visual');return {edge:Math.round(g.getBoundingClientRect().left),gap:parseFloat(getComputedStyle(g).gap),height:Math.round(s.getBoundingClientRect().height),chartGap:Math.round(v.getBoundingClientRect().top-s.getBoundingClientRect().bottom)}});record(view,'compact home geometry',compact.edge===6&&compact.gap===6&&compact.height===32&&compact.chartGap===4,compact);
