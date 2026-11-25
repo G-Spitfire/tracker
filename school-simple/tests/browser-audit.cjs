@@ -57,13 +57,20 @@ async function run() {
    page.on('pageerror',err=>errors.push(err.message));
    await page.route('**/school-sync-client.js',route=>route.fulfill({
      contentType:'application/javascript',
-     body:'window.SchoolSync={readCached:async()=>null,sync:async()=>({source:"network",data:'+JSON.stringify(fakeDiary)+'})};'
+     body:'window.__syncCalls=0;window.SchoolSync={readCached:async()=>null,sync:async()=>{window.__syncCalls++;return {source:"network",data:'+JSON.stringify(fakeDiary)+'}}};'
    }));
-   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.33.6"}'}));
+   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.33.37"}'}));
    const view=size.name;
    try {
     await page.goto(BASE,{waitUntil:'domcontentloaded',timeout:30000});
     await page.getByText('Средний балл',{exact:true}).waitFor({timeout:15000});
+    const initialCalls=await page.evaluate(()=>window.__syncCalls);
+    await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
+    record(view,'resume within five minutes skips fetch',await page.evaluate(()=>window.__syncCalls)===initialCalls);
+    await page.evaluate(()=>{lastDiaryAttempt=Date.now()-DIARY_REFRESH_MS-1;window.dispatchEvent(new Event('focus'))});
+    await page.waitForFunction(n=>window.__syncCalls===n+1,initialCalls);
+    await page.waitForFunction(()=>!syncInProgress);
+    record(view,'resume after five minutes fetches once',await page.evaluate(()=>window.__syncCalls)===initialCalls+1);
     for(const [scenario,tab] of [['home','home'],['grades','grades'],['schedule','schedule'],['homework','homework']]) {
       if(tab!=='home')await page.locator('[data-action="tab"][data-value="'+tab+'"]').click();
       if(tab==='home'){
@@ -114,6 +121,13 @@ async function run() {
      await page.locator('#profile').click();
     const p=await geometry(page);
     record(view,'profile geometry',!p.overflow && !p.offenders.length,p);
+    await page.locator('[data-action="quarter"][data-value="1"]').click();
+    record(view,'quarter one selected',await page.locator('[data-action="quarter"][data-value="1"]').evaluate(e=>e.classList.contains('active')));
+    await page.locator('#profile').click();
+    await page.locator('[data-action="tab"][data-value="grades"]').click();
+    record(view,'quarter one excludes quarter two grades',await page.getByText('Математика',{exact:true}).count()===0);
+    await page.locator('#profile').click();
+    await page.locator('[data-action="quarter"][data-value="2"]').click();
     const oldSyncBlock=await page.locator('.sync-meta').count();
     record(view,'profile sync information moved to dialog',oldSyncBlock===0,{oldSyncBlock});
     for(const theme of ['light','dark','system']) {
