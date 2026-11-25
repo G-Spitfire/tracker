@@ -346,8 +346,15 @@ html[data-motion=off] .motion-line,html[data-motion=off] .motion-area,html[data-
 html[data-motion=off] button .symbol,html[data-motion=off] button svg,html[data-motion=off] button .mark,html[data-motion=off] button::before{transition:none;transform:none}
 
 /* Sticky header: no scroll listener or duplicated markup. */
-.head{position:sticky;top:env(safe-area-inset-top,0px);z-index:21;background:var(--surface);box-shadow:none}
+.head{position:relative;flex:none;z-index:21;background:var(--surface);box-shadow:none}
 @media(prefers-reduced-motion:no-preference){html[data-motion=on] .seg button:active,html[data-motion=on] .modal-button:active{opacity:.8;transition:opacity 100ms ease}}
 
 /* Keep the safe-area background opaque without covering content below the header. */
-.head::after{content:'';position:absolute;bottom:100%;left:0;right:0;height:calc(env(safe-area-inset-top,0px) + 12px);background:var(--surface);pointer-events:none}
+
+
+/* Fixed viewport shell: only the content scrolls. */
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+.app{position:fixed;inset:0;min-height:0;height:100%;height:100dvh;display:flex;flex-direction:column;padding-bottom:0;overflow:hidden}
+#main{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
+.bottom{position:relative;flex:none;left:auto;right:auto;bottom:auto;margin-inline:0;width:auto;max-width:none}
+body.is-loading #main{min-height:0}
