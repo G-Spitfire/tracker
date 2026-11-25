@@ -81,6 +81,7 @@ async function run() {
         });
         record(view,'schedule lessons are independent full-width rows',layout.count>=2&&layout.allDirect&&layout.widths.every(w=>w>=size.width-55),layout);
       }
+      const header=await page.evaluate(()=>({gap:parseFloat(getComputedStyle(document.querySelector('.head')).marginBottom),targets:[...document.querySelectorAll('.head .icon,.schedule-arrows .icon')].map(e=>{const r=e.getBoundingClientRect();return [r.width,r.height]})}));record(view,scenario+' header targets and gap',header.gap===8&&header.targets.every(([w,h])=>w>=44&&h>=44),header);
       const g=await geometry(page);
       record(view,scenario+' geometry',!g.overflow && !g.offenders.length,g);
       await page.screenshot({path:path.join(OUT,view+'-'+scenario+'.png'),fullPage:false});
@@ -125,6 +126,7 @@ async function run() {
       record(view,'accent '+accent,current.toLowerCase()===accent);
     }
     await page.screenshot({path:path.join(OUT,view+'-profile.png'),fullPage:false});
+    for(const theme of ['light','dark']){await page.locator('[data-action="theme"][data-value="'+theme+'"]').click();for(const accent of ['#4c8bf5','#16a34a','#8b5cf6','#f97316','#ef4444','#ec4899']){await page.locator('[data-action="accent"][data-value="'+accent+'"]').click();const contrast=await page.evaluate(()=>{const s=getComputedStyle(document.documentElement),l=h=>{h=h.trim();if(h.length===4)h='#'+[...h.slice(1)].map(x=>x+x).join('');return h.slice(1).match(/../g).map(x=>parseInt(x,16)/255).map(x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4).reduce((a,x,i)=>a+x*[.2126,.7152,.0722][i],0)},r=(a,b)=>(Math.max(l(a),l(b))+.05)/(Math.min(l(a),l(b))+.05);return {text:r(s.getPropertyValue('--accent-text'),s.getPropertyValue('--surface')),fill:r(s.getPropertyValue('--accent-fill'),s.getPropertyValue('--accent-on'))}});record(view,theme+' contrast '+accent,contrast.text>=4.5&&contrast.fill>=4.5,contrast)}}
     await page.locator('[data-action="child"][data-value="1"]').click();
     await page.locator('#profile').click();
     await page.locator('[data-action="tab"][data-value="grades"]').click();

@@ -39,13 +39,13 @@ html[data-theme=dark]{--bg:#09090b;--surface:#202023;--fg:#ffffff;--muted:#b4b4b
 .schedule-bar{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .schedule-month{font-weight:var(--weight-medium);font-size:var(--font-body)}
 .schedule-arrows{display:flex;gap:6px}
-.schedule-arrows .icon{min-width:44px;min-height:44px}
+
 .schedule-calendar{margin-top:var(--space-2)}
 .schedule-calendar .day-cell{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:48px;padding:4px 0}
 .schedule-calendar .day-cell .sub{font-size:11px}
 .grades-filter-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px}
 .grades-filter-check{display:inline-flex;align-items:center;gap:8px;font-size:var(--font-control);min-height:44px;cursor:pointer;align-self:flex-start}
-.grades-filter-check input{width:20px;height:20px;accent-color:var(--accent);margin:0}
+
 .grades-filter-row .sub{white-space:nowrap}
 .lesson{gap:12px;border-bottom:1px solid var(--line)}
 .homework-day{border:1px solid var(--line);border-radius:var(--radius-panel);overflow:hidden;margin-bottom:var(--space-4)}.homework-day-title{font-size:var(--font-body);font-weight:var(--weight-medium);margin:0;background:var(--soft);padding:8px 12px 8px 17px;position:relative}.homework-day-title:before{content:"";position:absolute;left:8px;top:7px;bottom:7px;width:3px;border-radius:3px;background:var(--accent)}.homework-day-body{padding:0 12px}.homework-day-body .task:last-child{border-bottom:0}.homework-celebration{padding:15px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}.homework-celebration strong{font-size:var(--font-body)}.homework-celebration span,.homework-unknown{color:var(--muted);font-size:var(--font-caption)}.homework-unknown{padding:15px 0}.task{border-bottom:1px solid var(--line)}
@@ -71,7 +71,7 @@ html[data-theme=dark]{--bg:#09090b;--surface:#202023;--fg:#ffffff;--muted:#b4b4b
 .profile-footer{text-align:center;margin-top:32px;padding:16px 0 8px;color:var(--muted);font-size:10px;line-height:1.8}
 .sync-error-panel{margin:24px 12px;padding:24px 16px}.sync-retry-button{width:auto;padding:10px 18px}
 .profile-theme-label{margin-bottom:var(--space-2)}.profile-accent-label{margin-top:var(--space-4)}
-.head{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-4);min-height:44px}
+.head{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-2);min-height:44px}
 .head h1{font-size:var(--font-page);margin:0;line-height:1.2;font-weight:var(--weight-bold);letter-spacing:-.35px}
 .icon{background:var(--soft);border:0;border-radius:var(--radius-control);padding:0;color:var(--fg);font-size:18px;display:inline-grid;place-items:center;min-width:44px;min-height:44px}
 .icon svg{width:24px;height:24px}
@@ -95,7 +95,7 @@ html[data-theme=dark]{--bg:#09090b;--surface:#202023;--fg:#ffffff;--muted:#b4b4b
 button{touch-action:manipulation}
 button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 button,a,[data-action]{touch-action:manipulation}
-.bottom .symbol,.bottom .symbol svg{width:28px;height:28px}
+
 .bottom button{border:0;background:none;color:var(--muted);display:flex;flex-direction:column;gap:3px;align-items:center;font-size:var(--font-nav);padding:7px 0;min-height:54px;line-height:1.2}
 .bottom button.active .symbol svg{filter:drop-shadow(0 1px 1px color-mix(in srgb,var(--accent) 20%,transparent))}
 .stat-top>span:first-child{min-width:0}
@@ -103,7 +103,7 @@ button,a,[data-action]{touch-action:manipulation}
 body{margin:0;font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--surface);color:var(--fg);font-size:var(--font-body);line-height:1.4}
 .app{width:100%;max-width:550px;margin:auto;min-height:100dvh;background:var(--surface);padding:var(--space-3) var(--space-4) calc(88px + env(safe-area-inset-bottom));overflow-x:hidden}
 .stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;width:100%;margin:0 0 15px}
-.stat-tile{display:flex;flex-direction:column;min-width:0;min-height:96px;padding:10px 11px;background:var(--soft);border-radius:var(--radius-panel);gap:4px}
+.stat-tile{display:flex;flex-direction:column;min-width:0;min-height:90px;padding:10px 11px;background:var(--soft);border-radius:var(--radius-panel);gap:4px}
 .stat-top{display:flex;align-items:flex-start;justify-content:space-between;gap:5px;color:var(--muted);font-size:var(--font-kpi-label);font-weight:var(--weight-medium);line-height:1.25}
 .stat-value{display:block;font-size:var(--font-kpi-value);line-height:1.05;letter-spacing:-.5px;font-weight:var(--weight-bold);font-variant-numeric:tabular-nums;white-space:nowrap}
 .stat-hint{font-size:var(--font-kpi-hint);color:var(--muted);line-height:1.25;margin-top:auto}
@@ -118,7 +118,7 @@ html{background:var(--surface)}
   .app{padding-left:12px;padding-right:12px}
   .home-legend-item{font-size:var(--font-caption)}
   .stats-grid{gap:8px}
-  .stat-tile{min-height:94px;padding:9px}
+  .stat-tile{min-height:88px;padding:9px}
   .stat-value{font-size:24px}
   .stat-top{font-size:11px}
   .stat-hint{font-size:11px}
@@ -169,8 +169,8 @@ html[data-theme=dark] .lesson-mark-2{color:#ff8a8a}
 .updates-count.has-events{color:var(--accent);font-weight:650}
 .grades-filter-row{min-height:34px;gap:6px}
 .grades-filter-check{min-height:34px;gap:7px;font-size:13px}
-.grades-filter-check input{width:17px;height:17px}
-.grades-filter-row+.content-after-controls{margin-top:8px}
+
+
 .marks{gap:0;margin-top:2px}
 .lesson-title-row{align-items:flex-start;gap:8px}
 .lesson-copy{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;overflow-wrap:anywhere}
@@ -190,7 +190,7 @@ html[data-theme=dark] .lesson-mark-2{color:#ff8a8a}
 .lesson-grades{flex:0 1 auto;min-width:0;max-width:48%}
 .forecast-track{height:6px;margin-top:6px}
 .grades-filter-check{min-height:44px}
-.grades-filter-check input{appearance:none;-webkit-appearance:none;display:grid;place-items:center;flex:none;width:19px;height:19px;border:1.5px solid var(--muted);border-radius:5px;background:var(--surface);cursor:pointer}
+.grades-filter-check input{appearance:none;-webkit-appearance:none;display:grid;place-items:center;flex:none;width:16px;height:16px;margin:0;border:1.5px solid var(--muted);border-radius:4px;background:var(--surface);cursor:pointer}
 .grades-filter-check input:checked{background:var(--accent);border-color:var(--accent)}
 .grades-filter-check input:checked::after{content:"";width:9px;height:5px;border-left:2px solid white;border-bottom:2px solid white;transform:translateY(-1px) rotate(-45deg)}
 html[data-theme=dark] .home-line text{fill:#d2d2da}
@@ -224,7 +224,7 @@ html.platform-apple .calendar button,html.platform-apple .schedule-month{font-va
 /* Home screen polish: consistent KPI text baselines and compact updates. */
 .stats-grid{grid-auto-rows:1fr;margin-bottom:10px}
 .stat-tile .stat-top{min-height:2.5em}
-.stat-tile .stat-hint{min-height:2.5em}
+.stat-tile .stat-hint{min-height:1.3em}
 .updates-panel{margin:0 0 4px}
 .updates-day{padding:0 0 4px}
 .updates-day-label{padding:6px 2px 3px}
@@ -234,9 +234,9 @@ html.platform-apple .calendar button,html.platform-apple .schedule-month{font-va
 .app{padding-bottom:calc(112px + env(safe-area-inset-bottom))}
 
 /* Solid notification indicator, 44px tap target */
-.notice-indicator{margin-left:auto;margin-right:4px;background:transparent;color:#9297a1}
-.notice-indicator.unread{color:#ef4444}
-.notice-indicator svg{width:28px;height:28px}
+.notice-indicator{margin-left:auto;margin-right:4px;background:transparent;color:var(--muted)}
+
+
 .head .sync-indicator{margin-left:0}
 .notice-day{font-size:var(--font-caption);font-weight:650;color:var(--muted);padding:6px 0}
 .notice-item{width:100%;min-height:50px;display:flex;align-items:center;gap:10px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--fg);text-align:left;padding:8px 2px;font:inherit;cursor:pointer}
@@ -249,9 +249,9 @@ html.platform-apple .calendar button,html.platform-apple .schedule-month{font-va
 /* Compact grade filters: explicit exception to general control sizing. */
 .grades-filter-row{justify-content:flex-start;gap:12px;min-height:28px;margin-top:4px}
 .grades-filter-check{min-height:28px;gap:4px;font-size:var(--font-caption,12px);white-space:nowrap}
-.grades-filter-check input{width:16px;height:16px;border-radius:4px}
+
 .grades-filter-check input:checked{background:var(--accent);border-color:var(--accent)}
-.grades-filter-check input:checked::after{border-color:white}
+
 .grades-filter-row+.content-after-controls{margin-top:4px}
 
 .notice-indicator{position:relative}.notice-indicator.unread{color:var(--accent)}.notice-badge{position:absolute;top:0;right:0;background:var(--accent);color:white;border-radius:12px;min-width:17px;height:17px;padding:0 3px;font-size:10px;display:grid;place-items:center}.notice-item{cursor:default}.notice-item .mark{flex:none;display:inline-flex}.notice-grade-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.notice-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex:none}.notice-summary{font-size:var(--font-body);color:var(--muted)}
@@ -272,10 +272,10 @@ html.platform-apple .calendar button,html.platform-apple .schedule-month{font-va
 .notice-overlay .notice-grade-text strong{font-size:var(--font-body);font-weight:var(--weight-medium);line-height:1.4}
 .notice-overlay .notice-grade-text small{font-size:var(--font-caption);line-height:1.4}
 
-/* 1.33.35 — Soft Minimal Compact: shared density tokens and scoped exceptions. */
+/* 1.33.36 — Soft Minimal Compact: shared density tokens and scoped exceptions. */
 body{line-height:1.3}
 .sub,.notice,.lesson,.task,.home-legend-item{line-height:1.3}
-.head{margin-bottom:var(--space-3)}
+
 .home-screen{width:calc(100% + 20px);margin-inline:-10px}
 .stats-grid{gap:var(--space-compact);margin-bottom:var(--space-2)}
 .stat-tile{padding:10px;gap:var(--space-1)}
@@ -300,10 +300,18 @@ html.platform-apple .stat-value{font-weight:var(--weight-bold)}
 @media(max-width:360px){.home-screen{width:calc(100% + 12px);margin-inline:-6px}.stat-top,.stat-hint{font-size:var(--font-caption)}.stat-tile{padding:8px}}
 
 /* Shared compact controls and grade column labels. */
-.head{gap:4px;padding-top:6px}.head .icon{position:relative;min-width:44px;min-height:44px;background:transparent}.head .icon::before{content:"";position:absolute;inset:6px;background:transparent;border-radius:var(--radius-control)}.head .icon svg,.head .notice-badge{position:relative}.head .notice-badge{position:absolute}.head .icon svg{width:28px;height:28px}.head .icon:active::before,.schedule-arrows .icon:active::before{background:var(--soft)}.schedule-arrows .icon::before{inset:6px}
+.head{gap:4px;padding-top:6px}.head .icon{position:relative;width:44px;height:44px;flex:0 0 44px;background:transparent}.head .icon::before{content:"";position:absolute;inset:6px;background:transparent;border-radius:var(--radius-control)}.head .icon svg,.head .notice-badge{position:relative}.head .notice-badge{position:absolute}.head .icon svg{width:28px;height:28px}.head .icon:active::before,.schedule-arrows .icon:active::before{background:var(--soft)}.schedule-arrows .icon::before{inset:6px}
 #header-filters{margin-left:auto;min-width:0;transform:translateY(3px)}#header-filters .grades-filter-row{display:flex;flex-direction:row;align-items:center;gap:4px;margin:0;min-height:0}#header-filters .grades-filter-check{min-height:32px;gap:3px;font-size:var(--font-caption);color:var(--fg);align-self:center}
 .grades-column-header{display:flex;justify-content:space-between;color:var(--muted);font-size:var(--font-caption);padding-bottom:var(--space-2)}
 .home-legend{width:max-content;max-width:100%}.home-legend-item{gap:4px}.home-legend-item b{padding-left:4px}
 @media(max-width:360px){.head{gap:2px}#header-filters .grades-filter-row{gap:2px}#header-filters .grades-filter-check{font-size:11px;gap:2px}}
 
 .schedule-calendar + .heading{margin:12px 0 8px}
+
+/* Accessible accent roles retain the selected palette for decoration. */
+:root{--accent-text:var(--accent);--accent-fill:var(--accent);--accent-on:#fff}
+.bottom button.active,.notice-indicator.unread{color:var(--accent-text)}
+.calendar button.active,.modal-button.primary,.notice-badge{background:var(--accent-fill);color:var(--accent-on)}
+.grades-filter-check input:checked{background:var(--accent-fill);border-color:var(--accent-fill)}
+.grades-filter-check input:checked::after{border-color:var(--accent-on)}
+#main > :first-child{margin-top:0}

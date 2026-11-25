@@ -9,7 +9,7 @@ home:'<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M
 grades:'<rect x="4" y="13" width="3.7" height="7" rx="1.7"/><rect x="10.2" y="9" width="3.7" height="11" rx="1.7"/><rect x="16.4" y="5" width="3.7" height="15" rx="1.7"/>',
 schedule:'<rect x="3.5" y="5.5" width="17" height="15" rx="3.5"/><path d="M8 3.8v3.5M16 3.8v3.5M3.5 10.5h17"/><path d="M8 14.2h3.5M8 17.3h3.5M15 14.2h1"/>',
  homework:'<path d="M12 6.5C9.5 4.8 6.2 4.4 3.5 5.5v13c3-1 6-.6 8.5 1.2 2.5-1.8 5.5-2.2 8.5-1.2v-13c-2.7-1.1-6-.7-8.5 1zM12 6.5v13.2"/>',
-refresh:'<path d="M19 8a7.8 7.8 0 0 0-13-2L4 8M4 4.5V8h3.5M5 16a7.8 7.8 0 0 0 13 2l2-2M20 19.5V16h-3.5"/>',profile:'<circle cx="12" cy="8" r="3.6"/><path d="M5 20v-1.3c0-3.8 3-6.2 7-6.2s7 2.4 7 6.2V20z"/>',
+refresh:'<path d="M19 8a7.8 7.8 0 0 0-13-2L4 8M4 4.5V8h3.5M5 16a7.8 7.8 0 0 0 13 2l2-2M20 19.5V16h-3.5"/>',profile:'<circle cx="12" cy="7.5" r="4"/><path d="M4 20v-1.3c0-4 3.5-6.5 8-6.5s8 2.5 8 6.5V20z"/>',bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/>',
 close:'<path d="M6 6l12 12M18 6 6 18"/>',
 left:'<path d="m15 18-6-6 6-6"/>',right:'<path d="m9 18 6-6-6-6"/>'};
 return '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(line[name]||'')+'</svg>'}
