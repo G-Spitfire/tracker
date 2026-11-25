@@ -22,7 +22,7 @@ jobs:
       - name: Install Playwright and Chromium
         run: |
           npm install --no-save --no-package-lock playwright@1.58.2
-          npx playwright install --with-deps chromium
+          npx playwright install --with-deps chromium webkit
       - name: Start local read-only web server
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/school-audit-server.log 2>&1 &
@@ -35,6 +35,8 @@ jobs:
         run: node school-simple/tests/browser-smoke.cjs
       - name: Run responsive UI audit
         run: node school-simple/tests/browser-audit.cjs
+      - name: Run WebKit responsive UI audit
+        run: SCHOOL_BROWSER=webkit SCHOOL_AUDIT_OUT=school-audit-results/webkit node school-simple/tests/browser-audit.cjs
       - name: Upload screenshots and results
         if: always()
         uses: actions/upload-artifact@v4
