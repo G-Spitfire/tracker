@@ -275,3 +275,33 @@ html.platform-apple .calendar button,html.platform-apple .schedule-month{font-va
 .notice-overlay .notice-grade-text{gap:0}
 .notice-overlay .notice-grade-text strong{font-size:var(--font-body);font-weight:var(--weight-medium);line-height:1.4}
 .notice-overlay .notice-grade-text small{font-size:var(--font-caption);line-height:1.4}
+
+/* 1.33.31 — Soft Minimal Compact: shared density tokens and scoped exceptions. */
+:root{--space-tight:2px;--space-compact:6px;--font-page:22px;--font-legend:12px;--space-controls-content:var(--space-3);--space-item-detail:var(--space-1);--space-item-vertical:var(--space-compact)}
+body{line-height:1.3}
+.sub,.notice,.lesson,.task,.home-legend-item{line-height:1.3}
+.head{margin-bottom:var(--space-3)}
+.home-screen{width:calc(100% + 20px);margin-inline:-10px}
+.stats-grid{gap:var(--space-compact);margin-bottom:var(--space-2)}
+.stat-tile{padding:10px;gap:var(--space-1)}
+.stat-top{gap:var(--space-1)}
+.home-switch{margin-bottom:var(--space-1)}
+.home-switch .seg{min-height:32px;padding:2px;gap:2px}
+.home-switch .seg button{min-height:28px;padding:4px 6px}
+.home-legend{gap:var(--space-2)}
+.subject{padding:var(--space-1) 0}
+.subject .marks{gap:0;margin-top:var(--space-tight);min-height:40px}
+.subject .marks .mark{width:40px;min-width:40px;height:40px}
+.subject .marks .mark::before{inset:5.5px}
+.subject .marks .mark.new::after{top:7px;right:7px}
+.subject .subject-score .subject-trend{top:29px}
+.task p{margin-top:var(--space-1)}
+.detail-overlay{z-index:30}
+.detail-box{display:flex;flex-direction:column;max-height:80vh;max-height:80dvh;overflow:hidden;padding:var(--space-4)}
+.detail-box h3{flex:none;font-size:var(--font-section);font-weight:var(--weight-medium);line-height:1.3;margin:0 0 var(--space-2)}
+.modal-body{min-height:0;overflow-y:auto;overscroll-behavior:contain;font-size:var(--font-body);line-height:1.3;gap:var(--space-2)}
+.modal-actions{flex:none;margin-top:var(--space-2);padding-top:var(--space-2);border-top:1px solid var(--line)}
+.notice-overlay .notice-grade-text strong,.notice-overlay .notice-grade-text small{line-height:1.3}
+.sync-meta>span,.schedule-calendar .day-cell .sub{font-size:var(--font-caption)}
+html.platform-apple .stat-value{font-weight:var(--weight-bold)}
+@media(max-width:360px){.home-screen{width:calc(100% + 12px);margin-inline:-6px}.stat-top,.stat-hint{font-size:var(--font-caption)}.stat-tile{padding:8px}}
