@@ -104,7 +104,7 @@ async function run() {
       if(!box||!body||!actions||!nav)return null;
       body.insertAdjacentHTML('beforeend',Array.from({length:36},(_,i)=>'<div class="notice-item"><span class="mark">5</span><div class="notice-grade-text"><strong>Математика '+i+'</strong><small>Контрольная работа</small></div></div>').join(''));
       const b=box.getBoundingClientRect(),x=body.getBoundingClientRect(),a=actions.getBoundingClientRect();
-      return {overlayAboveNav:+getComputedStyle(overlay).zIndex>+getComputedStyle(nav).zIndex,buttonVisible:a.bottom<=innerHeight&&a.top>=b.top,scrollsList:body.scrollHeight>body.clientHeight,inside:a.top>=x.bottom-1};
+      return {overlayAboveNav:+getComputedStyle(overlay).zIndex>+getComputedStyle(nav).zIndex,heightLimited:b.height<=innerHeight*0.8+1,buttonVisible:a.bottom<=innerHeight&&a.top>=b.top,scrollsList:body.scrollHeight>body.clientHeight,inside:a.top>=x.bottom-1};
      });
      record(view,'long notice modal scroll and button accessible',!!modalLayout&&Object.values(modalLayout).every(Boolean),modalLayout);
      await page.locator('[data-action="notice-read"]').click();
