@@ -10,8 +10,8 @@ fs.mkdirSync(OUT, { recursive: true });
 const results = [];
 const sizes = [
   {name:'iphone-se', width:375, height:667},
-  {name:'iphone-regular', width:390, height:844},
-  {name:'iphone-large', width:430, height:932},
+  {name:'iphone-14-pro', width:393, height:852},
+  {name:'iphone-16-pro', width:402, height:874},
   {name:'small-320', width:320, height:568},
 ];
 const fakeDiary = {
@@ -59,7 +59,7 @@ async function run() {
      contentType:'application/javascript',
      body:'window.__syncCalls=0;window.SchoolSync={readCached:async()=>null,sync:async()=>{window.__syncCalls++;return {source:"network",data:'+JSON.stringify(fakeDiary)+'}}};'
    }));
-   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.33.37"}'}));
+   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.33.41"}'}));
    const view=size.name;
    try {
     await page.goto(BASE,{waitUntil:'domcontentloaded',timeout:30000});
@@ -77,7 +77,9 @@ async function run() {
         await page.waitForTimeout(500);
         await page.evaluate(()=>{render();});
         record(view,'unchanged graph does not replay',await page.locator('.motion-line').count()===0);
+        await page.evaluate(()=>{window.__stableNodes=['#brand-mark img','#notice-indicator svg','#sync-indicator','.stats-grid'].map(s=>document.querySelector(s))});
         await page.locator('[data-action="chart"][data-value="ring"]').click();
+        record(view,'chart switch preserves header and tiles',await page.evaluate(()=>['#brand-mark img','#notice-indicator svg','#sync-indicator','.stats-grid'].every((s,i)=>document.querySelector(s)===window.__stableNodes[i])));
         await page.locator('[data-action="chart"][data-value="line"]').click();
         record(view,'line chart motion on selection',await page.locator('.motion-line').count()===1);
         await page.waitForTimeout(500);
@@ -88,11 +90,12 @@ async function run() {
         await page.evaluate(()=>render());
         record(view,'reduced motion disables graph effect',await page.locator('.motion-line').count()===0);
         await page.emulateMedia({reducedMotion:'no-preference'});
+        const scroll=await page.evaluate(()=>{window.scrollTo(0,0);const content=document.querySelector('.home-screen').getBoundingClientRect(),nav=document.querySelector('#nav').getBoundingClientRect();return {fits:content.bottom<=nav.top+1,extra:document.scrollingElement.scrollHeight-innerHeight}});record(view,'no unnecessary home scroll',!scroll.fits||scroll.extra<=1,scroll);
         const graph=await page.locator('.home-line').evaluate(el=>{const r=el.getBoundingClientRect(),p=el.parentElement.getBoundingClientRect();return {ratio:r.width/p.width,width:r.width,parent:p.width}});
         record(view,'line chart fills available width',graph.ratio>=0.94,graph);
         const compact=await page.evaluate(()=>{const g=document.querySelector('.stats-grid'),s=document.querySelector('.home-switch .seg'),v=document.querySelector('.home-visual');return {edge:Math.round(g.getBoundingClientRect().left),gap:parseFloat(getComputedStyle(g).gap),height:Math.round(s.getBoundingClientRect().height),chartGap:Math.round(v.getBoundingClientRect().top-s.getBoundingClientRect().bottom)}});record(view,'compact home geometry',compact.edge===6&&compact.gap===6&&compact.height===32&&compact.chartGap===4,compact);
       }
-      if(tab==='grades'){record(view,'grade filters in header',await page.locator('#header-filters #tests-toggle').count()===1&&await page.locator('.grades-column-header').count()===1);}
+      if(tab==='grades'){record(view,'sticky header CSS',await page.locator('.head').evaluate(e=>getComputedStyle(e).position==='sticky'));record(view,'grade filters in header',await page.locator('#header-filters #tests-toggle').count()===1&&await page.locator('.grades-column-header').count()===1);}
       if(tab==='schedule'){
         await page.evaluate(()=>{state.date='2026-11-20';render();});
         const layout=await page.evaluate(()=>{
