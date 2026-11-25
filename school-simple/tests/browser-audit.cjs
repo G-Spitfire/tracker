@@ -74,11 +74,16 @@ async function run() {
     for(const [scenario,tab] of [['home','home'],['grades','grades'],['schedule','schedule'],['homework','homework']]) {
       if(tab!=='home')await page.locator('[data-action="tab"][data-value="'+tab+'"]').click();
       if(tab==='home'){
+        await page.waitForTimeout(500);
         await page.evaluate(()=>{render();});
         record(view,'unchanged graph does not replay',await page.locator('.motion-line').count()===0);
         await page.locator('[data-action="chart"][data-value="ring"]').click();
         await page.locator('[data-action="chart"][data-value="line"]').click();
         record(view,'line chart motion on selection',await page.locator('.motion-line').count()===1);
+        await page.waitForTimeout(500);
+        await page.locator('[data-action="tab"][data-value="grades"]').click();
+        await page.locator('[data-action="tab"][data-value="home"]').click();
+        record(view,'return home does not replay unchanged graph',await page.locator('.motion-line').count()===0);
         await page.emulateMedia({reducedMotion:'reduce'});
         await page.evaluate(()=>render());
         record(view,'reduced motion disables graph effect',await page.locator('.motion-line').count()===0);
