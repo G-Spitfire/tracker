@@ -23,7 +23,7 @@ html[data-theme=dark]{--bg:#09090b;--surface:#202023;--fg:#ffffff;--muted:#b4b4b
 .forecast-track{height:3px;background:var(--soft);border-radius:999px;overflow:hidden;margin-top:4px}
 .forecast-fill{height:100%;border-radius:999px}
 .forecast-number{text-align:right;font-variant-numeric:tabular-nums}
-.header-quarter{width:44px;min-width:44px;max-width:44px;height:44px;min-height:44px;border:0;border-radius:var(--radius-control);background:var(--soft);color:var(--fg);padding:0 5px;font:inherit;font-size:var(--font-control);font-weight:var(--weight-medium);text-align:center;text-align-last:center;appearance:none;-webkit-appearance:none;cursor:pointer;margin-left:auto;margin-right:8px}.grades-footnote{margin-top:var(--space-4);color:var(--muted);font-size:var(--font-caption)}
+.grades-footnote{margin-top:var(--space-4);color:var(--muted);font-size:var(--font-caption)}
 .content-after-controls{margin-top:var(--space-controls-content)}
 .content-after-controls>.task:first-child,.content-after-controls>.subject:first-child{padding-top:0}
 .marks{display:flex;flex-wrap:wrap;gap:5px;overflow:visible;white-space:normal;margin-top:7px}
@@ -236,7 +236,7 @@ html.platform-apple .calendar button,html.platform-apple .schedule-month{font-va
 /* Solid notification indicator, 44px tap target */
 .notice-indicator{margin-left:auto;margin-right:4px;background:transparent;color:#9297a1}
 .notice-indicator.unread{color:#ef4444}
-.notice-indicator svg{width:26px;height:26px}
+.notice-indicator svg{width:28px;height:28px}
 .head .sync-indicator{margin-left:0}
 .notice-day{font-size:var(--font-caption);font-weight:650;color:var(--muted);padding:6px 0}
 .notice-item{width:100%;min-height:50px;display:flex;align-items:center;gap:10px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--fg);text-align:left;padding:8px 2px;font:inherit;cursor:pointer}
@@ -272,7 +272,7 @@ html.platform-apple .calendar button,html.platform-apple .schedule-month{font-va
 .notice-overlay .notice-grade-text strong{font-size:var(--font-body);font-weight:var(--weight-medium);line-height:1.4}
 .notice-overlay .notice-grade-text small{font-size:var(--font-caption);line-height:1.4}
 
-/* 1.33.34 — Soft Minimal Compact: shared density tokens and scoped exceptions. */
+/* 1.33.35 — Soft Minimal Compact: shared density tokens and scoped exceptions. */
 body{line-height:1.3}
 .sub,.notice,.lesson,.task,.home-legend-item{line-height:1.3}
 .head{margin-bottom:var(--space-3)}
@@ -300,10 +300,10 @@ html.platform-apple .stat-value{font-weight:var(--weight-bold)}
 @media(max-width:360px){.home-screen{width:calc(100% + 12px);margin-inline:-6px}.stat-top,.stat-hint{font-size:var(--font-caption)}.stat-tile{padding:8px}}
 
 /* Shared compact controls and grade column labels. */
-.head{gap:4px}.head .icon{position:relative;min-width:44px;min-height:44px;background:transparent}.head .icon::before{content:"";position:absolute;inset:6px;background:transparent;border-radius:var(--radius-control)}.head .icon svg,.head .notice-badge{position:relative}.head .notice-badge{position:absolute}.head .icon svg{width:26px;height:26px}.head .icon:active::before,.schedule-arrows .icon:active::before{background:var(--soft)}.header-quarter{width:32px;min-width:32px;max-width:32px;height:32px;min-height:32px;margin:0}.schedule-arrows .icon::before{inset:6px}
+.head{gap:4px;padding-top:6px}.head .icon{position:relative;min-width:44px;min-height:44px;background:transparent}.head .icon::before{content:"";position:absolute;inset:6px;background:transparent;border-radius:var(--radius-control)}.head .icon svg,.head .notice-badge{position:relative}.head .notice-badge{position:absolute}.head .icon svg{width:28px;height:28px}.head .icon:active::before,.schedule-arrows .icon:active::before{background:var(--soft)}.schedule-arrows .icon::before{inset:6px}
 #header-filters{margin-left:auto;min-width:0;transform:translateY(3px)}#header-filters .grades-filter-row{display:flex;flex-direction:row;align-items:center;gap:4px;margin:0;min-height:0}#header-filters .grades-filter-check{min-height:32px;gap:3px;font-size:var(--font-caption);color:var(--fg);align-self:center}
 .grades-column-header{display:flex;justify-content:space-between;color:var(--muted);font-size:var(--font-caption);padding-bottom:var(--space-2)}
 .home-legend{width:max-content;max-width:100%}.home-legend-item{gap:4px}.home-legend-item b{padding-left:4px}
-@media(max-width:360px){.head{gap:2px}#header-filters .grades-filter-row{gap:2px}#header-filters .grades-filter-check{font-size:11px;gap:2px}.head:has(#header-filters) h1{font-size:20px}.head:has(#header-filters) #profile{min-width:36px}}
+@media(max-width:360px){.head{gap:2px}#header-filters .grades-filter-row{gap:2px}#header-filters .grades-filter-check{font-size:11px;gap:2px}}
 
 .schedule-calendar + .heading{margin:12px 0 8px}
