@@ -64,6 +64,23 @@ async function run() {
    try {
     await page.goto(BASE,{waitUntil:'domcontentloaded',timeout:30000});
     await page.getByText('Средний балл',{exact:true}).waitFor({timeout:15000});
+    const semantic=await page.evaluate(()=>{
+      const original=kids[state.child],oldQuarter=state.quarter;
+      state.quarter='2';
+      const mk=(values)=>values.map((v,i)=>({name:'Предмет '+i,grades:[{value:v,date:'2026-11-19'}]}));
+      const check=(values)=>{kids[state.child]={...original,subjects:mk(values)};return home().includes('data-risk="critical"')};
+      const result={exact30:!check([3,3,3,4,4,4,4,4,4,4]),above30:check([3,3,4,4,4]),singleTwo:check([2,4,4,4,4,4,4,4,4,4]),empty:!check([])};
+      const kid={lessons:['2026-10-22','2026-10-23','2026-11-04','2026-11-05'].map(d=>({from:d+'T09:00:00'})),schedule:[],subjects:[{grades:[{value:3,date:'2026-10-23'}]}]};
+      result.crossQuarter=completedCleanStreak(kid,'2026-11-05')===3;
+      kid.subjects[0].grades.push({value:2,date:'2026-10-23'});
+      result.twoBreaks=completedCleanStreak(kid,'2026-11-05')===1;
+      kids[state.child]=original;state.quarter=oldQuarter;render();
+      return result;
+    });
+    record(view,'critical risk and streak rules',Object.values(semantic).every(Boolean),semantic);
+    await page.evaluate(()=>{state.date=iso(TODAY);state.tab='schedule';render()});
+    record(view,'today is marked',await page.locator('.calendar button.today[aria-current="date"]').count()===1);
+    await page.evaluate(()=>{state.tab='home';render()});
     // Compare the actual application with synthetic data, not generated mockups.
     await page.evaluate(()=>{state.motion=false;state.quarter='2';state.date='2026-11-20';render()});
     for(const theme of ['light','dark']){
