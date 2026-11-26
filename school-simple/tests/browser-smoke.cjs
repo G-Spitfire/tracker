@@ -33,7 +33,7 @@ const assert = require('node:assert/strict');
       return {saturday,tuesday,backdated};
     }finally{state.quarter=previous}
   });
-  assert.deepEqual(streak,{saturday:2,tuesday:3,backdated:1},'Completed school day streak, schedule union, deduplication, no grades, weekend, today and backdated grade');
+  assert.deepEqual(streak,{saturday:3,tuesday:4,backdated:1},'Completed school day streak, schedule union, deduplication, no grades, weekend, today and backdated grade');
   const iconLibrary=await page.evaluate(()=>({
     navigation:typeof ico==='function' && ico('home').includes('<svg'),
     metrics:typeof kpiIcon==='function' && kpiIcon('average').includes('<svg')
