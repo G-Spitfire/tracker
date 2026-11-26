@@ -103,6 +103,20 @@ async function run() {
       }
     }
     await page.evaluate(()=>{saveSetting('school-premium-preview','off');state.motion=true;state.theme='light';state.accent='#4c8bf5';state.tab='home';render()});
+    // Rich, isolated synthetic fixture for final visual review.
+    await page.evaluate(()=>{
+      window.__previewOriginal=kids[state.child];
+      const names=['Математика','Русский язык','Литература','История','Английский язык','Биология','География','Физическая культура'];
+      const dates=['2026-11-05','2026-11-06','2026-11-09','2026-11-10','2026-11-11','2026-11-12','2026-11-13','2026-11-16','2026-11-17','2026-11-18','2026-11-19'];
+      kids[state.child]={...window.__previewOriginal,subjects:names.map((name,i)=>({name,grades:dates.map((date,j)=>({date,value:i===0?2:i===1?3:3+(i+j)%3,homework:j%3===0,type:'Урок'}))})),lessons:dates.map(d=>({from:d+'T09:00:00'}))};
+      state.motion=false;state.tab='home';state.chart='line';saveSetting('school-premium-preview','on');render();
+    });
+    for(const theme of ['light','dark']){
+      await page.evaluate(theme=>{state.theme=theme;state.accent='#4c8bf5';render()},theme);
+      record(view,'rich critical risk '+theme,await page.locator('.stat-tile[data-risk="critical"]').count()===1);
+      await page.screenshot({path:path.join(OUT,view+'-'+theme+'-rich-risk.png')});
+    }
+    await page.evaluate(()=>{kids[state.child]=window.__previewOriginal;delete window.__previewOriginal;saveSetting('school-premium-preview','off');state.motion=true;state.theme='light';state.accent='#4c8bf5';state.tab='home';render()});
     const initialCalls=await page.evaluate(()=>window.__syncCalls);
     await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
     record(view,'resume within five minutes skips fetch',await page.evaluate(()=>window.__syncCalls)===initialCalls);
