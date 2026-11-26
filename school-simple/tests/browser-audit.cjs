@@ -10,8 +10,8 @@ fs.mkdirSync(OUT, { recursive: true });
 const results = [];
 const sizes = [
   {name:'iphone-se', width:375, height:667},
-  {name:'iphone-regular', width:390, height:844},
-  {name:'iphone-large', width:430, height:932},
+  {name:'iphone-regular', width:393, height:852},
+  {name:'iphone-large', width:402, height:874},
   {name:'small-320', width:320, height:568},
 ];
 const fakeDiary = {
@@ -59,7 +59,7 @@ async function run() {
      contentType:'application/javascript',
      body:'window.__syncCalls=0;window.SchoolSync={readCached:async()=>null,sync:async()=>{window.__syncCalls++;return {source:"network",data:'+JSON.stringify(fakeDiary)+'}}};'
    }));
-   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.33.37"}'}));
+   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.33.50"}'}));
    const view=size.name;
    try {
     await page.goto(BASE,{waitUntil:'domcontentloaded',timeout:30000});
@@ -75,11 +75,14 @@ async function run() {
       if(tab!=='home')await page.locator('[data-action="tab"][data-value="'+tab+'"]').click();
       if(tab==='home'){
         await page.waitForTimeout(500);
+        const stable=await page.evaluate(()=>{const logo=document.querySelector('#brand-mark img'),bell=document.querySelector('#notice-indicator svg'),stats=document.querySelector('.stats-grid');motionPending.add(state.child);render();render();return {logo:logo===document.querySelector('#brand-mark img'),bell:bell===document.querySelector('#notice-indicator svg')&&bell.classList.contains('motion-bell'),stats:stats===document.querySelector('.stats-grid'),tap:getComputedStyle(document.querySelector('#nav button')).webkitTapHighlightColor};});
+        record(view,'stable logo bell and KPI nodes',stable.logo&&stable.bell&&stable.stats,stable);
+        record(view,'native tap highlight transparent',stable.tap==='rgba(0, 0, 0, 0)',stable.tap);
         await page.evaluate(()=>{render();});
         record(view,'unchanged graph does not replay',await page.locator('.motion-line').count()===0);
         await page.locator('[data-action="chart"][data-value="ring"]').click();
         await page.locator('[data-action="chart"][data-value="line"]').click();
-        record(view,'line chart motion on selection',await page.locator('.motion-line').count()===1);
+        record(view,'line and area static on selection',await page.locator('.motion-line,.motion-area').count()===0);
         await page.waitForTimeout(500);
         await page.locator('[data-action="tab"][data-value="grades"]').click();
         await page.locator('[data-action="tab"][data-value="home"]').click();
