@@ -48,7 +48,7 @@ async function geometry(page) {
   });
 }
 async function run() {
- const browser=await (process.env.SCHOOL_AUDIT_BROWSER==='webkit'?webkit:chromium).launch({headless:true});
+ const browser=await (process.env.SCHOOL_BROWSER==='webkit'?webkit:chromium).launch({headless:true});
  try {
   for(const size of sizes) {
    const context=await browser.newContext({viewport:{width:size.width,height:size.height},deviceScaleFactor:2,isMobile:true,hasTouch:true,serviceWorkers:'block'});
@@ -83,6 +83,7 @@ async function run() {
         record(view,'native tap highlight disabled',await page.locator('#nav button').first().evaluate(el=>getComputedStyle(el).webkitTapHighlightColor==='rgba(0, 0, 0, 0)'));
         await page.evaluate(()=>{motionPending.add(state.child);render();render();});
         record(view,'bell animation survives repeated render',await page.locator('#notice-indicator svg.motion-bell').count()===1);
+        record(view,'KPI animation duration 800 ms',await page.evaluate(()=>motionAfterRender.toString().includes('(t-start)/800')));
         await page.waitForTimeout(500);
         await page.locator('[data-action="tab"][data-value="grades"]').click();
         await page.locator('[data-action="tab"][data-value="home"]').click();
