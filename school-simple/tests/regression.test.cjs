@@ -18,6 +18,7 @@ function setup(extra = {}) {
   const kids = [{ subjects: [], lessons: [], schedule: [], tasks: [] }];
   const context = {
     TODAY, state, kids, Date, Math, Set, Map,
+    SCHOOL_QUARTERS:[{start:'2026-09-01',end:'2026-10-23'},{start:'2026-11-01',end:'2026-12-31'}],
     iso: d => [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-'),
     mean: a => a.length ? a.reduce((sum,n) => sum+n,0)/a.length : 0,
     fmt: n => n.toFixed(2).replace('.', ','),
@@ -55,7 +56,7 @@ test('home: no-grade school day counts towards streak', () => {
   c.kids[0].subjects = [{name:'A',grades:[{value:5,date:'2026-11-17'}]}];
   c.kids[0].lessons = [{from:'2026-11-17T09:00'},{from:'2026-11-18T09:00'},{from:'2026-11-19T09:00'}];
   const html = vm.runInContext('home()',c);
-  assert.match(html, /Без троек и двоек<\/span>.*?<strong class="stat-value">2<\/strong>/s, 'Today is not yet a completed school day');
+  assert.match(html, /Без двоек<\/span>.*?<strong class="stat-value">2<\/strong>/s, 'Today is not yet a completed school day');
 });
 test('homework: next five actual scheduled days, skipping weekends', () => {
   const c = setup();
