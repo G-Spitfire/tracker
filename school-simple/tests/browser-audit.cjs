@@ -59,7 +59,7 @@ async function run() {
      contentType:'application/javascript',
      body:'window.__syncCalls=0;window.SchoolSync={readCached:async()=>null,sync:async()=>{window.__syncCalls++;return {source:"network",data:'+JSON.stringify(fakeDiary)+'}}};'
    }));
-   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.33.50"}'}));
+   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.33.51"}'}));
    const view=size.name;
    try {
     await page.goto(BASE,{waitUntil:'domcontentloaded',timeout:30000});
@@ -137,6 +137,17 @@ async function run() {
      record(view,'long notice modal scroll and button accessible',!!modalLayout&&Object.values(modalLayout).every(Boolean),modalLayout);
      await page.locator('[data-action="notice-read"]').click();
      await page.locator('#profile').click();
+    await page.evaluate(()=>openModal('Тест','Тест','<button data-action="close-detail">Закрыть</button>'));
+    record(view,'modal and backdrop opening synchronized',await page.evaluate(()=>['.detail-box','.detail-overlay'].every(sel=>getComputedStyle(document.querySelector(sel)).animationDuration==='0.2s')));
+    await page.waitForTimeout(220);
+    await page.evaluate(()=>closeModal(document.querySelector('.detail-overlay')));
+    record(view,'modal and backdrop closing synchronized',await page.evaluate(()=>['.detail-box','.detail-overlay'].every(sel=>getComputedStyle(document.querySelector(sel)).animationDuration==='0.15s')));
+    await page.locator('.detail-overlay').waitFor({state:'detached'});
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await page.evaluate(()=>openModal('Тест','Тест','<button data-action="close-detail">Закрыть</button>'));
+    record(view,'reduced motion disables modal and backdrop',await page.evaluate(()=>['.detail-box','.detail-overlay'].every(sel=>getComputedStyle(document.querySelector(sel)).animationName==='none')));
+    await page.evaluate(()=>closeModal(document.querySelector('.detail-overlay')));
+    await page.emulateMedia({reducedMotion:'no-preference'});
     const motionSwitch=page.locator('[data-action="motion"]');
     record(view,'motion enabled by default',await motionSwitch.getAttribute('aria-checked')==='true');
     await motionSwitch.click();
@@ -146,7 +157,7 @@ async function run() {
     await page.locator('[data-action="chart"][data-value="line"]').click();
     record(view,'disabled graph stays static',await page.locator('.motion-line').count()===0);
     await page.locator('#notice-indicator').click();
-    record(view,'disabled modal stays static',await page.locator('.detail-box').evaluate(e=>getComputedStyle(e).animationName==='none'));
+    record(view,'disabled modal and backdrop stay static',await page.evaluate(()=>['.detail-box','.detail-overlay'].every(sel=>getComputedStyle(document.querySelector(sel)).animationName==='none')));
     await page.locator('[data-action="notice-read"]').click();
     await page.locator('#profile').click();
     await motionSwitch.click();
