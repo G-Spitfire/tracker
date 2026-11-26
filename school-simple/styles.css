@@ -343,3 +343,11 @@ html[data-motion=off] button .symbol,html[data-motion=off] button svg,html[data-
 
 /* Use the custom press feedback instead of WebKit tap highlighting. */
 button, a, label, input{-webkit-tap-highlight-color:transparent}
+
+/* Animate only the backdrop color, not the dialog's parent opacity. */
+@media(prefers-reduced-motion:no-preference){
+html[data-motion=on] .detail-overlay{animation:motion-backdrop-in 200ms ease-out both}
+html[data-motion=on] .detail-overlay.motion-closing{animation:motion-backdrop-out 150ms ease-in both}
+}
+@keyframes motion-backdrop-in{from{background-color:transparent}}
+@keyframes motion-backdrop-out{to{background-color:transparent}}
