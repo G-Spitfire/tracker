@@ -319,6 +319,7 @@ html.platform-apple .stat-value{font-weight:var(--weight-bold)}
 /* Motion: opt-in, no layout changes. */
 @media(prefers-reduced-motion:no-preference){
 button .symbol,button svg,button .mark,button::before{transition:transform 100ms ease}button:active .symbol,button:active svg,button:active .mark,button:active::before{transform:scale(.96)}
+html[data-motion=on] .detail-overlay{animation:motion-backdrop-in 200ms ease-out both}
 .detail-box{animation:motion-modal 200ms ease-out both}
 .motion-bell{transform-origin:50% 15%;animation:motion-bell 500ms ease-in-out both}
 .motion-selection-active{position:relative;background:transparent!important;box-shadow:none!important;isolation:isolate}
@@ -337,9 +338,12 @@ button .symbol,button svg,button .mark,button::before{transition:transform 100ms
 html[data-motion=off] button{transition:none;transform:none}
 html[data-motion=off] .detail-box,html[data-motion=off] .motion-bell{animation:none}
 
-@media(prefers-reduced-motion:no-preference){html[data-motion=on] .motion-closing .detail-box{animation:motion-modal-out 150ms ease-in both}.motion-closing{pointer-events:none}}
+@media(prefers-reduced-motion:no-preference){html[data-motion=on] .detail-overlay.motion-closing{animation:motion-backdrop-out 150ms ease-in both}html[data-motion=on] .motion-closing .detail-box{animation:motion-modal-out 150ms ease-in both}.motion-closing{pointer-events:none}}
 @keyframes motion-modal-out{to{opacity:0;transform:translateY(8px)}}
 html[data-motion=off] button .symbol,html[data-motion=off] button svg,html[data-motion=off] button .mark,html[data-motion=off] button::before{transition:none;transform:none}
 
 /* Use the custom press feedback instead of WebKit tap highlighting. */
 button, a, label, input{-webkit-tap-highlight-color:transparent}
+
+@keyframes motion-backdrop-in{from{background-color:transparent}to{background-color:#0007}}
+@keyframes motion-backdrop-out{from{background-color:#0007}to{background-color:transparent}}
