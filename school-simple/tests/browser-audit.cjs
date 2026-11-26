@@ -59,7 +59,7 @@ async function run() {
      contentType:'application/javascript',
      body:'window.__syncCalls=0;window.SchoolSync={readCached:async()=>null,sync:async()=>{window.__syncCalls++;return {source:"network",data:'+JSON.stringify(fakeDiary)+'}}};'
    }));
-   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.33.53"}'}));
+   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.33.54"}'}));
    const view=size.name;
    try {
     await page.goto(BASE,{waitUntil:'domcontentloaded',timeout:30000});
@@ -132,16 +132,23 @@ async function run() {
       syncError=oldError;
       let finish;
       window.SchoolSync.sync=()=>new Promise(resolve=>{finish=resolve});
+      const overlay=showSyncDialog(),box=overlay.querySelector('.detail-box');
       const pending=loadDiarySnapshot(true);
+      const stableStart=overlay===document.querySelector('.detail-overlay')&&box===overlay.querySelector('.detail-box');
       while(!finish)await new Promise(resolve=>setTimeout(resolve,10));
-      closeModal(document.querySelector('.detail-overlay'));
       finish({source:'cache',data:{"schemaVersion":1,"children":{"polina":{"marks":[],"lessons":[],"schedule":[]},"matvey":{"marks":[],"lessons":[],"schedule":[]}}},warning:'Тестовая ошибка'});
       await pending;
+      const stableEnd=overlay===document.querySelector('.detail-overlay')&&box===overlay.querySelector('.detail-box')&&overlay.textContent.includes('Тестовая ошибка');
+      finish=null;const pendingClose=loadDiarySnapshot(true);
+      while(!finish)await new Promise(resolve=>setTimeout(resolve,10));
+      closeModal(overlay);
+      finish({source:'cache',data:{schemaVersion:1,children:{polina:{marks:[],lessons:[],schedule:[]},matvey:{marks:[],lessons:[],schedule:[]}}},warning:'Тестовая ошибка'});
+      await pendingClose;
       await new Promise(resolve=>setTimeout(resolve,180));
       const noReopen=!document.querySelector('.detail-overlay'),warningPriority=syncIndicatorState()==='error';
       window.SchoolSync.sync=original;
       await loadDiarySnapshot();
-      return {errorPriority,noReopen,warningPriority};
+      return {errorPriority,noReopen,warningPriority,stableStart,stableEnd};
     });
     record(view,'sync warning priority and dismissed dialog',Object.values(syncRegression).every(Boolean),syncRegression);
     for(const [scenario,tab] of [['home','home'],['grades','grades'],['schedule','schedule'],['homework','homework']]) {
