@@ -157,8 +157,8 @@ const quarterRange=q=>SCHOOL_QUARTERS[Number(q)-1];const inQuarter=date=>{const 
 // Every December the fifth KPI temporarily displays a New Year countdown.
 function holidayInfo(){const now=new Date();return now.getMonth()===11?{days:31-now.getDate()}:null;}
 function completedCleanStreak(kid,today){
- const dates=[...new Set([...(kid.lessons||[]),...(kid.schedule||[])].map(l=>String(l?.from||'').slice(0,10)).filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d)&&d<today&&inQuarter(d)))].sort().reverse();
- const bad=new Set(kid.subjects.flatMap(s=>s.grades.filter(g=>g.value===2||g.value===3).map(g=>g.date)));
+ const dates=[...new Set([...(kid.lessons||[]),...(kid.schedule||[])].map(l=>String(l?.from||'').slice(0,10)).filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d)&&d<today&&SCHOOL_QUARTERS.some(q=>d>=q.start&&d<=q.end)))].sort().reverse();
+ const bad=new Set(kid.subjects.flatMap(s=>s.grades.filter(g=>g.value===2).map(g=>g.date)));
  let count=0;for(const date of dates){if(bad.has(date))break;count++}return count;
 }
 function home(){
@@ -168,16 +168,18 @@ function home(){
  const direction=!hasBaseline?'none':delta>0?'up':delta<0?'down':'flat';
  const arrow=direction==='up'?'↑':direction==='down'?'↓':direction==='none'?'—':'→';
  const fiveShare=all.length?Math.round(counts[0]/all.length*100):0;
- const riskCount=kids[state.child].subjects.filter(s=>{const q=s.grades.filter(g=>inQuarter(g.date));return q.length&&mean(q.map(g=>g.value))<3.6}).length;
+ const subjectAverages=kids[state.child].subjects.map(s=>s.grades.filter(g=>inQuarter(g.date))).filter(q=>q.length).map(q=>mean(q.map(g=>g.value)));
+ const riskCount=subjectAverages.filter(v=>v<3.6).length;
+ const criticalRisk=subjectAverages.some(v=>v<2.6)||(subjectAverages.length>0&&riskCount/subjectAverages.length>0.3);
  const hwGrades=all.filter(g=>g.homework),hwAverage=hwGrades.length?fmt(mean(hwGrades.map(g=>g.value))):'—';
  const cleanStreak=completedCleanStreak(kids[state.child],today);
- const tile=(label,value,hint,icon,color)=>'<div class="stat-tile"'+(icon==='trend'?' data-direction="'+direction+'"':'')+'><div class="stat-top"><span>'+label+'</span><span class="stat-icon">'+kpiIcon(icon)+'</span></div><strong class="stat-value"'+(color?' style="color:'+color+'"':'')+'>'+value+'</strong><span class="stat-hint">'+hint+'</span></div>';
+ const tile=(label,value,hint,icon,color)=>'<div class="stat-tile"'+(icon==='alert'&&criticalRisk?' data-risk="critical"':'')+'><div class="stat-top"><span>'+label+'</span><span class="stat-icon">'+kpiIcon(icon)+'</span></div><strong class="stat-value"'+(color?' style="color:'+color+'"':'')+'>'+value+'</strong><span class="stat-hint">'+hint+'</span></div>';
  let out='<section class="home-screen"><div class="stats-grid">'+
  tile('Средний балл',fmt(score()),'За четверть','average')+
  tile('Динамика',hasBaseline?arrow+' '+(delta>0?'+':'')+fmt(delta):'—',hasBaseline?'К прошлым 7 дням':'Нет данных','trend',delta>0?'#31ad81':delta<0?'#d76a6a':null)+
  tile('Доля пятёрок',fiveShare+'%','От всех оценок','star')+
  tile('Под риском',String(riskCount),'Предмета · средний < 3,60','alert')+
- (holidayInfo()?tile('До Нового года',String(holidayInfo().days),'Дней до праздника','tree'):tile('Без троек и двоек',String(cleanStreak),'Учебных дней подряд','flame'))+
+ tile('Без двоек',String(cleanStreak),'Учебных дней подряд','flame')+
  tile('Средний за ДЗ',hwAverage,'За четверть','homework')+
  '</div>'+'<div class="home-switch">'+btns([['line','Линейный'],['ring','Кольцевой']],state.chart,'chart')+'</div><div class="home-visual">';
  if(!all.length){out+='<div class="empty">Пока нет оценок за эту четверть</div>';}else if(state.chart==='ring'){
@@ -220,7 +222,7 @@ function schedule(){
  lessons.sort((a,b)=>(a.from||'').localeCompare(b.from||'')||(Number(a.number)||0)-(Number(b.number)||0));
  let sameMonth=days[0].getMonth()===days[6].getMonth();
  let monthLabel=sameMonth?days[0].toLocaleDateString('ru-RU',{month:'long',year:'numeric'}):days[0].toLocaleDateString('ru-RU',{month:'short'})+' — '+days[6].toLocaleDateString('ru-RU',{month:'short',year:'numeric'});
- return '<div class="schedule-bar"><span class="schedule-month">'+monthLabel+'</span><div class="schedule-arrows"><button class="icon" data-action="week" data-value="-1" aria-label="Предыдущая неделя">'+ico('left')+'</button><button class="icon" data-action="week" data-value="1" aria-label="Следующая неделя">'+ico('right')+'</button></div></div><div class="calendar schedule-calendar">'+days.map(x=>'<button class="day-cell '+(iso(x)===state.date?'active':'')+'" data-action="date" data-value="'+iso(x)+'"><span class="sub">'+['Вс','Пн','Вт','Ср','Чт','Пт','Сб'][x.getDay()]+'</span><span>'+x.getDate()+'</span></button>').join('')+'</div><h3 class="heading">'+selected.toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'long'})+'</h3>'+(lessons.length?lessons.map((l,i)=>'<div class="lesson"><span class="sub">'+(l.number||i+1)+'</span><div class="lesson-main"><div class="lesson-title-row"><div class="lesson-copy"><strong>'+escapeHTML(l.subject)+'</strong>'+(l.from?'<div class="sub">'+escapeHTML(l.from.slice(11,16))+(l.to?'–'+escapeHTML(l.to.slice(11,16)):'')+'</div>':'')+(l.topic?'<div class="sub">'+escapeHTML(l.topic)+'</div>':'')+'</div><div class="lesson-grades">'+lessonGradeButtons(l,lessons,i,kid,state.date)+'</div></div></div></div>').join(''):'<div class="empty">Нет уроков</div>');
+ return '<div class="schedule-bar"><span class="schedule-month">'+monthLabel+'</span><div class="schedule-arrows"><button class="icon" data-action="week" data-value="-1" aria-label="Предыдущая неделя">'+ico('left')+'</button><button class="icon" data-action="week" data-value="1" aria-label="Следующая неделя">'+ico('right')+'</button></div></div><div class="calendar schedule-calendar">'+days.map(x=>'<button class="day-cell '+(iso(x)===state.date?'active':'')+(iso(x)===iso(TODAY)?' today':'')+'"'+(iso(x)===iso(TODAY)?' aria-current="date"':'')+' data-action="date" data-value="'+iso(x)+'"><span class="sub">'+['Вс','Пн','Вт','Ср','Чт','Пт','Сб'][x.getDay()]+'</span><span>'+x.getDate()+'</span></button>').join('')+'</div><h3 class="heading">'+selected.toLocaleDateString('ru-RU',{day:'numeric',month:'long',weekday:'long'})+'</h3>'+(lessons.length?lessons.map((l,i)=>'<div class="lesson"><span class="sub">'+(l.number||i+1)+'</span><div class="lesson-main"><div class="lesson-title-row"><div class="lesson-copy"><strong>'+escapeHTML(l.subject)+'</strong>'+(l.from?'<div class="sub">'+escapeHTML(l.from.slice(11,16))+(l.to?'–'+escapeHTML(l.to.slice(11,16)):'')+'</div>':'')+(l.topic?'<div class="sub">'+escapeHTML(l.topic)+'</div>':'')+'</div><div class="lesson-grades">'+lessonGradeButtons(l,lessons,i,kid,state.date)+'</div></div></div></div>').join(''):'<div class="empty">Нет уроков</div>');
 }
 function homework(){
  const kid=kids[state.child],today=iso(TODAY),nextDay=new Date(TODAY);nextDay.setDate(nextDay.getDate()+1);const calendarTomorrow=iso(nextDay);
