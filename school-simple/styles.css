@@ -351,3 +351,21 @@ html[data-motion=on] .detail-overlay.motion-closing{animation:motion-backdrop-ou
 }
 @keyframes motion-backdrop-in{from{background-color:transparent}}
 @keyframes motion-backdrop-out{to{background-color:transparent}}
+
+/* Isolated preview: paint only, no layout changes. */
+html[data-premium=on]{
+ --premium-tile:#f3f3f6;--premium-edge:#e2e2e8;
+ --premium-shadow:0 2px 5px #17171a0d;--premium-segment:0 1px 3px #17171a0a;
+ --premium-tint:8%;--premium-dynamic:6%;--premium-modal:0 6px 20px #0000001a;
+}
+html[data-premium=on][data-theme=dark]{--premium-tile:#303035;--premium-edge:#414147;--premium-shadow:0 0 0 transparent;--premium-segment:0 0 0 transparent;--premium-tint:13%;--premium-dynamic:13%;--premium-modal:0 6px 20px #0004}
+@media(prefers-color-scheme:dark){html[data-premium=on][data-theme=system]{--premium-tile:#303035;--premium-edge:#414147;--premium-shadow:0 0 0 transparent;--premium-segment:0 0 0 transparent;--premium-tint:13%;--premium-dynamic:13%;--premium-modal:0 6px 20px #0004}}
+html[data-premium=on] .stat-tile{background:var(--premium-tile);box-shadow:inset 0 0 0 1px var(--premium-edge),var(--premium-shadow)}
+html[data-premium=on] .seg button.active{box-shadow:var(--premium-segment)}
+html[data-premium=on] .mark::before{box-shadow:inset 0 0 0 1px var(--premium-edge)}
+html[data-premium=on] .calendar button.active{box-shadow:var(--premium-shadow)}
+html[data-premium=on] .homework-day-title{background:color-mix(in srgb,var(--accent) 6%,var(--premium-tile))}
+html[data-premium=on] .detail-box{box-shadow:inset 0 0 0 1px var(--premium-edge),var(--premium-modal)}
+
+html[data-premium=on] .stat-tile[data-risk=critical]{background:color-mix(in srgb,#ef4444 var(--premium-dynamic),var(--premium-tile))}
+html[data-premium=on] .calendar button.today:not(.active){box-shadow:inset 0 0 0 1px var(--accent);color:var(--accent-text,var(--accent))}

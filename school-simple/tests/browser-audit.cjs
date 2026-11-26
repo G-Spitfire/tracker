@@ -59,11 +59,64 @@ async function run() {
      contentType:'application/javascript',
      body:'window.__syncCalls=0;window.SchoolSync={readCached:async()=>null,sync:async()=>{window.__syncCalls++;return {source:"network",data:'+JSON.stringify(fakeDiary)+'}}};'
    }));
-   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.33.52"}'}));
+   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.33.53"}'}));
    const view=size.name;
    try {
     await page.goto(BASE,{waitUntil:'domcontentloaded',timeout:30000});
     await page.getByText('Средний балл',{exact:true}).waitFor({timeout:15000});
+    const semantic=await page.evaluate(()=>{
+      const original=kids[state.child],oldQuarter=state.quarter;
+      state.quarter='2';
+      const mk=(values)=>values.map((v,i)=>({name:'Предмет '+i,grades:[{value:v,date:'2026-11-19'}]}));
+      const check=(values)=>{kids[state.child]={...original,subjects:mk(values)};return home().includes('data-risk="critical"')};
+      const result={exact30:!check([3,3,3,4,4,4,4,4,4,4]),above30:check([3,3,4,4,4]),singleTwo:check([2,4,4,4,4,4,4,4,4,4]),empty:!check([])};
+      const kid={lessons:['2026-10-22','2026-10-23','2026-11-04','2026-11-05'].map(d=>({from:d+'T09:00:00'})),schedule:[],subjects:[{grades:[{value:3,date:'2026-10-23'}]}]};
+      result.crossQuarter=completedCleanStreak(kid,'2026-11-05')===3;
+      kid.subjects[0].grades.push({value:2,date:'2026-10-23'});
+      result.twoBreaks=completedCleanStreak(kid,'2026-11-05')===1;
+      kids[state.child]=original;state.quarter=oldQuarter;render();
+      return result;
+    });
+    record(view,'critical risk and streak rules',Object.values(semantic).every(Boolean),semantic);
+    await page.evaluate(()=>{state.date=iso(TODAY);state.tab='schedule';render()});
+    record(view,'today is marked',await page.locator('.calendar button.today[aria-current="date"]').count()===1);
+    await page.evaluate(()=>{state.tab='home';render()});
+    // Compare the actual application with synthetic data, not generated mockups.
+    await page.evaluate(()=>{state.motion=false;state.quarter='2';state.date='2026-11-20';render()});
+    for(const theme of ['light','dark']){
+      for(const accent of ['#4c8bf5','#16a34a','#8b5cf6','#f97316','#ef4444','#ec4899']){
+        for(const tab of ['home','grades','schedule','homework','profile']){
+          await page.evaluate(({theme,accent,tab})=>{state.theme=theme;state.accent=accent;state.tab=tab;render();window.scrollTo(0,0)},{theme,accent,tab});
+          const rects=()=>page.evaluate(()=>[...document.querySelectorAll('.head,#nav,#main,#main *')].map(e=>{const r=e.getBoundingClientRect();return [r.x,r.y,r.width,r.height]}));
+          await page.evaluate(()=>document.documentElement.dataset.premium='off');
+          const before=await rects();
+          if(accent==='#ec4899')await page.screenshot({path:path.join(OUT,view+'-'+theme+'-'+tab+'-current.png')});
+          await page.evaluate(()=>document.documentElement.dataset.premium='on');
+          const after=await rects();
+          record(view,'premium geometry '+theme+' '+accent+' '+tab,JSON.stringify(before)===JSON.stringify(after));
+          if(tab==='home'){
+            const paints=await page.evaluate(()=>[...document.querySelectorAll('.stat-tile')].map(e=>({bg:getComputedStyle(e).backgroundColor,shadow:getComputedStyle(e).boxShadow})));
+            record(view,'premium tiles '+theme+' '+accent,paints.length===6&&paints.every(p=>p.shadow!=='none')&&paints[0].bg===paints[2].bg,paints);
+          }
+          if(accent==='#ec4899')await page.screenshot({path:path.join(OUT,view+'-'+theme+'-'+tab+'-premium.png')});
+        }
+      }
+    }
+    await page.evaluate(()=>{saveSetting('school-premium-preview','off');state.motion=true;state.theme='light';state.accent='#4c8bf5';state.tab='home';render()});
+    // Rich, isolated synthetic fixture for final visual review.
+    await page.evaluate(()=>{
+      window.__previewOriginal=kids[state.child];
+      const names=['Математика','Русский язык','Литература','История','Английский язык','Биология','География','Физическая культура'];
+      const dates=['2026-11-05','2026-11-06','2026-11-09','2026-11-10','2026-11-11','2026-11-12','2026-11-13','2026-11-16','2026-11-17','2026-11-18','2026-11-19'];
+      kids[state.child]={...window.__previewOriginal,subjects:names.map((name,i)=>({name,grades:dates.map((date,j)=>({date,value:i===0?2:i===1?3:3+(i+j)%3,homework:j%3===0,type:'Урок'}))})),lessons:dates.map(d=>({from:d+'T09:00:00'}))};
+      state.motion=false;state.tab='home';state.chart='line';saveSetting('school-premium-preview','on');render();
+    });
+    for(const theme of ['light','dark']){
+      await page.evaluate(theme=>{state.theme=theme;state.accent='#4c8bf5';render()},theme);
+      record(view,'rich critical risk '+theme,await page.locator('.stat-tile[data-risk="critical"]').count()===1);
+      await page.screenshot({path:path.join(OUT,view+'-'+theme+'-rich-risk.png')});
+    }
+    await page.evaluate(()=>{kids[state.child]=window.__previewOriginal;delete window.__previewOriginal;saveSetting('school-premium-preview','off');state.motion=true;state.theme='light';state.accent='#4c8bf5';state.tab='home';render()});
     const initialCalls=await page.evaluate(()=>window.__syncCalls);
     await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
     record(view,'resume within five minutes skips fetch',await page.evaluate(()=>window.__syncCalls)===initialCalls);
