@@ -79,7 +79,7 @@ async function run() {
           record(view,'premium geometry '+theme+' '+accent+' '+tab,JSON.stringify(before)===JSON.stringify(after));
           if(tab==='home'){
             const paints=await page.evaluate(()=>[...document.querySelectorAll('.stat-tile')].map(e=>({bg:getComputedStyle(e).backgroundColor,shadow:getComputedStyle(e).boxShadow})));
-            record(view,'premium tiles '+theme+' '+accent,paints.length===6&&paints.every(p=>p.shadow!=='none')&&paints[0].bg!==paints[2].bg,paints);
+            record(view,'premium tiles '+theme+' '+accent,paints.length===6&&paints.every(p=>p.shadow!=='none')&&paints[0].bg===paints[2].bg,paints);
           }
           if(accent==='#ec4899')await page.screenshot({path:path.join(OUT,view+'-'+theme+'-'+tab+'-premium.png')});
         }
