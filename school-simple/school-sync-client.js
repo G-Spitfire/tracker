@@ -115,9 +115,19 @@
     const cached = await dbGet(SNAPSHOT_KEY).catch(() => null);
     if (navigator.onLine && options.force !== false) {
       try {
-        const response = await fetch(DATA_URL + "?t=" + Date.now(), { cache: "no-store" });
-        if (!response.ok) throw new Error("Не удалось загрузить зашифрованные данные (" + response.status + ")");
-        const envelope = await response.json();
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000);
+        let envelope;
+        try {
+          const response = await fetch(DATA_URL + "?t=" + Date.now(), { cache: "no-store", signal: controller.signal });
+          if (!response.ok) throw new Error("Не удалось загрузить зашифрованные данные (" + response.status + ")");
+          envelope = await response.json();
+        } catch (error) {
+          if (controller.signal.aborted) throw new Error("Превышено время ожидания загрузки (30 секунд)");
+          throw error;
+        } finally {
+          clearTimeout(timeout);
+        }
         const data = await decryptEnvelope(envelope);
         if (data.schemaVersion !== 1 || !data.children || !data.children.polina || !data.children.matvey) {
           throw new Error("Получен файл неизвестной или неполной структуры");

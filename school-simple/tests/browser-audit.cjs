@@ -59,7 +59,7 @@ async function run() {
      contentType:'application/javascript',
      body:'window.__syncCalls=0;window.SchoolSync={readCached:async()=>null,sync:async()=>{window.__syncCalls++;return {source:"network",data:'+JSON.stringify(fakeDiary)+'}}};'
    }));
-   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.33.51"}'}));
+   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.33.52"}'}));
    const view=size.name;
    try {
     await page.goto(BASE,{waitUntil:'domcontentloaded',timeout:30000});
@@ -71,6 +71,26 @@ async function run() {
     await page.waitForFunction(n=>window.__syncCalls===n+1,initialCalls);
     await page.waitForFunction(()=>!syncInProgress);
     record(view,'resume after five minutes fetches once',await page.evaluate(()=>window.__syncCalls)===initialCalls+1);
+    const syncRegression=await page.evaluate(async()=>{
+      const original=window.SchoolSync.sync;
+      const oldError=syncError;
+      syncError=true;render();
+      const errorPriority=syncIndicatorState()==='error';
+      syncError=oldError;
+      let finish;
+      window.SchoolSync.sync=()=>new Promise(resolve=>{finish=resolve});
+      const pending=loadDiarySnapshot(true);
+      while(!finish)await new Promise(resolve=>setTimeout(resolve,10));
+      closeModal(document.querySelector('.detail-overlay'));
+      finish({source:'cache',data:{"schemaVersion":1,"children":{"polina":{"marks":[],"lessons":[],"schedule":[]},"matvey":{"marks":[],"lessons":[],"schedule":[]}}},warning:'Тестовая ошибка'});
+      await pending;
+      await new Promise(resolve=>setTimeout(resolve,180));
+      const noReopen=!document.querySelector('.detail-overlay'),warningPriority=syncIndicatorState()==='error';
+      window.SchoolSync.sync=original;
+      await loadDiarySnapshot();
+      return {errorPriority,noReopen,warningPriority};
+    });
+    record(view,'sync warning priority and dismissed dialog',Object.values(syncRegression).every(Boolean),syncRegression);
     for(const [scenario,tab] of [['home','home'],['grades','grades'],['schedule','schedule'],['homework','homework']]) {
       if(tab!=='home')await page.locator('[data-action="tab"][data-value="'+tab+'"]').click();
       if(tab==='home'){
