@@ -59,7 +59,7 @@ async function run() {
      contentType:'application/javascript',
      body:'window.__syncCalls=0;window.SchoolSync={readCached:async()=>null,sync:async()=>{window.__syncCalls++;return {source:"network",data:'+JSON.stringify(fakeDiary)+'}}};'
    }));
-   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.33.50"}'}));
+   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.33.51"}'}));
    const view=size.name;
    try {
     await page.goto(BASE,{waitUntil:'domcontentloaded',timeout:30000});
@@ -126,6 +126,7 @@ async function run() {
      record(view,'notice indicator present',await indicator.count()===1);
      await indicator.click();
      record(view,'notice dialog opens',await page.locator('.detail-overlay').count()===1);
+     record(view,'modal and backdrop open together',await page.locator('.detail-overlay').evaluate(e=>{const a=getComputedStyle(e),b=getComputedStyle(e.querySelector('.detail-box'));return a.animationName==='motion-backdrop-in'&&a.animationDuration==='0.2s'&&a.animationDuration===b.animationDuration&&a.animationTimingFunction===b.animationTimingFunction}));
      // Long notification lists must scroll independently of their action button.
      const modalLayout=await page.evaluate(()=>{
       const box=document.querySelector('.notice-overlay .detail-box'),body=box?.querySelector('.modal-body'),actions=box?.querySelector('.modal-actions'),nav=document.querySelector('.bottom'),overlay=document.querySelector('.notice-overlay');
@@ -136,6 +137,8 @@ async function run() {
      });
      record(view,'long notice modal scroll and button accessible',!!modalLayout&&Object.values(modalLayout).every(Boolean),modalLayout);
      await page.locator('[data-action="notice-read"]').click();
+     record(view,'modal and backdrop close together',await page.locator('.detail-overlay').evaluate(e=>{const a=getComputedStyle(e),b=getComputedStyle(e.querySelector('.detail-box'));return a.animationName==='motion-backdrop-out'&&a.animationDuration==='0.15s'&&a.animationDuration===b.animationDuration&&a.animationTimingFunction===b.animationTimingFunction}));
+     await page.locator('.detail-overlay').waitFor({state:'detached'});
      await page.locator('#profile').click();
     const motionSwitch=page.locator('[data-action="motion"]');
     record(view,'motion enabled by default',await motionSwitch.getAttribute('aria-checked')==='true');
@@ -146,7 +149,7 @@ async function run() {
     await page.locator('[data-action="chart"][data-value="line"]').click();
     record(view,'disabled graph stays static',await page.locator('.motion-line').count()===0);
     await page.locator('#notice-indicator').click();
-    record(view,'disabled modal stays static',await page.locator('.detail-box').evaluate(e=>getComputedStyle(e).animationName==='none'));
+    record(view,'disabled modal stays static',await page.locator('.detail-box').evaluate(e=>getComputedStyle(e).animationName==='none'&&getComputedStyle(e.closest('.detail-overlay')).animationName==='none'));
     await page.locator('[data-action="notice-read"]').click();
     await page.locator('#profile').click();
     await motionSwitch.click();
