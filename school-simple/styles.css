@@ -367,5 +367,8 @@ html[data-premium=on] .calendar button.active{box-shadow:var(--premium-shadow)}
 html[data-premium=on] .homework-day-title{background:color-mix(in srgb,var(--accent) 6%,var(--premium-tile))}
 html[data-premium=on] .detail-box{box-shadow:inset 0 0 0 1px var(--premium-edge),var(--premium-modal)}
 
-html[data-premium=on] .stat-tile[data-risk=critical]{background:color-mix(in srgb,#ef4444 var(--premium-dynamic),var(--premium-tile))}
+html[data-premium=on] .stat-tile[data-risk=critical]{background:var(--risk-bg,#FDEBEC);box-shadow:inset 0 0 0 1px var(--risk-edge,#F1C4C8),var(--premium-shadow)}
+html[data-premium=on] .stat-tile[data-risk=critical] .stat-icon{color:var(--risk-icon,#DC454F)}
+html[data-premium=on][data-theme=dark]{--risk-bg:#3D252C;--risk-edge:#683740;--risk-icon:#FF707B}
+@media(prefers-color-scheme:dark){html[data-premium=on][data-theme=system]{--risk-bg:#3D252C;--risk-edge:#683740;--risk-icon:#FF707B}}
 html[data-premium=on] .calendar button.today:not(.active){box-shadow:inset 0 0 0 1px var(--accent);color:var(--accent-text,var(--accent))}
