@@ -1,6 +1,6 @@
 'use strict';
 // Read-only browser audit: synthetic diary data only, no real account or credentials.
-const { chromium } = require('playwright');
+const { chromium, webkit } = require('playwright');
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -48,7 +48,7 @@ async function geometry(page) {
   });
 }
 async function run() {
- const browser=await chromium.launch({headless:true});
+ const browser=await (process.env.SCHOOL_BROWSER==='webkit'?webkit:chromium).launch({headless:true});
  try {
   for(const size of sizes) {
    const context=await browser.newContext({viewport:{width:size.width,height:size.height},deviceScaleFactor:2,isMobile:true,hasTouch:true,serviceWorkers:'block'});
@@ -77,7 +77,10 @@ async function run() {
         await page.waitForTimeout(500);
         const stable=await page.evaluate(()=>{const logo=document.querySelector('#brand-mark img'),bell=document.querySelector('#notice-indicator svg'),stats=document.querySelector('.stats-grid');motionPending.add(state.child);render();render();return {logo:logo===document.querySelector('#brand-mark img'),bell:bell===document.querySelector('#notice-indicator svg')&&bell.classList.contains('motion-bell'),stats:stats===document.querySelector('.stats-grid'),tap:getComputedStyle(document.querySelector('#nav button')).webkitTapHighlightColor};});
         record(view,'stable logo bell and KPI nodes',stable.logo&&stable.bell&&stable.stats,stable);
-        record(view,'native tap highlight transparent',stable.tap==='rgba(0, 0, 0, 0)',stable.tap);
+        record(view,'native tap highlight transparent',stable.tap==='rgba(0, 0, 0, 0)'||stable.tap==='transparent',stable.tap);
+        const kpi=await page.evaluate(()=>{const el=document.querySelector('.stat-value'),key=el.parentElement.querySelector('.stat-top span').textContent,target=el.textContent;motionValues.set(key,'0');motionAfterRender([],true);const sameNode=el===document.querySelector('.stat-value');render();return {sameNode:sameNode&&el===document.querySelector('.stat-value'),target};});
+        await page.waitForTimeout(850);
+        record(view,'KPI settles after 800ms and unchanged render',kpi.sameNode&&await page.locator('.stat-value').first().textContent()===kpi.target);
         await page.evaluate(()=>{render();});
         record(view,'unchanged graph does not replay',await page.locator('.motion-line').count()===0);
         await page.locator('[data-action="chart"][data-value="ring"]').click();
