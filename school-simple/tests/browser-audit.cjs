@@ -1,6 +1,6 @@
 'use strict';
 // Read-only browser audit: synthetic diary data only, no real account or credentials.
-const { chromium } = require('playwright');
+const { chromium, webkit } = require('playwright');
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -10,8 +10,8 @@ fs.mkdirSync(OUT, { recursive: true });
 const results = [];
 const sizes = [
   {name:'iphone-se', width:375, height:667},
-  {name:'iphone-regular', width:390, height:844},
-  {name:'iphone-large', width:430, height:932},
+  {name:'iphone-regular', width:393, height:852},
+  {name:'iphone-large', width:402, height:874},
   {name:'small-320', width:320, height:568},
 ];
 const fakeDiary = {
@@ -48,7 +48,7 @@ async function geometry(page) {
   });
 }
 async function run() {
- const browser=await chromium.launch({headless:true});
+ const browser=await (process.env.SCHOOL_BROWSER==='webkit'?webkit:chromium).launch({headless:true});
  try {
   for(const size of sizes) {
    const context=await browser.newContext({viewport:{width:size.width,height:size.height},deviceScaleFactor:2,isMobile:true,hasTouch:true,serviceWorkers:'block'});
@@ -59,7 +59,7 @@ async function run() {
      contentType:'application/javascript',
      body:'window.__syncCalls=0;window.SchoolSync={readCached:async()=>null,sync:async()=>{window.__syncCalls++;return {source:"network",data:'+JSON.stringify(fakeDiary)+'}}};'
    }));
-   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.33.37"}'}));
+   await page.route('**/version.json*',route=>route.fulfill({contentType:'application/json',body:'{"version":"1.33.50"}'}));
    const view=size.name;
    try {
     await page.goto(BASE,{waitUntil:'domcontentloaded',timeout:30000});
@@ -74,12 +74,16 @@ async function run() {
     for(const [scenario,tab] of [['home','home'],['grades','grades'],['schedule','schedule'],['homework','homework']]) {
       if(tab!=='home')await page.locator('[data-action="tab"][data-value="'+tab+'"]').click();
       if(tab==='home'){
-        await page.waitForTimeout(500);
-        await page.evaluate(()=>{render();});
+        await page.evaluate(()=>{window.__brandNode=document.querySelector('#brand-mark img');window.__bellNode=document.querySelector('#notice-indicator svg');window.__kpiNode=document.querySelector('.stat-value');render();});
         record(view,'unchanged graph does not replay',await page.locator('.motion-line').count()===0);
         await page.locator('[data-action="chart"][data-value="ring"]').click();
         await page.locator('[data-action="chart"][data-value="line"]').click();
-        record(view,'line chart motion on selection',await page.locator('.motion-line').count()===1);
+        record(view,'line chart stays static',await page.locator('.motion-line,.motion-area').count()===0);
+        record(view,'header and KPI nodes survive chart switching',await page.evaluate(()=>window.__brandNode===document.querySelector('#brand-mark img')&&window.__bellNode===document.querySelector('#notice-indicator svg')&&window.__kpiNode===document.querySelector('.stat-value')));
+        record(view,'native tap highlight disabled',await page.locator('#nav button').first().evaluate(el=>getComputedStyle(el).webkitTapHighlightColor==='rgba(0, 0, 0, 0)'));
+        await page.evaluate(()=>{motionPending.add(state.child);render();render();});
+        record(view,'bell animation survives repeated render',await page.locator('#notice-indicator svg.motion-bell').count()===1);
+        record(view,'KPI animation duration 800 ms',await page.evaluate(()=>motionAfterRender.toString().includes('(t-start)/800')));
         await page.waitForTimeout(500);
         await page.locator('[data-action="tab"][data-value="grades"]').click();
         await page.locator('[data-action="tab"][data-value="home"]').click();

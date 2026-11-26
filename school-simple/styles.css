@@ -319,15 +319,11 @@ html.platform-apple .stat-value{font-weight:var(--weight-bold)}
 /* Motion: opt-in, no layout changes. */
 @media(prefers-reduced-motion:no-preference){
 button .symbol,button svg,button .mark,button::before{transition:transform 100ms ease}button:active .symbol,button:active svg,button:active .mark,button:active::before{transform:scale(.96)}
-.motion-line{stroke-dasharray:1;animation:motion-draw 450ms ease-out both}
-.motion-area{animation:motion-fade 350ms 100ms both}
 .detail-box{animation:motion-modal 200ms ease-out both}
 .motion-bell{transform-origin:50% 15%;animation:motion-bell 500ms ease-in-out both}
 .motion-selection-active{position:relative;background:transparent!important;box-shadow:none!important;isolation:isolate}
 .motion-selection{position:absolute;inset:0;z-index:-1;pointer-events:none}
 }
-@keyframes motion-draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
-@keyframes motion-fade{from{opacity:0}to{opacity:1}}
 @keyframes motion-modal{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes motion-bell{0%,100%{transform:rotate(0)}15%,55%{transform:rotate(12deg)}35%,75%{transform:rotate(-12deg)}}
 
@@ -339,8 +335,11 @@ button .symbol,button svg,button .mark,button::before{transition:transform 100ms
 .motion-setting[aria-checked=true] .motion-toggle{background:var(--accent-fill);border-color:var(--accent-fill)}
 .motion-setting[aria-checked=true] .motion-toggle::after{left:20px}
 html[data-motion=off] button{transition:none;transform:none}
-html[data-motion=off] .motion-line,html[data-motion=off] .motion-area,html[data-motion=off] .detail-box,html[data-motion=off] .motion-bell{animation:none}
+html[data-motion=off] .detail-box,html[data-motion=off] .motion-bell{animation:none}
 
 @media(prefers-reduced-motion:no-preference){html[data-motion=on] .motion-closing .detail-box{animation:motion-modal-out 150ms ease-in both}.motion-closing{pointer-events:none}}
 @keyframes motion-modal-out{to{opacity:0;transform:translateY(8px)}}
 html[data-motion=off] button .symbol,html[data-motion=off] button svg,html[data-motion=off] button .mark,html[data-motion=off] button::before{transition:none;transform:none}
+
+/* Use the custom press feedback instead of WebKit tap highlighting. */
+button, a, label, input{-webkit-tap-highlight-color:transparent}
