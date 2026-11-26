@@ -64,6 +64,28 @@ async function run() {
    try {
     await page.goto(BASE,{waitUntil:'domcontentloaded',timeout:30000});
     await page.getByText('Средний балл',{exact:true}).waitFor({timeout:15000});
+    // Compare the actual application with synthetic data, not generated mockups.
+    await page.evaluate(()=>{state.motion=false;state.quarter='2';state.date='2026-11-20';render()});
+    for(const theme of ['light','dark']){
+      for(const accent of ['#4c8bf5','#16a34a','#8b5cf6','#f97316','#ef4444','#ec4899']){
+        for(const tab of ['home','grades','schedule','homework','profile']){
+          await page.evaluate(({theme,accent,tab})=>{state.theme=theme;state.accent=accent;state.tab=tab;render();window.scrollTo(0,0)},{theme,accent,tab});
+          const rects=()=>page.evaluate(()=>[...document.querySelectorAll('.head,#nav,#main,#main *')].map(e=>{const r=e.getBoundingClientRect();return [r.x,r.y,r.width,r.height]}));
+          await page.evaluate(()=>document.documentElement.dataset.premium='off');
+          const before=await rects();
+          if(accent==='#ec4899')await page.screenshot({path:path.join(OUT,view+'-'+theme+'-'+tab+'-current.png')});
+          await page.evaluate(()=>document.documentElement.dataset.premium='on');
+          const after=await rects();
+          record(view,'premium geometry '+theme+' '+accent+' '+tab,JSON.stringify(before)===JSON.stringify(after));
+          if(tab==='home'){
+            const paints=await page.evaluate(()=>[...document.querySelectorAll('.stat-tile')].map(e=>({bg:getComputedStyle(e).backgroundColor,shadow:getComputedStyle(e).boxShadow})));
+            record(view,'premium tiles '+theme+' '+accent,paints.length===6&&paints.every(p=>p.shadow!=='none')&&paints[0].bg!==paints[2].bg,paints);
+          }
+          if(accent==='#ec4899')await page.screenshot({path:path.join(OUT,view+'-'+theme+'-'+tab+'-premium.png')});
+        }
+      }
+    }
+    await page.evaluate(()=>{saveSetting('school-premium-preview','off');state.motion=true;state.theme='light';state.accent='#4c8bf5';state.tab='home';render()});
     const initialCalls=await page.evaluate(()=>window.__syncCalls);
     await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
     record(view,'resume within five minutes skips fetch',await page.evaluate(()=>window.__syncCalls)===initialCalls);
