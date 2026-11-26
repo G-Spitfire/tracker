@@ -179,7 +179,7 @@ function home(){
  tile('Средний балл',fmt(score()),'За четверть','average')+
  tile('Динамика',hasBaseline?arrow+' '+(delta>0?'+':'')+fmt(delta):'—',hasBaseline?'К прошлым 7 дням':'Нет данных','trend',delta>0?'#31ad81':delta<0?'#d76a6a':null)+
  tile('Доля пятёрок',fiveShare+'%','От всех оценок','star')+
- tile('Под риском',String(riskCount),'Предмета · средний < 3,60','alert')+
+ tile('Под риском',String(riskCount)+' <span class="risk-total">из '+subjectAverages.length+'</span>','Средний балл &lt; 3,60','alert')+
  tile('Без двоек',String(cleanStreak),'Учебных дней подряд','flame')+
  tile('Средний за ДЗ',hwAverage,'За четверть','homework')+
  '</div>'+'<div class="home-switch">'+btns([['line','Линейный'],['ring','Кольцевой']],state.chart,'chart')+'</div><div class="home-visual">';
