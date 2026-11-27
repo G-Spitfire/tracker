@@ -94,7 +94,7 @@ test('home: seven-day change compares matched weekly subject means', () => {
     {name:'B',grades:[{value:3,date:'2026-11-10'},{value:5,date:'2026-11-19'}]}
   ];
   const html=vm.runInContext('home()',c);
-  assert.ok(html.includes('↑ +1,50'), 'seven-day delta should be +1.50');
+  assert.ok(html.includes('<strong class="stat-value"><span style="color:var(--grade-5)">↑</span> +1,50</strong>'), 'seven-day delta should be +1.50');
   assert.ok(html.includes('К прошлым 7 дням'));
 });
 test('home: seven-day change is unavailable without a baseline', () => {
