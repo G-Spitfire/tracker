@@ -3,7 +3,7 @@
   --bg: #f5f4ee;
   --surface: #fffefa;
   --ink: #26372e;
-  --muted: #667263;
+  --muted: #5a6657;
   --accent: #355740;
   --soft: #e2e9d9;
   --mid: #91a889;
@@ -466,6 +466,7 @@ nav .add svg {
 nav { gap: clamp(12px, 10vw, 45px); }
 dialog { max-height: calc(100dvh - env(safe-area-inset-top) - 12px); }
 .dayspick label { min-height: 44px; }
+button[data-action="prevweek"], button[data-action="nextweek"] { min-width: 44px; padding: 0; }
 .metric {
   flex: 1;
 }
