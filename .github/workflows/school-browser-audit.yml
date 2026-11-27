@@ -16,6 +16,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -37,6 +39,13 @@ jobs:
         run: node school-simple/tests/browser-audit.cjs
       - name: Run WebKit responsive UI audit
         run: SCHOOL_BROWSER=webkit SCHOOL_AUDIT_OUT=school-audit-results/webkit node school-simple/tests/browser-audit.cjs
+      - name: Verify December holiday card in both themes
+        run: HOLIDAY_OUT=school-audit-results/holiday node school-simple/tests/holiday-browser.cjs
+      - name: Deep Black iPhone SE acceptance screenshots
+        env:
+          SCHOOL_LIGHT_BASELINE: ${{ github.event.pull_request.base.sha }}
+          DEEP_BLACK_OUT: school-audit-results/deep-black
+        run: node school-simple/tests/deep-black-browser.cjs
       - name: Upload screenshots and results
         if: always()
         uses: actions/upload-artifact@v4
