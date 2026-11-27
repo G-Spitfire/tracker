@@ -1,5 +1,5 @@
 const PREFIX = "core-pwa:" + self.registration.scope + ":";
-const CACHE = PREFIX + "1.2.0";
+const CACHE = PREFIX + "1.2.1";
 const FILES = [
   "./",
   "./index.html",
@@ -11,7 +11,7 @@ const FILES = [
   "./icon-512.png",
 ];
 self.addEventListener("install", (e) =>
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES))),
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES.map(path => new Request(new URL(path, self.registration.scope), {cache:"reload"})))).then(() => self.skipWaiting())),
 );
 self.addEventListener("activate", (e) =>
   e.waitUntil(
@@ -40,3 +40,5 @@ self.addEventListener("fetch", (e) => {
     return (await c.match(e.request)) || fetch(e.request);
   }));
 });
+
+self.addEventListener("message", e => { if(e.data === "CORE_ACTIVATE") e.waitUntil(self.skipWaiting()); });

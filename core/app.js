@@ -458,7 +458,7 @@ function settings() {
             `<div class="row between"><span>${esc(h.name)}</span>${btn("restore:" + h.id, "Восстановить " + h.name, "Вернуть", "smallbutton")}</div>`,
         )
         .join("") || '<p class="muted">Архив пуст</p>'
-    }<h3>Данные</h3><button class="secondary full" data-action="export">Экспорт резервной копии</button><label for="import">Импорт резервной копии (замена данных)</label><input id="import" type="file" accept="application/json,.json"><p class="notice">Данные хранятся на устройстве. Периодически экспортируйте копию. CORE 1.2</p><button class="primary full" data-action="close">Готово</button>`,
+    }<h3>Данные</h3><button class="secondary full" data-action="export">Экспорт резервной копии</button><label for="import">Импорт резервной копии (замена данных)</label><input id="import" type="file" accept="application/json,.json"><p class="notice">Данные хранятся на устройстве. Периодически экспортируйте копию. CORE 1.2.1</p><button class="primary full" data-action="close">Готово</button>`,
   );
   $("#import").onchange = async (e) => {
     try {
@@ -606,6 +606,34 @@ function refreshDate() {
 }
 document.addEventListener("visibilitychange", refreshDate);
 setInterval(refreshDate, 30000);
+async function setupUpdates() {
+  try {
+    let controlled = !!navigator.serviceWorker.controller;
+    let reloadPending = false;
+    async function reloadWhenSafe() {
+      if (!reloadPending || modal.open || document.visibilityState !== "visible") return;
+      reloadPending = false;
+      await saveQueue;
+      if (modal.open || document.visibilityState !== "visible") { reloadPending = true; return; }
+      location.reload();
+    }
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (controlled) { reloadPending = true; reloadWhenSafe(); }
+      controlled = true;
+    });
+    modal.addEventListener("close", reloadWhenSafe);
+    const registration = await navigator.serviceWorker.register("./sw.js", {updateViaCache:"none"});
+    const check = () => {
+      if(document.visibilityState === "visible") {
+        reloadWhenSafe();
+        registration.update().catch(()=>{});
+      }
+    };
+    document.addEventListener("visibilitychange",check);
+    window.addEventListener("pageshow",check);
+    check();
+  } catch(e) { console.error(e); }
+}
 (async () => {
   try {
     db = await openDB();
@@ -613,8 +641,7 @@ setInterval(refreshDate, 30000);
     if (saved && C.valid(saved)) state = saved;
     else if (saved) toast("Не удалось прочитать данные");
     render();
-    if ("serviceWorker" in navigator)
-      navigator.serviceWorker.register("./sw.js").catch(console.error);
+    if ("serviceWorker" in navigator) setupUpdates();
   } catch (e) {
     app.textContent =
       "Не удалось открыть локальное хранилище. Проверьте настройки браузера.";
