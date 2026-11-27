@@ -189,6 +189,7 @@ function render() {
   const oldTab = app.dataset.tab;
   const previous = new Map([...app.querySelectorAll(".check,.quick,.progress i,.weekly-progress i,.barfill,.day em i")].map(el => [motionKey(el),{cls:el.className, width:el.style.width, height:el.style.height, text:el.textContent}]));
   const oldScore = app.querySelector(".hero .big")?.textContent;
+  const oldTicks = [...app.querySelectorAll(".dial-tick")].map(x=>x.classList.contains("lit"));
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   theme();
   $("#nav").innerHTML =
@@ -223,6 +224,7 @@ function render() {
         el.animate([{opacity:.3,transform:"scaleX(.55)"},{opacity:1,transform:"scaleX(1)"}],{duration:300,easing:ease});
       }
     }
+    [...app.querySelectorAll(".dial-tick")].forEach((el,i)=>{if(oldTicks[i]!==undefined && oldTicks[i]!==el.classList.contains("lit")) el.animate([{opacity:.3},{opacity:1}],{duration:300,delay:Math.min(180,i*3),easing:ease});});
     const big = app.querySelector(".hero .big");
     if(big && oldScore && oldScore !== big.textContent) big.animate([{opacity:.55,transform:"translateY(3px)"},{opacity:1,transform:"translateY(0)"}],{duration:240,easing:ease});
   } else if(!reduced && oldTab && oldTab !== tab) {
@@ -246,21 +248,10 @@ function todayView() {
   const daynames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
   let html =
     header("") +
-    `<div class="row between"><div class="eyebrow">${esc(fmt(selected, { month: "long", year: "numeric" }))}</div><div class="row">${btn("prevweek", "Предыдущая неделя", icon("left"))}${btn("now", "Сегодня", "Сегодня", "smallbutton")}${btn("nextweek", "Следующая неделя", icon("right"))}</div></div><div class="week">${week
-      .map((d, i) => {
-        const p = ratio(C.daily(state, d));
-        return `<button class="day ${d === selected ? "selected" : ""}" data-action="date:${d}" ${d > now ? "disabled" : ""} aria-label="${short(d)}"><span>${daynames[i]}</span><b>${C.parse(d).getDate()}</b><em><i style="width:${d > now ? 0 : p || 0}%"></i></em></button>`;
-      })
-      .join(
-        "",
-      )}</div><div class="hero"><div><div class="eyebrow">${selected === now ? "Сегодня" : short(selected)}</div><div class="big">${score(ratio(a))}</div><div class="muted">${a.total ? `${a.done} из ${a.total} привычек` : "Нет дневного плана"}</div></div><div class="bars">${week
-      .map((d, i) => {
-        const p = d > now ? null : ratio(C.daily(state, d));
-        return `<div class="barcol" title="${short(d)}: ${score(p)}"><div class="bartrack"><div class="barfill ${d === selected ? "current" : ""}" style="height:${p || 0}%"></div></div><small>${daynames[i]}</small></div>`;
-      })
-      .join(
-        "",
-      )}</div></div><div class="row between section"><h2>Привычки</h2>${btn("group", "Переключить группировку", state.settings.group ? "По категориям" : "Список", "smallbutton")}</div>`;
+    `<div class="row between date-heading"><div><h2>${esc(fmt(selected,{day:"numeric",month:"long"}))}</h2><div class="muted">${esc(fmt(selected,{weekday:"long",year:"numeric"}))}</div></div><div class="row date-controls">${btn("prevweek","Предыдущая неделя",icon("left"))}${selected!==now?btn("now","Вернуться к сегодняшнему дню","Сегодня","smallbutton"):""}${btn("nextweek","Следующая неделя",icon("right"))}</div></div><div class="week">${week.map((d,i)=>{
+      const p=ratio(C.daily(state,d));
+      return `<button class="day ${d===selected?"selected":""} ${p===null?"no-plan":""}" data-action="date:${d}" ${d>now?"disabled":""} aria-label="${short(d)}"><span>${daynames[i]}</span><b>${C.parse(d).getDate()}</b><em><i style="width:${d>now?0:p||0}%"></i></em></button>`;
+    }).join("")}</div><div class="hero core-hero"><div class="core-dial" role="img" aria-label="Дневной план: ${score(ratio(a))}"><svg viewBox="0 0 120 120" aria-hidden="true">${Array.from({length:60},(_,i)=>`<line class="dial-tick ${ratio(a)!==null&&i<Math.round(ratio(a)*.6)?"lit":""}" x1="60" x2="60" y1="5" y2="${i%5===0?17:13}" transform="rotate(${i*6} 60 60)"/>`).join("")}</svg><div class="dial-label"><div class="big">${score(ratio(a))}</div><span>ДЕНЬ</span></div></div><div class="hero-summary"><div class="eyebrow">Дневной план</div><b>${a.total?`${a.done} из ${a.total}`:"Нет плана"}</b><div class="muted">${a.total?"привычек выполнено":"на выбранный день"}</div>${wh.length?`<div class="week-summary"><div class="eyebrow">Гибкие привычки · неделя</div><b>${wh.reduce((n,h)=>{const x=C.weekly(state,h,selected);return n+Math.min(x.count,x.goal)},0)} из ${wh.reduce((n,h)=>n+C.weekly(state,h,selected).goal,0)}</b></div>`:""}</div></div><div class="row between section"><h2>Привычки</h2>${btn("group",state.settings.group?"Показать единый список":"Группировать по категориям",state.settings.group?'<svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg>':'<svg viewBox="0 0 24 24"><path d="M4 4h5v5H4zM12 6.5h8M4 15h5v5H4zM12 17.5h8"/></svg>',"iconbtn grouping "+(state.settings.group?"grouped":""))}</div>`;
   if (!hs.length && !wh.length)
     html += `<div class="empty">${state.habits.length ? "На этот день нет запланированных привычек." : "Начните с одного маленького действия."}<br><button class="primary" data-action="new" style="margin-top:14px">Создать привычку</button></div>`;
   const all = state.habits.filter(h => hs.includes(h) || wh.includes(h));
@@ -279,7 +270,7 @@ function habitRow(h, d, w = false) {
     n = C.val(state, h, d),
     done = C.complete(state, h, d),
     wk = w ? C.weekly(state, h, d) : null;
-  return `<div class="habit"><div class="glyph" style="color:${colors[h.color] || "var(--accent)"}">${icon(h.icon)}</div><button class="habitname" data-action="entry:${h.id}"><strong>${esc(h.name)}</strong><small>${w ? `${wk.count} из ${wk.goal} за неделю${h.type === "check" ? "" : " · "}` : ""}${h.type === "check" ? (w ? "" : (done ? "Выполнено" : "Сегодня")) : `${esc(unit(h, n))} / ${esc(unit(h, v.goal))}`}</small>${w ? `<div class="weekly-progress" aria-hidden="true">${Array.from({length:wk.goal},(_,i)=>`<i class="${i<wk.count?"filled":""}"></i>`).join("")}</div>` : ""}${h.type !== "check" ? `<div class="progress"><i style="width:${Math.min(100, (n / v.goal) * 100)}%"></i></div>` : ""}</button>${h.type === "check" ? btn("toggle:" + h.id, "Отметить " + h.name, `<span>${icon("check")}</span>`, "check " + (done ? "done" : "")) : btn("inc:" + h.id, "Добавить " + v.step, `+${v.step}${h.type === "duration" ? " м" : ""}`, "quick")}</div>`;
+  return `<div class="habit ${done?"is-done":""}"><div class="glyph" style="color:${colors[h.color] || "var(--accent)"}">${icon(h.icon)}</div><button class="habitname" data-action="entry:${h.id}"><strong>${esc(h.name)}</strong><small>${w ? `${wk.count} из ${wk.goal} за неделю${h.type === "check" ? "" : " · "}` : ""}${h.type === "check" ? (w ? "" : (done ? "Выполнено" : v.schedule==="days"?v.days.map(i=>["Пн","Вт","Ср","Чт","Пт","Сб","Вс"][i]).join(" · "):"Ежедневно")) : `${esc(unit(h, n))} / ${esc(unit(h, v.goal))}`}</small>${w ? `<div class="weekly-progress" aria-hidden="true">${Array.from({length:wk.goal},(_,i)=>`<i class="${i<wk.count?"filled":""}"></i>`).join("")}</div>` : ""}${h.type !== "check" ? `<div class="progress"><i style="width:${Math.min(100, (n / v.goal) * 100)}%"></i></div>` : ""}</button>${h.type === "check" ? btn("toggle:" + h.id, "Отметить " + h.name, `<span>${icon("check")}</span>`, "check " + (done ? "done" : "")) : btn("inc:" + h.id, "Добавить " + v.step, `+${v.step}${h.type === "duration" ? " м" : ""}`, "quick")}</div>`;
 }
 function progressView() {
   const now = C.today(),
@@ -311,10 +302,10 @@ function progressView() {
     );
   return (
     header("Прогресс") +
-    `<div class="segments">${[7, 30, 90].map((n) => btn("period:" + n, n + " дней", n + " дней", period === n ? "active" : "")).join("")}</div><select id="filter" aria-label="Фильтр статистики">${options}</select><div class="panel"><div class="eyebrow">Регулярность</div><div class="row"><div class="big">${score(s.p)}</div>${diff === null ? "" : `<span class="muted">${diff > 0 ? "+" : ""}${diff} п.п.</span>`}</div><details class="metric-help"><summary>Как считается</summary><p class="muted">Дневные планы и завершённые недели. Текущая гибкая недельная цель отображается отдельно.</p></details>${s.days.filter(x=>x.p!==null).length <= 1 && !s.actions ? `<div class="empty chart-empty">История только начинается. Отмечайте привычки, чтобы увидеть динамику.</div>` : `<div class="chart">${s.days.map((x) => `<button data-action="inspect:${x.d}" aria-label="${short(x.d)}: ${score(x.p)}" style="height:${x.p === null ? 0 : Math.max(2, x.p)}%;opacity:${x.p === null ? 0 : 1}"></button>`).join("")}</div><div class="row between muted"><span>${short(from)}</span><span>${short(now)}</span></div>`}<div class="row" style="margin-top:12px"><div class="metric"><span class="muted">Выполнено</span><b>${s.actions}</b></div><div class="metric"><span class="muted">Лучшая серия</span><b>${s.best} дн.</b></div></div><details class="metric-help"><summary>О серии</summary><p class="muted">Дни с выполнением всего дневного плана; дни отдыха не прерывают серию.</p></details></div><div class="panel activity-panel"><h2>Активность</h2><div class="heat-wrap"><div class="heat-labels">${["Пн","Вт","Ср","Чт","Пт","Сб","Вс"].map(x=>`<span>${x}</span>`).join("")}</div><div class="heat">${heatDates
+    `<div class="segments">${[7, 30, 90].map((n) => btn("period:" + n, n + " дней", n + " дней", period === n ? "active" : "")).join("")}</div><select id="filter" aria-label="Фильтр статистики">${options}</select><div class="panel"><div class="eyebrow">Регулярность</div><div class="row"><div class="big">${score(s.p)}</div>${diff === null ? "" : `<span class="muted">${diff > 0 ? "+" : ""}${diff} п.п.</span>`}</div><details class="metric-help"><summary aria-label="Как считается регулярность">ⓘ Как считается</summary><p class="muted">Дневные планы и завершённые недели. Текущая гибкая недельная цель отображается отдельно.</p></details>${s.days.filter(x=>x.p!==null).length <= 1 && !s.actions ? `<div class="empty chart-empty">История только начинается. Отмечайте привычки, чтобы увидеть динамику.</div>` : `<div class="chart">${s.days.map((x) => `<button data-action="inspect:${x.d}" aria-label="${short(x.d)}: ${score(x.p)}" style="height:${x.p === null ? 0 : Math.max(2, x.p)}%;opacity:${x.p === null ? 0 : 1}"></button>`).join("")}</div><div class="row between muted"><span>${short(from)}</span><span>${short(now)}</span></div>`}<div class="row" style="margin-top:12px"><div class="metric"><span class="muted">Выполнено</span><b>${s.actions}</b></div><div class="metric"><span class="muted">Лучшая серия</span><b>${s.best} дн.</b></div></div><details class="metric-help"><summary aria-label="Как считается серия">ⓘ О серии</summary><p class="muted">Дни с выполнением всего дневного плана; дни отдыха не прерывают серию.</p></details></div><div class="panel activity-panel"><div class="row between"><h2>Активность</h2><span class="muted">${short(from)} — ${short(now)}</span></div><div class="heat-wrap"><div class="heat-labels">${["Пн","Вт","Ср","Чт","Пт","Сб","Вс"].map(x=>`<span>${x}</span>`).join("")}</div><div class="heat ${period===90?"heat-long":""}">${heatDates
       .map((d) => {
         const p = d < from || d > now ? null : ratio(C.activity(state, d, hs));
-        return `<button ${d < from || d > now ? "disabled" : ""} data-action="inspect:${d}" aria-label="${short(d)}: ${score(p)}" style="opacity:${d < from || d > now || p === null ? 0.25 : 1};background:${p === null ? "var(--line)" : `color-mix(in srgb,var(--accent) ${Math.max(8, p)}%,var(--soft))`}"></button>`;
+        return `<button ${d < from || d > now ? "disabled" : ""} data-action="inspect:${d}" aria-label="${short(d)}: ${score(p)}" class="${d===now?"heat-today":""}" style="opacity:${d < from || d > now ? 0.15 : p === null ? 0.42 : 1};background:${p === null ? "var(--line)" : `color-mix(in srgb,var(--accent) ${p}%,var(--soft))`};color:${p!==null&&p>=65?"white":"var(--ink)"}">${C.parse(d).getDate()}</button>`;
       })
       .join(
         "",
@@ -326,7 +317,7 @@ function progressView() {
               const sum = Object.entries(state.logs[h.id] || {})
                 .filter(([d]) => d >= from && d <= now)
                 .reduce((n, [, v]) => n + v, 0);
-              return `<div class="habit"><div class="glyph">${icon(h.icon)}</div><button class="habitname" data-action="filterhabit:${h.id}"><strong>${esc(h.name)}</strong><small>${esc(h.type === "duration" && sum >= 60 ? `${Math.floor(sum / 60)} ч ${sum % 60} мин` : unit(h, sum))}${h.archived ? " · архив" : ""}</small><div class="progress"><i style="width:${a.p || 0}%"></i></div></button><b>${score(a.p)}</b></div>`;
+              return `<div class="habit"><div class="glyph" style="color:${colors[h.color] || "var(--accent)"}">${icon(h.icon)}</div><button class="habitname" data-action="filterhabit:${h.id}"><strong>${esc(h.name)}</strong><small>${esc(h.type === "duration" && sum >= 60 ? `${Math.floor(sum / 60)} ч ${sum % 60} мин` : unit(h, sum))}${h.archived ? " · архив" : ""}</small><div class="progress"><i style="width:${a.p || 0}%"></i></div></button><b>${score(a.p)}</b></div>`;
             })
             .join("")}</div>`
         : '<div class="empty">Здесь появятся ваши результаты.</div>'
@@ -467,7 +458,7 @@ function settings() {
             `<div class="row between"><span>${esc(h.name)}</span>${btn("restore:" + h.id, "Восстановить " + h.name, "Вернуть", "smallbutton")}</div>`,
         )
         .join("") || '<p class="muted">Архив пуст</p>'
-    }<h3>Данные</h3><button class="secondary full" data-action="export">Экспорт резервной копии</button><label for="import">Импорт резервной копии (замена данных)</label><input id="import" type="file" accept="application/json,.json"><p class="notice">Данные хранятся на устройстве. Периодически экспортируйте копию. CORE 1.1</p><button class="primary full" data-action="close">Готово</button>`,
+    }<h3>Данные</h3><button class="secondary full" data-action="export">Экспорт резервной копии</button><label for="import">Импорт резервной копии (замена данных)</label><input id="import" type="file" accept="application/json,.json"><p class="notice">Данные хранятся на устройстве. Периодически экспортируйте копию. CORE 1.2</p><button class="primary full" data-action="close">Готово</button>`,
   );
   $("#import").onchange = async (e) => {
     try {

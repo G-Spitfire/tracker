@@ -665,3 +665,49 @@ dialog[open]::backdrop { animation: core-fade .25s ease both; }
 
 .chart-empty { min-height: 70px; padding: 16px; margin-top: 12px; border: 0; background: var(--soft); font-size: 13px; border-radius: 14px; }
 .metric-help summary { width: fit-content; }
+
+/* CORE 1.2: dial, tactile surfaces and calendar rhythm */
+.date-heading { margin: 4px 0 7px; }
+.date-heading h2 { font-size: 21px; letter-spacing: -.55px; }
+.date-heading .muted { margin-top: 3px; }
+.date-controls { gap: 0; }
+.week { margin-bottom: 15px; }
+.day.selected { background: var(--soft); color: var(--accent); }
+.day.selected b { color: var(--accent); }
+.day.selected em { background: var(--line); }
+.day.selected em i { background: var(--accent); }
+.day.no-plan em { opacity: .35; }
+.core-hero { padding: 16px; min-height: 142px; gap: 20px; background: linear-gradient(135deg,var(--soft),color-mix(in srgb,var(--soft) 68%,var(--surface))); }
+.core-hero > .core-dial { flex: 0 0 116px; width: 116px; height: 116px; position: relative; }
+.core-dial > svg { width: 100%; height: 100%; display: block; }
+.dial-tick { stroke: color-mix(in srgb,var(--accent) 22%,var(--soft)); stroke-width: 2.4; }
+.dial-tick.lit { stroke: var(--accent); }
+.dial-label { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.dial-label .big { font-size: 33px; letter-spacing: -1.8px; margin: 0; }
+.dial-label span { font-size: 9px; letter-spacing: 1.3px; color: var(--muted); margin-top: 3px; }
+.hero-summary { min-width: 0; flex: 1; }
+.hero-summary .eyebrow { letter-spacing: .9px; font-size: 9px; }
+.hero-summary b { display: block; font-size: 22px; letter-spacing: -.6px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.hero-summary .muted { margin-top: 2px; }
+.week-summary { border-top: 1px solid color-mix(in srgb,var(--accent) 15%,transparent); margin-top: 11px; padding-top: 10px; }
+.grouping.grouped { background: var(--soft); color: var(--accent); }
+.list { display: flex; flex-direction: column; gap: 7px; }
+.habit { border: 0; background: var(--surface); border-radius: 15px; padding: 8px 10px; min-height: 65px; }
+.habit.is-done { background: color-mix(in srgb,var(--soft) 55%,var(--surface)); }
+.glyph { background: color-mix(in srgb,var(--soft) 55%,var(--surface)); width: 36px; height: 36px; }
+.habitname small { font-size: 12px; }
+.section { margin: 12px 0 5px; }
+nav { border-top-color: color-mix(in srgb,var(--line) 70%,transparent); }
+nav button.active { font-weight: 650; }
+nav .add { background: var(--accent); }
+.metric-help summary { list-style: none; }
+.metric-help summary::-webkit-details-marker { display: none; }
+.heat-wrap { display: block; margin: 10px 0; }
+.heat-labels { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); grid-template-rows: auto; text-align: center; font-size: 11px; margin-bottom: 5px; }
+.heat { display: grid; width: 100%; grid-template-columns: repeat(7,minmax(0,1fr)); grid-template-rows: none; grid-auto-flow: row; grid-auto-columns: auto; gap: 4px; }
+.heat button { aspect-ratio: auto; min-height: 36px; border-radius: 7px; font-size: 12px; font-variant-numeric: tabular-nums; }
+.heat button.heat-today { box-shadow: inset 0 0 0 1.5px var(--accent); }
+.heat-long button { min-height: 30px; font-size: 10px; }
+.legend { justify-content: flex-end; }
+@media(max-width:350px){ .core-hero{gap:12px;padding:12px;} .core-hero > .core-dial{flex-basis:100px;width:100px;height:100px;} .hero-summary b{font-size:20px;} }
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;}}
