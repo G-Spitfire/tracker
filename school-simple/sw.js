@@ -1,4 +1,4 @@
-const CACHE_NAME = "school-shell-v1.33.56-holiday-frost-premium";
+const CACHE_NAME = "school-shell-v1.33.57-holiday-frost-premium";
 const SHELL = [
   "./",
   "./index.html",
