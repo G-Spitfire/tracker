@@ -380,3 +380,15 @@ html[data-theme=dark] .detail-box{background:#212121}
 html[data-theme=dark] .detail-box .modal-button:not(.primary){background:#303030}
 html[data-theme=dark] .seg button.active{background:#292929}
 @media(prefers-color-scheme:dark){html[data-theme=system] .detail-box{background:#212121}html[data-theme=system] .detail-box .modal-button:not(.primary){background:#303030}html[data-theme=system] .seg button.active{background:#292929}}
+
+/* Keep status text legible on dark dialogs without changing status behavior. */
+html[data-theme=dark] .sync-ok{color:#57d5a6}
+html[data-theme=dark] :is(.sync-cached,.sync-warning-text){color:#f0c06d}
+html[data-theme=dark] .sync-error{color:#ff8a8a}
+html[data-theme=dark] .sync-status-icon{background:#303030}
+@media(prefers-color-scheme:dark){
+  html[data-theme=system] .sync-ok{color:#57d5a6}
+  html[data-theme=system] :is(.sync-cached,.sync-warning-text){color:#f0c06d}
+  html[data-theme=system] .sync-error{color:#ff8a8a}
+  html[data-theme=system] .sync-status-icon{background:#303030}
+}
