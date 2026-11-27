@@ -174,7 +174,7 @@ function completedCleanStreak(kid,today){
  return dates.filter(d=>!lastBad||d>lastBad).length;
 }
 function home(){
- const all=gradeData(),counts=[5,4,3,2].map(n=>all.filter(g=>g.value===n).length),colors=['#31ad81','#538fe0','#e8ac45','#e36565'];
+ const all=gradeData(),counts=[5,4,3,2].map(n=>all.filter(g=>g.value===n).length),colors=['var(--grade-5)','var(--grade-4)','var(--chart-3)','var(--grade-2)'];
  const today=iso(TODAY),weekly=weeklyDynamics(kids[state.child].subjects);
  const hasBaseline=weekly!==null,delta=weekly?.delta??0;
  const direction=!hasBaseline?'none':delta>0?'up':delta<0?'down':'flat';
@@ -188,7 +188,7 @@ function home(){
  const tile=(label,value,hint,icon,color)=>'<div class="stat-tile"'+(icon==='alert'&&criticalRisk?' data-risk="critical"':'')+'><div class="stat-top"><span>'+label+'</span><span class="stat-icon">'+kpiIcon(icon)+'</span></div><strong class="stat-value"'+(color?' style="color:'+color+'"':'')+'>'+value+'</strong><span class="stat-hint">'+hint+'</span></div>';
  let out='<section class="home-screen"><div class="stats-grid">'+
  tile('Средний балл',fmt(score()),'За четверть','average')+
- tile('Динамика',hasBaseline?arrow+' '+(delta>0?'+':'')+fmt(delta):'—',hasBaseline?'К прошлым 7 дням':'Нет данных','trend',delta>0?'#31ad81':delta<0?'#d76a6a':null)+
+ tile('Динамика',hasBaseline?arrow+' '+(delta>0?'+':'')+fmt(delta):'—',hasBaseline?'К прошлым 7 дням':'Нет данных','trend',delta>0?'var(--grade-5)':delta<0?'var(--grade-2)':null)+
  (holidayInfo()?holidayTile(holidayInfo()):tile('Доля пятёрок',fiveShare+'%','От всех оценок','star'))+
  tile('Под риском',String(riskCount)+' <span class="risk-total">из '+subjectAverages.length+'</span>','Средний балл &lt; 3,60','alert')+
  tile('Без двоек',String(cleanStreak),'Учебных дней подряд','flame')+
@@ -209,7 +209,7 @@ function grades(){
  const period='';
  const subjects=kids[state.child].subjects.map(s=>({...s,grades:s.grades.filter(g=>inQuarter(g.date)),avg:mean(s.grades.filter(g=>inQuarter(g.date)).map(g=>g.value))}));
  const newGradeIds=recentGradeNoticeIds(state.child);
- const note='Оценки загружены из электронного дневника.';const performanceColor=n=>n>=4.6?'#16a34a':n>=3.6?'#eab308':n>=2.6?'#f97316':'#ef4444';
+ const note='Оценки загружены из электронного дневника.';const performanceColor=n=>n>=4.6?'var(--grade-5)':n>=3.6?'var(--grade-4)':n>=2.6?'var(--grade-3)':'var(--grade-2)';
  if(state.gradesView==='grades')return tabs+period+'<div class="content-after-controls"><div class="grades-column-header"><span>Предмет</span><span>Средний</span></div>'+subjects.map(s=>{let visible=s.grades.filter(g=>(!state.testsOnly||g.test)&&(!state.twosOnly||g.value===2));if(!visible.length)return '';return '<section class="subject"><div class="row"><strong>'+escapeHTML(s.name)+'</strong><span class="subject-score"><strong class="subject-average">'+fmt(s.avg)+'</strong>'+subjectTrend(s.grades)+'</span></div><div class="marks">'+visible.map(g=>'<button class="mark '+(newGradeIds.has(gradeNoticeId(state.child,s.name,g))?'new':'')+'" data-action="grade" data-value="'+encodeURIComponent(JSON.stringify({subject:s.name,...g}))+'" aria-label="Оценка '+g.value+' за '+g.date+'">'+g.value+'</button>').join('')+'</div></section>'}).join('')+'<p class="grades-footnote">'+note+'</p></div>';
  if(state.gradesView==='forecast')return tabs+period+'<div class="content-after-controls"><div class="forecast-header"><span>Предмет</span><span class="forecast-number">Средний</span><span class="forecast-number">Прогноз</span></div>'+subjects.filter(s=>s.grades.length).sort((a,b)=>(a.avg>=4.6?5:a.avg>=3.6?4:a.avg>=2.6?3:2)-(b.avg>=4.6?5:b.avg>=3.6?4:b.avg>=2.6?3:2)||a.avg-b.avg||a.name.localeCompare(b.name,'ru')).map(s=>'<div class="forecast-item"><div class="forecast-row"><strong>'+escapeHTML(s.name)+'</strong><span class="forecast-number sub">'+fmt(s.avg)+'</span><strong class="forecast-number forecast-result" style="color:'+performanceColor(s.avg)+'">'+(s.avg>=4.6?5:s.avg>=3.6?4:s.avg>=2.6?3:2)+'</strong></div><div class="forecast-track" aria-label="Средний балл '+fmt(s.avg)+' из 5"><div class="forecast-fill" style="background:'+performanceColor(s.avg)+';width:'+Math.max(0,Math.min(100,s.avg/5*100))+'%"></div></div></div>').join('')+'<p class="grades-footnote">Прогноз предварительный: используются пороги 2,60 / 3,60 / 4,60, а не официальные правила выставления итоговой оценки.</p></div>';
  return tabs+period+'<div class="content-after-controls"></div>';
