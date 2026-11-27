@@ -58,6 +58,16 @@ test('home: no-grade school day counts towards streak', () => {
   const html = vm.runInContext('home()',c);
   assert.match(html, /Без двоек<\/span>.*?<strong class="stat-value">2<\/strong>/s, 'Today is not yet a completed school day');
 });
+test('holiday: December calendar, Russian plurals, annual reset and third tile only',()=>{
+  for(const [month,day,expected,word] of [[10,30,null,null],[11,1,30,'дней'],[11,15,16,'дней'],[11,19,12,'дней'],[11,27,4,'дня'],[11,30,1,'день'],[11,31,0,'дней'],[0,1,null,null]]){
+    const c=setup({TODAY:new Date(2027,month,day,12)});
+    const info=vm.runInContext('holidayInfo()',c);
+    const html=vm.runInContext('home()',c);
+    assert.equal((html.match(/class="stat-tile(?: holiday-ice)?"/g)||[]).length,6);
+    if(expected===null){assert.equal(info,null);assert.match(html,/Доля пятёрок/);assert.doesNotMatch(html,/holiday-ice/);}
+    else {assert.equal(info.days,expected);assert.equal(info.word,word);assert.doesNotMatch(html,/Доля пятёрок/);assert.match(html,expected===0?/Новый год сегодня!/:new RegExp('>'+expected+'</strong>.*?'+word+(word==='день'?' остался':' осталось')));}
+  }
+});
 test('homework: next five actual scheduled days, skipping weekends', () => {
   const c = setup();
   const dates=['2026-11-20','2026-11-23','2026-11-24','2026-11-25','2026-11-26','2026-11-27'];
