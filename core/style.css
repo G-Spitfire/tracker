@@ -612,3 +612,53 @@ form .row > div {
     animation: none !important;
   }
 }
+
+/* CORE 1.1 — quiet, compact layout and shared motion tokens */
+:root { --ease-core: cubic-bezier(.22,1,.36,1); }
+main { padding: calc(8px + env(safe-area-inset-top)) 18px calc(88px + env(safe-area-inset-bottom)); }
+header { margin-bottom: 8px; }
+.brand { font-size: 31px; }
+.iconbtn { border-color: transparent; }
+.week { gap: 3px; margin: 2px 0 13px; }
+.day { height: 56px; gap: 3px; border-radius: 12px; transition: background .22s, color .22s, transform .12s; }
+.hero { min-height: 104px; padding: 13px 16px; border-radius: 18px; }
+.hero .big { font-size: 43px; margin: 3px 0; }
+.bars { height: 66px; }
+.bartrack { height: 49px; background: transparent; border-bottom: 1px solid var(--line); border-radius: 3px; }
+.barfill { transition: height .5s var(--ease-core); }
+.day em i,.progress i { transition: width .5s var(--ease-core); }
+.section { margin: 15px 0 5px; }
+h2 { font-size: 18px; font-weight: 650; }
+.list { border: 0; background: transparent; padding: 0; border-radius: 0; }
+.habit { min-height: 64px; gap: 10px; padding: 6px 0; border-color: color-mix(in srgb,var(--line) 65%,transparent); }
+.glyph { width: 34px; height: 34px; border-radius: 10px; background: transparent; }
+.habitname strong { font-weight: 600; font-size: 16px; }
+.habitname small { margin-top: 3px; }
+.weekly-progress { display: flex; gap: 4px; margin-top: 6px; max-width: 100px; }
+.weekly-progress i { flex: 1; height: 3px; border-radius: 3px; background: var(--line); transition: background .3s; }
+.weekly-progress i.filled { background: var(--accent); }
+.check span { transition: background .24s, border-color .24s, transform .24s var(--ease-core); }
+.check svg { stroke: white; opacity: 0; stroke-dasharray: 24; stroke-dashoffset: 24; transition: opacity .15s,stroke-dashoffset .32s var(--ease-core); }
+.check.done svg { opacity: 1; stroke-dashoffset: 0; }
+.check.done span { transform: scale(1.04); }
+button { transition: transform .12s var(--ease-core), background .2s, color .2s; }
+nav { padding: 5px 18px calc(6px + env(safe-area-inset-bottom)); gap: clamp(16px,10vw,45px); }
+nav .add { width: 44px; min-width: 44px; height: 44px; box-shadow: none; }
+nav .add svg { width: 22px; height: 22px; }
+.panel { background: transparent; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 12px 0 16px; margin: 8px 0; }
+.segments { margin: 8px 0; }
+#filter { background: transparent; border: 0; padding: 8px 0; font-size: 14px; }
+.chart { height: 96px; margin: 10px 0 6px; }
+.metric-help { color: var(--muted); font-size: 12px; margin: 6px 0; }
+.metric-help summary { cursor: pointer; padding: 5px 0; }
+.metric-help p { margin: 3px 0; line-height: 1.5; }
+.heat-wrap { display: flex; gap: 8px; align-items: stretch; margin: 10px 0; }
+.heat-labels { display: grid; grid-template-rows: repeat(7,1fr); gap: 3px; font-size: 10px; color: var(--muted); align-items: center; }
+.heat { flex: 0 1 auto; width: min(100%, calc(var(--heat-weeks,5) * 23px)); grid-auto-columns: minmax(0,1fr); margin: 0; }
+.heat button { width: 100%; }
+.legend { justify-content: flex-start; }
+dialog[open] { animation: core-sheet .3s var(--ease-core) both; }
+dialog[open]::backdrop { animation: core-fade .25s ease both; }
+@keyframes core-sheet { from { transform: translateY(25px); opacity: .4; } to { transform: translateY(0); opacity: 1; } }
+@keyframes core-fade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }

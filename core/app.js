@@ -177,7 +177,17 @@ function setValue(h, d, n) {
   save();
   render();
 }
+function motionKey(el) {
+  const habit = el.closest(".habit");
+  if(habit) return habit.querySelector(".habitname").dataset.action + ":" + (el.matches(".weekly-progress i") ? "week"+[...el.parentNode.children].indexOf(el) : el.matches(".progress i") ? "progress" : "action");
+  const day = el.closest(".day");
+  if(day) return day.dataset.action;
+  const bar = el.closest(".barcol");
+  return bar ? "bar:"+bar.title.split(":")[0] : "";
+}
 function render() {
+  const oldTab = app.dataset.tab;
+  const previous = new Map([...app.querySelectorAll(".check,.quick,.progress i,.weekly-progress i,.barfill,.day em i")].map(el => [motionKey(el),el]));
   theme();
   $("#nav").innerHTML =
     btn(
@@ -194,11 +204,23 @@ function render() {
       tab === "progress" ? "active" : "",
     );
   app.innerHTML = tab === "today" ? todayView() : progressView();
+  app.dataset.tab = tab;
+  if(oldTab === tab && tab === "today") {
+    for(const el of app.querySelectorAll(".check,.quick,.progress i,.weekly-progress i,.barfill,.day em i")) {
+      const old = previous.get(motionKey(el));
+      if(!old) continue;
+      const nextClass = el.className, nextStyle = el.getAttribute("style");
+      el.replaceWith(old); old.className = nextClass;
+      if(nextStyle !== null) old.setAttribute("style", nextStyle); else old.removeAttribute("style");
+    }
+  } else if(oldTab && oldTab !== tab && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    app.animate([{opacity:0.55,transform:"translateY(5px)"},{opacity:1,transform:"translateY(0)"}],{duration:220,easing:"cubic-bezier(.2,.8,.2,1)"});
+  }
   const heat = app.querySelector(".heat");
   if (heat) heat.style.setProperty("--heat-weeks", heat.children.length / 7);
 }
 function header(title) {
-  return `<header>${title ? `<h1>${title}</h1>` : '<div><div class="brand">core<i>.</i></div><div class="eyebrow" style="margin-top:7px">Personal development</div></div>'}${btn("settings", "Настройки", icon("settings"), "iconbtn")}</header>`;
+  return `<header>${title ? `<h1>${title}</h1>` : '<div><div class="brand">core<i>.</i></div></div>'}${btn("settings", "Настройки", icon("settings"), "iconbtn")}</header>`;
 }
 function todayView() {
   const now = C.today(),
@@ -226,33 +248,17 @@ function todayView() {
       })
       .join(
         "",
-      )}</div></div><div class="row between section"><h2>Привычки</h2>${btn("group", "Переключить группировку", state.settings.group ? "По категориям" : "Единый список", "smallbutton")}</div>`;
+      )}</div></div><div class="row between section"><h2>Привычки</h2>${btn("group", "Переключить группировку", state.settings.group ? "По категориям" : "Список", "smallbutton")}</div>`;
   if (!hs.length && !wh.length)
     html += `<div class="empty">${state.habits.length ? "На этот день нет запланированных привычек." : "Начните с одного маленького действия."}<br><button class="primary" data-action="new" style="margin-top:14px">Создать привычку</button></div>`;
-  if (hs.length) {
+  const all = state.habits.filter(h => hs.includes(h) || wh.includes(h));
+  const renderRows = list => list.map(h => habitRow(h, selected, wh.includes(h))).join("");
+  if (all.length) {
     if (state.settings.group) {
-      const groups = [...new Set(hs.map((h) => h.category || "Без категории"))];
-      html += groups
-        .map(
-          (g) =>
-            `<h3>${esc(g)}</h3><div class="list">${hs
-              .filter((h) => (h.category || "Без категории") === g)
-              .map((h) => habitRow(h, selected))
-              .join("")}</div>`,
-        )
-        .join("");
-    } else
-      html += `<div class="list">${hs.map((h) => habitRow(h, selected)).join("")}</div>`;
-  }
-  if (wh.length) {
-    html += `<div class="section"><h2>Цели недели</h2><div class="muted">Выполняйте в удобные дни</div></div>`;
-    if (state.settings.group) {
-      for (const group of new Set(wh.map(h=>h.category||"Без категории"))) {
-        html += `<h3>${esc(group)}</h3><div class="list">${wh.filter(h=>(h.category||"Без категории")===group).map(h=>habitRow(h,selected,true)).join("")}</div>`;
+      for (const g of new Set(all.map(h => h.category || "Без категории"))) {
+        html += `<h3>${esc(g)}</h3><div class="list">${renderRows(all.filter(h => (h.category || "Без категории") === g))}</div>`;
       }
-    } else {
-      html += `<div class="list">${wh.map(h=>habitRow(h,selected,true)).join("")}</div>`;
-    }
+    } else html += `<div class="list">${renderRows(all)}</div>`;
   }
   return html;
 }
@@ -261,7 +267,7 @@ function habitRow(h, d, w = false) {
     n = C.val(state, h, d),
     done = C.complete(state, h, d),
     wk = w ? C.weekly(state, h, d) : null;
-  return `<div class="habit"><div class="glyph" style="color:${colors[h.color] || "var(--accent)"}">${icon(h.icon)}</div><button class="habitname" data-action="entry:${h.id}"><strong>${esc(h.name)}</strong><small>${w ? `${wk.count} / ${wk.goal} за неделю · ` : ""}${h.type === "check" ? (done ? "Выполнено" : "Не выполнено") : `${esc(unit(h, n))} / ${esc(unit(h, v.goal))}`}</small>${h.type !== "check" ? `<div class="progress"><i style="width:${Math.min(100, (n / v.goal) * 100)}%"></i></div>` : ""}</button>${h.type === "check" ? btn("toggle:" + h.id, "Отметить " + h.name, `<span>${done ? icon("check") : ""}</span>`, "check " + (done ? "done" : "")) : btn("inc:" + h.id, "Добавить " + v.step, `+${v.step}${h.type === "duration" ? " м" : ""}`, "quick")}</div>`;
+  return `<div class="habit"><div class="glyph" style="color:${colors[h.color] || "var(--accent)"}">${icon(h.icon)}</div><button class="habitname" data-action="entry:${h.id}"><strong>${esc(h.name)}</strong><small>${w ? `${wk.count} из ${wk.goal} за неделю${h.type === "check" ? "" : " · "}` : ""}${h.type === "check" ? (w ? "" : (done ? "Выполнено" : "Сегодня")) : `${esc(unit(h, n))} / ${esc(unit(h, v.goal))}`}</small>${w ? `<div class="weekly-progress" aria-hidden="true">${Array.from({length:wk.goal},(_,i)=>`<i class="${i<wk.count?"filled":""}"></i>`).join("")}</div>` : ""}${h.type !== "check" ? `<div class="progress"><i style="width:${Math.min(100, (n / v.goal) * 100)}%"></i></div>` : ""}</button>${h.type === "check" ? btn("toggle:" + h.id, "Отметить " + h.name, `<span>${icon("check")}</span>`, "check " + (done ? "done" : "")) : btn("inc:" + h.id, "Добавить " + v.step, `+${v.step}${h.type === "duration" ? " м" : ""}`, "quick")}</div>`;
 }
 function progressView() {
   const now = C.today(),
@@ -293,14 +299,14 @@ function progressView() {
     );
   return (
     header("Прогресс") +
-    `<div class="segments">${[7, 30, 90].map((n) => btn("period:" + n, n + " дней", n + " дней", period === n ? "active" : "")).join("")}</div><select id="filter" aria-label="Фильтр статистики">${options}</select><div class="panel"><div class="eyebrow">Регулярность</div><div class="row"><div class="big">${score(s.p)}</div>${diff === null ? "" : `<span class="muted">${diff > 0 ? "+" : ""}${diff} п.п.</span>`}</div><div class="muted">Выполнение дневных и завершённых недельных планов</div><div class="chart">${s.days.map((x) => `<button data-action="inspect:${x.d}" aria-label="${short(x.d)}: ${score(x.p)}" style="height:${x.p === null ? 2 : Math.max(2, x.p)}%;opacity:${x.p === null ? 0.2 : 1}"></button>`).join("")}</div><div class="row between muted"><span>${short(from)}</span><span>${short(now)}</span></div><div class="row" style="margin-top:20px"><div class="metric"><span class="muted">Выполнено</span><b>${s.actions}</b></div><div class="metric"><span class="muted">Лучшая серия*</span><b>${s.best} дн.</b></div></div><div class="notice">*Дни с выполнением всего дневного плана; дни отдыха не прерывают серию.</div></div><div class="panel"><h2>Карта активности</h2><div class="heat">${heatDates
+    `<div class="segments">${[7, 30, 90].map((n) => btn("period:" + n, n + " дней", n + " дней", period === n ? "active" : "")).join("")}</div><select id="filter" aria-label="Фильтр статистики">${options}</select><div class="panel"><div class="eyebrow">Регулярность</div><div class="row"><div class="big">${score(s.p)}</div>${diff === null ? "" : `<span class="muted">${diff > 0 ? "+" : ""}${diff} п.п.</span>`}</div><details class="metric-help"><summary>Как считается</summary><p class="muted">Дневные планы и завершённые недели. Текущая гибкая недельная цель отображается отдельно.</p></details><div class="chart">${s.days.map((x) => `<button data-action="inspect:${x.d}" aria-label="${short(x.d)}: ${score(x.p)}" style="height:${x.p === null ? 0 : Math.max(2, x.p)}%;opacity:${x.p === null ? 0 : 1}"></button>`).join("")}</div><div class="row between muted"><span>${short(from)}</span><span>${short(now)}</span></div><div class="row" style="margin-top:20px"><div class="metric"><span class="muted">Выполнено</span><b>${s.actions}</b></div><div class="metric"><span class="muted">Лучшая серия</span><b>${s.best} дн.</b></div></div><details class="metric-help"><summary>О серии</summary><p class="muted">Дни с выполнением всего дневного плана; дни отдыха не прерывают серию.</p></details></div><div class="panel activity-panel"><h2>Активность</h2><div class="heat-wrap"><div class="heat-labels">${["Пн","Вт","Ср","Чт","Пт","Сб","Вс"].map(x=>`<span>${x}</span>`).join("")}</div><div class="heat">${heatDates
       .map((d) => {
         const p = d < from || d > now ? null : ratio(C.activity(state, d, hs));
-        return `<button ${d < from || d > now ? "disabled" : ""} data-action="inspect:${d}" aria-label="${short(d)}: ${score(p)}" style="opacity:${d < from || d > now ? 0.12 : 1};background:${p === null ? "var(--line)" : `color-mix(in srgb,var(--accent) ${Math.max(8, p)}%,var(--soft))`}"></button>`;
+        return `<button ${d < from || d > now ? "disabled" : ""} data-action="inspect:${d}" aria-label="${short(d)}: ${score(p)}" style="opacity:${d < from || d > now || p === null ? 0.25 : 1};background:${p === null ? "var(--line)" : `color-mix(in srgb,var(--accent) ${Math.max(8, p)}%,var(--soft))`}"></button>`;
       })
       .join(
         "",
-      )}</div><div class="legend muted">Меньше ${[10, 35, 65, 100].map((p) => `<i style="background:color-mix(in srgb,var(--accent) ${p}%,var(--soft))"></i>`).join("")} Больше</div></div><div class="section"><h2>Мои результаты</h2></div>${
+      )}</div></div><div class="legend muted">Меньше ${[10, 35, 65, 100].map((p) => `<i style="background:color-mix(in srgb,var(--accent) ${p}%,var(--soft))"></i>`).join("")} Больше</div></div><div class="section"><h2>Мои результаты</h2></div>${
       hs.length
         ? `<div class="list">${hs
             .map((h) => {
@@ -449,7 +455,7 @@ function settings() {
             `<div class="row between"><span>${esc(h.name)}</span>${btn("restore:" + h.id, "Восстановить " + h.name, "Вернуть", "smallbutton")}</div>`,
         )
         .join("") || '<p class="muted">Архив пуст</p>'
-    }<h3>Данные</h3><button class="secondary full" data-action="export">Экспорт резервной копии</button><label for="import">Импорт резервной копии (замена данных)</label><input id="import" type="file" accept="application/json,.json"><p class="notice">Данные хранятся на устройстве. Периодически экспортируйте копию. CORE 1.0</p><button class="primary full" data-action="close">Готово</button>`,
+    }<h3>Данные</h3><button class="secondary full" data-action="export">Экспорт резервной копии</button><label for="import">Импорт резервной копии (замена данных)</label><input id="import" type="file" accept="application/json,.json"><p class="notice">Данные хранятся на устройстве. Периодически экспортируйте копию. CORE 1.1</p><button class="primary full" data-action="close">Готово</button>`,
   );
   $("#import").onchange = async (e) => {
     try {
