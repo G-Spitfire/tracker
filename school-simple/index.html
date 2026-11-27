@@ -1,6 +1,13 @@
 <!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f7f8fb"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Школа"><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" type="image/svg+xml" href="./icon.svg"><link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png"><title>Школа</title>
-<script>if(/iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent)&&!/Android|Windows/.test(navigator.userAgent)){document.documentElement.classList.add("platform-apple")}</script><link rel="stylesheet" href="./styles.css?v=1.33.56"></head><body><div class="app"><header class="head"><div class="head-title"><span id="brand-mark" class="brand-mark" aria-hidden="true"></span><h1 id="title">Главная</h1></div><button class="icon" id="profile" aria-label="Профиль"></button></header><main id="main"></main></div><nav class="bottom" id="nav"></nav>
+<script>if(/iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent)&&!/Android|Windows/.test(navigator.userAgent)){document.documentElement.classList.add("platform-apple")}</script><link rel="stylesheet" href="./styles.css?v=1.33.56"><style>
+.stat-tile.holiday-ice{position:relative;overflow:hidden;background:linear-gradient(145deg,#f5fcff,#b6dff5 65%,#8fc8e9);border-color:#9bcde7;color:#164d72;box-shadow:inset 0 0 12px #fff9}
+.holiday-ice .stat-top,.holiday-ice .stat-value,.holiday-ice .stat-hint,.holiday-ice .stat-icon{color:#164d72!important;position:relative;z-index:1}
+.holiday-ice:before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-conic-gradient(from 20deg at 100% 100%,transparent 0deg 12deg,#fff9 13deg 14deg,transparent 15deg 30deg);mask-image:linear-gradient(135deg,transparent 55%,#000)}
+.ice-flakes{position:absolute;right:5px;bottom:8px;color:white;opacity:.8;pointer-events:none;animation:ice-drift 5s ease-in-out infinite alternate}
+@keyframes ice-drift{from{transform:translateY(-9px)}to{transform:translateY(3px)}}
+@media(prefers-reduced-motion:reduce){.ice-flakes{animation:none}}
+</style></head><body><div class="app"><header class="head"><div class="head-title"><span id="brand-mark" class="brand-mark" aria-hidden="true"></span><h1 id="title">Главная</h1></div><button class="icon" id="profile" aria-label="Профиль"></button></header><main id="main"></main></div><nav class="bottom" id="nav"></nav>
 <script src="./assets/icons.js"></script>
 
 <script src="./school-sync-client.js"></script>
@@ -155,8 +162,9 @@ function weeklyDynamics(subjects, today=TODAY){
 let state={tab:'home',child:readSetting('school-active-child','0')==='1'?1:0,gradesView:'grades',quarter:currentQuarter(),testsOnly:false,twosOnly:false,chart:'line',hw:'tomorrow',date:iso(TODAY),week:0,theme:readSetting('school-theme','system'),accent:readSetting('school-accent','#4c8bf5'),motion:readSetting('school-motion','on')!=='off',returnTab:'home'};
 const main=document.querySelector('#main'),nav=document.querySelector('#nav');const mean=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:0;const fmt=n=>n.toFixed(2).replace('.',',');const gradeData=()=>kids[state.child].subjects.flatMap(s=>s.grades).filter(g=>inQuarter(g.date));
 const quarterRange=q=>SCHOOL_QUARTERS[Number(q)-1];const inQuarter=date=>{const q=quarterRange(state.quarter);return !!q&&date>=q.start&&date<=q.end};const score=()=>SchoolAnalytics.overallAverage(kids[state.child].subjects,state.quarter,SCHOOL_QUARTERS);const setTab=t=>{if(state.tab===t)return;state.tab=t;render();window.scrollTo({top:0,left:0,behavior:'instant'})};const btns=(items,current,handler)=>'<div class="seg">'+items.map(([v,l])=>'<button data-action="'+handler+'" data-value="'+v+'" class="'+(v===current?'active':'')+'">'+l+'</button>').join('')+'</div>';
-// Every December the fifth KPI temporarily displays a New Year countdown.
-function holidayInfo(){const now=new Date();return now.getMonth()===11?{days:31-now.getDate()}:null;}
+// Preview only: fixed December date.
+function holidayInfo(){return {days:30};}
+function holidayTile(info){return `<div class="stat-tile holiday-ice"><div class="stat-top"><span>До Нового года</span><span class="stat-icon">❄</span></div><strong class="stat-value">${info.days}</strong><span class="stat-hint">дней осталось</span><span aria-hidden="true" class="ice-flakes">❄　·　❅</span></div>`;}
 function completedCleanStreak(kid,today){
  const dates=[...new Set([...(kid.lessons||[]),...(kid.schedule||[])].map(l=>String(l?.from||'').slice(0,10)).filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d)&&d<today&&SCHOOL_QUARTERS.some(q=>d>=q.start&&d<=q.end)))].sort().reverse();
  const bad=new Set(kid.subjects.flatMap(s=>s.grades.filter(g=>g.value===2).map(g=>g.date)));
@@ -179,7 +187,7 @@ function home(){
  let out='<section class="home-screen"><div class="stats-grid">'+
  tile('Средний балл',fmt(score()),'За четверть','average')+
  tile('Динамика',hasBaseline?arrow+' '+(delta>0?'+':'')+fmt(delta):'—',hasBaseline?'К прошлым 7 дням':'Нет данных','trend',delta>0?'#31ad81':delta<0?'#d76a6a':null)+
- tile('Доля пятёрок',fiveShare+'%','От всех оценок','star')+
+ (holidayInfo()?holidayTile(holidayInfo()):tile('Доля пятёрок',fiveShare+'%','От всех оценок','star'))+
  tile('Под риском',String(riskCount)+' <span class="risk-total">из '+subjectAverages.length+'</span>','Средний балл &lt; 3,60','alert')+
  tile('Без двоек',String(cleanStreak),'Учебных дней подряд','flame')+
  tile('Средний за ДЗ',hwAverage,'За четверть','homework')+
