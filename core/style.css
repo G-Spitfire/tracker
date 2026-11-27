@@ -662,3 +662,6 @@ dialog[open]::backdrop { animation: core-fade .25s ease both; }
 @keyframes core-sheet { from { transform: translateY(25px); opacity: .4; } to { transform: translateY(0); opacity: 1; } }
 @keyframes core-fade { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+
+.chart-empty { min-height: 70px; padding: 16px; margin-top: 12px; border: 0; background: var(--soft); font-size: 13px; border-radius: 14px; }
+.metric-help summary { width: fit-content; }

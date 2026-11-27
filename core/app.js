@@ -187,7 +187,9 @@ function motionKey(el) {
 }
 function render() {
   const oldTab = app.dataset.tab;
-  const previous = new Map([...app.querySelectorAll(".check,.quick,.progress i,.weekly-progress i,.barfill,.day em i")].map(el => [motionKey(el),el]));
+  const previous = new Map([...app.querySelectorAll(".check,.quick,.progress i,.weekly-progress i,.barfill,.day em i")].map(el => [motionKey(el),{cls:el.className, width:el.style.width, height:el.style.height, text:el.textContent}]));
+  const oldScore = app.querySelector(".hero .big")?.textContent;
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   theme();
   $("#nav").innerHTML =
     btn(
@@ -205,16 +207,26 @@ function render() {
     );
   app.innerHTML = tab === "today" ? todayView() : progressView();
   app.dataset.tab = tab;
-  if(oldTab === tab && tab === "today") {
-    for(const el of app.querySelectorAll(".check,.quick,.progress i,.weekly-progress i,.barfill,.day em i")) {
+  if (!reduced && oldTab === tab && tab === "today") {
+    const ease = "cubic-bezier(.22,1,.36,1)";
+    for (const el of app.querySelectorAll(".check,.quick,.progress i,.weekly-progress i,.barfill,.day em i")) {
       const old = previous.get(motionKey(el));
-      if(!old) continue;
-      const nextClass = el.className, nextStyle = el.getAttribute("style");
-      el.replaceWith(old); old.className = nextClass;
-      if(nextStyle !== null) old.setAttribute("style", nextStyle); else old.removeAttribute("style");
+      if (!old) continue;
+      if (el.matches(".check") && old.cls !== el.className) {
+        el.querySelector("span").animate([{transform:"scale(.78)"},{transform:"scale(1.08)",offset:.65},{transform:"scale(1)"}],{duration:320,easing:ease});
+        if(el.classList.contains("done")) el.querySelector("svg").animate([{strokeDashoffset:24,opacity:0},{strokeDashoffset:0,opacity:1}],{duration:350,easing:ease});
+      } else if (el.matches(".barfill") && old.height !== el.style.height) {
+        el.animate([{height:old.height},{height:el.style.height}],{duration:450,easing:ease});
+      } else if (el.style.width && old.width !== el.style.width) {
+        el.animate([{width:old.width},{width:el.style.width}],{duration:450,easing:ease});
+      } else if (el.matches(".weekly-progress i") && old.cls !== el.className) {
+        el.animate([{opacity:.3,transform:"scaleX(.55)"},{opacity:1,transform:"scaleX(1)"}],{duration:300,easing:ease});
+      }
     }
-  } else if(oldTab && oldTab !== tab && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    app.animate([{opacity:0.55,transform:"translateY(5px)"},{opacity:1,transform:"translateY(0)"}],{duration:220,easing:"cubic-bezier(.2,.8,.2,1)"});
+    const big = app.querySelector(".hero .big");
+    if(big && oldScore && oldScore !== big.textContent) big.animate([{opacity:.55,transform:"translateY(3px)"},{opacity:1,transform:"translateY(0)"}],{duration:240,easing:ease});
+  } else if(!reduced && oldTab && oldTab !== tab) {
+    app.animate([{opacity:.55,transform:"translateY(5px)"},{opacity:1,transform:"translateY(0)"}],{duration:220,easing:"cubic-bezier(.2,.8,.2,1)"});
   }
   const heat = app.querySelector(".heat");
   if (heat) heat.style.setProperty("--heat-weeks", heat.children.length / 7);
@@ -299,7 +311,7 @@ function progressView() {
     );
   return (
     header("Прогресс") +
-    `<div class="segments">${[7, 30, 90].map((n) => btn("period:" + n, n + " дней", n + " дней", period === n ? "active" : "")).join("")}</div><select id="filter" aria-label="Фильтр статистики">${options}</select><div class="panel"><div class="eyebrow">Регулярность</div><div class="row"><div class="big">${score(s.p)}</div>${diff === null ? "" : `<span class="muted">${diff > 0 ? "+" : ""}${diff} п.п.</span>`}</div><details class="metric-help"><summary>Как считается</summary><p class="muted">Дневные планы и завершённые недели. Текущая гибкая недельная цель отображается отдельно.</p></details><div class="chart">${s.days.map((x) => `<button data-action="inspect:${x.d}" aria-label="${short(x.d)}: ${score(x.p)}" style="height:${x.p === null ? 0 : Math.max(2, x.p)}%;opacity:${x.p === null ? 0 : 1}"></button>`).join("")}</div><div class="row between muted"><span>${short(from)}</span><span>${short(now)}</span></div><div class="row" style="margin-top:20px"><div class="metric"><span class="muted">Выполнено</span><b>${s.actions}</b></div><div class="metric"><span class="muted">Лучшая серия</span><b>${s.best} дн.</b></div></div><details class="metric-help"><summary>О серии</summary><p class="muted">Дни с выполнением всего дневного плана; дни отдыха не прерывают серию.</p></details></div><div class="panel activity-panel"><h2>Активность</h2><div class="heat-wrap"><div class="heat-labels">${["Пн","Вт","Ср","Чт","Пт","Сб","Вс"].map(x=>`<span>${x}</span>`).join("")}</div><div class="heat">${heatDates
+    `<div class="segments">${[7, 30, 90].map((n) => btn("period:" + n, n + " дней", n + " дней", period === n ? "active" : "")).join("")}</div><select id="filter" aria-label="Фильтр статистики">${options}</select><div class="panel"><div class="eyebrow">Регулярность</div><div class="row"><div class="big">${score(s.p)}</div>${diff === null ? "" : `<span class="muted">${diff > 0 ? "+" : ""}${diff} п.п.</span>`}</div><details class="metric-help"><summary>Как считается</summary><p class="muted">Дневные планы и завершённые недели. Текущая гибкая недельная цель отображается отдельно.</p></details>${s.days.filter(x=>x.p!==null).length <= 1 && !s.actions ? `<div class="empty chart-empty">История только начинается. Отмечайте привычки, чтобы увидеть динамику.</div>` : `<div class="chart">${s.days.map((x) => `<button data-action="inspect:${x.d}" aria-label="${short(x.d)}: ${score(x.p)}" style="height:${x.p === null ? 0 : Math.max(2, x.p)}%;opacity:${x.p === null ? 0 : 1}"></button>`).join("")}</div><div class="row between muted"><span>${short(from)}</span><span>${short(now)}</span></div>`}<div class="row" style="margin-top:12px"><div class="metric"><span class="muted">Выполнено</span><b>${s.actions}</b></div><div class="metric"><span class="muted">Лучшая серия</span><b>${s.best} дн.</b></div></div><details class="metric-help"><summary>О серии</summary><p class="muted">Дни с выполнением всего дневного плана; дни отдыха не прерывают серию.</p></details></div><div class="panel activity-panel"><h2>Активность</h2><div class="heat-wrap"><div class="heat-labels">${["Пн","Вт","Ср","Чт","Пт","Сб","Вс"].map(x=>`<span>${x}</span>`).join("")}</div><div class="heat">${heatDates
       .map((d) => {
         const p = d < from || d > now ? null : ratio(C.activity(state, d, hs));
         return `<button ${d < from || d > now ? "disabled" : ""} data-action="inspect:${d}" aria-label="${short(d)}: ${score(p)}" style="opacity:${d < from || d > now || p === null ? 0.25 : 1};background:${p === null ? "var(--line)" : `color-mix(in srgb,var(--accent) ${Math.max(8, p)}%,var(--soft))`}"></button>`;
