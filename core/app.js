@@ -324,13 +324,33 @@ function progressView() {
     }`
   );
 }
-function show(html) {
-  modal.innerHTML = html;
-  if (!modal.open) modal.showModal();
+let sheetClosing = false, sheetReturn = null, pendingImport = null;
+function show(html, back = false) {
+  const wasOpen = modal.open;
+  sheetClosing = false;
+  modal.classList.remove("closing");
+  const heading = html.match(/^<h2>(.*?)<\/h2>/s);
+  const title = heading ? heading[1] : "";
+  const content = heading ? html.slice(heading[0].length) : html;
+  modal.setAttribute("aria-labelledby","sheet-title");
+  modal.innerHTML = `<div class="sheet-handle" aria-hidden="true"></div><div class="sheet-header">${back?btn("settings","Назад к настройкам",icon("left"),"sheet-back"):""}<h2 id="sheet-title" tabindex="-1">${title}</h2>${btn("close","Закрыть",icon("close"),"sheet-close")}</div><div class="sheet-body">${content}</div>`;
+  if (!wasOpen) modal.showModal();
+  modal.scrollTop = 0;
+  modal.querySelector("#sheet-title").focus({preventScroll:true});
+  if(wasOpen && !matchMedia("(prefers-reduced-motion: reduce)").matches)
+    modal.querySelector(".sheet-body").animate([{opacity:.55,transform:"translateY(4px)"},{opacity:1,transform:"translateY(0)"}],{duration:180,easing:"ease-out"});
 }
-function close() {
-  modal.close();
+function close(immediate=false) {
+  if(!modal.open || sheetClosing) return;
+  pendingImport = null;
+  sheetReturn = null;
+  if(immediate || matchMedia("(prefers-reduced-motion: reduce)").matches) { modal.close(); return; }
+  sheetClosing = true;
+  modal.classList.add("closing");
+  setTimeout(()=>{if(sheetClosing){modal.close();modal.classList.remove("closing");sheetClosing=false;}},180);
 }
+modal.addEventListener("cancel",e=>{e.preventDefault();close();});
+modal.addEventListener("click",e=>{if(e.target===modal){const r=modal.getBoundingClientRect();if(e.clientY<r.top||e.clientY>r.bottom||e.clientX<r.left||e.clientX>r.right)close();}});
 function formHabit(h) {
   const v = h
     ? C.config(h, C.today())
@@ -342,7 +362,7 @@ function formHabit(h) {
         frequency: 2,
       };
   show(
-    `<h2>${h ? "Редактировать привычку" : "Новая привычка"}</h2><form id="habitform"><label>Название</label><input name="name" required maxlength="70" placeholder="Например, английский" value="${esc(h?.name)}"><label>Тип</label><select name="type" ${h ? "disabled" : ""}><option value="check">Галочка</option><option value="count" ${h?.type === "count" ? "selected" : ""}>Количество</option><option value="duration" ${h?.type === "duration" ? "selected" : ""}>Продолжительность (минуты)</option></select><div id="quantity"><div class="row"><div><label>Цель</label><input type="number" name="goal" min="0.01" step="0.01" value="${v.goal}"></div><div><label>Шаг добавления</label><input type="number" name="step" min="0.01" step="0.01" value="${v.step}"></div></div><div id="unit"><label>Единица измерения</label><input name="unit" maxlength="24" placeholder="страниц" value="${esc(h?.unit)}"></div></div><label>Периодичность</label><select name="schedule"><option value="daily">Каждый день</option><option value="days" ${v.schedule === "days" ? "selected" : ""}>Выбранные дни</option><option value="weekly" ${v.schedule === "weekly" ? "selected" : ""}>N раз в неделю</option></select><div id="days"><label>Дни недели</label><div class="dayspick">${["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].map((x, i) => `<label><input type="checkbox" name="days" value="${i}" ${v.days.includes(i) ? "checked" : ""}>${x}</label>`).join("")}</div></div><div id="freq"><label>Раз в неделю</label><input type="number" min="1" max="7" name="frequency" value="${v.frequency}"></div><label>Категория (необязательно)</label><input name="category" maxlength="40" list="categories" value="${esc(h?.category)}" placeholder="Тело, развитие…"><datalist id="categories">${[...new Set(state.habits.map((h) => h.category).filter(Boolean))].map((x) => `<option value="${esc(x)}">`).join("")}</datalist><div class="row"><div><label>Иконка</label><select name="icon">${Object.entries(
+    `<h2>${h ? "Редактировать привычку" : "Новая привычка"}</h2><form id="habitform"><label>Название</label><input name="name" required maxlength="70" placeholder="Например, английский" autocomplete="off" value="${esc(h?.name)}"><label>Тип</label><select name="type" ${h ? "disabled" : ""}><option value="check">Галочка</option><option value="count" ${h?.type === "count" ? "selected" : ""}>Количество</option><option value="duration" ${h?.type === "duration" ? "selected" : ""}>Продолжительность (минуты)</option></select><div id="quantity"><div class="row"><div><label>Объём за день</label><input type="number" name="goal" min="0.01" step="0.01" value="${v.goal}"></div><div><label>Шаг добавления</label><input type="number" name="step" min="0.01" step="0.01" value="${v.step}"></div></div><div id="unit"><label>Единица измерения</label><input name="unit" maxlength="24" placeholder="страниц" value="${esc(h?.unit)}"></div></div><label>Периодичность</label><select name="schedule"><option value="daily">Каждый день</option><option value="days" ${v.schedule === "days" ? "selected" : ""}>Выбранные дни</option><option value="weekly" ${v.schedule === "weekly" ? "selected" : ""}>Любые дни недели</option></select><div id="days"><label>Дни недели</label><div class="dayspick">${["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].map((x, i) => `<label><input type="checkbox" name="days" value="${i}" ${v.days.includes(i) ? "checked" : ""}><span>${x}</span></label>`).join("")}</div></div><div id="freq"><label>Сколько дней в неделю</label><input type="number" min="1" max="7" name="frequency" value="${v.frequency}"></div><label>Категория (необязательно)</label><input name="category" maxlength="40" list="categories" value="${esc(h?.category)}" placeholder="Тело, развитие…"><datalist id="categories">${[...new Set(state.habits.map((h) => h.category).filter(Boolean))].map((x) => `<option value="${esc(x)}">`).join("")}</datalist><div class="row"><div><label>Иконка</label><select name="icon">${Object.entries(
       {
         star: "Звезда",
         book: "Книга",
@@ -411,8 +431,8 @@ function formHabit(h) {
       .concat(version);
     if (!h) state.habits.push(item);
     save();
-    close();
     render();
+    if(sheetReturn==="manage")manageHabits(false);else close();
   };
 }
 function entry(h) {
@@ -420,7 +440,7 @@ function entry(h) {
     v = C.config(h, d),
     n = C.val(state, h, d);
   show(
-    `<h2>${esc(h.name)}</h2><div class="muted">${short(d)} · Цель: ${esc(unit(h, v.goal))}</div>${h.type === "check" ? `<button class="primary full detail" data-action="toggleclose:${h.id}">${n ? "Снять отметку" : "Отметить выполнение"}</button>` : `<form id="entryform"><label>Фактическое значение ${h.type === "duration" ? "(минуты)" : ""}</label><input name="value" type="number" min="0" step="0.01" required value="${n}"><div class="actions"><button type="button" class="secondary" data-action="close">Отмена</button><button class="primary">Сохранить</button></div></form>`}<button class="secondary full detail" data-action="edit:${h.id}">Настроить привычку</button><button class="full" data-action="close">Закрыть</button>`,
+    `<h2>${esc(h.name)}</h2><div class="muted">${short(d)} · Цель: ${esc(unit(h, v.goal))}</div>${h.type === "check" ? `<button class="primary full detail" data-action="toggleclose:${h.id}">${n ? "Снять отметку" : "Отметить выполнение"}</button>` : `<form id="entryform"><label>Результат ${h.type === "duration" ? "· минуты" : ""}</label><input name="value" type="number" min="0" step="0.01" required value="${n}"><div class="actions"><button type="button" class="secondary" data-action="close">Отмена</button><button class="primary">Сохранить</button></div></form>`}<button class="secondary full detail" data-action="edit:${h.id}">Настроить привычку</button>`,
   );
   if ($("#entryform"))
     $("#entryform").onsubmit = (e) => {
@@ -429,52 +449,36 @@ function entry(h) {
       close();
     };
 }
+const settingsIcons = {
+ list:"M8 6h12M8 12h12M8 18h12M3 6h1M3 12h1M3 18h1",
+ archive:"M4 8h16v13H4zM3 3h18v5H3zM10 12h4",
+ download:"M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5",
+ upload:"M12 16V4m-5 5 5-5 5 5M4 16v5h16v-5"
+};
+function settingRow(action,label,glyph,meta="") {
+ return btn(action,label,`<span class="setting-icon"><svg viewBox="0 0 24 24"><path d="${settingsIcons[glyph]}"/></svg></span><span class="setting-label">${esc(label)}</span>${meta!==""?`<span class="setting-meta">${esc(meta)}</span>`:""}${icon("right")}`,"setting-row");
+}
 function settings() {
-  show(
-    `<h2>Настройки</h2><div class="eyebrow">Цветовая палитра</div><div class="swatches detail">${Object.entries(
-      palettes,
-    )
-      .map(([k, p]) =>
-        btn(
-          "palette:" + k,
-          k,
-          `<i style="background:${p[4]}"></i>${k[0].toUpperCase() + k.slice(1)}`,
-          state.settings.palette === k ? "active" : "",
-        ),
-      )
-      .join("")}</div><h3>Управление привычками</h3>${
-      state.habits
-        .filter((h) => !h.archived)
-        .map(
-          (h) =>
-            `<div class="row between"><span>${esc(h.name)}</span>${btn("edit:" + h.id, "Редактировать " + h.name, "Изменить", "smallbutton")}</div>`,
-        )
-        .join("") || '<p class="muted">Нет привычек</p>'
-    }<h3>Архив</h3>${
-      state.habits
-        .filter((h) => h.archived)
-        .map(
-          (h) =>
-            `<div class="row between"><span>${esc(h.name)}</span>${btn("restore:" + h.id, "Восстановить " + h.name, "Вернуть", "smallbutton")}</div>`,
-        )
-        .join("") || '<p class="muted">Архив пуст</p>'
-    }<h3>Данные</h3><button class="secondary full" data-action="export">Экспорт резервной копии</button><label for="import">Импорт резервной копии (замена данных)</label><input id="import" type="file" accept="application/json,.json"><p class="notice">Данные хранятся на устройстве. Периодически экспортируйте копию. CORE 1.2.1</p><button class="primary full" data-action="close">Готово</button>`,
-  );
-  $("#import").onchange = async (e) => {
+  sheetReturn=null;
+  const active=state.habits.filter(h=>!h.archived).length, archived=state.habits.length-active;
+  show(`<h2>Настройки</h2><div class="settings-section"><div class="eyebrow">Оформление</div><div class="palette-grid">${Object.entries(palettes).map(([k,p])=>`<button class="palette-choice ${state.settings.palette===k?"active":""}" data-action="palette:${k}" aria-pressed="${state.settings.palette===k}"><span class="palette-preview" style="--preview:${p[4]};--preview-bg:${p[5]}"><i>${state.settings.palette===k?icon("check"):""}</i></span><span>${k[0].toUpperCase()+k.slice(1)}</span></button>`).join("")}</div></div><div class="settings-section"><div class="eyebrow">Привычки</div><div class="settings-group">${settingRow("manage","Управление привычками","list",active)}${settingRow("archiveview","Архив","archive",archived)}</div></div><div class="settings-section"><div class="eyebrow">Данные</div><div class="settings-group">${settingRow("export","Создать резервную копию","download")}${settingRow("importpick","Восстановить из копии","upload")}</div><input id="import" type="file" accept="application/json,.json" hidden><p class="notice settings-note">Данные хранятся на устройстве. Сохраняйте резервную копию.</p></div><div class="settings-footer"><div class="brand">core<i>.</i></div><span class="muted">Версия 1.3</span></div>`);
+  $("#import").onchange=async e=>{
     try {
-      const x = JSON.parse(await e.target.files[0].text());
-      if (!C.valid(x)) throw Error("invalid");
-      if (!confirm("Заменить все текущие данные резервной копией?")) return;
-      state = x;
-      filter = "all";
-      await save();
-      close();
-      render();
-      toast("Данные восстановлены");
-    } catch {
-      toast("Некорректная резервная копия");
-    }
+      const file=e.target.files[0]; if(!file)return;
+      const x=JSON.parse(await file.text());
+      if(!C.valid(x))throw Error("invalid");
+      pendingImport=x;
+      show(`<h2>Восстановить данные?</h2><p class="sheet-message">Резервная копия содержит ${x.habits.length} привычек. Текущие данные будут полностью заменены. Перед восстановлением можно сохранить свою копию.</p><button class="secondary full" data-action="export">Сохранить текущую копию</button><div class="actions"><button class="secondary" data-action="settings">Отмена</button><button class="primary" data-action="importconfirm">Восстановить</button></div>`,true);
+    }catch{toast("Некорректная резервная копия");}
   };
+}
+function manageHabits(archived=false){
+  sheetReturn=archived?"archiveview":"manage";
+  const hs=state.habits.filter(h=>!!h.archived===archived);
+  show(`<h2>${archived?"Архив":"Мои привычки"}</h2><div class="settings-group">${hs.map(h=>`<div class="manage-row"><span class="glyph" style="color:${colors[h.color]||"var(--accent)"}">${icon(h.icon)}</span><span class="manage-name">${esc(h.name)}</span>${btn((archived?"restore:":"edit:")+h.id,(archived?"Вернуть ":"Изменить ")+h.name,archived?"Вернуть":icon("right"),"smallbutton")}</div>`).join("")||`<div class="sheet-empty">${archived?"Архив пуст. Здесь сохраняются завершённые привычки.":"Пока нет привычек."}</div>`}</div>${archived?"":`<button class="primary full detail" data-action="new">Добавить привычку</button>`}`,true);
+}
+function archiveConfirm(h){
+  show(`<h2>В архив?</h2><p class="sheet-message">«${esc(h.name)}» исчезнет из активного списка. История сохранится, а привычку можно будет вернуть.</p><div class="actions"><button class="secondary" data-action="edit:${h.id}">Отмена</button><button class="primary destructive" data-action="archiveconfirm:${h.id}">В архив</button></div>`);
 }
 document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-action]");
@@ -495,7 +499,22 @@ document.addEventListener("click", (e) => {
       close();
       break;
     case "settings":
+      pendingImport=null;
       settings();
+      break;
+    case "manage":
+      manageHabits(false);
+      break;
+    case "archiveview":
+      manageHabits(true);
+      break;
+    case "importpick":
+      $("#import")?.click();
+      break;
+    case "importconfirm":
+      if(pendingImport && C.valid(pendingImport)){
+        state=pendingImport; pendingImport=null; filter="all"; save(); close(); render(); toast("Данные восстановлены");
+      }
       break;
     case "group":
       state.settings.group = !state.settings.group;
@@ -538,11 +557,14 @@ document.addEventListener("click", (e) => {
       if (h) formHabit(h);
       break;
     case "archive":
-      if (h && confirm("Переместить привычку в архив? История сохранится.")) {
+      if(h) archiveConfirm(h);
+      break;
+    case "archiveconfirm":
+      if (h) {
         h.archived = C.today();
         save();
-        close();
         render();
+        manageHabits(true);
       }
       break;
     case "restore":
@@ -551,7 +573,7 @@ document.addEventListener("click", (e) => {
           (h.pauses ??= []).push({from: h.archived, to: C.today()});
         delete h.archived;
         save();
-        settings();
+        manageHabits(true);
         render();
       }
       break;
@@ -598,7 +620,7 @@ document.addEventListener("change", (e) => {
 function refreshDate() {
   const n = C.today();
   if (n !== lastToday) {
-    if (modal.open) close();
+    if (modal.open) close(true);
     if (selected === lastToday) selected = n;
     lastToday = n;
     render();

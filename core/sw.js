@@ -1,5 +1,5 @@
 const PREFIX = "core-pwa:" + self.registration.scope + ":";
-const CACHE = PREFIX + "1.2.1";
+const CACHE = PREFIX + "1.3.0";
 const FILES = [
   "./",
   "./index.html",
